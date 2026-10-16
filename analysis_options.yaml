@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - build/**
     - "**/*.g.dart"
+    - test/coverage_helper_test.dart
     - android/**
     - ios/**
 

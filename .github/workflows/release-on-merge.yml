@@ -1,0 +1,148 @@
+name: Release on merge
+
+# Tags are made here and nowhere else. The only way to ship is: open a PR, pass ci-ok, merge.
+# This workflow then decides whether that merge earns a tag.
+#
+#   PR -> develop     ships only if the PR carries a commit whose subject is
+#                     "release: v1.0.1-dev.16". Its body becomes the tag message.
+#   PR -> staging     always ships. The version line comes from the newest dev
+#                     tag on the merge commit; the -stag.N counter is bumped.
+#   PR -> production  always ships. The version comes from the top CHANGELOG.md
+#                     entry, so the release PR must bump it first.
+#                     hotfix/* ships nothing here, patch.yml ships it.
+#
+# deploy.yml is called, not left to trigger itself: a tag pushed with GITHUB_TOKEN
+# does not fire another workflow's `on: push`.
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+      - staging
+      - production
+
+permissions:
+  contents: write # creates the tag
+  pull-requests: read
+  checks: read # reads the PR's ci-ok result
+
+concurrency:
+  group: release-on-merge-${{ github.base_ref }}
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Create the tag
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.decide.outputs.tag }}
+    steps:
+      # merge_commit_sha is what landed on the base branch for a merge, a squash and a rebase alike
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      # github free can't make ci-ok a required check on a private repo, so the merge button
+      # still works on red. this is the lock instead: red or unfinished ci-ok, nothing ships.
+      - name: Refuse a PR that was merged without a green ci-ok
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          result="$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/check-runs?check_name=ci-ok" \
+            --jq '.check_runs | sort_by(.started_at) | last | .conclusion // "missing"')"
+          if [ "$result" != "success" ]; then
+            echo "::error::ci-ok on this PR's last commit is '$result', not success. Nothing ships. Fix it in a new PR and merge that once ci-ok is green."
+            exit 1
+          fi
+
+      - name: Work out the tag and its message
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force --quiet
+
+          case "$BASE" in
+            develop)
+              # read from the PR's own commits, not the merged history, so a squash merge can't lose it
+              marker="$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/commits" \
+                --paginate --jq '.[].commit.message | select(startswith("release: "))')"
+              if [ -z "$marker" ]; then
+                echo "No 'release:' commit in this PR — nothing to ship."
+                exit 0
+              fi
+              # first line is the tag, the rest is the message. ci.yml already refused more than one marker
+              tag="$(printf '%s' "$marker" | sed -n '1s/^release: //p')"
+              printf '%s' "$marker" | tail -n +2 > notes.txt
+              ;;
+
+            staging)
+              # staging inherits develop's version line from the dev build this merge carries
+              dev_tag="$(git describe --tags --match 'v*-dev.*' --abbrev=0 HEAD 2>/dev/null || true)"
+              if [ -z "$dev_tag" ]; then
+                echo "::error::no v*-dev.* tag is reachable from this merge, so there is no version line to promote. Ship a dev build first."
+                exit 1
+              fi
+              version="${dev_tag#v}"; version="${version%%-*}"
+              last="$(git tag --list "v${version}-stag.*" --sort=-v:refname | head -1)"
+              # not `[ ... ] && n=...`, under set -e that kills the step on the first ever stag tag
+              n=1
+              if [ -n "$last" ]; then n=$(( ${last##*.} + 1 )); fi
+              tag="v${version}-stag.${n}"
+              prev="${last:-$dev_tag}"
+              { printf '%s\n\n' "$PR_TITLE"
+                git log "${prev}..HEAD" --no-merges --pretty='- %s'
+              } > notes.txt
+              ;;
+
+            production)
+              # a hotfix lands without a CHANGELOG bump, the shorebird patch is what ships it
+              case "$HEAD_REF" in
+                hotfix/*)
+                  echo "Hotfix merge into production — no tag. Run the 'Patch (hotfix)' workflow from the production branch to ship it."
+                  exit 0 ;;
+              esac
+              # a release PR without a CHANGELOG bump fails below as a duplicate tag instead of re-shipping
+              version="$(python3 tool/changelog_release_notes.py --field version)"
+              tag="v${version}"
+              python3 tool/changelog_release_notes.py > notes.txt
+              ;;
+          esac
+
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::tag '$tag' already exists. For production, bump CHANGELOG.md (and pubspec.yaml) in the release PR before merging."
+            exit 1
+          fi
+          test -s notes.txt || printf '%s\n' "$PR_TITLE" > notes.txt
+          # app distribution rejects notes over 16384 bytes, and deploy.yml prepends the tag name
+          truncate -s '<16000' notes.txt
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "----- $tag -----"; cat notes.txt
+
+      - name: Push the tag
+        if: steps.decide.outputs.tag != ''
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag -a "${{ steps.decide.outputs.tag }}" -F notes.txt
+          git push origin "${{ steps.decide.outputs.tag }}"
+
+  deploy:
+    name: Deploy
+    needs: tag
+    if: needs.tag.outputs.tag != ''
+    uses: ./.github/workflows/deploy.yml
+    with:
+      tag: ${{ needs.tag.outputs.tag }}
+    secrets: inherit

@@ -1,0 +1,79 @@
+import 'package:better_muslim/core/resources/constants.dart';
+import 'package:flutter/foundation.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+
+/// app code reports through instance, never Sentry directly, so debug runs and tests send nothing
+abstract class CrashReporter {
+  static CrashReporter instance = const DebugCrashReporter();
+
+  Future<void> recordError(
+    Object error,
+    StackTrace? stackTrace, {
+    bool fatal = false,
+    Map<String, Object?>? context,
+  });
+
+  void addBreadcrumb(String message, {String? category});
+}
+
+class SentryCrashReporter implements CrashReporter {
+  const SentryCrashReporter();
+
+  @override
+  Future<void> recordError(
+    Object error,
+    StackTrace? stackTrace, {
+    bool fatal = false,
+    Map<String, Object?>? context,
+  }) async {
+    await Sentry.captureException(
+      error,
+      stackTrace: stackTrace,
+      withScope: context == null ? null : (scope) => scope.setContexts('error_context', context),
+    );
+  }
+
+  @override
+  void addBreadcrumb(String message, {String? category}) {
+    Sentry.addBreadcrumb(Breadcrumb(message: message, category: category));
+  }
+}
+
+/// one error in a loop would eat the free monthly quota
+class SentryEventCap {
+  SentryEventCap({this.maxPerErrorType = 3});
+
+  final int maxPerErrorType;
+  final Map<String, int> _seen = {};
+
+  SentryEvent? call(SentryEvent event, Hint hint) {
+    final key =
+        event.throwable?.runtimeType.toString() ?? event.exceptions?.firstOrNull?.type ?? 'unknown';
+    final count = (_seen[key] ?? 0) + 1;
+    _seen[key] = count;
+    return count > maxPerErrorType ? null : event;
+  }
+}
+
+class DebugCrashReporter implements CrashReporter {
+  const DebugCrashReporter();
+
+  @override
+  Future<void> recordError(
+    Object error,
+    StackTrace? stackTrace, {
+    bool fatal = false,
+    Map<String, Object?>? context,
+  }) async {
+    if (!kCustomDebugMode) return;
+    debugPrint('[Crash]${fatal ? '[FATAL]' : ''} $error');
+    if (context != null && context.isNotEmpty) debugPrint('[Crash] context: $context');
+    if (stackTrace != null) debugPrint('$stackTrace');
+  }
+
+  @override
+  void addBreadcrumb(String message, {String? category}) {
+    if (!kCustomDebugMode) return;
+    debugPrint('[Crash][breadcrumb]${category != null ? '[$category]' : ''} $message');
+  }
+}
