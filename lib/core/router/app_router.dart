@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/monitoring/monitoring.dart';
 import 'package:better_muslim/core/widgets/shell/app_shell.dart';
 import 'package:better_muslim/core/widgets/shell/tab_switcher.dart';
 import 'package:better_muslim/features/azkar/view/azkar_page.dart';
@@ -19,6 +20,7 @@ abstract final class Routes {
 /// one router per ProviderScope, so tests never share a location
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
+    observers: Monitoring.navigatorObservers,
     routes: [
       StatefulShellRoute(
         builder: (context, state, shell) => AppShell(shell: shell),

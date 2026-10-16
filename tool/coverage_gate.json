@@ -1,0 +1,16 @@
+{
+  "overallMin": 60,
+  "overallGated": true,
+  "logicMin": 90,
+  "areaMin": 80,
+  "logicFolders": ["data", "domain", "view_model", "extensions"],
+  "exclude": [
+    "**/*.g.dart",
+    "**/*.freezed.dart",
+    "lib/main_*.dart",
+    "lib/bootstrap.dart"
+  ],
+  "areas": {
+    "app": { "path": "lib/", "gated": false }
+  }
+}

@@ -52,3 +52,13 @@ app.*.map.json
 
 # store screenshots, only needed at release
 /design_handoff_better_muslim/store/
+
+# release signing, never committed
+/android/key.properties
+*.jks
+*.keystore
+# tier 2 config, CI writes it and deletes it after the build
+/dart_define/*.secret.json
+# coverage gate output
+/coverage/
+/test/coverage_helper_test.dart

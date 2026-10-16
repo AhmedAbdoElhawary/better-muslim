@@ -1,0 +1,66 @@
+name: Integration
+
+# The on-device journeys in integration_test/, on an Android emulator.
+# ci.yml calls this for PRs into staging and production. It can also be run by hand on any branch.
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  journeys:
+    name: Integration Journeys
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # booting an emulator for nothing costs minutes, so stop early until the first journey exists
+      - name: Find journeys
+        id: find
+        run: |
+          if ls integration_test/*_test.dart >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::no integration_test/*_test.dart yet, nothing to run"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.find.outputs.found == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        if: steps.find.outputs.found == 'true'
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: 3.47.5
+          cache: true
+
+      - name: Get dependencies
+        if: steps.find.outputs.found == 'true'
+        run: flutter pub get
+
+      # without this the emulator falls back to software and is too slow to boot
+      - name: Enable KVM
+        if: steps.find.outputs.found == 'true'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run journeys
+        if: steps.find.outputs.found == 'true'
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          arch: x86_64
+          ram-size: 2048M
+          cores: 2
+          script: tool/integration_test.sh

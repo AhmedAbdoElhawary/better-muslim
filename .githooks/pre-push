@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# github free + private has no rulesets, so the server can't refuse these pushes. this refuses them locally.
+# turn it on once per clone: git config core.hooksPath .githooks
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/develop|refs/heads/staging|refs/heads/production)
+      echo "pre-push: '${remote_ref#refs/heads/}' only changes through a merged PR. Push a feature branch and open one." >&2
+      exit 1
+      ;;
+    refs/tags/v*)
+      echo "pre-push: version tags are made by release-on-merge.yml after a PR merges, not by hand." >&2
+      exit 1
+      ;;
+  esac
+done
+
+exit 0
