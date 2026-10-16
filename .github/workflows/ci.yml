@@ -188,10 +188,10 @@ jobs:
           -t ${{ steps.map.outputs.target }}
           --dart-define-from-file=${{ steps.map.outputs.dart_define }}
 
-  # schemeless iOS compile check, iOS does not ship. macOS minutes cost about 10x Linux on a
+  # iOS compile check, iOS does not ship yet. macOS minutes cost about 10x Linux on a
   # private repo, so only promotions pay for it, ci-ok counts the develop skip as a pass.
   build-ios:
-    name: Build iOS (schemeless)
+    name: Build iOS
     needs: quality
     if: github.base_ref != 'develop'
     runs-on: macos-latest
@@ -213,6 +213,7 @@ jobs:
       - name: Build
         run: >-
           flutter build ios --debug --no-codesign
+          --flavor production
           -t lib/main_prod.dart
           --dart-define-from-file=dart_define/prod.json
 
