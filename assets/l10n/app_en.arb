@@ -1,0 +1,294 @@
+{
+  "@@locale": "en",
+  "appName": "Better Muslim",
+  "tabHome": "Home",
+  "tabPrayer": "Prayer",
+  "tabQuran": "Quran",
+  "tabAzkar": "Azkar",
+  "tabMore": "More",
+  "fajr": "Fajr",
+  "sunrise": "Sunrise",
+  "dhuhr": "Dhuhr",
+  "asr": "Asr",
+  "maghrib": "Maghrib",
+  "isha": "Isha",
+  "now": "NOW",
+  "nowShort": "Now",
+  "untilPrayerAt": "Until {prayer} at {time}",
+  "@untilPrayerAt": {
+    "placeholders": {
+      "prayer": {},
+      "time": {}
+    }
+  },
+  "nextPrayer": "Next prayer",
+  "adhanAtReminder": "Adhan at {time} · reminder {minutes} min before",
+  "@adhanAtReminder": {
+    "placeholders": {
+      "time": {},
+      "minutes": {}
+    }
+  },
+  "sunriseLabel": "Sunrise {time}",
+  "@sunriseLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "maghribLabel": "Maghrib {time}",
+  "@maghribLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "continueReading": "Continue reading",
+  "continueReadingSub": "{surah} · ayah {ayah} of {total}",
+  "@continueReadingSub": {
+    "placeholders": {
+      "surah": {},
+      "ayah": {},
+      "total": {}
+    }
+  },
+  "eveningAzkar": "Evening azkar",
+  "eveningAzkarSub": "After Asr · {done} of {total}",
+  "@eveningAzkarSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "verseOfTheDay": "Verse of the day",
+  "adhanHeader": "ADHAN · {city}",
+  "@adhanHeader": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "afterTheAdhan": "After the adhan",
+  "readDua": "Read dua",
+  "markPrayed": "Mark prayed",
+  "stopAdhan": "Stop adhan",
+  "prayerTimes": "Prayer times",
+  "prayedToday": "{count} of 5 prayed today",
+  "@prayedToday": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "missedToMakeUp": "{count} missed this month to make up",
+  "@missedToMakeUp": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "mark": "Mark",
+  "prayed": "Prayed",
+  "inDuration": "in {duration}",
+  "@inDuration": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "addToQada": "Add to qada",
+  "qibla": "Qibla",
+  "turnRight": "Turn {deg}° right",
+  "@turnRight": {
+    "placeholders": {
+      "deg": {}
+    }
+  },
+  "turnLeft": "Turn {deg}° left",
+  "@turnLeft": {
+    "placeholders": {
+      "deg": {}
+    }
+  },
+  "qiblaFrom": "{city} · Qibla at {deg}° from north",
+  "@qiblaFrom": {
+    "placeholders": {
+      "city": {},
+      "deg": {}
+    }
+  },
+  "facingQibla": "Facing the Qibla",
+  "holdSteady": "Hold steady",
+  "toTheKaaba": "to the Kaaba",
+  "compassAccuracy": "compass accuracy",
+  "accuracyHigh": "High",
+  "holdFlat": "Hold your phone flat, away from metal and magnets.",
+  "juzPage": "Juz {juz} · Page {page}",
+  "@juzPage": {
+    "placeholders": {
+      "juz": {},
+      "page": {}
+    }
+  },
+  "surahMeta": "{name} · {place} · {count} ayahs",
+  "@surahMeta": {
+    "placeholders": {
+      "name": {},
+      "place": {},
+      "count": {}
+    }
+  },
+  "ayahN": "{surah} · ayah {n}",
+  "@ayahN": {
+    "placeholders": {
+      "surah": {},
+      "n": {}
+    }
+  },
+  "murattal": "Murattal · {rate}×",
+  "@murattal": {
+    "placeholders": {
+      "rate": {}
+    }
+  },
+  "tasbih": "Tasbih",
+  "afterPrayer": "After prayer",
+  "ofTarget": "of {target}",
+  "@ofTarget": {
+    "placeholders": {
+      "target": {}
+    }
+  },
+  "setComplete": "Set complete",
+  "tapAnywhere": "Tap anywhere to count",
+  "more": "More",
+  "storedOnDevice": "Stored on this device · no account needed",
+  "hijriCalendar": "Hijri calendar",
+  "duas": "Duas",
+  "sectionPrayer": "PRAYER",
+  "calculationMethod": "Calculation method",
+  "adhanAndReminders": "Adhan and reminders",
+  "minBefore": "{minutes} min before",
+  "@minBefore": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "location": "Location",
+  "autoSuffix": "{city} · auto",
+  "@autoSuffix": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "sectionAppearance": "APPEARANCE",
+  "theme": "Theme",
+  "lightAndDark": "Light and dark",
+  "followSky": "Follow sky",
+  "reduceMotion": "Reduce motion",
+  "sectionSoundTouch": "SOUND AND TOUCH",
+  "haptics": "Haptics",
+  "uiSounds": "UI sounds",
+  "welcomeTagline": "Prayer, Quran and remembrance, moving with the sky above you.",
+  "getStarted": "Get started",
+  "restoreBackup": "Restore from backup",
+  "locTitle": "Prayer times for where you are",
+  "locBody": "Your location sets the prayer times, the Qibla and the calculation method for your region.",
+  "locB1": "Accurate prayer times",
+  "locB1s": "Recalculated when you travel more than 30 km",
+  "locB2": "Qibla direction",
+  "locB2s": "From your exact position",
+  "locB3": "Stays on this phone",
+  "locB3s": "Never sent to us or anyone else",
+  "useMyLocation": "Use my location",
+  "chooseCity": "Choose a city instead",
+  "changeLocationLater": "Change it anytime in More › Location",
+  "notifTitle": "How should each prayer reach you?",
+  "notifBody": "Choose the full adhan, a soft tone or silence, prayer by prayer.",
+  "soundAdhan": "Adhan",
+  "soundTone": "Tone",
+  "soundSilent": "Silent",
+  "reminderBefore": "Reminder before each prayer",
+  "allowNotifications": "Allow notifications",
+  "notNow": "Not now",
+  "comingUp": "COMING UP",
+  "ayyamAlBid": "Ayyam al-Bid",
+  "ayyamAlBidSub": "White days, fasting recommended · {range}",
+  "@ayyamAlBidSub": {
+    "placeholders": {
+      "range": {}
+    }
+  },
+  "monthBegins": "{month} begins",
+  "@monthBegins": {
+    "placeholders": {
+      "month": {}
+    }
+  },
+  "estimated": "Estimated {date}",
+  "@estimated": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "estimatedSighting": "Estimated {date} · confirmed by moon sighting",
+  "@estimatedSighting": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "dateAdjustment": "Date adjustment",
+  "days": "{n} days",
+  "@days": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "searchDuas": "Search in English or Arabic",
+  "catAll": "All",
+  "catMorningEvening": "Morning and evening",
+  "catHome": "Home",
+  "catTravel": "Travel",
+  "catSleep": "Sleep",
+  "listen": "Listen",
+  "save": "Save",
+  "share": "Share",
+  "applyTheme": "Apply theme",
+  "livePreview": "Live preview · {name}",
+  "@livePreview": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dark": "Dark",
+  "light": "Light",
+  "followSkyNote": "Follow sky switches to light after sunrise and back to dark at Maghrib.",
+  "notifAdhanTitle": "{prayer} · {time}",
+  "@notifAdhanTitle": {
+    "placeholders": {
+      "prayer": {},
+      "time": {}
+    }
+  },
+  "notifAdhanBody": "It is time for {prayer} in {city}. Tap to mark it prayed.",
+  "@notifAdhanBody": {
+    "placeholders": {
+      "prayer": {},
+      "city": {}
+    }
+  },
+  "notifReminderTitle": "{prayer} in {minutes} minutes",
+  "@notifReminderTitle": {
+    "placeholders": {
+      "prayer": {},
+      "minutes": {}
+    }
+  },
+  "notifAzkarBody": "After Asr · 24 remembrances, about 6 minutes",
+  "liveNextPrayer": "Next prayer · {city}",
+  "@liveNextPrayer": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "atTime": "at {time}",
+  "@atTime": {
+    "placeholders": {
+      "time": {}
+    }
+  }
+}

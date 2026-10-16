@@ -1,0 +1,15 @@
+part of 'adaptive_padding.dart';
+
+class TopPadding extends StatelessWidget {
+  const TopPadding({required this.padding, required this.child, super.key});
+  final double padding;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _RPadding(
+      padding: REdgeInsets.only(top: padding),
+      child: child,
+    );
+  }
+}
