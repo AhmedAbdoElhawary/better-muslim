@@ -49,7 +49,8 @@ From the spec to the code:
 
 ## Run
 
-VS Code: pick Dev, Staging or Prod in Run and Debug. Terminal, same on iOS and Android:
+VS Code (Run and Debug) and Android Studio (run configurations) both have Dev, Staging and Prod.
+Terminal, same on iOS and Android:
 
 ```bash
 flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=dart_define/dev.json
