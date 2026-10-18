@@ -1,5 +1,7 @@
 import Flutter
 import UIKit
+import UserNotifications
+import flutter_local_notifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -7,11 +9,17 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // the plugin shows notifications in front and hands taps to dart through this delegate
+    UNUserNotificationCenter.current().delegate = self
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    // mark prayed from a notification runs dart in a background engine, it needs the plugins too
+    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "BackupExclusion") {
       registerBackupExclusion(messenger: registrar.messenger())
     }
