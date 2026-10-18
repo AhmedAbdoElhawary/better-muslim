@@ -15,6 +15,7 @@ class MediumText extends _AdaptiveText {
     super.decoration,
     super.letterSpacing,
     super.shadows,
+    super.tabularFigures,
     super.key,
   }) : super(fontWeight: FontWeightManager.medium);
 }
