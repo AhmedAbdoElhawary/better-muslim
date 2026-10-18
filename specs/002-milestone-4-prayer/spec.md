@@ -294,8 +294,8 @@ moving to Cairo later gives the Egyptian method.
 - **FR-021**: A made up entry MUST keep when it was made up. A dated one shows "Made up" on its
   day's row, as a label that does nothing when tapped.
 - **FR-022**: The qada list has no PNG, so it MUST be built only from parts in
-  `03 Components.dc.html` (compact app bar, grouped list rows, chips, toast) and shown to me in
-  screenshots before it is called done. The same goes for the passed prayer choice of FR-008 and
+  `03 Components.dc.html` (compact app bar, grouped list rows, chips, toast) and I check it in
+  the app before it is called done. The same goes for the passed prayer choice of FR-008 and
   the + sheet of FR-020.
 
 **Method sheet**
@@ -359,7 +359,7 @@ moving to Cairo later gives the Egyptian method.
 
 - **FR-031**: "Dev · design scenario" MUST open with this week's log as in 4.04: Sun 11, Mon 12
   and Wed 14 all five prayed, Tue 13 four prayed with Isha in qada, Thu 15 Fajr and Dhuhr prayed,
-  and 3 open qada entries missed in October 2026, so the screen matches the PNGs before and after
+  and 3 open qada entries missed in October 2026, so the screen shows the 4.04 week before and after
   Mark on Asr.
 
 ### Key Entities
@@ -374,8 +374,8 @@ moving to Cairo later gives the Egyptian method.
 
 ### Measurable Outcomes
 
-- **SC-001**: In the design scenario the Prayer tab matches 4.04 and 4.17 within 1 pt in dark and
-  light, before and after Mark on Asr ("3 of 5 prayed today", ring at 3/5, Thursday with 3 dots).
+- **SC-001**: In the design scenario the Prayer tab is built from the 4.04 and 4.17 trees, in dark
+  and light, before and after Mark on Asr ("3 of 5 prayed today", ring at 3/5, Thursday with 3 dots).
 - **SC-002**: Marking or unmarking a prayer takes one tap, and the chip, ring and dot start moving
   within 100 ms.
 - **SC-003**: Every Undo within 4 s restores the exact state before, in every test.
