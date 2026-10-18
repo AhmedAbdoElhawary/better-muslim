@@ -98,8 +98,6 @@ abstract final class RadiusManager {
   static const double homeGlow = 36;
   static const double prayerBar = 2;
   static const double shortcutIcon = 12;
-  static const double adhanCard = 20;
-  static const double adhanButton = 14;
   static const double adhanBar = 2;
 }
 
@@ -160,7 +158,6 @@ abstract final class SizeManager {
   static const double adhanStar = 34;
   static const double adhanProgress = 200;
   static const double adhanBar = 3;
-  static const double adhanButton = 52;
 
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;
