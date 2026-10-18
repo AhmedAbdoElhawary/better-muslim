@@ -44,6 +44,7 @@ void main() {
       now: makkah(15, 10, 0),
       days: daysFrom(DateTime(2026, 10, 15)),
       sounds: sounds,
+      reminderMinutes: 0,
     );
 
     expect(alerts, hasLength(29));
@@ -58,7 +59,12 @@ void main() {
 
   test('nothing in the past', () {
     final now = makkah(15, 16, 32);
-    final alerts = buildSchedule(now: now, days: daysFrom(DateTime(2026, 10, 15)), sounds: sounds);
+    final alerts = buildSchedule(
+      now: now,
+      days: daysFrom(DateTime(2026, 10, 15)),
+      sounds: sounds,
+      reminderMinutes: 0,
+    );
 
     expect(alerts.every((alert) => alert.at.isAfter(now)), isTrue);
   });
@@ -74,6 +80,7 @@ void main() {
       now: TZDateTime(getLocation('Europe/Oslo'), 2026, 6, 21, 0, 1),
       days: days,
       sounds: sounds,
+      reminderMinutes: 0,
     );
 
     final withTime = [
@@ -89,6 +96,7 @@ void main() {
       now: makkah(16, 0, 30),
       days: daysFrom(DateTime(2026, 10, 15)),
       sounds: sounds,
+      reminderMinutes: 0,
     );
 
     expect(alerts.first.prayer, Prayer.fajr);
@@ -101,8 +109,59 @@ void main() {
       now: makkah(15, 0, 1),
       days: daysFrom(DateTime(2026, 10, 15)),
       sounds: sounds,
+      reminderMinutes: 0,
     );
 
     expect(alerts, hasLength(30));
+  });
+
+  group('reminders', () {
+    test('come the minutes before each of the five, whatever its sound', () {
+      final alerts = buildSchedule(
+        now: makkah(15, 0, 1),
+        days: daysFrom(DateTime(2026, 10, 15)),
+        sounds: sounds,
+        reminderMinutes: 10,
+      );
+
+      final reminders = alerts.where((alert) => alert.kind == AlertKind.reminder).toList();
+      expect(reminders, hasLength(30));
+      expect(alerts, hasLength(60));
+      for (final reminder in reminders) {
+        final adhan = alerts.singleWhere(
+          (alert) =>
+              alert.kind == AlertKind.adhan &&
+              alert.day == reminder.day &&
+              alert.prayer == reminder.prayer,
+        );
+        expect(adhan.at.difference(reminder.at), const Duration(minutes: 10));
+        expect(reminder.prayerTime, adhan.at);
+      }
+      expect(alerts.map((alert) => alert.id).toSet(), hasLength(60));
+    });
+
+    test('none at 0', () {
+      final alerts = buildSchedule(
+        now: makkah(15, 0, 1),
+        days: daysFrom(DateTime(2026, 10, 15)),
+        sounds: sounds,
+        reminderMinutes: 0,
+      );
+
+      expect(alerts.where((alert) => alert.kind == AlertKind.reminder), isEmpty);
+    });
+
+    test('a reminder already past is skipped while its adhan stays', () {
+      final asr = daysFrom(DateTime(2026, 10, 15)).first.asr!;
+      final alerts = buildSchedule(
+        now: asr.subtract(const Duration(minutes: 5)),
+        days: daysFrom(DateTime(2026, 10, 15)),
+        sounds: sounds,
+        reminderMinutes: 10,
+      );
+
+      final first = alerts.first;
+      expect([first.prayer, first.kind], [Prayer.asr, AlertKind.adhan]);
+    });
   });
 }

@@ -12,6 +12,7 @@ class Alert {
     required this.kind,
     required this.at,
     required this.sound,
+    this.before = Duration.zero,
   });
 
   /// the prayer day it belongs to, so isha after midnight stays on the day it started
@@ -22,6 +23,11 @@ class Alert {
 
   /// reminders ignore it
   final PrayerSound sound;
+
+  /// how long before the prayer a reminder comes, zero for the adhan
+  final Duration before;
+
+  TZDateTime get prayerTime => at.add(before);
 
   int get id => alertId(day, prayer, kind);
 }

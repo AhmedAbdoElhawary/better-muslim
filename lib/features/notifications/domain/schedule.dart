@@ -6,20 +6,36 @@ import 'package:better_muslim/features/notifications/domain/alert.dart';
 const scheduleDays = 6;
 
 /// calendar prayer days, not 144 hours: fajr gets earlier each day, so 144 hours can hold 7 fajrs.
-/// days are the prayer day of now and the ones after it, null where there is no location
+/// days are the prayer day of now and the ones after it, null where there is no location.
+/// reminders come for all five whatever their sound, 0 minutes is off. 60 at most, under ios's 64
 List<Alert> buildSchedule({
   required DateTime now,
   required List<DayTimes?> days,
   required Map<Prayer, PrayerSound> sounds,
-}) => [
-  for (final day in days.nonNulls)
-    for (final prayer in Prayer.values)
-      if (day.timeOf(prayer) case final time? when time.isAfter(now))
-        Alert(
-          day: day.date,
-          prayer: prayer,
-          kind: AlertKind.adhan,
-          at: time,
-          sound: sounds[prayer]!,
-        ),
-];
+  required int reminderMinutes,
+}) {
+  final before = Duration(minutes: reminderMinutes);
+  return [
+    for (final day in days.nonNulls)
+      for (final prayer in Prayer.values)
+        if (day.timeOf(prayer) case final time?) ...[
+          if (reminderMinutes > 0 && time.subtract(before).isAfter(now))
+            Alert(
+              day: day.date,
+              prayer: prayer,
+              kind: AlertKind.reminder,
+              at: time.subtract(before),
+              sound: sounds[prayer]!,
+              before: before,
+            ),
+          if (time.isAfter(now))
+            Alert(
+              day: day.date,
+              prayer: prayer,
+              kind: AlertKind.adhan,
+              at: time,
+              sound: sounds[prayer]!,
+            ),
+        ],
+  ];
+}

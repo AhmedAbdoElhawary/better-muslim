@@ -55,6 +55,7 @@ Future<void> topUp(
           timesOn(DateTime(first.year, first.month, first.day + i)),
       ],
       sounds: sounds,
+      reminderMinutes: settings.reminderMinutes,
     ),
     sounds: sounds,
     texts: texts,
