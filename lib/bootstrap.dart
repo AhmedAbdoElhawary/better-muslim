@@ -4,6 +4,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/monitoring/monitoring.dart';
+import 'package:better_muslim/features/notifications/presentation/notifications_boot.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,7 +38,7 @@ Future<void> _boot(FlavorConfig config) async {
         phoneZoneProvider.overrideWith(() => PhoneZone(phoneZone)),
         if (config.isDesignScenario) ...designScenarioOverrides(),
       ],
-      child: const App(),
+      child: const NotificationsBoot(child: App()),
     ),
   );
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
@@ -22,11 +24,15 @@ class LocationController {
 
   final Ref _ref;
   DateTime? _lastRefresh;
+  final _firstLocate = Completer<void>();
 
   static const _minMoveMeters = 30000.0;
   static const _refreshEvery = Duration(minutes: 30);
 
   Future<void> refresh() => _locate(force: false);
+
+  /// done once the first locate ends, saved, refused or no fix. the notification ask waits for it
+  Future<void> get firstLocate => _firstLocate.future;
 
   Future<void> choose(Place place) =>
       _save(place, (latitude: place.latitude, longitude: place.longitude), LocationMode.manual);
@@ -61,6 +67,14 @@ class LocationController {
   }
 
   Future<void> _locate({required bool force}) async {
+    try {
+      await _locateOnce(force: force);
+    } finally {
+      if (!_firstLocate.isCompleted) _firstLocate.complete();
+    }
+  }
+
+  Future<void> _locateOnce({required bool force}) async {
     _lastRefresh = _ref.read(clockProvider)();
 
     /// riverpod pauses a provider nobody listens to, so settingsProvider.future could wait forever
