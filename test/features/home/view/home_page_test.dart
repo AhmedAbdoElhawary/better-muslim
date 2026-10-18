@@ -66,7 +66,7 @@ void main() {
 
   group('the design scenario (4.01, 4.02, 4.16)', () {
     testWidgets('english', (tester) async {
-      await pumpHome(tester, designOverrides());
+      await pumpHome(tester, await designOverrides());
 
       expect(find.text('NOW'), findsOneWidget);
       expect(find.text('Asr'), findsNWidgets(2));
@@ -93,7 +93,7 @@ void main() {
     });
 
     testWidgets('arabic, with eastern digits and no second name', (tester) async {
-      await pumpHome(tester, designOverrides(), locale: const Locale('ar'));
+      await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
 
       expect(find.text('الآن'), findsOneWidget);
       expect(find.text('العصر'), findsNWidgets(2));
@@ -110,11 +110,11 @@ void main() {
     });
 
     testWidgets('dark and light both build', (tester) async {
-      await pumpHome(tester, designOverrides(), brightness: Brightness.light);
+      await pumpHome(tester, await designOverrides(), brightness: Brightness.light);
       expect(find.byType(NextPrayerCard), findsOneWidget);
       await unmount(tester);
 
-      await pumpHome(tester, designOverrides());
+      await pumpHome(tester, await designOverrides());
       expect(find.byType(NextPrayerCard), findsOneWidget);
       await unmount(tester);
     });
@@ -246,7 +246,7 @@ void main() {
     });
 
     testWidgets('arabic follows the digits setting', (tester) async {
-      await pumpHome(tester, designOverrides(), locale: const Locale('ar'));
+      await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
       expect(find.text('١٥:٢٧'), findsOneWidget);
 
       await tester.runAsync(
@@ -265,7 +265,7 @@ void main() {
 
   group('one tap to what I need (US3)', () {
     testWidgets('the verse, continue reading and the evening azkar in english', (tester) async {
-      await pumpHome(tester, designOverrides());
+      await pumpHome(tester, await designOverrides());
 
       expect(find.text('Al-Fatiha 1:5'), findsOneWidget);
       expect(find.text('إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ'), findsOneWidget);
@@ -286,7 +286,7 @@ void main() {
     });
 
     testWidgets('arabic has no translation and no azkar row', (tester) async {
-      await pumpHome(tester, designOverrides(), locale: const Locale('ar'));
+      await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
 
       expect(find.text('الفاتحة ٥'), findsOneWidget);
       expect(find.text('It is You we worship and You we ask for help.'), findsNothing);
@@ -304,7 +304,7 @@ void main() {
         (find.text('Evening azkar'), AzkarPage),
       ];
       for (final (target, page) in taps) {
-        await pumpHome(tester, designOverrides());
+        await pumpHome(tester, await designOverrides());
         await tester.ensureVisible(target);
         await tester.tap(target);
         await tester.pumpAndSettle();
@@ -345,7 +345,7 @@ void main() {
         testWidgets('${locale.languageCode} at $scale stacks the card and the strip', (
           tester,
         ) async {
-          await pumpHome(tester, designOverrides(), locale: locale, textScale: scale);
+          await pumpHome(tester, await designOverrides(), locale: locale, textScale: scale);
 
           final name = find.descendant(
             of: find.byType(NextPrayerCard),
@@ -375,14 +375,14 @@ void main() {
     testWidgets('24 hour times fit the strip cells, 12 hour phones get rows', (tester) async {
       bool cut(Finder text) => tester.renderObject<RenderParagraph>(text).didExceedMaxLines;
 
-      await pumpHome(tester, designOverrides());
+      await pumpHome(tester, await designOverrides());
       expect(find.byType(StripCell), findsNWidgets(5));
       for (final time in ['04:58', '12:05', '15:27', '17:56', '19:26']) {
         expect(cut(find.text(time)), isFalse, reason: time);
       }
       await unmount(tester);
 
-      await pumpHome(tester, designOverrides(), use24: false);
+      await pumpHome(tester, await designOverrides(), use24: false);
       expect(find.byType(StripRow), findsNWidgets(5));
 
       /// intl puts a narrow no-break space before PM
@@ -393,7 +393,7 @@ void main() {
 
     testWidgets('a screen reader hears hours and minutes, not every tick', (tester) async {
       final semantics = tester.ensureSemantics();
-      await pumpHome(tester, designOverrides());
+      await pumpHome(tester, await designOverrides());
 
       /// the card is one button, so the countdown's label is read as part of it
       final card = find.bySemanticsLabel(RegExp('1 h 24 min until Maghrib'));
