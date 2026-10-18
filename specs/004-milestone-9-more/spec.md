@@ -375,8 +375,8 @@ Tap Credits: GeoNames and its license are listed.
 
 - **FR-038**: The light and dark sheet, the day sheet, the date adjustment sheet, the Adhan and
   reminders page with its two sheets, the extra More rows, the two dialogs and the credits page
-  have no PNG. They MUST be built only from parts in `03 Components.dc.html` and shown to me in
-  screenshots before they count as done.
+  have no PNG. They MUST be built only from parts in `03 Components.dc.html` and I check them in
+  the app before they count as done.
 
 **Storage and privacy**
 
@@ -444,11 +444,11 @@ Tap Credits: GeoNames and its license are listed.
 
 **Design scenario**
 
-- **FR-043**: In "Dev · design scenario" More, the theme page and the calendar MUST match 4.09, 4.15
+- **FR-043**: In "Dev · design scenario" More, the theme page and the calendar MUST show 4.09, 4.15
   and 4.13 with the scenario's settings: Qiyam Emerald, Follow sky, reminder 10 minutes, Makkah ·
   auto, Umm al-Qura, adjustment 0, reduce motion off, haptics on, UI sounds off. In the scenario
-  Follow sky follows the phone's light and dark, so each PNG is checked in its mode as in
-  milestone 3. 4.15 is checked after tapping Dark.
+  Follow sky follows the phone's light and dark, so each screen is seen in its mode as in
+  milestone 3. 4.15 shows after tapping Dark.
 
 ### Key Entities
 
@@ -466,8 +466,8 @@ Tap Credits: GeoNames and its license are listed.
 
 ### Measurable Outcomes
 
-- **SC-001**: In the design scenario More, the theme page (after Dark) and the calendar match 4.09,
-  4.15 and 4.13 within 1 pt in dark and light.
+- **SC-001**: In the design scenario More, the theme page (after Dark) and the calendar are built
+  from the 4.09, 4.15 and 4.13 trees in dark and light.
 - **SC-002**: A toggle, a swatch or a mode tap shows its change within 100 ms. Apply restyles every
   visible part of the app in one 300 ms crossfade, with no flash.
 - **SC-003**: For every month from 1440 to 1460 AH, with each adjustment from −2 to +2, the grid's
