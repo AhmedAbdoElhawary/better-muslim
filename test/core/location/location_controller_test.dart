@@ -164,11 +164,80 @@ void main() {
       final container = containerWith(source);
       await container.read(locationControllerProvider).choose(places.search('tanta').first);
 
-      await container.read(locationControllerProvider).useAuto();
+      final done = await container.read(locationControllerProvider).useAuto();
       final settings = await saved(container);
 
+      expect(done, isTrue);
       expect(settings.locationMode, LocationMode.auto);
       expect(settings.placeName, 'Makkah');
+    });
+  });
+
+  group('use my location from the sheet asks and reports back (R12)', () {
+    Future<ProviderContainer> manualTanta(FakePositionSource source) async {
+      final container = containerWith(source);
+      await container.read(locationControllerProvider).choose(places.search('tanta').first);
+      return container;
+    }
+
+    test('denied with a manual place saved, it asks, and allowed saves the new place', () async {
+      final source = FakePositionSource(answer: LocationPermission.whileInUse, position: _kaaba);
+      final container = await manualTanta(source);
+
+      final done = await container.read(locationControllerProvider).useAuto();
+      final settings = await saved(container);
+
+      expect(source.requests, 1);
+      expect(done, isTrue);
+      expect(settings.locationMode, LocationMode.auto);
+      expect(settings.placeName, 'Makkah');
+    });
+
+    test('denied after asking changes nothing', () async {
+      final source = FakePositionSource(answer: LocationPermission.denied, position: _kaaba);
+      final container = await manualTanta(source);
+
+      final done = await container.read(locationControllerProvider).useAuto();
+      final settings = await saved(container);
+
+      expect(done, isFalse);
+      expect(source.fixes, 0);
+      expect(settings.locationMode, LocationMode.manual);
+      expect(settings.placeName, 'Tanta');
+    });
+
+    test('denied forever does not ask', () async {
+      final source = FakePositionSource(granted: LocationPermission.deniedForever);
+      final container = await manualTanta(source);
+
+      final done = await container.read(locationControllerProvider).useAuto();
+
+      expect(done, isFalse);
+      expect(source.requests, 0);
+      expect((await saved(container)).placeName, 'Tanta');
+    });
+
+    test('no fix, location off or too slow, changes nothing', () async {
+      final source = FakePositionSource(granted: LocationPermission.whileInUse);
+      final container = await manualTanta(source);
+
+      final done = await container.read(locationControllerProvider).useAuto();
+      final settings = await saved(container);
+
+      expect(done, isFalse);
+      expect(settings.locationMode, LocationMode.manual);
+      expect(settings.placeName, 'Tanta');
+    });
+
+    test('refresh still never asks with a location saved', () async {
+      final source = FakePositionSource(answer: LocationPermission.whileInUse, position: _kaaba);
+      final container = containerWith(source);
+      await container.read(databaseProvider).updateSettings(_cairo);
+
+      await container.read(locationControllerProvider).refresh();
+
+      expect(source.requests, 0);
+      expect((await saved(container)).placeName, 'Cairo');
     });
   });
 
