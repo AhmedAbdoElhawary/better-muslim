@@ -166,4 +166,26 @@ abstract final class StringsManager {
   static const String noPlacesFound = 'noPlacesFound';
   static const String locationFailed = 'locationFailed';
   static const String noLocationBody = 'noLocationBody';
+  static const String prayerUnmarked = 'prayerUnmarked';
+  static const String undo = 'undo';
+  static const String prayerPassedTitle = 'prayerPassedTitle';
+  static const String prayerPassedBody = 'prayerPassedBody';
+  static const String iPrayedIt = 'iPrayedIt';
+  static const String addedToQada = 'addedToQada';
+  static const String removedFromQada = 'removedFromQada';
+  static const String inQada = 'inQada';
+  static const String madeUp = 'madeUp';
+  static const String nothingToMakeUp = 'nothingToMakeUp';
+  static const String qadaList = 'qadaList';
+  static const String qadaTotal = 'qadaTotal';
+  static const String qadaLeft = 'qadaLeft';
+  static const String madeOneUp = 'madeOneUp';
+  static const String prayerMadeUp = 'prayerMadeUp';
+  static const String addOlderQada = 'addOlderQada';
+  static const String addMissedTitle = 'addMissedTitle';
+  static const String add = 'add';
+  static const String byCountry = 'byCountry';
+  static const String chosenForCountry = 'chosenForCountry';
+  static const String asrCalculation = 'asrCalculation';
+  static const String allFivePrayed = 'allFivePrayed';
 }
