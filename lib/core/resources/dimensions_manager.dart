@@ -90,6 +90,20 @@ abstract final class SpaceManager {
   /// dua card (4.14), the adhan's dua sheet uses it too
   static const double duaCardH = 18;
   static const double duaGap = 10;
+
+  /// qibla (4.05, 4.06), each gap from the tree's top to the bottom of the element above
+  static const double qiblaTitleTop = 26;
+  static const double qiblaTitleGap = 6;
+  static const double qiblaDialTop = 76;
+  static const double qiblaCardsTop = 50;
+  static const double qiblaHintTop = 33;
+  static const double qiblaHintSide = 24;
+  static const double qiblaCardsSide = 16;
+  static const double qiblaCardGap = 10;
+  static const double qiblaCardV = 14;
+  static const double qiblaCardH = 16;
+  static const double qiblaCardLineGap = 2;
+  static const double accuracyDotGap = 8;
 }
 
 abstract final class RadiusManager {
@@ -104,6 +118,8 @@ abstract final class RadiusManager {
   static const double prayerBar = 2;
   static const double shortcutIcon = 12;
   static const double adhanBar = 2;
+  static const double qiblaMarker = 3;
+  static const double qiblaNeedle = 1;
 }
 
 abstract final class SizeManager {
@@ -164,6 +180,29 @@ abstract final class SizeManager {
   static const double adhanStar = 34;
   static const double adhanProgress = 200;
   static const double adhanBar = 3;
+
+  /// qibla (4.05, 4.06), radii and lengths on the 300 pt dial
+  static const double qiblaDial = 300;
+  static const double qiblaTickOuter = 146;
+  static const double qiblaTickMajor = 18;
+  static const double qiblaTickMinor = 8;
+  static const double qiblaTickMajorStroke = 1.5;
+  static const double qiblaTickMinorStroke = 1;
+  static const double qiblaLetterRadius = 108;
+  static const double qiblaMarker = 16;
+  static const double qiblaMarkerLine = 3;
+  static const double qiblaMarkerStroke = 1.5;
+  static const double qiblaNeedle = 106;
+  static const double qiblaNeedleWidth = 2;
+  static const double qiblaNeedleHead = 12;
+  static const double qiblaHub = 10;
+  static const double qiblaTopTick = 16;
+  static const double qiblaTopTickWidth = 2;
+  static const double qiblaTopTickGap = 6;
+  static const double qiblaRing = 1;
+  static const double qiblaRingAligned = 1.5;
+  static const double qiblaGlow = 420;
+  static const double accuracyDot = 8;
 
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;
