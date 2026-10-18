@@ -9,6 +9,9 @@ const _adaptive = 'lib/core/widgets/adaptive/';
 /// the handoff's sky painter draws white stars and exact geometry from the mockup
 const _skyPainter = 'lib/features/home/view/widgets/sky_header_painter.dart';
 
+/// the app root copies the data once, nothing below it rebuilds for it
+const _appRoot = 'lib/core/app/app.dart';
+
 /// a layer may not import the layers listed for it
 const _forbiddenLayers = {
   'domain': {'data', 'presentation'},
@@ -62,6 +65,7 @@ final _rules = [
   _Rule(
     'MediaQuery.of rebuilds on any change, use MediaQuery.sizeOf, paddingOf...',
     RegExp(r'\bMediaQuery\.of\('),
+    allowedIn: [_appRoot],
   ),
   _Rule('widgets are classes, not build functions', RegExp(r'\bWidget\s+_?build[A-Z]\w*\(')),
   _Rule(
