@@ -18,9 +18,9 @@ const devConfig = FlavorConfig(
 );
 
 /// an in-memory store, the dev flavor and no gps, so a widget test never reaches the phone
-List<Override> testOverrides({PositionSource? positionSource}) => [
+List<Override> testOverrides({PositionSource? positionSource, FlavorConfig flavor = devConfig}) => [
   _memoryDatabase(),
-  flavorProvider.overrideWithValue(devConfig),
+  flavorProvider.overrideWithValue(flavor),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
 ];
 

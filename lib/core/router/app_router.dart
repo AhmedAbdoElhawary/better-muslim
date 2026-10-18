@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/database/civil_date.dart';
+import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/monitoring/monitoring.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
@@ -11,6 +12,7 @@ import 'package:better_muslim/features/azkar/view/azkar_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/more/view/more_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
+import 'package:better_muslim/features/notifications/presentation/view/dev_notifications_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
@@ -43,6 +45,9 @@ abstract final class Routes {
   ).toString();
 
   static const String adhanPath = '/adhan';
+
+  /// dev builds only
+  static const String devNotifications = '/dev/notifications';
 
   static const _date = CivilDate();
 }
@@ -89,6 +94,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+
+      /// staging and production don't have the route at all (FR-041)
+      if (ref.read(flavorProvider).flavor.isDev)
+        GoRoute(
+          path: Routes.devNotifications,
+          builder: (context, state) => const DevNotificationsPage(),
+        ),
 
       /// outside the shell, so it covers the nav bar too
       GoRoute(
