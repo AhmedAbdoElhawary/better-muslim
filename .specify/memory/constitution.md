@@ -29,7 +29,9 @@ Why: every feature can change or be deleted without touching the others.
   themes, `BmText`, `BmSpace`, `BmRadius`, `BmSize`, `BmMotion`, `BmHaptics`, `BmIcon`). The app
   reads them only through my api.
 - Colors MUST come from `context.getColor(ThemeEnum.x)`. Never `Colors.x`, `Color(0x..)` or
-  `context.bm` in features.
+  `context.bm` in features. The one exception is an always dark surface the handoff gives its own
+  colors (the adhan screen): its literals live in one file on the allow list of
+  `test/architecture_test.dart`.
 - Text MUST go through `LightText`, `RegularText`, `MediumText`, `SemiBoldText`, `BoldText`.
   Never `Text` or `TextStyle` outside core. The font defaults to `FontEnum.body` (Schibsted
   Grotesk / Noto Sans Arabic), Marcellus / Reem Kufi is `font: FontEnum.display`. Each weight
@@ -142,7 +144,10 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
   shared_preferences, no hive.
 - Domain packages, each added in its milestone: adhan_dart (not adhan, which stopped in 2023),
   hijri, geolocator, flutter_compass, flutter_local_notifications, timezone, flutter_timezone,
-  just_audio, audio_session, home_widget, live_activities.
+  just_audio, audio_session, workmanager (the background top-up), home_widget, live_activities.
+- Native code that has to run in every Flutter engine (the app's, a background task's, a headless
+  one) is a local plugin in `packages/`, like `packages/adhan_alarms`, so Flutter registers it in
+  each engine by itself.
 - Place names and city search come from a GeoNames list shipped in the app (every country, places
   over 1,000 people plus capitals and region seats), never from geocoding, which needs internet.
 - Any other package: check pub.dev maintenance and popularity first, then ask me.
@@ -175,4 +180,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.0.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-18
+**Version**: 3.1.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-18
