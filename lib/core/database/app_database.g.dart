@@ -205,6 +205,14 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultValue: const Constant(false),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<DateTime?, String> firstUse = GeneratedColumn<String>(
+    'first_use',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<DateTime?>($SettingsTable.$converterfirstUsen);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     latitude,
@@ -226,6 +234,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     haptics,
     uiSounds,
     storeResetPending,
+    firstUse,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -409,6 +418,9 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}store_reset_pending'],
       )!,
+      firstUse: $SettingsTable.$converterfirstUsen.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}first_use']),
+      ),
     );
   }
 
@@ -435,6 +447,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<BmThemeId>(BmThemeId.values);
   static JsonTypeConverter2<BmThemeMode, String, String> $converterthemeMode =
       const EnumNameConverter<BmThemeMode>(BmThemeMode.values);
+  static TypeConverter<DateTime, String> $converterfirstUse = const CivilDate();
+  static TypeConverter<DateTime?, String?> $converterfirstUsen = NullAwareTypeConverter.wrap(
+    $converterfirstUse,
+  );
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -468,6 +484,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
 
   /// set by a store reset, cleared once the user has been told (milestone 10)
   final bool storeResetPending;
+
+  /// the strip's earliest week. the v2 migration fills it with the upgrade date
+  final DateTime? firstUse;
   const AppSettings({
     required this.id,
     this.latitude,
@@ -489,6 +508,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.haptics,
     required this.uiSounds,
     required this.storeResetPending,
+    this.firstUse,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -543,6 +563,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['haptics'] = Variable<bool>(haptics);
     map['ui_sounds'] = Variable<bool>(uiSounds);
     map['store_reset_pending'] = Variable<bool>(storeResetPending);
+    if (!nullToAbsent || firstUse != null) {
+      map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse));
+    }
     return map;
   }
 
@@ -572,6 +595,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       haptics: Value(haptics),
       uiSounds: Value(uiSounds),
       storeResetPending: Value(storeResetPending),
+      firstUse: firstUse == null && nullToAbsent ? const Value.absent() : Value(firstUse),
     );
   }
 
@@ -606,6 +630,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       haptics: serializer.fromJson<bool>(json['haptics']),
       uiSounds: serializer.fromJson<bool>(json['uiSounds']),
       storeResetPending: serializer.fromJson<bool>(json['storeResetPending']),
+      firstUse: serializer.fromJson<DateTime?>(json['firstUse']),
     );
   }
   @override
@@ -636,6 +661,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'haptics': serializer.toJson<bool>(haptics),
       'uiSounds': serializer.toJson<bool>(uiSounds),
       'storeResetPending': serializer.toJson<bool>(storeResetPending),
+      'firstUse': serializer.toJson<DateTime?>(firstUse),
     };
   }
 
@@ -660,6 +686,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     bool? haptics,
     bool? uiSounds,
     bool? storeResetPending,
+    Value<DateTime?> firstUse = const Value.absent(),
   }) => AppSettings(
     id: id ?? this.id,
     latitude: latitude.present ? latitude.value : this.latitude,
@@ -681,6 +708,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     haptics: haptics ?? this.haptics,
     uiSounds: uiSounds ?? this.uiSounds,
     storeResetPending: storeResetPending ?? this.storeResetPending,
+    firstUse: firstUse.present ? firstUse.value : this.firstUse,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
     return AppSettings(
@@ -706,6 +734,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       storeResetPending: data.storeResetPending.present
           ? data.storeResetPending.value
           : this.storeResetPending,
+      firstUse: data.firstUse.present ? data.firstUse.value : this.firstUse,
     );
   }
 
@@ -731,13 +760,14 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('reduceMotion: $reduceMotion, ')
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
-          ..write('storeResetPending: $storeResetPending')
+          ..write('storeResetPending: $storeResetPending, ')
+          ..write('firstUse: $firstUse')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     latitude,
     longitude,
@@ -758,7 +788,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     haptics,
     uiSounds,
     storeResetPending,
-  );
+    firstUse,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -782,7 +813,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.reduceMotion == this.reduceMotion &&
           other.haptics == this.haptics &&
           other.uiSounds == this.uiSounds &&
-          other.storeResetPending == this.storeResetPending);
+          other.storeResetPending == this.storeResetPending &&
+          other.firstUse == this.firstUse);
 }
 
 class SettingsCompanion extends UpdateCompanion<AppSettings> {
@@ -806,6 +838,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<bool> haptics;
   final Value<bool> uiSounds;
   final Value<bool> storeResetPending;
+  final Value<DateTime?> firstUse;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.latitude = const Value.absent(),
@@ -827,6 +860,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.haptics = const Value.absent(),
     this.uiSounds = const Value.absent(),
     this.storeResetPending = const Value.absent(),
+    this.firstUse = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -849,6 +883,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.haptics = const Value.absent(),
     this.uiSounds = const Value.absent(),
     this.storeResetPending = const Value.absent(),
+    this.firstUse = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
     Expression<int>? id,
@@ -871,6 +906,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<bool>? haptics,
     Expression<bool>? uiSounds,
     Expression<bool>? storeResetPending,
+    Expression<String>? firstUse,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -893,6 +929,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (haptics != null) 'haptics': haptics,
       if (uiSounds != null) 'ui_sounds': uiSounds,
       if (storeResetPending != null) 'store_reset_pending': storeResetPending,
+      if (firstUse != null) 'first_use': firstUse,
     });
   }
 
@@ -917,6 +954,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<bool>? haptics,
     Value<bool>? uiSounds,
     Value<bool>? storeResetPending,
+    Value<DateTime?>? firstUse,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -939,6 +977,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       haptics: haptics ?? this.haptics,
       uiSounds: uiSounds ?? this.uiSounds,
       storeResetPending: storeResetPending ?? this.storeResetPending,
+      firstUse: firstUse ?? this.firstUse,
     );
   }
 
@@ -1011,6 +1050,9 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (storeResetPending.present) {
       map['store_reset_pending'] = Variable<bool>(storeResetPending.value);
     }
+    if (firstUse.present) {
+      map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse.value));
+    }
     return map;
   }
 
@@ -1036,7 +1078,464 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('reduceMotion: $reduceMotion, ')
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
-          ..write('storeResetPending: $storeResetPending')
+          ..write('storeResetPending: $storeResetPending, ')
+          ..write('firstUse: $firstUse')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PrayerLogTable extends PrayerLog with TableInfo<$PrayerLogTable, PrayerLogData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PrayerLogTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime, String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<DateTime>($PrayerLogTable.$converterdate);
+  @override
+  late final GeneratedColumnWithTypeConverter<Prayer, String> prayer = GeneratedColumn<String>(
+    'prayer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Prayer>($PrayerLogTable.$converterprayer);
+  @override
+  List<GeneratedColumn> get $columns => [date, prayer];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'prayer_log';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date, prayer};
+  @override
+  PrayerLogData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PrayerLogData(
+      date: $PrayerLogTable.$converterdate.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}date'])!,
+      ),
+      prayer: $PrayerLogTable.$converterprayer.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}prayer'])!,
+      ),
+    );
+  }
+
+  @override
+  $PrayerLogTable createAlias(String alias) {
+    return $PrayerLogTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, String> $converterdate = const CivilDate();
+  static JsonTypeConverter2<Prayer, String, String> $converterprayer =
+      const EnumNameConverter<Prayer>(Prayer.values);
+}
+
+class PrayerLogData extends DataClass implements Insertable<PrayerLogData> {
+  /// the prayer day the prayer belongs to, not the clock time it was marked
+  final DateTime date;
+  final Prayer prayer;
+  const PrayerLogData({required this.date, required this.prayer});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['date'] = Variable<String>($PrayerLogTable.$converterdate.toSql(date));
+    }
+    {
+      map['prayer'] = Variable<String>($PrayerLogTable.$converterprayer.toSql(prayer));
+    }
+    return map;
+  }
+
+  PrayerLogCompanion toCompanion(bool nullToAbsent) {
+    return PrayerLogCompanion(date: Value(date), prayer: Value(prayer));
+  }
+
+  factory PrayerLogData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PrayerLogData(
+      date: serializer.fromJson<DateTime>(json['date']),
+      prayer: $PrayerLogTable.$converterprayer.fromJson(
+        serializer.fromJson<String>(json['prayer']),
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<DateTime>(date),
+      'prayer': serializer.toJson<String>($PrayerLogTable.$converterprayer.toJson(prayer)),
+    };
+  }
+
+  PrayerLogData copyWith({DateTime? date, Prayer? prayer}) =>
+      PrayerLogData(date: date ?? this.date, prayer: prayer ?? this.prayer);
+  PrayerLogData copyWithCompanion(PrayerLogCompanion data) {
+    return PrayerLogData(
+      date: data.date.present ? data.date.value : this.date,
+      prayer: data.prayer.present ? data.prayer.value : this.prayer,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerLogData(')
+          ..write('date: $date, ')
+          ..write('prayer: $prayer')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, prayer);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PrayerLogData && other.date == this.date && other.prayer == this.prayer);
+}
+
+class PrayerLogCompanion extends UpdateCompanion<PrayerLogData> {
+  final Value<DateTime> date;
+  final Value<Prayer> prayer;
+  final Value<int> rowid;
+  const PrayerLogCompanion({
+    this.date = const Value.absent(),
+    this.prayer = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PrayerLogCompanion.insert({
+    required DateTime date,
+    required Prayer prayer,
+    this.rowid = const Value.absent(),
+  }) : date = Value(date),
+       prayer = Value(prayer);
+  static Insertable<PrayerLogData> custom({
+    Expression<String>? date,
+    Expression<String>? prayer,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (prayer != null) 'prayer': prayer,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PrayerLogCompanion copyWith({Value<DateTime>? date, Value<Prayer>? prayer, Value<int>? rowid}) {
+    return PrayerLogCompanion(
+      date: date ?? this.date,
+      prayer: prayer ?? this.prayer,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<String>($PrayerLogTable.$converterdate.toSql(date.value));
+    }
+    if (prayer.present) {
+      map['prayer'] = Variable<String>($PrayerLogTable.$converterprayer.toSql(prayer.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerLogCompanion(')
+          ..write('date: $date, ')
+          ..write('prayer: $prayer, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $QadaEntriesTable extends QadaEntries with TableInfo<$QadaEntriesTable, QadaEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QadaEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Prayer, String> prayer = GeneratedColumn<String>(
+    'prayer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Prayer>($QadaEntriesTable.$converterprayer);
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime?, String> missedOn = GeneratedColumn<String>(
+    'missed_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<DateTime?>($QadaEntriesTable.$convertermissedOnn);
+  static const VerificationMeta _madeUpAtMeta = const VerificationMeta('madeUpAt');
+  @override
+  late final GeneratedColumn<DateTime> madeUpAt = GeneratedColumn<DateTime>(
+    'made_up_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, prayer, missedOn, madeUpAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'qada_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QadaEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('made_up_at')) {
+      context.handle(
+        _madeUpAtMeta,
+        madeUpAt.isAcceptableOrUnknown(data['made_up_at']!, _madeUpAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QadaEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QadaEntry(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      prayer: $QadaEntriesTable.$converterprayer.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}prayer'])!,
+      ),
+      missedOn: $QadaEntriesTable.$convertermissedOnn.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}missed_on']),
+      ),
+      madeUpAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}made_up_at'],
+      ),
+    );
+  }
+
+  @override
+  $QadaEntriesTable createAlias(String alias) {
+    return $QadaEntriesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<Prayer, String, String> $converterprayer =
+      const EnumNameConverter<Prayer>(Prayer.values);
+  static TypeConverter<DateTime, String> $convertermissedOn = const CivilDate();
+  static TypeConverter<DateTime?, String?> $convertermissedOnn = NullAwareTypeConverter.wrap(
+    $convertermissedOn,
+  );
+}
+
+class QadaEntry extends DataClass implements Insertable<QadaEntry> {
+  final int id;
+  final Prayer prayer;
+
+  /// null = missed before using the app
+  final DateTime? missedOn;
+
+  /// null = still open
+  final DateTime? madeUpAt;
+  const QadaEntry({required this.id, required this.prayer, this.missedOn, this.madeUpAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['prayer'] = Variable<String>($QadaEntriesTable.$converterprayer.toSql(prayer));
+    }
+    if (!nullToAbsent || missedOn != null) {
+      map['missed_on'] = Variable<String>($QadaEntriesTable.$convertermissedOnn.toSql(missedOn));
+    }
+    if (!nullToAbsent || madeUpAt != null) {
+      map['made_up_at'] = Variable<DateTime>(madeUpAt);
+    }
+    return map;
+  }
+
+  QadaEntriesCompanion toCompanion(bool nullToAbsent) {
+    return QadaEntriesCompanion(
+      id: Value(id),
+      prayer: Value(prayer),
+      missedOn: missedOn == null && nullToAbsent ? const Value.absent() : Value(missedOn),
+      madeUpAt: madeUpAt == null && nullToAbsent ? const Value.absent() : Value(madeUpAt),
+    );
+  }
+
+  factory QadaEntry.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QadaEntry(
+      id: serializer.fromJson<int>(json['id']),
+      prayer: $QadaEntriesTable.$converterprayer.fromJson(
+        serializer.fromJson<String>(json['prayer']),
+      ),
+      missedOn: serializer.fromJson<DateTime?>(json['missedOn']),
+      madeUpAt: serializer.fromJson<DateTime?>(json['madeUpAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'prayer': serializer.toJson<String>($QadaEntriesTable.$converterprayer.toJson(prayer)),
+      'missedOn': serializer.toJson<DateTime?>(missedOn),
+      'madeUpAt': serializer.toJson<DateTime?>(madeUpAt),
+    };
+  }
+
+  QadaEntry copyWith({
+    int? id,
+    Prayer? prayer,
+    Value<DateTime?> missedOn = const Value.absent(),
+    Value<DateTime?> madeUpAt = const Value.absent(),
+  }) => QadaEntry(
+    id: id ?? this.id,
+    prayer: prayer ?? this.prayer,
+    missedOn: missedOn.present ? missedOn.value : this.missedOn,
+    madeUpAt: madeUpAt.present ? madeUpAt.value : this.madeUpAt,
+  );
+  QadaEntry copyWithCompanion(QadaEntriesCompanion data) {
+    return QadaEntry(
+      id: data.id.present ? data.id.value : this.id,
+      prayer: data.prayer.present ? data.prayer.value : this.prayer,
+      missedOn: data.missedOn.present ? data.missedOn.value : this.missedOn,
+      madeUpAt: data.madeUpAt.present ? data.madeUpAt.value : this.madeUpAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QadaEntry(')
+          ..write('id: $id, ')
+          ..write('prayer: $prayer, ')
+          ..write('missedOn: $missedOn, ')
+          ..write('madeUpAt: $madeUpAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, prayer, missedOn, madeUpAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QadaEntry &&
+          other.id == this.id &&
+          other.prayer == this.prayer &&
+          other.missedOn == this.missedOn &&
+          other.madeUpAt == this.madeUpAt);
+}
+
+class QadaEntriesCompanion extends UpdateCompanion<QadaEntry> {
+  final Value<int> id;
+  final Value<Prayer> prayer;
+  final Value<DateTime?> missedOn;
+  final Value<DateTime?> madeUpAt;
+  const QadaEntriesCompanion({
+    this.id = const Value.absent(),
+    this.prayer = const Value.absent(),
+    this.missedOn = const Value.absent(),
+    this.madeUpAt = const Value.absent(),
+  });
+  QadaEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required Prayer prayer,
+    this.missedOn = const Value.absent(),
+    this.madeUpAt = const Value.absent(),
+  }) : prayer = Value(prayer);
+  static Insertable<QadaEntry> custom({
+    Expression<int>? id,
+    Expression<String>? prayer,
+    Expression<String>? missedOn,
+    Expression<DateTime>? madeUpAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (prayer != null) 'prayer': prayer,
+      if (missedOn != null) 'missed_on': missedOn,
+      if (madeUpAt != null) 'made_up_at': madeUpAt,
+    });
+  }
+
+  QadaEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<Prayer>? prayer,
+    Value<DateTime?>? missedOn,
+    Value<DateTime?>? madeUpAt,
+  }) {
+    return QadaEntriesCompanion(
+      id: id ?? this.id,
+      prayer: prayer ?? this.prayer,
+      missedOn: missedOn ?? this.missedOn,
+      madeUpAt: madeUpAt ?? this.madeUpAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (prayer.present) {
+      map['prayer'] = Variable<String>($QadaEntriesTable.$converterprayer.toSql(prayer.value));
+    }
+    if (missedOn.present) {
+      map['missed_on'] = Variable<String>(
+        $QadaEntriesTable.$convertermissedOnn.toSql(missedOn.value),
+      );
+    }
+    if (madeUpAt.present) {
+      map['made_up_at'] = Variable<DateTime>(madeUpAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QadaEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('prayer: $prayer, ')
+          ..write('missedOn: $missedOn, ')
+          ..write('madeUpAt: $madeUpAt')
           ..write(')'))
         .toString();
   }
@@ -1046,11 +1545,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $PrayerLogTable prayerLog = $PrayerLogTable(this);
+  late final $QadaEntriesTable qadaEntries = $QadaEntriesTable(this);
+  late final Index qadaDay = Index(
+    'qada_day',
+    'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [settings];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [settings, prayerLog, qadaEntries, qadaDay];
 }
 
 typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
@@ -1074,6 +1579,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<bool> haptics,
   Value<bool> uiSounds,
   Value<bool> storeResetPending,
+  Value<DateTime?> firstUse,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> id,
@@ -1096,6 +1602,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<bool> haptics,
   Value<bool> uiSounds,
   Value<bool> storeResetPending,
+  Value<DateTime?> firstUse,
 });
 
 class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -1182,6 +1689,11 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
     column: $table.storeResetPending,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get firstUse => $composableBuilder(
+    column: $table.firstUse,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -1253,6 +1765,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
     column: $table.storeResetPending,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get firstUse =>
+      $composableBuilder(column: $table.firstUse, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -1321,6 +1836,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumn<bool> get storeResetPending =>
       $composableBuilder(column: $table.storeResetPending, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, String> get firstUse =>
+      $composableBuilder(column: $table.firstUse, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -1369,6 +1887,7 @@ class $$SettingsTableTableManager
                 Value<bool> haptics = const Value.absent(),
                 Value<bool> uiSounds = const Value.absent(),
                 Value<bool> storeResetPending = const Value.absent(),
+                Value<DateTime?> firstUse = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 latitude: latitude,
@@ -1390,6 +1909,7 @@ class $$SettingsTableTableManager
                 haptics: haptics,
                 uiSounds: uiSounds,
                 storeResetPending: storeResetPending,
+                firstUse: firstUse,
               ),
           createCompanionCallback:
               ({
@@ -1413,6 +1933,7 @@ class $$SettingsTableTableManager
                 Value<bool> haptics = const Value.absent(),
                 Value<bool> uiSounds = const Value.absent(),
                 Value<bool> storeResetPending = const Value.absent(),
+                Value<DateTime?> firstUse = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 latitude: latitude,
@@ -1434,6 +1955,7 @@ class $$SettingsTableTableManager
                 haptics: haptics,
                 uiSounds: uiSounds,
                 storeResetPending: storeResetPending,
+                firstUse: firstUse,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -1462,9 +1984,287 @@ typedef $$SettingsTableProcessedTableManager =
       AppSettings,
       PrefetchHooks Function()
     >;
+typedef $$PrayerLogTableCreateCompanionBuilder = PrayerLogCompanion Function({
+  required DateTime date,
+  required Prayer prayer,
+  Value<int> rowid,
+});
+typedef $$PrayerLogTableUpdateCompanionBuilder = PrayerLogCompanion Function({
+  Value<DateTime> date,
+  Value<Prayer> prayer,
+  Value<int> rowid,
+});
+
+class $$PrayerLogTableFilterComposer extends Composer<_$AppDatabase, $PrayerLogTable> {
+  $$PrayerLogTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Prayer, Prayer, String> get prayer => $composableBuilder(
+    column: $table.prayer,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+}
+
+class $$PrayerLogTableOrderingComposer extends Composer<_$AppDatabase, $PrayerLogTable> {
+  $$PrayerLogTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get prayer =>
+      $composableBuilder(column: $table.prayer, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PrayerLogTableAnnotationComposer extends Composer<_$AppDatabase, $PrayerLogTable> {
+  $$PrayerLogTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<DateTime, String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Prayer, String> get prayer =>
+      $composableBuilder(column: $table.prayer, builder: (column) => column);
+}
+
+class $$PrayerLogTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PrayerLogTable,
+          PrayerLogData,
+          $$PrayerLogTableFilterComposer,
+          $$PrayerLogTableOrderingComposer,
+          $$PrayerLogTableAnnotationComposer,
+          $$PrayerLogTableCreateCompanionBuilder,
+          $$PrayerLogTableUpdateCompanionBuilder,
+          (PrayerLogData, BaseReferences<_$AppDatabase, $PrayerLogTable, PrayerLogData>),
+          PrayerLogData,
+          PrefetchHooks Function()
+        > {
+  $$PrayerLogTableTableManager(_$AppDatabase db, $PrayerLogTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$PrayerLogTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PrayerLogTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PrayerLogTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<DateTime> date = const Value.absent(),
+            Value<Prayer> prayer = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => PrayerLogCompanion(date: date, prayer: prayer, rowid: rowid),
+          createCompanionCallback: ({
+            required DateTime date,
+            required Prayer prayer,
+            Value<int> rowid = const Value.absent(),
+          }) => PrayerLogCompanion.insert(date: date, prayer: prayer, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PrayerLogTable, PrayerLogData>(table),
+                  BaseReferences<_$AppDatabase, $PrayerLogTable, PrayerLogData>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PrayerLogTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PrayerLogTable,
+      PrayerLogData,
+      $$PrayerLogTableFilterComposer,
+      $$PrayerLogTableOrderingComposer,
+      $$PrayerLogTableAnnotationComposer,
+      $$PrayerLogTableCreateCompanionBuilder,
+      $$PrayerLogTableUpdateCompanionBuilder,
+      (PrayerLogData, BaseReferences<_$AppDatabase, $PrayerLogTable, PrayerLogData>),
+      PrayerLogData,
+      PrefetchHooks Function()
+    >;
+typedef $$QadaEntriesTableCreateCompanionBuilder = QadaEntriesCompanion Function({
+  Value<int> id,
+  required Prayer prayer,
+  Value<DateTime?> missedOn,
+  Value<DateTime?> madeUpAt,
+});
+typedef $$QadaEntriesTableUpdateCompanionBuilder = QadaEntriesCompanion Function({
+  Value<int> id,
+  Value<Prayer> prayer,
+  Value<DateTime?> missedOn,
+  Value<DateTime?> madeUpAt,
+});
+
+class $$QadaEntriesTableFilterComposer extends Composer<_$AppDatabase, $QadaEntriesTable> {
+  $$QadaEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Prayer, Prayer, String> get prayer => $composableBuilder(
+    column: $table.prayer,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get missedOn => $composableBuilder(
+    column: $table.missedOn,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get madeUpAt =>
+      $composableBuilder(column: $table.madeUpAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$QadaEntriesTableOrderingComposer extends Composer<_$AppDatabase, $QadaEntriesTable> {
+  $$QadaEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get prayer =>
+      $composableBuilder(column: $table.prayer, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get missedOn =>
+      $composableBuilder(column: $table.missedOn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get madeUpAt =>
+      $composableBuilder(column: $table.madeUpAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QadaEntriesTableAnnotationComposer extends Composer<_$AppDatabase, $QadaEntriesTable> {
+  $$QadaEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Prayer, String> get prayer =>
+      $composableBuilder(column: $table.prayer, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, String> get missedOn =>
+      $composableBuilder(column: $table.missedOn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get madeUpAt =>
+      $composableBuilder(column: $table.madeUpAt, builder: (column) => column);
+}
+
+class $$QadaEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QadaEntriesTable,
+          QadaEntry,
+          $$QadaEntriesTableFilterComposer,
+          $$QadaEntriesTableOrderingComposer,
+          $$QadaEntriesTableAnnotationComposer,
+          $$QadaEntriesTableCreateCompanionBuilder,
+          $$QadaEntriesTableUpdateCompanionBuilder,
+          (QadaEntry, BaseReferences<_$AppDatabase, $QadaEntriesTable, QadaEntry>),
+          QadaEntry,
+          PrefetchHooks Function()
+        > {
+  $$QadaEntriesTableTableManager(_$AppDatabase db, $QadaEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$QadaEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$QadaEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QadaEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<Prayer> prayer = const Value.absent(),
+                Value<DateTime?> missedOn = const Value.absent(),
+                Value<DateTime?> madeUpAt = const Value.absent(),
+              }) => QadaEntriesCompanion(
+                id: id,
+                prayer: prayer,
+                missedOn: missedOn,
+                madeUpAt: madeUpAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required Prayer prayer,
+                Value<DateTime?> missedOn = const Value.absent(),
+                Value<DateTime?> madeUpAt = const Value.absent(),
+              }) => QadaEntriesCompanion.insert(
+                id: id,
+                prayer: prayer,
+                missedOn: missedOn,
+                madeUpAt: madeUpAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QadaEntriesTable, QadaEntry>(table),
+                  BaseReferences<_$AppDatabase, $QadaEntriesTable, QadaEntry>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QadaEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QadaEntriesTable,
+      QadaEntry,
+      $$QadaEntriesTableFilterComposer,
+      $$QadaEntriesTableOrderingComposer,
+      $$QadaEntriesTableAnnotationComposer,
+      $$QadaEntriesTableCreateCompanionBuilder,
+      $$QadaEntriesTableUpdateCompanionBuilder,
+      (QadaEntry, BaseReferences<_$AppDatabase, $QadaEntriesTable, QadaEntry>),
+      QadaEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$SettingsTableTableManager get settings => $$SettingsTableTableManager(_db, _db.settings);
+  $$PrayerLogTableTableManager get prayerLog => $$PrayerLogTableTableManager(_db, _db.prayerLog);
+  $$QadaEntriesTableTableManager get qadaEntries =>
+      $$QadaEntriesTableTableManager(_db, _db.qadaEntries);
 }
