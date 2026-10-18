@@ -143,8 +143,10 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
   flutter_secure_storage and its file in path_provider's Application Support folder. No
   shared_preferences, no hive.
 - Domain packages, each added in its milestone: adhan_dart (not adhan, which stopped in 2023),
-  hijri, geolocator, flutter_compass, flutter_local_notifications, timezone, flutter_timezone,
-  just_audio, audio_session, workmanager (the background top-up), home_widget, live_activities.
+  hijri, geolocator, flutter_local_notifications, timezone, flutter_timezone, just_audio,
+  audio_session, workmanager (the background top-up), home_widget, live_activities.
+- The compass is the app's own `better_muslim/compass` channel, true north from the World Magnetic
+  Model in Dart.
 - Native code that has to run in every Flutter engine (the app's, a background task's, a headless
   one) is a local plugin in `packages/`, like `packages/adhan_alarms`, so Flutter registers it in
   each engine by itself.
@@ -180,4 +182,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.1.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-18
+**Version**: 3.2.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-18
