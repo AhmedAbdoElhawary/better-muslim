@@ -73,4 +73,27 @@ void main() {
 
     expect(english.titleOf(alert), 'Maghrib · 17:56');
   });
+
+  Alert reminder() => Alert(
+    day: DateTime(2026, 10, 15),
+    prayer: Prayer.maghrib,
+    kind: AlertKind.reminder,
+    at: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 17, 46),
+    sound: PrayerSound.adhan,
+    before: const Duration(minutes: 10),
+  );
+
+  test('a reminder in english', () async {
+    final english = await texts('en');
+
+    expect(english.titleOf(reminder()), 'Maghrib in 10 minutes');
+    expect(english.bodyOf(reminder()), '17:56 · Makkah');
+  });
+
+  test('a reminder in arabic', () async {
+    final arabic = await texts('ar');
+
+    expect(arabic.titleOf(reminder()), 'المغرب بعد ١٠ دقائق');
+    expect(arabic.bodyOf(reminder()), '١٧:٥٦ · مكة المكرمة');
+  });
 }

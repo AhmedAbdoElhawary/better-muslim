@@ -43,19 +43,32 @@ class AlertTexts {
 
   String get city => (language == 'ar' ? location.placeNameAr : null) ?? location.placeName ?? '';
 
-  String titleOf(Alert alert) => l10n.tr(StringsManager.notifAdhanTitle, {
-    'prayer': l10n.tr(alert.prayer.nameKey, const {}),
-    'time': timeOf(alert),
-  });
+  String titleOf(Alert alert) => switch (alert.kind) {
+    AlertKind.adhan => l10n.tr(StringsManager.notifAdhanTitle, {
+      'prayer': tr(alert.prayer.nameKey),
+      'time': timeOf(alert),
+    }),
+    AlertKind.reminder => l10n.tr(StringsManager.notifReminderTitle, {
+      'prayer': tr(alert.prayer.nameKey),
+      'minutes': formatDigitsIn('${alert.before.inMinutes}', language: language, digits: digits),
+    }),
+  };
 
-  String bodyOf(Alert alert) => l10n.tr(StringsManager.notifAdhanBody, {
-    'prayer': l10n.tr(alert.prayer.nameKey, const {}),
-    'city': city,
-  });
+  String bodyOf(Alert alert) => switch (alert.kind) {
+    AlertKind.adhan => l10n.tr(StringsManager.notifAdhanBody, {
+      'prayer': tr(alert.prayer.nameKey),
+      'city': city,
+    }),
+    AlertKind.reminder => l10n.tr(StringsManager.notifReminderBody, {
+      'time': timeOf(alert),
+      'city': city,
+    }),
+  };
 
-  /// the place's own clock, the same time the app shows for a manual city in another zone
+  /// the prayer's time, also on a reminder. the place's own clock, the same time the app shows
+  /// for a manual city in another zone
   String timeOf(Alert alert) => formatTimeIn(
-    TZDateTime.from(alert.at, location.zone),
+    TZDateTime.from(alert.prayerTime, location.zone),
     language: language,
     use24h: use24h,
     digits: digits,

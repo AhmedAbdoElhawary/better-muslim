@@ -147,6 +147,7 @@ class NotificationScheduler {
   Future<void> _ensureChannels(Map<Prayer, PrayerSound> sounds, AlertTexts texts) async {
     final android = _android;
     if (android == null) return;
+    await android.createNotificationChannel(_reminders(texts));
     await android.createNotificationChannelGroup(
       AndroidNotificationChannelGroup(_group, texts.tr(StringsManager.soundAdhan)),
     );
@@ -174,7 +175,30 @@ class NotificationScheduler {
         enableVibration: sound != PrayerSound.silent,
       );
 
+  /// one category for all five, default importance and the phone's own sound (FR-017)
+  static AndroidNotificationChannel _reminders(AlertTexts texts) =>
+      AndroidNotificationChannel('reminders', texts.tr(StringsManager.reminders));
+
   NotificationDetails _details(Alert alert, AlertTexts texts) {
+    if (alert.kind == AlertKind.reminder) {
+      final channel = _reminders(texts);
+      return NotificationDetails(
+        android: AndroidNotificationDetails(
+          channel.id,
+          channel.name,
+          color: _accent,
+          category: AndroidNotificationCategory.reminder,
+        ),
+
+        /// into the list, no sound and no lit screen (FR-035)
+        iOS: const DarwinNotificationDetails(
+          presentSound: false,
+          presentBanner: true,
+          presentList: true,
+          interruptionLevel: InterruptionLevel.passive,
+        ),
+      );
+    }
     final channel = _channelOf(alert.prayer, alert.sound, texts);
     final sound = alert.sound;
     return NotificationDetails(

@@ -58,6 +58,15 @@ void main() {
     sound: sounds[prayer]!,
   );
 
+  Alert reminderOf(Prayer prayer) => Alert(
+    day: DateTime(2026, 10, 15),
+    prayer: prayer,
+    kind: AlertKind.reminder,
+    at: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 17, 46),
+    sound: sounds[prayer]!,
+    before: const Duration(minutes: 10),
+  );
+
   late final alerts = [
     alertOf(Prayer.asr, 15, 27),
     alertOf(Prayer.maghrib, 17, 56),
@@ -93,7 +102,8 @@ void main() {
 
       await NotificationScheduler(channel).apply(alerts: alerts, sounds: sounds, texts: texts);
 
-      expect(android.channels.map((channel) => channel.id), [
+      final adhan = android.channels.where((channel) => channel.id.startsWith('adhan_')).toList();
+      expect(adhan.map((channel) => channel.id), [
         'adhan_fajr_adhan',
         'adhan_dhuhr_tone',
         'adhan_asr_tone',
@@ -102,11 +112,11 @@ void main() {
       ]);
       expect(android.deleted, containsAll(['adhan_maghrib_tone', 'adhan_maghrib_silent']));
       expect(android.deleted, isNot(contains('adhan_maghrib_adhan')));
-      final isha = android.channels.last;
+      final isha = adhan.last;
       expect([isha.playSound, isha.enableVibration], [false, false]);
-      final maghrib = android.channels[3];
+      final maghrib = adhan[3];
       expect((maghrib.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_makkah_clip');
-      final fajr = android.channels.first;
+      final fajr = adhan.first;
       expect((fajr.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_makkah_fajr_clip');
       expect(android.scheduled.map((call) => call.details!.channelId), [
         'adhan_asr_tone',
@@ -161,6 +171,23 @@ void main() {
       expect(android.scheduled, hasLength(3));
     });
 
+    test('reminders go to the reminders channel at default importance', () async {
+      final android = useAndroid();
+
+      await NotificationScheduler(channel)
+          .apply(alerts: [reminderOf(Prayer.maghrib)], sounds: sounds, texts: texts);
+
+      final reminders = android.channels.firstWhere((channel) => channel.id == 'reminders');
+      expect(reminders.importance, Importance.defaultImportance);
+      expect(reminders.name, 'Reminders');
+      final details = android.scheduled.single.details!;
+      expect(details.channelId, 'reminders');
+      expect(details.actions, isNull);
+      expect(android.scheduled.single.title, 'Maghrib in 10 minutes');
+      expect(android.scheduled.single.body, '17:56 · Makkah');
+      expect(channel.entries, isEmpty);
+    });
+
     test('a plugin call that throws reports only the step', () async {
       useAndroid().throwOnSchedule = true;
       final reporter = _RecordingReporter();
@@ -176,6 +203,20 @@ void main() {
   });
 
   group('ios', () {
+    test('reminders are passive and silent', () async {
+      final ios = useIos();
+
+      await NotificationScheduler(channel)
+          .apply(alerts: [reminderOf(Prayer.maghrib)], sounds: sounds, texts: texts);
+
+      final details = ios.scheduled.single.details!;
+      expect(details.interruptionLevel, InterruptionLevel.passive);
+      expect(
+        [details.presentSound, details.sound, details.categoryIdentifier],
+        [false, null, null],
+      );
+    });
+
     test('adhan, tone and silent follow research R2', () async {
       final ios = useIos();
 
