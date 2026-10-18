@@ -154,15 +154,15 @@ notification arrives at its minute with its sound (quickstart §3, steps 1 to 3)
 
 ### Tests for User Story 1
 
-- [ ] T017 [P] [US1] `test/features/notifications/domain/schedule_test.dart`:
+- [X] T017 [P] [US1] `test/features/notifications/domain/schedule_test.dart`:
   - 6 normal prayer days from 15 Oct 2026 10:00 Makkah give 29 adhans (today's Fajr is past)
   - nothing in the past, nothing for a prayer with a null time (Tromsø 21 Jun 2026)
   - at 00:30 the first day is yesterday's prayer day, so the next Fajr is today's
   - the count never passes 30 adhans, even when Fajr gets a minute earlier each day
-- [ ] T018 [P] [US1] `test/features/notifications/data/alert_texts_test.dart`: "Maghrib · 17:56"
+- [X] T018 [P] [US1] `test/features/notifications/data/alert_texts_test.dart`: "Maghrib · 17:56"
   and "It is time for Maghrib in Makkah. Tap to mark it prayed." in English. The Arabic with
   Eastern digits and the Arabic place name. "5:56 PM" on a 12 hour phone.
-- [ ] T019 [P] [US1] `test/features/notifications/data/notification_scheduler_test.dart` with a
+- [X] T019 [P] [US1] `test/features/notifications/data/notification_scheduler_test.dart` with a
   fake `FlutterLocalNotificationsPlatform` and a fake channel:
   - `apply` calls `cancelAllPendingNotifications` before anything else
   - iOS details follow the research R2 table for Adhan, Tone and Silent
@@ -174,17 +174,17 @@ notification arrives at its minute with its sound (quickstart §3, steps 1 to 3)
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Create `lib/features/notifications/domain/schedule.dart`:
+- [X] T020 [US1] Create `lib/features/notifications/domain/schedule.dart`:
   - `const scheduleDays = 6`, with this line above it:
     `// TODO(ahmed): when the 6 days run out on iOS the phone goes quiet, a last "open the app" message could go here if I design one.`
   - `List<Alert> buildSchedule({required DateTime now, required List<DayTimes?> days, required Map<Prayer, PrayerSound> sounds})`:
     `days` are the prayer day of now and the 5 after it. It returns the adhan alerts after `now`,
     skipping null times. Reminders come in US4.
-- [ ] T021 [P] [US1] Create `lib/features/notifications/data/alert_texts.dart`: `AlertTexts` built
+- [X] T021 [P] [US1] Create `lib/features/notifications/data/alert_texts.dart`: `AlertTexts` built
   from `AppLocalizations`, the language, `use24h`, `Digits` and the location. `titleOf(Alert)` →
   `notifAdhanTitle`, `bodyOf(Alert)` → `notifAdhanBody`, with the place name in the app's
   language (`placeNameAr` in Arabic when it exists). Uses `formatTimeIn` and `formatDigitsIn`.
-- [ ] T022 [US1] Create `lib/features/notifications/data/notification_scheduler.dart`:
+- [X] T022 [US1] Create `lib/features/notifications/data/notification_scheduler.dart`:
   - `init()`: `initialize` with the Android small icon `ic_notification` and
     `DarwinInitializationSettings` with every `request*Permission` false (asking is explicit)
   - `ensureChannels(Map<Prayer, PrayerSound>)`: the R2 channels in group "Adhan" (name from
@@ -199,7 +199,7 @@ notification arrives at its minute with its sound (quickstart §3, steps 1 to 3)
   - `Future<bool> askPermission()`: iOS `requestPermissions(alert: true, sound: true)`, Android
     `requestNotificationsPermission()`
   - a provider `notificationSchedulerProvider`
-- [ ] T023 [US1] Create `lib/features/notifications/presentation/notifications_boot.dart`, a
+- [X] T023 [US1] Create `lib/features/notifications/presentation/notifications_boot.dart`, a
   `ConsumerStatefulWidget` that returns its child:
   - `initState`: `scheduler.init()`. Unless `flavorProvider` says design scenario: await
     `locationControllerProvider`'s `firstLocate`, then ask once (FR-004) when `notificationsAsked`
@@ -211,12 +211,12 @@ notification arrives at its minute with its sound (quickstart §3, steps 1 to 3)
   - `_reschedule()`: returns at once in the design scenario (FR-013), so no trigger added later can
     schedule there. Otherwise reads `locationProvider`, `prayerDayProvider` (milestone 4), the 6
     `dayTimesProvider(date)`, the settings, builds the alerts and texts, calls `apply`.
-- [ ] T024 [US1] In `lib/bootstrap.dart` wrap the app: `child: const NotificationsBoot(child: App())`.
-- [ ] T025 [P] [US1] Android manifest (`android/app/src/main/AndroidManifest.xml`): add
+- [X] T024 [US1] In `lib/bootstrap.dart` wrap the app: `child: const NotificationsBoot(child: App())`.
+- [X] T025 [P] [US1] Android manifest (`android/app/src/main/AndroidManifest.xml`): add
   `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, and the plugin's
   `ScheduledNotificationReceiver`, `ScheduledNotificationBootReceiver` (boot, package replaced,
   quickboot actions) and `ActionBroadcastReceiver`, all `exported="false"`.
-- [ ] T026 [P] [US1] iOS:
+- [X] T026 [P] [US1] iOS:
   - `ios/Runner/AppDelegate.swift`: in `didInitializeImplicitFlutterEngine` call
     `FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in GeneratedPluginRegistrant.register(with: registry) }`,
     and set `UNUserNotificationCenter.current().delegate = self` in `didFinishLaunchingWithOptions`
