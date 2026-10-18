@@ -86,6 +86,9 @@ abstract final class FontSizeManager {
   static const double rowValue = 13.5;
   static const double nowTag = 11;
   static const double dayComplete = 20;
+
+  /// the adhan screen's dua line
+  static const double adhanDua = 22;
 }
 
 abstract final class LineHeightManager {
@@ -124,6 +127,7 @@ abstract final class LineHeightManager {
   static const double nextPrayerAr = 1.0;
   static const double skyLabelAr = 1.2;
   static const double verseTranslation = 1.5;
+  static const double adhanDua = 1.8;
 }
 
 abstract final class LetterSpacingManager {
@@ -133,4 +137,7 @@ abstract final class LetterSpacingManager {
 
   /// .12em of the 11 pt NOW tag on the prayer rows
   static const double nowTag = 1.32;
+
+  /// .18em of the 12 pt adhan header
+  static const double adhanHeader = 2.16;
 }

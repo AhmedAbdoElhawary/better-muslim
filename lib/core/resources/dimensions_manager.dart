@@ -67,6 +67,24 @@ abstract final class SpaceManager {
   static const double prayerGlowTop = 170;
   static const double dayCompleteDots = 24;
   static const double dayCompleteRise = 6;
+
+  /// adhan (4.03), positions are in the 393 x 852 frame of the mockup
+  static const double adhanHaloTop = 400;
+  static const double adhanSunTop = 500;
+  static const double adhanHorizonTop = 540;
+  static const double adhanHeaderTop = 120;
+  static const double adhanHeaderGap = 10;
+  static const double adhanNameTop = 8;
+  static const double adhanProgressTop = 22;
+  static const double adhanProgressGap = 10;
+  static const double adhanCardTop = 572;
+  static const double adhanCardV = 16;
+  static const double adhanCardH = 18;
+  static const double adhanCardGap = 6;
+  static const double adhanReadDuaGap = 2;
+  static const double adhanButtonsBottom = 44;
+  static const double adhanButtonGap = 10;
+  static const double adhanButtonIconGap = 8;
 }
 
 abstract final class RadiusManager {
@@ -80,6 +98,9 @@ abstract final class RadiusManager {
   static const double homeGlow = 36;
   static const double prayerBar = 2;
   static const double shortcutIcon = 12;
+  static const double adhanCard = 20;
+  static const double adhanButton = 14;
+  static const double adhanBar = 2;
 }
 
 abstract final class SizeManager {
@@ -129,6 +150,17 @@ abstract final class SizeManager {
   static const double dayCompleteDot = 10;
   static const double dayCompleteStar = 56;
   static const double dayCompleteRing = 72;
+
+  /// adhan (4.03)
+  static const double adhanSun = 84;
+  static const double adhanSunBlur = 50;
+  static const double adhanSunSpread = 18;
+  static const double adhanHaloW = 420;
+  static const double adhanHaloH = 280;
+  static const double adhanStar = 34;
+  static const double adhanProgress = 200;
+  static const double adhanBar = 3;
+  static const double adhanButton = 52;
 
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;
