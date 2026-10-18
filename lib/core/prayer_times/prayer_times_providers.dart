@@ -1,0 +1,64 @@
+import 'dart:async';
+
+import 'package:better_muslim/core/clock/clock.dart';
+import 'package:better_muslim/core/hijri/hijri_date.dart';
+import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart';
+
+/// the location's local date. rebuilds itself at the next local midnight
+final todayProvider = Provider<DateTime>((ref) {
+  final zone = ref.watch(locationProvider.select((location) => location?.zone));
+  final clock = ref.watch(clockProvider);
+  final now = zone == null ? clock() : TZDateTime.from(clock(), zone);
+  final midnight = zone == null
+      ? DateTime(now.year, now.month, now.day + 1)
+      : TZDateTime(zone, now.year, now.month, now.day + 1);
+  final timer = Timer(midnight.difference(now), ref.invalidateSelf);
+  ref.onDispose(timer.cancel);
+  return DateTime(now.year, now.month, now.day);
+});
+
+/// null without a location. reads no clock, so the same inputs give the same times
+final dayTimesProvider = Provider.family<DayTimes?, DateTime>((ref, date) {
+  final location = ref.watch(locationProvider);
+  final picked = ref.watch(
+    settingsProvider.select(
+      (settings) => (
+        method: settings.value?.method,
+        asrMethod: settings.value?.asrMethod,
+        hijriAdjust: settings.value?.hijriAdjust ?? 0,
+      ),
+    ),
+  );
+  if (location == null) return null;
+  return DayTimes.compute(
+    latitude: location.latitude,
+    longitude: location.longitude,
+    date: date,
+    zone: location.zone,
+    method: picked.method ?? PrayerMethod.forCountry(location.countryCode),
+    asrMethod: picked.asrMethod ?? AsrMethod.forCountry(location.countryCode),
+    isRamadan: HijriDate.of(date, picked.hijriAdjust).month == 9,
+  );
+});
+
+final todayTimesProvider = Provider<DayTimes?>(
+  (ref) => ref.watch(dayTimesProvider(ref.watch(todayProvider))),
+);
+
+/// follows the ticker, but only notifies when the period changes
+final periodProvider = Provider<Period?>((ref) {
+  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  return ref.watch(todayTimesProvider)?.periodAt(now);
+});
+
+final nextPrayerProvider = Provider<(Prayer, TZDateTime)?>((ref) {
+  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final today = ref.watch(todayProvider);
+  final tomorrow = DateTime(today.year, today.month, today.day + 1);
+  return ref.watch(todayTimesProvider)?.next(now, ref.watch(dayTimesProvider(tomorrow)));
+});
