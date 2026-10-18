@@ -347,24 +347,24 @@ Prayer show it prayed (quickstart §3 step 4, §4)
 
 ### Tests for User Story 3
 
-- [ ] T047 [P] [US3] `test/features/notifications/domain/tap_target_test.dart`: an Adhan payload at
+- [X] T047 [P] [US3] `test/features/notifications/domain/tap_target_test.dart`: an Adhan payload at
   0 s and at the length minus 1 s → adhan target with `from`, at the length plus 1 s → Prayer
   target, Tone and Silent → Prayer target, a reminder → no target, Isha after midnight keeps its
   day.
-- [ ] T048 [P] [US3] `test/features/notifications/data/background_test.dart`: `markFromPayload` on
+- [X] T048 [P] [US3] `test/features/notifications/data/background_test.dart`: `markFromPayload` on
   an in-memory store logs the payload's day and prayer once, twice changes nothing, a passed
   prayer is logged the same way (FR-038), a null store does nothing.
-- [ ] T049 [P] [US3] Extend `notifications_boot_test.dart`: a logged prayer cancels the delivered
+- [X] T049 [P] [US3] Extend `notifications_boot_test.dart`: a logged prayer cancels the delivered
   notification whose id decodes to it (FR-039), an unlogged one stays. Extend
   `adhan_page_test.dart` (FR-031): Mark prayed logs once through an in-memory store, the fake
   player keeps playing, the button shows "Prayed" with the check and a second tap does nothing.
 
 ### Implementation for User Story 3
 
-- [ ] T050 [P] [US3] Create `lib/features/notifications/domain/tap_target.dart`:
+- [X] T050 [P] [US3] Create `lib/features/notifications/domain/tap_target.dart`:
   `sealed class TapTarget` with `AdhanTarget(prayer, day, from)`, `PrayerTarget(day, prayer)`,
   `NoTarget`, and `tapTarget(String payload, DateTime now, Duration length)` per research R9.
-- [ ] T051 [US3] Create `lib/features/notifications/data/background.dart`:
+- [X] T051 [US3] Create `lib/features/notifications/data/background.dart`:
   - `Future<void> markFromPayload(String payload, {AppDatabase? db})`: decodes, opens
     `AppDatabase.openExisting()` unless given, `markPrayed(day, prayer)`, closes what it opened
   - `@pragma('vm:entry-point') void onNotificationActionInBackground(NotificationResponse response)`
@@ -373,22 +373,22 @@ Prayer show it prayed (quickstart §3 step 4, §4)
     `WidgetsFlutterBinding.ensureInitialized()` and `markFromPayload(args.first)`, and ends with
     `MethodChannel('better_muslim/adhan/background').invokeMethod('done')` so Kotlin can destroy
     the engine
-- [ ] T052 [US3] In `notification_scheduler.dart`: iOS category `adhan` with
+- [X] T052 [US3] In `notification_scheduler.dart`: iOS category `adhan` with
   `DarwinNotificationAction.plain('mark_prayed', markPrayed)` (no foreground, no authentication),
   Android `AndroidNotificationAction('mark_prayed', markPrayed, showsUserInterface: false, cancelNotification: true)`
   on adhan notifications, and `onDidReceiveBackgroundNotificationResponse: onNotificationActionInBackground`
   in `initialize`. Re-run `init()` after a language change so the action title follows.
-- [ ] T053 [US3] Create `.../adhan/MarkPrayedReceiver.kt`: `goAsync()`, a `FlutterEngine` running
+- [X] T053 [US3] Create `.../adhan/MarkPrayedReceiver.kt`: `goAsync()`, a `FlutterEngine` running
   `DartEntrypoint(findAppBundlePath(), "package:better_muslim/features/notifications/data/background.dart", "markPrayedInBackground")`
   with `[payload]`, destroys the engine on `done` or after 20 s, then asks `AdhanService` (if
   playing that id) to drop the Mark prayed action, or cancels the plain notification. Register it
   in the manifest. Add the Mark prayed custom action to `AdhanService` and the plain notification
   of `AdhanReceiver`.
-- [ ] T054 [US3] In `adhan_buttons.dart` wire Mark prayed: `db.markPrayed(day, prayer)` through
+- [X] T054 [US3] In `adhan_buttons.dart` wire Mark prayed: `db.markPrayed(day, prayer)` through
   the app's store, `BmHaptics` Mark prayed, then the button shows "Prayed" (`prayed`, `ui/check`)
   and is disabled (Decision 5), and `adhanChannel.markPrayedAction(id)` on Android. The adhan keeps
   playing.
-- [ ] T055 [US3] In `notifications_boot.dart`:
+- [X] T055 [US3] In `notifications_boot.dart`:
   - taps: `getNotificationAppLaunchDetails()` and `adhanChannel.launchPayload()` at start,
     `onDidReceiveNotificationResponse` and the `opened` stream after, each through `tapTarget`
     with `player.length(prayer)` → `router.push(Routes.adhan(..., from:))` or
