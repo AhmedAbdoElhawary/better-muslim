@@ -63,6 +63,20 @@ class NotificationScheduler {
           _android?.requestNotificationsPermission()) ??
       false;
 
+  /// android 12+ opens "alarms & reminders" once. refused, adhans come late and with the clip
+  Future<bool> askExactAlarms() async {
+    final android = _android;
+    if (android == null || await android.canScheduleExactNotifications() == true) return true;
+    return await android.requestExactAlarmsPermission() ?? false;
+  }
+
+  /// a permission granted later in the phone's settings is picked up here (FR-006)
+  Future<bool> isAllowed() async {
+    final ios = _ios;
+    if (ios != null) return (await ios.checkPermissions())?.isEnabled ?? false;
+    return await _android?.areNotificationsEnabled() ?? false;
+  }
+
   /// the payload of the notification that started the app, a tap on its action doesn't count
   Future<String?> launchPayload() async {
     final details = await _plugin.getNotificationAppLaunchDetails();
