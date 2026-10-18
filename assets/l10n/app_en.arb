@@ -175,6 +175,12 @@
       "city": {}
     }
   },
+  "manualSuffix": "{city} · manual",
+  "@manualSuffix": {
+    "placeholders": {
+      "city": {}
+    }
+  },
   "sectionAppearance": "APPEARANCE",
   "theme": "Theme",
   "lightAndDark": "Light and dark",
@@ -290,5 +296,32 @@
     "placeholders": {
       "time": {}
     }
-  }
+  },
+  "methodUmmAlQura": "Umm al-Qura",
+  "methodEgyptian": "Egyptian General Authority",
+  "methodDubai": "Dubai",
+  "methodQatar": "Qatar",
+  "methodKuwait": "Kuwait",
+  "methodTurkiye": "Diyanet",
+  "methodSingapore": "Singapore",
+  "methodKarachi": "University of Islamic Sciences, Karachi",
+  "methodTehran": "Tehran",
+  "methodNorthAmerica": "ISNA",
+  "methodMuslimWorldLeague": "Muslim World League",
+  "asrStandard": "Standard",
+  "asrHanafi": "Hanafi",
+  "duha": "Duha",
+  "hijriMonth1": "Muharram",
+  "hijriMonth2": "Safar",
+  "hijriMonth3": "Rabi I",
+  "hijriMonth4": "Rabi II",
+  "hijriMonth5": "Jumada I",
+  "hijriMonth6": "Jumada II",
+  "hijriMonth7": "Rajab",
+  "hijriMonth8": "Sha'ban",
+  "hijriMonth9": "Ramadan",
+  "hijriMonth10": "Shawwal",
+  "hijriMonth11": "Dhu al-Qi'dah",
+  "hijriMonth12": "Dhu al-Hijjah",
+  "noLocationYet": "No location yet"
 }
