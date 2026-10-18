@@ -73,6 +73,7 @@ class FakePositionSource implements PositionSource {
   LatLng? position;
   int requests = 0;
   int fixes = 0;
+  LocationAccuracy? accuracy;
 
   @override
   Future<LocationPermission> permission() async => granted;
@@ -84,8 +85,9 @@ class FakePositionSource implements PositionSource {
   }
 
   @override
-  Future<LatLng?> fix() async {
+  Future<LatLng?> fix({LocationAccuracy accuracy = LocationAccuracy.low}) async {
     fixes++;
+    this.accuracy = accuracy;
     return position;
   }
 }
