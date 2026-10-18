@@ -1,6 +1,8 @@
 import 'package:better_muslim/core/app/app.dart';
+import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +25,7 @@ void main() {
     await tester.pumpWidget(ProviderScope(overrides: testOverrides(), child: const App()));
     await tester.pumpAndSettle();
 
-    expect(find.text('الرئيسية'), findsNWidgets(2));
+    expect(find.text('الرئيسية'), findsOneWidget);
     await unmount(tester);
   });
 
@@ -36,6 +38,24 @@ void main() {
 
     expect(find.byType(PrayerPage), findsOneWidget);
     expect(find.byType(HomePage), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('the in-app reduce motion switch reaches every widget below the router (R4)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(ProviderScope(overrides: testOverrides(), child: const App()));
+    await tester.pumpAndSettle();
+    bool disabled() => MediaQuery.disableAnimationsOf(tester.element(find.byType(HomePage)));
+
+    expect(disabled(), isFalse);
+
+    await ProviderScope.containerOf(tester.element(find.byType(HomePage)))
+        .read(databaseProvider)
+        .updateSettings(const SettingsCompanion(reduceMotion: Value(true)));
+    await tester.pumpAndSettle();
+
+    expect(disabled(), isTrue);
     await unmount(tester);
   });
 }
