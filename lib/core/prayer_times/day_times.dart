@@ -5,26 +5,30 @@ import 'package:timezone/timezone.dart';
 
 /// the five prayers, sunrise is a time but not a prayer
 enum Prayer {
-  fajr(StringsManager.fajr),
-  dhuhr(StringsManager.dhuhr),
-  asr(StringsManager.asr),
-  maghrib(StringsManager.maghrib),
-  isha(StringsManager.isha);
+  fajr(StringsManager.fajr, StringsManager.fajrAr),
+  dhuhr(StringsManager.dhuhr, StringsManager.dhuhrAr),
+  asr(StringsManager.asr, StringsManager.asrAr),
+  maghrib(StringsManager.maghrib, StringsManager.maghribAr),
+  isha(StringsManager.isha, StringsManager.ishaAr);
 
-  const Prayer(this.nameKey);
+  const Prayer(this.nameKey, this.nameArKey);
   final String nameKey;
+
+  /// the arabic name in both languages, english shows it beside the name
+  final String nameArKey;
 }
 
 enum Period {
-  fajr(StringsManager.fajr),
-  duha(StringsManager.duha),
-  dhuhr(StringsManager.dhuhr),
-  asr(StringsManager.asr),
-  maghrib(StringsManager.maghrib),
-  isha(StringsManager.isha);
+  fajr(StringsManager.fajr, StringsManager.fajrAr),
+  duha(StringsManager.duha, StringsManager.duhaAr),
+  dhuhr(StringsManager.dhuhr, StringsManager.dhuhrAr),
+  asr(StringsManager.asr, StringsManager.asrAr),
+  maghrib(StringsManager.maghrib, StringsManager.maghribAr),
+  isha(StringsManager.isha, StringsManager.ishaAr);
 
-  const Period(this.nameKey);
+  const Period(this.nameKey, this.nameArKey);
   final String nameKey;
+  final String nameArKey;
 }
 
 /// the six times of one local date at one place, null = not available that day (polar)
@@ -111,22 +115,24 @@ class DayTimes {
     Prayer.isha => isha,
   };
 
+  TZDateTime? startOf(Period period) => switch (period) {
+    Period.fajr => fajr,
+    Period.duha => sunrise,
+    Period.dhuhr => dhuhr,
+    Period.asr => asr,
+    Period.maghrib => maghrib,
+    Period.isha => isha,
+  };
+
   /// before today's fajr it is still yesterday's isha
   Period? periodAt(DateTime now) {
-    final starts = {
-      Period.fajr: fajr,
-      Period.duha: sunrise,
-      Period.dhuhr: dhuhr,
-      Period.asr: asr,
-      Period.maghrib: maghrib,
-      Period.isha: isha,
-    };
-    if (starts.values.every((start) => start == null)) return null;
-    var period = Period.isha;
-    for (final MapEntry(key: candidate, value: start) in starts.entries) {
-      if (start != null && !now.isBefore(start)) period = candidate;
+    if (Period.values.every((period) => startOf(period) == null)) return null;
+    var current = Period.isha;
+    for (final period in Period.values) {
+      final start = startOf(period);
+      if (start != null && !now.isBefore(start)) current = period;
     }
-    return period;
+    return current;
   }
 
   /// after isha it is tomorrow's fajr, so the caller passes tomorrow's times
