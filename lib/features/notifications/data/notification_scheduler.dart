@@ -11,6 +11,7 @@ import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' show TZDateTime;
 
 final notificationSchedulerProvider = Provider<NotificationScheduler>(
   (ref) => NotificationScheduler(ref.watch(adhanChannelProvider)),
@@ -22,6 +23,9 @@ class NotificationScheduler {
 
   final AdhanChannel _channel;
   final _plugin = FlutterLocalNotificationsPlugin();
+
+  /// what kotlin was last given, the dev test adds to it instead of replacing it
+  var _native = <Map<String, Object?>>[];
 
   static const _recording = AdhanRecording.makkah;
   static const _group = 'adhan';
@@ -151,10 +155,42 @@ class NotificationScheduler {
           payload: payloadOf(alert),
         );
       }
+      _native = native;
       if (native.isNotEmpty) await _channel.schedule(native);
     } catch (error, stack) {
       await CrashReporter.instance.recordError(error, stack, context: const {'step': 'schedule'});
     }
+  }
+
+  /// the dev page's check: the next prayer's notification with its sound, a minute from now
+  Future<void> testIn1Minute(Alert next, AlertTexts texts) async {
+    final at = TZDateTime.now(next.at.location).add(const Duration(minutes: 1));
+    final alert = Alert(
+      day: next.day,
+      prayer: next.prayer,
+      kind: AlertKind.adhan,
+      at: at,
+      sound: next.sound,
+    );
+    final exact = await _android?.canScheduleExactNotifications() ?? false;
+    if (exact && alert.sound == PrayerSound.adhan) {
+      await _channel.schedule([
+        ..._native,
+        {...entryOf(alert, texts), 'id': testAlertId},
+      ]);
+      return;
+    }
+    await _plugin.zonedSchedule(
+      id: testAlertId,
+      scheduledDate: at,
+      notificationDetails: _details(alert, texts),
+      androidScheduleMode: exact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
+      title: texts.titleOf(alert),
+      body: texts.bodyOf(alert),
+      payload: payloadOf(alert),
+    );
   }
 
   /// one entry per prayer in the phone's settings: the prayer's other two channels are deleted
