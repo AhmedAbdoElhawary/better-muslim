@@ -194,8 +194,8 @@ ayah I was reading stays in view. Restart: the size is kept.
 - **FR-001**: The Quran tab MUST lead to the reader with a Continue reading card, the list of the
   114 surahs and my bookmarks and notes. [NEEDS CLARIFICATION: Q1, what else the tab holds]
 - **FR-002**: The tab has no PNG, so it MUST be built only from parts in `03 Components.dc.html`
-  (large app bar, Continue reading card, chips, list rows, empty state) and shown to me in
-  screenshots before it is called done.
+  (large app bar, Continue reading card, chips, list rows, empty state) and I check it in the
+  app before it is called done.
 - **FR-003**: Each surah row MUST show its number, name in English and Arabic, and ayah count, and
   open the reader at its first ayah.
 
@@ -279,7 +279,7 @@ ayah I was reading stays in view. Restart: the size is kept.
 **Text size**
 
 - **FR-034**: The Aa sheet MUST change the reader's text as decided, at once and kept, built from
-  the sheet and control components and shown to me in screenshots before it is called done.
+  the sheet and control components and I check it in the app before it is called done.
   [NEEDS CLARIFICATION: Q9]
 
 **Last position**
@@ -359,7 +359,7 @@ ayah I was reading stays in view. Restart: the size is kept.
 
 ### Measurable Outcomes
 
-- **SC-001**: In the design scenario the reader matches 4.07 within 1 pt in dark and light.
+- **SC-001**: In the design scenario the reader is built from the 4.07 tree in dark and light.
 - **SC-002**: A surah opens from the Quran tab in under 1 second, and swiping through 20 pages in a
   row shows no visible stutter on a mid-range phone.
 - **SC-003**: Across a full surah (Al-Mulk, 30 ayahs) the highlight lands on each new ayah within
