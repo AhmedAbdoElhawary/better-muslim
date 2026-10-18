@@ -410,23 +410,23 @@ none comes, and Home reads "Adhan at {time}" (quickstart §3)
 
 ### Tests for User Story 4
 
-- [ ] T056 [P] [US4] Extend `schedule_test.dart`: reminders at the prayer time minus the minutes,
+- [X] T056 [P] [US4] Extend `schedule_test.dart`: reminders at the prayer time minus the minutes,
   for all five whatever their sound, none at 0, a reminder already past is skipped while its adhan
   stays, 60 at most for 6 full days.
-- [ ] T057 [P] [US4] Extend `notification_scheduler_test.dart` and `alert_texts_test.dart`: reminders
+- [X] T057 [P] [US4] Extend `notification_scheduler_test.dart` and `alert_texts_test.dart`: reminders
   use channel `reminders` (default importance) and iOS `passive` with no sound, title "Maghrib in
   10 minutes", body "17:56 · Makkah", Arabic forms.
-- [ ] T058 [P] [US4] A widget test next to milestone 3's Home card test: "Adhan at 17:56 · reminder
+- [X] T058 [P] [US4] A widget test next to milestone 3's Home card test: "Adhan at 17:56 · reminder
   10 min before" at 10, "Adhan at 17:56" at 0.
 
 ### Implementation for User Story 4
 
-- [ ] T059 [US4] In `schedule.dart` take `required int reminderMinutes` and add the reminder alert
+- [X] T059 [US4] In `schedule.dart` take `required int reminderMinutes` and add the reminder alert
   of each prayer when it is above 0 and still in the future.
-- [ ] T060 [US4] In `alert_texts.dart` and `notification_scheduler.dart`: `notifReminderTitle` and
+- [X] T060 [US4] In `alert_texts.dart` and `notification_scheduler.dart`: `notifReminderTitle` and
   `notifReminderBody`, the `reminders` channel (name `reminders`, importance default, the phone's
   default sound), iOS `InterruptionLevel.passive`, `presentSound: false`, no category.
-- [ ] T061 [US4] In milestone 3's Home card (the widget that shows "Adhan at 17:56 · reminder 10
+- [X] T061 [US4] In milestone 3's Home card (the widget that shows "Adhan at 17:56 · reminder 10
   min before", under `lib/features/home/view/widgets/`) read
   `settingsProvider.select((s) => s.value?.reminderMinutes)`: `adhanAtReminder` above 0, `adhanAt`
   at 0. Remove milestone 3's sample marker for it (FR-036).
