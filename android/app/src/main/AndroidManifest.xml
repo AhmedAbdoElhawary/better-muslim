@@ -6,6 +6,9 @@
     <!-- not USE_EXACT_ALARM, play keeps it for alarm and calendar apps -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
@@ -50,6 +53,22 @@
         </receiver>
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false"/>
+        <!-- the full adhan with the app closed, contracts/adhan-channel.md -->
+        <service
+            android:name=".adhan.AdhanService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"/>
+        <receiver
+            android:name=".adhan.AdhanReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".adhan.MarkPrayedReceiver"
             android:exported="false"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
