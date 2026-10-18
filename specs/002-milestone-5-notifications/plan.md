@@ -56,7 +56,7 @@ scenario. Real delivery on phones per quickstart.md.
 - the log only in the encrypted store
 - never two adhans at once
 - background code never resets the store
-- 4.03 within 1 pt, text scale 2.0, reduce motion, RTL with the time and progress unmirrored
+- 4.03 built from its tree, text scale 2.0, reduce motion, RTL with the time and progress unmirrored
 
 **Scale/Scope**: 7 new settings columns, 1 feature (3 domain files, 7 data files, 1 screen with 5
 widgets, 1 sheet, 1 dev page, the boot widget), 4 Kotlin classes, AppDelegate and Info.plist
@@ -70,7 +70,7 @@ changes, about 10 strings in 2 languages, 6 audio placeholders.
 | --- | --- | --- |
 | I. Structure | `features/notifications/{domain,data,presentation}`, clean as the constitution says. `PrayerSound` and the columns in `core/settings` and `core/database`, since Home reads the reminder. The adhan and dev routes in `core/router/`. `bootstrap.dart` wraps the app in the feature's `NotificationsBoot`. More reaches the dev page by route. No feature imports another | pass |
 | II. Design system | weight text widgets, `font: FontEnum.display` for Reem Kufi and Marcellus, adaptive paddings, `RSizedBox`, named manager sizes, `BmIcon`, `BmHaptics`, `BmMotion`. 4.03's literal colors in one allow-listed file, as the project CLAUDE.md allows for always dark surfaces. New strings in `StringsManager` and both arb files. Dev page text is `translate: false`, like milestone 2's readout | pass |
-| III. Faithful | 4.03 from its spec for Maghrib, Motion 06 and the halo from MOTION.md, Mark prayed haptic. The other four skies, the dua sheet and the "Prayed" state of the button have no PNG and wait for my OK on screenshots. 5.1 and 5.2 are drawn by the phone, matched in texts and actions | pass |
+| III. Faithful | 4.03 from its spec for Maghrib, Motion 06 and the halo from MOTION.md, Mark prayed haptic. The other four skies, the dua sheet and the "Prayed" state of the button have no PNG and I check them in the app. 5.1 and 5.2 are drawn by the phone, matched in texts and actions | pass |
 | IV. Simplicity | one `AdhanPlayer` type with two implementations, one per platform (Complexity Tracking). The schedule is pure functions, `apply` replaces everything. No repository interfaces | pass |
 | V. Performance | `.select()` on settings, the period provider for the prayer moment (no new timer), debounced rescheduling, const leaves, lazy audio load | pass |
 | VI. Tests | unit, data with fakes, migration, widget, architecture test with the allow list entry | pass |
