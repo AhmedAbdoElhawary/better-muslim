@@ -25,7 +25,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.media.app.NotificationCompat.MediaStyle
-import com.elhawary.bettermuslim.R
 import io.flutter.FlutterInjector
 import io.flutter.plugin.common.EventChannel
 import org.json.JSONObject

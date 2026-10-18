@@ -8,8 +8,6 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.elhawary.bettermuslim.MainActivity
-import com.elhawary.bettermuslim.R
 import org.json.JSONObject
 
 // the adhan alarm went off, or the phone restarted or the app was updated
@@ -56,10 +54,11 @@ class AdhanReceiver : BroadcastReceiver() {
             manager.notify(entry.getInt("id"), builder.build())
         }
 
+        // the app's own activity, this package doesn't know its class
         fun openIntent(context: Context, entry: JSONObject): PendingIntent = PendingIntent.getActivity(
             context,
             entry.getInt("id"),
-            Intent(context, MainActivity::class.java)
+            context.packageManager.getLaunchIntentForPackage(context.packageName)!!
                 .setAction(ACTION_OPEN)
                 .putExtra(EXTRA_PAYLOAD, entry.getString("payload"))
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),

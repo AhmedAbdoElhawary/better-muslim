@@ -110,6 +110,4 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-    // MediaStyle and MediaSessionCompat for the adhan's media notification
-    implementation("androidx.media:media:1.8.0")
 }
