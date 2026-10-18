@@ -34,7 +34,7 @@
 - Q1 to Q7 open, waiting for answers.
 - Motion numbers (09, 10), spring.needle and `03 Components.dc.html` point at the design, not at
   code.
-- The weak compass, no compass and no location states have no PNG, FR-023 asks for screenshots
-  before they count as done.
+- The weak compass, no compass and no location states have no PNG, FR-023 asks me to check
+  them in the app before they count as done.
 - London from the PNG checks out: 4,794 km and 118.99°, so the design rounds the distance to 10 km
   (FR-009).
