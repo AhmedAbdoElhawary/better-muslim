@@ -444,14 +444,14 @@ times. Leave the app closed a day, 6 days are still pending (quickstart §5)
 
 ### Tests for User Story 5
 
-- [ ] T062 [P] [US5] Extend `notifications_boot_test.dart`: a change of location, method, Asr, Hijri
+- [X] T062 [P] [US5] Extend `notifications_boot_test.dart`: a change of location, method, Asr, Hijri
   adjustment, any sound, the reminder, the language, the digits or the phone zone gives exactly
   one `apply` after 500 ms. Resume gives one `apply`. In the design scenario neither gives any
   (FR-013).
 
 ### Implementation for User Story 5
 
-- [ ] T063 [US5] In `notifications_boot.dart` add `_scheduleInputsProvider` (a `Provider` of a
+- [X] T063 [US5] In `notifications_boot.dart` add `_scheduleInputsProvider` (a `Provider` of a
   record built with `.select()` from `locationProvider`, `settingsProvider` and `phoneZoneProvider`
   plus the app's locale) and listen to it with a 500 ms debounce that calls `_reschedule()`. On
   resume also compare `PlatformDispatcher.alwaysUse24HourFormat` and the locale.
@@ -459,13 +459,13 @@ times. Leave the app closed a day, 6 days are still pending (quickstart §5)
   in `lib/features/notifications/data/background.dart`, so the app and the background run the same
   steps. It computes the 6 `DayTimes` with `DayTimes.compute` from the stored location and
   settings (no Riverpod), the prayer day from milestone 4's rule.
-- [ ] T065 [US5] (Decision 1) In `background.dart` add `@pragma('vm:entry-point') void callbackDispatcher()`
+- [X] T065 [US5] (Decision 1) In `background.dart` add `@pragma('vm:entry-point') void callbackDispatcher()`
   with `Workmanager().executeTask`: `tz.initializeTimeZones()`, `openExisting()`, the phone zone
   from flutter_timezone, `AppLocalizations.load(PlatformDispatcher.instance.locale)`, `topUp`,
   close. In `lib/bootstrap.dart` call `Workmanager().initialize(callbackDispatcher)` and
   `registerPeriodicTask('better_muslim.topup', 'better_muslim.topup', frequency: Duration(hours: 12), existingWorkPolicy: ExistingPeriodicWorkPolicy.keep)`
   outside the design scenario. The name has to be the iOS identifier of T066, or iOS never runs it.
-- [ ] T066 [US5] (Decision 1) iOS: `BGTaskSchedulerPermittedIdentifiers` = `better_muslim.topup` and
+- [X] T066 [US5] (Decision 1) iOS: `BGTaskSchedulerPermittedIdentifiers` = `better_muslim.topup` and
   `fetch` in `UIBackgroundModes` in `ios/Runner/Info.plist`. In `AppDelegate.swift`
   `WorkmanagerPlugin.setPluginRegistrantCallback { registry in GeneratedPluginRegistrant.register(with: registry) }`
   and `WorkmanagerPlugin.registerPeriodicTask(withIdentifier: "better_muslim.topup", frequency: NSNumber(value: 6 * 60 * 60))`.
@@ -485,14 +485,14 @@ Allow in the phone's settings, come back, the schedule is made (quickstart §3 s
 
 ### Tests for User Story 6
 
-- [ ] T067 [P] [US6] Extend `notifications_boot_test.dart` with a fake scheduler: the ask happens
+- [X] T067 [P] [US6] Extend `notifications_boot_test.dart` with a fake scheduler: the ask happens
   once after the location settles, never in the design scenario. Refused: nothing scheduled, no
   second ask after a restart. Android 12+: the alarms page opens once after notifications are
   allowed. A permission granted later: the next resume schedules.
 
 ### Implementation for User Story 6
 
-- [ ] T068 [US6] In `notification_scheduler.dart` add `Future<bool> askExactAlarms()`
+- [X] T068 [US6] In `notification_scheduler.dart` add `Future<bool> askExactAlarms()`
   (`requestExactAlarmsPermission()` when `canScheduleExactNotifications()` is false, Android 12+
   only) and `Future<bool> isAllowed()` (iOS `checkPermissions`, Android `areNotificationsEnabled`).
   In `notifications_boot.dart` call `askExactAlarms()` right after a granted notifications ask, and
