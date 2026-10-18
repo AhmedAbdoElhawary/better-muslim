@@ -107,22 +107,42 @@ Why: rules that only live in a document get broken, a failing test doesn't.
 ### VII. Security And Privacy
 
 - Location and prayer history stay on the device. Nothing leaves it without my decision.
+- The whole drift database is encrypted. Its key is made on the phone on first launch and lives
+  only in flutter_secure_storage.
+- The database stays out of iCloud and Android auto backup. A new phone gets the data only from
+  the app's own backup file.
 - Secrets never go in the repo or the app bundle.
 - Https only, and anything downloaded (Quran text, audio) is validated before use.
 - Ask me before writing the privacy policy and terms.
 
 Why: what someone prays and where they are is personal.
 
+### VIII. Offline-First And Free
+
+- Everything works with no internet: prayer times, Hijri date, Qibla, city search, Quran text,
+  azkar and duas. All of it is computed on the phone or shipped inside the app.
+- The network is only for downloading content (recitation audio), and what is downloaded is
+  cached so it works offline after.
+- No backend, no account, no paid API or service. A free online service only when nothing on the
+  phone can do the job, and only after I decide it.
+- Data and content used under a license (GeoNames, Tanzil, fonts) get the credit their license
+  asks for.
+
+Why: a prayer app has to work on a plane, abroad without data, and cost nothing to run.
+
 ## Stack And Constraints
 
 - State: Riverpod. Routing: GoRouter with a `StatefulShellRoute` for the 5 tabs (Home, Prayer,
   Quran, Azkar, More). Localization: the arb files in `assets/l10n/`, read at runtime by
   `AppLocalizations` in core, no code generation. Sizing: flutter_screenutil. Svg: flutter_svg.
-- Storage: drift only. No shared_preferences, no hive. flutter_secure_storage only if something
-  sensitive appears.
+- Storage: drift only (with drift_dev and build_runner for its code), encrypted, with its key in
+  flutter_secure_storage and its file in path_provider's Application Support folder. No
+  shared_preferences, no hive.
 - Domain packages, each added in its milestone: adhan_dart (not adhan, which stopped in 2023),
-  hijri, geolocator, geocoding, flutter_compass, flutter_local_notifications, timezone,
-  flutter_timezone, just_audio, audio_session, home_widget, live_activities.
+  hijri, geolocator, flutter_compass, flutter_local_notifications, timezone, flutter_timezone,
+  just_audio, audio_session, home_widget, live_activities.
+- Place names and city search come from a GeoNames list shipped in the app (every country, places
+  over 1,000 people plus capitals and region seats), never from geocoding, which needs internet.
 - Any other package: check pub.dev maintenance and popularity first, then ask me.
 - Content not in the handoff (Quran text, recitation audio with timings, adhan audio, azkar and
   duas with sources) uses the handoff's sample content and a `TODO(ahmed)` until I provide it.
@@ -134,8 +154,9 @@ Why: what someone prays and where they are is personal.
 - Build in the handoff's milestone order (`design_handoff_better_muslim/HANDOFF_CLAUDE.md`), one
   milestone at a time. Stop after each with screenshots: phone and tablet, dark and light,
   English and Arabic.
-- Speckit (specify, plan, tasks) only for logic the handoff doesn't spec: qada rules and
-  notification scheduling. Everything else is built straight from the handoff specs.
+- Speckit (specify, plan, tasks) for every milestone. Where the handoff already specs the screen,
+  the spec is short: only what the handoff leaves open, the layout stays in the handoff and is
+  built straight from it.
 - Comments only say why, one line, default none. Public core classes get a one-line `///` where
   a teammate would ask.
 - Commits are mine: no tool or AI names in commits, branches, PRs or tags.
@@ -152,4 +173,4 @@ Why: what someone prays and where they are is personal.
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 2.0.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-16
+**Version**: 2.2.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-17
