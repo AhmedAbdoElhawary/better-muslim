@@ -6,6 +6,7 @@ import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/hijri/hijri_date.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
@@ -64,6 +65,20 @@ void main() {
         [times.fajr, times.sunrise, times.dhuhr, times.asr, times.maghrib, times.isha].map(hhmm),
         ['04:58', '06:15', '12:05', '15:27', '17:56', '19:26'],
       );
+    });
+
+    test('the prayer day has the handoff times with fajr and dhuhr logged, other days compute', () {
+      final prayerDay = container.read(prayerDayProvider);
+      final tomorrow = container.read(dayTimesProvider(DateTime(2026, 10, 16)))!;
+
+      expect(prayerDay, DateTime(2026, 10, 15));
+      expect(container.read(dayTimesProvider(prayerDay)), same(container.read(todayTimesProvider)));
+      expect(container.read(prayedProvider(prayerDay)), {Prayer.fajr, Prayer.dhuhr});
+      expect(container.read(prayedProvider(DateTime(2026, 10, 16))), isEmpty);
+
+      /// a real umm al-qura calculation, the handoff's fixed times end on the 15th
+      expect(tomorrow.date, DateTime(2026, 10, 16));
+      expect((tomorrow.fajr!.hour, tomorrow.fajr!.minute), (5, 0));
     });
 
     test('maghrib is next in 1:24:00 and the date is 4 jumada i 1448', () {
