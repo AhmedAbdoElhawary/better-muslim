@@ -24,20 +24,27 @@ List<Override> testOverrides({PositionSource? positionSource}) => [
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
 ];
 
-/// the moment every PNG shows (FR-026), on an in-memory store
-List<Override> designOverrides() => [
-  _memoryDatabase(),
-  flavorProvider.overrideWithValue(
-    const FlavorConfig(
-      flavor: Flavor.dev,
-      appName: 'Better Muslim',
-      apiBaseUrl: '',
-      sentryDsn: '',
-      scenario: 'design',
+/// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store
+Future<List<Override>> designOverrides() async {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  final db = await designScenarioStore();
+  return [
+    databaseProvider.overrideWith((ref) {
+      ref.onDispose(db.close);
+      return db;
+    }),
+    flavorProvider.overrideWithValue(
+      const FlavorConfig(
+        flavor: Flavor.dev,
+        appName: 'Better Muslim',
+        apiBaseUrl: '',
+        sentryDsn: '',
+        scenario: 'design',
+      ),
     ),
-  ),
-  ...designScenarioOverrides(),
-];
+    ...designScenarioOverrides(),
+  ];
+}
 
 Override _memoryDatabase() => databaseProvider.overrideWith((ref) {
   /// every test gets its own in-memory store, so drift's shared executor warning doesn't apply
