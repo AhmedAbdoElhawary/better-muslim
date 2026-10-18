@@ -1,0 +1,108 @@
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:better_muslim/features/notifications/domain/schedule.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart';
+
+void main() {
+  setUpAll(tz.initializeTimeZones);
+
+  const sounds = {
+    Prayer.fajr: PrayerSound.adhan,
+    Prayer.dhuhr: PrayerSound.tone,
+    Prayer.asr: PrayerSound.tone,
+    Prayer.maghrib: PrayerSound.adhan,
+    Prayer.isha: PrayerSound.silent,
+  };
+
+  List<DayTimes> daysFrom(
+    DateTime first, {
+    double latitude = 21.4225,
+    double longitude = 39.8262,
+    String zone = 'Asia/Riyadh',
+  }) => [
+    for (var i = 0; i < scheduleDays; i++)
+      DayTimes.compute(
+        latitude: latitude,
+        longitude: longitude,
+        date: DateTime(first.year, first.month, first.day + i),
+        zone: getLocation(zone),
+        method: PrayerMethod.ummAlQura,
+        asrMethod: AsrMethod.standard,
+        isRamadan: false,
+      ),
+  ];
+
+  TZDateTime makkah(int day, int hour, int minute) =>
+      TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, day, hour, minute);
+
+  test('6 days from 15 oct 10:00 give 29 adhans, today\'s fajr is past', () {
+    final alerts = buildSchedule(
+      now: makkah(15, 10, 0),
+      days: daysFrom(DateTime(2026, 10, 15)),
+      sounds: sounds,
+    );
+
+    expect(alerts, hasLength(29));
+    expect(alerts.first.prayer, Prayer.dhuhr);
+    expect(alerts.every((alert) => alert.kind == AlertKind.adhan), isTrue);
+    expect(
+      alerts.where((alert) => alert.prayer == Prayer.isha).map((alert) => alert.sound).toSet(),
+      {PrayerSound.silent},
+    );
+    expect(alerts.map((alert) => alert.id).toSet(), hasLength(29));
+  });
+
+  test('nothing in the past', () {
+    final now = makkah(15, 16, 32);
+    final alerts = buildSchedule(now: now, days: daysFrom(DateTime(2026, 10, 15)), sounds: sounds);
+
+    expect(alerts.every((alert) => alert.at.isAfter(now)), isTrue);
+  });
+
+  test('nothing for a prayer with no time that day (tromsø, 21 jun)', () {
+    final days = daysFrom(
+      DateTime(2026, 6, 21),
+      latitude: 69.6489,
+      longitude: 18.9551,
+      zone: 'Europe/Oslo',
+    );
+    final alerts = buildSchedule(
+      now: TZDateTime(getLocation('Europe/Oslo'), 2026, 6, 21, 0, 1),
+      days: days,
+      sounds: sounds,
+    );
+
+    final withTime = [
+      for (final day in days)
+        for (final prayer in Prayer.values) ?day.timeOf(prayer),
+    ];
+    expect(alerts, hasLength(withTime.length));
+    expect(alerts.where((alert) => alert.prayer == Prayer.maghrib), isEmpty);
+  });
+
+  test('at 00:30 the first day is yesterday\'s prayer day, so the next fajr is today\'s', () {
+    final alerts = buildSchedule(
+      now: makkah(16, 0, 30),
+      days: daysFrom(DateTime(2026, 10, 15)),
+      sounds: sounds,
+    );
+
+    expect(alerts.first.prayer, Prayer.fajr);
+    expect(alerts.first.day, DateTime(2026, 10, 16));
+    expect(alerts.where((alert) => alert.day == DateTime(2026, 10, 15)), isEmpty);
+  });
+
+  test('never more than 30 adhans, even as fajr gets earlier each day', () {
+    final alerts = buildSchedule(
+      now: makkah(15, 0, 1),
+      days: daysFrom(DateTime(2026, 10, 15)),
+      sounds: sounds,
+    );
+
+    expect(alerts, hasLength(30));
+  });
+}
