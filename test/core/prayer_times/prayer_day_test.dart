@@ -1,5 +1,7 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +57,66 @@ void main() {
     return container;
   }
 
+  group('endOf', () {
+    final zone = tz.UTC;
+    tz.TZDateTime at(int day, int hour) => tz.TZDateTime(zone, 2026, 10, day, hour);
+    DayTimes times(
+      int day, {
+      bool fajr = true,
+      bool asr = true,
+      bool maghrib = true,
+      bool isha = true,
+    }) => DayTimes(
+      date: DateTime(2026, 10, day),
+      fajr: fajr ? at(day, 5) : null,
+      sunrise: at(day, 6),
+      dhuhr: at(day, 12),
+      asr: asr ? at(day, 15) : null,
+      maghrib: maghrib ? at(day, 18) : null,
+      isha: isha ? at(day, 19) : null,
+      method: PrayerMethod.ummAlQura,
+      asrMethod: AsrMethod.standard,
+    );
+
+    test('each prayer ends where the next period starts, isha at tomorrow fajr', () {
+      final today = times(15);
+      final tomorrow = times(16);
+
+      expect(today.endOf(Prayer.fajr, tomorrow), at(15, 6));
+      expect(today.endOf(Prayer.dhuhr, tomorrow), at(15, 15));
+      expect(today.endOf(Prayer.asr, tomorrow), at(15, 18));
+      expect(today.endOf(Prayer.maghrib, tomorrow), at(15, 19));
+      expect(today.endOf(Prayer.isha, tomorrow), at(16, 5));
+    });
+
+    test('a missing time is skipped, and with nothing left it is null', () {
+      final polar = times(15, asr: false, isha: false);
+
+      expect(polar.endOf(Prayer.dhuhr, times(16)), at(15, 18));
+      expect(polar.endOf(Prayer.maghrib, times(16)), at(16, 5));
+      expect(polar.endOf(Prayer.maghrib, times(16, fajr: false)), isNull);
+      expect(polar.endOf(Prayer.isha, null), isNull);
+    });
+
+    /// 1 ramadan 1448 is about 10 feb 2027
+    test('in ramadan with umm al-qura maghrib stays open 120 minutes', () {
+      final ramadan = DayTimes.compute(
+        latitude: 21.4225,
+        longitude: 39.8262,
+        date: DateTime(2027, 2, 20),
+        zone: tz.getLocation('Asia/Riyadh'),
+        method: PrayerMethod.ummAlQura,
+        asrMethod: AsrMethod.standard,
+        isRamadan: true,
+      );
+
+      expect(
+        ramadan.endOf(Prayer.maghrib, null)!.difference(ramadan.maghrib!),
+        const Duration(minutes: 120),
+      );
+    });
+  });
+
   /// 03:00 in makkah, fajr is about 05:00
   testWidgets('before fajr it is still yesterday', (tester) async {
     final container = await containerAt(tester, DateTime.utc(2026, 10, 15, 0));
@@ -86,6 +148,16 @@ void main() {
     await tester.pump(const Duration(seconds: 20));
 
     expect(days, [DateTime(2026, 10, 15)]);
+    await disposeAll(tester);
+  });
+
+  /// 23:59 and 00:01 in makkah
+  testWidgets('midnight changes nothing, the day runs until fajr (SC-004)', (tester) async {
+    final before = await containerAt(tester, DateTime.utc(2026, 10, 15, 20, 59));
+    final after = await containerAt(tester, DateTime.utc(2026, 10, 15, 21, 1));
+
+    expect(before.read(prayerDayProvider), DateTime(2026, 10, 15));
+    expect(after.read(prayerDayProvider), DateTime(2026, 10, 15));
     await disposeAll(tester);
   });
 
