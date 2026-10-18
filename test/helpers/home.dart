@@ -14,6 +14,7 @@ import 'providers.dart';
 Future<void> pumpHome(
   WidgetTester tester,
   List<Override> overrides, {
+  Size size = const Size(393, 852),
   Locale locale = const Locale('en'),
   Brightness brightness = Brightness.dark,
   double textScale = 1,
@@ -22,7 +23,7 @@ Future<void> pumpHome(
   bool settle = true,
   Widget app = const App(),
 }) async {
-  tester.view.physicalSize = const Size(393, 852) * 3;
+  tester.view.physicalSize = size * 3;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   tester.platformDispatcher.localesTestValue = [locale];
