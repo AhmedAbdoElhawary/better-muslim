@@ -125,7 +125,7 @@ void main() {
   });
 
   testWidgets('the design scenario paints the theme base sky (FR-013)', (tester) async {
-    await pumpHome(tester, designOverrides());
+    await pumpHome(tester, await designOverrides());
     final dark = bmThemes[BmThemeId.qiyamEmerald]!.dark;
 
     expect(same(painter(tester).stops, BmSkyStops(dark.sky1, dark.sky2, dark.sky3)), isTrue);
