@@ -37,6 +37,7 @@ enum ThemeEnum {
   glass,
   glassHighlight,
   scrim,
+  toastAction,
   transparent;
 
   Color resolve(BmPalette palette) => switch (this) {
@@ -78,6 +79,9 @@ enum ThemeEnum {
 
     /// black in every theme, the sheet sets its opacity by mode
     ThemeEnum.scrim => const Color(0xFF000000),
+
+    /// the toast's undo, primary mixed 25% toward bg so it reads on the inverted toast
+    ThemeEnum.toastAction => Color.lerp(palette.primary, palette.bg, .25)!,
     ThemeEnum.transparent => Colors.transparent,
   };
 }
