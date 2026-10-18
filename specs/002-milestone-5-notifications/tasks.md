@@ -558,18 +558,18 @@ closing it returns to the screen with the adhan still playing
 
 ## Phase 11: Polish & Cross-Cutting Concerns
 
-- [ ] T075 Run `dart format --set-exit-if-changed lib test tool`, `flutter analyze` and `flutter test`,
+- [X] T075 Run `dart format --set-exit-if-changed lib test tool`, `flutter analyze` and `flutter test`,
   and fix everything. Run the adaptive-widgets self-check greps on `lib/features/notifications/`.
 - [ ] T076 Run `specs/002-milestone-5-notifications/quickstart.md` §2 to §5 on an iPhone and an
   Android 13+ phone. Note the delivery delay with exact alarms (SC-001), the Stop delay (SC-004),
   the pending count on iOS (SC-008).
-- [ ] T077 Check WCAG AA contrast of every text on the adhan screen against each
+- [X] T077 Check WCAG AA contrast of every text on the adhan screen against each
   of the five skies, and list any miss in the milestone reply.
-- [ ] T078 [P] In `.specify/memory/constitution.md`: add workmanager to the domain packages
+- [X] T078 [P] In `.specify/memory/constitution.md`: add workmanager to the domain packages
   (Decision 1), and add to principle II the exception the project CLAUDE.md already allows (always
   dark surfaces like the adhan screen keep their literal colors in one allow-listed file). Bump the
   MINOR version from the version found in the file then, and update the date.
-- [ ] T079 [P] Mark milestone 5 as "Done, waiting for my review." in `CLAUDE.md`.
+- [X] T079 [P] Mark milestone 5 as "Done, waiting for my review." in `CLAUDE.md`.
 
 ---
 
