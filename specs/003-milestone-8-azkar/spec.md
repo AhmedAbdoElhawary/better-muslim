@@ -201,7 +201,7 @@ phone's share sheet opens with the dua. [NEEDS CLARIFICATION: Q6, Q7]
   Morning azkar ("After Fajr · {done} of {total}"), Evening azkar ("After Asr · {done} of
   {total}") and Tasbih ("After prayer"), each row built like Home's azkar row (icon tile, title,
   subtitle, chevron). It has no PNG, so it MUST be built only from parts in
-  `03 Components.dc.html` and 4.01, and shown to me in screenshots before it is called done.
+  `03 Components.dc.html` and 4.01, and I check it in the app before it is called done.
   [NEEDS CLARIFICATION: Q1]
 - **FR-002**: The Azkar tab in the bottom bar MUST show the designed badge ("Badge · new azkar
   set") once the current set's window has started and the set hasn't been opened in it, and drop
@@ -219,7 +219,7 @@ phone's share sheet opens with the dua. [NEEDS CLARIFICATION: Q6, Q7]
 - **FR-006**: A set MUST be a pushed page with the compact app bar (the set's name), showing one
   zikr per card using the azkar card in `03 Components.dc.html`: "{set} · {index} of {total}",
   "{n} / {count}", the Arabic in Amiri, the transliteration, the translation, and a footer with the
-  source, the grading and the progress bar. It has no PNG, screenshots before done.
+  source, the grading and the progress bar. It has no PNG, I check it in the app before done.
   [NEEDS CLARIFICATION: Q3]
 - **FR-007**: A tap on the card MUST count 1 with the bead haptic. At its number the card MUST show
   done with the set complete haptic, and the next tap MUST move to the next card. A swipe MUST move
@@ -257,8 +257,8 @@ phone's share sheet opens with the dua. [NEEDS CLARIFICATION: Q6, Q7]
 - **FR-019**: A chip MUST filter the page: the card shows the first dua of the chip and the rows
   show the chip's other categories. The chip row scrolls sideways. [NEEDS CLARIFICATION: Q5]
 - **FR-020**: A category row MUST open a pushed page with the compact app bar (the category name)
-  and that category's duas as dua cards with Listen, Save and Share. It has no PNG, screenshots
-  before done. [NEEDS CLARIFICATION: Q5]
+  and that category's duas as dua cards with Listen, Save and Share. It has no PNG, I check it
+  in the app before done. [NEEDS CLARIFICATION: Q5]
 - **FR-021**: While the search field has text, the chips' content MUST give way to the matching
   duas as cards across all categories, updated as I type. Matching covers the Arabic, the
   transliteration, the translation and the category name, ignoring case, diacritics, tatweel and
@@ -287,7 +287,7 @@ phone's share sheet opens with the dua. [NEEDS CLARIFICATION: Q6, Q7]
 - **FR-027**: Share MUST open the phone's share sheet with the dua as an image card: the Arabic,
   the transliteration, the translation and the source in the arch frame from `01 Brand.dc.html`,
   with the app's wordmark. A long dua makes the card taller, never cut. The card has no design, so
-  it is shown to me in screenshots before done. [NEEDS CLARIFICATION: Q7]
+  I check it in the app before done. [NEEDS CLARIFICATION: Q7]
 
 **Content**
 
@@ -343,7 +343,7 @@ phone's share sheet opens with the dua. [NEEDS CLARIFICATION: Q6, Q7]
 
 - **FR-036**: "Dev · design scenario" MUST open with Tasbih at SubhanAllah 16 of 33, the evening
   set current at 0 of 24, the morning set with 12 items, nothing saved, and Duas on All as in 4.14,
-  so Tasbih, Duas and Home's row match their PNGs.
+  so Tasbih, Duas and Home's row show their mockups' values.
 
 ### Key Entities
 
@@ -362,8 +362,8 @@ phone's share sheet opens with the dua. [NEEDS CLARIFICATION: Q6, Q7]
 
 ### Measurable Outcomes
 
-- **SC-001**: In the design scenario Tasbih and Duas match 4.08 and 4.14 within 1 pt in dark and
-  light, and Tasbih after 17 taps shows the full ring, the glow and "Set complete".
+- **SC-001**: In the design scenario Tasbih and Duas are built from the 4.08 and 4.14 trees in dark
+  and light, and Tasbih after 17 taps shows the full ring, the glow and "Set complete".
 - **SC-002**: 20 taps in 2 seconds count exactly 20, each tap's haptic and bead start on the next
   frame, and the screen is at rest within 400 ms of the last tap.
 - **SC-003**: The tasbih count, the set progress and the saved duas survive a restart and an

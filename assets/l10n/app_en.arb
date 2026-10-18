@@ -323,5 +323,105 @@
   "hijriMonth10": "Shawwal",
   "hijriMonth11": "Dhu al-Qi'dah",
   "hijriMonth12": "Dhu al-Hijjah",
-  "noLocationYet": "No location yet"
+  "noLocationYet": "No location yet",
+  "fajrAr": "الفجر",
+  "duhaAr": "الضحى",
+  "dhuhrAr": "الظهر",
+  "asrAr": "العصر",
+  "maghribAr": "المغرب",
+  "ishaAr": "العشاء",
+  "ishaLabel": "Isha {time}",
+  "@ishaLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "fajrLabel": "Fajr {time}",
+  "@fajrLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "morningAzkar": "Morning azkar",
+  "morningAzkarSub": "After Fajr · {done} of {total}",
+  "@morningAzkarSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "timeLeftSemantics": "{hours} h {minutes} min until {prayer}",
+  "@timeLeftSemantics": {
+    "placeholders": {
+      "hours": {},
+      "minutes": {},
+      "prayer": {}
+    }
+  },
+  "searchCity": "Search for a city",
+  "noPlacesFound": "No places found",
+  "locationFailed": "Couldn't get your location. Check that location is on, or choose a city.",
+  "noLocationBody": "Prayer times need your location or a city.",
+  "prayerUnmarked": "{prayer} unmarked",
+  "@prayerUnmarked": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "undo": "Undo",
+  "prayerPassedTitle": "{prayer} has passed",
+  "@prayerPassedTitle": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "prayerPassedBody": "You can add it to your qada list whenever you're ready.",
+  "iPrayedIt": "I prayed it",
+  "addedToQada": "{prayer} added to qada",
+  "@addedToQada": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "removedFromQada": "{prayer} removed from qada",
+  "@removedFromQada": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "inQada": "In qada",
+  "madeUp": "Made up",
+  "nothingToMakeUp": "Nothing to make up this month",
+  "qadaList": "Qada list",
+  "qadaTotal": "{count} to make up",
+  "@qadaTotal": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "qadaLeft": "{count} left",
+  "@qadaLeft": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "madeOneUp": "Made one up",
+  "prayerMadeUp": "{prayer} made up",
+  "@prayerMadeUp": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "addOlderQada": "Add one missed before",
+  "addMissedTitle": "Add missed {prayer}",
+  "@addMissedTitle": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "add": "Add",
+  "byCountry": "By country",
+  "chosenForCountry": "Chosen for your country",
+  "asrCalculation": "Asr calculation",
+  "allFivePrayed": "All five prayed"
 }

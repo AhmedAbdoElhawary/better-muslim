@@ -1,8 +1,11 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/database/app_database.steps.dart';
 import 'package:better_muslim/core/database/backup_exclusion.dart';
+import 'package:better_muslim/core/database/civil_date.dart';
 import 'package:better_muslim/core/database/database_key.dart';
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
@@ -54,11 +57,36 @@ class Settings extends Table {
   /// set by a store reset, cleared once the user has been told (milestone 10)
   BoolColumn get storeResetPending => boolean().withDefault(const Constant(false))();
 
+  /// the strip's earliest week. the v2 migration fills it with the upgrade date
+  TextColumn get firstUse => text().map(const CivilDate()).nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Settings])
+class PrayerLog extends Table {
+  /// the prayer day the prayer belongs to, not the clock time it was marked
+  TextColumn get date => text().map(const CivilDate())();
+  TextColumn get prayer => textEnum<Prayer>()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {date, prayer};
+}
+
+/// sqlite nulls are distinct, so dateless entries never collide on the index
+@TableIndex(name: 'qada_day', columns: {#missedOn, #prayer}, unique: true)
+class QadaEntries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get prayer => textEnum<Prayer>()();
+
+  /// null = missed before using the app
+  TextColumn get missedOn => text().map(const CivilDate()).nullable()();
+
+  /// null = still open
+  DateTimeColumn get madeUpAt => dateTime().nullable()();
+}
+
+@DriftDatabase(tables: [Settings, PrayerLog, QadaEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.executor);
 
@@ -117,14 +145,44 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
-  Stream<AppSettings> watchSettings() async* {
-    await into(settings).insert(const SettingsCompanion(), mode: InsertMode.insertOrIgnore);
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: stepByStep(
+      from1To2: (m, schema) async {
+        await m.createTable(schema.prayerLog);
+        await m.createTable(schema.qadaEntries);
+        await m.createIndex(schema.qadaDay);
+        await m.addColumn(schema.settings, schema.settings.firstUse);
+
+        /// sqlite can't add a column with a non constant default
+        await customStatement("update settings set first_use = date('now', 'localtime')");
+      },
+    ),
+  );
+
+  /// an existing row keeps its first use, now is passed so tests and the scenario control it
+  Stream<AppSettings> watchSettings({DateTime? now}) async* {
+    await into(settings).insert(
+      SettingsCompanion(firstUse: Value((now ?? DateTime.now()).toLocal())),
+      mode: InsertMode.insertOrIgnore,
+    );
     yield* (select(settings)..where((row) => row.id.equals(1))).watchSingle();
   }
 
   /// only the columns in values change. Value(null) on method or asrMethod goes back to by country
   Future<void> updateSettings(SettingsCompanion values) =>
       into(settings).insertOnConflictUpdate(values.copyWith(id: const Value(1)));
+
+  /// a plain call with no riverpod, so milestone 5 can log from a notification. twice is once
+  Future<void> markPrayed(DateTime day, Prayer prayer) => into(prayerLog).insert(
+    PrayerLogCompanion.insert(date: day, prayer: prayer),
+    mode: InsertMode.insertOrIgnore,
+  );
+
+  /// a plain call with no riverpod, like markPrayed
+  Future<void> unmarkPrayed(DateTime day, Prayer prayer) => (delete(
+    prayerLog,
+  )..where((row) => row.date.equalsValue(day) & row.prayer.equalsValue(prayer))).go();
 }

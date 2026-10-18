@@ -15,6 +15,9 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "BackupExclusion") {
       registerBackupExclusion(messenger: registrar.messenger())
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "PowerSaving") {
+      registerPowerSaving(messenger: registrar.messenger())
+    }
   }
 
   /// iCloud backs Application Support up, the store has to stay on this phone (FR-023)
@@ -36,6 +39,18 @@ import UIKit
         let code = (error as NSError).code
         result(FlutterError(code: "exclude_failed", message: "\(code)", details: nil))
       }
+    }
+  }
+
+  /// home's sky pauses its ambient motion in low power mode (MOTION tiers)
+  private func registerPowerSaving(messenger: FlutterBinaryMessenger) {
+    let channel = FlutterMethodChannel(name: "better_muslim/power", binaryMessenger: messenger)
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "isPowerSaving" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      result(ProcessInfo.processInfo.isLowPowerModeEnabled)
     }
   }
 }

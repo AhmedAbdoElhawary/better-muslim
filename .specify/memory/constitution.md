@@ -55,9 +55,11 @@ languages keep working.
 ### III. Faithful To The Design
 
 - The handoff is the approved design. Don't redesign, restyle, re-space or "improve" it.
-- A screen is done only when it matches its PNG at 393 x 852 within 1 pt (positions, sizes,
-  colors, fonts, copy, icons), and works in dark and light, English and Arabic, text scale 1.0
-  and 2.0, reduce motion on and off.
+- A screen is built straight from its tree in `specs/screens/*.md` (positions, sizes, colors,
+  fonts, copy, icons), and works in dark and light, English and Arabic, text scale 1.0 and 2.0,
+  reduce motion on and off.
+- No golden tests and no comparing screenshots against the PNGs, too expensive. The PNGs are only
+  a reference to look at.
 - Contrast meets WCAG AA in both modes. Every hit target is at least 44 x 44.
 - Every animation follows `MOTION.md` and has its reduce-motion fallback. Haptics only through
   `BmHaptics`.
@@ -152,8 +154,8 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Ask me every question first, all in one message with a recommendation each. Never fill a gap.
   When everything is answered, write **start building**.
 - Build in the handoff's milestone order (`design_handoff_better_muslim/HANDOFF_CLAUDE.md`), one
-  milestone at a time. Stop after each with screenshots: phone and tablet, dark and light,
-  English and Arabic.
+  milestone at a time. Stop after each, I review it by running the app myself (Dev or the design
+  scenario). No screenshots, also for screens the handoff doesn't design.
 - Speckit (specify, plan, tasks) for every milestone. Where the handoff already specs the screen,
   the spec is short: only what the handoff leaves open, the layout stays in the handoff and is
   built straight from it.
@@ -173,4 +175,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 2.2.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-17
+**Version**: 3.0.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-18

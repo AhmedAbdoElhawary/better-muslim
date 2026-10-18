@@ -7,6 +7,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,9 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
+    );
     return AppScreenUtilInit(
       child: MaterialApp.router(
         onGenerateTitle: (context) => context.tr(StringsManager.appName),
@@ -42,14 +46,20 @@ class _AppState extends ConsumerState<App> {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: ref.watch(routerProvider),
-        builder: (context, child) => MediaQuery.withClampedTextScaling(
-          maxScaleFactor: bmMaxTextScale,
-          child: ColoredBox(
-            color: context.getColor(ThemeEnum.bg),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: SizeManager.maxContentWidth.w),
-                child: child,
+
+        /// the in-app switch joins the os flag here, so every widget reads one flag (R4)
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(disableAnimations: MediaQuery.disableAnimationsOf(context) || reduceMotion),
+          child: MediaQuery.withClampedTextScaling(
+            maxScaleFactor: bmMaxTextScale,
+            child: ColoredBox(
+              color: context.getColor(ThemeEnum.bg),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: SizeManager.maxContentWidth.w),
+                  child: child,
+                ),
               ),
             ),
           ),

@@ -29,6 +29,7 @@ class _AdaptiveText extends StatelessWidget {
     this.decoration,
     this.letterSpacing,
     this.shadows,
+    this.tabularFigures = false,
     super.key,
   });
 
@@ -48,6 +49,9 @@ class _AdaptiveText extends StatelessWidget {
   final double? letterSpacing;
   final List<Shadow>? shadows;
 
+  /// every time and the countdown, so digits keep their width while they change
+  final bool tabularFigures;
+
   @override
   Widget build(BuildContext context) {
     final color = this.color;
@@ -63,10 +67,14 @@ class _AdaptiveText extends StatelessWidget {
         fontVariations: [FontVariation.weight(fontWeight.value.toDouble())],
         color: color == null ? null : context.getColor(color),
         height: height,
+
+        /// the specs are css, which splits a line height evenly above and below the text
+        leadingDistribution: TextLeadingDistribution.even,
         fontStyle: fontStyle,
         decoration: decoration,
         letterSpacing: letterSpacing,
         shadows: shadows,
+        fontFeatures: tabularFigures ? const [FontFeature.tabularFigures()] : null,
         fontFamily: isArabic ? font.arabic : font.latin,
 
         /// an arabic word inside english text (or the reverse) still gets the design font

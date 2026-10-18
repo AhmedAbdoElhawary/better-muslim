@@ -45,9 +45,9 @@ milestone 4.
   come in milestones 9 and 10.
 - Q: "Read dua" has no designed sheet. → A: A bottom sheet styled like the dua cards in 4.14, with
   the full dua after the adhan (Bukhari 614). Its text and translation get a `TODO(ahmed)` for me
-  to check, and I approve the layout from the screenshots.
-- Q: How is the milestone checked? → A: Unit tests for the schedule, 4.03 next to its PNG in the
-  design scenario, and two dev only buttons, "Open adhan screen" and "Test notification in 1
+  to check, and I check the layout in the app.
+- Q: How is the milestone checked? → A: Unit tests for the schedule, 4.03 in the design
+  scenario, and two dev only buttons, "Open adhan screen" and "Test notification in 1
   min" (on a dev page reached from More, since milestone 3 removes the readout). The design scenario never schedules real notifications.
 - Q: The evening azkar nudge and the lock screen widgets in 5.1 and 5.2? → A: Azkar nudges come in
   milestone 8 with their switch in Azkar, widgets and Live Activity in milestone 11. This milestone
@@ -58,7 +58,7 @@ milestone 4.
   last message later.
 - Q: 4.03 only shows Maghrib. What sky do the other prayers get on the adhan screen? → A: Each
   prayer gets its own Living Sky state with the sun at its real position. Maghrib matches 4.03
-  exactly, the other four I approve from the screenshots.
+  exactly, the other four I check in the app.
 - Q: What does the adhan icon on the Prayer tab's later rows mean now that each prayer has a
   sound? → A: It stays on every later row whatever the sound. In 4.04 Isha shows it while Isha
   defaults to Tone, so it means "this prayer notifies you".
@@ -279,13 +279,13 @@ source, the adhan keeps playing, closing the sheet returns to the adhan screen.
 
 ### User Story 8 - Checking it against the design (Priority: P3)
 
-As the developer, I can open the adhan screen in the design scenario and put it next to 4.03, and
+As the developer, I can open the adhan screen in the design scenario with 4.03's values, and
 send myself a test notification without waiting for a prayer.
 
-**Why this priority**: Every screen is checked against its PNG within 1 pt, and waiting hours for a
-real prayer makes testing notifications slow.
+**Why this priority**: waiting hours for a real prayer makes testing the adhan screen and
+notifications slow.
 
-**Independent Test**: Run "Dev · design scenario", tap "Open adhan screen", compare with 4.03. In a
+**Independent Test**: Run "Dev · design scenario", tap "Open adhan screen", it shows 4.03's values. In a
 normal dev run tap "Test notification in 1 min", it arrives a minute later.
 
 **Acceptance Scenarios**:
@@ -464,7 +464,7 @@ normal dev run tap "Test notification in 1 min", it arrives a minute later.
   prayer's notification with its sound, one minute from now). Staging and production builds MUST
   NOT have them.
 - **FR-042**: In the design scenario the adhan screen MUST show 4.03's progress, 0:42 of 2:56, as
-  fixed values, so it can be put next to the PNG.
+  fixed values.
 
 ### Key Entities
 
@@ -491,7 +491,7 @@ normal dev run tap "Test notification in 1 min", it arrives a minute later.
   notification.
 - **SC-005**: Marking a prayer from a notification takes one tap and no app launch, and the prayer
   shows as prayed the next time Home or Prayer opens.
-- **SC-006**: The adhan screen in the design scenario matches 4.03 within 1 pt, in English and
+- **SC-006**: The adhan screen in the design scenario is built from the 4.03 tree, in English and
   Arabic, text scale 1.0 and 2.0, reduce motion on and off.
 - **SC-007**: A refused permission never causes an error or a crash, and the rest of the app works
   the same.
@@ -506,9 +506,9 @@ normal dev run tap "Test notification in 1 min", it arrives a minute later.
   placeholders with a `TODO(ahmed)` until I supply licensed files. Until then Tone and the Android
   reminder use the phone's default notification sound.
 - The full dua after the adhan is not in the handoff either. Its text, transliteration and
-  translation get a `TODO(ahmed)` for me to check. The sheet has no exact design, I approve it from
-  the screenshots.
-- The design scenario shows 4.03's fixed progress (0:42 of 2:56) only for the PNG check. The real
+  translation get a `TODO(ahmed)` for me to check. The sheet has no exact design, I check it in
+  the app.
+- The design scenario shows 4.03's fixed progress (0:42 of 2:56) only in that scenario. The real
   progress comes from the recording, and the Brand board lists the Makkah adhan at 3:52.
 - System surfaces (the notifications in 5.1 and the media notification in 5.2) are drawn by the
   phone. They match the design in what an app controls (texts, actions, icon, sound, order), not

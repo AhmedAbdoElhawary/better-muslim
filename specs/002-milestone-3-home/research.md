@@ -263,7 +263,7 @@ Checked on 2026-10-17 against the code from milestones 1 and 2, the handoff, and
     - reduce motion leaves no ticker running
   - **Contrast**: a test computes WCAG contrast for the header text on all six skies and the
     theme base in both modes (SC-006).
-  - **Matching the PNGs** is the screenshot check at the end of the milestone.
+  - **No golden tests** and no comparing against the PNGs (constitution 3.0.0).
 - **Integration tests** (approved 2026-10-18): none in this milestone. The project has no
   `integration_test` setup yet. The first main journey that needs one, onboarding into Home, comes
   in milestone 10, and the setup comes with it.

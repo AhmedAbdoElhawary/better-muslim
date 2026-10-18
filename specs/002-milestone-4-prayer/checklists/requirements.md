@@ -33,5 +33,5 @@
 
 - Q1 to Q8 answered 2026-10-17 (all recommendations), logged under Clarifications in the spec.
 - Motion numbers (07, 08) and `03 Components.dc.html` point at the design, not at code.
-- The qada list, the passed prayer choice and the method sheet have no PNG, FR-022 asks for
-  screenshots before they count as done.
+- The qada list, the passed prayer choice and the method sheet have no PNG, FR-022 asks me to
+  check them in the app before they count as done.

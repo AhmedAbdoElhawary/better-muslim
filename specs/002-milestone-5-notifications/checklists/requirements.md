@@ -31,8 +31,8 @@
 
 ## Notes
 
-- FR-029: 4.03 only shows Maghrib, the other four prayers use their own Living Sky state and get
-  approved from the screenshots.
+- FR-029: 4.03 only shows Maghrib, the other four prayers use their own Living Sky state and I
+  check them in the app.
 - Platform names (time sensitive, "Alarms & reminders", notification categories, media
   notification) are what the user sees in the phone, not implementation. Packages are left to the
   plan.

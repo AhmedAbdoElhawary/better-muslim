@@ -16,8 +16,8 @@ The Prayer tab (4.04, 4.17) on top of milestone 2's times:
   step migration (R6).
 - **Core widgets**: the toast, the bottom sheet and the compact bar come from the components file
   (R8). Arabic counts get real plural forms through intl's `MessageFormat` (R7).
-- **Checking it**: the design scenario opens a seeded in-memory store, so the screen matches the
-  PNGs before and after Mark on Asr (R12).
+- **Checking it**: the design scenario opens a seeded in-memory store, so the screen shows the
+  4.04 week before and after Mark on Asr (R12).
 - **Shared with milestone 3**: the pin opens the same location sheet as Home's pill, kept in
   `core/` (R14).
 
@@ -52,7 +52,7 @@ of the main journey on the design scenario (R16).
 - offline only
 - the log is keyed by date, never by clock time
 - nothing personal in crash reports
-- 1 pt match with the PNGs
+- built from the 4.04 and 4.17 trees
 - text scale 2.0, reduce motion, RTL
 
 **Scale/Scope**: 2 new tables, 1 new column, 1 tab screen, 1 pushed page, 3 sheets, 3 core
@@ -66,7 +66,7 @@ widgets, 21 strings in 2 languages
 | --- | --- | --- |
 | I. Structure | log, prayer day and windows in `core/` (Home, notifications and widgets need them). Qada, row states, week and screens in `features/prayer/{data,domain,presentation}`. Tables in `core/database/`, since drift registers them on the one database. The router imports the feature, as allowed. The location sheet Home and Prayer share is in core (R14). No feature imports another | pass |
 | II. Design system | weight text widgets, adaptive paddings, `RSizedBox`, `ThemeEnum`, `BmIcon`. Each new size (ring 56 and stroke 4, rows 62 and 44, chips 26 and 32, week cell 68, dot 4) gets a named manager entry. The 21 strings go into `StringsManager` and both arb files. Toast, sheet and compact bar are components from `03 Components.dc.html`, so they sit in `core/widgets/` next to the adaptive ones (R8) | pass |
-| III. Faithful | 4.04 and 4.17 built from their specs, Motion 07 and 08 from MOTION.md. The undesigned parts (qada list, passed sheet, method sheet, + count sheet, "In qada" and "Made up" chips) use only existing components and wait for my OK on screenshots (FR-022) | pass |
+| III. Faithful | 4.04 and 4.17 built from their specs, Motion 07 and 08 from MOTION.md. The undesigned parts (qada list, passed sheet, method sheet, + count sheet, "In qada" and "Made up" chips) use only existing components and I check them in the app (FR-022) | pass |
 | IV. Simplicity | no repository interface, no use case classes, the drift data classes are the entities. The domain layer is pure functions. One converter for dates. No new package | pass |
 | V. Performance | derived providers that notify only on change (like `periodProvider`), `.select()`, one query per visible week, autoDispose families, const leaves | pass |
 | VI. Tests | unit tests at every window boundary (SC-004), qada order, plurals, migration v1 → v2, widget tests for every flow, one integration test of the main journey, architecture test unchanged and green | pass |
@@ -207,4 +207,4 @@ Three things come from reading the code and the other specs:
 | --- | --- | --- |
 | step by step migration v1 → v2 | milestone 2 FR-022: the dev phone's store survives the layout change | a reset on upgrade loses data, which FR-022 rules out |
 | ICU plurals in `AppLocalizations` (about 15 lines) | FR-029: Arabic counts are wrong for 1, 2 and 11+ today | a key per form gives the two arb files different keys, which `strings_manager_test` rejects |
-| in-memory store for the design scenario | the PNG week has to be seeded without touching the real log | seeding the dev store mixes fake prayers into the developer's own data |
+| in-memory store for the design scenario | the 4.04 week has to be seeded without touching the real log | seeding the dev store mixes fake prayers into the developer's own data |

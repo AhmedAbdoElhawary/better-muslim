@@ -15,6 +15,7 @@ class BoldText extends _AdaptiveText {
     super.decoration,
     super.letterSpacing,
     super.shadows,
+    super.tabularFigures,
     super.key,
   }) : super(fontWeight: FontWeightManager.bold);
 }

@@ -26,8 +26,7 @@ class _TabSwitcherState extends State<TabSwitcher> with SingleTickerProviderStat
     super.didUpdateWidget(oldWidget);
     if (oldWidget.index == widget.index) return;
     _previous = oldWidget.index;
-    // TODO: pass the in-app reduce motion switch once settings exist (milestone 2)
-    _reduceMotion = context.reduceMotion(false);
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
     _controller.duration = _reduceMotion ? BmMotion.micro : _outDuration + _inDuration;
     _controller.forward(from: 0);
   }

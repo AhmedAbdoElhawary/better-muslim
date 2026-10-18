@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
@@ -18,16 +19,40 @@ const devConfig = FlavorConfig(
 
 /// an in-memory store, the dev flavor and no gps, so a widget test never reaches the phone
 List<Override> testOverrides({PositionSource? positionSource}) => [
-  databaseProvider.overrideWith((ref) {
-    /// every test gets its own in-memory store, so drift's shared executor warning doesn't apply
-    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-    final db = AppDatabase.forTesting(NativeDatabase.memory());
-    ref.onDispose(db.close);
-    return db;
-  }),
+  _memoryDatabase(),
   flavorProvider.overrideWithValue(devConfig),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
 ];
+
+/// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store
+Future<List<Override>> designOverrides() async {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  final db = await designScenarioStore();
+  return [
+    databaseProvider.overrideWith((ref) {
+      ref.onDispose(db.close);
+      return db;
+    }),
+    flavorProvider.overrideWithValue(
+      const FlavorConfig(
+        flavor: Flavor.dev,
+        appName: 'Better Muslim',
+        apiBaseUrl: '',
+        sentryDsn: '',
+        scenario: 'design',
+      ),
+    ),
+    ...designScenarioOverrides(),
+  ];
+}
+
+Override _memoryDatabase() => databaseProvider.overrideWith((ref) {
+  /// every test gets its own in-memory store, so drift's shared executor warning doesn't apply
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  final db = AppDatabase.forTesting(NativeDatabase.memory());
+  ref.onDispose(db.close);
+  return db;
+});
 
 /// drift starts a zero timer when a watched query loses its last listener, it has to run before
 /// the test ends or flutter_test fails on a pending timer

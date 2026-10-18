@@ -40,7 +40,7 @@ Journey test, on a simulator or a phone (R16):
 flutter test integration_test/prayer_journey_test.dart --flavor dev -d <device id>
 ```
 
-## 2. Design scenario (the PNG check, SC-001)
+## 2. Design scenario (SC-001)
 
 Run **Dev · design scenario**. On the Prayer tab:
 - "Prayer times", "Makkah · Umm al-Qura", Sun 11 to Sat 17 with Thursday highlighted.
@@ -49,7 +49,7 @@ Run **Dev · design scenario**. On the Prayer tab:
 - Fajr and Dhuhr "Prayed", Sunrise time only, Asr filled with NOW and Mark, Maghrib "in 1:24",
   Isha with the adhan icon.
 
-Put it next to `4.04-prayer.png` (dark) and `4.17-prayer-arabic.png` (Arabic, light), within 1 pt.
+Same in Arabic and in light mode.
 
 Then:
 1. Tap Mark on Asr: chip to "Prayed" (Motion 07), "3 of 5", ring at 3/5, Thursday 3 dots.

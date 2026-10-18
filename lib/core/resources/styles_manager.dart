@@ -9,10 +9,12 @@ class GetTextStyle extends TextStyle {
     super.fontVariations,
     super.color,
     super.height,
+    super.leadingDistribution,
     super.fontStyle,
     super.decoration,
     super.letterSpacing,
     super.shadows,
+    super.fontFeatures,
     super.fontFamily,
     super.fontFamilyFallback,
   });

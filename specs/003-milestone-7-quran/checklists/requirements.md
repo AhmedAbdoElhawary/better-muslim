@@ -34,5 +34,5 @@
 - Q1 to Q11 are open, the markers go once they are answered.
 - Motion numbers (13, 14, 15), `03 Components.dc.html` and the fonts point at the design and the
   content, not at code.
-- The Quran tab, the text size sheet and the note sheet have no PNG, FR-002 and FR-034 ask for
-  screenshots before they count as done.
+- The Quran tab, the text size sheet and the note sheet have no PNG, FR-002 and FR-034 ask me to
+  check them in the app before they count as done.

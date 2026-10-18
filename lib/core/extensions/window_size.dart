@@ -10,4 +10,7 @@ extension WindowSizeExtension on BuildContext {
     if (width < 840) return WindowSize.medium;
     return WindowSize.expanded;
   }
+
+  /// above it the countdown and the prayer rows stack
+  bool get isLargeText => MediaQuery.textScalerOf(this).scale(1) > 1.4;
 }

@@ -223,8 +223,8 @@ and 4, and the package sources from pub.dev: flutter_local_notifications 22.3.2,
   - Sky: Maghrib uses 4.03's four stops, halo and sun on the horizon exactly. The other prayers
     use their `BmSkyStops` from `core/resources/design/bm_sky.dart`. The sun's height comes from
     `BmSunArc.fraction` at the prayer time: `y = horizon - sin(pi × fraction) × (horizon - 120)`,
-    which gives the horizon at Maghrib. Fajr and Isha are night, no sun and no halo. I approve
-    those four from the screenshots.
+    which gives the horizon at Maghrib. Fajr and Isha are night, no sun and no halo. I check
+    those four in the app.
   - Colors: 4.03 is an always dark surface, so its literal colors live in one file,
     `presentation/view/adhan_colors.dart`, added to the architecture test's allow list (project
     CLAUDE.md). Sizes are named entries in `SizeManager` and `SpaceManager` (`adhanSun`,
@@ -277,8 +277,8 @@ and 4, and the package sources from pub.dev: flutter_local_notifications 22.3.2,
     paused and silent (FR-042), and `NotificationsBoot` schedules nothing.
   - Tests: unit tests for `buildSchedule`, the ids, `tapTarget` and the texts. A fake
     `FlutterLocalNotificationsPlatform` and a fake channel for `apply`, migration test v2 to v3,
-    widget tests for the adhan screen and the dua sheet. 4.03 is checked side by side with its PNG
-    in the design scenario (quickstart §2), no golden files, the project has none. The Kotlin part
+    widget tests for the adhan screen and the dua sheet. No golden tests and no comparing against
+    the PNG (constitution 3.0.0). The Kotlin part
     and real delivery are checked on phones with `quickstart.md`.
 - **Spec change**: FR-041 says "the dev readout", it becomes "a dev page reached from More".
 

@@ -56,9 +56,8 @@ until it, ticking every second, with today's five times and the ones I already p
 **Why this priority**: This is why the app gets opened many times a day. Everything else on Home
 is a shortcut.
 
-**Independent Test**: Run "Dev · design scenario", put Home next to 4.01, 4.02 (phone in light)
-and 4.16 (phone in Arabic). Same at 393 x 852 within 1 pt, with the countdown at 1:24:00. The
-scenario's clock stands still, so the tick is checked in a normal dev run.
+**Independent Test**: Run "Dev · design scenario": Home shows the 4.01 values in dark, light and
+Arabic, with the countdown at 1:24:00. The scenario's clock stands still, so the tick is checked in a normal dev run.
 
 **Acceptance Scenarios**:
 
@@ -251,8 +250,7 @@ screen reader and with reduce motion on.
   while Home is visible, the app is in front and the phone is not in Low Power Mode or Battery
   Saver. With reduce motion it is still in the current state.
 - **FR-012**: Every text on the sky MUST meet WCAG AA in every sky state, in both modes.
-- **FR-013**: The design scenario MUST show the mockup's sky so Home can be checked against the
-  PNGs. Every other run uses the live sky.
+- **FR-013**: The design scenario MUST show the theme's base sky, as the mockups do. Every other run uses the live sky.
 
 **Glow and countdown**
 
@@ -319,8 +317,8 @@ screen reader and with reduce motion on.
 
 ### Measurable Outcomes
 
-- **SC-001**: In the design scenario, Home matches 4.01, 4.02 and 4.16 at 393 x 852 within 1 pt:
-  positions, sizes, colors, fonts, copy and icons.
+- **SC-001**: In the design scenario, Home is built from the 4.01, 4.02 and 4.16 trees and shows
+  their values (NOW Asr, Maghrib in 1:24:00) in dark, light and Arabic.
 - **SC-002**: After Home has been open for an hour, the time left it shows equals the real time
   left, to the second.
 - **SC-003**: When a prayer time comes, Home shows the next prayer within 1 second without leaving

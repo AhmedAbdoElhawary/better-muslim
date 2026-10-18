@@ -31,13 +31,23 @@ class LocationController {
   Future<void> choose(Place place) =>
       _save(place, (latitude: place.latitude, longitude: place.longitude), LocationMode.manual);
 
-  Future<void> useAuto() async {
-    await _ref
-        .read(databaseProvider)
-        .updateSettings(const SettingsCompanion(locationMode: Value(LocationMode.auto)));
+  /// the user asked for it, so unlike refresh it asks again even with a location saved. false =
+  /// denied, location off or no fix, and nothing is changed
+  Future<bool> useAuto() async {
+    final source = _ref.read(positionSourceProvider);
+    var permission = await source.permission();
+    if (permission == LocationPermission.denied) permission = await source.request();
+    if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
+      return false;
+    }
+    final position = await source.fix();
+    if (position == null) return false;
+    _lastRefresh = _ref.read(clockProvider)();
 
     /// the manual place may be under 30 km away, auto still has to name where the phone is
-    await _locate(force: true);
+    final place = (await _placeList()).nearest(position.latitude, position.longitude);
+    await _save(place, position, LocationMode.auto);
+    return true;
   }
 
   Future<void> _onResume() async {

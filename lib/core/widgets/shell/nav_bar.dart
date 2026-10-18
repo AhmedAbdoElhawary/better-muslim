@@ -26,8 +26,7 @@ class NavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: pass the in-app reduce motion switch once settings exist (milestone 2)
-    final reduceMotion = context.reduceMotion(false);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     /// the design's 30 pt sits 4 pt inside the 34 pt home indicator inset
     final bottom = max(SpaceManager.s2, MediaQuery.paddingOf(context).bottom - SpaceManager.s1);

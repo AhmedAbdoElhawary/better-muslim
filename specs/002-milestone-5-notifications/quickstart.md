@@ -41,8 +41,7 @@ flutter run --flavor dev -t lib/main_dev.dart \
 ```
 
 More → Notifications (dev) → "Open adhan screen". Expected: Maghrib 17:56, "ADHAN · MAKKAH",
-0:42 of 2:56, side by side with `design_handoff_better_muslim/reference/screens/4.03-adhan.png`
-within 1 pt. Repeat in Arabic, light mode (it stays dark), text scale 2.0, reduce motion.
+0:42 of 2:56, built from the 4.03 tree. Repeat in Arabic, light mode (it stays dark), text scale 2.0, reduce motion.
 Nothing is scheduled: Settings → Notifications on the phone shows no pending items for the app.
 
 ## 3. Delivery with the app closed (real dev build, no scenario)
@@ -79,5 +78,5 @@ Nothing is scheduled: Settings → Notifications on the phone shows no pending i
 
 ## 6. Before calling it done
 
-Screenshots of the adhan screen for all five prayers, dark and light, English and Arabic, phone and
-tablet, plus the media notification and the iOS lock screen, for my review.
+I check the adhan screen for all five prayers in the app, dark and light, English and Arabic, plus
+the media notification and the iOS lock screen.
