@@ -10,7 +10,7 @@ import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
-import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -36,19 +36,23 @@ void main() {
 
   group('the overrides', () {
     late ProviderContainer container;
+    var storeCalls = 0;
 
-    setUp(() {
-      container = ProviderContainer(
-        overrides: [
-          databaseProvider.overrideWith((ref) {
-            final db = AppDatabase.forTesting(NativeDatabase.memory());
-            ref.onDispose(db.close);
-            return db;
-          }),
-          ...designScenarioOverrides(),
-        ],
+    setUp(() async {
+      /// AppDatabase.open asks path_provider for its folder first
+      storeCalls = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        (_) async => '${storeCalls++}',
       );
-      addTearDown(container.dispose);
+      final db = await designScenarioStore();
+      container = ProviderContainer(
+        overrides: [databaseProvider.overrideWithValue(db), ...designScenarioOverrides()],
+      );
+      addTearDown(() async {
+        container.dispose();
+        await db.close();
+      });
     });
 
     test('freeze 16:32 in makkah with umm al-qura and the handoff times (SC-001)', () {
@@ -67,14 +71,12 @@ void main() {
       );
     });
 
-    test('the prayer day has the handoff times with fajr and dhuhr logged, other days compute', () {
+    test('the prayer day has the handoff times, other days compute', () {
       final prayerDay = container.read(prayerDayProvider);
       final tomorrow = container.read(dayTimesProvider(DateTime(2026, 10, 16)))!;
 
       expect(prayerDay, DateTime(2026, 10, 15));
       expect(container.read(dayTimesProvider(prayerDay)), same(container.read(todayTimesProvider)));
-      expect(container.read(prayedProvider(prayerDay)), {Prayer.fajr, Prayer.dhuhr});
-      expect(container.read(prayedProvider(DateTime(2026, 10, 16))), isEmpty);
 
       /// a real umm al-qura calculation, the handoff's fixed times end on the 15th
       expect(tomorrow.date, DateTime(2026, 10, 16));
@@ -92,6 +94,28 @@ void main() {
       );
       expect(container.read(periodProvider), Period.asr);
       expect((hijri.day, hijri.month, hijri.year), (4, 5, 1448));
+    });
+
+    test('the store has the 4.04 week, first use 1 oct and 3 open qada entries (FR-031)', () async {
+      final db = container.read(databaseProvider);
+      final provider = weekLogProvider(DateTime(2026, 10, 11));
+      container.listen(provider, (_, _) {});
+      final week = await container.read(provider.future);
+      final qada = await db.select(db.qadaEntries).get();
+
+      expect(
+        {for (final MapEntry(:key, :value) in week.entries) key.day: value.length},
+        {11: 5, 12: 5, 13: 4, 14: 5, 15: 2},
+      );
+      expect(week[DateTime(2026, 10, 13)], isNot(contains(Prayer.isha)));
+      expect(week[DateTime(2026, 10, 15)], {Prayer.fajr, Prayer.dhuhr});
+      expect(qada.map((entry) => (entry.missedOn, entry.prayer, entry.madeUpAt)), [
+        (DateTime(2026, 10, 13), Prayer.isha, null),
+        (DateTime(2026, 10, 6), Prayer.fajr, null),
+        (DateTime(2026, 10, 8), Prayer.fajr, null),
+      ]);
+      expect((await db.watchSettings().first).firstUse, DateTime(2026, 10, 1));
+      expect(storeCalls, 0);
     });
 
     /// the real PositionSource would throw MissingPluginException in a host test
