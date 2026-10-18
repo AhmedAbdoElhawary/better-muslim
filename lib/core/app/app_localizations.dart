@@ -3,11 +3,15 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/message_format.dart';
 
 /// reads the arb files in assets/l10n/ at runtime, so a text takes a const StringsManager key
 class AppLocalizations {
-  const AppLocalizations(this._strings);
+  const AppLocalizations(this._strings, [this._languageCode = 'en']);
   final Map<String, String> _strings;
+  final String _languageCode;
+
+  static final _plural = RegExp(r'\{(\w+), plural,');
 
   static const supportedLocales = [Locale('en'), Locale('ar')];
 
@@ -30,7 +34,15 @@ class AppLocalizations {
     for (final arg in args.entries) {
       text = text.replaceAll('{${arg.key}}', arg.value);
     }
-    return text;
+
+    /// arabic has its own form for 1, 2, 3 to 10 and 11 or more, the count comes already formatted
+    final plural = _plural.firstMatch(text);
+    if (plural == null) return text;
+    final count = args[plural[1]]!.replaceAllMapped(
+      RegExp('[٠-٩]'),
+      (match) => '${match[0]!.codeUnitAt(0) - 0x0660}',
+    );
+    return MessageFormat(text, locale: _languageCode).format({plural[1]!: int.parse(count)});
   }
 }
 
@@ -56,7 +68,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
     return AppLocalizations({
       for (final MapEntry(:key, :value) in json.entries)
         if (!key.startsWith('@')) key: value as String,
-    });
+    }, locale.languageCode);
   }
 
   @override
