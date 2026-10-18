@@ -15,7 +15,10 @@ enum FontEnum {
   body(latin: FontFamilyManager.body, arabic: FontFamilyManager.bodyAr),
 
   /// the design uses it only at weight 400, so with RegularText
-  display(latin: FontFamilyManager.display, arabic: FontFamilyManager.displayAr);
+  display(latin: FontFamilyManager.display, arabic: FontFamilyManager.displayAr),
+
+  // TODO(ahmed): switch to KFGQPC Hafs once licensed, the mushaf text must render in the licensed font.
+  quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran);
 
   const FontEnum({required this.latin, required this.arabic});
   final String latin;
@@ -71,6 +74,11 @@ abstract final class FontSizeManager {
   static const double duaAr = 24;
   static const double dhikrAr = 40;
   static const double quranAr = 26;
+
+  /// home values with no BmText role
+  static const double skyLabel = 11;
+  static const double cardNote = 12.5;
+  static const double nextPrayerAr = 16;
 }
 
 abstract final class LineHeightManager {
@@ -103,6 +111,12 @@ abstract final class LineHeightManager {
   static const double duaAr = 1.9;
   static const double dhikrAr = 1.7;
   static const double quranAr = 2.2;
+
+  /// home values with no BmText role
+  static const double cardTitleAr = 1.2;
+  static const double nextPrayerAr = 1.0;
+  static const double skyLabelAr = 1.2;
+  static const double verseTranslation = 1.5;
 }
 
 abstract final class LetterSpacingManager {
