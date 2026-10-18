@@ -39,7 +39,10 @@ class CompactAppBar extends StatelessWidget {
                 padding: SpaceManager.s2,
                 child: Row(
                   children: [
-                    if (back) const _Back() else const RSizedBox.square(dimension: SizeManager.hit),
+                    if (back)
+                      const BarBackButton()
+                    else
+                      const RSizedBox.square(dimension: SizeManager.hit),
                     Expanded(child: SemiBoldText(title, textAlign: TextAlign.center, maxLines: 1)),
                     const RSizedBox.square(dimension: SizeManager.hit),
                   ],
@@ -53,8 +56,9 @@ class CompactAppBar extends StatelessWidget {
   }
 }
 
-class _Back extends StatelessWidget {
-  const _Back();
+/// the bar's back chevron, 44 x 44, flipped in arabic. the qibla bar has no surface and uses it alone
+class BarBackButton extends StatelessWidget {
+  const BarBackButton({super.key});
 
   @override
   Widget build(BuildContext context) {
