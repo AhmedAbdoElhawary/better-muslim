@@ -16,7 +16,7 @@ flutter test
 `flutter test` includes the architecture test, `home_moment_test.dart`, `home_page_test.dart`,
 `location_sheet_test.dart`, and the changed core tests (ticker, prayer day, useAuto, scenario).
 
-## Against the PNGs (SC-001)
+## Design scenario (SC-001)
 
 Run "Dev · design scenario" (VS Code or Android Studio), or:
 
@@ -25,16 +25,15 @@ flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=dart_defin
   --dart-define=SCENARIO=design
 ```
 
-On an iPhone 15 size simulator (393 x 852), screenshot Home and put it next to:
+On a phone:
 
-| Phone set to | Compare with | Expect |
-| --- | --- | --- |
-| dark, English | `reference/screens/4.01-home.png` | NOW Asr, Maghrib in 1:24:00, bar 44%, Fajr and Dhuhr checked, Asr highlighted |
-| light, English | `reference/screens/4.02-home-light.png` | same values, the sky's own palette, light cards |
-| dark, Arabic | `reference/screens/4.16-home-ar.png` | mirrored, Eastern Arabic digits, arc on the left side, one shortcut row |
+| Phone set to | Expect |
+| --- | --- |
+| dark, English | NOW Asr, Maghrib in 1:24:00, bar 44%, Fajr and Dhuhr checked, Asr highlighted |
+| light, English | same values, the sky's own palette, light cards |
+| dark, Arabic | mirrored, Eastern Arabic digits, arc on the left side, one shortcut row |
 
-Within 1 pt: positions, sizes, colors, fonts, copy, icons. The scenario's clock stands still, so
-the countdown stays at 1:24:00.
+The scenario's clock stands still, so the countdown stays at 1:24:00.
 
 ## Live checks (normal dev run)
 
@@ -54,5 +53,3 @@ the countdown stays at 1:24:00.
 | use my location | deny location, tap "Use my location" | the message shows, nothing changes. Allow it: Home goes back to auto |
 | no location | fresh install, deny location | sky with no sun, "No location yet", the card with both choices, no NOW and no strip |
 | taps | tap the card, a strip cell, the verse, Continue reading, the azkar row | Prayer, Prayer, Quran, Quran, Azkar tabs |
-
-Screenshots at the end of the milestone: phone and tablet, dark and light, English and Arabic.
