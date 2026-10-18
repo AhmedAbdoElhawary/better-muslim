@@ -17,6 +17,7 @@ abstract final class StringsManager {
   static const String untilPrayerAt = 'untilPrayerAt';
   static const String nextPrayer = 'nextPrayer';
   static const String adhanAtReminder = 'adhanAtReminder';
+  static const String adhanAt = 'adhanAt';
   static const String sunriseLabel = 'sunriseLabel';
   static const String maghribLabel = 'maghribLabel';
   static const String continueReading = 'continueReading';
@@ -29,6 +30,7 @@ abstract final class StringsManager {
   static const String readDua = 'readDua';
   static const String markPrayed = 'markPrayed';
   static const String stopAdhan = 'stopAdhan';
+  static const String adhanOfMakkah = 'adhanOfMakkah';
   static const String prayerTimes = 'prayerTimes';
   static const String prayedToday = 'prayedToday';
   static const String missedToMakeUp = 'missedToMakeUp';
@@ -121,6 +123,11 @@ abstract final class StringsManager {
   static const String notifAdhanTitle = 'notifAdhanTitle';
   static const String notifAdhanBody = 'notifAdhanBody';
   static const String notifReminderTitle = 'notifReminderTitle';
+  static const String notifReminderBody = 'notifReminderBody';
+  static const String reminders = 'reminders';
+  static const String stop = 'stop';
+  static const String pause = 'pause';
+  static const String play = 'play';
   static const String notifAzkarBody = 'notifAzkarBody';
   static const String liveNextPrayer = 'liveNextPrayer';
   static const String atTime = 'atTime';

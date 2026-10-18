@@ -29,6 +29,12 @@
       "minutes": {}
     }
   },
+  "adhanAt": "Adhan at {time}",
+  "@adhanAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "sunriseLabel": "Sunrise {time}",
   "@sunriseLabel": {
     "placeholders": {
@@ -69,6 +75,7 @@
   "readDua": "Read dua",
   "markPrayed": "Mark prayed",
   "stopAdhan": "Stop adhan",
+  "adhanOfMakkah": "Adhan of Makkah",
   "prayerTimes": "Prayer times",
   "prayedToday": "{count} of 5 prayed today",
   "@prayedToday": {
@@ -284,6 +291,17 @@
       "minutes": {}
     }
   },
+  "notifReminderBody": "{time} · {city}",
+  "@notifReminderBody": {
+    "placeholders": {
+      "time": {},
+      "city": {}
+    }
+  },
+  "reminders": "Reminders",
+  "stop": "Stop",
+  "pause": "Pause",
+  "play": "Play",
   "notifAzkarBody": "After Asr · 24 remembrances, about 6 minutes",
   "liveNextPrayer": "Next prayer · {city}",
   "@liveNextPrayer": {
