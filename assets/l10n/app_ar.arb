@@ -150,5 +150,20 @@
   "hijriMonth10": "شوال",
   "hijriMonth11": "ذو القعدة",
   "hijriMonth12": "ذو الحجة",
-  "noLocationYet": "لا يوجد موقع بعد"
+  "noLocationYet": "لا يوجد موقع بعد",
+  "fajrAr": "الفجر",
+  "duhaAr": "الضحى",
+  "dhuhrAr": "الظهر",
+  "asrAr": "العصر",
+  "maghribAr": "المغرب",
+  "ishaAr": "العشاء",
+  "ishaLabel": "العشاء {time}",
+  "fajrLabel": "الفجر {time}",
+  "morningAzkar": "أذكار الصباح",
+  "morningAzkarSub": "بعد الفجر · {done} من {total}",
+  "timeLeftSemantics": "{hours} س {minutes} د حتى {prayer}",
+  "searchCity": "ابحث عن مدينة",
+  "noPlacesFound": "لا توجد أماكن",
+  "locationFailed": "تعذّر تحديد موقعك. تأكد أن الموقع مفعّل، أو اختر مدينة.",
+  "noLocationBody": "أوقات الصلاة تحتاج موقعك أو مدينة."
 }
