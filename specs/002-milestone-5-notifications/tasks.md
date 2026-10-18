@@ -242,32 +242,32 @@ once. On Android with the app closed the media notification plays and stops (qui
 
 ### Tests for User Story 2
 
-- [ ] T027 [P] [US2] `test/features/notifications/data/adhan_player_test.dart`: the native player
+- [X] T027 [P] [US2] `test/features/notifications/data/adhan_player_test.dart`: the native player
   maps the state events to playback state and sends `play` once for the same id twice. The
   just_audio player is checked through a fake `AudioPlayer` for the 1.5 s fade target and stop on
   interruption.
-- [ ] T028 [P] [US2] `test/features/notifications/presentation/adhan_page_test.dart` with a fake
+- [X] T028 [P] [US2] `test/features/notifications/presentation/adhan_page_test.dart` with a fake
   player at 0:42 of 2:56: the 4.03 texts, Stop calls `stop` and pops, reduce motion gives the
   fade transition and a still halo, Arabic keeps the progress row left to right, text scale 2.0
   cuts nothing.
-- [ ] T029 [P] [US2] Extend `notification_scheduler_test.dart`: with exact alarms allowed, Adhan
+- [X] T029 [P] [US2] Extend `notification_scheduler_test.dart`: with exact alarms allowed, Adhan
   prayers go to the channel's `schedule` (entries as in data-model.md) and not to the plugin.
-- [ ] T030 [P] [US2] `test/features/notifications/presentation/notifications_boot_test.dart`: a
+- [X] T030 [P] [US2] `test/features/notifications/presentation/notifications_boot_test.dart`: a
   period change to an Adhan prayer while resumed pushes `/adhan` and calls `play`. The first period
   value, a Tone prayer and the design scenario push nothing.
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [US2] Create `android/app/src/main/kotlin/com/elhawary/bettermuslim/adhan/AdhanAlarms.kt`:
+- [X] T031 [P] [US2] Create `android/app/src/main/kotlin/com/elhawary/bettermuslim/adhan/AdhanAlarms.kt`:
   keep entries as JSON in private `SharedPreferences` `adhan_alarms`, `schedule(entries)` replaces
   all and sets `setExactAndAllowWhileIdle` per entry (`PendingIntent` request code = id),
   `cancelAll()`, `restore()` for future entries.
-- [ ] T032 [P] [US2] Create `.../adhan/AdhanReceiver.kt`: on the alarm, ringer
+- [X] T032 [P] [US2] Create `.../adhan/AdhanReceiver.kt`: on the alarm, ringer
   `RINGER_MODE_NORMAL` and `INTERRUPTION_FILTER_ALL` → `startForegroundService(AdhanService)` with
   the entry, else post the plain notification on the entry's channel with `setSilent(true)`, small
   icon `ic_notification`, color `notification_accent`, the payload in its content intent to
   `MainActivity`. On `BOOT_COMPLETED` and `MY_PACKAGE_REPLACED` call `AdhanAlarms.restore()`.
-- [ ] T033 [US2] Create `.../adhan/AdhanService.kt` (foreground, `mediaPlayback`):
+- [X] T033 [US2] Create `.../adhan/AdhanService.kt` (foreground, `mediaPlayback`):
   - `MediaPlayer` on the Flutter asset through `FlutterInjector.instance().flutterLoader().getLookupKeyForAsset`
     and `assets.openFd`, wake mode partial, seek to `fromMillis`
   - volume ramp 0 → 1 over 1500 ms
@@ -279,18 +279,18 @@ once. On Android with the app closed the media notification plays and stops (qui
   - on completion: `stopForeground(STOP_FOREGROUND_DETACH)` and post the plain notification under
     the same id (FR-027). On Stop: `stopForeground(STOP_FOREGROUND_REMOVE)` (FR-026)
   - state events for the event channel
-- [ ] T034 [US2] In `android/app/src/main/kotlin/com/elhawary/bettermuslim/MainActivity.kt`
+- [X] T034 [US2] In `android/app/src/main/kotlin/com/elhawary/bettermuslim/MainActivity.kt`
   override `configureFlutterEngine` and register the method channel and the two event channels of
   `contracts/adhan-channel.md` (`play` checks the ringer like the receiver), plus
   `launchPayload` from the start intent and `opened` from `onNewIntent`.
-- [ ] T035 [P] [US2] Manifest: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`,
+- [X] T035 [P] [US2] Manifest: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`,
   `WAKE_LOCK`, the `AdhanService` with `foregroundServiceType="mediaPlayback"` and the
   `AdhanReceiver` with boot and package replaced actions (`contracts/adhan-channel.md`).
-- [ ] T036 [US2] In `notification_scheduler.dart`, when `canScheduleExactNotifications()` is true,
+- [X] T036 [US2] In `notification_scheduler.dart`, when `canScheduleExactNotifications()` is true,
   send Adhan alerts to `adhanChannel.schedule` as alarm entries (texts, channel id, asset,
   localized action labels) and the rest to the plugin. Call `adhanChannel.cancelAll()` at the
   start of `apply`.
-- [ ] T037 [P] [US2] Create `lib/features/notifications/data/adhan_player.dart`:
+- [X] T037 [P] [US2] Create `lib/features/notifications/data/adhan_player.dart`:
   - `abstract class AdhanPlayer` with `play(Alert, {Duration from})`, `pause`, `resume`, `stop`,
     `length(Prayer)`, `Stream<Playback> playback`
   - `NativeAdhanPlayer` over `adhan_channel.dart`
@@ -298,37 +298,37 @@ once. On Android with the app closed the media notification plays and stops (qui
     (playback), `setAsset(fullAsset(prayer))`, seek to `from`, volume ramp over 1500 ms, stop on
     `interruptionEventStream` begin
   - `FixedAdhanPlayer(position, duration)`: paused, silent, for the design scenario
-- [ ] T038 [US2] Create `lib/features/notifications/presentation/providers/adhan_providers.dart`:
+- [X] T038 [US2] Create `lib/features/notifications/presentation/providers/adhan_providers.dart`:
   `adhanPlayerProvider` (Android → native, iOS → just_audio, design scenario → `FixedAdhanPlayer`
   at 0:42 of 2:56) and `playbackProvider` as a `StreamProvider`.
-- [ ] T039 [P] [US2] iOS `ios/Runner/Info.plist`: `UIBackgroundModes` with `audio`.
-- [ ] T040 [US2] In `lib/core/router/app_router.dart` add `Routes.adhan(Prayer, DateTime, {Duration from})`
+- [X] T039 [P] [US2] iOS `ios/Runner/Info.plist`: `UIBackgroundModes` with `audio`.
+- [X] T040 [US2] In `lib/core/router/app_router.dart` add `Routes.adhan(Prayer, DateTime, {Duration from})`
   → `/adhan?prayer=&day=&from=` (`from` in whole seconds) as a root `GoRoute` outside the shell with a
   `CustomTransitionPage`: Motion 06 (`ClipPath` circle from the sun's position, 520 ms
   `BmMotion` decelerate, text fade and slide 300 ms later), a 300 ms fade with reduce motion.
-- [ ] T041 [P] [US2] Create `lib/features/notifications/presentation/view/adhan_colors.dart`: every
+- [X] T041 [P] [US2] Create `lib/features/notifications/presentation/view/adhan_colors.dart`: every
   literal color of 4.03 (sky stops, halo, sun and glow, horizon line, `#F1E3C4`, `#EADBC6`, card
   `rgba(24,16,20,.6)`, glass button, primary button `#F6EAD6` on `#1E1A26`), as one `abstract final class AdhanColors`.
-- [ ] T042 [P] [US2] Create `lib/features/notifications/presentation/view/widgets/adhan_sky.dart`:
+- [X] T042 [P] [US2] Create `lib/features/notifications/presentation/view/widgets/adhan_sky.dart`:
   a `CustomPainter` widget. Maghrib draws 4.03 exactly (4 stops, halo, sun on the horizon with its
   glow, horizon line). Other prayers use their `BmSkyStops` and the sun at
   `horizon - sin(pi × BmSunArc.fraction) × (horizon - 120)`, no sun and no halo at Fajr and Isha
   (FR-029). The halo breathes per MOTION.md `halo` and stands still with reduce motion.
-- [ ] T043 [P] [US2] Create `.../widgets/adhan_header.dart`: the star mark (brand art
+- [X] T043 [P] [US2] Create `.../widgets/adhan_header.dart`: the star mark (brand art
   `assets/brand/star_8point.svg` through `SvgPicture.asset` tinted `#F1E3C4` from `AdhanColors`, it
   isn't a `BmIcon`), "ADHAN · {city}"
   (`adhanHeader`), the Arabic name in `FontEnum.display` (Reem Kufi 40), the English name
   (Marcellus 60), the time, then `adhan_progress.dart` with elapsed, bar and total inside
   `Directionality(ltr)`, reading `playbackProvider.select(...)`.
-- [ ] T044 [P] [US2] Create `lib/features/notifications/data/dua_after_adhan.dart` with the dua's
+- [X] T044 [P] [US2] Create `lib/features/notifications/data/dua_after_adhan.dart` with the dua's
   title key, source, Arabic, transliteration and translation, and
   `// TODO(ahmed): check the dua text, transliteration and translation against Bukhari 614.` Then
   `.../widgets/adhan_dua_card.dart`: "After the adhan" and "Read dua ›" (`readDua`, `ui/forward`
   14), the first line in Amiri 22, the translation's first line (4.03 card).
-- [ ] T045 [US2] Create `.../widgets/adhan_buttons.dart` (Mark prayed glass, Stop adhan primary,
+- [X] T045 [US2] Create `.../widgets/adhan_buttons.dart` (Mark prayed glass, Stop adhan primary,
   52 high, 44 × 44 minimum) and `lib/features/notifications/presentation/view/adhan_page.dart`
   laying out 4.03 with the sky, header, card and buttons. Stop → `player.stop()` and pop.
-- [ ] T046 [US2] In `notifications_boot.dart` listen to `periodProvider`: a change to a prayer
+- [X] T046 [US2] In `notifications_boot.dart` listen to `periodProvider`: a change to a prayer
   whose sound is Adhan, while resumed and not in the design scenario, pushes
   `Routes.adhan(prayer, prayerDay)` and calls `player.play(alert)`. Never on the first value.
 
@@ -455,7 +455,7 @@ times. Leave the app closed a day, 6 days are still pending (quickstart §5)
   record built with `.select()` from `locationProvider`, `settingsProvider` and `phoneZoneProvider`
   plus the app's locale) and listen to it with a 500 ms debounce that calls `_reschedule()`. On
   resume also compare `PlatformDispatcher.alwaysUse24HourFormat` and the locale.
-- [ ] T064 [US5] Move the body of `_reschedule()` into `Future<void> topUp(AppDatabase db, {required Locale locale, required bool use24h})`
+- [X] T064 [US5] Move the body of `_reschedule()` into `Future<void> topUp(AppDatabase db, {required Locale locale, required bool use24h})`
   in `lib/features/notifications/data/background.dart`, so the app and the background run the same
   steps. It computes the 6 `DayTimes` with `DayTimes.compute` from the stored location and
   settings (no Riverpod), the prayer day from milestone 4's rule.
@@ -517,7 +517,7 @@ closing it returns to the screen with the adhan still playing
 
 ### Implementation for User Story 7
 
-- [ ] T070 [US7] Create `lib/features/notifications/presentation/view/widgets/dua_sheet.dart` laid
+- [X] T070 [US7] Create `lib/features/notifications/presentation/view/widgets/dua_sheet.dart` laid
   out like the 4.14 dua card (title, source, Arabic in Amiri, transliteration, translation) and
   open it from "Read dua" in `adhan_dua_card.dart` with milestone 4's `showBmSheet` (Motion 15).
 
