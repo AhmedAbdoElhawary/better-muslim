@@ -129,7 +129,7 @@ void main() {
     }
 
     testWidgets('theme base sky, ${brightness.name} mode', (tester) async {
-      await pumpHome(tester, designOverrides(), brightness: brightness);
+      await pumpHome(tester, await designOverrides(), brightness: brightness);
       await expectAA(tester, 'theme base ${brightness.name}');
       await unmount(tester);
     });
