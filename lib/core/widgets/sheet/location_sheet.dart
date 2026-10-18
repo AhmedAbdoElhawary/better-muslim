@@ -62,34 +62,36 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SymmetricPadding(
-          horizontal: SpaceManager.screen,
-          child: SemiBoldText(StringsManager.location),
-        ),
-        const RSizedBox.vertical(SpaceManager.s2),
-        _UseMyLocationRow(busy: _busy, onTap: _useMyLocation),
-        if (_failed)
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           const SymmetricPadding(
             horizontal: SpaceManager.screen,
-            child: RegularText(StringsManager.locationFailed, color: ThemeEnum.error),
+            child: SemiBoldText(StringsManager.location),
           ),
-        const RSizedBox.vertical(SpaceManager.s3),
-        HorizontalPadding(
-          padding: SpaceManager.screen,
-          child: SearchField(
-            hint: StringsManager.searchCity,
-            onChanged: (query) => setState(() => _query = query),
+          const RSizedBox.vertical(SpaceManager.s2),
+          _UseMyLocationRow(busy: _busy, onTap: _useMyLocation),
+          if (_failed)
+            const SymmetricPadding(
+              horizontal: SpaceManager.screen,
+              child: RegularText(StringsManager.locationFailed, color: ThemeEnum.error),
+            ),
+          const RSizedBox.vertical(SpaceManager.s3),
+          HorizontalPadding(
+            padding: SpaceManager.screen,
+            child: SearchField(
+              hint: StringsManager.searchCity,
+              onChanged: (query) => setState(() => _query = query),
+            ),
           ),
-        ),
-        const RSizedBox.vertical(SpaceManager.s2),
-        Flexible(
-          child: _Results(query: _query, onChoose: _choose),
-        ),
-      ],
+          const RSizedBox.vertical(SpaceManager.s2),
+          Flexible(
+            child: _Results(query: _query, onChoose: _choose),
+          ),
+        ],
+      ),
     );
   }
 }
