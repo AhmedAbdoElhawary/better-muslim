@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -30,6 +31,9 @@ class MorePage extends ConsumerWidget {
                 fontSize: FontSizeManager.largeTitle,
                 height: LineHeightManager.largeTitle,
               ),
+              const RSizedBox.vertical(SpaceManager.s4),
+              // TODO: replaced by the 4.09 Qibla tile in milestone 9.
+              BmButton.secondary(StringsManager.qibla, onPressed: () => context.push(Routes.qibla)),
               if (isDev) const _DevRow(),
             ],
           ),
