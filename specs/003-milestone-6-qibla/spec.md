@@ -20,8 +20,8 @@ else it works with no internet, and neither the heading nor the position leaves 
 
 ### Session 2026-10-17
 
-- Q: How do I reach Qibla before milestone 9 builds More? → A: A temporary Qibla tile on the More
-  placeholder, replaced by the real tile in milestone 9.
+- Q: How do I reach Qibla before milestone 9 builds More? → A: A temporary Qibla entry on the More
+  placeholder (a plain button), replaced by the real tile in milestone 9.
 - Q: Where does the position come from? → A: The saved location, plus a fresh fix while the screen
   is open when the location is automatic and allowed. The fix is used for the bearing and distance
   only, never saved.
@@ -181,7 +181,7 @@ marker or needle, and "Use my location" and "Choose a city instead" open the loc
   handoff, in dark and light: back, title, gear, instruction, subtitle, dial, needle, top tick, the
   two cards and the hint. Arabic has no PNG, it follows the same tree with the RTL rules.
 - **FR-002**: The screen MUST be a pushed page reached from More. Until milestone 9 builds More's
-  tiles, a temporary Qibla tile on the More placeholder pushes it.
+  tiles, a temporary Qibla button on the More placeholder pushes it.
 
 **Heading**
 
