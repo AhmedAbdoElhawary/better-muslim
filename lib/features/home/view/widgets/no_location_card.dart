@@ -3,8 +3,8 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
+import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/home/view/widgets/home_card.dart';
-import 'package:better_muslim/features/home/view/widgets/location_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
