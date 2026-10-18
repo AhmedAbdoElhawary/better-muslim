@@ -24,6 +24,40 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// everything a pending notification is made from, so a change to any of them replaces them all
+/// (FR-010). the language and the 12/24 hour setting are read again on every resume
+final _scheduleInputsProvider = Provider((ref) {
+  final place = ref.watch(
+    locationProvider.select(
+      (location) => (
+        location?.latitude,
+        location?.longitude,
+        location?.placeName,
+        location?.placeNameAr,
+        location?.zone.name,
+      ),
+    ),
+  );
+  final choices = ref.watch(
+    settingsProvider.select((settings) {
+      final row = settings.value;
+      return (
+        row?.method,
+        row?.asrMethod,
+        row?.hijriAdjust,
+        row?.digits,
+        row?.reminderMinutes,
+        row?.fajrSound,
+        row?.dhuhrSound,
+        row?.asrSound,
+        row?.maghribSound,
+        row?.ishaSound,
+      );
+    }),
+  );
+  return (place, choices);
+});
+
 /// the notifications' wiring around the app: the first ask, rescheduling, taps and cleanup
 class NotificationsBoot extends ConsumerStatefulWidget {
   const NotificationsBoot({required this.child, super.key});
@@ -37,6 +71,11 @@ class NotificationsBoot extends ConsumerStatefulWidget {
 class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   late final AppLifecycleListener _lifecycle;
   final _subscriptions = <StreamSubscription<Object?>>[];
+  Timer? _debounce;
+  Locale? _initLocale;
+
+  /// a sheet's slider or a fast location fix changes several inputs in a row
+  static const _debounceTime = Duration(milliseconds: 500);
 
   /// one apply at a time, two at once would cancel each other's notifications
   Future<void> _running = Future.value();
@@ -49,11 +88,17 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(
-      onResume: () {
-        _reschedule();
-        _cleanUp();
+      onResume: () async {
+        /// ios keeps the mark prayed title from init
+        if (_locale != _initLocale) await _init();
+        await _reschedule();
+        await _cleanUp();
       },
     );
+    ref.listenManual(_scheduleInputsProvider, (_, _) {
+      _debounce?.cancel();
+      _debounce = Timer(_debounceTime, _reschedule);
+    });
 
     /// only a change, opening the app a minute after a prayer shows no adhan screen
     ref.listenManual(periodProvider, (previous, next) {
@@ -64,6 +109,7 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _lifecycle.dispose();
     for (final subscription in _subscriptions) {
       subscription.cancel();
@@ -96,14 +142,15 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     if (!settings.notificationsAsked) {
       /// stored before asking, so a refusal or a killed app never asks again
       await db.updateSettings(const SettingsCompanion(notificationsAsked: Value(true)));
-      await scheduler.askPermission();
+      if (await scheduler.askPermission()) await scheduler.askExactAlarms();
     }
     await _reschedule();
     await _cleanUp();
   }
 
   Future<void> _init() async {
-    final l10n = await AppLocalizations.load(_locale);
+    final locale = _initLocale = _locale;
+    final l10n = await AppLocalizations.load(locale);
     if (!mounted) return;
     await ref
         .read(notificationSchedulerProvider)
@@ -117,15 +164,17 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final scheduler = ref.read(notificationSchedulerProvider);
     final phoneZone = ref.read(phoneZoneProvider);
     final locale = _locale;
-    return _running = _running.then(
-      (_) => topUp(
+    return _running = _running.then((_) async {
+      /// refused stays quiet, a grant in the phone's settings is seen on the next resume
+      if (!await scheduler.isAllowed()) return;
+      await topUp(
         db,
         scheduler: scheduler,
         locale: locale,
         use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
         phoneZone: phoneZone,
-      ),
-    );
+      );
+    });
   }
 
   /// the full adhan in front, over any screen (FR-021)

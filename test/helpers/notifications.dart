@@ -19,6 +19,18 @@ List<MethodCall> muteAdhanChannel() {
       return null;
     },
   );
+  for (final name in ['better_muslim/adhan/state', 'better_muslim/adhan/opened']) {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+      EventChannel(name),
+      MockStreamHandler.inline(onListen: (_, _) {}),
+    );
+  }
+
+  /// a resume reads the phone's zone again
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    const MethodChannel('flutter_timezone'),
+    (_) async => 'Asia/Riyadh',
+  );
   return calls;
 }
 
@@ -51,6 +63,18 @@ class FakeScheduler extends NotificationScheduler {
     allowed = grants;
     return grants;
   }
+
+  @override
+  Future<bool> askExactAlarms() async {
+    alarmAsks++;
+    return true;
+  }
+
+  @override
+  Future<bool> isAllowed() async => allowed;
+
+  /// each topUp ends in one of these two
+  int get runs => applied.length + cancels;
 
   @override
   Future<void> cancelAll() async => cancels++;
