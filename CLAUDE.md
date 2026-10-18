@@ -12,7 +12,8 @@ icons, sky) is already in `lib/core/resources/design/`, the sky painter in
 `lib/features/home/view/widgets/`, fonts and icons in `assets/`, strings in `assets/l10n/` with
 their keys in `StringsManager`.
 
-- `reference/screens/*.png`, `reference/surfaces/*.png`: what each screen must look like.
+- `reference/screens/*.png`, `reference/surfaces/*.png`: what each screen looks like. Only to look
+  at, never compared against (no golden tests, no screenshot checks).
 - `specs/screens/*.md`, `specs/surfaces/*.md`: exact layout trees. Read `specs/HOW_TO_READ.md`
   first.
 - `SCREENS.md` (entry, dynamic values, behaviour), `MOTION.md` (animations, haptics, reduce
@@ -37,18 +38,19 @@ From the spec to the code:
 - Always-dark surfaces (adhan screen, system surfaces) may use literal colors: add that one file
   to the allow list at the top of `test/architecture_test.dart`.
 - Text scale is clamped at 2.0 in `App`. Above 1.4 the countdown and prayer rows stack.
-- Living Sky follows `BmSkyState`. For checks against the PNGs use `BmSkyMode.themeBase`.
+- Living Sky follows `BmSkyState`. The design scenario shows the theme's base sky.
 - Quran mockups use Amiri Quran. Production needs KFGQPC Hafs + QCF V2 (licensed separately).
 
 ## Milestones
 
 1. Setup: core, theme, fonts, l10n, 5-tab shell, icons, splash. **Done, waiting for my review.**
 2. Data: location, prayer times (Umm al-Qura in KSA), hijri, settings in drift, and a debug
-   scenario that freezes time at Thu 15 Oct 2026 16:32 Makkah so screens match the PNGs.
+   scenario that freezes time at Thu 15 Oct 2026 16:32 Makkah, a fixed moment for tests and demos.
    **Done, waiting for my review.**
 3. Home: Living Sky, live countdown and glow, the prayer day strip, verse and shortcuts, the
    location sheet with offline city search. **Done, waiting for my review.**
-4. to 11. as in `HANDOFF_CLAUDE.md`.
+4. Prayer: logging, qada, method sheet. **Done, waiting for my review.**
+5. to 11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
 
