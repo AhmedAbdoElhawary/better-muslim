@@ -37,29 +37,29 @@ checking story (US8) and SC-006 ask for the 4.03 check.
 
 **Purpose**: Packages, native build config, placeholder audio
 
-- [ ] T001 Add to `pubspec.yaml`:
+- [X] T001 Add to `pubspec.yaml`:
   - dependencies: `flutter_local_notifications: ^22.3.2`, `just_audio: ^0.10.6`,
     `audio_session: ^0.2.4`, and `workmanager: ^0.10.10` (Decision 1)
   - `assets/audio/` under `flutter: assets:`, with a yaml comment above it:
     `# TODO(ahmed): replace the placeholder adhan files in assets/audio/ with the licensed recordings, same names.`
 
   Then run `flutter pub get`.
-- [ ] T002 [P] In `android/app/build.gradle.kts`:
+- [X] T002 [P] In `android/app/build.gradle.kts`:
   - `compileOptions { isCoreLibraryDesugaringEnabled = true }`
   - a `dependencies { coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5"); implementation("androidx.media:media:1.8.0") }` block
   - keep `compileSdk = flutter.compileSdkVersion` (36 on Flutter 3.47.5, the plugin needs 35+)
-- [ ] T003 [P] Make the placeholder audio with macOS `say` and `afconvert` (research R11), each a
+- [X] T003 [P] Make the placeholder audio with macOS `say` and `afconvert` (research R11), each a
   spoken "adhan placeholder" plus silence:
   - `assets/audio/adhan_makkah.m4a` (about 60 s) and `assets/audio/adhan_makkah_fajr.m4a` (says
     "fajr adhan placeholder"), AAC
   - `ios/Runner/Sounds/adhan_makkah_clip.caf` and `adhan_makkah_fajr_clip.caf`, 25 s, IMA4 or
     linear PCM
   - `android/app/src/main/res/raw/adhan_makkah_clip.m4a` and `adhan_makkah_fajr_clip.m4a`, 25 s
-- [ ] T004 [P] Copy `assets/app_icon/png/notification_small/drawable-*/` into
+- [X] T004 [P] Copy `assets/app_icon/png/notification_small/drawable-*/` into
   `android/app/src/main/res/drawable-*/ic_notification.png` and add
   `android/app/src/main/res/values/colors.xml` with `notification_accent` `#A88A52` (system
   surfaces use the dark Qiyam Emerald, TOKENS.md).
-- [ ] T005 [P] In `test/architecture_test.dart` add
+- [X] T005 [P] In `test/architecture_test.dart` add
   `const _adhanColors = 'lib/features/notifications/presentation/view/adhan_colors.dart';` and add
   it to `allowedIn` of the colors rule, next to `_skyPainter`.
 
@@ -72,10 +72,10 @@ payloads, the Android channel's Dart side
 
 **⚠️ CRITICAL**: No story work starts before this phase is done
 
-- [ ] T006 In `lib/core/settings/settings.dart` add `enum PrayerSound { adhan, tone, silent }` and an
+- [X] T006 In `lib/core/settings/settings.dart` add `enum PrayerSound { adhan, tone, silent }` and an
   extension `soundOf(Prayer prayer)` on `AppSettings` that returns the matching column (sunrise
   is never asked).
-- [ ] T007 In `lib/core/database/app_database.dart`:
+- [X] T007 In `lib/core/database/app_database.dart`:
   - add to `Settings`: `fajrSound` (`textEnum<PrayerSound>()`, default `'adhan'`), `dhuhrSound`
     (`'tone'`), `asrSound` (`'tone'`), `maghribSound` (`'adhan'`), `ishaSound` (`'tone'`),
     `reminderMinutes` (`integer()`, default 10, "check: one of 0, 5, 10, 15, 20, 30. 0 is off"),
@@ -88,17 +88,17 @@ payloads, the Android channel's Dart side
 
   Then run `dart run build_runner build --delete-conflicting-outputs` and
   `dart run drift_dev make-migrations`, and commit `drift_schemas/app_database/drift_schema_v3.json`.
-- [ ] T008 [P] Extend `test/drift/app_database/migration_test.dart`: v2 → v3 keeps every value and
+- [X] T008 [P] Extend `test/drift/app_database/migration_test.dart`: v2 → v3 keeps every value and
   reads the seven defaults. Add `test/core/database/open_existing_test.dart`: a missing key or an
   unreadable file gives null and leaves the file in place.
-- [ ] T009 [P] In `lib/core/app/app_localizations.dart` add `static Future<AppLocalizations> load(Locale locale)`
+- [X] T009 [P] In `lib/core/app/app_localizations.dart` add `static Future<AppLocalizations> load(Locale locale)`
   and have the delegate's `load` call it.
-- [ ] T010 [P] In `lib/core/extensions/time_format.dart` add plain functions
+- [X] T010 [P] In `lib/core/extensions/time_format.dart` add plain functions
   `formatTimeIn(TZDateTime time, {required String language, required bool use24h, required Digits digits})`
   and `formatDigitsIn(String text, {required String language, required Digits digits})`. The
   context extension calls them with the context's values. Add cases to
   `test/core/extensions/time_format_test.dart` for both.
-- [ ] T011 [P] Add these keys to `lib/core/resources/strings_manager.dart`, `assets/l10n/app_en.arb`
+- [X] T011 [P] Add these keys to `lib/core/resources/strings_manager.dart`, `assets/l10n/app_en.arb`
   and `assets/l10n/app_ar.arb` (with `@` placeholders where they have one):
 
   | Key | English | Arabic |
@@ -112,12 +112,12 @@ payloads, the Android channel's Dart side
   | `play` | Play | تشغيل |
 
   Skip any that milestone 3 or 4 already added. `strings_manager_test` stays green.
-- [ ] T012 [P] Add the 4.03 sizes to `lib/core/resources/dimensions_manager.dart` as named entries,
+- [X] T012 [P] Add the 4.03 sizes to `lib/core/resources/dimensions_manager.dart` as named entries,
   values from `design_handoff_better_muslim/specs/screens/4.03-adhan.md`: sun 84, sun glow blur
   50 and spread 18, halo 420 × 280 at top 400, horizon top 540, header top 120 with gap 10, star
   34, name gap 8, progress width 200, top margin 22, bar height 3, card top 572 with side 16,
   radius 20, padding 16/18, gap 6, buttons bottom 44, height 52, radius 14, gap 10.
-- [ ] T013 [P] Create `lib/features/notifications/domain/alert.dart`:
+- [X] T013 [P] Create `lib/features/notifications/domain/alert.dart`:
   - `enum AlertKind { adhan, reminder }` and `Alert` with `id`, `day`, `prayer`, `kind`, `at`,
     `sound` as in data-model.md
   - `int alertId(DateTime day, Prayer prayer, AlertKind kind)`: days since 2020-01-01 (UTC dates)
@@ -126,15 +126,15 @@ payloads, the Android channel's Dart side
     `testAlertId = 1000000`
   - `String payloadOf(Alert)` and `Alert? alertFromPayload(String)` with
     `yyyy-MM-dd|prayer|kind|sound|atMillis`, no place in it
-- [ ] T014 [P] `test/features/notifications/domain/alert_test.dart`: ids round trip for every
+- [X] T014 [P] `test/features/notifications/domain/alert_test.dart`: ids round trip for every
   prayer and kind across a year, the test id gives null, a payload round trips and never contains
   a place.
-- [ ] T015 [P] Create `lib/features/notifications/data/adhan_recording.dart`:
+- [X] T015 [P] Create `lib/features/notifications/data/adhan_recording.dart`:
   `enum AdhanRecording { makkah }` with the full asset, the Fajr full asset, the iOS clip names
   and the Android raw names from research R11, and `fullAsset(Prayer)` / `clipOf(Prayer)` that
   pick the Fajr variant. One `// TODO(ahmed):` above the enum: the files are placeholders until
   the licensed Makkah recordings come, keep the names.
-- [ ] T016 [P] Create `lib/features/notifications/data/adhan_channel.dart`, the Dart side of
+- [X] T016 [P] Create `lib/features/notifications/data/adhan_channel.dart`, the Dart side of
   `contracts/adhan-channel.md`: `MethodChannel('better_muslim/adhan')` with `schedule`,
   `cancelAll`, `play`, `pause`, `resume`, `stop`, `markPrayedAction`, `length`, `dismiss`,
   `launchPayload`, and the event channels `better_muslim/adhan/state` and
