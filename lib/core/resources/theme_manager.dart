@@ -31,6 +31,12 @@ enum ThemeEnum {
   sky3,
   onSky,
   sun,
+  onSkyMuted,
+  onSkyBright,
+  skyScrim,
+  glass,
+  glassHighlight,
+  scrim,
   transparent;
 
   Color resolve(BmPalette palette) => switch (this) {
@@ -60,6 +66,18 @@ enum ThemeEnum {
     ThemeEnum.sky3 => palette.sky3,
     ThemeEnum.onSky => palette.onSky,
     ThemeEnum.sun => palette.sun,
+
+    /// the secondary header lines sit at 85% on the sky (4.01)
+    ThemeEnum.onSkyMuted => palette.onSky.withValues(alpha: .85),
+
+    /// bm_sky's numbers, the same on every theme and mode since the sky keeps its own palette
+    ThemeEnum.onSkyBright => const Color(0xEBFFFFFF),
+    ThemeEnum.skyScrim => const Color(0x47000000),
+    ThemeEnum.glass => const Color(0x6607100D),
+    ThemeEnum.glassHighlight => const Color(0x1AFFFFFF),
+
+    /// black in every theme, the sheet sets its opacity by mode
+    ThemeEnum.scrim => const Color(0xFF000000),
     ThemeEnum.transparent => Colors.transparent,
   };
 }
@@ -68,6 +86,8 @@ extension ThemeExtension on BuildContext {
   bool get isThemeDark => Theme.of(this).brightness == Brightness.dark;
 
   Color getColor(ThemeEnum color) => color.resolve(bm);
+
+  double get starOpacity => bm.starOpacity;
 }
 
 abstract final class AppTheme {
