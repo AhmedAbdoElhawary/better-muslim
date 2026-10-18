@@ -19,7 +19,4 @@ abstract final class HomeSamples {
   static const int morningAzkarTotal = 12;
   static const int eveningAzkarDone = 0;
   static const int eveningAzkarTotal = 24;
-
-  // TODO: the reminder setting (milestone 5)
-  static const int reminderMinutes = 10;
 }

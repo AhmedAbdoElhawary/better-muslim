@@ -65,6 +65,20 @@ void main() {
       ProviderScope.containerOf(tester.element(find.byType(HomePage)));
 
   group('the design scenario (4.01, 4.02, 4.16)', () {
+    testWidgets('the adhan line follows the reminder setting (FR-036)', (tester) async {
+      await pumpHome(tester, await designOverrides());
+      final db = containerOf(tester).read(databaseProvider);
+
+      await db.updateSettings(const SettingsCompanion(reminderMinutes: Value(15)));
+      await tester.pumpAndSettle();
+      expect(find.text('Adhan at 17:56 · reminder 15 min before'), findsOneWidget);
+
+      await db.updateSettings(const SettingsCompanion(reminderMinutes: Value(0)));
+      await tester.pumpAndSettle();
+      expect(find.text('Adhan at 17:56'), findsOneWidget);
+      await unmount(tester);
+    });
+
     testWidgets('english', (tester) async {
       await pumpHome(tester, await designOverrides());
 
