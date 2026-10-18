@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import UserNotifications
 import flutter_local_notifications
+import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -11,6 +12,12 @@ import flutter_local_notifications
   ) -> Bool {
     // the plugin shows notifications in front and hands taps to dart through this delegate
     UNUserNotificationCenter.current().delegate = self
+    // ios only runs a task registered before launch ends, the name is topUpTask in background.dart
+    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+    WorkmanagerPlugin.registerPeriodicTask(
+      withIdentifier: "better_muslim.topup", earliestBeginInSeconds: NSNumber(value: 6 * 60 * 60))
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
