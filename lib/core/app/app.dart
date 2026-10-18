@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/location/location_controller.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_text.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -11,11 +12,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  @override
+  void initState() {
+    super.initState();
+
+    /// after the first frame, so the saved location's times show before any gps work (FR-007)
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ref.read(locationControllerProvider).refresh(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AppScreenUtilInit(
       child: MaterialApp.router(
         onGenerateTitle: (context) => context.tr(StringsManager.appName),
