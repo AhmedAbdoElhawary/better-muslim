@@ -46,7 +46,9 @@ From the spec to the code:
 2. Data: location, prayer times (Umm al-Qura in KSA), hijri, settings in drift, and a debug
    scenario that freezes time at Thu 15 Oct 2026 16:32 Makkah so screens match the PNGs.
    **Done, waiting for my review.**
-3. to 11. as in `HANDOFF_CLAUDE.md`.
+3. Home: Living Sky, live countdown and glow, the prayer day strip, verse and shortcuts, the
+   location sheet with offline city search. **Done, waiting for my review.**
+4. to 11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
 
