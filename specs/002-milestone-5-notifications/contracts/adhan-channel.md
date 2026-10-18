@@ -1,9 +1,9 @@
 # Contract: the Android adhan channel
 
 Between Dart (`features/notifications/data/adhan_channel.dart`) and Kotlin
-(`android/app/src/main/kotlin/com/elhawary/bettermuslim/adhan/`). Android only, iOS never calls it.
-Registered in `MainActivity.configureFlutterEngine`, next to nothing else (iOS's backup channel
-lives in `AppDelegate`).
+(`packages/adhan_alarms/android/src/main/kotlin/com/elhawary/bettermuslim/adhan/`). Android only,
+iOS never calls it. Registered by `AdhanAlarmsPlugin`, a local plugin, so the app's engine, the
+workmanager top-up's and the mark prayed headless engine all have it.
 
 ## Method channel `better_muslim/adhan`
 
@@ -44,12 +44,16 @@ Kotlin destroys the engine (or after 20 s).
 
 | Class | Role |
 | --- | --- |
+| `AdhanAlarmsPlugin` | registers the method and event channels in every engine, hands the launch and tap payloads from the activity |
 | `AdhanAlarms` | keeps the entries in private preferences, sets `setExactAndAllowWhileIdle` alarms, restores them after boot and update |
 | `AdhanReceiver` | alarm fired, boot, package replaced. Ringer on → `AdhanService`, else the plain notification without sound |
 | `AdhanService` | foreground service `mediaPlayback`: `MediaPlayer`, 1.5 s fade, audio focus, `MediaSessionCompat`, `MediaStyle` notification, custom actions Pause/Play, Mark prayed, Stop |
 | `MarkPrayedReceiver` | runs `markPrayedInBackground([payload])` in a headless `FlutterEngine`, then updates the notification |
 
 ## Manifest
+
+The plugin's own manifest, merged into the app's. The plugin's three receivers of
+flutter_local_notifications stay in the app's manifest.
 
 ```xml
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -59,18 +63,19 @@ Kotlin destroys the engine (or after 20 s).
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-<service android:name=".adhan.AdhanService" android:exported="false"
+<service android:name=".AdhanService" android:exported="false"
     android:foregroundServiceType="mediaPlayback"/>
-<receiver android:name=".adhan.AdhanReceiver" android:exported="false">
+<receiver android:name=".AdhanReceiver" android:exported="false">
     <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
         <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
     </intent-filter>
 </receiver>
-<receiver android:name=".adhan.MarkPrayedReceiver" android:exported="false"/>
+<receiver android:name=".MarkPrayedReceiver" android:exported="false"/>
 <!-- plus the plugin's ScheduledNotificationReceiver, ScheduledNotificationBootReceiver and
      ActionBroadcastReceiver -->
 ```
 
-Gradle: `isCoreLibraryDesugaringEnabled = true`, `coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")`,
-`implementation("androidx.media:media:1.8.0")`, and `compileSdk` 35 or more.
+Gradle: the app keeps `isCoreLibraryDesugaringEnabled = true` and
+`coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")`, the plugin has
+`implementation("androidx.media:media:1.8.0")`, both `compileSdk` 35 or more.
