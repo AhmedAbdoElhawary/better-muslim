@@ -22,6 +22,16 @@ class AppLocalizations {
     GlobalCupertinoLocalizations.delegate,
   ];
 
+  /// what MaterialApp picks from the phone's languages, for code that runs above it
+  static Locale localeFor(List<Locale> preferred) {
+    for (final locale in preferred) {
+      for (final supported in supportedLocales) {
+        if (supported.languageCode == locale.languageCode) return supported;
+      }
+    }
+    return supportedLocales.first;
+  }
+
   static AppLocalizations of(BuildContext context) =>
       Localizations.of<AppLocalizations>(context, AppLocalizations)!;
 

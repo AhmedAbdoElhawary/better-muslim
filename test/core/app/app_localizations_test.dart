@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -66,5 +67,14 @@ void main() {
           .where((entry) => entry.value.contains(', plural,') && entry.value.contains("'"));
       expect(quoted, isEmpty, reason: language);
     }
+  });
+
+  test('above the app the language follows the phone\'s order, like MaterialApp', () {
+    expect(
+      AppLocalizations.localeFor(const [Locale('ar', 'SA'), Locale('en')]),
+      const Locale('ar'),
+    );
+    expect(AppLocalizations.localeFor(const [Locale('fr'), Locale('ar')]), const Locale('ar'));
+    expect(AppLocalizations.localeFor(const [Locale('fr')]), const Locale('en'));
   });
 }
