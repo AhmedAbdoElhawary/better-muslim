@@ -53,6 +53,9 @@ List<Override> designScenarioOverrides() {
   ];
 }
 
+/// the qibla PNGs show london, from makkah the qibla is a few metres away
+const designQiblaPlace = (latitude: 51.5074, longitude: -0.1278, name: 'London', nameAr: 'لندن');
+
 /// the 4.04 week in memory, so its fake prayers never land in the dev phone's real log (R12)
 Future<AppDatabase> designScenarioStore() async {
   final db = AppDatabase.forTesting(NativeDatabase.memory());
@@ -87,5 +90,5 @@ class _NoPosition implements PositionSource {
   Future<LocationPermission> request() async => LocationPermission.deniedForever;
 
   @override
-  Future<LatLng?> fix() async => null;
+  Future<LatLng?> fix({LocationAccuracy accuracy = LocationAccuracy.low}) async => null;
 }
