@@ -79,6 +79,13 @@ abstract final class FontSizeManager {
   static const double skyLabel = 11;
   static const double cardNote = 12.5;
   static const double nextPrayerAr = 16;
+
+  /// components and prayer values with no BmText role
+  static const double sheetTitle = 22;
+  static const double rowSubtitle = 12.5;
+  static const double rowValue = 13.5;
+  static const double nowTag = 11;
+  static const double dayComplete = 20;
 }
 
 abstract final class LineHeightManager {
@@ -123,4 +130,7 @@ abstract final class LetterSpacingManager {
   static const double wordmark = .42;
   static const double overline = 1.6;
   static const double sectionLabel = 1.44;
+
+  /// .12em of the 11 pt NOW tag on the prayer rows
+  static const double nowTag = 1.32;
 }
