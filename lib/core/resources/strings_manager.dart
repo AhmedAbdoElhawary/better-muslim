@@ -151,4 +151,19 @@ abstract final class StringsManager {
   static const String hijriMonth11 = 'hijriMonth11';
   static const String hijriMonth12 = 'hijriMonth12';
   static const String noLocationYet = 'noLocationYet';
+  static const String fajrAr = 'fajrAr';
+  static const String duhaAr = 'duhaAr';
+  static const String dhuhrAr = 'dhuhrAr';
+  static const String asrAr = 'asrAr';
+  static const String maghribAr = 'maghribAr';
+  static const String ishaAr = 'ishaAr';
+  static const String ishaLabel = 'ishaLabel';
+  static const String fajrLabel = 'fajrLabel';
+  static const String morningAzkar = 'morningAzkar';
+  static const String morningAzkarSub = 'morningAzkarSub';
+  static const String timeLeftSemantics = 'timeLeftSemantics';
+  static const String searchCity = 'searchCity';
+  static const String noPlacesFound = 'noPlacesFound';
+  static const String locationFailed = 'locationFailed';
+  static const String noLocationBody = 'noLocationBody';
 }
