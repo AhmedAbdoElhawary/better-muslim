@@ -128,6 +128,39 @@ void main() {
       });
     });
 
+    test('with exact alarms, adhan prayers go to kotlin and not the plugin', () async {
+      final android = useAndroid();
+
+      await NotificationScheduler(channel).apply(alerts: alerts, sounds: sounds, texts: texts);
+
+      expect(channel.calls, ['cancelAll', 'schedule']);
+      final [entry] = channel.entries;
+      expect(entry['id'], alerts[1].id);
+      expect(entry['atMillis'], alerts[1].at.millisecondsSinceEpoch);
+      expect(entry['payload'], payloadOf(alerts[1]));
+      expect(entry['asset'], 'assets/audio/adhan_makkah.m4a');
+      expect(entry['channel'], 'adhan_maghrib_adhan');
+      expect(entry['title'], 'Maghrib · 17:56');
+      expect(entry['mediaSubtitle'], 'Adhan of Makkah');
+      expect(entry['subText'], 'Adhan');
+      expect(entry['actions'], {
+        'markPrayed': 'Mark prayed',
+        'stop': 'Stop',
+        'pause': 'Pause',
+        'play': 'Play',
+      });
+      expect(android.scheduled.map((call) => call.id), [alerts[0].id, alerts[2].id]);
+    });
+
+    test('without exact alarms the adhan stays with the plugin and its clip', () async {
+      final android = useAndroid(exact: false);
+
+      await NotificationScheduler(channel).apply(alerts: alerts, sounds: sounds, texts: texts);
+
+      expect(channel.calls, ['cancelAll']);
+      expect(android.scheduled, hasLength(3));
+    });
+
     test('a plugin call that throws reports only the step', () async {
       useAndroid().throwOnSchedule = true;
       final reporter = _RecordingReporter();

@@ -1,4 +1,3 @@
-import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
@@ -8,7 +7,6 @@ import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/schedule.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
 
 /// the same steps in the app and in the background, with no riverpod, so both write the same
@@ -38,11 +36,8 @@ Future<void> topUp(
   final first = prayerDayOf(at, today, timesOn(today).fajr);
   final sounds = {for (final prayer in Prayer.values) prayer: settings.soundOf(prayer)};
 
-  /// flutter_localizations loads the date symbols only inside the app
-  await initializeDateFormatting();
-  final texts = AlertTexts(
-    l10n: await AppLocalizations.load(locale),
-    language: locale.languageCode,
+  final texts = await AlertTexts.load(
+    locale: locale,
     use24h: use24h,
     digits: settings.digits,
     location: location,

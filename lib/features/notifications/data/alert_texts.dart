@@ -4,6 +4,8 @@ import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
 
 /// the notification texts, built with no context so the background top-up writes the same ones
@@ -15,6 +17,23 @@ class AlertTexts {
     required this.digits,
     required this.location,
   });
+
+  /// flutter_localizations loads the date symbols only inside the app, the background needs them
+  static Future<AlertTexts> load({
+    required Locale locale,
+    required bool use24h,
+    required Digits digits,
+    required Location location,
+  }) async {
+    await initializeDateFormatting();
+    return AlertTexts(
+      l10n: await AppLocalizations.load(locale),
+      language: locale.languageCode,
+      use24h: use24h,
+      digits: digits,
+      location: location,
+    );
+  }
 
   final AppLocalizations l10n;
   final String language;

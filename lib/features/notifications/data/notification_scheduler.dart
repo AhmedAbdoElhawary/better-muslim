@@ -52,7 +52,32 @@ class NotificationScheduler {
       false;
 
   /// no location, nothing can be right
-  Future<void> cancelAll() => _plugin.cancelAllPendingNotifications();
+  Future<void> cancelAll() async {
+    await _plugin.cancelAllPendingNotifications();
+    await _channel.cancelAll();
+  }
+
+  /// what kotlin needs to fire and play an adhan on its own (data-model.md, alarm entry)
+  static Map<String, Object?> entryOf(Alert alert, AlertTexts texts) => {
+    'id': alert.id,
+    'atMillis': alert.at.millisecondsSinceEpoch,
+    'payload': payloadOf(alert),
+    'asset': _recording.fullAsset(alert.prayer),
+    'channel': _channelId(alert.prayer, PrayerSound.adhan),
+    'title': texts.titleOf(alert),
+    'body': texts.bodyOf(alert),
+    'mediaTitle': texts.titleOf(alert),
+    'mediaSubtitle': texts.tr(_recording.nameKey),
+
+    /// android draws the app name before it, "Better Muslim · Adhan"
+    'subText': texts.tr(StringsManager.soundAdhan),
+    'actions': {
+      'markPrayed': texts.tr(StringsManager.markPrayed),
+      'stop': texts.tr(StringsManager.stop),
+      'pause': texts.tr(StringsManager.pause),
+      'play': texts.tr(StringsManager.play),
+    },
+  };
 
   /// errors carry only the step, never a payload, a place or a time (FR-040)
   Future<void> apply({
@@ -62,9 +87,17 @@ class NotificationScheduler {
   }) async {
     try {
       await _plugin.cancelAllPendingNotifications();
+      await _channel.cancelAll();
       await _ensureChannels(sounds, texts);
       final exact = await _android?.canScheduleExactNotifications() ?? false;
+      final native = <Map<String, Object?>>[];
       for (final alert in alerts) {
+        /// the full adhan needs code at prayer time with the app closed, the plugin can't run it.
+        /// without exact alarms it stays with the plugin and its clip (FR-023)
+        if (exact && alert.kind == AlertKind.adhan && alert.sound == PrayerSound.adhan) {
+          native.add(entryOf(alert, texts));
+          continue;
+        }
         await _plugin.zonedSchedule(
           id: alert.id,
           scheduledDate: alert.at,
@@ -77,6 +110,7 @@ class NotificationScheduler {
           payload: payloadOf(alert),
         );
       }
+      if (native.isNotEmpty) await _channel.schedule(native);
     } catch (error, stack) {
       await CrashReporter.instance.recordError(error, stack, context: const {'step': 'schedule'});
     }
