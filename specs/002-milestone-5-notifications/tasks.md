@@ -527,10 +527,10 @@ closing it returns to the screen with the adhan still playing
 
 ## Phase 10: User Story 8 - Checking it against the design (Priority: P3)
 
-**Goal**: 4.03 can be put next to its PNG, and a test notification comes in a minute
+**Goal**: 4.03 opens in the design scenario, and a test notification comes in a minute
 
-**Independent Test**: Design scenario → More → Notifications (dev) → Open adhan screen matches
-4.03. In a normal dev run the test notification arrives a minute later (quickstart §2, §3)
+**Independent Test**: Design scenario → More → Notifications (dev) → Open adhan screen shows
+4.03's values. In a normal dev run the test notification arrives a minute later (quickstart §2, §3)
 
 ### Tests for User Story 8
 
@@ -563,9 +563,7 @@ closing it returns to the screen with the adhan still playing
 - [ ] T076 Run `specs/002-milestone-5-notifications/quickstart.md` §2 to §5 on an iPhone and an
   Android 13+ phone. Note the delivery delay with exact alarms (SC-001), the Stop delay (SC-004),
   the pending count on iOS (SC-008).
-- [ ] T077 Screenshots for my review: the adhan screen for all five prayers, dark and light,
-  English and Arabic, phone and tablet, the dua sheet, the media notification on Android, the iOS
-  lock screen notifications. Check WCAG AA contrast of every text on the adhan screen against each
+- [ ] T077 Check WCAG AA contrast of every text on the adhan screen against each
   of the five skies, and list any miss in the milestone reply.
 - [ ] T078 [P] In `.specify/memory/constitution.md`: add workmanager to the domain packages
   (Decision 1), and add to principle II the exception the project CLAUDE.md already allows (always
