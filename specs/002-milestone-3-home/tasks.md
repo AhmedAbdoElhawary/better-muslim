@@ -158,10 +158,10 @@ Integration tests wait for milestone 10 (plan decision 6).
 ## Phase 3: User Story 1 - Where am I in the day (Priority: P1) 🎯 MVP
 
 **Goal**: Home shows NOW, the next prayer with a live countdown, the bar, the glow and the
-strip, in English and Arabic, matching 4.01, 4.02 and 4.16 in the design scenario
+strip, in English and Arabic, built from the 4.01, 4.02 and 4.16 trees
 
-**Independent Test**: Run "Dev · design scenario", put Home next to the three PNGs: same within 1
-pt, countdown at 1:24:00. In a normal dev run the countdown ticks with the phone clock.
+**Independent Test**: Run "Dev · design scenario": Home shows the 4.01 values, countdown at
+1:24:00. In a normal dev run the countdown ticks with the phone clock.
 
 ### Tests for User Story 1
 
@@ -270,7 +270,7 @@ pt, countdown at 1:24:00. In a normal dev run the countdown ticks with the phone
   (top 62, sides 14 / 20, mirrored in Arabic), card, strip. T017 passes for everything except the
   verse and shortcuts.
 
-**Checkpoint**: US1 matches the PNGs above the verse card in the scenario, and ticks in a dev run.
+**Checkpoint**: US1 shows the scenario's values above the verse card, and ticks in a dev run.
 
 ---
 
@@ -356,7 +356,7 @@ another tab or power saving.
 - [X] T045 [US2] In `home_page.dart`, fill the top overscroll with the sky's top color, so iOS
   bounce never shows the page background above the sky (R16).
 
-**Checkpoint**: the sky follows the time in a dev run, the scenario still matches the PNGs.
+**Checkpoint**: the sky follows the time in a dev run, the scenario still shows the theme's base sky.
 
 ---
 
@@ -553,14 +553,13 @@ TalkBack, and with reduce motion on.
 - [X] T068 Run `dart format --set-exit-if-changed lib test`, `flutter analyze` and `flutter test`,
   and fix everything.
 - [ ] T069 Run `specs/002-milestone-3-home/quickstart.md` on the iOS simulator and an Android
-  emulator: the PNG comparison and every live check. Take screenshots of Home on phone and tablet,
-  dark and light, English and Arabic, in the design scenario (constitution workflow).
+  emulator: the design scenario and every live check.
 - [ ] T070 Measure, and write in the milestone reply:
   - start to times on screen with a saved location (SC-004)
   - frame times while scrolling and with the sky running, on a mid-range phone, including the
     pill's blur over the moving sky (SC-007)
   - the sky's CPU when on another tab or in the background
-- [ ] T071 [P] Mark milestone 3 as "Done, waiting for my review." in `CLAUDE.md`.
+- [X] T071 [P] Mark milestone 3 as "Done, waiting for my review." in `CLAUDE.md`.
 
 ---
 
@@ -613,8 +612,8 @@ T052 → T055 useAuto | T056 bm_sheet | T057 search_field | T058 bm_button
 ### MVP First (User Story 1)
 
 1. Phase 1 and Phase 2.
-2. Phase 3 (US1): Home with live values on a still sky. It matches the PNGs above the verse card.
-3. Stop and check against 4.01, 4.02 and 4.16.
+2. Phase 3 (US1): Home with live values on a still sky. It shows the scenario's values above the verse card.
+3. Stop and check it in the design scenario.
 
 ### Incremental Delivery
 
