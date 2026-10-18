@@ -15,6 +15,7 @@ import 'package:better_muslim/features/notifications/presentation/view/adhan_pag
 import 'package:better_muslim/features/notifications/presentation/view/dev_notifications_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
+import 'package:better_muslim/features/qibla/view/qibla_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ abstract final class Routes {
   static const String azkar = '/azkar';
   static const String more = '/more';
   static const String qada = '/prayer/qada';
+  static const String qibla = '/qibla';
 
   /// home's strip cells and notification taps open the prayer tab on a day, at a prayer
   static String prayerAt(DateTime day, Prayer prayer) => Uri(
@@ -94,6 +96,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+
+      /// outside the shell, the qibla tree has no tab bar
+      GoRoute(path: Routes.qibla, builder: (context, state) => const QiblaPage()),
 
       /// staging and production don't have the route at all (FR-041)
       if (ref.read(flavorProvider).flavor.isDev)
