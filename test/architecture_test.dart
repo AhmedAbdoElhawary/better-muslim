@@ -117,6 +117,17 @@ void main() {
     });
   }
 
+  test('no golden tests, comparing against the PNGs is too expensive', () {
+    final goldens = Directory('test')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart') && file.path != 'test/architecture_test.dart')
+        .where((file) => file.readAsStringSync().contains('matchesGoldenFile'))
+        .map((file) => file.path)
+        .toList();
+    _expectNone('no golden tests, comparing against the PNGs is too expensive', goldens);
+  });
+
   test('lib has only main, bootstrap, core and features', () {
     final extra = Directory('lib')
         .listSync()
