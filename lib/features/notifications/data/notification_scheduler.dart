@@ -7,6 +7,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/adhan_recording.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
+import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,22 +35,48 @@ class NotificationScheduler {
   IOSFlutterLocalNotificationsPlugin? get _ios =>
       _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
 
-  /// asking is its own step, after the location (FR-004)
-  Future<void> init() => _plugin.initialize(
-    settings: const InitializationSettings(
-      android: AndroidInitializationSettings('ic_notification'),
-      iOS: DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
-      ),
-    ),
-  );
+  /// asking is its own step, after the location (FR-004). ios keeps the action's title from here,
+  /// so this runs again when the language changes
+  Future<void> init({required String markPrayed, DidReceiveNotificationResponseCallback? onTap}) =>
+      _plugin.initialize(
+        settings: InitializationSettings(
+          android: const AndroidInitializationSettings('ic_notification'),
+          iOS: DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+            notificationCategories: [
+              /// no foreground and no unlock, the log is written from the lock screen (research R5)
+              DarwinNotificationCategory(
+                _group,
+                actions: [DarwinNotificationAction.plain(markPrayedAction, markPrayed)],
+              ),
+            ],
+          ),
+        ),
+        onDidReceiveNotificationResponse: onTap,
+        onDidReceiveBackgroundNotificationResponse: onNotificationActionInBackground,
+      );
 
   Future<bool> askPermission() async =>
       await (_ios?.requestPermissions(alert: true, sound: true) ??
           _android?.requestNotificationsPermission()) ??
       false;
+
+  /// the payload of the notification that started the app, a tap on its action doesn't count
+  Future<String?> launchPayload() async {
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    final response = details?.notificationResponse;
+    if (details?.didNotificationLaunchApp != true || response?.actionId != null) return null;
+    return response?.payload;
+  }
+
+  Future<List<int>> activeIds() async => [
+    for (final notification in await _plugin.getActiveNotifications()) ?notification.id,
+  ];
+
+  /// also removes kotlin's plain adhan notification, they share the id
+  Future<void> cancel(int id) => _plugin.cancel(id: id);
 
   /// no location, nothing can be right
   Future<void> cancelAll() async {
@@ -162,6 +189,14 @@ class NotificationScheduler {
         enableVibration: channel.enableVibration,
         color: _accent,
         category: AndroidNotificationCategory.reminder,
+        actions: [
+          AndroidNotificationAction(
+            markPrayedAction,
+            texts.tr(StringsManager.markPrayed),
+            showsUserInterface: false,
+            cancelNotification: true,
+          ),
+        ],
       ),
 
       /// ios plays the clip with the app closed. in front the adhan screen plays the full adhan
