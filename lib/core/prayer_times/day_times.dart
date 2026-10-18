@@ -135,6 +135,19 @@ class DayTimes {
     return current;
   }
 
+  /// a prayer is open until the next start that has a time, the same boundaries as periodAt.
+  /// null on a polar day with nothing after it
+  TZDateTime? endOf(Prayer prayer, DayTimes? tomorrow) {
+    final after = switch (prayer) {
+      Prayer.fajr => [sunrise, dhuhr, asr, maghrib, isha],
+      Prayer.dhuhr => [asr, maghrib, isha],
+      Prayer.asr => [maghrib, isha],
+      Prayer.maghrib => [isha],
+      Prayer.isha => <TZDateTime?>[],
+    };
+    return [...after, tomorrow?.fajr].nonNulls.firstOrNull;
+  }
+
   /// after isha it is tomorrow's fajr, so the caller passes tomorrow's times
   (Prayer, TZDateTime)? next(DateTime now, DayTimes? tomorrow) {
     for (final day in [this, ?tomorrow]) {
