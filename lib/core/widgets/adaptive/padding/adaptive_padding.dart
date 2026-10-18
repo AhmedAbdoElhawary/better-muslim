@@ -5,6 +5,7 @@ part 'all_padding.dart';
 part 'bottom_padding.dart';
 part 'end_padding.dart';
 part 'horizontal_padding.dart';
+part 'keyboard_padding.dart';
 part 'only_padding.dart';
 part 'start_padding.dart';
 part 'symmetric_padding.dart';
