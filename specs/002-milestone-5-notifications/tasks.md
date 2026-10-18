@@ -511,7 +511,7 @@ closing it returns to the screen with the adhan still playing
 
 ### Tests for User Story 7
 
-- [ ] T069 [P] [US7] `test/features/notifications/presentation/dua_sheet_test.dart`: English shows
+- [X] T069 [P] [US7] `test/features/notifications/presentation/dua_sheet_test.dart`: English shows
   title, source, Arabic, transliteration and translation, Arabic shows only the Arabic and the
   source (Decision 6), the player is never stopped.
 
@@ -534,22 +534,22 @@ closing it returns to the screen with the adhan still playing
 
 ### Tests for User Story 8
 
-- [ ] T071 [P] [US8] `test/features/notifications/presentation/dev_notifications_page_test.dart`:
+- [X] T071 [P] [US8] `test/features/notifications/presentation/dev_notifications_page_test.dart`:
   both buttons exist in dev and the page route doesn't exist in staging and production. Extend
   `adhan_page_test.dart`: in the design scenario the page shows Maghrib 17:56, "ADHAN · MAKKAH"
   and 0:42 of 2:56 (FR-042).
 
 ### Implementation for User Story 8
 
-- [ ] T072 [US8] In `notification_scheduler.dart` add `testIn1Minute(Alert next, AlertTexts texts)`:
+- [X] T072 [US8] In `notification_scheduler.dart` add `testIn1Minute(Alert next, AlertTexts texts)`:
   the next prayer's notification with its sound at now + 1 min under `testAlertId`, through the
   channel for an Android Adhan prayer with exact alarms, the plugin otherwise.
-- [ ] T073 [US8] Create `lib/features/notifications/presentation/view/dev_notifications_page.dart`:
+- [X] T073 [US8] Create `lib/features/notifications/presentation/view/dev_notifications_page.dart`:
   two rows, "Open adhan screen" (pushes `Routes.adhan` for the next prayer, Maghrib in the
   scenario) and "Test notification in 1 min", dev text with `translate: false`. Add
   `Routes.devNotifications` → `/dev/notifications` to `lib/core/router/app_router.dart`, registered
   only when the flavor is dev.
-- [ ] T074 [US8] In `lib/features/more/view/more_page.dart` add one row "Notifications (dev)" at the
+- [X] T074 [US8] In `lib/features/more/view/more_page.dart` add one row "Notifications (dev)" at the
   end, shown only in dev builds, that pushes `Routes.devNotifications`.
 
 **Checkpoint**: everything in quickstart.md can be run
