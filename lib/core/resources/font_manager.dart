@@ -92,6 +92,9 @@ abstract final class FontSizeManager {
 
   /// the adhan screen's dua line
   static const double adhanDua = 22;
+
+  /// the qibla cards' distance and accuracy
+  static const double qiblaValue = 20;
 }
 
 abstract final class LineHeightManager {
@@ -131,6 +134,7 @@ abstract final class LineHeightManager {
   static const double skyLabelAr = 1.2;
   static const double verseTranslation = 1.5;
   static const double adhanDua = 1.8;
+  static const double qiblaHint = 1.5;
 }
 
 abstract final class LetterSpacingManager {
