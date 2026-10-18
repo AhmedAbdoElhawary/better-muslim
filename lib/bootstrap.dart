@@ -27,7 +27,7 @@ Future<void> _boot(FlavorConfig config) async {
 
   /// latest.dart lacks zones like Europe/Oslo
   tz.initializeTimeZones();
-  final db = await AppDatabase.open();
+  final db = config.isDesignScenario ? await designScenarioStore() : await AppDatabase.open();
   final phoneZone = await PhoneZone.read();
   runApp(
     ProviderScope(
