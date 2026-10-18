@@ -8,7 +8,7 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/features/home/view/widgets/location_sheet.dart';
+import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
