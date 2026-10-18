@@ -33,5 +33,5 @@
 
 - Q1 to Q8 are open. Each marked requirement holds the recommended answer until I confirm it.
 - Motion numbers, `MOTION.md` and `03 Components.dc.html` point at the design, not at code.
-- The sheets, pages, rows and dialogs with no PNG are listed in FR-038, which asks for screenshots
-  before they count as done.
+- The sheets, pages, rows and dialogs with no PNG are listed in FR-038, which asks me to check them
+  in the app before they count as done.
