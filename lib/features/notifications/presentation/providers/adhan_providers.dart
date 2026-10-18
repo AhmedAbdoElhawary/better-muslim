@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final adhanPlayerProvider = Provider<AdhanPlayer>((ref) {
   final AdhanPlayer player;
-  if (ref.watch(flavorProvider).isDesignScenario) {
+  if (ref.watch(flavorProvider.select((config) => config.isDesignScenario))) {
     player = FixedAdhanPlayer(
       position: const Duration(seconds: 42),
       duration: const Duration(minutes: 2, seconds: 56),
