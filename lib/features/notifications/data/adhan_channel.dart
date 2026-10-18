@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,15 +7,11 @@ final adhanChannelProvider = Provider<AdhanChannel>((ref) => AdhanChannel());
 /// the kotlin side that plays the full adhan on android (contracts/adhan-channel.md).
 /// every call does nothing off android
 class AdhanChannel {
-  AdhanChannel({bool? isAndroid}) : _isAndroid = isAndroid ?? Platform.isAndroid;
-
-  final bool _isAndroid;
-
   static const _methods = MethodChannel('better_muslim/adhan');
   static const _state = EventChannel('better_muslim/adhan/state');
   static const _opened = EventChannel('better_muslim/adhan/opened');
 
-  bool get isAndroid => _isAndroid;
+  bool get _isAndroid => defaultTargetPlatform == TargetPlatform.android;
 
   Future<void> schedule(List<Map<String, Object?>> entries) => _call('schedule', entries);
 
