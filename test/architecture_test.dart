@@ -69,6 +69,14 @@ final _rules = [
     RegExp(r'package:shared_preferences/'),
   ),
   _Rule(
+    'no geocoding, place names come from the GeoNames list in the app',
+    RegExp(r'package:geocoding/'),
+  ),
+  _Rule(
+    'no network in the app, it is offline-first (FR-025)',
+    RegExp(r'package:(http|dio)/|\bHttpClient\('),
+  ),
+  _Rule(
     'icons come from BmIcon, never Material or Cupertino icons',
     RegExp(r'\b(Icons|CupertinoIcons)\.'),
   ),

@@ -9,6 +9,13 @@
             "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json"]
         },
         {
+            "name": "Dev · design scenario",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_dev.dart",
+            "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json", "--dart-define=SCENARIO=design"]
+        },
+        {
             "name": "Staging",
             "request": "launch",
             "type": "dart",

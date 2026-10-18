@@ -1,0 +1,47 @@
+{
+  "city": "New York City",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 2 (ISNA), school 0, latitudeAdjustmentMethod 1 (middle of the night), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 40.7143,
+  "longitude": -74.006,
+  "timeZone": "America/New_York",
+  "method": "northAmerica",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:52",
+      "sunrise": "07:07",
+      "dhuhr": "12:42",
+      "asr": "15:47",
+      "maghrib": "18:16",
+      "isha": "19:31"
+    },
+    {
+      "date": "2026-03-08",
+      "source": "aladhan",
+      "fajr": "06:04",
+      "sunrise": "07:19",
+      "dhuhr": "13:07",
+      "asr": "16:21",
+      "maghrib": "18:55",
+      "isha": "20:10",
+      "gaps": {
+        "asr": "adhan_dart takes the asr shadow from the declination at 0h UT, so it runs about 1.5 min early in autumn and late in spring at this latitude, and AlAdhan errs the other way. NOAA solar position gives 16:21:58, between the two"
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "source": "aladhan",
+      "fajr": "05:10",
+      "sunrise": "06:26",
+      "dhuhr": "11:40",
+      "asr": "14:29",
+      "maghrib": "16:52",
+      "isha": "18:09"
+    }
+  ]
+}

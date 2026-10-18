@@ -1,0 +1,50 @@
+{
+  "city": "London",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 3 (Muslim World League), school 0, latitudeAdjustmentMethod 2 (one seventh), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 51.5085,
+  "longitude": -0.1257,
+  "timeZone": "Europe/London",
+  "method": "muslimWorldLeague",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:33",
+      "sunrise": "07:24",
+      "dhuhr": "12:46",
+      "asr": "15:34",
+      "maghrib": "18:07",
+      "isha": "19:52",
+      "gaps": {
+        "asr": "adhan_dart takes the asr shadow from the declination at 0h UT, so it runs about 1.5 min early in autumn and late in spring at this latitude, and AlAdhan errs the other way. NOAA solar position gives 15:32:21, between the two"
+      }
+    },
+    {
+      "date": "2026-03-29",
+      "source": "aladhan",
+      "fajr": "05:07",
+      "sunrise": "06:43",
+      "dhuhr": "13:05",
+      "asr": "16:34",
+      "maghrib": "19:29",
+      "isha": "21:05"
+    },
+    {
+      "date": "2026-10-25",
+      "source": "aladhan",
+      "fajr": "04:49",
+      "sunrise": "06:42",
+      "dhuhr": "11:45",
+      "asr": "14:18",
+      "maghrib": "16:47",
+      "isha": "18:32",
+      "gaps": {
+        "asr": "adhan_dart takes the asr shadow from the declination at 0h UT, so it runs about 1.5 min early in autumn and late in spring at this latitude, and AlAdhan errs the other way. NOAA solar position gives 14:16:13, between the two"
+      }
+    }
+  ]
+}

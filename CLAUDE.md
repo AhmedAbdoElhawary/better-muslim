@@ -45,6 +45,7 @@ From the spec to the code:
 1. Setup: core, theme, fonts, l10n, 5-tab shell, icons, splash. **Done, waiting for my review.**
 2. Data: location, prayer times (Umm al-Qura in KSA), hijri, settings in drift, and a debug
    scenario that freezes time at Thu 15 Oct 2026 16:32 Makkah so screens match the PNGs.
+   **Done, waiting for my review.**
 3. to 11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
