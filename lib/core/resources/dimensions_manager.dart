@@ -47,6 +47,26 @@ abstract final class SpaceManager {
   static const double shortcutTextGapAr = 1;
   static const double fieldSide = 14;
   static const double fieldIconGap = 10;
+  static const double rowLineGap = 2;
+
+  /// prayer (4.04, 4.17)
+  static const double prayerTitleTop = 2;
+  static const double prayerSubtitleTop = 6;
+  static const double prayerSubtitleTopAr = 2;
+  static const double weekTop = 18;
+  static const double weekSide = 14;
+  static const double weekCellGap = 5;
+  static const double dayDotGap = 2;
+  static const double summaryTop = 14;
+  static const double summaryPaddingV = 14;
+  static const double prayerRowGap = 14;
+  static const double nowTagGap = 10;
+  static const double chipSide = 10;
+  static const double markStart = 9;
+  static const double prayerGlowSide = 60;
+  static const double prayerGlowTop = 170;
+  static const double dayCompleteDots = 24;
+  static const double dayCompleteRise = 6;
 }
 
 abstract final class RadiusManager {
@@ -93,6 +113,25 @@ abstract final class SizeManager {
   static const double searchField = 46;
   static const double grabberW = 32;
   static const double grabberH = 4;
+  static const double toast = 52;
+  static const double pickerRow = 60;
+  static const double pickerCheck = 22;
+
+  /// prayer (4.04, 4.17)
+  static const double rowTrailing = 96;
+  static const double weekCell = 68;
+  static const double dayDot = 4;
+  static const double ring = 56;
+  static const double ringStroke = 4;
+  static const double markChip = 32;
+  static const double stateChip = 26;
+  static const double prayerGlow = 340;
+  static const double dayCompleteDot = 10;
+  static const double dayCompleteStar = 56;
+  static const double dayCompleteRing = 72;
+
+  /// the + sheet's count holds 999 without the buttons moving
+  static const double countValue = 72;
 
   /// tablets and foldables get the phone layout stretched to this, until they have their own design
   static const double maxContentWidth = 480;
