@@ -6,6 +6,7 @@ import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// widget tests run as android, so the kotlin channel gets an answer that does nothing
@@ -32,8 +33,17 @@ class FakeScheduler extends NotificationScheduler {
   int cancels = 0;
   final applied = <List<Alert>>[];
 
+  int inits = 0;
+  String? markPrayedLabel;
+
   @override
-  Future<void> init() async {}
+  Future<void> init({
+    required String markPrayed,
+    DidReceiveNotificationResponseCallback? onTap,
+  }) async {
+    inits++;
+    markPrayedLabel = markPrayed;
+  }
 
   @override
   Future<bool> askPermission() async {
@@ -44,6 +54,23 @@ class FakeScheduler extends NotificationScheduler {
 
   @override
   Future<void> cancelAll() async => cancels++;
+
+  /// delivered notifications, as the os lists them
+  final active = <int>[];
+  final cancelled = <int>[];
+  String? launch;
+
+  @override
+  Future<String?> launchPayload() async => launch;
+
+  @override
+  Future<List<int>> activeIds() async => [...active];
+
+  @override
+  Future<void> cancel(int id) async {
+    cancelled.add(id);
+    active.remove(id);
+  }
 
   @override
   Future<void> apply({

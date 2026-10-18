@@ -1,21 +1,27 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:better_muslim/features/notifications/domain/tap_target.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter/widgets.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// the notifications' wiring around the app: the first ask, rescheduling, taps and cleanup
@@ -30,16 +36,24 @@ class NotificationsBoot extends ConsumerStatefulWidget {
 
 class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   late final AppLifecycleListener _lifecycle;
+  final _subscriptions = <StreamSubscription<Object?>>[];
 
   /// one apply at a time, two at once would cancel each other's notifications
   Future<void> _running = Future.value();
 
   bool get _isScenario => ref.read(flavorProvider).isDesignScenario;
 
+  Locale get _locale => AppLocalizations.localeFor(PlatformDispatcher.instance.locales);
+
   @override
   void initState() {
     super.initState();
-    _lifecycle = AppLifecycleListener(onResume: _reschedule);
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        _reschedule();
+        _cleanUp();
+      },
+    );
 
     /// only a change, opening the app a minute after a prayer shows no adhan screen
     ref.listenManual(periodProvider, (previous, next) {
@@ -51,16 +65,32 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   @override
   void dispose() {
     _lifecycle.dispose();
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
     super.dispose();
   }
 
   Future<void> _start() async {
     final scheduler = ref.read(notificationSchedulerProvider);
-    await scheduler.init();
-    if (_isScenario) return;
+    final channel = ref.read(adhanChannelProvider);
+    await _init();
+    if (!mounted) return;
+    _subscriptions
+      ..add(channel.opened.listen(_open))
+      ..add(
+        ref
+            .read(databaseProvider)
+            .tableUpdates(const TableUpdateQuery.onTableName('prayer_log'))
+            .listen((_) => _cleanUp()),
+      );
+    final launched = await scheduler.launchPayload() ?? await channel.launchPayload();
+    if (launched != null) await _open(launched);
+    if (_isScenario || !mounted) return;
 
     /// after the location dialog, never on top of it (FR-004)
     await ref.read(locationControllerProvider).firstLocate;
+    if (!mounted) return;
     final db = ref.read(databaseProvider);
     final settings = await db.watchSettings().first;
     if (!settings.notificationsAsked) {
@@ -69,6 +99,15 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       await scheduler.askPermission();
     }
     await _reschedule();
+    await _cleanUp();
+  }
+
+  Future<void> _init() async {
+    final l10n = await AppLocalizations.load(_locale);
+    if (!mounted) return;
+    await ref
+        .read(notificationSchedulerProvider)
+        .init(markPrayed: l10n.tr(StringsManager.markPrayed, const {}), onTap: _onTap);
   }
 
   /// the design scenario never schedules, whatever calls this (FR-013)
@@ -77,11 +116,12 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final db = ref.read(databaseProvider);
     final scheduler = ref.read(notificationSchedulerProvider);
     final phoneZone = ref.read(phoneZoneProvider);
+    final locale = _locale;
     return _running = _running.then(
       (_) => topUp(
         db,
         scheduler: scheduler,
-        locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
+        locale: locale,
         use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
         phoneZone: phoneZone,
       ),
@@ -109,8 +149,52 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     await ref.read(adhanPlayerProvider).play(alert, await _texts(location));
   }
 
+  /// mark prayed while the app runs comes here instead of the background isolate
+  void _onTap(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null || !mounted) return;
+    if (response.actionId == markPrayedAction) {
+      markFromPayload(payload, db: ref.read(databaseProvider));
+    } else {
+      _open(payload);
+    }
+  }
+
+  /// the adhan screen while the adhan would still play, the prayer tab after (FR-019)
+  Future<void> _open(String payload) async {
+    final alert = alertFromPayload(payload);
+    if (alert == null || !mounted) return;
+    final player = ref.read(adhanPlayerProvider);
+    final length = await player.length(alert.prayer);
+    if (!mounted) return;
+    final target = tapTarget(payload, ref.read(clockProvider)(), length);
+    final router = ref.read(routerProvider);
+    switch (target) {
+      case AdhanTarget(:final prayer, :final day, :final from):
+        router.push(Routes.adhan(prayer, day, from: from));
+        final location = ref.read(locationProvider);
+        if (location != null) await player.play(alert, await _texts(location), from: from);
+      case PrayerTarget(:final day, :final prayer):
+        router.go(Routes.prayerAt(day, prayer));
+      case NoTarget():
+    }
+  }
+
+  /// a prayer logged anywhere takes its delivered adhan notification with it (FR-039)
+  Future<void> _cleanUp() async {
+    if (!mounted) return;
+    final scheduler = ref.read(notificationSchedulerProvider);
+    final db = ref.read(databaseProvider);
+    final playing = ref.read(playbackProvider).value?.id;
+    for (final id in await scheduler.activeIds()) {
+      final alert = alertFromId(id);
+      if (alert == null || alert.kind != AlertKind.adhan || id == playing) continue;
+      if (await db.isPrayed(alert.day, alert.prayer)) await scheduler.cancel(id);
+    }
+  }
+
   Future<AlertTexts> _texts(Location location) => AlertTexts.load(
-    locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
+    locale: _locale,
     use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
     digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
     location: location,
