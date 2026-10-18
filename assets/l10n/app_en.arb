@@ -323,5 +323,43 @@
   "hijriMonth10": "Shawwal",
   "hijriMonth11": "Dhu al-Qi'dah",
   "hijriMonth12": "Dhu al-Hijjah",
-  "noLocationYet": "No location yet"
+  "noLocationYet": "No location yet",
+  "fajrAr": "الفجر",
+  "duhaAr": "الضحى",
+  "dhuhrAr": "الظهر",
+  "asrAr": "العصر",
+  "maghribAr": "المغرب",
+  "ishaAr": "العشاء",
+  "ishaLabel": "Isha {time}",
+  "@ishaLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "fajrLabel": "Fajr {time}",
+  "@fajrLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "morningAzkar": "Morning azkar",
+  "morningAzkarSub": "After Fajr · {done} of {total}",
+  "@morningAzkarSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "timeLeftSemantics": "{hours} h {minutes} min until {prayer}",
+  "@timeLeftSemantics": {
+    "placeholders": {
+      "hours": {},
+      "minutes": {},
+      "prayer": {}
+    }
+  },
+  "searchCity": "Search for a city",
+  "noPlacesFound": "No places found",
+  "locationFailed": "Couldn't get your location. Check that location is on, or choose a city.",
+  "noLocationBody": "Prayer times need your location or a city."
 }
