@@ -229,6 +229,13 @@ class AppDatabase extends _$AppDatabase {
   );
 
   /// a plain call with no riverpod, like markPrayed
+  Future<bool> isPrayed(DateTime day, Prayer prayer) async =>
+      await (select(prayerLog)
+            ..where((row) => row.date.equalsValue(day) & row.prayer.equalsValue(prayer)))
+          .getSingleOrNull() !=
+      null;
+
+  /// a plain call with no riverpod, like markPrayed
   Future<void> unmarkPrayed(DateTime day, Prayer prayer) => (delete(
     prayerLog,
   )..where((row) => row.date.equalsValue(day) & row.prayer.equalsValue(prayer))).go();
