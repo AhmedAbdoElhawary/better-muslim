@@ -13,7 +13,7 @@ needle that springs to the Kaaba marker, the turn instruction, the distance to t
 compass accuracy. The screen itself is built straight from the handoff specs. This spec covers what
 the handoff doesn't: where the heading and the position come from, how the bearing and distance
 are worked out, when the screen counts as aligned, what it shows when the compass is weak or
-missing or there is no location, and how the design scenario reaches the PNGs. Like everything
+missing or there is no location, and how the design scenario reaches the 4.05 and 4.06 values. Like everything
 else it works with no internet, and neither the heading nor the position leaves the phone.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -229,7 +229,7 @@ marker or needle, and "Use my location" asks for permission.
   hint. The button asks for permission, or opens the phone's settings for the app when location
   was refused for good. [NEEDS CLARIFICATION: Q3]
 - **FR-023**: These states have no PNG, so they MUST be built only from parts in
-  `03 Components.dc.html` and the Qibla screens, and shown to me in screenshots before they count
+  `03 Components.dc.html` and the Qibla screens, and I check them in the app before they count
   as done.
 
 **Gear**
@@ -269,7 +269,7 @@ marker or needle, and "Use my location" asks for permission.
 **Design scenario**
 
 - **FR-029**: "Dev · design scenario" MUST show the Qibla from London (51.5074° N, 0.1278° W) with
-  the heading frozen at 105° for 4.05, and a way to see 119° for 4.06, so both PNGs can be checked
+  the heading frozen at 105° for 4.05, and a way to see 119° for 4.06, so both can be seen
   on a phone. [NEEDS CLARIFICATION: Q6]
 
 ### Key Entities
@@ -285,7 +285,7 @@ marker or needle, and "Use my location" asks for permission.
 
 ### Measurable Outcomes
 
-- **SC-001**: In the design scenario the screen matches 4.05 and 4.06 within 1 pt in dark and
+- **SC-001**: In the design scenario the screen is built from the 4.05 and 4.06 trees in dark and
   light.
 - **SC-002**: For 20 test places on every continent, both hemispheres, near the date line and
   inside Makkah, the bearing is within 0.5° and the distance within 0.5% of a reference geodesic
