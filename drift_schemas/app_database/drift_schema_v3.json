@@ -1,0 +1,584 @@
+{
+  "_meta": {
+    "description": "This file contains a serialized version of schema entities for drift.",
+    "version": "1.3.0"
+  },
+  "options": {
+    "store_date_time_values_as_text": false
+  },
+  "entities": [
+    {
+      "id": 0,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "settings",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "latitude",
+            "getter_name": "latitude",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "longitude",
+            "getter_name": "longitude",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "place_name",
+            "getter_name": "placeName",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "place_name_ar",
+            "getter_name": "placeNameAr",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "region_name",
+            "getter_name": "regionName",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "region_name_ar",
+            "getter_name": "regionNameAr",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "country_code",
+            "getter_name": "countryCode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "time_zone",
+            "getter_name": "timeZone",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "location_mode",
+            "getter_name": "locationMode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<LocationMode>(LocationMode.values)",
+              "dart_type_name": "LocationMode"
+            }
+          },
+          {
+            "name": "method",
+            "getter_name": "method",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerMethod>(PrayerMethod.values)",
+              "dart_type_name": "PrayerMethod"
+            }
+          },
+          {
+            "name": "asr_method",
+            "getter_name": "asrMethod",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AsrMethod>(AsrMethod.values)",
+              "dart_type_name": "AsrMethod"
+            }
+          },
+          {
+            "name": "hijri_adjust",
+            "getter_name": "hijriAdjust",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "hijriAdjust",
+                        "tag": "hijriAdjust"
+                      },
+                      ").isBetweenValues(-2,2)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "digits",
+            "getter_name": "digits",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'eastern\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Digits>(Digits.values)",
+              "dart_type_name": "Digits"
+            }
+          },
+          {
+            "name": "theme",
+            "getter_name": "theme",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'qiyamEmerald\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<BmThemeId>(BmThemeId.values)",
+              "dart_type_name": "BmThemeId"
+            }
+          },
+          {
+            "name": "theme_mode",
+            "getter_name": "themeMode",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'followSky\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<BmThemeMode>(BmThemeMode.values)",
+              "dart_type_name": "BmThemeMode"
+            }
+          },
+          {
+            "name": "reduce_motion",
+            "getter_name": "reduceMotion",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"reduce_motion\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"reduce_motion\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "haptics",
+            "getter_name": "haptics",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"haptics\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"haptics\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ui_sounds",
+            "getter_name": "uiSounds",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"ui_sounds\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"ui_sounds\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "store_reset_pending",
+            "getter_name": "storeResetPending",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"store_reset_pending\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"store_reset_pending\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "first_use",
+            "getter_name": "firstUse",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "fajr_sound",
+            "getter_name": "fajrSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'adhan\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "dhuhr_sound",
+            "getter_name": "dhuhrSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'tone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "asr_sound",
+            "getter_name": "asrSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'tone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "maghrib_sound",
+            "getter_name": "maghribSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'adhan\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "isha_sound",
+            "getter_name": "ishaSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'tone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "reminder_minutes",
+            "getter_name": "reminderMinutes",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('10')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "reminderMinutes",
+                        "tag": "reminderMinutes"
+                      },
+                      ".isIn(const [0,5,10,15,20,30])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "notifications_asked",
+            "getter_name": "notificationsAsked",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"notifications_asked\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"notifications_asked\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "prayer_log",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "date",
+            "getter_name": "date",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "prayer",
+            "getter_name": "prayer",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Prayer>(Prayer.values)",
+              "dart_type_name": "Prayer"
+            }
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "date",
+          "prayer"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "qada_entries",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "PRIMARY KEY AUTOINCREMENT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "PRIMARY KEY AUTOINCREMENT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "prayer",
+            "getter_name": "prayer",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Prayer>(Prayer.values)",
+              "dart_type_name": "Prayer"
+            }
+          },
+          {
+            "name": "missed_on",
+            "getter_name": "missedOn",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "made_up_at",
+            "getter_name": "madeUpAt",
+            "moor_type": "dateTime",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 3,
+      "references": [
+        2
+      ],
+      "type": "index",
+      "data": {
+        "on": 2,
+        "name": "qada_day",
+        "sql": null,
+        "unique": true,
+        "columns": [
+          {
+            "column": "missed_on",
+            "order_by": null
+          },
+          {
+            "column": "prayer",
+            "order_by": null
+          }
+        ]
+      }
+    }
+  ],
+  "fixed_sql": [
+    {
+      "name": "settings",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"settings\" (\"id\" INTEGER NOT NULL DEFAULT 1, \"latitude\" REAL NULL, \"longitude\" REAL NULL, \"place_name\" TEXT NULL, \"place_name_ar\" TEXT NULL, \"region_name\" TEXT NULL, \"region_name_ar\" TEXT NULL, \"country_code\" TEXT NULL, \"time_zone\" TEXT NULL, \"location_mode\" TEXT NULL, \"method\" TEXT NULL, \"asr_method\" TEXT NULL, \"hijri_adjust\" INTEGER NOT NULL DEFAULT 0 CHECK(\"hijri_adjust\" BETWEEN -2 AND 2), \"digits\" TEXT NOT NULL DEFAULT 'eastern', \"theme\" TEXT NOT NULL DEFAULT 'qiyamEmerald', \"theme_mode\" TEXT NOT NULL DEFAULT 'followSky', \"reduce_motion\" INTEGER NOT NULL DEFAULT 0 CHECK (\"reduce_motion\" IN (0, 1)), \"haptics\" INTEGER NOT NULL DEFAULT 1 CHECK (\"haptics\" IN (0, 1)), \"ui_sounds\" INTEGER NOT NULL DEFAULT 0 CHECK (\"ui_sounds\" IN (0, 1)), \"store_reset_pending\" INTEGER NOT NULL DEFAULT 0 CHECK (\"store_reset_pending\" IN (0, 1)), \"first_use\" TEXT NULL, \"fajr_sound\" TEXT NOT NULL DEFAULT 'adhan', \"dhuhr_sound\" TEXT NOT NULL DEFAULT 'tone', \"asr_sound\" TEXT NOT NULL DEFAULT 'tone', \"maghrib_sound\" TEXT NOT NULL DEFAULT 'adhan', \"isha_sound\" TEXT NOT NULL DEFAULT 'tone', \"reminder_minutes\" INTEGER NOT NULL DEFAULT 10 CHECK(\"reminder_minutes\" IN (0, 5, 10, 15, 20, 30)), \"notifications_asked\" INTEGER NOT NULL DEFAULT 0 CHECK (\"notifications_asked\" IN (0, 1)), PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "prayer_log",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"prayer_log\" (\"date\" TEXT NOT NULL, \"prayer\" TEXT NOT NULL, PRIMARY KEY (\"date\", \"prayer\"));"
+        }
+      ]
+    },
+    {
+      "name": "qada_entries",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"qada_entries\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"prayer\" TEXT NOT NULL, \"missed_on\" TEXT NULL, \"made_up_at\" INTEGER NULL);"
+        }
+      ]
+    },
+    {
+      "name": "qada_day",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)"
+        }
+      ]
+    }
+  ]
+}

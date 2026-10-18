@@ -7,7 +7,7 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:timezone/timezone.dart';
+import 'package:timezone/timezone.dart' show TZDateTime;
 
 /// the location's local date. rebuilds itself at the next local midnight
 final todayProvider = Provider<DateTime>((ref) {
@@ -38,16 +38,31 @@ DayTimes? computeDayTimes(Ref ref, DateTime date) {
     ),
   );
   if (location == null) return null;
-  return DayTimes.compute(
-    latitude: location.latitude,
-    longitude: location.longitude,
-    date: date,
-    zone: location.zone,
-    method: picked.method ?? PrayerMethod.forCountry(location.countryCode),
-    asrMethod: picked.asrMethod ?? AsrMethod.forCountry(location.countryCode),
-    isRamadan: HijriDate.of(date, picked.hijriAdjust).month == 9,
+  return dayTimesAt(
+    location,
+    date,
+    method: picked.method,
+    asrMethod: picked.asrMethod,
+    hijriAdjust: picked.hijriAdjust,
   );
 }
+
+/// null method or asr = by country. plain, so the background top-up computes the same times
+DayTimes dayTimesAt(
+  Location location,
+  DateTime date, {
+  required PrayerMethod? method,
+  required AsrMethod? asrMethod,
+  required int hijriAdjust,
+}) => DayTimes.compute(
+  latitude: location.latitude,
+  longitude: location.longitude,
+  date: date,
+  zone: location.zone,
+  method: method ?? PrayerMethod.forCountry(location.countryCode),
+  asrMethod: asrMethod ?? AsrMethod.forCountry(location.countryCode),
+  isRamadan: HijriDate.of(date, hijriAdjust).month == 9,
+);
 
 final todayTimesProvider = Provider<DayTimes?>(
   (ref) => ref.watch(dayTimesProvider(ref.watch(todayProvider))),
@@ -62,10 +77,14 @@ final prayerDayProvider = Provider<DateTime>((ref) {
   );
   if (!times.located) return today;
   final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
-  final fajr = times.fajr;
+  return prayerDayOf(now, today, times.fajr);
+});
+
+/// the day before until today's fajr has come
+DateTime prayerDayOf(DateTime now, DateTime today, DateTime? fajr) {
   if (fajr != null && !now.isBefore(fajr)) return today;
   return DateTime(today.year, today.month, today.day - 1);
-});
+}
 
 /// follows the ticker, but only notifies when the period changes
 final periodProvider = Provider<Period?>((ref) {

@@ -1,0 +1,20 @@
+name: adhan_alarms
+description: "The full adhan on Android with the app closed: exact alarms, a media notification and mark prayed."
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.4
+  flutter: '>=3.47.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+# a plugin, so its channels exist in every engine: the app's, workmanager's and mark prayed's
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.elhawary.bettermuslim.adhan
+        pluginClass: AdhanAlarmsPlugin

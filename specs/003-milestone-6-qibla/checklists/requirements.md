@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,7 +31,8 @@
 
 ## Notes
 
-- Q1 to Q7 open, waiting for answers.
+- Q1 to Q7 answered 2026-10-17 (all recommendations), logged under Clarifications in the spec. The
+  gear and the no location state use the location sheet milestone 3 already built.
 - Motion numbers (09, 10), spring.needle and `03 Components.dc.html` point at the design, not at
   code.
 - The weak compass, no compass and no location states have no PNG, FR-023 asks me to check

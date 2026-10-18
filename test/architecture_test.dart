@@ -9,6 +9,9 @@ const _adaptive = 'lib/core/widgets/adaptive/';
 /// the handoff's sky painter draws white stars and exact geometry from the mockup
 const _skyPainter = 'lib/features/home/view/widgets/sky_header_painter.dart';
 
+/// the adhan screen is always dark, 4.03 gives its own literal colors
+const _adhanColors = 'lib/features/notifications/presentation/view/adhan_colors.dart';
+
 /// the app root copies the data once, nothing below it rebuilds for it
 const _appRoot = 'lib/core/app/app.dart';
 
@@ -27,7 +30,7 @@ final _rules = [
   _Rule(
     'colors come from context.getColor(ThemeEnum.x)',
     RegExp(r'\bColors\.|\bColor\(0x|\bColor\.from(ARGB|RGBO)\('),
-    allowedIn: [_theme, _skyPainter],
+    allowedIn: [_theme, _skyPainter, _adhanColors],
   ),
   _Rule(
     'ColorManager is read only by the theme files',

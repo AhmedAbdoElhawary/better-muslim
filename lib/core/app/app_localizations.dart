@@ -22,8 +22,35 @@ class AppLocalizations {
     GlobalCupertinoLocalizations.delegate,
   ];
 
+  /// what MaterialApp picks from the phone's languages, for code that runs above it
+  static Locale localeFor(List<Locale> preferred) {
+    for (final locale in preferred) {
+      for (final supported in supportedLocales) {
+        if (supported.languageCode == locale.languageCode) return supported;
+      }
+    }
+    return supportedLocales.first;
+  }
+
   static AppLocalizations of(BuildContext context) =>
       Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+
+  /// also without a context, notifications are built in the background
+  static Future<AppLocalizations> load(Locale locale) async {
+    final arb = await rootBundle.loadString(
+      'assets/l10n/app_${locale.languageCode}.arb',
+
+      /// Localizations keeps the result already, and a cached load hangs the next widget test
+      cache: false,
+    );
+    final json = jsonDecode(arb) as Map<String, dynamic>;
+
+    /// @ keys are the arb's notes about placeholders, not strings
+    return AppLocalizations({
+      for (final MapEntry(:key, :value) in json.entries)
+        if (!key.startsWith('@')) key: value as String,
+    }, locale.languageCode);
+  }
 
   String tr(String key, Map<String, String> args) {
     assert(
@@ -55,21 +82,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   );
 
   @override
-  Future<AppLocalizations> load(Locale locale) async {
-    final arb = await rootBundle.loadString(
-      'assets/l10n/app_${locale.languageCode}.arb',
-
-      /// Localizations keeps the result already, and a cached load hangs the next widget test
-      cache: false,
-    );
-    final json = jsonDecode(arb) as Map<String, dynamic>;
-
-    /// @ keys are the arb's notes about placeholders, not strings
-    return AppLocalizations({
-      for (final MapEntry(:key, :value) in json.entries)
-        if (!key.startsWith('@')) key: value as String,
-    }, locale.languageCode);
-  }
+  Future<AppLocalizations> load(Locale locale) => AppLocalizations.load(locale);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

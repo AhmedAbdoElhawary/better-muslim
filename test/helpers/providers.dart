@@ -18,9 +18,9 @@ const devConfig = FlavorConfig(
 );
 
 /// an in-memory store, the dev flavor and no gps, so a widget test never reaches the phone
-List<Override> testOverrides({PositionSource? positionSource}) => [
+List<Override> testOverrides({PositionSource? positionSource, FlavorConfig flavor = devConfig}) => [
   _memoryDatabase(),
-  flavorProvider.overrideWithValue(devConfig),
+  flavorProvider.overrideWithValue(flavor),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
 ];
 
@@ -73,6 +73,7 @@ class FakePositionSource implements PositionSource {
   LatLng? position;
   int requests = 0;
   int fixes = 0;
+  LocationAccuracy? accuracy;
 
   @override
   Future<LocationPermission> permission() async => granted;
@@ -84,8 +85,9 @@ class FakePositionSource implements PositionSource {
   }
 
   @override
-  Future<LatLng?> fix() async {
+  Future<LatLng?> fix({LocationAccuracy accuracy = LocationAccuracy.low}) async {
     fixes++;
+    this.accuracy = accuracy;
     return position;
   }
 }

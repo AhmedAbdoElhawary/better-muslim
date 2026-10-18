@@ -50,7 +50,11 @@ From the spec to the code:
 3. Home: Living Sky, live countdown and glow, the prayer day strip, verse and shortcuts, the
    location sheet with offline city search. **Done, waiting for my review.**
 4. Prayer: logging, qada, method sheet. **Done, waiting for my review.**
-5. to 11. as in `HANDOFF_CLAUDE.md`.
+5. Notifications and adhan: the 6 day schedule with reminders, the adhan screen (4.03), the full
+   adhan on Android from `packages/adhan_alarms`, Mark prayed from every notification, the
+   background top-up, a dev page from More. **Done, waiting for my review.**
+6. Qibla: compass, alignment, haptics. **Done, waiting for my review.**
+7. to 11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
 

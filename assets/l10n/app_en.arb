@@ -29,6 +29,12 @@
       "minutes": {}
     }
   },
+  "adhanAt": "Adhan at {time}",
+  "@adhanAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "sunriseLabel": "Sunrise {time}",
   "@sunriseLabel": {
     "placeholders": {
@@ -69,6 +75,7 @@
   "readDua": "Read dua",
   "markPrayed": "Mark prayed",
   "stopAdhan": "Stop adhan",
+  "adhanOfMakkah": "Adhan of Makkah",
   "prayerTimes": "Prayer times",
   "prayedToday": "{count} of 5 prayed today",
   "@prayedToday": {
@@ -117,6 +124,30 @@
   "compassAccuracy": "compass accuracy",
   "accuracyHigh": "High",
   "holdFlat": "Hold your phone flat, away from metal and magnets.",
+  "distanceKm": "{distance} km",
+  "@distanceKm": {
+    "placeholders": {
+      "distance": {}
+    }
+  },
+  "distanceM": "{distance} m",
+  "@distanceM": {
+    "placeholders": {
+      "distance": {}
+    }
+  },
+  "accuracyMedium": "Medium",
+  "accuracyLow": "Low",
+  "calibrateHint": "Move your phone in a figure 8 to calibrate the compass.",
+  "noCompass": "No compass on this phone",
+  "accuracyNone": "Not available",
+  "noCompassHint": "Turn the N on the dial to north to see the Qibla.",
+  "qiblaNeedsLocation": "The Qibla needs your location or a city.",
+  "compassN": "N",
+  "compassE": "E",
+  "compassS": "S",
+  "compassW": "W",
+  "qiblaCompass": "Qibla compass",
   "juzPage": "Juz {juz} · Page {page}",
   "@juzPage": {
     "placeholders": {
@@ -284,6 +315,17 @@
       "minutes": {}
     }
   },
+  "notifReminderBody": "{time} · {city}",
+  "@notifReminderBody": {
+    "placeholders": {
+      "time": {},
+      "city": {}
+    }
+  },
+  "reminders": "Reminders",
+  "stop": "Stop",
+  "pause": "Pause",
+  "play": "Play",
   "notifAzkarBody": "After Asr · 24 remembrances, about 6 minutes",
   "liveNextPrayer": "Next prayer · {city}",
   "@liveNextPrayer": {

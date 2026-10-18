@@ -3,6 +3,7 @@ package com.elhawary.bettermuslim
 import android.os.PowerManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
@@ -18,5 +19,8 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "better_muslim/compass")
+            .setStreamHandler(CompassStreamHandler(this))
     }
 }

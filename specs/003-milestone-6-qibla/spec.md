@@ -1,6 +1,6 @@
 # Feature Specification: Milestone 6, Qibla
 
-**Feature Branch**: `feature/milestone-6` [NEEDS CLARIFICATION: Q7, cut from where?]
+**Feature Branch**: `feature/milestone-6`, cut from where milestone 5 ends
 
 **Created**: 2026-10-17
 
@@ -15,6 +15,26 @@ the handoff doesn't: where the heading and the position come from, how the beari
 are worked out, when the screen counts as aligned, what it shows when the compass is weak or
 missing or there is no location, and how the design scenario reaches the 4.05 and 4.06 values. Like everything
 else it works with no internet, and neither the heading nor the position leaves the phone.
+
+## Clarifications
+
+### Session 2026-10-17
+
+- Q: How do I reach Qibla before milestone 9 builds More? → A: A temporary Qibla entry on the More
+  placeholder (a plain button), replaced by the real tile in milestone 9.
+- Q: Where does the position come from? → A: The saved location, plus a fresh fix while the screen
+  is open when the location is automatic and allowed. The fix is used for the bearing and distance
+  only, never saved.
+- Q: The copy and look of the weak compass, no compass and no location states? → A: The FR-025
+  table and FR-019 to FR-022 as written. The no location state reuses Home's no location copy and
+  buttons, since the location sheet exists since milestone 3.
+- Q: What does the gear open? → A: The location sheet. It was planned for milestone 10, it already
+  exists since milestone 3.
+- Q: Dial letters in Arabic? → A: ش ق ج غ in Arabic, N E S W in English, never mirrored.
+- Q: How does the design scenario show both states? → A: Qibla from London with the heading frozen
+  at 105°, a tap on the dial switches to 119° and back, in the design scenario only.
+- Q: Order and branch? → A: Plan and tasks now, built after milestone 5, on `feature/milestone-6`
+  cut from where milestone 5 ends.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -91,7 +111,7 @@ warning dot, Low an error dot and the calibration hint. Back to High, the normal
 **Acceptance Scenarios**:
 
 1. **Given** the phone reports its compass accuracy, **When** it changes, **Then** the card shows
-   High, Medium or Low with the matching dot. [NEEDS CLARIFICATION: Q3, the new copy]
+   High, Medium or Low with the matching dot.
 2. **Given** accuracy is Low, **When** I look at the hint, **Then** it tells me how to calibrate.
 3. **Given** accuracy goes back to Medium or High, **When** I look at the hint, **Then** it is
    "Hold your phone flat, away from metal and magnets." again.
@@ -107,18 +127,18 @@ helps where it can and says plainly what is missing.
 
 **Independent Test**: With no compass the dial stays north up, the needle and Kaaba marker sit at
 the bearing, the title says the phone has no compass. With no location the dial turns, there is no
-marker or needle, and "Use my location" asks for permission.
+marker or needle, and "Use my location" and "Choose a city instead" open the location sheet.
 
 **Acceptance Scenarios**:
 
 1. **Given** the phone has no compass, **When** I open Qibla, **Then** the dial stays north up, the
    Kaaba marker and the needle sit at the bearing, the subtitle and distance show as usual and the
-   accuracy card says the compass is not available. [NEEDS CLARIFICATION: Q3]
+   accuracy card says the compass is not available.
 2. **Given** no location is saved, **When** I open Qibla, **Then** the dial still turns with the
-   heading, there is no Kaaba marker, no needle and no distance, and a "Use my location" button
-   asks for permission. [NEEDS CLARIFICATION: Q3]
-3. **Given** location was refused for good, **When** I tap "Use my location", **Then** the phone's
-   settings for the app open.
+   heading, there is no Kaaba marker, no needle and no distance, and "Use my location" and "Choose
+   a city instead" show in place of the hint.
+3. **Given** that state, **When** I tap either button, **Then** the location sheet opens the same
+   way Home's no location card opens it.
 4. **Given** a location arrives while the screen is open, **When** it is saved, **Then** the marker,
    needle, subtitle and distance show at once.
 
@@ -140,7 +160,9 @@ marker or needle, and "Use my location" asks for permission.
 - Location changes while the screen is open (new fix, city picked): bearing, distance and subtitle
   update, the marker moves and the needle springs to it.
 - Inside Makkah: the bearing changes a lot with a few kilometres, so it is worked out from where
-  the phone is, not the saved place. [NEEDS CLARIFICATION: Q2]
+  the phone is, not the saved place.
+- Location allowed but no fix yet (indoors, first seconds): the saved location is used until the
+  fix comes, then the needle springs to the new bearing.
 - Under 1 km from the Kaaba the distance shows in metres.
 - A city picked by hand: the Qibla is from that city's point, with no fix.
 - The screen turned to landscape: the needle still points the right way.
@@ -158,8 +180,8 @@ marker or needle, and "Use my location" asks for permission.
 - **FR-001**: The Qibla screen MUST match 4.05 (turning) and 4.06 (aligned) as specified in the
   handoff, in dark and light: back, title, gear, instruction, subtitle, dial, needle, top tick, the
   two cards and the hint. Arabic has no PNG, it follows the same tree with the RTL rules.
-- **FR-002**: The screen MUST be reachable from the app. Its designed entry is the Qibla tile on
-  More, which milestone 9 builds. [NEEDS CLARIFICATION: Q1, how to reach it before milestone 9]
+- **FR-002**: The screen MUST be a pushed page reached from More. Until milestone 9 builds More's
+  tiles, a temporary Qibla button on the More placeholder pushes it.
 
 **Heading**
 
@@ -178,7 +200,8 @@ marker or needle, and "Use my location" asks for permission.
   the place name: "{city} · Qibla at {deg}° from north".
 - **FR-008**: The position MUST come from the saved location (milestone 2). When the location is
   automatic and allowed, a fresh fix MUST be taken while the screen is open and used for the
-  bearing and distance only, never saved as the location. [NEEDS CLARIFICATION: Q2]
+  bearing and distance only, never saved as the location. A city picked by hand is used as it is,
+  with no fix.
 - **FR-009**: The distance MUST be the great circle distance to the Kaaba, rounded to 10 km from
   100 km up, to the whole km below 100 km, and to 10 m below 1 km, with the locale's digits and
   group separator.
@@ -186,7 +209,8 @@ marker or needle, and "Use my location" asks for permission.
 **Dial and needle**
 
 - **FR-010**: The dial (ticks, letters, Kaaba marker) MUST turn by minus the heading, at once. The
-  Kaaba marker sits on the dial at the bearing. [NEEDS CLARIFICATION: Q5, letters in Arabic]
+  Kaaba marker sits on the dial at the bearing. The letters are N E S W in English and ش ق ج غ in
+  Arabic, and stay upright as the dial turns, like in the PNG.
 - **FR-011**: The needle MUST point at bearing minus heading and follow with spring.needle
   (Motion 09), the short way across 0°/360°. A new reading retargets the spring from where it is
   and how fast it moves, never queues. Reduce motion: standard 300 ms, no overshoot.
@@ -215,7 +239,7 @@ marker or needle, and "Use my location" asks for permission.
 **Accuracy**
 
 - **FR-019**: The accuracy card MUST show High, Medium or Low from what the phone reports, with a
-  success, warning or error dot. [NEEDS CLARIFICATION: Q3]
+  success, warning or error dot.
 - **FR-020**: At Low the hint MUST change to the calibration hint, at Medium or High it MUST be the
   designed hint.
 
@@ -223,23 +247,24 @@ marker or needle, and "Use my location" asks for permission.
 
 - **FR-021**: With no compass: the dial north up and still, the Kaaba marker and the needle at the
   bearing, title "No compass on this phone", the subtitle and distance as usual, accuracy "Not
-  available", and a hint to line the dial up with north. No haptics. [NEEDS CLARIFICATION: Q3]
+  available", and a hint to line the dial up with north. No haptics.
 - **FR-022**: With no location: the dial turns with the heading, no Kaaba marker, no needle, title
-  "Location needed", the distance card shows "—", and a "Use my location" button in place of the
-  hint. The button asks for permission, or opens the phone's settings for the app when location
-  was refused for good. [NEEDS CLARIFICATION: Q3]
+  "No location yet", subtitle "The Qibla needs your location or a city.", the distance card shows
+  "—", and "Use my location" and "Choose a city instead" in place of the hint. Both open the
+  location sheet the way Home's no location card does.
 - **FR-023**: These states have no PNG, so they MUST be built only from parts in
   `03 Components.dc.html` and the Qibla screens, and I check them in the app before they count
   as done.
 
 **Gear**
 
-- **FR-024**: The gear MUST stay visible as designed. [NEEDS CLARIFICATION: Q4, what it opens]
+- **FR-024**: The gear MUST open the location sheet. A new place there updates the screen at once.
 
 **Copy and access**
 
-- **FR-025**: Every new string MUST exist in English and Arabic with this wording:
-  [NEEDS CLARIFICATION: Q3]
+- **FR-025**: Every new string MUST exist in English and Arabic with this wording. The no location
+  title and buttons reuse Home's existing "No location yet", "Use my location" and "Choose a city
+  instead".
 
   | Where | English | Arabic |
   | --- | --- | --- |
@@ -251,9 +276,8 @@ marker or needle, and "Use my location" asks for permission.
   | title, no compass | No compass on this phone | لا توجد بوصلة في هذا الهاتف |
   | accuracy, no compass | Not available | غير متوفرة |
   | hint, no compass | Turn the N on the dial to north to see the Qibla. | وجّه الشمال في القرص نحو الشمال لترى القبلة. |
-  | title, no location | Location needed | الموقع مطلوب |
-  | subtitle, no location | Allow location to find the Qibla. | اسمح بالوصول إلى موقعك لتحديد القبلة. |
-  | button, no location | Use my location | استخدم موقعي |
+  | subtitle, no location | The Qibla needs your location or a city. | القبلة تحتاج موقعك أو مدينة. |
+  | dial letters | N, E, S, W | ش، ق، ج، غ |
   | dial, for screen readers | Qibla compass | بوصلة القبلة |
 
 - **FR-026**: A screen reader MUST hear the instruction, the bearing, the distance and the
@@ -269,8 +293,8 @@ marker or needle, and "Use my location" asks for permission.
 **Design scenario**
 
 - **FR-029**: "Dev · design scenario" MUST show the Qibla from London (51.5074° N, 0.1278° W) with
-  the heading frozen at 105° for 4.05, and a way to see 119° for 4.06, so both can be seen
-  on a phone. [NEEDS CLARIFICATION: Q6]
+  the heading frozen at 105° for 4.05, and a tap on the dial switching to 119° for 4.06 and back,
+  in the design scenario only, so both can be seen on a phone.
 
 ### Key Entities
 
@@ -309,6 +333,7 @@ marker or needle, and "Use my location" asks for permission.
 - The aligned sound in the haptics table comes with "UI sounds" in More (milestone 9), not here.
 - The screen doesn't keep the phone awake.
 - The Kaaba point is fixed at 21.4225° N, 39.8262° E.
-- The location sheet and the city search come in milestone 10. Until then "Use my location" is the
-  only way to give a location from this screen.
+- The location sheet and the offline city search are the ones milestone 3 built, used as they are.
 - No tab bar on this screen, as designed.
+- More's real Qibla tile and the in-app haptics switch come in milestone 9, this milestone only
+  reads the switch.

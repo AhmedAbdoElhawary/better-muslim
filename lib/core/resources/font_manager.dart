@@ -17,6 +17,9 @@ enum FontEnum {
   /// the design uses it only at weight 400, so with RegularText
   display(latin: FontFamilyManager.display, arabic: FontFamilyManager.displayAr),
 
+  /// amiri for duas and azkar, in both languages
+  dua(latin: FontFamilyManager.dua, arabic: FontFamilyManager.dua),
+
   // TODO(ahmed): switch to KFGQPC Hafs once licensed, the mushaf text must render in the licensed font.
   quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran);
 
@@ -86,6 +89,12 @@ abstract final class FontSizeManager {
   static const double rowValue = 13.5;
   static const double nowTag = 11;
   static const double dayComplete = 20;
+
+  /// the adhan screen's dua line
+  static const double adhanDua = 22;
+
+  /// the qibla cards' distance and accuracy
+  static const double qiblaValue = 20;
 }
 
 abstract final class LineHeightManager {
@@ -124,6 +133,8 @@ abstract final class LineHeightManager {
   static const double nextPrayerAr = 1.0;
   static const double skyLabelAr = 1.2;
   static const double verseTranslation = 1.5;
+  static const double adhanDua = 1.8;
+  static const double qiblaHint = 1.5;
 }
 
 abstract final class LetterSpacingManager {
@@ -133,4 +144,7 @@ abstract final class LetterSpacingManager {
 
   /// .12em of the 11 pt NOW tag on the prayer rows
   static const double nowTag = 1.32;
+
+  /// .18em of the 12 pt adhan header
+  static const double adhanHeader = 2.16;
 }

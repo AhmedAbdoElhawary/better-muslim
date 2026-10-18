@@ -33,6 +33,15 @@
 		<true/>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Your location sets the prayer times, the Qibla and the calculation method for your region. It stays on this phone.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>audio</string>
+			<string>fetch</string>
+		</array>
+		<key>BGTaskSchedulerPermittedIdentifiers</key>
+		<array>
+			<string>better_muslim.topup</string>
+		</array>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>

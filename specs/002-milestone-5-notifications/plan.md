@@ -144,13 +144,20 @@ assets/audio/                                   # adhan_makkah(.m4a), adhan_makk
 assets/l10n/app_en.arb, app_ar.arb              # + new strings
 drift_schemas/app_database/drift_schema_v3.json
 
-android/app/build.gradle.kts                    # desugaring, androidx.media
-android/app/src/main/AndroidManifest.xml        # permissions, service, receivers
-android/app/src/main/kotlin/com/elhawary/bettermuslim/
-├── MainActivity.kt                             # registers the adhan channels
-└── adhan/AdhanAlarms.kt  AdhanReceiver.kt  AdhanService.kt  MarkPrayedReceiver.kt
+android/app/build.gradle.kts                    # desugaring
+android/app/src/main/AndroidManifest.xml        # notification permissions, the plugin's receivers
 android/app/src/main/res/raw/                   # adhan clips (placeholders)
-android/app/src/main/res/drawable-*/ic_notification.png
+
+packages/adhan_alarms/                          # local plugin, so every engine gets its channels
+├── pubspec.yaml
+└── android/
+    ├── build.gradle.kts                        # androidx.media
+    └── src/main/
+        ├── AndroidManifest.xml                 # foreground service, receivers, permissions
+        ├── kotlin/com/elhawary/bettermuslim/adhan/
+        │   └── AdhanAlarmsPlugin.kt  AdhanAlarms.kt  AdhanReceiver.kt  AdhanService.kt
+        │       MarkPrayedReceiver.kt
+        └── res/                                # ic_notification, media action icons, accent
 
 ios/Runner/AppDelegate.swift                    # plugin registrant callbacks, workmanager task
 ios/Runner/Info.plist                           # UIBackgroundModes audio, fetch, BG task id
@@ -201,6 +208,10 @@ The clarify answers are in the spec. All seven plan decisions took the recommend
 6. **The dua in Arabic** shows only the Arabic and its source (FR-032).
 7. **Android tops up in the background at least every 12 hours** (FR-009), instead of each time an
    adhan fires.
+
+**Changed while building (2026-10-18)**: the Kotlin part became the local plugin
+`packages/adhan_alarms`. workmanager runs the top-up in its own engine, which only gets plugins, so
+channels registered in `MainActivity` were out of its reach.
 
 ## Complexity Tracking
 

@@ -16,16 +16,17 @@ class PositionSource {
   /// while in use only, the app never asks for background location
   Future<LocationPermission> request() => Geolocator.requestPermission();
 
-  /// coarse is enough for prayer times and works offline. null = indoors, gps off or too slow
-  Future<LatLng?> fix() async {
+  /// coarse is enough for prayer times and works offline. null = indoors, gps off or too slow.
+  /// the qibla asks for high, a kilometre off in makkah turns the needle by up to 11°
+  Future<LatLng?> fix({LocationAccuracy accuracy = LocationAccuracy.low}) async {
     /// with location off android shows a turn it on dialog on every refresh, the saved location
     /// just stays instead (edge cases: gps off)
     if (!await Geolocator.isLocationServiceEnabled()) return null;
     try {
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 15),
+        locationSettings: LocationSettings(
+          accuracy: accuracy,
+          timeLimit: const Duration(seconds: 15),
         ),
       );
       return (latitude: position.latitude, longitude: position.longitude);

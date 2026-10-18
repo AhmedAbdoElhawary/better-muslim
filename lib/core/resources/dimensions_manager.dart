@@ -67,6 +67,43 @@ abstract final class SpaceManager {
   static const double prayerGlowTop = 170;
   static const double dayCompleteDots = 24;
   static const double dayCompleteRise = 6;
+
+  /// adhan (4.03), positions are in the 393 x 852 frame of the mockup
+  static const double adhanHaloTop = 400;
+  static const double adhanSunTop = 500;
+  static const double adhanHorizonTop = 540;
+  static const double adhanHeaderTop = 120;
+  static const double adhanHeaderGap = 10;
+  static const double adhanNameTop = 8;
+  static const double adhanProgressTop = 22;
+  static const double adhanProgressGap = 10;
+  static const double adhanCardTop = 572;
+  static const double adhanCardV = 16;
+  static const double adhanCardH = 18;
+  static const double adhanCardGap = 6;
+  static const double adhanReadDuaGap = 2;
+  static const double adhanButtonsBottom = 44;
+  static const double adhanButtonGap = 10;
+  static const double adhanButtonIconGap = 8;
+  static const double adhanTextRise = 10;
+
+  /// dua card (4.14), the adhan's dua sheet uses it too
+  static const double duaCardH = 18;
+  static const double duaGap = 10;
+
+  /// qibla (4.05, 4.06), each gap from the tree's top to the bottom of the element above
+  static const double qiblaTitleTop = 26;
+  static const double qiblaTitleGap = 6;
+  static const double qiblaDialTop = 76;
+  static const double qiblaCardsTop = 50;
+  static const double qiblaHintTop = 33;
+  static const double qiblaHintSide = 24;
+  static const double qiblaCardsSide = 16;
+  static const double qiblaCardGap = 10;
+  static const double qiblaCardV = 14;
+  static const double qiblaCardH = 16;
+  static const double qiblaCardLineGap = 2;
+  static const double accuracyDotGap = 8;
 }
 
 abstract final class RadiusManager {
@@ -80,6 +117,9 @@ abstract final class RadiusManager {
   static const double homeGlow = 36;
   static const double prayerBar = 2;
   static const double shortcutIcon = 12;
+  static const double adhanBar = 2;
+  static const double qiblaMarker = 3;
+  static const double qiblaNeedle = 1;
 }
 
 abstract final class SizeManager {
@@ -129,6 +169,40 @@ abstract final class SizeManager {
   static const double dayCompleteDot = 10;
   static const double dayCompleteStar = 56;
   static const double dayCompleteRing = 72;
+
+  /// adhan (4.03)
+  static const double adhanSun = 84;
+  static const double adhanHorizon = 1;
+  static const double adhanSunBlur = 50;
+  static const double adhanSunSpread = 18;
+  static const double adhanHaloW = 420;
+  static const double adhanHaloH = 280;
+  static const double adhanStar = 34;
+  static const double adhanProgress = 200;
+  static const double adhanBar = 3;
+
+  /// qibla (4.05, 4.06), radii and lengths on the 300 pt dial
+  static const double qiblaDial = 300;
+  static const double qiblaTickOuter = 146;
+  static const double qiblaTickMajor = 18;
+  static const double qiblaTickMinor = 8;
+  static const double qiblaTickMajorStroke = 1.5;
+  static const double qiblaTickMinorStroke = 1;
+  static const double qiblaLetterRadius = 108;
+  static const double qiblaMarker = 16;
+  static const double qiblaMarkerLine = 3;
+  static const double qiblaMarkerStroke = 1.5;
+  static const double qiblaNeedle = 106;
+  static const double qiblaNeedleWidth = 2;
+  static const double qiblaNeedleHead = 12;
+  static const double qiblaHub = 10;
+  static const double qiblaTopTick = 16;
+  static const double qiblaTopTickWidth = 2;
+  static const double qiblaTopTickGap = 6;
+  static const double qiblaRing = 1;
+  static const double qiblaRingAligned = 1.5;
+  static const double qiblaGlow = 420;
+  static const double accuracyDot = 8;
 
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;

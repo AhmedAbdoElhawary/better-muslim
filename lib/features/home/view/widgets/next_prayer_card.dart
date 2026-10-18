@@ -10,7 +10,6 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/features/home/model/home_samples.dart';
 import 'package:better_muslim/features/home/view/widgets/card_glow.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
 import 'package:better_muslim/features/home/view/widgets/home_card.dart';
@@ -150,6 +149,9 @@ class _AdhanLine extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final reminder = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reminderMinutes ?? 0),
+    );
     if (time == null) return const SizedBox.shrink();
     return Row(
       children: [
@@ -161,10 +163,10 @@ class _AdhanLine extends ConsumerWidget {
         const RSizedBox.horizontal(SpaceManager.adhanLineGap),
         Expanded(
           child: RegularText(
-            StringsManager.adhanAtReminder,
+            reminder > 0 ? StringsManager.adhanAtReminder : StringsManager.adhanAt,
             args: {
               'time': context.formatTime(time, digits),
-              'minutes': context.formatDigits('${HomeSamples.reminderMinutes}', digits),
+              'minutes': context.formatDigits('$reminder', digits),
             },
             fontSize: FontSizeManager.cardNote,
             color: ThemeEnum.text2,
