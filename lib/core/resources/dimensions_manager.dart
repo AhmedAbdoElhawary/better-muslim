@@ -85,6 +85,11 @@ abstract final class SpaceManager {
   static const double adhanButtonsBottom = 44;
   static const double adhanButtonGap = 10;
   static const double adhanButtonIconGap = 8;
+  static const double adhanTextRise = 10;
+
+  /// dua card (4.14), the adhan's dua sheet uses it too
+  static const double duaCardH = 18;
+  static const double duaGap = 10;
 }
 
 abstract final class RadiusManager {
@@ -151,6 +156,7 @@ abstract final class SizeManager {
 
   /// adhan (4.03)
   static const double adhanSun = 84;
+  static const double adhanHorizon = 1;
   static const double adhanSunBlur = 50;
   static const double adhanSunSpread = 18;
   static const double adhanHaloW = 420;

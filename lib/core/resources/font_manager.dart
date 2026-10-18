@@ -17,6 +17,9 @@ enum FontEnum {
   /// the design uses it only at weight 400, so with RegularText
   display(latin: FontFamilyManager.display, arabic: FontFamilyManager.displayAr),
 
+  /// amiri for duas and azkar, in both languages
+  dua(latin: FontFamilyManager.dua, arabic: FontFamilyManager.dua),
+
   // TODO(ahmed): switch to KFGQPC Hafs once licensed, the mushaf text must render in the licensed font.
   quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran);
 
