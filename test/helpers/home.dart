@@ -20,6 +20,7 @@ Future<void> pumpHome(
   bool use24 = true,
   bool reduceMotion = false,
   bool settle = true,
+  Widget app = const App(),
 }) async {
   tester.view.physicalSize = const Size(393, 852) * 3;
   tester.view.devicePixelRatio = 3;
@@ -36,7 +37,7 @@ Future<void> pumpHome(
           textScaler: TextScaler.linear(textScale),
           disableAnimations: reduceMotion,
         ),
-        child: const App(),
+        child: app,
       ),
     ),
   );

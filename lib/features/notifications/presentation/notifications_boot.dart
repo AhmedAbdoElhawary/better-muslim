@@ -5,8 +5,15 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
+import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +40,11 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(onResume: _reschedule);
+
+    /// only a change, opening the app a minute after a prayer shows no adhan screen
+    ref.listenManual(periodProvider, (previous, next) {
+      if (previous != null && next != null && previous != next) _onPeriod(next);
+    });
     _start();
   }
 
@@ -75,6 +87,34 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       ),
     );
   }
+
+  /// the full adhan in front, over any screen (FR-021)
+  Future<void> _onPeriod(Period period) async {
+    final prayer = Prayer.values.asNameMap()[period.name];
+    if (prayer == null || _isScenario) return;
+    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+    final sound = ref.read(settingsProvider).value?.soundOf(prayer);
+    final location = ref.read(locationProvider);
+    final at = ref.read(todayTimesProvider)?.timeOf(prayer);
+    if (sound != PrayerSound.adhan || location == null || at == null) return;
+    final day = ref.read(prayerDayProvider);
+    final alert = Alert(
+      day: day,
+      prayer: prayer,
+      kind: AlertKind.adhan,
+      at: at,
+      sound: PrayerSound.adhan,
+    );
+    ref.read(routerProvider).push(Routes.adhan(prayer, day));
+    await ref.read(adhanPlayerProvider).play(alert, await _texts(location));
+  }
+
+  Future<AlertTexts> _texts(Location location) => AlertTexts.load(
+    locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
+    use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+    digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
+    location: location,
+  );
 
   @override
   Widget build(BuildContext context) => widget.child;

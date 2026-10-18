@@ -1,0 +1,86 @@
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
+import 'package:better_muslim/features/notifications/data/adhan_player.dart';
+import 'package:better_muslim/features/notifications/data/alert_texts.dart';
+import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
+import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// widget tests run as android, so the kotlin channel gets an answer that does nothing
+List<MethodCall> muteAdhanChannel() {
+  final calls = <MethodCall>[];
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    const MethodChannel('better_muslim/adhan'),
+    (call) async {
+      calls.add(call);
+      return null;
+    },
+  );
+  return calls;
+}
+
+/// records what the app asks of the plugin, nothing reaches the phone
+class FakeScheduler extends NotificationScheduler {
+  FakeScheduler({this.allowed = true, this.grants = true}) : super(AdhanChannel());
+
+  bool allowed;
+  bool grants;
+  int asks = 0;
+  int alarmAsks = 0;
+  int cancels = 0;
+  final applied = <List<Alert>>[];
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<bool> askPermission() async {
+    asks++;
+    allowed = grants;
+    return grants;
+  }
+
+  @override
+  Future<void> cancelAll() async => cancels++;
+
+  @override
+  Future<void> apply({
+    required List<Alert> alerts,
+    required Map<Prayer, PrayerSound> sounds,
+    required AlertTexts texts,
+  }) async => applied.add(alerts);
+}
+
+class FakePlayer extends AdhanPlayer {
+  FakePlayer({
+    this.position = const Duration(seconds: 42),
+    this.duration = const Duration(minutes: 2, seconds: 56),
+  });
+
+  final Duration position;
+  final Duration duration;
+  final played = <Alert>[];
+  int stops = 0;
+
+  @override
+  Future<void> play(Alert alert, AlertTexts texts, {Duration from = Duration.zero}) async =>
+      played.add(alert);
+
+  @override
+  Future<void> pause() async {}
+
+  @override
+  Future<void> resume() async {}
+
+  @override
+  Future<void> stop() async => stops++;
+
+  @override
+  Future<Duration> length(Prayer prayer) async => duration;
+
+  @override
+  Stream<Playback> get playback =>
+      Stream.value(Playback(id: 1, playing: true, position: position, duration: duration));
+}
