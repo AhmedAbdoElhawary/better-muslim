@@ -213,6 +213,82 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     requiredDuringInsert: false,
   ).withConverter<DateTime?>($SettingsTable.$converterfirstUsen);
   @override
+  late final GeneratedColumnWithTypeConverter<PrayerSound, String> fajrSound =
+      GeneratedColumn<String>(
+        'fajr_sound',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('adhan'),
+      ).withConverter<PrayerSound>($SettingsTable.$converterfajrSound);
+  @override
+  late final GeneratedColumnWithTypeConverter<PrayerSound, String> dhuhrSound =
+      GeneratedColumn<String>(
+        'dhuhr_sound',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('tone'),
+      ).withConverter<PrayerSound>($SettingsTable.$converterdhuhrSound);
+  @override
+  late final GeneratedColumnWithTypeConverter<PrayerSound, String> asrSound =
+      GeneratedColumn<String>(
+        'asr_sound',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('tone'),
+      ).withConverter<PrayerSound>($SettingsTable.$converterasrSound);
+  @override
+  late final GeneratedColumnWithTypeConverter<PrayerSound, String> maghribSound =
+      GeneratedColumn<String>(
+        'maghrib_sound',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('adhan'),
+      ).withConverter<PrayerSound>($SettingsTable.$convertermaghribSound);
+  @override
+  late final GeneratedColumnWithTypeConverter<PrayerSound, String> ishaSound =
+      GeneratedColumn<String>(
+        'isha_sound',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('tone'),
+      ).withConverter<PrayerSound>($SettingsTable.$converterishaSound);
+  static const VerificationMeta _reminderMinutesMeta = const VerificationMeta('reminderMinutes');
+  @override
+  late final GeneratedColumn<int> reminderMinutes = GeneratedColumn<int>(
+    'reminder_minutes',
+    aliasedName,
+    false,
+    check: () => reminderMinutes.isIn(const [0, 5, 10, 15, 20, 30]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _notificationsAskedMeta = const VerificationMeta(
+    'notificationsAsked',
+  );
+  @override
+  late final GeneratedColumn<bool> notificationsAsked = GeneratedColumn<bool>(
+    'notifications_asked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("notifications_asked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     latitude,
@@ -235,6 +311,13 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     uiSounds,
     storeResetPending,
     firstUse,
+    fajrSound,
+    dhuhrSound,
+    asrSound,
+    maghribSound,
+    ishaSound,
+    reminderMinutes,
+    notificationsAsked,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -326,6 +409,21 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         storeResetPending.isAcceptableOrUnknown(
           data['store_reset_pending']!,
           _storeResetPendingMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reminder_minutes')) {
+      context.handle(
+        _reminderMinutesMeta,
+        reminderMinutes.isAcceptableOrUnknown(data['reminder_minutes']!, _reminderMinutesMeta),
+      );
+    }
+    if (data.containsKey('notifications_asked')) {
+      context.handle(
+        _notificationsAskedMeta,
+        notificationsAsked.isAcceptableOrUnknown(
+          data['notifications_asked']!,
+          _notificationsAskedMeta,
         ),
       );
     }
@@ -421,6 +519,44 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       firstUse: $SettingsTable.$converterfirstUsen.fromSql(
         attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}first_use']),
       ),
+      fajrSound: $SettingsTable.$converterfajrSound.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}fajr_sound'],
+        )!,
+      ),
+      dhuhrSound: $SettingsTable.$converterdhuhrSound.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}dhuhr_sound'],
+        )!,
+      ),
+      asrSound: $SettingsTable.$converterasrSound.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}asr_sound'],
+        )!,
+      ),
+      maghribSound: $SettingsTable.$convertermaghribSound.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}maghrib_sound'],
+        )!,
+      ),
+      ishaSound: $SettingsTable.$converterishaSound.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}isha_sound'],
+        )!,
+      ),
+      reminderMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_minutes'],
+      )!,
+      notificationsAsked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}notifications_asked'],
+      )!,
     );
   }
 
@@ -451,6 +587,16 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
   static TypeConverter<DateTime?, String?> $converterfirstUsen = NullAwareTypeConverter.wrap(
     $converterfirstUse,
   );
+  static JsonTypeConverter2<PrayerSound, String, String> $converterfajrSound =
+      const EnumNameConverter<PrayerSound>(PrayerSound.values);
+  static JsonTypeConverter2<PrayerSound, String, String> $converterdhuhrSound =
+      const EnumNameConverter<PrayerSound>(PrayerSound.values);
+  static JsonTypeConverter2<PrayerSound, String, String> $converterasrSound =
+      const EnumNameConverter<PrayerSound>(PrayerSound.values);
+  static JsonTypeConverter2<PrayerSound, String, String> $convertermaghribSound =
+      const EnumNameConverter<PrayerSound>(PrayerSound.values);
+  static JsonTypeConverter2<PrayerSound, String, String> $converterishaSound =
+      const EnumNameConverter<PrayerSound>(PrayerSound.values);
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -487,6 +633,17 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
 
   /// the strip's earliest week. the v2 migration fills it with the upgrade date
   final DateTime? firstUse;
+  final PrayerSound fajrSound;
+  final PrayerSound dhuhrSound;
+  final PrayerSound asrSound;
+  final PrayerSound maghribSound;
+  final PrayerSound ishaSound;
+
+  /// minutes before each prayer, 0 is off
+  final int reminderMinutes;
+
+  /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
+  final bool notificationsAsked;
   const AppSettings({
     required this.id,
     this.latitude,
@@ -509,6 +666,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.uiSounds,
     required this.storeResetPending,
     this.firstUse,
+    required this.fajrSound,
+    required this.dhuhrSound,
+    required this.asrSound,
+    required this.maghribSound,
+    required this.ishaSound,
+    required this.reminderMinutes,
+    required this.notificationsAsked,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -566,6 +730,25 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     if (!nullToAbsent || firstUse != null) {
       map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse));
     }
+    {
+      map['fajr_sound'] = Variable<String>($SettingsTable.$converterfajrSound.toSql(fajrSound));
+    }
+    {
+      map['dhuhr_sound'] = Variable<String>($SettingsTable.$converterdhuhrSound.toSql(dhuhrSound));
+    }
+    {
+      map['asr_sound'] = Variable<String>($SettingsTable.$converterasrSound.toSql(asrSound));
+    }
+    {
+      map['maghrib_sound'] = Variable<String>(
+        $SettingsTable.$convertermaghribSound.toSql(maghribSound),
+      );
+    }
+    {
+      map['isha_sound'] = Variable<String>($SettingsTable.$converterishaSound.toSql(ishaSound));
+    }
+    map['reminder_minutes'] = Variable<int>(reminderMinutes);
+    map['notifications_asked'] = Variable<bool>(notificationsAsked);
     return map;
   }
 
@@ -596,6 +779,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       uiSounds: Value(uiSounds),
       storeResetPending: Value(storeResetPending),
       firstUse: firstUse == null && nullToAbsent ? const Value.absent() : Value(firstUse),
+      fajrSound: Value(fajrSound),
+      dhuhrSound: Value(dhuhrSound),
+      asrSound: Value(asrSound),
+      maghribSound: Value(maghribSound),
+      ishaSound: Value(ishaSound),
+      reminderMinutes: Value(reminderMinutes),
+      notificationsAsked: Value(notificationsAsked),
     );
   }
 
@@ -631,6 +821,23 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       uiSounds: serializer.fromJson<bool>(json['uiSounds']),
       storeResetPending: serializer.fromJson<bool>(json['storeResetPending']),
       firstUse: serializer.fromJson<DateTime?>(json['firstUse']),
+      fajrSound: $SettingsTable.$converterfajrSound.fromJson(
+        serializer.fromJson<String>(json['fajrSound']),
+      ),
+      dhuhrSound: $SettingsTable.$converterdhuhrSound.fromJson(
+        serializer.fromJson<String>(json['dhuhrSound']),
+      ),
+      asrSound: $SettingsTable.$converterasrSound.fromJson(
+        serializer.fromJson<String>(json['asrSound']),
+      ),
+      maghribSound: $SettingsTable.$convertermaghribSound.fromJson(
+        serializer.fromJson<String>(json['maghribSound']),
+      ),
+      ishaSound: $SettingsTable.$converterishaSound.fromJson(
+        serializer.fromJson<String>(json['ishaSound']),
+      ),
+      reminderMinutes: serializer.fromJson<int>(json['reminderMinutes']),
+      notificationsAsked: serializer.fromJson<bool>(json['notificationsAsked']),
     );
   }
   @override
@@ -662,6 +869,17 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'uiSounds': serializer.toJson<bool>(uiSounds),
       'storeResetPending': serializer.toJson<bool>(storeResetPending),
       'firstUse': serializer.toJson<DateTime?>(firstUse),
+      'fajrSound': serializer.toJson<String>($SettingsTable.$converterfajrSound.toJson(fajrSound)),
+      'dhuhrSound': serializer.toJson<String>(
+        $SettingsTable.$converterdhuhrSound.toJson(dhuhrSound),
+      ),
+      'asrSound': serializer.toJson<String>($SettingsTable.$converterasrSound.toJson(asrSound)),
+      'maghribSound': serializer.toJson<String>(
+        $SettingsTable.$convertermaghribSound.toJson(maghribSound),
+      ),
+      'ishaSound': serializer.toJson<String>($SettingsTable.$converterishaSound.toJson(ishaSound)),
+      'reminderMinutes': serializer.toJson<int>(reminderMinutes),
+      'notificationsAsked': serializer.toJson<bool>(notificationsAsked),
     };
   }
 
@@ -687,6 +905,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     bool? uiSounds,
     bool? storeResetPending,
     Value<DateTime?> firstUse = const Value.absent(),
+    PrayerSound? fajrSound,
+    PrayerSound? dhuhrSound,
+    PrayerSound? asrSound,
+    PrayerSound? maghribSound,
+    PrayerSound? ishaSound,
+    int? reminderMinutes,
+    bool? notificationsAsked,
   }) => AppSettings(
     id: id ?? this.id,
     latitude: latitude.present ? latitude.value : this.latitude,
@@ -709,6 +934,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     uiSounds: uiSounds ?? this.uiSounds,
     storeResetPending: storeResetPending ?? this.storeResetPending,
     firstUse: firstUse.present ? firstUse.value : this.firstUse,
+    fajrSound: fajrSound ?? this.fajrSound,
+    dhuhrSound: dhuhrSound ?? this.dhuhrSound,
+    asrSound: asrSound ?? this.asrSound,
+    maghribSound: maghribSound ?? this.maghribSound,
+    ishaSound: ishaSound ?? this.ishaSound,
+    reminderMinutes: reminderMinutes ?? this.reminderMinutes,
+    notificationsAsked: notificationsAsked ?? this.notificationsAsked,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
     return AppSettings(
@@ -735,6 +967,17 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.storeResetPending.value
           : this.storeResetPending,
       firstUse: data.firstUse.present ? data.firstUse.value : this.firstUse,
+      fajrSound: data.fajrSound.present ? data.fajrSound.value : this.fajrSound,
+      dhuhrSound: data.dhuhrSound.present ? data.dhuhrSound.value : this.dhuhrSound,
+      asrSound: data.asrSound.present ? data.asrSound.value : this.asrSound,
+      maghribSound: data.maghribSound.present ? data.maghribSound.value : this.maghribSound,
+      ishaSound: data.ishaSound.present ? data.ishaSound.value : this.ishaSound,
+      reminderMinutes: data.reminderMinutes.present
+          ? data.reminderMinutes.value
+          : this.reminderMinutes,
+      notificationsAsked: data.notificationsAsked.present
+          ? data.notificationsAsked.value
+          : this.notificationsAsked,
     );
   }
 
@@ -761,7 +1004,14 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
           ..write('storeResetPending: $storeResetPending, ')
-          ..write('firstUse: $firstUse')
+          ..write('firstUse: $firstUse, ')
+          ..write('fajrSound: $fajrSound, ')
+          ..write('dhuhrSound: $dhuhrSound, ')
+          ..write('asrSound: $asrSound, ')
+          ..write('maghribSound: $maghribSound, ')
+          ..write('ishaSound: $ishaSound, ')
+          ..write('reminderMinutes: $reminderMinutes, ')
+          ..write('notificationsAsked: $notificationsAsked')
           ..write(')'))
         .toString();
   }
@@ -789,6 +1039,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     uiSounds,
     storeResetPending,
     firstUse,
+    fajrSound,
+    dhuhrSound,
+    asrSound,
+    maghribSound,
+    ishaSound,
+    reminderMinutes,
+    notificationsAsked,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -814,7 +1071,14 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.haptics == this.haptics &&
           other.uiSounds == this.uiSounds &&
           other.storeResetPending == this.storeResetPending &&
-          other.firstUse == this.firstUse);
+          other.firstUse == this.firstUse &&
+          other.fajrSound == this.fajrSound &&
+          other.dhuhrSound == this.dhuhrSound &&
+          other.asrSound == this.asrSound &&
+          other.maghribSound == this.maghribSound &&
+          other.ishaSound == this.ishaSound &&
+          other.reminderMinutes == this.reminderMinutes &&
+          other.notificationsAsked == this.notificationsAsked);
 }
 
 class SettingsCompanion extends UpdateCompanion<AppSettings> {
@@ -839,6 +1103,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<bool> uiSounds;
   final Value<bool> storeResetPending;
   final Value<DateTime?> firstUse;
+  final Value<PrayerSound> fajrSound;
+  final Value<PrayerSound> dhuhrSound;
+  final Value<PrayerSound> asrSound;
+  final Value<PrayerSound> maghribSound;
+  final Value<PrayerSound> ishaSound;
+  final Value<int> reminderMinutes;
+  final Value<bool> notificationsAsked;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.latitude = const Value.absent(),
@@ -861,6 +1132,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.uiSounds = const Value.absent(),
     this.storeResetPending = const Value.absent(),
     this.firstUse = const Value.absent(),
+    this.fajrSound = const Value.absent(),
+    this.dhuhrSound = const Value.absent(),
+    this.asrSound = const Value.absent(),
+    this.maghribSound = const Value.absent(),
+    this.ishaSound = const Value.absent(),
+    this.reminderMinutes = const Value.absent(),
+    this.notificationsAsked = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -884,6 +1162,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.uiSounds = const Value.absent(),
     this.storeResetPending = const Value.absent(),
     this.firstUse = const Value.absent(),
+    this.fajrSound = const Value.absent(),
+    this.dhuhrSound = const Value.absent(),
+    this.asrSound = const Value.absent(),
+    this.maghribSound = const Value.absent(),
+    this.ishaSound = const Value.absent(),
+    this.reminderMinutes = const Value.absent(),
+    this.notificationsAsked = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
     Expression<int>? id,
@@ -907,6 +1192,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<bool>? uiSounds,
     Expression<bool>? storeResetPending,
     Expression<String>? firstUse,
+    Expression<String>? fajrSound,
+    Expression<String>? dhuhrSound,
+    Expression<String>? asrSound,
+    Expression<String>? maghribSound,
+    Expression<String>? ishaSound,
+    Expression<int>? reminderMinutes,
+    Expression<bool>? notificationsAsked,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -930,6 +1222,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (uiSounds != null) 'ui_sounds': uiSounds,
       if (storeResetPending != null) 'store_reset_pending': storeResetPending,
       if (firstUse != null) 'first_use': firstUse,
+      if (fajrSound != null) 'fajr_sound': fajrSound,
+      if (dhuhrSound != null) 'dhuhr_sound': dhuhrSound,
+      if (asrSound != null) 'asr_sound': asrSound,
+      if (maghribSound != null) 'maghrib_sound': maghribSound,
+      if (ishaSound != null) 'isha_sound': ishaSound,
+      if (reminderMinutes != null) 'reminder_minutes': reminderMinutes,
+      if (notificationsAsked != null) 'notifications_asked': notificationsAsked,
     });
   }
 
@@ -955,6 +1254,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<bool>? uiSounds,
     Value<bool>? storeResetPending,
     Value<DateTime?>? firstUse,
+    Value<PrayerSound>? fajrSound,
+    Value<PrayerSound>? dhuhrSound,
+    Value<PrayerSound>? asrSound,
+    Value<PrayerSound>? maghribSound,
+    Value<PrayerSound>? ishaSound,
+    Value<int>? reminderMinutes,
+    Value<bool>? notificationsAsked,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -978,6 +1284,13 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       uiSounds: uiSounds ?? this.uiSounds,
       storeResetPending: storeResetPending ?? this.storeResetPending,
       firstUse: firstUse ?? this.firstUse,
+      fajrSound: fajrSound ?? this.fajrSound,
+      dhuhrSound: dhuhrSound ?? this.dhuhrSound,
+      asrSound: asrSound ?? this.asrSound,
+      maghribSound: maghribSound ?? this.maghribSound,
+      ishaSound: ishaSound ?? this.ishaSound,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
+      notificationsAsked: notificationsAsked ?? this.notificationsAsked,
     );
   }
 
@@ -1053,6 +1366,35 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (firstUse.present) {
       map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse.value));
     }
+    if (fajrSound.present) {
+      map['fajr_sound'] = Variable<String>(
+        $SettingsTable.$converterfajrSound.toSql(fajrSound.value),
+      );
+    }
+    if (dhuhrSound.present) {
+      map['dhuhr_sound'] = Variable<String>(
+        $SettingsTable.$converterdhuhrSound.toSql(dhuhrSound.value),
+      );
+    }
+    if (asrSound.present) {
+      map['asr_sound'] = Variable<String>($SettingsTable.$converterasrSound.toSql(asrSound.value));
+    }
+    if (maghribSound.present) {
+      map['maghrib_sound'] = Variable<String>(
+        $SettingsTable.$convertermaghribSound.toSql(maghribSound.value),
+      );
+    }
+    if (ishaSound.present) {
+      map['isha_sound'] = Variable<String>(
+        $SettingsTable.$converterishaSound.toSql(ishaSound.value),
+      );
+    }
+    if (reminderMinutes.present) {
+      map['reminder_minutes'] = Variable<int>(reminderMinutes.value);
+    }
+    if (notificationsAsked.present) {
+      map['notifications_asked'] = Variable<bool>(notificationsAsked.value);
+    }
     return map;
   }
 
@@ -1079,7 +1421,14 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
           ..write('storeResetPending: $storeResetPending, ')
-          ..write('firstUse: $firstUse')
+          ..write('firstUse: $firstUse, ')
+          ..write('fajrSound: $fajrSound, ')
+          ..write('dhuhrSound: $dhuhrSound, ')
+          ..write('asrSound: $asrSound, ')
+          ..write('maghribSound: $maghribSound, ')
+          ..write('ishaSound: $ishaSound, ')
+          ..write('reminderMinutes: $reminderMinutes, ')
+          ..write('notificationsAsked: $notificationsAsked')
           ..write(')'))
         .toString();
   }
@@ -1580,6 +1929,13 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<bool> uiSounds,
   Value<bool> storeResetPending,
   Value<DateTime?> firstUse,
+  Value<PrayerSound> fajrSound,
+  Value<PrayerSound> dhuhrSound,
+  Value<PrayerSound> asrSound,
+  Value<PrayerSound> maghribSound,
+  Value<PrayerSound> ishaSound,
+  Value<int> reminderMinutes,
+  Value<bool> notificationsAsked,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> id,
@@ -1603,6 +1959,13 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<bool> uiSounds,
   Value<bool> storeResetPending,
   Value<DateTime?> firstUse,
+  Value<PrayerSound> fajrSound,
+  Value<PrayerSound> dhuhrSound,
+  Value<PrayerSound> asrSound,
+  Value<PrayerSound> maghribSound,
+  Value<PrayerSound> ishaSound,
+  Value<int> reminderMinutes,
+  Value<bool> notificationsAsked,
 });
 
 class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -1694,6 +2057,46 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
     column: $table.firstUse,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<PrayerSound, PrayerSound, String> get fajrSound =>
+      $composableBuilder(
+        column: $table.fajrSound,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<PrayerSound, PrayerSound, String> get dhuhrSound =>
+      $composableBuilder(
+        column: $table.dhuhrSound,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<PrayerSound, PrayerSound, String> get asrSound =>
+      $composableBuilder(
+        column: $table.asrSound,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<PrayerSound, PrayerSound, String> get maghribSound =>
+      $composableBuilder(
+        column: $table.maghribSound,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<PrayerSound, PrayerSound, String> get ishaSound =>
+      $composableBuilder(
+        column: $table.ishaSound,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get notificationsAsked => $composableBuilder(
+    column: $table.notificationsAsked,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -1768,6 +2171,31 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
 
   ColumnOrderings<String> get firstUse =>
       $composableBuilder(column: $table.firstUse, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fajrSound =>
+      $composableBuilder(column: $table.fajrSound, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get dhuhrSound =>
+      $composableBuilder(column: $table.dhuhrSound, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get asrSound =>
+      $composableBuilder(column: $table.asrSound, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get maghribSound =>
+      $composableBuilder(column: $table.maghribSound, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ishaSound =>
+      $composableBuilder(column: $table.ishaSound, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get reminderMinutes => $composableBuilder(
+    column: $table.reminderMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get notificationsAsked => $composableBuilder(
+    column: $table.notificationsAsked,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -1839,6 +2267,27 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumnWithTypeConverter<DateTime?, String> get firstUse =>
       $composableBuilder(column: $table.firstUse, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PrayerSound, String> get fajrSound =>
+      $composableBuilder(column: $table.fajrSound, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PrayerSound, String> get dhuhrSound =>
+      $composableBuilder(column: $table.dhuhrSound, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PrayerSound, String> get asrSound =>
+      $composableBuilder(column: $table.asrSound, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PrayerSound, String> get maghribSound =>
+      $composableBuilder(column: $table.maghribSound, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PrayerSound, String> get ishaSound =>
+      $composableBuilder(column: $table.ishaSound, builder: (column) => column);
+
+  GeneratedColumn<int> get reminderMinutes =>
+      $composableBuilder(column: $table.reminderMinutes, builder: (column) => column);
+
+  GeneratedColumn<bool> get notificationsAsked =>
+      $composableBuilder(column: $table.notificationsAsked, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -1888,6 +2337,13 @@ class $$SettingsTableTableManager
                 Value<bool> uiSounds = const Value.absent(),
                 Value<bool> storeResetPending = const Value.absent(),
                 Value<DateTime?> firstUse = const Value.absent(),
+                Value<PrayerSound> fajrSound = const Value.absent(),
+                Value<PrayerSound> dhuhrSound = const Value.absent(),
+                Value<PrayerSound> asrSound = const Value.absent(),
+                Value<PrayerSound> maghribSound = const Value.absent(),
+                Value<PrayerSound> ishaSound = const Value.absent(),
+                Value<int> reminderMinutes = const Value.absent(),
+                Value<bool> notificationsAsked = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 latitude: latitude,
@@ -1910,6 +2366,13 @@ class $$SettingsTableTableManager
                 uiSounds: uiSounds,
                 storeResetPending: storeResetPending,
                 firstUse: firstUse,
+                fajrSound: fajrSound,
+                dhuhrSound: dhuhrSound,
+                asrSound: asrSound,
+                maghribSound: maghribSound,
+                ishaSound: ishaSound,
+                reminderMinutes: reminderMinutes,
+                notificationsAsked: notificationsAsked,
               ),
           createCompanionCallback:
               ({
@@ -1934,6 +2397,13 @@ class $$SettingsTableTableManager
                 Value<bool> uiSounds = const Value.absent(),
                 Value<bool> storeResetPending = const Value.absent(),
                 Value<DateTime?> firstUse = const Value.absent(),
+                Value<PrayerSound> fajrSound = const Value.absent(),
+                Value<PrayerSound> dhuhrSound = const Value.absent(),
+                Value<PrayerSound> asrSound = const Value.absent(),
+                Value<PrayerSound> maghribSound = const Value.absent(),
+                Value<PrayerSound> ishaSound = const Value.absent(),
+                Value<int> reminderMinutes = const Value.absent(),
+                Value<bool> notificationsAsked = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 latitude: latitude,
@@ -1956,6 +2426,13 @@ class $$SettingsTableTableManager
                 uiSounds: uiSounds,
                 storeResetPending: storeResetPending,
                 firstUse: firstUse,
+                fajrSound: fajrSound,
+                dhuhrSound: dhuhrSound,
+                asrSound: asrSound,
+                maghribSound: maghribSound,
+                ishaSound: ishaSound,
+                reminderMinutes: reminderMinutes,
+                notificationsAsked: notificationsAsked,
               ),
           withReferenceMapper: (p0) => p0
               .map(

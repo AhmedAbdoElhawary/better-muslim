@@ -60,6 +60,21 @@ class Settings extends Table {
   /// the strip's earliest week. the v2 migration fills it with the upgrade date
   TextColumn get firstUse => text().map(const CivilDate()).nullable()();
 
+  TextColumn get fajrSound => textEnum<PrayerSound>().withDefault(const Constant('adhan'))();
+  TextColumn get dhuhrSound => textEnum<PrayerSound>().withDefault(const Constant('tone'))();
+  TextColumn get asrSound => textEnum<PrayerSound>().withDefault(const Constant('tone'))();
+  TextColumn get maghribSound => textEnum<PrayerSound>().withDefault(const Constant('adhan'))();
+  TextColumn get ishaSound => textEnum<PrayerSound>().withDefault(const Constant('tone'))();
+
+  /// minutes before each prayer, 0 is off
+  IntColumn get reminderMinutes => integer()
+      .withDefault(const Constant(10))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(reminderMinutes.isIn(const [0, 5, 10, 15, 20, 30]))();
+
+  /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
+  BoolColumn get notificationsAsked => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -115,6 +130,22 @@ class AppDatabase extends _$AppDatabase {
     return db;
   }
 
+  /// background code must never reset the store, a locked keychain there is not a lost key
+  static Future<AppDatabase?> openExisting() async {
+    final directory = await getApplicationSupportDirectory();
+    final file = File('${directory.path}/$_name.sqlite');
+    final key = await DatabaseKey.read();
+    if (key == null || !file.existsSync()) return null;
+    final db = _connect(file, key);
+    try {
+      await db.customSelect('select count(*) from sqlite_master').get();
+      return db;
+    } catch (_) {
+      await db.close();
+      return null;
+    }
+  }
+
   /// only the reason is reported, never the path or anything from the store
   static Future<AppDatabase> _reset(
     File file,
@@ -139,13 +170,16 @@ class AppDatabase extends _$AppDatabase {
       name: _name,
       native: DriftNativeOptions(
         databasePath: () async => file.path,
+
+        /// a mark from a notification's background engine shows in the app's streams at once
+        shareAcrossIsolates: true,
         setup: (db) => db.execute("pragma key = '$key'"),
       ),
     ),
   );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -158,6 +192,19 @@ class AppDatabase extends _$AppDatabase {
 
         /// sqlite can't add a column with a non constant default
         await customStatement("update settings set first_use = date('now', 'localtime')");
+      },
+      from2To3: (m, schema) async {
+        for (final column in [
+          schema.settings.fajrSound,
+          schema.settings.dhuhrSound,
+          schema.settings.asrSound,
+          schema.settings.maghribSound,
+          schema.settings.ishaSound,
+          schema.settings.reminderMinutes,
+          schema.settings.notificationsAsked,
+        ]) {
+          await m.addColumn(schema.settings, column);
+        }
       },
     ),
   );
