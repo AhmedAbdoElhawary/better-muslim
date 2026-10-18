@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -23,8 +24,7 @@ class StripRow extends ConsumerWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        // TODO: Routes.prayerAt(day, prayer) once milestone 4 adds it
-        onTap: () => context.go(Routes.prayer),
+        onTap: () => context.go(Routes.prayerAt(ref.read(prayerDayProvider), cell.prayer)),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: cell.current ? context.getColor(ThemeEnum.primaryContainer) : null,
