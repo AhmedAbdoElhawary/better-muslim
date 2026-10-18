@@ -8,7 +8,8 @@ class KeyboardPadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _RPadding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      /// ios can report a negative inset while the keyboard closes, and Padding asserts on it
+      padding: EdgeInsets.only(bottom: math.max(0, MediaQuery.viewInsetsOf(context).bottom)),
       child: child,
     );
   }
