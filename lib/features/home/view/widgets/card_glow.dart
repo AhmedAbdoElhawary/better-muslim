@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/widgets/ellipse_transform.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,7 +57,7 @@ class _CardGlowState extends ConsumerState<CardGlow> with SingleTickerProviderSt
               glow.withValues(alpha: 0),
             ],
             stops: const [0, _stop],
-            transform: const _Ellipse(),
+            transform: const EllipseTransform(),
           ),
         ),
       ),
@@ -74,20 +75,5 @@ class _CardGlowState extends ConsumerState<CardGlow> with SingleTickerProviderSt
         },
       ),
     );
-  }
-}
-
-/// stretches the circle on the short side into the box's ellipse
-class _Ellipse extends GradientTransform {
-  const _Ellipse();
-
-  @override
-  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    final center = bounds.center;
-    final aspect = bounds.width / bounds.height;
-    return Matrix4.identity()
-      ..translateByDouble(center.dx, center.dy, 0, 1)
-      ..scaleByDouble(math.max(aspect, 1), math.max(1 / aspect, 1), 1, 1)
-      ..translateByDouble(-center.dx, -center.dy, 0, 1);
   }
 }
