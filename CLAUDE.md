@@ -47,6 +47,15 @@ From the spec to the code:
    scenario that freezes time at Thu 15 Oct 2026 16:32 Makkah so screens match the PNGs.
 3. to 11. as in `HANDOFF_CLAUDE.md`.
 
+## Run
+
+VS Code (Run and Debug) and Android Studio (run configurations) both have Dev, Staging and Prod.
+Terminal, same on iOS and Android:
+
+```bash
+flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=dart_define/dev.json
+```
+
 ## Before saying done
 
 ```bash
