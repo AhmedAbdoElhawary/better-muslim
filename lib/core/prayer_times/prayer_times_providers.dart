@@ -23,7 +23,10 @@ final todayProvider = Provider<DateTime>((ref) {
 });
 
 /// null without a location. reads no clock, so the same inputs give the same times
-final dayTimesProvider = Provider.family<DayTimes?, DateTime>((ref, date) {
+final dayTimesProvider = Provider.family<DayTimes?, DateTime>(computeDayTimes);
+
+/// outside the provider, so the design scenario's override can fall back to it for other dates
+DayTimes? computeDayTimes(Ref ref, DateTime date) {
   final location = ref.watch(locationProvider);
   final picked = ref.watch(
     settingsProvider.select(
@@ -44,11 +47,25 @@ final dayTimesProvider = Provider.family<DayTimes?, DateTime>((ref, date) {
     asrMethod: picked.asrMethod ?? AsrMethod.forCountry(location.countryCode),
     isRamadan: HijriDate.of(date, picked.hijriAdjust).month == 9,
   );
-});
+}
 
 final todayTimesProvider = Provider<DayTimes?>(
   (ref) => ref.watch(dayTimesProvider(ref.watch(todayProvider))),
 );
+
+/// fajr to the next fajr, so last night's isha and its log stay until fajr. a missing fajr
+/// counts as not yet. follows the ticker, but only notifies when the day changes
+final prayerDayProvider = Provider<DateTime>((ref) {
+  final today = ref.watch(todayProvider);
+  final times = ref.watch(
+    todayTimesProvider.select((times) => (located: times != null, fajr: times?.fajr)),
+  );
+  if (!times.located) return today;
+  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final fajr = times.fajr;
+  if (fajr != null && !now.isBefore(fajr)) return today;
+  return DateTime(today.year, today.month, today.day - 1);
+});
 
 /// follows the ticker, but only notifies when the period changes
 final periodProvider = Provider<Period?>((ref) {
