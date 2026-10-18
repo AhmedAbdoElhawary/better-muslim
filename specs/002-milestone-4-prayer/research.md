@@ -217,7 +217,7 @@ cache (drift 2.35.2, drift_flutter 0.3.1, riverpod 3.4.3, intl 0.20.3) and the F
     every step.
 - **Rationale**: someone returning to prayer adds months at once (the second Q2). The handoff has
   no stepper, so it is built from parts it does have, the minus and plus icons and the sheet, and
-  it waits for my OK on screenshots (FR-022).
+  I check it in the app before it counts as done (FR-022).
 - **Alternatives**: a text field for the number (needs a keyboard and validation, and Eastern
   digits input), one entry per tap (the first answer, slow for years).
 
