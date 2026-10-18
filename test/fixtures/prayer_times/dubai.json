@@ -1,0 +1,28 @@
+{
+  "city": "Dubai",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 16 (Dubai), school 0, latitudeAdjustmentMethod 1 (middle of the night), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 25.0773,
+  "longitude": 55.3093,
+  "timeZone": "Asia/Dubai",
+  "method": "dubai",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:00",
+      "sunrise": "06:17",
+      "dhuhr": "12:08",
+      "asr": "15:24",
+      "maghrib": "17:55",
+      "isha": "19:09",
+      "gaps": {
+        "sunrise": "adhan's dubai preset moves sunrise 3 min earlier, AlAdhan method 16 doesn't. No official Dubai table was fetched",
+        "asr": "adhan's dubai preset adds 3 min to asr, AlAdhan method 16 doesn't. NOAA gives 15:23:38 before offsets"
+      }
+    }
+  ]
+}

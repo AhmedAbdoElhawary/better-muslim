@@ -1,0 +1,27 @@
+{
+  "city": "Cairo",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 5 (Egyptian General Authority of Survey), school 0, latitudeAdjustmentMethod 1 (middle of the night), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 30.0626,
+  "longitude": 31.2497,
+  "timeZone": "Africa/Cairo",
+  "method": "egyptian",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:30",
+      "sunrise": "06:57",
+      "dhuhr": "12:41",
+      "asr": "15:58",
+      "maghrib": "18:24",
+      "isha": "19:42",
+      "gaps": {
+        "asr": "adhan_dart takes the asr shadow from the declination at 0h UT, so it runs about 1.5 min early in autumn and late in spring at this latitude, and AlAdhan errs the other way. NOAA solar position gives 15:56:53, between the two"
+      }
+    }
+  ]
+}
