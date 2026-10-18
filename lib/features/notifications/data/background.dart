@@ -1,10 +1,13 @@
 import 'dart:ui';
 
+import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -12,7 +15,9 @@ import 'package:better_muslim/features/notifications/domain/schedule.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' show TZDateTime;
+import 'package:workmanager/workmanager.dart';
 
 /// the same steps in the app and in the background, with no riverpod, so both write the same
 /// schedule (FR-009)
@@ -98,4 +103,36 @@ Future<void> markPrayedInBackground(List<String> args) async {
     /// kotlin destroys the engine on this
     await const MethodChannel('better_muslim/adhan/background').invokeMethod<void>('done');
   }
+}
+
+/// the same name on both platforms, ios only runs a task listed in BGTaskSchedulerPermittedIdentifiers
+const topUpTask = 'better_muslim.topup';
+
+/// the phone left alone still gets 6 days: android every 12 h, ios when it allows (FR-009).
+/// errors aren't reported from here, the next launch tries again (research R14)
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, input) async {
+    DartPluginRegistrant.ensureInitialized();
+    tz.initializeTimeZones();
+    final db = await AppDatabase.openExisting();
+    if (db == null) return true;
+    try {
+      final locale = AppLocalizations.localeFor(PlatformDispatcher.instance.locales);
+      final l10n = await AppLocalizations.load(locale);
+      final scheduler = NotificationScheduler(AdhanChannel());
+      await scheduler.init(markPrayed: l10n.tr(StringsManager.markPrayed, const {}));
+      if (!await scheduler.isAllowed()) return true;
+      await topUp(
+        db,
+        scheduler: scheduler,
+        locale: locale,
+        use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+        phoneZone: await PhoneZone.read(),
+      );
+    } finally {
+      await db.close();
+    }
+    return true;
+  });
 }

@@ -4,12 +4,14 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/monitoring/monitoring.dart';
+import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/presentation/notifications_boot.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:workmanager/workmanager.dart';
 
 Future<void> bootstrap(FlavorConfig config) {
   return Monitoring.start(config: config, appRunner: () => _boot(config));
@@ -30,6 +32,17 @@ Future<void> _boot(FlavorConfig config) async {
   tz.initializeTimeZones();
   final db = config.isDesignScenario ? await designScenarioStore() : await AppDatabase.open();
   final phoneZone = await PhoneZone.read();
+
+  /// keep, so every launch doesn't push the next run 12 hours away
+  if (!config.isDesignScenario) {
+    await Workmanager().initialize(callbackDispatcher);
+    await Workmanager().registerPeriodicTask(
+      topUpTask,
+      topUpTask,
+      frequency: const Duration(hours: 12),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    );
+  }
   runApp(
     ProviderScope(
       overrides: [
