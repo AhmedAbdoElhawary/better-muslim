@@ -31,7 +31,7 @@
   "stopAdhan": "إيقاف الأذان",
   "prayerTimes": "مواقيت الصلاة",
   "prayedToday": "{count} من ٥ صلوات اليوم",
-  "missedToMakeUp": "{count} صلوات فائتة هذا الشهر للقضاء",
+  "missedToMakeUp": "{count, plural, one{صلاة واحدة فائتة هذا الشهر للقضاء} two{صلاتان فائتتان هذا الشهر للقضاء} few{{count} صلوات فائتة هذا الشهر للقضاء} other{{count} صلاة فائتة هذا الشهر للقضاء}}",
   "mark": "تسجيل",
   "prayed": "صلّيت",
   "inDuration": "بعد {duration}",
@@ -165,5 +165,67 @@
   "searchCity": "ابحث عن مدينة",
   "noPlacesFound": "لا توجد أماكن",
   "locationFailed": "تعذّر تحديد موقعك. تأكد أن الموقع مفعّل، أو اختر مدينة.",
-  "noLocationBody": "أوقات الصلاة تحتاج موقعك أو مدينة."
+  "noLocationBody": "أوقات الصلاة تحتاج موقعك أو مدينة.",
+  "prayerUnmarked": "أُلغي تسجيل {prayer}",
+  "@prayerUnmarked": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "undo": "تراجع",
+  "prayerPassedTitle": "انتهى وقت {prayer}",
+  "@prayerPassedTitle": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "prayerPassedBody": "يمكنك إضافتها إلى قائمة القضاء متى شئت.",
+  "iPrayedIt": "صلّيتها",
+  "addedToQada": "أُضيفت صلاة {prayer} إلى القضاء",
+  "@addedToQada": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "removedFromQada": "أُزيلت صلاة {prayer} من القضاء",
+  "@removedFromQada": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "inQada": "في القضاء",
+  "madeUp": "قُضيت",
+  "nothingToMakeUp": "لا صلوات للقضاء هذا الشهر",
+  "qadaList": "قائمة القضاء",
+  "qadaTotal": "{count, plural, one{صلاة واحدة للقضاء} two{صلاتان للقضاء} few{{count} صلوات للقضاء} other{{count} صلاة للقضاء}}",
+  "@qadaTotal": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "qadaLeft": "بقي {count}",
+  "@qadaLeft": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "madeOneUp": "قضيت واحدة",
+  "prayerMadeUp": "قُضيت صلاة {prayer}",
+  "@prayerMadeUp": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "addOlderQada": "أضف صلاة فائتة سابقة",
+  "addMissedTitle": "أضف صلوات {prayer} الفائتة",
+  "@addMissedTitle": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "add": "أضف",
+  "byCountry": "حسب البلد",
+  "chosenForCountry": "مُختارة حسب بلدك",
+  "asrCalculation": "حساب العصر",
+  "allFivePrayed": "صلّيت الخمس"
 }
