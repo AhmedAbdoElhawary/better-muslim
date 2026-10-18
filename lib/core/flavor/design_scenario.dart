@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/location/position_source.dart';
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
@@ -12,6 +13,7 @@ import 'package:timezone/timezone.dart' show TZDateTime, getLocation;
 /// the moment every PNG shows: thu 15 oct 2026, 16:32 in makkah (FR-026). dev builds only
 List<Override> designScenarioOverrides() {
   final riyadh = getLocation('Asia/Riyadh');
+  final day = DateTime(2026, 10, 15);
   TZDateTime at(int hour, int minute) => TZDateTime(riyadh, 2026, 10, 15, hour, minute);
   return [
     clockProvider.overrideWithValue(() => DateTime.utc(2026, 10, 15, 13, 32)),
@@ -28,19 +30,26 @@ List<Override> designScenarioOverrides() {
       ),
     ),
 
-    /// the handoff's times, a real calculation gives fajr 05:00, sunrise 06:16, dhuhr 12:06 (R10)
-    todayTimesProvider.overrideWithValue(
-      DayTimes(
-        date: DateTime(2026, 10, 15),
-        fajr: at(4, 58),
-        sunrise: at(6, 15),
-        dhuhr: at(12, 5),
-        asr: at(15, 27),
-        maghrib: at(17, 56),
-        isha: at(19, 26),
-        method: PrayerMethod.ummAlQura,
-        asrMethod: AsrMethod.standard,
-      ),
+    /// the handoff's times, a real calculation gives fajr 05:00, sunrise 06:16, dhuhr 12:06 (R10).
+    /// on the date, not on today, so the strip's prayer day gets them too
+    dayTimesProvider.overrideWith(
+      (ref, date) => date == day
+          ? DayTimes(
+              date: day,
+              fajr: at(4, 58),
+              sunrise: at(6, 15),
+              dhuhr: at(12, 5),
+              asr: at(15, 27),
+              maghrib: at(17, 56),
+              isha: at(19, 26),
+              method: PrayerMethod.ummAlQura,
+              asrMethod: AsrMethod.standard,
+            )
+          : computeDayTimes(ref, date),
+    ),
+    // TODO: milestone 4 drops this once the scenario seeds the store
+    prayedProvider.overrideWith(
+      (ref, date) => date == day ? const {Prayer.fajr, Prayer.dhuhr} : const {},
     ),
     positionSourceProvider.overrideWithValue(const _NoPosition()),
   ];
