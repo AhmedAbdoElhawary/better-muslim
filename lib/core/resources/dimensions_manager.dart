@@ -137,6 +137,75 @@ abstract final class SpaceManager {
   /// the share card has no design, inside the arch's shoulders
   static const double shareCardTop = 96;
   static const double shareCardSide = 32;
+
+  /// more (4.09) and the components' grouped list rows
+  static const double moreTitleTop = 2;
+  static const double moreSubtitleTop = 6;
+  static const double moreTilesTop = 20;
+  static const double moreSectionsTop = 22;
+  static const double tileGap = 10;
+  static const double tilePadding = 14;
+  static const double sectionGap = 20;
+  static const double sectionLabelGap = 8;
+  static const double listRowStart = 16;
+  static const double listRowEnd = 14;
+  static const double listRowGap = 14;
+
+  /// the components' segmented control, 4.15's and 4.12's smaller one
+  static const double segmentTrack = 3;
+  static const double segmentGap = 2;
+  static const double segmentSmallSide = 10;
+
+  /// theme (4.15), each gap from the tree's top to the bottom of the element above
+  static const double previewTop = 8;
+  static const double previewSnippetTop = 18;
+  static const double previewChipStart = 12;
+  static const double previewChipBottom = 10;
+  static const double previewChipH = 10;
+  static const double previewChipV = 4;
+  static const double modeTop = 14;
+  static const double swatchesTop = 16;
+  static const double swatchRowGap = 12;
+  static const double swatchColumnGap = 10;
+  static const double swatchInset = 7;
+  static const double swatchNameGap = 6;
+  static const double swatchCheck = 5;
+  static const double themeNoteTop = 26;
+
+  /// the snippet inside the preview (Theme Snippet.dc.html)
+  static const double snippetTopH = 20;
+  static const double snippetTopV = 16;
+  static const double snippetNowTop = 12;
+  static const double snippetCardOverlap = 58;
+  static const double snippetCardSide = 14;
+  static const double snippetCardH = 16;
+  static const double snippetCardTop = 14;
+  static const double snippetCardBottom = 15;
+  static const double snippetCardGap = 7;
+  static const double snippetStripTop = 14;
+  static const double snippetCellV = 9;
+  static const double snippetCellGap = 3;
+  static const double snippetVerseTop = 12;
+  static const double snippetVerseBottom = 15;
+  static const double snippetVerseLineTop = 6;
+  static const double snippetTranslationTop = 8;
+
+  /// hijri calendar (4.13), each gap from the tree's top to the bottom of the element above
+  static const double monthHeaderTop = 8;
+  static const double monthNameGap = 2;
+  static const double gridTop = 22;
+  static const double gridSide = 12;
+  static const double gridGap = 2;
+  static const double comingUpTop = 12;
+  static const double comingUpLabelSide = 4;
+  static const double comingUpRowV = 12;
+  static const double adjustmentTop = 20;
+  static const double stepperGap = 24;
+
+  /// the components' dialog
+  static const double dialogBodyTop = 10;
+  static const double dialogActionsTop = 22;
+  static const double dialogShadowY = 20;
 }
 
 abstract final class RadiusManager {
@@ -154,6 +223,17 @@ abstract final class RadiusManager {
   static const double qiblaMarker = 3;
   static const double qiblaNeedle = 1;
   static const double zikrBar = 2;
+  static const double tileIcon = 12;
+  static const double segmentTrack = 12;
+  static const double segment = 9;
+  static const double segmentSmallTrack = 11;
+  static const double segmentSmall = 8;
+  static const double swatchPill = 4;
+  static const double snippet = 30;
+  static const double snippetVerse = 18;
+  static const double dayCell = 14;
+  static const double dialog = 28;
+  static const double dialogAction = 12;
 }
 
 abstract final class SizeManager {
@@ -274,6 +354,53 @@ abstract final class SizeManager {
 
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;
+
+  /// more (4.09) and the components' grouped list rows
+  static const double divider = 1;
+  static const double tile = 92;
+  static const double tileIconBox = 36;
+
+  /// the components' segmented control, 4.15's and 4.12's smaller one
+  static const double segment = 38;
+  static const double segmentSmall = 30;
+
+  /// theme (4.15)
+  static const double preview = 300;
+  static const double previewFade = 70;
+  static const double swatch = 60;
+  static const double swatchCheck = 18;
+  static const double swatchPillW = 18;
+  static const double swatchPillH = 7;
+  static const double swatchRing = 2.5;
+
+  /// the snippet inside the preview (Theme Snippet.dc.html), on its own 300 pt width
+  static const double snippet = 300;
+  static const double snippetSky = 176;
+  static const double snippetHorizon = 150;
+  static const double snippetSun = 14;
+  static const double snippetSunBlur = 18;
+  static const double snippetSunSpread = 6;
+  static const double snippetGlowInset = 16;
+
+  /// hijri calendar (4.13)
+  static const double weekdayRow = 22;
+  static const double dayCell = 54;
+  static const double dayMark = 4;
+  static const double dayMarkTop = 44;
+  static const double fastMark = 10;
+  static const double todayRing = 1.5;
+  static const double comingUpDay = 46;
+
+  /// the components' dialog and the adhan sound sheet
+  static const double dialog = 320;
+  static const double dialogShadowBlur = 60;
+  static const double radio = 22;
+  static const double radioDot = 11;
+  static const double radioRing = 2;
+  static const double radioRingOff = 1.5;
+  static const double playButton = 44;
+  static const double sliderTrack = 4;
+  static const double sliderThumb = 22;
 
   /// tablets and foldables get the phone layout stretched to this, until they have their own design
   static const double maxContentWidth = 480;
