@@ -1,12 +1,15 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
-import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_haptics.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_text.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
 import 'package:flutter/material.dart';
@@ -29,10 +32,21 @@ class _AppState extends ConsumerState<App> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => ref.read(locationControllerProvider).refresh(),
     );
+    ref.listenManual(
+      settingsProvider.select(
+        (settings) => (haptics: settings.value?.haptics, uiSounds: settings.value?.uiSounds),
+      ),
+      (_, flags) {
+        BmHaptics.enabled = flags.haptics ?? true;
+        BmSounds.enabled = flags.uiSounds ?? false;
+      },
+      fireImmediately: true,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeId = ref.watch(themeIdProvider);
     final reduceMotion = ref.watch(
       settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
     );
@@ -40,9 +54,11 @@ class _AppState extends ConsumerState<App> {
       child: MaterialApp.router(
         onGenerateTitle: (context) => context.tr(StringsManager.appName),
         debugShowCheckedModeBanner: false,
-        // TODO: read the chosen theme and mode from settings (milestone 9)
-        theme: AppTheme.light(BmThemeId.qiyamEmerald),
-        darkTheme: AppTheme.dark(BmThemeId.qiyamEmerald),
+        theme: AppTheme.light(themeId),
+        darkTheme: AppTheme.dark(themeId),
+        themeMode: ref.watch(themeModeProvider),
+        themeAnimationDuration: BmMotion.standard,
+        themeAnimationCurve: BmMotion.standardCurve,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: ref.watch(routerProvider),
