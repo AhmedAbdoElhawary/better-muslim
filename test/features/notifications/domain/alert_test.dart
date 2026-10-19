@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -17,7 +18,7 @@ void main() {
     for (var i = 0; i < 366; i++) {
       final day = DateTime(2026, 1, 1 + i);
       for (final prayer in Prayer.values) {
-        for (final kind in AlertKind.values) {
+        for (final kind in [AlertKind.adhan, AlertKind.reminder]) {
           final id = alertId(day, prayer, kind);
           expect(alertFromId(id), (day: day, prayer: prayer, kind: kind));
           ids.add(id);
@@ -25,6 +26,42 @@ void main() {
       }
     }
     expect(ids, hasLength(366 * 10));
+  });
+
+  test('azkar ids start at 2,000,000, one per set and day, and alertFromId leaves them', () {
+    final ids = <int>{};
+    for (var i = 0; i < 366; i++) {
+      for (final set in AzkarSet.values) {
+        final id = azkarAlertId(DateTime(2026, 1, 1 + i), set);
+        expect(id, greaterThanOrEqualTo(2000000));
+        expect(alertFromId(id), isNull);
+        ids.add(id);
+      }
+    }
+    expect(ids, hasLength(366 * 2));
+
+    final evening = Alert(
+      day: DateTime(2026, 10, 15),
+      prayer: Prayer.asr,
+      kind: AlertKind.azkar,
+      at: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 15, 47),
+      sound: PrayerSound.silent,
+    );
+    expect(evening.id, azkarAlertId(DateTime(2026, 10, 15), AzkarSet.evening));
+  });
+
+  test('an azkar payload round trips with its kind', () {
+    final alert = Alert(
+      day: DateTime(2026, 10, 15),
+      prayer: Prayer.asr,
+      kind: AlertKind.azkar,
+      at: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 15, 47),
+      sound: PrayerSound.silent,
+    );
+    final payload = payloadOf(alert);
+
+    expect(payload, '2026-10-15|asr|azkar|silent|${alert.at.millisecondsSinceEpoch}');
+    expect(alertFromPayload(payload)!.kind, AlertKind.azkar);
   });
 
   test('the test id gives null', () {
