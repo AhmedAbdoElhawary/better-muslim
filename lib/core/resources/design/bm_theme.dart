@@ -10,7 +10,8 @@ class BmColors extends ThemeExtension<BmColors> {
   @override
   BmColors copyWith({BmPalette? p}) => BmColors(p ?? this.p);
   @override
-  BmColors lerp(BmColors? other, double t) => t < .5 ? this : (other ?? this);
+  BmColors lerp(BmColors? other, double t) =>
+      other == null ? this : BmColors(BmPalette.lerp(p, other.p, t));
 }
 
 extension BmContext on BuildContext {

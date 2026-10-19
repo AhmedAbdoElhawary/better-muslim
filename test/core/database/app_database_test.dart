@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
@@ -33,6 +34,30 @@ void main() {
     expect(settings.haptics, isTrue);
     expect(settings.uiSounds, isFalse);
     expect(settings.storeResetPending, isFalse);
+  });
+
+  test('watching the settings again never adds a row', () async {
+    final db = await open();
+    await db.watchSettings().first;
+    await db.watchSettings().first;
+    expect(await db.select(db.settings).get(), hasLength(1));
+  });
+
+  test('reset prayer journey clears the log and qada only', () async {
+    final db = await open();
+    final day = DateTime(2026, 10, 15);
+    await db.watchSettings().first;
+    await db.updateSettings(const SettingsCompanion(haptics: Value(false)));
+    await db.markPrayed(day, Prayer.asr);
+    await db.into(db.qadaEntries).insert(QadaEntriesCompanion.insert(prayer: Prayer.fajr));
+    await db.saveDua('travel-1');
+
+    await db.resetPrayerJourney();
+
+    expect(await db.select(db.prayerLog).get(), isEmpty);
+    expect(await db.select(db.qadaEntries).get(), isEmpty);
+    expect(await db.select(db.savedDuas).get(), hasLength(1));
+    expect((await db.watchSettings().first).haptics, isFalse);
   });
 
   test('every column survives closing and opening again', () async {

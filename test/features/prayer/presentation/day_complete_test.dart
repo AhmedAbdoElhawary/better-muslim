@@ -1,5 +1,8 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
+import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_complete.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -8,6 +11,7 @@ import '../../../helpers/fonts.dart';
 import '../../../helpers/home.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
+import '../../../helpers/sounds.dart';
 
 void main() {
   setUpAll(tz.initializeTimeZones);
@@ -52,6 +56,21 @@ void main() {
 
     await finish(tester);
     expect(find.byType(DayComplete), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('with ui sounds on the fifth mark plays the complete sound once', (tester) async {
+    final sounds = FakeSoundOutput();
+    BmSounds.output = sounds;
+    addTearDown(() => BmSounds.enabled = false);
+    await pumpIsha(tester, logged: 4);
+    await dbOf(tester).updateSettings(const SettingsCompanion(uiSounds: Value(true)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(isha('Mark'));
+    await tester.pump();
+    expect(sounds.played, ['assets/audio/ui_complete.m4a']);
+    await finish(tester);
     await unmount(tester);
   });
 

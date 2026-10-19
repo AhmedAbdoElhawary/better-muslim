@@ -2,41 +2,16 @@ import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart';
 
-/// null without a next prayer. the only home value that changes every second
-final timeLeftProvider = Provider<Duration?>((ref) {
-  final next = ref.watch(nextPrayerProvider.select((next) => next?.$2));
-  if (next == null) return null;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
-  return next.difference(now);
-});
-
 final glowBreathingProvider = Provider<bool>(
   (ref) => glowBreathing(ref.watch(timeLeftProvider) ?? Duration.zero),
 );
-
-/// rounded, so the bar rebuilds every few seconds instead of every second
-final barShareProvider = Provider<double?>((ref) {
-  final period = ref.watch(periodProvider);
-  final next = ref.watch(nextPrayerProvider.select((next) => next?.$2));
-  final times = ref.watch(todayTimesProvider);
-  if (period == null || next == null || times == null) return null;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
-  final today = ref.watch(todayProvider);
-  final start = periodStart(
-    period,
-    now,
-    times,
-    ref.watch(dayTimesProvider(DateTime(today.year, today.month, today.day - 1))),
-  );
-  final share = barShare(now, start, next);
-  return share == null ? null : (share * 1000).round() / 1000;
-});
 
 typedef StripEntry = ({Prayer prayer, TZDateTime? time, bool current, bool logged, bool past});
 
@@ -86,5 +61,3 @@ final arcLabelsProvider = Provider<ArcLabels?>((ref) {
     ref.watch(dayTimesProvider(DateTime(today.year, today.month, today.day + 1))),
   );
 });
-
-final morningAzkarProvider = Provider<bool>((ref) => isMorningAzkar(ref.watch(periodProvider)));

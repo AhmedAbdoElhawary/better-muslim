@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,7 +31,7 @@
 
 ## Notes
 
-- Q1 to Q10 are open, the markers go once they are answered.
+- Q1 to Q10 answered on 2026-10-19 (all as recommended), the markers are gone.
 - Motion numbers (11, 12), font names and `03 Components.dc.html` point at the design, not at code.
 - The Azkar tab, the set page, the dua category page and the share card have no PNG, FR-001,
   FR-006, FR-020 and FR-027 ask me to check them in the app before they count as done.

@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -96,6 +97,24 @@ void main() {
     expect(
       target,
       isA<PrayerTarget>().having((target) => target.day, 'day', DateTime(2026, 10, 14)),
+    );
+  });
+
+  test('an azkar nudge opens its set', () {
+    final target = tapTarget(
+      payload(Prayer.asr, PrayerSound.silent, kind: AlertKind.azkar),
+      after(const Duration(minutes: 20)),
+      length,
+    );
+
+    expect(target, isA<AzkarTarget>().having((target) => target.set, 'set', AzkarSet.evening));
+    expect(
+      tapTarget(
+        payload(Prayer.fajr, PrayerSound.silent, kind: AlertKind.azkar),
+        after(Duration.zero),
+        length,
+      ),
+      isA<AzkarTarget>().having((target) => target.set, 'set', AzkarSet.morning),
     );
   });
 }

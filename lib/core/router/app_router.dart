@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/monitoring/monitoring.dart';
@@ -9,14 +10,24 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/widgets/shell/app_shell.dart';
 import 'package:better_muslim/core/widgets/shell/tab_switcher.dart';
 import 'package:better_muslim/features/azkar/view/azkar_page.dart';
+import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
+import 'package:better_muslim/features/azkar/view/tasbih_page.dart';
+import 'package:better_muslim/features/duas/view/dua_category_page.dart';
+import 'package:better_muslim/features/duas/view/duas_page.dart';
+import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
+import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
+import 'package:better_muslim/features/more/view/credits_page.dart';
+import 'package:better_muslim/features/more/view/licenses_page.dart';
 import 'package:better_muslim/features/more/view/more_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
+import 'package:better_muslim/features/notifications/presentation/view/adhan_settings_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/dev_notifications_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
+import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +40,22 @@ abstract final class Routes {
   static const String more = '/more';
   static const String qada = '/prayer/qada';
   static const String qibla = '/qibla';
+  static const String tasbih = '/azkar/tasbih';
+  static const String duas = '/duas';
+
+  /// more's pages, outside the shell with the compact bar and no tab bar
+  static const String theme = '/theme';
+  static const String hijriCalendar = '/hijri-calendar';
+  static const String adhanSettings = '/adhan-settings';
+  static const String credits = '/credits';
+  static const String licenses = '/credits/licenses';
+  static String license(String package) => '$licenses/${Uri.encodeComponent(package)}';
+
+  /// inside the azkar tab, so the tab bar stays
+  static String azkarSet(AzkarSet set) => '$azkar/${set.name}';
+
+  /// outside the shell like duas
+  static String duaCategory(String id) => '$duas/$id';
 
   /// home's strip cells and notification taps open the prayer tab on a day, at a prayer
   static String prayerAt(DateTime day, Prayer prayer) => Uri(
@@ -89,7 +116,24 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [GoRoute(path: Routes.quran, builder: (context, state) => const QuranPage())],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: Routes.azkar, builder: (context, state) => const AzkarPage())],
+            routes: [
+              GoRoute(
+                path: Routes.azkar,
+                builder: (context, state) => const AzkarPage(),
+                routes: [
+                  GoRoute(path: 'tasbih', builder: (context, state) => const TasbihPage()),
+                  GoRoute(
+                    path: ':set',
+                    redirect: (context, state) =>
+                        AzkarSet.values.asNameMap()[state.pathParameters['set']] == null
+                        ? Routes.azkar
+                        : null,
+                    builder: (context, state) =>
+                        AzkarSetPage(AzkarSet.values.byName(state.pathParameters['set']!)),
+                  ),
+                ],
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [GoRoute(path: Routes.more, builder: (context, state) => const MorePage())],
@@ -99,6 +143,46 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       /// outside the shell, the qibla tree has no tab bar
       GoRoute(path: Routes.qibla, builder: (context, state) => const QiblaPage()),
+
+      /// outside the shell, the 4.14 tree has no tab bar
+      GoRoute(
+        path: Routes.duas,
+        builder: (context, state) => const DuasPage(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            redirect: (context, state) {
+              final categories = ref.read(duasContentProvider).value;
+              final id = state.pathParameters['id'];
+              if (categories == null || categories.any((category) => category.id == id)) {
+                return null;
+              }
+              return Routes.duas;
+            },
+            builder: (context, state) => DuaCategoryPage(state.pathParameters['id']!),
+          ),
+        ],
+      ),
+
+      GoRoute(path: Routes.theme, builder: (context, state) => const ThemePage()),
+      GoRoute(path: Routes.adhanSettings, builder: (context, state) => const AdhanSettingsPage()),
+      GoRoute(path: Routes.hijriCalendar, builder: (context, state) => const HijriCalendarPage()),
+      GoRoute(
+        path: Routes.credits,
+        builder: (context, state) => const CreditsPage(),
+        routes: [
+          GoRoute(
+            path: 'licenses',
+            builder: (context, state) => const LicensesPage(),
+            routes: [
+              GoRoute(
+                path: ':package',
+                builder: (context, state) => PackageLicensePage(state.pathParameters['package']!),
+              ),
+            ],
+          ),
+        ],
+      ),
 
       /// staging and production don't have the route at all (FR-041)
       if (ref.read(flavorProvider).flavor.isDev)

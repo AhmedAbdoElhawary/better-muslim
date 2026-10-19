@@ -3,9 +3,9 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// surface, radius 20 and the outline ring every home card has
-class HomeCard extends StatelessWidget {
-  const HomeCard({required this.child, super.key});
+/// surface, radius 20 and the outline ring of the home cards and grouped lists
+class SurfaceCard extends StatelessWidget {
+  const SurfaceCard({required this.child, super.key});
   final Widget child;
 
   @override

@@ -15,11 +15,21 @@ const _surfaceOpacity = .8;
 
 /// the components' 56 pt compact bar on a blurred surface, the back chevron only on pushed pages
 class CompactAppBar extends StatelessWidget {
-  const CompactAppBar(this.title, {this.back = true, super.key});
+  const CompactAppBar(
+    this.title, {
+    this.back = true,
+    this.translate = true,
+    this.action,
+    super.key,
+  });
 
-  /// a StringsManager key
+  /// a StringsManager key, or content like a category's name with translate false
   final String title;
   final bool back;
+  final bool translate;
+
+  /// a 44 x 44 button at the end, the calendar's today
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +53,15 @@ class CompactAppBar extends StatelessWidget {
                       const BarBackButton()
                     else
                       const RSizedBox.square(dimension: SizeManager.hit),
-                    Expanded(child: SemiBoldText(title, textAlign: TextAlign.center, maxLines: 1)),
-                    const RSizedBox.square(dimension: SizeManager.hit),
+                    Expanded(
+                      child: SemiBoldText(
+                        title,
+                        translate: translate,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                      ),
+                    ),
+                    action ?? const RSizedBox.square(dimension: SizeManager.hit),
                   ],
                 ),
               ),

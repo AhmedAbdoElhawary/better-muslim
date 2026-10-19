@@ -269,9 +269,10 @@
     }
   },
   "dateAdjustment": "Date adjustment",
-  "days": "{n} days",
+  "days": "{sign}{n, plural, one{{n} day} other{{n} days}}",
   "@days": {
     "placeholders": {
+      "sign": {},
       "n": {}
     }
   },
@@ -326,7 +327,13 @@
   "stop": "Stop",
   "pause": "Pause",
   "play": "Play",
-  "notifAzkarBody": "After Asr · 24 remembrances, about 6 minutes",
+  "notifAzkarBody": "After Asr · {count, plural, one{{count} remembrance} other{{count} remembrances}}, about {minutes, plural, one{{minutes} minute} other{{minutes} minutes}}",
+  "@notifAzkarBody": {
+    "placeholders": {
+      "count": {},
+      "minutes": {}
+    }
+  },
   "liveNextPrayer": "Next prayer · {city}",
   "@liveNextPrayer": {
     "placeholders": {
@@ -465,5 +472,174 @@
   "byCountry": "By country",
   "chosenForCountry": "Chosen for your country",
   "asrCalculation": "Asr calculation",
-  "allFivePrayed": "All five prayed"
+  "allFivePrayed": "All five prayed",
+  "setCardHeader": "{set} · {index} of {total}",
+  "@setCardHeader": {
+    "placeholders": {
+      "set": {},
+      "index": {},
+      "total": {}
+    }
+  },
+  "duaCount": "{count, plural, one{{count} dua} other{{count} duas}}",
+  "@duaCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "chipSaved": "Saved",
+  "saved": "Saved",
+  "removedFromSaved": "Removed from saved",
+  "noSavedTitle": "No duas saved yet",
+  "noSavedBody": "Tap Save on any dua to keep it here.",
+  "noDuasFound": "No duas found",
+  "noDuasFoundBody": "Try another word in English or Arabic.",
+  "countReset": "Count reset",
+  "resetCount": "Reset count",
+  "tasbihA11y": "{dhikr}, {count} of {target}. Tap to count",
+  "@tasbihA11y": {
+    "placeholders": {
+      "dhikr": {},
+      "count": {},
+      "target": {}
+    }
+  },
+  "notifAzkarMorningBody": "After Fajr · {count, plural, one{{count} remembrance} other{{count} remembrances}}, about {minutes, plural, one{{minutes} minute} other{{minutes} minutes}}",
+  "@notifAzkarMorningBody": {
+    "placeholders": {
+      "count": {},
+      "minutes": {}
+    }
+  },
+  "azkarReminders": "Azkar reminders",
+  "azkarRemindersSub": "{minutes} min after Fajr and Asr",
+  "@azkarRemindersSub": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "newAzkarSet": "New azkar set",
+  "reminderOff": "Off",
+  "reminderValue": "{minutes} min",
+  "@reminderValue": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "adjustmentBody": "Move the Hijri date to match the moon sighting where you live.",
+  "today": "Today",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "monthSpan": "{first} – {last} {year}",
+  "@monthSpan": {
+    "placeholders": {
+      "first": {},
+      "last": {},
+      "year": {}
+    }
+  },
+  "monthSpanYears": "{first} {firstYear} – {last} {lastYear}",
+  "@monthSpanYears": {
+    "placeholders": {
+      "first": {},
+      "firstYear": {},
+      "last": {},
+      "lastYear": {}
+    }
+  },
+  "hijriShort1": "Muh",
+  "hijriShort2": "Saf",
+  "hijriShort3": "Rab I",
+  "hijriShort4": "Rab II",
+  "hijriShort5": "Jum I",
+  "hijriShort6": "Jum II",
+  "hijriShort7": "Rajab",
+  "hijriShort8": "Sha'b",
+  "hijriShort9": "Ram",
+  "hijriShort10": "Shaw",
+  "hijriShort11": "Dhul Q",
+  "hijriShort12": "Dhul H",
+  "eventNewYear": "Islamic New Year",
+  "eventTasua": "Tasu'a",
+  "eventAshura": "Ashura",
+  "eventRamadan": "Ramadan begins",
+  "eventLastTen": "Last ten nights",
+  "eventEidFitr": "Eid al-Fitr",
+  "eventArafah": "Day of Arafah",
+  "eventEidAdha": "Eid al-Adha",
+  "eventTashreeq": "Days of Tashreeq",
+  "noteWhiteDays": "White days, fasting recommended",
+  "noteFasting": "Fasting recommended",
+  "noteQadr": "Seek Laylat al-Qadr",
+  "noteNoFasting": "No fasting",
+  "sectionEvents": "EVENTS",
+  "adhanSound": "Adhan sound",
+  "forPrayer": "For {prayer}",
+  "@forPrayer": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
+  "recordingMakkah": "Makkah",
+  "recordingMadinah": "Madinah",
+  "recordingAlAqsa": "Al-Aqsa",
+  "recordingCairo": "Cairo",
+  "recordingIstanbul": "Istanbul",
+  "recordingTakbir": "Takbir only",
+  "fullAdhanLength": "Full adhan · {length}",
+  "@fullAdhanLength": {
+    "placeholders": {
+      "length": {}
+    }
+  },
+  "shortLength": "Short · {length}",
+  "@shortLength": {
+    "placeholders": {
+      "length": {}
+    }
+  },
+  "recordingFull": "{recording} · full adhan",
+  "@recordingFull": {
+    "placeholders": {
+      "recording": {}
+    }
+  },
+  "recordingShort": "{recording} · short",
+  "@recordingShort": {
+    "placeholders": {
+      "recording": {}
+    }
+  },
+  "notificationsOff": "Notifications are off for this app.",
+  "openSettings": "Open settings",
+  "sectionYourData": "YOUR DATA",
+  "resetJourney": "Reset prayer journey",
+  "resetJourneyTitle": "Reset prayer journey?",
+  "resetJourneyBody": "This clears your private log on this phone. It can't be undone.",
+  "cancel": "Cancel",
+  "reset": "Reset",
+  "sectionAbout": "ABOUT",
+  "credits": "Credits",
+  "openSourceLicenses": "Open source licenses",
+  "usePlaceNames": "Place names",
+  "useFonts": "Fonts",
+  "useAzkarDuas": "Azkar and duas",
+  "useAdhanRecordings": "Adhan recordings",
+  "creditLine": "{use} · {license}",
+  "@creditLine": {
+    "placeholders": {
+      "license": {},
+      "use": {}
+    }
+  },
+  "version": "Version",
+  "easternDigits": "Eastern Arabic digits ١٢٣",
+  "themeQiyamEmerald": "Qiyam Emerald",
+  "themeQiyam": "Qiyam",
+  "themeNoor": "Noor",
+  "themeLivingSky": "Living Sky",
+  "themeIznik": "Iznik",
+  "themeAndalus": "Andalus",
+  "themeMoonlight": "Moonlight",
+  "themeQiyamRose": "Qiyam Rose"
 }

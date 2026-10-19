@@ -1,11 +1,10 @@
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown_digit.dart';
-import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -10,6 +10,11 @@ import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,6 +88,21 @@ void main() {
       expect((tomorrow.fajr!.hour, tomorrow.fajr!.minute), (5, 0));
     });
 
+    test('follow sky follows the phone, dark and light stay as saved (FR-041)', () async {
+      container.listen(themeModeProvider, (_, _) {});
+      await container.read(settingsProvider.future);
+      expect(container.read(themeModeProvider), ThemeMode.system);
+      final db = container.read(databaseProvider);
+      for (final (mode, expected) in [
+        (BmThemeMode.dark, ThemeMode.dark),
+        (BmThemeMode.light, ThemeMode.light),
+      ]) {
+        await db.updateSettings(SettingsCompanion(themeMode: Value(mode)));
+        await pumpEventQueue();
+        expect(container.read(themeModeProvider), expected);
+      }
+    });
+
     test('maghrib is next in 1:24:00 and the date is 4 jumada i 1448', () {
       final (prayer, time) = container.read(nextPrayerProvider)!;
       final hijri = container.read(hijriDateProvider(container.read(todayProvider)));
@@ -116,6 +136,15 @@ void main() {
       ]);
       expect((await db.watchSettings().first).firstUse, DateTime(2026, 10, 1));
       expect(storeCalls, 0);
+    });
+
+    test('tasbih at subhanallah 16, nothing counted or saved (FR-036)', () async {
+      final db = container.read(databaseProvider);
+      final settings = await db.watchSettings().first;
+
+      expect((settings.tasbihDhikr, settings.tasbihCount), (0, 16));
+      expect(await db.select(db.azkarCounts).get(), isEmpty);
+      expect(await db.select(db.savedDuas).get(), isEmpty);
     });
 
     /// the real PositionSource would throw MissingPluginException in a host test

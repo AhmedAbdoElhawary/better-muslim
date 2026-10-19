@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
@@ -6,9 +7,10 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/features/azkar/view/azkar_page.dart';
+import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown_digit.dart';
@@ -291,6 +293,26 @@ void main() {
       await unmount(tester);
     });
 
+    testWidgets('the azkar row shows the evening set\'s real progress and opens it', (
+      tester,
+    ) async {
+      await pumpHome(tester, await designOverrides());
+      final container = containerOf(tester);
+      await container
+          .read(databaseProvider)
+          .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e02', 1);
+      await tester.pumpAndSettle();
+      expect(find.text('After Asr · 1 of 24'), findsOneWidget);
+
+      await tester.tap(find.text('Evening azkar'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(routerProvider).routerDelegate.currentConfiguration.uri.path,
+        '/azkar/evening',
+      );
+      await unmount(tester);
+    });
+
     testWidgets('morning azkar from fajr until asr', (tester) async {
       await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 5)));
 
@@ -315,7 +337,7 @@ void main() {
         (find.byWidgetPredicate((widget) => widget is StripCell && widget.index == 0), PrayerPage),
         (find.byType(VerseCard), QuranPage),
         (find.text('Continue reading'), QuranPage),
-        (find.text('Evening azkar'), AzkarPage),
+        (find.text('Evening azkar'), AzkarSetPage),
       ];
       for (final (target, page) in taps) {
         await pumpHome(tester, await designOverrides());

@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:flutter/material.dart';
 
 /// every color in the app goes through this, the active BmPalette fills it so all 8 themes work
@@ -92,6 +93,27 @@ extension ThemeExtension on BuildContext {
   Color getColor(ThemeEnum color) => color.resolve(bm);
 
   double get starOpacity => bm.starOpacity;
+}
+
+extension BmThemeName on BmThemeId {
+  String get nameKey => switch (this) {
+    BmThemeId.qiyamEmerald => StringsManager.themeQiyamEmerald,
+    BmThemeId.qiyam => StringsManager.themeQiyam,
+    BmThemeId.noor => StringsManager.themeNoor,
+    BmThemeId.livingSky => StringsManager.themeLivingSky,
+    BmThemeId.iznik => StringsManager.themeIznik,
+    BmThemeId.andalus => StringsManager.themeAndalus,
+    BmThemeId.moonlight => StringsManager.themeMoonlight,
+    BmThemeId.qiyamRose => StringsManager.themeQiyamRose,
+  };
+}
+
+extension BmThemeModeName on BmThemeMode {
+  String get nameKey => switch (this) {
+    BmThemeMode.dark => StringsManager.dark,
+    BmThemeMode.light => StringsManager.light,
+    BmThemeMode.followSky => StringsManager.followSky,
+  };
 }
 
 abstract final class AppTheme {

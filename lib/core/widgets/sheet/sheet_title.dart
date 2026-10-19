@@ -8,12 +8,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// the components' bottom sheet title, with its optional line under it
 class SheetTitle extends StatelessWidget {
-  const SheetTitle(this.title, {this.args = const {}, this.subtitle, super.key});
+  const SheetTitle(
+    this.title, {
+    this.args = const {},
+    this.subtitle,
+    this.subtitleArgs = const {},
+    this.translate = true,
+    super.key,
+  });
 
-  /// StringsManager keys
+  /// StringsManager keys, or dates like the day sheet's with translate false
   final String title;
   final Map<String, String> args;
   final String? subtitle;
+  final Map<String, String> subtitleArgs;
+  final bool translate;
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +35,13 @@ class SheetTitle extends StatelessWidget {
           RegularText(
             title,
             args: args,
+            translate: translate,
             font: FontEnum.display,
             fontSize: FontSizeManager.sheetTitle,
           ),
           if (subtitle != null) ...[
             const RSizedBox.vertical(SpaceManager.s1),
-            RegularText(subtitle, color: ThemeEnum.text2),
+            RegularText(subtitle, args: subtitleArgs, translate: translate, color: ThemeEnum.text2),
           ],
           const RSizedBox.vertical(SpaceManager.s2),
         ],

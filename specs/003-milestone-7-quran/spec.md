@@ -1,11 +1,10 @@
 # Feature Specification: Milestone 7, Quran Reader
 
-**Feature Branch**: `feature/milestone-7` [NEEDS CLARIFICATION: Q11, cut when, and built before or
-after milestones 3 to 6?]
+**Feature Branch**: `feature/milestone-7`, built after milestone 11
 
 **Created**: 2026-10-17
 
-**Status**: Draft
+**Status**: Parked until milestones 8 to 11 are done
 
 **Input**: User description: "milstone 7"
 

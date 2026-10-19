@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:audio_session/audio_session.dart';
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
-import 'package:better_muslim/features/notifications/data/adhan_recording.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -30,7 +31,12 @@ class Playback {
 /// one type for the adhan screen and the tests, ios plays in the app, android in its service
 abstract class AdhanPlayer {
   /// once per alert, the alarm and the app can both start the same adhan
-  Future<void> play(Alert alert, AlertTexts texts, {Duration from = Duration.zero});
+  Future<void> play(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording, {
+    Duration from = Duration.zero,
+  });
 
   Future<void> pause();
 
@@ -39,14 +45,12 @@ abstract class AdhanPlayer {
   Future<void> stop();
 
   /// read from the file, so the real recordings can come without a code change
-  Future<Duration> length(Prayer prayer);
+  Future<Duration> length(Prayer prayer, AdhanRecording recording);
 
   Stream<Playback> get playback;
 
   void dispose() {}
 }
-
-const _recording = AdhanRecording.makkah;
 
 /// android: the app never plays audio itself, so the screen and the shade show the same adhan
 class NativeAdhanPlayer extends AdhanPlayer {
@@ -54,12 +58,19 @@ class NativeAdhanPlayer extends AdhanPlayer {
 
   final AdhanChannel _channel;
   int? _played;
+  StreamSubscription<Playback>? _busy;
 
   @override
-  Future<void> play(Alert alert, AlertTexts texts, {Duration from = Duration.zero}) async {
+  Future<void> play(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording, {
+    Duration from = Duration.zero,
+  }) async {
     if (_played == alert.id) return;
     _played = alert.id;
-    await _channel.play(NotificationScheduler.entryOf(alert, texts), from: from);
+    _busy ??= playback.listen((state) => BmSounds.busy = state.playing && !state.ended);
+    await _channel.play(NotificationScheduler.entryOf(alert, texts, recording), from: from);
   }
 
   @override
@@ -75,8 +86,8 @@ class NativeAdhanPlayer extends AdhanPlayer {
   }
 
   @override
-  Future<Duration> length(Prayer prayer) async =>
-      await _channel.length(_recording.fullAsset(prayer)) ?? Duration.zero;
+  Future<Duration> length(Prayer prayer, AdhanRecording recording) async =>
+      await _channel.length(recording.fullAsset(prayer)) ?? Duration.zero;
 
   @override
   Stream<Playback> get playback => _channel.state.map(
@@ -88,6 +99,12 @@ class NativeAdhanPlayer extends AdhanPlayer {
       ended: state['ended'] as bool? ?? false,
     ),
   );
+
+  @override
+  void dispose() {
+    _busy?.cancel();
+    BmSounds.busy = false;
+  }
 }
 
 /// ios: playback keeps going with the screen locked and the silent switch on (FR-022a)
@@ -100,6 +117,7 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
   final Future<AudioSession> _session;
   final _lengths = <String, Duration>{};
   StreamSubscription<AudioInterruptionEvent>? _interruptions;
+  StreamSubscription<PlayerState>? _busy;
   Timer? _fade;
   int? _id;
 
@@ -107,7 +125,12 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
   static const _fadeStep = Duration(milliseconds: 50);
 
   @override
-  Future<void> play(Alert alert, AlertTexts texts, {Duration from = Duration.zero}) async {
+  Future<void> play(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording, {
+    Duration from = Duration.zero,
+  }) async {
     if (_id == alert.id) return;
     _id = alert.id;
     final session = await _session;
@@ -117,7 +140,11 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
     _interruptions ??= session.interruptionEventStream.listen((event) {
       if (event.begin) stop();
     });
-    await _player.setAsset(_recording.fullAsset(alert.prayer));
+    _busy ??= _player.playerStateStream.listen(
+      (state) =>
+          BmSounds.busy = state.playing && state.processingState != ProcessingState.completed,
+    );
+    await _player.setAsset(recording.fullAsset(alert.prayer));
     await _player.seek(from);
     await _player.setVolume(0);
     await session.setActive(true);
@@ -145,8 +172,8 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
   }
 
   @override
-  Future<Duration> length(Prayer prayer) async {
-    final asset = _recording.fullAsset(prayer);
+  Future<Duration> length(Prayer prayer, AdhanRecording recording) async {
+    final asset = recording.fullAsset(prayer);
     final known = _lengths[asset];
     if (known != null) return known;
     final reader = AudioPlayer();
@@ -187,6 +214,8 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
   void dispose() {
     _fade?.cancel();
     _interruptions?.cancel();
+    _busy?.cancel();
+    BmSounds.busy = false;
     _player.dispose();
   }
 }
@@ -199,7 +228,12 @@ class FixedAdhanPlayer extends AdhanPlayer {
   final Duration duration;
 
   @override
-  Future<void> play(Alert alert, AlertTexts texts, {Duration from = Duration.zero}) async {}
+  Future<void> play(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording, {
+    Duration from = Duration.zero,
+  }) async {}
 
   @override
   Future<void> pause() async {}
@@ -211,7 +245,7 @@ class FixedAdhanPlayer extends AdhanPlayer {
   Future<void> stop() async {}
 
   @override
-  Future<Duration> length(Prayer prayer) async => duration;
+  Future<Duration> length(Prayer prayer, AdhanRecording recording) async => duration;
 
   @override
   Stream<Playback> get playback => Stream.value(Playback(position: position, duration: duration));

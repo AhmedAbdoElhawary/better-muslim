@@ -31,7 +31,8 @@
 
 ## Notes
 
-- Q1 to Q11 are open, the markers go once they are answered.
+- Q11 answered 2026-10-19: built after milestone 11. Q1 to Q10 are open, the markers go once they
+  are answered.
 - Motion numbers (13, 14, 15), `03 Components.dc.html` and the fonts point at the design and the
   content, not at code.
 - The Quran tab, the text size sheet and the note sheet have no PNG, FR-002 and FR-034 ask me to

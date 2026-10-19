@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/audio/clip_player.dart';
+import 'package:better_muslim/core/azkar/azkar_progress.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
@@ -11,6 +14,7 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
@@ -52,10 +56,22 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.asrSound,
         row?.maghribSound,
         row?.ishaSound,
+        row?.fajrRecording,
+        row?.dhuhrRecording,
+        row?.asrRecording,
+        row?.maghribRecording,
+        row?.ishaRecording,
+        row?.azkarNudges,
       );
     }),
   );
-  return (place, choices);
+
+  /// finishing a set takes back its nudge
+  bool done(AzkarSet set) => ref.watch(
+    azkarProgressProvider(set)
+        .select((progress) => progress.total > 0 && progress.done == progress.total),
+  );
+  return (place, choices, done(AzkarSet.morning), done(AzkarSet.evening));
 });
 
 /// the notifications' wiring around the app: the first ask, rescheduling, taps and cleanup
@@ -195,7 +211,8 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       sound: PrayerSound.adhan,
     );
     ref.read(routerProvider).push(Routes.adhan(prayer, day));
-    await ref.read(adhanPlayerProvider).play(alert, await _texts(location));
+    _stopPreview();
+    await ref.read(adhanPlayerProvider).play(alert, await _texts(location), _recordingOf(prayer));
   }
 
   /// mark prayed while the app runs comes here instead of the background isolate
@@ -214,17 +231,22 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final alert = alertFromPayload(payload);
     if (alert == null || !mounted) return;
     final player = ref.read(adhanPlayerProvider);
-    final length = await player.length(alert.prayer);
+    final length = await player.length(alert.prayer, _recordingOf(alert.prayer));
     if (!mounted) return;
     final target = tapTarget(payload, ref.read(clockProvider)(), length);
     final router = ref.read(routerProvider);
     switch (target) {
       case AdhanTarget(:final prayer, :final day, :final from):
         router.push(Routes.adhan(prayer, day, from: from));
+        _stopPreview();
         final location = ref.read(locationProvider);
-        if (location != null) await player.play(alert, await _texts(location), from: from);
+        if (location != null) {
+          await player.play(alert, await _texts(location), _recordingOf(prayer), from: from);
+        }
       case PrayerTarget(:final day, :final prayer):
         router.go(Routes.prayerAt(day, prayer));
+      case AzkarTarget(:final set):
+        router.go(Routes.azkarSet(set));
       case NoTarget():
     }
   }
@@ -240,6 +262,14 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       if (alert == null || alert.kind != AlertKind.adhan || id == playing) continue;
       if (await db.isPrayed(alert.day, alert.prayer)) await scheduler.cancel(id);
     }
+  }
+
+  AdhanRecording _recordingOf(Prayer prayer) =>
+      ref.read(settingsProvider).value?.recordingOf(prayer) ?? AdhanRecording.makkah;
+
+  /// a recording previewed in the adhan sound sheet gives way to the real adhan
+  void _stopPreview() {
+    if (ref.exists(clipPlayerProvider)) ref.read(clipPlayerProvider).stop();
   }
 
   Future<AlertTexts> _texts(Location location) => AlertTexts.load(

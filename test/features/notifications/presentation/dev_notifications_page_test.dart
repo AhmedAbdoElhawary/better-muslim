@@ -9,6 +9,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
 import '../../../helpers/home.dart';
+import '../../../helpers/more.dart';
 import '../../../helpers/notifications.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
@@ -38,8 +39,7 @@ void main() {
     await pumpHome(tester, testOverrides());
     await openMore(tester);
 
-    await tester.tap(find.text('Notifications (dev)'));
-    await tester.pumpAndSettle();
+    await tapText(tester, 'Notifications (dev)');
 
     expect(find.byType(DevNotificationsPage), findsOneWidget);
     expect(find.text('Open adhan screen'), findsOneWidget);

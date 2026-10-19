@@ -1,11 +1,10 @@
 # Feature Specification: Milestone 9, More, Theme and Hijri Calendar
 
-**Feature Branch**: `feature/milestone-9` (made when the build starts, after milestones 3 to 8 are
-merged) [NEEDS CLARIFICATION: Q1, order and branch]
+**Feature Branch**: `feature/milestone-9`, cut when the build starts, after milestone 8
 
 **Created**: 2026-10-17
 
-**Status**: Draft
+**Status**: Clarified
 
 **Input**: User description: "milstone 9"
 
@@ -15,8 +14,27 @@ theme, light and dark, reduce motion, haptics and UI sounds, plus the tiles to Q
 calendar and Duas. The three screens are built straight from the handoff specs. This spec covers
 what the handoff doesn't: what each setting changes across the app, what "Follow sky" means, the
 pages and sheets More opens that have no PNG, which days the calendar marks, and the rows other
-milestones already sent here (credits, downloaded recitations, the page turn haptic, Reset prayer
-journey).
+milestones sent here (credits, Reset prayer journey).
+
+## Clarifications
+
+### Session 2026-10-19
+
+- Q: Order and branch? → A: Spec, plan and tasks now, built next after milestone 8, on
+  `feature/milestone-9` cut when the build starts.
+- Q: Rows below the 4.09 design? → A: YOUR DATA (Reset prayer journey) and ABOUT (Credits, Version)
+  under SOUND AND TOUCH, from the same grouped rows. The Quran reader moved after milestone 11, so
+  its rows (Page turn haptic, Downloaded recitations), its credits and the Page sound come with it.
+- Q: The Arabic digits switch? → A: A toggle in APPEARANCE, shown only when the app is in Arabic.
+- Q: The Light and dark row? → A: A small sheet with Dark, Light and Follow sky, applied at once.
+- Q: The Adhan and reminders page? → A: The 4.12 rows, one recording per prayer from the "Adhan
+  sound · For {prayer}" sheet with a preview, the reminder on the 0 to 30 minute slider (adds 25),
+  and a line with "Open settings" when notifications are refused.
+- Q: Which days does the calendar mark? → A: The FR-020 table. Not Mondays and Thursdays, the
+  Mawlid, Isra and Mi'raj or 15 Sha'ban, and no white day dot on 13 Dhu al-Hijjah.
+- Q: The sky in the other 7 themes? → A: Qiyam Emerald's six sky states in every theme, the theme
+  restyles everything else.
+- Q: The new copy? → A: The FR-038 table as written.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -28,8 +46,8 @@ turn them off. Reduce motion goes on for my father's phone. Every change works a
 **Why this priority**: The settings are stored since milestone 2, but nothing lets me change them.
 More is the one place for them, and every other screen reads them.
 
-**Independent Test**: In the design scenario, More matches 4.09. Turn Haptics off: marking a
-prayer no longer vibrates. Turn Reduce motion on: Home's sky stops drifting. Restart: both stay.
+**Independent Test**: In the design scenario, More shows 4.09. Turn Haptics off: marking a prayer
+no longer vibrates. Turn Reduce motion on: Home's sky stops drifting. Restart: both stay.
 
 **Acceptance Scenarios**:
 
@@ -45,6 +63,7 @@ prayer no longer vibrates. Turn Reduce motion on: Home's sky stops drifting. Res
 5. **Given** a tile, **When** I tap Qibla, Hijri calendar or Duas, **Then** that screen is pushed.
 6. **Given** the Calculation method row, **When** I tap it, **Then** the method sheet from the
    Prayer tab (milestone 4) opens, and a change shows on both screens.
+7. **Given** the Location row, **When** I tap it, **Then** the location sheet from milestone 3 opens.
 
 ---
 
@@ -56,7 +75,7 @@ changes to my theme. If I go back without Apply, nothing changes.
 **Why this priority**: The 8 themes and both modes are built since milestone 1, but the app only
 shows Qiyam Emerald until this page exists.
 
-**Independent Test**: In the design scenario open Theme and tap Dark: it matches 4.15. Tap Iznik:
+**Independent Test**: In the design scenario open Theme and tap Dark: it shows 4.15. Tap Iznik:
 only the preview turns Iznik. Go back: the app is still Qiyam Emerald. Open again, tap Iznik, Apply:
 the app crossfades to Iznik and More's Theme row says "Iznik".
 
@@ -105,7 +124,7 @@ month starts. I go forward to see when Ramadan begins.
 **Why this priority**: Fasting days and the start of the months are what people look the Hijri
 calendar up for, and the design gives it a tile on More.
 
-**Independent Test**: In the design scenario the calendar matches 4.13: Jumada I 1448, 4 highlighted
+**Independent Test**: In the design scenario the calendar shows 4.13: Jumada I 1448, 4 highlighted
 on 15 Oct, dots on 13 to 15, three rows in COMING UP. Forward 4 times: Ramadan 1448, 1 Ramadan
 marked. The calendar icon: back to Jumada I.
 
@@ -172,23 +191,19 @@ before" and the pending notifications change to match.
 
 ### User Story 7 - My data and the credits (Priority: P3)
 
-I want to start my prayer log over, free up space taken by recitations, and see where the app's
-data comes from.
+I want to start my prayer log over and see where the app's data comes from.
 
-**Why this priority**: Milestones 4 and 7 left these to More, and the GeoNames license needs its
+**Why this priority**: Milestone 4 left the reset to More, and the GeoNames license needs its
 credit inside the app before release.
 
 **Independent Test**: Tap Reset prayer journey, then Reset: the Prayer tab and Home show nothing
-logged and no qada, every setting stays. Tap Downloaded recitations, Delete: the size reads "None".
-Tap Credits: GeoNames and its license are listed.
+logged and no qada, every setting stays. Tap Credits: GeoNames and its license are listed.
 
 **Acceptance Scenarios**:
 
 1. **Given** Reset prayer journey, **When** I tap it, **Then** a dialog asks first, Cancel changes
    nothing, Reset clears the log and qada only.
-2. **Given** downloaded recitations, **When** I tap the row and confirm, **Then** they are deleted
-   and play again by downloading.
-3. **Given** Credits, **When** I tap it, **Then** each source the app uses is listed with its
+2. **Given** Credits, **When** I tap it, **Then** each source the app uses is listed with its
    license and a link.
 
 ---
@@ -205,18 +220,15 @@ Tap Credits: GeoNames and its license are listed.
 - Midnight while the calendar is open: the highlight moves to the new today, the shown month stays.
 - The first and last month of the Umm al-Qura table: the arrow past it is disabled.
 - 13 Dhu al-Hijjah is a day of Tashreeq, when fasting isn't allowed, so it gets no white day dot.
-  [NEEDS CLARIFICATION: Q6]
 - Follow sky where the sun doesn't rise or set that day: dark all day without a sunrise, light all
   day without a Maghrib.
 - Follow sky with no location yet: the app follows the phone's light and dark.
 - Follow sky when the location changes: the switch moves to the new place's sunrise and Maghrib.
 - Sunrise or Maghrib while the theme page is open: the app switches, the preview keeps what I
   picked there.
-- Haptics off: the page turn haptic is off too, its toggle disabled until Haptics is on again.
-- UI sounds on with the phone on silent, or while a recitation or the adhan plays: no UI sound.
+- UI sounds on with the phone on silent, or while the adhan or a dua clip plays: no UI sound.
 - A recording preview playing when a prayer's adhan starts: the preview stops, the adhan plays.
 - Reset prayer journey while a toast with Undo shows on the Prayer tab: that Undo is dropped.
-- Deleting recitations while one plays: the playback stops first.
 - Text scale 2.0: a long value ("Egyptian General Authority") goes under its row's title, nothing
   is cut, swatch names wrap.
 - 12 hour phones: the times on the Adhan and reminders page and in the day sheet fit "5:56 PM".
@@ -228,37 +240,39 @@ Tap Credits: GeoNames and its license are listed.
 
 **The More tab**
 
-- **FR-001**: The More tab MUST match 4.09 as specified in the handoff: title, "Stored on this
-  device · no account needed", the three tiles, PRAYER, APPEARANCE and SOUND AND TOUCH, in dark and
-  light. Arabic has no PNG, it follows the same tree with the RTL rules. The large title collapses
-  into the compact bar on scroll.
-- **FR-002**: The tiles MUST push Qibla (milestone 6), the Hijri calendar and Duas (milestone 8).
+- **FR-001**: The More tab MUST be built from the 4.09 tree: title, "Stored on this device · no
+  account needed", the three tiles, PRAYER, APPEARANCE and SOUND AND TOUCH, in dark and light.
+  Arabic has no PNG, it follows the same tree with the RTL rules. The large title collapses into
+  the compact bar on scroll.
+- **FR-002**: The tiles MUST push Qibla (milestone 6), the Hijri calendar and Duas (milestone 8),
+  replacing the temporary buttons.
 - **FR-003**: Each row MUST show its current value and update the moment it changes:
 
   | Row | Value | Tap |
   | --- | --- | --- |
   | Calculation method | the method's name | the method sheet from milestone 4 |
   | Adhan and reminders | "{minutes} min before", or "Off" | the Adhan and reminders page |
-  | Location | "{city} · auto", "{city} · manual" or "No location yet" | nothing until milestone 10 |
+  | Location | "{city} · auto", "{city} · manual" or "No location yet" | the location sheet from milestone 3 |
   | Theme | the theme's name | the theme page |
   | Light and dark | Dark, Light or Follow sky | the light and dark sheet (FR-016) |
 
-- **FR-004**: The Location row MUST stay as designed and do nothing until milestone 10 builds the
-  location sheet and city search. A `TODO:` marks it.
+- **FR-004**: In dev builds the "Notifications (dev)" entry from milestone 5 MUST stay reachable
+  from More, below everything else. Staging and production MUST NOT show it.
 - **FR-005**: Every toggle MUST change at once with the toggle haptic, and be kept on the phone.
 - **FR-006**: Reduce motion on MUST give every animation its reduce motion fallback (MOTION.md). The
   app's toggle and the phone's setting each do it alone.
 - **FR-007**: Haptics off MUST stop every haptic the app makes. Haptics on still follows the phone's
   own vibration settings.
 - **FR-008**: UI sounds on MUST play the Brand board's sounds with their events: Bead on each tasbih
-  count, Complete on set complete and day complete, Aligned on Qibla aligned, Page on a page turn.
-  They are off by default, never play over a recitation or the adhan, and stay quiet with the phone
-  on silent. Until I supply the files they are placeholders with a `TODO(ahmed)`.
+  count, Complete on set complete and day complete, Aligned on Qibla aligned. Page comes with the
+  Quran reader (milestone 7). They are off by default, never play over the adhan or a dua clip, and
+  stay quiet with the phone on silent. Until I supply the files they are placeholders with a
+  `TODO(ahmed)`.
 
 **Theme page**
 
-- **FR-009**: The theme page MUST match 4.15: compact bar, live preview, Dark, Light and Follow sky,
-  the 8 swatches in the 4.15 order, the Follow sky note and Apply theme.
+- **FR-009**: The theme page MUST be built from the 4.15 tree: compact bar, live preview, Dark,
+  Light and Follow sky, the 8 swatches in the 4.15 order, the Follow sky note and Apply theme.
 - **FR-010**: It MUST open with the saved theme and mode selected. A swatch or a mode tap MUST
   restyle only the preview, at once, with the toggle haptic.
 - **FR-011**: The preview MUST be the Home snippet (sky, now, next prayer with the live countdown,
@@ -270,7 +284,7 @@ Tap Credits: GeoNames and its license are listed.
   surfaces keep their own colors (milestones 5 and 11).
 - **FR-014**: Home's Living Sky MUST keep Qiyam Emerald's six sky states in every theme ("the sky is
   the sky"), the theme restyles everything else. The swatches and the preview show each theme's
-  base sky as designed. [NEEDS CLARIFICATION: Q7, the sky in the other 7 themes]
+  base sky as designed.
 
 **Light and dark**
 
@@ -279,14 +293,13 @@ Tap Credits: GeoNames and its license are listed.
   a 300 ms crossfade while the app is open. With no location yet it follows the phone.
 - **FR-016**: The Light and dark row MUST open a bottom sheet with three picker rows (Dark, Light,
   Follow sky) and the Follow sky note. A pick applies at once with the toggle haptic.
-  [NEEDS CLARIFICATION: Q4, sheet or the theme page]
 
 **Hijri calendar**
 
-- **FR-017**: The calendar MUST match 4.13: compact bar with the calendar icon, the month with its
-  arrows, the Hijri month and year, the Gregorian months it spans, the weekday letters, the month
-  grid, COMING UP and Date adjustment. Arabic has no PNG, it follows the same tree with the RTL
-  rules: Sunday on the right, the arrows mirror, digits per the digits setting.
+- **FR-017**: The calendar MUST be built from the 4.13 tree: compact bar with the calendar icon, the
+  month with its arrows, the Hijri month and year, the Gregorian months it spans, the weekday
+  letters, the month grid, COMING UP and Date adjustment. Arabic has no PNG, it follows the same
+  tree with the RTL rules: Sunday on the right, the arrows mirror, digits per the digits setting.
 - **FR-018**: The grid MUST show the Hijri month from the Umm al-Qura table plus my adjustment, one
   cell per day: the Hijri day large, the Gregorian day small, with the short Gregorian month on the
   month's first cell and on each Gregorian 1st. Days of other months are empty cells. The week
@@ -294,8 +307,7 @@ Tap Credits: GeoNames and its license are listed.
 - **FR-019**: Each cell MUST show one look, in this order: today (primary fill), selected, Sunnah
   fast, event, white day (accent dot), plain. Selected, Sunnah fast and event use their cell looks
   in `03 Components.dc.html`.
-- **FR-020**: The calendar MUST mark these days, the same in every year
-  [NEEDS CLARIFICATION: Q6, which days]:
+- **FR-020**: The calendar MUST mark these days, the same in every year:
 
   | Hijri date | Event | Look | Note |
   | --- | --- | --- | --- |
@@ -328,7 +340,7 @@ Tap Credits: GeoNames and its license are listed.
 - **FR-025**: A saved adjustment MUST move every Hijri date in the app at once: the calendar, Home,
   the notifications, the widgets, and Ramadan for the Umm al-Qura Isha.
 
-**Adhan and reminders** [NEEDS CLARIFICATION: Q5, the page]
+**Adhan and reminders**
 
 - **FR-026**: The row MUST push a page with the compact bar: the five prayers, each with today's time
   and the Adhan, Tone, Silent control from 4.12, a row under each prayer on Adhan with its
@@ -343,51 +355,50 @@ Tap Credits: GeoNames and its license are listed.
   30 minutes in 5 minute steps, 0 is off, the toggle haptic on each step. This adds 25 minutes to
   milestone 5's list.
 - **FR-029**: Every change MUST be kept at once and remake the pending notifications the way
-  milestone 5 does for any change of choices.
+  milestone 5 does for any change of choices. A prayer's adhan, the iOS clip and the Android
+  notification sound all use its recording.
 - **FR-030**: When notifications are off for the app in the phone's settings, the page MUST say so
-  at the top with "Open settings", which opens the app's page in the phone's settings. The choices
-  still save.
+  at the top with "Open settings", which opens the app's notification settings on the phone. The
+  choices still save.
 
-**Below the design** [NEEDS CLARIFICATION: Q2, the extra rows]
+**Below the design**
 
-- **FR-031**: SOUND AND TOUCH MUST get "Page turn haptic" after Haptics (milestone 7), off by
-  default, disabled while Haptics is off.
-- **FR-032**: Below SOUND AND TOUCH, More MUST get two sections built from the same grouped rows:
-  YOUR DATA (Downloaded recitations, Reset prayer journey) and ABOUT (Credits, Version).
-- **FR-033**: Reset prayer journey MUST ask with the dialog in `03 Components.dc.html` ("Reset prayer
+- **FR-031**: Below SOUND AND TOUCH, More MUST get two sections built from the same grouped rows:
+  YOUR DATA (Reset prayer journey) and ABOUT (Credits, Version). The Quran reader (milestone 7)
+  adds Page turn haptic to SOUND AND TOUCH and Downloaded recitations to YOUR DATA, milestone 10
+  adds the backup rows.
+- **FR-032**: Reset prayer journey MUST ask with the dialog in `03 Components.dc.html` ("Reset prayer
   journey?", Cancel, Reset). Reset MUST clear the prayer log and the qada entries only. Settings,
-  first use, Quran, tasbih and azkar stay.
-- **FR-034**: Downloaded recitations MUST show the space they take ("48 MB", or "None" and disabled)
-  and ask with the same dialog look before deleting them all.
-- **FR-035**: Credits MUST push a page listing each source with the credit its license asks for and
+  first use, tasbih, azkar and saved duas stay.
+- **FR-033**: Credits MUST push a page listing each source with the credit its license asks for and
   a link that opens in the browser: GeoNames (CC BY 4.0), the fonts (SIL Open Font License), the
-  Quran text, translation and recitation (milestone 7), the adhan recordings, and the open source
-  licenses of what the app is built on. Each credit not final yet gets a `TODO(ahmed)`.
-- **FR-036**: Version MUST show the app's version and build ("1.0.0 (12)") and do nothing on tap.
+  azkar and duas sources (milestone 8), the adhan recordings, and the open source licenses of what
+  the app is built on. Each credit not final yet gets a `TODO(ahmed)`. Milestone 7 adds the Quran
+  text, translation and recitation.
+- **FR-034**: Version MUST show the app's version and build ("1.0.0 (12)") and do nothing on tap.
 
-**Arabic digits** [NEEDS CLARIFICATION: Q3, the switch]
+**Arabic digits**
 
-- **FR-037**: In Arabic, APPEARANCE MUST get a toggle "Eastern Arabic digits ١٢٣" after Reduce
+- **FR-035**: In Arabic, APPEARANCE MUST get a toggle "Eastern Arabic digits ١٢٣" after Reduce
   motion, on by default. Off shows Western digits everywhere: screens, notifications and widgets.
   In English the row is hidden.
 
 **Pages with no PNG**
 
-- **FR-038**: The light and dark sheet, the day sheet, the date adjustment sheet, the Adhan and
-  reminders page with its two sheets, the extra More rows, the two dialogs and the credits page
+- **FR-036**: The light and dark sheet, the day sheet, the date adjustment sheet, the Adhan and
+  reminders page with its two sheets, the extra More rows, the reset dialog and the credits page
   have no PNG. They MUST be built only from parts in `03 Components.dc.html` and I check them in
   the app before they count as done.
 
 **Storage and privacy**
 
-- **FR-039**: Every setting here MUST be kept in the encrypted store on the phone with the
-  milestone 2 settings, survive restarts and updates, and never leave the phone. The page turn
-  haptic (off) and each prayer's recording (Makkah) are new settings with their defaults.
+- **FR-037**: Every setting here MUST be kept in the encrypted store on the phone with the
+  milestone 2 settings, survive restarts and updates, and never leave the phone. Each prayer's
+  recording (default Makkah) is new, and the reminder minutes take 25 as well.
 
 **Copy and access**
 
-- **FR-040**: Every new string MUST exist in English and Arabic with this wording
-  [NEEDS CLARIFICATION: Q8, the copy]:
+- **FR-038**: Every new string MUST exist in English and Arabic with this wording:
 
   | Where | English | Arabic |
   | --- | --- | --- |
@@ -418,13 +429,7 @@ Tap Credits: GeoNames and its license are listed.
   | prayer's recording row | {recording} · full adhan | {recording} · أذان كامل |
   | notifications off | Notifications are off for this app. | الإشعارات متوقفة لهذا التطبيق. |
   | its action | Open settings | فتح الإعدادات |
-  | row | Page turn haptic | اهتزاز تقليب الصفحة |
   | section | YOUR DATA | بياناتك |
-  | row | Downloaded recitations | التلاوات المُنزَّلة |
-  | its values | {size} MB, None | {size} ميغابايت، لا شيء |
-  | dialog | Delete downloaded recitations? | حذف التلاوات المُنزَّلة؟ |
-  | dialog body | They download again the next time you play them. | ستُنزَّل من جديد عند تشغيلها. |
-  | dialog action | Delete | حذف |
   | row | Reset prayer journey | إعادة ضبط رحلة الصلاة |
   | dialog | Reset prayer journey? | إعادة ضبط رحلة الصلاة؟ |
   | dialog body | This clears your private log on this phone. It can't be undone. | سيُمسح سجلك الخاص على هذا الهاتف، ولا يمكن التراجع عن ذلك. |
@@ -432,19 +437,20 @@ Tap Credits: GeoNames and its license are listed.
   | section | ABOUT | حول التطبيق |
   | row | Credits | المصادر والشكر |
   | credits row | Open source licenses | تراخيص البرمجيات المفتوحة |
+  | what a credit is for | Place names, Fonts, Azkar and duas, Adhan recordings | أسماء الأماكن، الخطوط، الأذكار والأدعية، تسجيلات الأذان |
   | row | Version | الإصدار |
   | toggle, Arabic only | Eastern Arabic digits ١٢٣ | الأرقام المشرقية ١٢٣ |
   | theme names | Qiyam Emerald, Qiyam, Noor, Living Sky, Iznik, Andalus, Moonlight, Qiyam Rose | قيام زمردي، قيام، نور، السماء الحية، إزنيق، الأندلس، ضوء القمر، قيام وردي |
 
-- **FR-041**: Counts MUST read correctly in Arabic, including the existing "{minutes} min before"
+- **FR-039**: Counts MUST read correctly in Arabic, including the existing "{minutes} min before"
   (15 to 30 take the singular) and "{n} days".
-- **FR-042**: Every row, toggle, swatch, segment, arrow and calendar day MUST be at least 44 x 44.
+- **FR-040**: Every row, toggle, swatch, segment, arrow and calendar day MUST be at least 44 x 44.
   A screen reader MUST hear each row's name and value, each toggle's state, each swatch's name and
   whether it's selected, and each day's full Hijri and Gregorian date with its marks.
 
 **Design scenario**
 
-- **FR-043**: In "Dev · design scenario" More, the theme page and the calendar MUST show 4.09, 4.15
+- **FR-041**: In "Dev · design scenario" More, the theme page and the calendar MUST show 4.09, 4.15
   and 4.13 with the scenario's settings: Qiyam Emerald, Follow sky, reminder 10 minutes, Makkah ·
   auto, Umm al-Qura, adjustment 0, reduce motion off, haptics on, UI sounds off. In the scenario
   Follow sky follows the phone's light and dark, so each screen is seen in its mode as in
@@ -453,7 +459,7 @@ Tap Credits: GeoNames and its license are listed.
 ### Key Entities
 
 - **Appearance settings**: theme, light and dark (dark, light, follow sky), reduce motion, haptics,
-  page turn haptic, UI sounds, Arabic digits. All but the page turn haptic exist since milestone 2.
+  UI sounds, Arabic digits. All exist since milestone 2.
 - **Hijri adjustment**: −2 to +2 days, since milestone 2.
 - **Notification choices**: each prayer's sound and recording, the reminder minutes. Sound and
   reminder exist since milestone 5, the recording is new.
@@ -484,7 +490,7 @@ Tap Credits: GeoNames and its license are listed.
 ## Assumptions
 
 - Language follows the phone, More has no language row (milestone 2).
-- The method sheet is milestone 4's, More only opens it.
+- The method sheet is milestone 4's and the location sheet milestone 3's, More only opens them.
 - The 8 themes in the 4.15 order are the final set, as the constitution says.
 - In onboarding (milestone 10) the same theme page shows with no back button and Apply goes on to
   Home.
@@ -497,8 +503,7 @@ Tap Credits: GeoNames and its license are listed.
 - The UI sound files and five of the six adhan recordings aren't in the handoff. They are
   placeholders with a `TODO(ahmed)` until I supply them. UI sounds stay off by default, so nobody
   hears a placeholder.
-- Backup and restore rows join YOUR DATA in milestone 10.
+- Milestones 3 to 6 and 8 are built. The Quran reader (7) comes after 11 and adds its rows, its
+  credits and the Page sound to More then. Backup and restore rows join YOUR DATA in milestone 10.
 - No privacy policy or terms row until I write them (the constitution says ask me first).
-- Milestones 3 to 8 are built before this one, so the tiles, the sounds' events and the downloads
-  exist.
 - Each later milestone adds its own sources to Credits.

@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
@@ -31,6 +32,7 @@ void main() {
       zone: getLocation('Asia/Riyadh'),
       mode: LocationMode.auto,
     ),
+    azkar: await loadAzkarContent(),
   );
 
   Alert maghrib() => Alert(
@@ -40,6 +42,27 @@ void main() {
     at: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 17, 56),
     sound: PrayerSound.adhan,
   );
+
+  Alert nudge(Prayer prayer) => Alert(
+    day: DateTime(2026, 10, 15),
+    prayer: prayer,
+    kind: AlertKind.azkar,
+    at: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 15, 47),
+    sound: PrayerSound.silent,
+  );
+
+  test('the nudges take the set\'s name, count and minutes (FR-037)', () async {
+    final english = await texts('en');
+    final arabic = await texts('ar');
+
+    expect(english.titleOf(nudge(Prayer.asr)), 'Evening azkar');
+    expect(english.bodyOf(nudge(Prayer.asr)), 'After Asr · 24 remembrances, about 6 minutes');
+    expect(english.titleOf(nudge(Prayer.fajr)), 'Morning azkar');
+    expect(english.bodyOf(nudge(Prayer.fajr)), 'After Fajr · 12 remembrances, about 3 minutes');
+    expect(arabic.titleOf(nudge(Prayer.asr)), 'أذكار المساء');
+    expect(arabic.bodyOf(nudge(Prayer.asr)), 'بعد العصر · ٢٤ ذكرًا، حوالي ٦ دقائق');
+    expect(arabic.bodyOf(nudge(Prayer.fajr)), 'بعد الفجر · ١٢ ذكرًا، حوالي ٣ دقائق');
+  });
 
   test('english', () async {
     final english = await texts('en');

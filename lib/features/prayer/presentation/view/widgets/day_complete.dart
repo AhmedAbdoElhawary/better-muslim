@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// Motion 08 over the whole screen, tab bar too. it never blocks: any tap dismisses it
 void showDayComplete(BuildContext context) {
   BmHaptics.dayComplete();
+  BmSounds.complete();
   final overlay = Overlay.of(context, rootOverlay: true);
   late final OverlayEntry entry;
   entry = OverlayEntry(builder: (_) => DayComplete(onDone: entry.remove));

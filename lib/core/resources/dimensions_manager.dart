@@ -104,6 +104,108 @@ abstract final class SpaceManager {
   static const double qiblaCardH = 16;
   static const double qiblaCardLineGap = 2;
   static const double accuracyDotGap = 8;
+
+  /// tasbih (4.08), each gap from the tree's top to the bottom of the element above. the chips'
+  /// 44 pt hit box is 4 taller than the chip on each side
+  static const double tasbihChipsTop = 8;
+  static const double chipGap = 6;
+  static const double tasbihDhikrTop = 24;
+  static const double dhikrLineGap = 2;
+  static const double tasbihAreaTop = 44;
+
+  /// to and from the 36 pt focus ring, the strip's box
+  static const double tasbihStripGap = 40;
+  static const double tasbihHintGap = 24;
+  static const double beadGap = 16;
+  static const double counterGap = 6;
+  static const double barTitleGap = 1;
+  static const double navBadgeTop = 4;
+  static const double navBadgeEnd = 14;
+
+  /// the components' azkar card
+  static const double zikrCardV = 18;
+  static const double zikrFooterTop = 10;
+
+  /// duas (4.14)
+  static const double duaChipSide = 14;
+  static const double duaRowsTop = 44;
+  static const double duaCardBottom = 6;
+  static const double duaActionsTop = 2;
+  static const double duaActionGap = 6;
+  static const double categoryRowEnd = 14;
+
+  /// the share card has no design, inside the arch's shoulders
+  static const double shareCardTop = 96;
+  static const double shareCardSide = 32;
+
+  /// more (4.09) and the components' grouped list rows
+  static const double moreTitleTop = 2;
+  static const double moreSubtitleTop = 6;
+  static const double moreTilesTop = 20;
+  static const double moreSectionsTop = 22;
+  static const double tileGap = 10;
+  static const double tilePadding = 14;
+  static const double sectionGap = 20;
+  static const double sectionLabelGap = 8;
+  static const double listRowStart = 16;
+  static const double listRowEnd = 14;
+  static const double listRowGap = 14;
+
+  /// the components' segmented control, 4.15's and 4.12's smaller one
+  static const double segmentTrack = 3;
+  static const double segmentGap = 2;
+  static const double segmentSmallSide = 10;
+
+  /// theme (4.15), each gap from the tree's top to the bottom of the element above
+  static const double previewTop = 8;
+  static const double previewSnippetTop = 18;
+  static const double previewChipStart = 12;
+  static const double previewChipBottom = 10;
+  static const double previewChipH = 10;
+  static const double previewChipV = 4;
+  static const double modeTop = 14;
+  static const double swatchesTop = 16;
+  static const double swatchRowGap = 12;
+  static const double swatchColumnGap = 10;
+  static const double swatchInset = 7;
+  static const double swatchNameGap = 6;
+  static const double swatchCheck = 5;
+  static const double themeNoteTop = 26;
+
+  /// the snippet inside the preview (Theme Snippet.dc.html)
+  static const double snippetTopH = 20;
+  static const double snippetTopV = 16;
+  static const double snippetNowTop = 12;
+  static const double snippetCardOverlap = 58;
+  static const double snippetCardSide = 14;
+  static const double snippetCardH = 16;
+  static const double snippetCardTop = 14;
+  static const double snippetCardBottom = 15;
+  static const double snippetCardGap = 7;
+  static const double snippetStripTop = 14;
+  static const double snippetCellV = 9;
+  static const double snippetCellGap = 3;
+  static const double snippetVerseTop = 12;
+  static const double snippetVerseBottom = 15;
+  static const double snippetVerseLineTop = 6;
+  static const double snippetTranslationTop = 8;
+
+  /// hijri calendar (4.13), each gap from the tree's top to the bottom of the element above
+  static const double monthHeaderTop = 8;
+  static const double monthNameGap = 2;
+  static const double gridTop = 22;
+  static const double gridSide = 12;
+  static const double gridGap = 2;
+  static const double comingUpTop = 12;
+  static const double comingUpLabelSide = 4;
+  static const double comingUpRowV = 12;
+  static const double adjustmentTop = 20;
+  static const double stepperGap = 24;
+
+  /// the components' dialog
+  static const double dialogBodyTop = 10;
+  static const double dialogActionsTop = 22;
+  static const double dialogShadowY = 20;
 }
 
 abstract final class RadiusManager {
@@ -120,6 +222,18 @@ abstract final class RadiusManager {
   static const double adhanBar = 2;
   static const double qiblaMarker = 3;
   static const double qiblaNeedle = 1;
+  static const double zikrBar = 2;
+  static const double tileIcon = 12;
+  static const double segmentTrack = 12;
+  static const double segment = 9;
+  static const double segmentSmallTrack = 11;
+  static const double segmentSmall = 8;
+  static const double swatchPill = 4;
+  static const double snippet = 30;
+  static const double snippetVerse = 18;
+  static const double dayCell = 14;
+  static const double dialog = 28;
+  static const double dialogAction = 12;
 }
 
 abstract final class SizeManager {
@@ -204,8 +318,89 @@ abstract final class SizeManager {
   static const double qiblaGlow = 420;
   static const double accuracyDot = 8;
 
+  /// tasbih (4.08), the ring is r 114 with a 5 stroke in its 240 box
+  static const double tasbihRing = 240;
+  static const double tasbihRingArc = 233;
+  static const double tasbihRingStroke = 5;
+  static const double tasbihGlow = 340;
+
+  /// the count keeps inside the ring up to this text scale
+  static const double counterMaxTextScale = 1.3;
+  static const double burstParticle = 6;
+  static const double burstReach = 92;
+  static const double bead = 28;
+  static const double beadFocus = 36;
+  static const double beadFocusStroke = 1.5;
+  static const double beadLine = 1;
+  static const double chip = 36;
+  static const double navBadge = 7;
+  static const double navBadgeRing = 2;
+  static const double toggleKnobOff = 20;
+  static const double toggleKnobOn = 24;
+  static const double toggleRingOff = 1.5;
+
+  /// the components' azkar card
+  static const double zikrBarW = 90;
+  static const double zikrBarH = 3;
+
+  /// duas (4.14) and the components' empty state
+  static const double duaAction = 48;
+  static const double categoryRow = 56;
+  static const double emptyIcon = 56;
+  static const double emptyIconStroke = 1.4;
+
+  /// the shared dua image, at 3x
+  static const double shareCard = 360;
+
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;
+
+  /// more (4.09) and the components' grouped list rows
+  static const double divider = 1;
+  static const double tile = 92;
+  static const double tileIconBox = 36;
+
+  /// the components' segmented control, 4.15's and 4.12's smaller one
+  static const double segment = 38;
+  static const double segmentSmall = 30;
+
+  /// theme (4.15)
+  static const double preview = 300;
+  static const double previewFade = 70;
+  static const double swatch = 60;
+  static const double swatchCheck = 18;
+  static const double swatchPillW = 18;
+  static const double swatchPillH = 7;
+  static const double swatchRing = 2.5;
+
+  /// the snippet inside the preview (Theme Snippet.dc.html), on its own 300 pt width
+  static const double snippet = 300;
+  static const double snippetSky = 176;
+  static const double snippetHorizon = 150;
+  static const double snippetSun = 14;
+  static const double snippetSunBlur = 18;
+  static const double snippetSunSpread = 6;
+  static const double snippetGlowInset = 16;
+
+  /// hijri calendar (4.13)
+  static const double weekdayRow = 22;
+  static const double dayCell = 54;
+  static const double dayMark = 4;
+  static const double dayMarkTop = 44;
+  static const double fastMark = 10;
+  static const double todayRing = 1.5;
+  static const double comingUpDay = 46;
+
+  /// the components' dialog and the adhan sound sheet
+  static const double dialog = 320;
+  static const double dialogShadowBlur = 60;
+  static const double radio = 22;
+  static const double radioDot = 11;
+  static const double radioRing = 2;
+  static const double radioRingOff = 1.5;
+  static const double playButton = 44;
+  static const double sliderTrack = 4;
+  static const double sliderThumb = 22;
 
   /// tablets and foldables get the phone layout stretched to this, until they have their own design
   static const double maxContentWidth = 480;

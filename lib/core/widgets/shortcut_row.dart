@@ -6,7 +6,7 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// a 64 pt row of the shortcuts card. it grows with large text instead of clipping
+/// a 64 pt row of home's shortcuts card and the azkar tab. it grows with large text instead of clipping
 class ShortcutRow extends StatelessWidget {
   const ShortcutRow({
     required this.icon,

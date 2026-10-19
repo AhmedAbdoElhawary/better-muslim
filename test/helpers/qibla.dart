@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'home.dart';
 import 'prayer.dart';
 
-/// More › Qibla at 393 x 852, the way the temporary button opens it
+/// More › Qibla at 393 x 852, the way its tile opens it
 Future<void> pumpQibla(
   WidgetTester tester,
   List<Override> overrides, {

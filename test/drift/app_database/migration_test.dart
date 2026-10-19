@@ -7,6 +7,8 @@ import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
+import 'generated/schema_v4.dart' as v4;
+import 'generated/schema_v5.dart' as v5;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -116,6 +118,139 @@ void main() {
           'reminderMinutes': 10,
           'notificationsAsked': 0,
         });
+      },
+    );
+  });
+
+  test('v3 to v4 keeps every row, adds the azkar defaults and two empty tables', () async {
+    const old = v3.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 0,
+      digits: 'eastern',
+      theme: 'qiyamEmerald',
+      themeMode: 'followSky',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+    );
+    const prayed = v3.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+    const qada = v3.QadaEntriesData(id: 1, prayer: 'fajr', missedOn: '2026-10-02');
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 3,
+      newVersion: 4,
+      createOld: v3.DatabaseAtV3.new,
+      createNew: v4.DatabaseAtV4.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, old)
+          ..insert(oldDb.prayerLog, prayed)
+          ..insert(oldDb.qadaEntries, qada);
+      },
+      validateItems: (newDb) async {
+        final [row] = await newDb.select(newDb.settings).get();
+        expect(row.toJson(), {
+          ...old.toJson(),
+          'tasbihDhikr': 0,
+          'tasbihCount': 0,
+          'morningOpenedOn': null,
+          'eveningOpenedOn': null,
+          'azkarNudges': 1,
+        });
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+        expect((await newDb.select(newDb.qadaEntries).get()).single.toJson(), qada.toJson());
+        expect(await newDb.select(newDb.azkarCounts).get(), isEmpty);
+        expect(await newDb.select(newDb.savedDuas).get(), isEmpty);
+      },
+    );
+  });
+
+  test('v4 to v5 keeps row 1 only, reads makkah for each prayer and takes 25 minutes', () async {
+    const old = v4.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 1,
+      digits: 'western',
+      theme: 'iznik',
+      themeMode: 'light',
+      reduceMotion: 1,
+      haptics: 0,
+      uiSounds: 1,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+      tasbihDhikr: 2,
+      tasbihCount: 12,
+      morningOpenedOn: '2026-10-14',
+      azkarNudges: 0,
+    );
+    const prayed = v4.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+    const qada = v4.QadaEntriesData(id: 1, prayer: 'fajr', missedOn: '2026-10-02');
+    const saved = v4.SavedDuasData(dua: 'travel-1', savedAt: 1760000000);
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 4,
+      newVersion: 5,
+      createOld: v4.DatabaseAtV4.new,
+      createNew: v5.DatabaseAtV5.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, old)
+          ..insert(oldDb.settings, old.copyWith(id: 2))
+          ..insert(oldDb.prayerLog, prayed)
+          ..insert(oldDb.qadaEntries, qada)
+          ..insert(oldDb.savedDuas, saved);
+      },
+      validateItems: (newDb) async {
+        final [row] = await newDb.select(newDb.settings).get();
+        expect(row.toJson(), {
+          ...old.toJson(),
+          'fajrRecording': 'makkah',
+          'dhuhrRecording': 'makkah',
+          'asrRecording': 'makkah',
+          'maghribRecording': 'makkah',
+          'ishaRecording': 'makkah',
+        });
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+        expect((await newDb.select(newDb.qadaEntries).get()).single.toJson(), qada.toJson());
+        expect((await newDb.select(newDb.savedDuas).get()).single.toJson(), saved.toJson());
+
+        await newDb
+            .update(newDb.settings)
+            .write(const v5.SettingsCompanion(reminderMinutes: Value(25)));
+        expect((await newDb.select(newDb.settings).getSingle()).reminderMinutes, 25);
+        await expectLater(
+          newDb.update(newDb.settings).write(const v5.SettingsCompanion(reminderMinutes: Value(7))),
+          throwsA(anything),
+        );
       },
     );
   });

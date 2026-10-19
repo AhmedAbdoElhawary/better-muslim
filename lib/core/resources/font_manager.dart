@@ -95,6 +95,27 @@ abstract final class FontSizeManager {
 
   /// the qibla cards' distance and accuracy
   static const double qiblaValue = 20;
+
+  /// tasbih (4.08), duas (4.14) and the components' azkar card
+  static const double dhikrMeaning = 13.5;
+  static const double dhikrChip = 12.5;
+  static const double duaChip = 13.5;
+  static const double zikrAr = 26;
+  static const double zikrTranslation = 13.5;
+
+  /// theme (4.15) and the snippet in its preview
+  static const double swatchName = 11.5;
+  static const double snippetPrayer = 28;
+  static const double snippetCountdown = 22;
+  static const double snippetPlace = 11.5;
+  static const double snippetNow = 10.5;
+  static const double snippetTab = 10.5;
+  static const double snippetVerse = 24;
+
+  /// hijri calendar (4.13)
+  static const double weekday = 11.5;
+  static const double calendarGregorian = 10.5;
+  static const double dialogBody = 14.5;
 }
 
 abstract final class LineHeightManager {
@@ -135,6 +156,10 @@ abstract final class LineHeightManager {
   static const double verseTranslation = 1.5;
   static const double adhanDua = 1.8;
   static const double qiblaHint = 1.5;
+  static const double snippetVerse = 2.3;
+  static const double comingUpDay = 1.2;
+  static const double dialogTitle = 1.25;
+  static const double dialogBody = 1.55;
 }
 
 abstract final class LetterSpacingManager {
@@ -147,4 +172,10 @@ abstract final class LetterSpacingManager {
 
   /// .18em of the 12 pt adhan header
   static const double adhanHeader = 2.16;
+
+  /// the snippet's NOW, .14em of 10.5 pt
+  static const double snippetNow = 1.47;
+
+  /// the snippet's countdown, .01em of 22 pt
+  static const double snippetCountdown = .22;
 }

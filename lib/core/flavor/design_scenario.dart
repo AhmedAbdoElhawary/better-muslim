@@ -5,9 +5,11 @@ import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:timezone/timezone.dart' show TZDateTime, getLocation;
@@ -50,6 +52,9 @@ List<Override> designScenarioOverrides() {
           : computeDayTimes(ref, date),
     ),
     positionSourceProvider.overrideWithValue(const _NoPosition()),
+
+    /// each PNG is looked at in the phone's mode, the frozen 16:32 would always be light (FR-041)
+    followSkyProvider.overrideWithValue(ThemeMode.system),
   ];
 }
 
@@ -61,7 +66,11 @@ Future<AppDatabase> designScenarioStore() async {
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   DateTime october(int day) => DateTime(2026, 10, day);
   await db.batch((batch) {
-    batch.insert(db.settings, SettingsCompanion(firstUse: Value(october(1))));
+    /// 4.08 shows subhanallah at 16 of 33
+    batch.insert(
+      db.settings,
+      SettingsCompanion(firstUse: Value(october(1)), tasbihCount: const Value(16)),
+    );
     batch.insertAll(db.prayerLog, [
       for (final day in [11, 12, 14])
         for (final prayer in Prayer.values)

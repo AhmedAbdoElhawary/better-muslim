@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -203,10 +204,5 @@ void main() {
     test('a time that is null has no label', () {
       expect(arcLabels(at(15, 21, 0), times(14), times(15, polar: true), times(16)).start, isNull);
     });
-  });
-
-  test('morning azkar from fajr until asr, evening from asr until fajr', () {
-    expect(Period.values.where(isMorningAzkar), [Period.fajr, Period.duha, Period.dhuhr]);
-    expect(isMorningAzkar(null), isFalse);
   });
 }

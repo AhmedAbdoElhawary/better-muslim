@@ -1,8 +1,10 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:timezone/timezone.dart';
 
-enum AlertKind { adhan, reminder }
+/// azkar is the quiet nudge after fajr and asr, its prayer says which set
+enum AlertKind { adhan, reminder, azkar }
 
 /// one notification to schedule
 class Alert {
@@ -29,8 +31,11 @@ class Alert {
 
   TZDateTime get prayerTime => at.add(before);
 
-  int get id => alertId(day, prayer, kind);
+  int get id =>
+      kind == AlertKind.azkar ? azkarAlertId(day, azkarSetOf(prayer)) : alertId(day, prayer, kind);
 }
+
+AzkarSet azkarSetOf(Prayer prayer) => prayer == Prayer.fajr ? AzkarSet.morning : AzkarSet.evening;
 
 /// the dev page's test notification, far from any real day
 const testAlertId = 1000000;
@@ -43,6 +48,14 @@ int alertId(DateTime day, Prayer prayer, AlertKind kind) {
   final slot = prayer.index + (kind == AlertKind.reminder ? Prayer.values.length : 0);
   return days * 10 + slot;
 }
+
+/// past alertFromId's range, so the delivered cleanup leaves the nudges alone
+int azkarAlertId(DateTime day, AzkarSet set) {
+  final days = DateTime.utc(day.year, day.month, day.day).difference(_firstDay).inDays;
+  return _firstAzkarId + days * AzkarSet.values.length + set.index;
+}
+
+const _firstAzkarId = 2000000;
 
 ({DateTime day, Prayer prayer, AlertKind kind})? alertFromId(int id) {
   if (id < 0 || id >= testAlertId) return null;

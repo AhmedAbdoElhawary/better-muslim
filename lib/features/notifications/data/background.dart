@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/azkar/azkar_content.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
@@ -45,6 +47,7 @@ Future<void> topUp(
   final today = DateTime(at.year, at.month, at.day);
   final first = prayerDayOf(at, today, timesOn(today).fajr);
   final sounds = {for (final prayer in Prayer.values) prayer: settings.soundOf(prayer)};
+  final recordings = {for (final prayer in Prayer.values) prayer: settings.recordingOf(prayer)};
 
   final texts = await AlertTexts.load(
     locale: locale,
@@ -52,19 +55,46 @@ Future<void> topUp(
     digits: settings.digits,
     location: location,
   );
+  final days = [
+    for (var i = 0; i < scheduleDays; i++)
+      timesOn(DateTime(first.year, first.month, first.day + i)),
+  ];
   await scheduler.apply(
-    alerts: buildSchedule(
-      now: at,
-      days: [
-        for (var i = 0; i < scheduleDays; i++)
-          timesOn(DateTime(first.year, first.month, first.day + i)),
-      ],
-      sounds: sounds,
-      reminderMinutes: settings.reminderMinutes,
-    ),
+    alerts: [
+      ...buildSchedule(
+        now: at,
+        days: days,
+        sounds: sounds,
+        reminderMinutes: settings.reminderMinutes,
+      ),
+      if (settings.azkarNudges)
+        ...buildNudges(
+          now: at,
+          days: days,
+          done: await _doneWindows(db, texts.azkar, first, timesOn(today).periodAt(at)),
+        ),
+    ],
     sounds: sounds,
+    recordings: recordings,
     texts: texts,
   );
+}
+
+/// only the latest windows can hold counts, a later one always starts from 0
+Future<Set<(AzkarSet, DateTime)>> _doneWindows(
+  AppDatabase db,
+  AzkarContent? content,
+  DateTime prayerDay,
+  Period? period,
+) async {
+  if (content == null) return const {};
+  final done = <(AzkarSet, DateTime)>{};
+  for (final set in AzkarSet.values) {
+    final day = azkarWindowDay(set, prayerDay, period);
+    final items = content.setOf(set);
+    if (items.doneIn(await db.zikrCounts(set, day)) == items.total) done.add((set, day));
+  }
+  return done;
 }
 
 const markPrayedAction = 'mark_prayed';

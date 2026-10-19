@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -26,6 +27,7 @@ class QiblaPage extends ConsumerWidget {
       if (next.approaches > previous.approaches) BmHaptics.qiblaApproach();
       if (next.alignments > previous.alignments) {
         BmHaptics.qiblaAligned();
+        BmSounds.aligned();
         SemanticsService.sendAnnouncement(
           View.of(context),
           context.tr(StringsManager.facingQibla),

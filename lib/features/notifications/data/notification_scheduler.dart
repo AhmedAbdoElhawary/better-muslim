@@ -3,9 +3,9 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
-import 'package:better_muslim/features/notifications/data/adhan_recording.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -27,7 +27,6 @@ class NotificationScheduler {
   /// what kotlin was last given, the dev test adds to it instead of replacing it
   var _native = <Map<String, Object?>>[];
 
-  static const _recording = AdhanRecording.makkah;
   static const _group = 'adhan';
 
   /// system surfaces use the dark qiyam emerald, whatever the app's theme
@@ -103,16 +102,16 @@ class NotificationScheduler {
   }
 
   /// what kotlin needs to fire and play an adhan on its own (data-model.md, alarm entry)
-  static Map<String, Object?> entryOf(Alert alert, AlertTexts texts) => {
+  static Map<String, Object?> entryOf(Alert alert, AlertTexts texts, AdhanRecording recording) => {
     'id': alert.id,
     'atMillis': alert.at.millisecondsSinceEpoch,
     'payload': payloadOf(alert),
-    'asset': _recording.fullAsset(alert.prayer),
-    'channel': _channelId(alert.prayer, PrayerSound.adhan),
+    'asset': recording.fullAsset(alert.prayer),
+    'channel': channelId(alert.prayer, PrayerSound.adhan, recording),
     'title': texts.titleOf(alert),
     'body': texts.bodyOf(alert),
     'mediaTitle': texts.titleOf(alert),
-    'mediaSubtitle': texts.tr(_recording.nameKey),
+    'mediaSubtitle': texts.tr(recording.subtitleKey),
 
     /// android draws the app name before it, "Better Muslim · Adhan"
     'subText': texts.tr(StringsManager.soundAdhan),
@@ -128,25 +127,27 @@ class NotificationScheduler {
   Future<void> apply({
     required List<Alert> alerts,
     required Map<Prayer, PrayerSound> sounds,
+    required Map<Prayer, AdhanRecording> recordings,
     required AlertTexts texts,
   }) async {
     try {
       await _plugin.cancelAllPendingNotifications();
       await _channel.cancelAll();
-      await _ensureChannels(sounds, texts);
+      await _ensureChannels(sounds, recordings, texts);
       final exact = await _android?.canScheduleExactNotifications() ?? false;
       final native = <Map<String, Object?>>[];
       for (final alert in alerts) {
         /// the full adhan needs code at prayer time with the app closed, the plugin can't run it.
         /// without exact alarms it stays with the plugin and its clip (FR-023)
+        final recording = recordings[alert.prayer] ?? AdhanRecording.makkah;
         if (exact && alert.kind == AlertKind.adhan && alert.sound == PrayerSound.adhan) {
-          native.add(entryOf(alert, texts));
+          native.add(entryOf(alert, texts, recording));
           continue;
         }
         await _plugin.zonedSchedule(
           id: alert.id,
           scheduledDate: alert.at,
-          notificationDetails: _details(alert, texts),
+          notificationDetails: _details(alert, texts, recording),
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
               : AndroidScheduleMode.inexactAllowWhileIdle,
@@ -163,7 +164,7 @@ class NotificationScheduler {
   }
 
   /// the dev page's check: the next prayer's notification with its sound, a minute from now
-  Future<void> testIn1Minute(Alert next, AlertTexts texts) async {
+  Future<void> testIn1Minute(Alert next, AlertTexts texts, AdhanRecording recording) async {
     final at = TZDateTime.now(next.at.location).add(const Duration(minutes: 1));
     final alert = Alert(
       day: next.day,
@@ -176,14 +177,14 @@ class NotificationScheduler {
     if (exact && alert.sound == PrayerSound.adhan) {
       await _channel.schedule([
         ..._native,
-        {...entryOf(alert, texts), 'id': testAlertId},
+        {...entryOf(alert, texts, recording), 'id': testAlertId},
       ]);
       return;
     }
     await _plugin.zonedSchedule(
       id: testAlertId,
       scheduledDate: at,
-      notificationDetails: _details(alert, texts),
+      notificationDetails: _details(alert, texts, recording),
       androidScheduleMode: exact
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
@@ -193,43 +194,93 @@ class NotificationScheduler {
     );
   }
 
-  /// one entry per prayer in the phone's settings: the prayer's other two channels are deleted
-  Future<void> _ensureChannels(Map<Prayer, PrayerSound> sounds, AlertTexts texts) async {
+  /// one entry per prayer in the phone's settings: every other channel of the prayer is deleted,
+  /// milestone 5's adhan_{prayer}_adhan too
+  Future<void> _ensureChannels(
+    Map<Prayer, PrayerSound> sounds,
+    Map<Prayer, AdhanRecording> recordings,
+    AlertTexts texts,
+  ) async {
     final android = _android;
     if (android == null) return;
     await android.createNotificationChannel(_reminders(texts));
+    await android.createNotificationChannel(_azkar(texts));
     await android.createNotificationChannelGroup(
       AndroidNotificationChannelGroup(_group, texts.tr(StringsManager.soundAdhan)),
     );
     for (final MapEntry(key: prayer, value: sound) in sounds.entries) {
-      await android.createNotificationChannel(_channelOf(prayer, sound, texts));
-      for (final other in PrayerSound.values.where((other) => other != sound)) {
-        await android.deleteNotificationChannel(channelId: _channelId(prayer, other));
+      final recording = recordings[prayer] ?? AdhanRecording.makkah;
+      final kept = channelId(prayer, sound, recording);
+      await android.createNotificationChannel(_channelOf(prayer, sound, recording, texts));
+      for (final other in channelIdsOf(prayer).where((id) => id != kept)) {
+        await android.deleteNotificationChannel(channelId: other);
       }
     }
   }
 
-  static String _channelId(Prayer prayer, PrayerSound sound) =>
-      'adhan_${prayer.name}_${sound.name}';
+  /// android fixes a channel's sound when it is made, so each recording needs its own id
+  static String channelId(Prayer prayer, PrayerSound sound, AdhanRecording recording) =>
+      sound == PrayerSound.adhan
+      ? 'adhan_${prayer.name}_adhan_${recording.name}'
+      : 'adhan_${prayer.name}_${sound.name}';
 
-  AndroidNotificationChannel _channelOf(Prayer prayer, PrayerSound sound, AlertTexts texts) =>
-      AndroidNotificationChannel(
-        _channelId(prayer, sound),
-        texts.tr(prayer.nameKey),
-        groupId: _group,
-        importance: Importance.high,
-        playSound: sound != PrayerSound.silent,
-        sound: sound == PrayerSound.adhan
-            ? RawResourceAndroidNotificationSound(_recording.clipOf(prayer))
-            : null,
-        enableVibration: sound != PrayerSound.silent,
-      );
+  /// every id the prayer has ever had, so an apply can leave exactly one
+  static List<String> channelIdsOf(Prayer prayer) => [
+    'adhan_${prayer.name}_adhan',
+    for (final sound in PrayerSound.values)
+      if (sound != PrayerSound.adhan) channelId(prayer, sound, AdhanRecording.makkah),
+    for (final recording in AdhanRecording.values) channelId(prayer, PrayerSound.adhan, recording),
+  ];
+
+  AndroidNotificationChannel _channelOf(
+    Prayer prayer,
+    PrayerSound sound,
+    AdhanRecording recording,
+    AlertTexts texts,
+  ) => AndroidNotificationChannel(
+    channelId(prayer, sound, recording),
+    texts.tr(prayer.nameKey),
+    groupId: _group,
+    importance: Importance.high,
+    playSound: sound != PrayerSound.silent,
+    sound: sound == PrayerSound.adhan
+        ? RawResourceAndroidNotificationSound(recording.clipOf(prayer))
+        : null,
+    enableVibration: sound != PrayerSound.silent,
+  );
 
   /// one category for all five, default importance and the phone's own sound (FR-017)
   static AndroidNotificationChannel _reminders(AlertTexts texts) =>
       AndroidNotificationChannel('reminders', texts.tr(StringsManager.reminders));
 
-  NotificationDetails _details(Alert alert, AlertTexts texts) {
+  /// the nudges never make a sound or buzz (FR-037)
+  static AndroidNotificationChannel _azkar(AlertTexts texts) => AndroidNotificationChannel(
+    'azkar',
+    texts.tr(StringsManager.tabAzkar),
+    playSound: false,
+    enableVibration: false,
+  );
+
+  NotificationDetails _details(Alert alert, AlertTexts texts, AdhanRecording recording) {
+    if (alert.kind == AlertKind.azkar) {
+      final channel = _azkar(texts);
+      return NotificationDetails(
+        android: AndroidNotificationDetails(
+          channel.id,
+          channel.name,
+          playSound: false,
+          enableVibration: false,
+          color: _accent,
+          category: AndroidNotificationCategory.reminder,
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentSound: false,
+          presentBanner: true,
+          presentList: true,
+          interruptionLevel: InterruptionLevel.passive,
+        ),
+      );
+    }
     if (alert.kind == AlertKind.reminder) {
       final channel = _reminders(texts);
       return NotificationDetails(
@@ -249,7 +300,7 @@ class NotificationScheduler {
         ),
       );
     }
-    final channel = _channelOf(alert.prayer, alert.sound, texts);
+    final channel = _channelOf(alert.prayer, alert.sound, recording, texts);
     final sound = alert.sound;
     return NotificationDetails(
       android: AndroidNotificationDetails(
@@ -276,7 +327,7 @@ class NotificationScheduler {
       /// ios plays the clip with the app closed. in front the adhan screen plays the full adhan
       /// instead, so the adhan notification itself stays out of the way (FR-021)
       iOS: DarwinNotificationDetails(
-        sound: sound == PrayerSound.adhan ? '${_recording.clipOf(alert.prayer)}.caf' : null,
+        sound: sound == PrayerSound.adhan ? '${recording.clipOf(alert.prayer)}.caf' : null,
         presentSound: sound == PrayerSound.tone,
         presentBanner: sound != PrayerSound.adhan,
         presentList: true,
