@@ -1,5 +1,7 @@
 // GENERATED from the design files. Do not edit values by hand; they are the approved design.
 // Main theme: #9 Qiyam Emerald (exact values). Other themes: parked alternates, derived roles.
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 
 @immutable
@@ -112,6 +114,37 @@ class BmPalette {
       starOpacity: starOpacity,
     );
   }
+
+  /// the 300 ms crossfade when the theme or the mode changes
+  static BmPalette lerp(BmPalette a, BmPalette b, double t) => BmPalette(
+    bg: Color.lerp(a.bg, b.bg, t)!,
+    surface: Color.lerp(a.surface, b.surface, t)!,
+    raised: Color.lerp(a.raised, b.raised, t)!,
+    variant: Color.lerp(a.variant, b.variant, t)!,
+    outline: Color.lerp(a.outline, b.outline, t)!,
+    outlineStrong: Color.lerp(a.outlineStrong, b.outlineStrong, t)!,
+    text: Color.lerp(a.text, b.text, t)!,
+    text2: Color.lerp(a.text2, b.text2, t)!,
+    text3: Color.lerp(a.text3, b.text3, t)!,
+    primary: Color.lerp(a.primary, b.primary, t)!,
+    onPrimary: Color.lerp(a.onPrimary, b.onPrimary, t)!,
+    primaryContainer: Color.lerp(a.primaryContainer, b.primaryContainer, t)!,
+    onPrimaryContainer: Color.lerp(a.onPrimaryContainer, b.onPrimaryContainer, t)!,
+    accent: Color.lerp(a.accent, b.accent, t)!,
+    accentContainer: Color.lerp(a.accentContainer, b.accentContainer, t)!,
+    onAccentContainer: Color.lerp(a.onAccentContainer, b.onAccentContainer, t)!,
+    success: Color.lerp(a.success, b.success, t)!,
+    warning: Color.lerp(a.warning, b.warning, t)!,
+    error: Color.lerp(a.error, b.error, t)!,
+    onError: Color.lerp(a.onError, b.onError, t)!,
+    glow: Color.lerp(a.glow, b.glow, t)!,
+    sky1: Color.lerp(a.sky1, b.sky1, t)!,
+    sky2: Color.lerp(a.sky2, b.sky2, t)!,
+    sky3: Color.lerp(a.sky3, b.sky3, t)!,
+    onSky: Color.lerp(a.onSky, b.onSky, t)!,
+    sun: Color.lerp(a.sun, b.sun, t)!,
+    starOpacity: lerpDouble(a.starOpacity, b.starOpacity, t)!,
+  );
 }
 
 enum BmThemeId { noor, livingSky, andalus, iznik, qiyam, qiyamEmerald, moonlight, qiyamRose }
