@@ -288,6 +288,57 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _tasbihDhikrMeta = const VerificationMeta('tasbihDhikr');
+  @override
+  late final GeneratedColumn<int> tasbihDhikr = GeneratedColumn<int>(
+    'tasbih_dhikr',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(tasbihDhikr).isBetweenValues(0, 2),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tasbihCountMeta = const VerificationMeta('tasbihCount');
+  @override
+  late final GeneratedColumn<int> tasbihCount = GeneratedColumn<int>(
+    'tasbih_count',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(tasbihCount).isBiggerOrEqualValue(0),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime?, String> morningOpenedOn =
+      GeneratedColumn<String>(
+        'morning_opened_on',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<DateTime?>($SettingsTable.$convertermorningOpenedOnn);
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime?, String> eveningOpenedOn =
+      GeneratedColumn<String>(
+        'evening_opened_on',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<DateTime?>($SettingsTable.$convertereveningOpenedOnn);
+  static const VerificationMeta _azkarNudgesMeta = const VerificationMeta('azkarNudges');
+  @override
+  late final GeneratedColumn<bool> azkarNudges = GeneratedColumn<bool>(
+    'azkar_nudges',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("azkar_nudges" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -318,6 +369,11 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     ishaSound,
     reminderMinutes,
     notificationsAsked,
+    tasbihDhikr,
+    tasbihCount,
+    morningOpenedOn,
+    eveningOpenedOn,
+    azkarNudges,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -425,6 +481,24 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
           data['notifications_asked']!,
           _notificationsAskedMeta,
         ),
+      );
+    }
+    if (data.containsKey('tasbih_dhikr')) {
+      context.handle(
+        _tasbihDhikrMeta,
+        tasbihDhikr.isAcceptableOrUnknown(data['tasbih_dhikr']!, _tasbihDhikrMeta),
+      );
+    }
+    if (data.containsKey('tasbih_count')) {
+      context.handle(
+        _tasbihCountMeta,
+        tasbihCount.isAcceptableOrUnknown(data['tasbih_count']!, _tasbihCountMeta),
+      );
+    }
+    if (data.containsKey('azkar_nudges')) {
+      context.handle(
+        _azkarNudgesMeta,
+        azkarNudges.isAcceptableOrUnknown(data['azkar_nudges']!, _azkarNudgesMeta),
       );
     }
     return context;
@@ -557,6 +631,30 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}notifications_asked'],
       )!,
+      tasbihDhikr: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tasbih_dhikr'],
+      )!,
+      tasbihCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tasbih_count'],
+      )!,
+      morningOpenedOn: $SettingsTable.$convertermorningOpenedOnn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}morning_opened_on'],
+        ),
+      ),
+      eveningOpenedOn: $SettingsTable.$convertereveningOpenedOnn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}evening_opened_on'],
+        ),
+      ),
+      azkarNudges: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}azkar_nudges'],
+      )!,
     );
   }
 
@@ -597,6 +695,14 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<PrayerSound>(PrayerSound.values);
   static JsonTypeConverter2<PrayerSound, String, String> $converterishaSound =
       const EnumNameConverter<PrayerSound>(PrayerSound.values);
+  static TypeConverter<DateTime, String> $convertermorningOpenedOn = const CivilDate();
+  static TypeConverter<DateTime?, String?> $convertermorningOpenedOnn = NullAwareTypeConverter.wrap(
+    $convertermorningOpenedOn,
+  );
+  static TypeConverter<DateTime, String> $convertereveningOpenedOn = const CivilDate();
+  static TypeConverter<DateTime?, String?> $convertereveningOpenedOnn = NullAwareTypeConverter.wrap(
+    $convertereveningOpenedOn,
+  );
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -644,6 +750,15 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
 
   /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
   final bool notificationsAsked;
+
+  /// 0 subhanallah, 1 alhamdulillah, 2 allahu akbar
+  final int tasbihDhikr;
+  final int tasbihCount;
+
+  /// the window last opened, the azkar tab's badge goes once it's the current one
+  final DateTime? morningOpenedOn;
+  final DateTime? eveningOpenedOn;
+  final bool azkarNudges;
   const AppSettings({
     required this.id,
     this.latitude,
@@ -673,6 +788,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.ishaSound,
     required this.reminderMinutes,
     required this.notificationsAsked,
+    required this.tasbihDhikr,
+    required this.tasbihCount,
+    this.morningOpenedOn,
+    this.eveningOpenedOn,
+    required this.azkarNudges,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -749,6 +869,19 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     }
     map['reminder_minutes'] = Variable<int>(reminderMinutes);
     map['notifications_asked'] = Variable<bool>(notificationsAsked);
+    map['tasbih_dhikr'] = Variable<int>(tasbihDhikr);
+    map['tasbih_count'] = Variable<int>(tasbihCount);
+    if (!nullToAbsent || morningOpenedOn != null) {
+      map['morning_opened_on'] = Variable<String>(
+        $SettingsTable.$convertermorningOpenedOnn.toSql(morningOpenedOn),
+      );
+    }
+    if (!nullToAbsent || eveningOpenedOn != null) {
+      map['evening_opened_on'] = Variable<String>(
+        $SettingsTable.$convertereveningOpenedOnn.toSql(eveningOpenedOn),
+      );
+    }
+    map['azkar_nudges'] = Variable<bool>(azkarNudges);
     return map;
   }
 
@@ -786,6 +919,15 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       ishaSound: Value(ishaSound),
       reminderMinutes: Value(reminderMinutes),
       notificationsAsked: Value(notificationsAsked),
+      tasbihDhikr: Value(tasbihDhikr),
+      tasbihCount: Value(tasbihCount),
+      morningOpenedOn: morningOpenedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(morningOpenedOn),
+      eveningOpenedOn: eveningOpenedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eveningOpenedOn),
+      azkarNudges: Value(azkarNudges),
     );
   }
 
@@ -838,6 +980,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       ),
       reminderMinutes: serializer.fromJson<int>(json['reminderMinutes']),
       notificationsAsked: serializer.fromJson<bool>(json['notificationsAsked']),
+      tasbihDhikr: serializer.fromJson<int>(json['tasbihDhikr']),
+      tasbihCount: serializer.fromJson<int>(json['tasbihCount']),
+      morningOpenedOn: serializer.fromJson<DateTime?>(json['morningOpenedOn']),
+      eveningOpenedOn: serializer.fromJson<DateTime?>(json['eveningOpenedOn']),
+      azkarNudges: serializer.fromJson<bool>(json['azkarNudges']),
     );
   }
   @override
@@ -880,6 +1027,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'ishaSound': serializer.toJson<String>($SettingsTable.$converterishaSound.toJson(ishaSound)),
       'reminderMinutes': serializer.toJson<int>(reminderMinutes),
       'notificationsAsked': serializer.toJson<bool>(notificationsAsked),
+      'tasbihDhikr': serializer.toJson<int>(tasbihDhikr),
+      'tasbihCount': serializer.toJson<int>(tasbihCount),
+      'morningOpenedOn': serializer.toJson<DateTime?>(morningOpenedOn),
+      'eveningOpenedOn': serializer.toJson<DateTime?>(eveningOpenedOn),
+      'azkarNudges': serializer.toJson<bool>(azkarNudges),
     };
   }
 
@@ -912,6 +1064,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     PrayerSound? ishaSound,
     int? reminderMinutes,
     bool? notificationsAsked,
+    int? tasbihDhikr,
+    int? tasbihCount,
+    Value<DateTime?> morningOpenedOn = const Value.absent(),
+    Value<DateTime?> eveningOpenedOn = const Value.absent(),
+    bool? azkarNudges,
   }) => AppSettings(
     id: id ?? this.id,
     latitude: latitude.present ? latitude.value : this.latitude,
@@ -941,6 +1098,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     ishaSound: ishaSound ?? this.ishaSound,
     reminderMinutes: reminderMinutes ?? this.reminderMinutes,
     notificationsAsked: notificationsAsked ?? this.notificationsAsked,
+    tasbihDhikr: tasbihDhikr ?? this.tasbihDhikr,
+    tasbihCount: tasbihCount ?? this.tasbihCount,
+    morningOpenedOn: morningOpenedOn.present ? morningOpenedOn.value : this.morningOpenedOn,
+    eveningOpenedOn: eveningOpenedOn.present ? eveningOpenedOn.value : this.eveningOpenedOn,
+    azkarNudges: azkarNudges ?? this.azkarNudges,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
     return AppSettings(
@@ -978,6 +1140,15 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       notificationsAsked: data.notificationsAsked.present
           ? data.notificationsAsked.value
           : this.notificationsAsked,
+      tasbihDhikr: data.tasbihDhikr.present ? data.tasbihDhikr.value : this.tasbihDhikr,
+      tasbihCount: data.tasbihCount.present ? data.tasbihCount.value : this.tasbihCount,
+      morningOpenedOn: data.morningOpenedOn.present
+          ? data.morningOpenedOn.value
+          : this.morningOpenedOn,
+      eveningOpenedOn: data.eveningOpenedOn.present
+          ? data.eveningOpenedOn.value
+          : this.eveningOpenedOn,
+      azkarNudges: data.azkarNudges.present ? data.azkarNudges.value : this.azkarNudges,
     );
   }
 
@@ -1011,7 +1182,12 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('maghribSound: $maghribSound, ')
           ..write('ishaSound: $ishaSound, ')
           ..write('reminderMinutes: $reminderMinutes, ')
-          ..write('notificationsAsked: $notificationsAsked')
+          ..write('notificationsAsked: $notificationsAsked, ')
+          ..write('tasbihDhikr: $tasbihDhikr, ')
+          ..write('tasbihCount: $tasbihCount, ')
+          ..write('morningOpenedOn: $morningOpenedOn, ')
+          ..write('eveningOpenedOn: $eveningOpenedOn, ')
+          ..write('azkarNudges: $azkarNudges')
           ..write(')'))
         .toString();
   }
@@ -1046,6 +1222,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     ishaSound,
     reminderMinutes,
     notificationsAsked,
+    tasbihDhikr,
+    tasbihCount,
+    morningOpenedOn,
+    eveningOpenedOn,
+    azkarNudges,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1078,7 +1259,12 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.maghribSound == this.maghribSound &&
           other.ishaSound == this.ishaSound &&
           other.reminderMinutes == this.reminderMinutes &&
-          other.notificationsAsked == this.notificationsAsked);
+          other.notificationsAsked == this.notificationsAsked &&
+          other.tasbihDhikr == this.tasbihDhikr &&
+          other.tasbihCount == this.tasbihCount &&
+          other.morningOpenedOn == this.morningOpenedOn &&
+          other.eveningOpenedOn == this.eveningOpenedOn &&
+          other.azkarNudges == this.azkarNudges);
 }
 
 class SettingsCompanion extends UpdateCompanion<AppSettings> {
@@ -1110,6 +1296,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<PrayerSound> ishaSound;
   final Value<int> reminderMinutes;
   final Value<bool> notificationsAsked;
+  final Value<int> tasbihDhikr;
+  final Value<int> tasbihCount;
+  final Value<DateTime?> morningOpenedOn;
+  final Value<DateTime?> eveningOpenedOn;
+  final Value<bool> azkarNudges;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.latitude = const Value.absent(),
@@ -1139,6 +1330,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.ishaSound = const Value.absent(),
     this.reminderMinutes = const Value.absent(),
     this.notificationsAsked = const Value.absent(),
+    this.tasbihDhikr = const Value.absent(),
+    this.tasbihCount = const Value.absent(),
+    this.morningOpenedOn = const Value.absent(),
+    this.eveningOpenedOn = const Value.absent(),
+    this.azkarNudges = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1169,6 +1365,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.ishaSound = const Value.absent(),
     this.reminderMinutes = const Value.absent(),
     this.notificationsAsked = const Value.absent(),
+    this.tasbihDhikr = const Value.absent(),
+    this.tasbihCount = const Value.absent(),
+    this.morningOpenedOn = const Value.absent(),
+    this.eveningOpenedOn = const Value.absent(),
+    this.azkarNudges = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
     Expression<int>? id,
@@ -1199,6 +1400,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? ishaSound,
     Expression<int>? reminderMinutes,
     Expression<bool>? notificationsAsked,
+    Expression<int>? tasbihDhikr,
+    Expression<int>? tasbihCount,
+    Expression<String>? morningOpenedOn,
+    Expression<String>? eveningOpenedOn,
+    Expression<bool>? azkarNudges,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1229,6 +1435,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (ishaSound != null) 'isha_sound': ishaSound,
       if (reminderMinutes != null) 'reminder_minutes': reminderMinutes,
       if (notificationsAsked != null) 'notifications_asked': notificationsAsked,
+      if (tasbihDhikr != null) 'tasbih_dhikr': tasbihDhikr,
+      if (tasbihCount != null) 'tasbih_count': tasbihCount,
+      if (morningOpenedOn != null) 'morning_opened_on': morningOpenedOn,
+      if (eveningOpenedOn != null) 'evening_opened_on': eveningOpenedOn,
+      if (azkarNudges != null) 'azkar_nudges': azkarNudges,
     });
   }
 
@@ -1261,6 +1472,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<PrayerSound>? ishaSound,
     Value<int>? reminderMinutes,
     Value<bool>? notificationsAsked,
+    Value<int>? tasbihDhikr,
+    Value<int>? tasbihCount,
+    Value<DateTime?>? morningOpenedOn,
+    Value<DateTime?>? eveningOpenedOn,
+    Value<bool>? azkarNudges,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -1291,6 +1507,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       ishaSound: ishaSound ?? this.ishaSound,
       reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       notificationsAsked: notificationsAsked ?? this.notificationsAsked,
+      tasbihDhikr: tasbihDhikr ?? this.tasbihDhikr,
+      tasbihCount: tasbihCount ?? this.tasbihCount,
+      morningOpenedOn: morningOpenedOn ?? this.morningOpenedOn,
+      eveningOpenedOn: eveningOpenedOn ?? this.eveningOpenedOn,
+      azkarNudges: azkarNudges ?? this.azkarNudges,
     );
   }
 
@@ -1395,6 +1616,25 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (notificationsAsked.present) {
       map['notifications_asked'] = Variable<bool>(notificationsAsked.value);
     }
+    if (tasbihDhikr.present) {
+      map['tasbih_dhikr'] = Variable<int>(tasbihDhikr.value);
+    }
+    if (tasbihCount.present) {
+      map['tasbih_count'] = Variable<int>(tasbihCount.value);
+    }
+    if (morningOpenedOn.present) {
+      map['morning_opened_on'] = Variable<String>(
+        $SettingsTable.$convertermorningOpenedOnn.toSql(morningOpenedOn.value),
+      );
+    }
+    if (eveningOpenedOn.present) {
+      map['evening_opened_on'] = Variable<String>(
+        $SettingsTable.$convertereveningOpenedOnn.toSql(eveningOpenedOn.value),
+      );
+    }
+    if (azkarNudges.present) {
+      map['azkar_nudges'] = Variable<bool>(azkarNudges.value);
+    }
     return map;
   }
 
@@ -1428,7 +1668,12 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('maghribSound: $maghribSound, ')
           ..write('ishaSound: $ishaSound, ')
           ..write('reminderMinutes: $reminderMinutes, ')
-          ..write('notificationsAsked: $notificationsAsked')
+          ..write('notificationsAsked: $notificationsAsked, ')
+          ..write('tasbihDhikr: $tasbihDhikr, ')
+          ..write('tasbihCount: $tasbihCount, ')
+          ..write('morningOpenedOn: $morningOpenedOn, ')
+          ..write('eveningOpenedOn: $eveningOpenedOn, ')
+          ..write('azkarNudges: $azkarNudges')
           ..write(')'))
         .toString();
   }
@@ -1890,12 +2135,479 @@ class QadaEntriesCompanion extends UpdateCompanion<QadaEntry> {
   }
 }
 
+class $AzkarCountsTable extends AzkarCounts with TableInfo<$AzkarCountsTable, AzkarCount> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AzkarCountsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<AzkarSet, String> setId = GeneratedColumn<String>(
+    'set_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<AzkarSet>($AzkarCountsTable.$convertersetId);
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime, String> day = GeneratedColumn<String>(
+    'day',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<DateTime>($AzkarCountsTable.$converterday);
+  static const VerificationMeta _zikrMeta = const VerificationMeta('zikr');
+  @override
+  late final GeneratedColumn<String> zikr = GeneratedColumn<String>(
+    'zikr',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [setId, day, zikr, count];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'azkar_counts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AzkarCount> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('zikr')) {
+      context.handle(_zikrMeta, zikr.isAcceptableOrUnknown(data['zikr']!, _zikrMeta));
+    } else if (isInserting) {
+      context.missing(_zikrMeta);
+    }
+    if (data.containsKey('count')) {
+      context.handle(_countMeta, count.isAcceptableOrUnknown(data['count']!, _countMeta));
+    } else if (isInserting) {
+      context.missing(_countMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {setId, day, zikr};
+  @override
+  AzkarCount map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AzkarCount(
+      setId: $AzkarCountsTable.$convertersetId.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}set_id'])!,
+      ),
+      day: $AzkarCountsTable.$converterday.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}day'])!,
+      ),
+      zikr: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}zikr'])!,
+      count: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}count'])!,
+    );
+  }
+
+  @override
+  $AzkarCountsTable createAlias(String alias) {
+    return $AzkarCountsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<AzkarSet, String, String> $convertersetId =
+      const EnumNameConverter<AzkarSet>(AzkarSet.values);
+  static TypeConverter<DateTime, String> $converterday = const CivilDate();
+}
+
+class AzkarCount extends DataClass implements Insertable<AzkarCount> {
+  final AzkarSet setId;
+
+  /// the window's prayer day
+  final DateTime day;
+
+  /// the item's id in azkar.json
+  final String zikr;
+  final int count;
+  const AzkarCount({
+    required this.setId,
+    required this.day,
+    required this.zikr,
+    required this.count,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['set_id'] = Variable<String>($AzkarCountsTable.$convertersetId.toSql(setId));
+    }
+    {
+      map['day'] = Variable<String>($AzkarCountsTable.$converterday.toSql(day));
+    }
+    map['zikr'] = Variable<String>(zikr);
+    map['count'] = Variable<int>(count);
+    return map;
+  }
+
+  AzkarCountsCompanion toCompanion(bool nullToAbsent) {
+    return AzkarCountsCompanion(
+      setId: Value(setId),
+      day: Value(day),
+      zikr: Value(zikr),
+      count: Value(count),
+    );
+  }
+
+  factory AzkarCount.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AzkarCount(
+      setId: $AzkarCountsTable.$convertersetId.fromJson(serializer.fromJson<String>(json['setId'])),
+      day: serializer.fromJson<DateTime>(json['day']),
+      zikr: serializer.fromJson<String>(json['zikr']),
+      count: serializer.fromJson<int>(json['count']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'setId': serializer.toJson<String>($AzkarCountsTable.$convertersetId.toJson(setId)),
+      'day': serializer.toJson<DateTime>(day),
+      'zikr': serializer.toJson<String>(zikr),
+      'count': serializer.toJson<int>(count),
+    };
+  }
+
+  AzkarCount copyWith({AzkarSet? setId, DateTime? day, String? zikr, int? count}) => AzkarCount(
+    setId: setId ?? this.setId,
+    day: day ?? this.day,
+    zikr: zikr ?? this.zikr,
+    count: count ?? this.count,
+  );
+  AzkarCount copyWithCompanion(AzkarCountsCompanion data) {
+    return AzkarCount(
+      setId: data.setId.present ? data.setId.value : this.setId,
+      day: data.day.present ? data.day.value : this.day,
+      zikr: data.zikr.present ? data.zikr.value : this.zikr,
+      count: data.count.present ? data.count.value : this.count,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AzkarCount(')
+          ..write('setId: $setId, ')
+          ..write('day: $day, ')
+          ..write('zikr: $zikr, ')
+          ..write('count: $count')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(setId, day, zikr, count);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AzkarCount &&
+          other.setId == this.setId &&
+          other.day == this.day &&
+          other.zikr == this.zikr &&
+          other.count == this.count);
+}
+
+class AzkarCountsCompanion extends UpdateCompanion<AzkarCount> {
+  final Value<AzkarSet> setId;
+  final Value<DateTime> day;
+  final Value<String> zikr;
+  final Value<int> count;
+  final Value<int> rowid;
+  const AzkarCountsCompanion({
+    this.setId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.zikr = const Value.absent(),
+    this.count = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AzkarCountsCompanion.insert({
+    required AzkarSet setId,
+    required DateTime day,
+    required String zikr,
+    required int count,
+    this.rowid = const Value.absent(),
+  }) : setId = Value(setId),
+       day = Value(day),
+       zikr = Value(zikr),
+       count = Value(count);
+  static Insertable<AzkarCount> custom({
+    Expression<String>? setId,
+    Expression<String>? day,
+    Expression<String>? zikr,
+    Expression<int>? count,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (setId != null) 'set_id': setId,
+      if (day != null) 'day': day,
+      if (zikr != null) 'zikr': zikr,
+      if (count != null) 'count': count,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AzkarCountsCompanion copyWith({
+    Value<AzkarSet>? setId,
+    Value<DateTime>? day,
+    Value<String>? zikr,
+    Value<int>? count,
+    Value<int>? rowid,
+  }) {
+    return AzkarCountsCompanion(
+      setId: setId ?? this.setId,
+      day: day ?? this.day,
+      zikr: zikr ?? this.zikr,
+      count: count ?? this.count,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (setId.present) {
+      map['set_id'] = Variable<String>($AzkarCountsTable.$convertersetId.toSql(setId.value));
+    }
+    if (day.present) {
+      map['day'] = Variable<String>($AzkarCountsTable.$converterday.toSql(day.value));
+    }
+    if (zikr.present) {
+      map['zikr'] = Variable<String>(zikr.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AzkarCountsCompanion(')
+          ..write('setId: $setId, ')
+          ..write('day: $day, ')
+          ..write('zikr: $zikr, ')
+          ..write('count: $count, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SavedDuasTable extends SavedDuas with TableInfo<$SavedDuasTable, SavedDua> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavedDuasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _duaMeta = const VerificationMeta('dua');
+  @override
+  late final GeneratedColumn<String> dua = GeneratedColumn<String>(
+    'dua',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _savedAtMeta = const VerificationMeta('savedAt');
+  @override
+  late final GeneratedColumn<DateTime> savedAt = GeneratedColumn<DateTime>(
+    'saved_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [dua, savedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'saved_duas';
+  @override
+  VerificationContext validateIntegrity(Insertable<SavedDua> instance, {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('dua')) {
+      context.handle(_duaMeta, dua.isAcceptableOrUnknown(data['dua']!, _duaMeta));
+    } else if (isInserting) {
+      context.missing(_duaMeta);
+    }
+    if (data.containsKey('saved_at')) {
+      context.handle(_savedAtMeta, savedAt.isAcceptableOrUnknown(data['saved_at']!, _savedAtMeta));
+    } else if (isInserting) {
+      context.missing(_savedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {dua};
+  @override
+  SavedDua map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavedDua(
+      dua: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}dua'])!,
+      savedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}saved_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SavedDuasTable createAlias(String alias) {
+    return $SavedDuasTable(attachedDatabase, alias);
+  }
+}
+
+class SavedDua extends DataClass implements Insertable<SavedDua> {
+  /// the dua's id in duas.json
+  final String dua;
+  final DateTime savedAt;
+  const SavedDua({required this.dua, required this.savedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['dua'] = Variable<String>(dua);
+    map['saved_at'] = Variable<DateTime>(savedAt);
+    return map;
+  }
+
+  SavedDuasCompanion toCompanion(bool nullToAbsent) {
+    return SavedDuasCompanion(dua: Value(dua), savedAt: Value(savedAt));
+  }
+
+  factory SavedDua.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavedDua(
+      dua: serializer.fromJson<String>(json['dua']),
+      savedAt: serializer.fromJson<DateTime>(json['savedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'dua': serializer.toJson<String>(dua),
+      'savedAt': serializer.toJson<DateTime>(savedAt),
+    };
+  }
+
+  SavedDua copyWith({String? dua, DateTime? savedAt}) =>
+      SavedDua(dua: dua ?? this.dua, savedAt: savedAt ?? this.savedAt);
+  SavedDua copyWithCompanion(SavedDuasCompanion data) {
+    return SavedDua(
+      dua: data.dua.present ? data.dua.value : this.dua,
+      savedAt: data.savedAt.present ? data.savedAt.value : this.savedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedDua(')
+          ..write('dua: $dua, ')
+          ..write('savedAt: $savedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(dua, savedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavedDua && other.dua == this.dua && other.savedAt == this.savedAt);
+}
+
+class SavedDuasCompanion extends UpdateCompanion<SavedDua> {
+  final Value<String> dua;
+  final Value<DateTime> savedAt;
+  final Value<int> rowid;
+  const SavedDuasCompanion({
+    this.dua = const Value.absent(),
+    this.savedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SavedDuasCompanion.insert({
+    required String dua,
+    required DateTime savedAt,
+    this.rowid = const Value.absent(),
+  }) : dua = Value(dua),
+       savedAt = Value(savedAt);
+  static Insertable<SavedDua> custom({
+    Expression<String>? dua,
+    Expression<DateTime>? savedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (dua != null) 'dua': dua,
+      if (savedAt != null) 'saved_at': savedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SavedDuasCompanion copyWith({Value<String>? dua, Value<DateTime>? savedAt, Value<int>? rowid}) {
+    return SavedDuasCompanion(
+      dua: dua ?? this.dua,
+      savedAt: savedAt ?? this.savedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (dua.present) {
+      map['dua'] = Variable<String>(dua.value);
+    }
+    if (savedAt.present) {
+      map['saved_at'] = Variable<DateTime>(savedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedDuasCompanion(')
+          ..write('dua: $dua, ')
+          ..write('savedAt: $savedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SettingsTable settings = $SettingsTable(this);
   late final $PrayerLogTable prayerLog = $PrayerLogTable(this);
   late final $QadaEntriesTable qadaEntries = $QadaEntriesTable(this);
+  late final $AzkarCountsTable azkarCounts = $AzkarCountsTable(this);
+  late final $SavedDuasTable savedDuas = $SavedDuasTable(this);
   late final Index qadaDay = Index(
     'qada_day',
     'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
@@ -1904,7 +2616,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [settings, prayerLog, qadaEntries, qadaDay];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    settings,
+    prayerLog,
+    qadaEntries,
+    azkarCounts,
+    savedDuas,
+    qadaDay,
+  ];
 }
 
 typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
@@ -1936,6 +2655,11 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<PrayerSound> ishaSound,
   Value<int> reminderMinutes,
   Value<bool> notificationsAsked,
+  Value<int> tasbihDhikr,
+  Value<int> tasbihCount,
+  Value<DateTime?> morningOpenedOn,
+  Value<DateTime?> eveningOpenedOn,
+  Value<bool> azkarNudges,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> id,
@@ -1966,6 +2690,11 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<PrayerSound> ishaSound,
   Value<int> reminderMinutes,
   Value<bool> notificationsAsked,
+  Value<int> tasbihDhikr,
+  Value<int> tasbihCount,
+  Value<DateTime?> morningOpenedOn,
+  Value<DateTime?> eveningOpenedOn,
+  Value<bool> azkarNudges,
 });
 
 class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -2097,6 +2826,27 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
     column: $table.notificationsAsked,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<int> get tasbihDhikr =>
+      $composableBuilder(column: $table.tasbihDhikr, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get tasbihCount =>
+      $composableBuilder(column: $table.tasbihCount, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get morningOpenedOn =>
+      $composableBuilder(
+        column: $table.morningOpenedOn,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get eveningOpenedOn =>
+      $composableBuilder(
+        column: $table.eveningOpenedOn,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<bool> get azkarNudges =>
+      $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnFilters(column));
 }
 
 class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -2196,6 +2946,25 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
     column: $table.notificationsAsked,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get tasbihDhikr =>
+      $composableBuilder(column: $table.tasbihDhikr, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get tasbihCount =>
+      $composableBuilder(column: $table.tasbihCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get morningOpenedOn => $composableBuilder(
+    column: $table.morningOpenedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eveningOpenedOn => $composableBuilder(
+    column: $table.eveningOpenedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get azkarNudges =>
+      $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -2288,6 +3057,21 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumn<bool> get notificationsAsked =>
       $composableBuilder(column: $table.notificationsAsked, builder: (column) => column);
+
+  GeneratedColumn<int> get tasbihDhikr =>
+      $composableBuilder(column: $table.tasbihDhikr, builder: (column) => column);
+
+  GeneratedColumn<int> get tasbihCount =>
+      $composableBuilder(column: $table.tasbihCount, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, String> get morningOpenedOn =>
+      $composableBuilder(column: $table.morningOpenedOn, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, String> get eveningOpenedOn =>
+      $composableBuilder(column: $table.eveningOpenedOn, builder: (column) => column);
+
+  GeneratedColumn<bool> get azkarNudges =>
+      $composableBuilder(column: $table.azkarNudges, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -2344,6 +3128,11 @@ class $$SettingsTableTableManager
                 Value<PrayerSound> ishaSound = const Value.absent(),
                 Value<int> reminderMinutes = const Value.absent(),
                 Value<bool> notificationsAsked = const Value.absent(),
+                Value<int> tasbihDhikr = const Value.absent(),
+                Value<int> tasbihCount = const Value.absent(),
+                Value<DateTime?> morningOpenedOn = const Value.absent(),
+                Value<DateTime?> eveningOpenedOn = const Value.absent(),
+                Value<bool> azkarNudges = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 latitude: latitude,
@@ -2373,6 +3162,11 @@ class $$SettingsTableTableManager
                 ishaSound: ishaSound,
                 reminderMinutes: reminderMinutes,
                 notificationsAsked: notificationsAsked,
+                tasbihDhikr: tasbihDhikr,
+                tasbihCount: tasbihCount,
+                morningOpenedOn: morningOpenedOn,
+                eveningOpenedOn: eveningOpenedOn,
+                azkarNudges: azkarNudges,
               ),
           createCompanionCallback:
               ({
@@ -2404,6 +3198,11 @@ class $$SettingsTableTableManager
                 Value<PrayerSound> ishaSound = const Value.absent(),
                 Value<int> reminderMinutes = const Value.absent(),
                 Value<bool> notificationsAsked = const Value.absent(),
+                Value<int> tasbihDhikr = const Value.absent(),
+                Value<int> tasbihCount = const Value.absent(),
+                Value<DateTime?> morningOpenedOn = const Value.absent(),
+                Value<DateTime?> eveningOpenedOn = const Value.absent(),
+                Value<bool> azkarNudges = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 latitude: latitude,
@@ -2433,6 +3232,11 @@ class $$SettingsTableTableManager
                 ishaSound: ishaSound,
                 reminderMinutes: reminderMinutes,
                 notificationsAsked: notificationsAsked,
+                tasbihDhikr: tasbihDhikr,
+                tasbihCount: tasbihCount,
+                morningOpenedOn: morningOpenedOn,
+                eveningOpenedOn: eveningOpenedOn,
+                azkarNudges: azkarNudges,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2736,6 +3540,284 @@ typedef $$QadaEntriesTableProcessedTableManager =
       QadaEntry,
       PrefetchHooks Function()
     >;
+typedef $$AzkarCountsTableCreateCompanionBuilder = AzkarCountsCompanion Function({
+  required AzkarSet setId,
+  required DateTime day,
+  required String zikr,
+  required int count,
+  Value<int> rowid,
+});
+typedef $$AzkarCountsTableUpdateCompanionBuilder = AzkarCountsCompanion Function({
+  Value<AzkarSet> setId,
+  Value<DateTime> day,
+  Value<String> zikr,
+  Value<int> count,
+  Value<int> rowid,
+});
+
+class $$AzkarCountsTableFilterComposer extends Composer<_$AppDatabase, $AzkarCountsTable> {
+  $$AzkarCountsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<AzkarSet, AzkarSet, String> get setId => $composableBuilder(
+    column: $table.setId,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get zikr =>
+      $composableBuilder(column: $table.zikr, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => ColumnFilters(column));
+}
+
+class $$AzkarCountsTableOrderingComposer extends Composer<_$AppDatabase, $AzkarCountsTable> {
+  $$AzkarCountsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get setId =>
+      $composableBuilder(column: $table.setId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get zikr =>
+      $composableBuilder(column: $table.zikr, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => ColumnOrderings(column));
+}
+
+class $$AzkarCountsTableAnnotationComposer extends Composer<_$AppDatabase, $AzkarCountsTable> {
+  $$AzkarCountsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<AzkarSet, String> get setId =>
+      $composableBuilder(column: $table.setId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, String> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<String> get zikr =>
+      $composableBuilder(column: $table.zikr, builder: (column) => column);
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+}
+
+class $$AzkarCountsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AzkarCountsTable,
+          AzkarCount,
+          $$AzkarCountsTableFilterComposer,
+          $$AzkarCountsTableOrderingComposer,
+          $$AzkarCountsTableAnnotationComposer,
+          $$AzkarCountsTableCreateCompanionBuilder,
+          $$AzkarCountsTableUpdateCompanionBuilder,
+          (AzkarCount, BaseReferences<_$AppDatabase, $AzkarCountsTable, AzkarCount>),
+          AzkarCount,
+          PrefetchHooks Function()
+        > {
+  $$AzkarCountsTableTableManager(_$AppDatabase db, $AzkarCountsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$AzkarCountsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$AzkarCountsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AzkarCountsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<AzkarSet> setId = const Value.absent(),
+                Value<DateTime> day = const Value.absent(),
+                Value<String> zikr = const Value.absent(),
+                Value<int> count = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AzkarCountsCompanion(
+                setId: setId,
+                day: day,
+                zikr: zikr,
+                count: count,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required AzkarSet setId,
+                required DateTime day,
+                required String zikr,
+                required int count,
+                Value<int> rowid = const Value.absent(),
+              }) => AzkarCountsCompanion.insert(
+                setId: setId,
+                day: day,
+                zikr: zikr,
+                count: count,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AzkarCountsTable, AzkarCount>(table),
+                  BaseReferences<_$AppDatabase, $AzkarCountsTable, AzkarCount>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AzkarCountsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AzkarCountsTable,
+      AzkarCount,
+      $$AzkarCountsTableFilterComposer,
+      $$AzkarCountsTableOrderingComposer,
+      $$AzkarCountsTableAnnotationComposer,
+      $$AzkarCountsTableCreateCompanionBuilder,
+      $$AzkarCountsTableUpdateCompanionBuilder,
+      (AzkarCount, BaseReferences<_$AppDatabase, $AzkarCountsTable, AzkarCount>),
+      AzkarCount,
+      PrefetchHooks Function()
+    >;
+typedef $$SavedDuasTableCreateCompanionBuilder = SavedDuasCompanion Function({
+  required String dua,
+  required DateTime savedAt,
+  Value<int> rowid,
+});
+typedef $$SavedDuasTableUpdateCompanionBuilder = SavedDuasCompanion Function({
+  Value<String> dua,
+  Value<DateTime> savedAt,
+  Value<int> rowid,
+});
+
+class $$SavedDuasTableFilterComposer extends Composer<_$AppDatabase, $SavedDuasTable> {
+  $$SavedDuasTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get dua =>
+      $composableBuilder(column: $table.dua, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get savedAt =>
+      $composableBuilder(column: $table.savedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$SavedDuasTableOrderingComposer extends Composer<_$AppDatabase, $SavedDuasTable> {
+  $$SavedDuasTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get dua =>
+      $composableBuilder(column: $table.dua, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get savedAt =>
+      $composableBuilder(column: $table.savedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SavedDuasTableAnnotationComposer extends Composer<_$AppDatabase, $SavedDuasTable> {
+  $$SavedDuasTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get dua =>
+      $composableBuilder(column: $table.dua, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get savedAt =>
+      $composableBuilder(column: $table.savedAt, builder: (column) => column);
+}
+
+class $$SavedDuasTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SavedDuasTable,
+          SavedDua,
+          $$SavedDuasTableFilterComposer,
+          $$SavedDuasTableOrderingComposer,
+          $$SavedDuasTableAnnotationComposer,
+          $$SavedDuasTableCreateCompanionBuilder,
+          $$SavedDuasTableUpdateCompanionBuilder,
+          (SavedDua, BaseReferences<_$AppDatabase, $SavedDuasTable, SavedDua>),
+          SavedDua,
+          PrefetchHooks Function()
+        > {
+  $$SavedDuasTableTableManager(_$AppDatabase db, $SavedDuasTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$SavedDuasTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$SavedDuasTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SavedDuasTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> dua = const Value.absent(),
+            Value<DateTime> savedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => SavedDuasCompanion(dua: dua, savedAt: savedAt, rowid: rowid),
+          createCompanionCallback: ({
+            required String dua,
+            required DateTime savedAt,
+            Value<int> rowid = const Value.absent(),
+          }) => SavedDuasCompanion.insert(dua: dua, savedAt: savedAt, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SavedDuasTable, SavedDua>(table),
+                  BaseReferences<_$AppDatabase, $SavedDuasTable, SavedDua>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SavedDuasTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SavedDuasTable,
+      SavedDua,
+      $$SavedDuasTableFilterComposer,
+      $$SavedDuasTableOrderingComposer,
+      $$SavedDuasTableAnnotationComposer,
+      $$SavedDuasTableCreateCompanionBuilder,
+      $$SavedDuasTableUpdateCompanionBuilder,
+      (SavedDua, BaseReferences<_$AppDatabase, $SavedDuasTable, SavedDua>),
+      SavedDua,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2744,4 +3826,7 @@ class $AppDatabaseManager {
   $$PrayerLogTableTableManager get prayerLog => $$PrayerLogTableTableManager(_db, _db.prayerLog);
   $$QadaEntriesTableTableManager get qadaEntries =>
       $$QadaEntriesTableTableManager(_db, _db.qadaEntries);
+  $$AzkarCountsTableTableManager get azkarCounts =>
+      $$AzkarCountsTableTableManager(_db, _db.azkarCounts);
+  $$SavedDuasTableTableManager get savedDuas => $$SavedDuasTableTableManager(_db, _db.savedDuas);
 }
