@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/adhan_player.dart';
@@ -44,6 +45,7 @@ class FakeScheduler extends NotificationScheduler {
   int alarmAsks = 0;
   int cancels = 0;
   final applied = <List<Alert>>[];
+  final appliedRecordings = <Map<Prayer, AdhanRecording>>[];
 
   int inits = 0;
   String? markPrayedLabel;
@@ -100,8 +102,12 @@ class FakeScheduler extends NotificationScheduler {
   Future<void> apply({
     required List<Alert> alerts,
     required Map<Prayer, PrayerSound> sounds,
+    required Map<Prayer, AdhanRecording> recordings,
     required AlertTexts texts,
-  }) async => applied.add(alerts);
+  }) async {
+    applied.add(alerts);
+    appliedRecordings.add(recordings);
+  }
 }
 
 class FakePlayer extends AdhanPlayer {
@@ -113,11 +119,19 @@ class FakePlayer extends AdhanPlayer {
   final Duration position;
   final Duration duration;
   final played = <Alert>[];
+  final recordings = <AdhanRecording>[];
   int stops = 0;
 
   @override
-  Future<void> play(Alert alert, AlertTexts texts, {Duration from = Duration.zero}) async =>
-      played.add(alert);
+  Future<void> play(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording, {
+    Duration from = Duration.zero,
+  }) async {
+    played.add(alert);
+    recordings.add(recording);
+  }
 
   @override
   Future<void> pause() async {}
@@ -129,7 +143,7 @@ class FakePlayer extends AdhanPlayer {
   Future<void> stop() async => stops++;
 
   @override
-  Future<Duration> length(Prayer prayer) async => duration;
+  Future<Duration> length(Prayer prayer, AdhanRecording recording) async => duration;
 
   @override
   Stream<Playback> get playback =>
