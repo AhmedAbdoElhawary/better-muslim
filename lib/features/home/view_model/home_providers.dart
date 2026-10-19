@@ -86,5 +86,3 @@ final arcLabelsProvider = Provider<ArcLabels?>((ref) {
     ref.watch(dayTimesProvider(DateTime(today.year, today.month, today.day + 1))),
   );
 });
-
-final morningAzkarProvider = Provider<bool>((ref) => isMorningAzkar(ref.watch(periodProvider)));
