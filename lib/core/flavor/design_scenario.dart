@@ -61,7 +61,11 @@ Future<AppDatabase> designScenarioStore() async {
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   DateTime october(int day) => DateTime(2026, 10, day);
   await db.batch((batch) {
-    batch.insert(db.settings, SettingsCompanion(firstUse: Value(october(1))));
+    /// 4.08 shows subhanallah at 16 of 33
+    batch.insert(
+      db.settings,
+      SettingsCompanion(firstUse: Value(october(1)), tasbihCount: const Value(16)),
+    );
     batch.insertAll(db.prayerLog, [
       for (final day in [11, 12, 14])
         for (final prayer in Prayer.values)
