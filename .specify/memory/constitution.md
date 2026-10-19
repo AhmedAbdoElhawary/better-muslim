@@ -49,7 +49,8 @@ Why: every feature can change or be deleted without touching the others.
 - Sizes scale from the 393 pt design with ScreenUtil, capped at 1.3x. Tablets and foldables get
   the phone layout stretched to at most 480 pt until they have their own design.
 - RTL works by default: start/end, never left/right. The sun arc, clock times, progress rings and
-  media controls are never mirrored. Arabic shows Eastern Arabic digits.
+  media controls are never mirrored. Arabic shows Eastern Arabic digits by default, a switch in
+  More turns them Western.
 
 Why: one place to change any color, size, font or string, and all 8 themes, both modes and both
 languages keep working.
@@ -183,4 +184,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.4.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-19
+**Version**: 3.4.1 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-19
