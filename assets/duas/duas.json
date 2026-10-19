@@ -1,0 +1,176 @@
+{
+  "categories": [
+    {
+      "id": "leaving-home",
+      "name": {
+        "en": "Leaving the home",
+        "ar": "مغادرة المنزل"
+      },
+      "note": "TODO(ahmed): sample category, check its arabic name",
+      "chip": "home",
+      "duas": [
+        {
+          "id": "d001",
+          "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+          "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+          "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+          "source": {
+            "en": "Abu Dawud 5095",
+            "ar": "أبو داود ٥٠٩٥"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        }
+      ]
+    },
+    {
+      "id": "waking-up",
+      "name": {
+        "en": "Waking up",
+        "ar": "الاستيقاظ"
+      },
+      "note": "TODO(ahmed): sample category, check its arabic name",
+      "chip": "morningEvening",
+      "duas": [
+        {
+          "id": "d002",
+          "arabic": "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",
+          "transliteration": "Allāhumma rabba hādhihi-d-da‘wati-t-tāmmah, wa-ṣ-ṣalāti-l-qā’imah, āti Muḥammadan al-wasīlata wa-l-faḍīlah, wa-b‘ath-hu maqāman maḥmūdan alladhī wa‘adtah.",
+          "translation": "O Allah, Lord of this perfect call and of the prayer about to be established, grant Muhammad the means of nearness and the excellence, and raise him to the praised station You promised him.",
+          "source": {
+            "en": "Sahih al-Bukhari 614",
+            "ar": "صحيح البخاري ٦١٤"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        }
+      ]
+    },
+    {
+      "id": "before-sleeping",
+      "name": {
+        "en": "Before sleeping",
+        "ar": "قبل النوم"
+      },
+      "note": "TODO(ahmed): sample category, check its arabic name",
+      "chip": "sleep",
+      "duas": [
+        {
+          "id": "d003",
+          "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+          "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+          "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+          "source": {
+            "en": "Abu Dawud 5095",
+            "ar": "أبو داود ٥٠٩٥"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        },
+        {
+          "id": "d004",
+          "arabic": "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",
+          "transliteration": "Allāhumma rabba hādhihi-d-da‘wati-t-tāmmah, wa-ṣ-ṣalāti-l-qā’imah, āti Muḥammadan al-wasīlata wa-l-faḍīlah, wa-b‘ath-hu maqāman maḥmūdan alladhī wa‘adtah.",
+          "translation": "O Allah, Lord of this perfect call and of the prayer about to be established, grant Muhammad the means of nearness and the excellence, and raise him to the praised station You promised him.",
+          "source": {
+            "en": "Sahih al-Bukhari 614",
+            "ar": "صحيح البخاري ٦١٤"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        },
+        {
+          "id": "d005",
+          "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+          "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+          "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+          "source": {
+            "en": "Abu Dawud 5095",
+            "ar": "أبو داود ٥٠٩٥"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        }
+      ]
+    },
+    {
+      "id": "mosque",
+      "name": {
+        "en": "Entering and leaving the mosque",
+        "ar": "دخول المسجد والخروج منه"
+      },
+      "note": "TODO(ahmed): sample category, check its arabic name",
+      "chip": "home",
+      "duas": [
+        {
+          "id": "d006",
+          "arabic": "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",
+          "transliteration": "Allāhumma rabba hādhihi-d-da‘wati-t-tāmmah, wa-ṣ-ṣalāti-l-qā’imah, āti Muḥammadan al-wasīlata wa-l-faḍīlah, wa-b‘ath-hu maqāman maḥmūdan alladhī wa‘adtah.",
+          "translation": "O Allah, Lord of this perfect call and of the prayer about to be established, grant Muhammad the means of nearness and the excellence, and raise him to the praised station You promised him.",
+          "source": {
+            "en": "Sahih al-Bukhari 614",
+            "ar": "صحيح البخاري ٦١٤"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        },
+        {
+          "id": "d007",
+          "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+          "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+          "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+          "source": {
+            "en": "Abu Dawud 5095",
+            "ar": "أبو داود ٥٠٩٥"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        }
+      ]
+    },
+    {
+      "id": "eating",
+      "name": {
+        "en": "Before and after eating",
+        "ar": "قبل الطعام وبعده"
+      },
+      "note": "TODO(ahmed): sample category, check its arabic name",
+      "chip": "home",
+      "duas": [
+        {
+          "id": "d008",
+          "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+          "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+          "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+          "source": {
+            "en": "Abu Dawud 5095",
+            "ar": "أبو داود ٥٠٩٥"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        },
+        {
+          "id": "d009",
+          "arabic": "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",
+          "transliteration": "Allāhumma rabba hādhihi-d-da‘wati-t-tāmmah, wa-ṣ-ṣalāti-l-qā’imah, āti Muḥammadan al-wasīlata wa-l-faḍīlah, wa-b‘ath-hu maqāman maḥmūdan alladhī wa‘adtah.",
+          "translation": "O Allah, Lord of this perfect call and of the prayer about to be established, grant Muhammad the means of nearness and the excellence, and raise him to the praised station You promised him.",
+          "source": {
+            "en": "Sahih al-Bukhari 614",
+            "ar": "صحيح البخاري ٦١٤"
+          },
+          "grading": null,
+          "audio": null,
+          "note": "TODO(ahmed): sample, replace with the dataset"
+        }
+      ]
+    }
+  ]
+}
