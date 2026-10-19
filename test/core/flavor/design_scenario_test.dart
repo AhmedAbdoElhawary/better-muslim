@@ -10,6 +10,11 @@ import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -81,6 +86,21 @@ void main() {
       /// a real umm al-qura calculation, the handoff's fixed times end on the 15th
       expect(tomorrow.date, DateTime(2026, 10, 16));
       expect((tomorrow.fajr!.hour, tomorrow.fajr!.minute), (5, 0));
+    });
+
+    test('follow sky follows the phone, dark and light stay as saved (FR-041)', () async {
+      container.listen(themeModeProvider, (_, _) {});
+      await container.read(settingsProvider.future);
+      expect(container.read(themeModeProvider), ThemeMode.system);
+      final db = container.read(databaseProvider);
+      for (final (mode, expected) in [
+        (BmThemeMode.dark, ThemeMode.dark),
+        (BmThemeMode.light, ThemeMode.light),
+      ]) {
+        await db.updateSettings(SettingsCompanion(themeMode: Value(mode)));
+        await pumpEventQueue();
+        expect(container.read(themeModeProvider), expected);
+      }
     });
 
     test('maghrib is next in 1:24:00 and the date is 4 jumada i 1448', () {
