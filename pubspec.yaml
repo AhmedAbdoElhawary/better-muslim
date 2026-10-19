@@ -53,6 +53,7 @@ dependencies:
   sentry_flutter: ^10.1.0
   timezone: ^0.11.2
   workmanager: ^0.10.10
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:
@@ -92,6 +93,8 @@ flutter:
     - assets/fonts/licenses/
     - assets/l10n/
     - assets/places/
+    - assets/azkar/
+    - assets/duas/
     # TODO(ahmed): replace the placeholder adhan files in assets/audio/ with the licensed recordings, same names.
     - assets/audio/
     - shorebird.yaml
