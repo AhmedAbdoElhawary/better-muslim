@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
