@@ -13,6 +13,7 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -285,6 +286,8 @@ void main() {
         const SettingsCompanion(hijriAdjust: Value(1)),
         const SettingsCompanion(ishaSound: Value(PrayerSound.silent)),
         const SettingsCompanion(reminderMinutes: Value(20)),
+        const SettingsCompanion(reminderMinutes: Value(25)),
+        const SettingsCompanion(maghribRecording: Value(AdhanRecording.madinah)),
         const SettingsCompanion(digits: Value(Digits.western)),
       ]) {
         final runs = scheduler.runs;
