@@ -1,30 +1,7 @@
-import 'dart:math';
-
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:timezone/timezone.dart';
-
-/// before today's start the period began the day before, isha before fajr started last night
-DateTime? periodStart(Period period, DateTime now, DayTimes today, DayTimes? yesterday) {
-  final start = today.startOf(period);
-  if (start != null && !now.isBefore(start)) return start;
-  return yesterday?.startOf(period);
-}
-
-/// null when the period's start is not available (polar)
-double? barShare(DateTime now, DateTime? start, DateTime next) {
-  if (start == null) return null;
-  final whole = next.difference(start).inMilliseconds;
-  if (whole <= 0) return null;
-  return (now.difference(start).inMilliseconds / whole).clamp(0.0, 1.0);
-}
-
-/// rounded, so a tick landing just after the second doesn't show one second too few
-({int hours, int minutes, int seconds}) countdownParts(Duration left) {
-  final total = max(0, (left.inMicroseconds / Duration.microsecondsPerSecond).round());
-  return (hours: total ~/ 3600, minutes: total ~/ 60 % 60, seconds: total % 60);
-}
 
 /// MOTION 05, the final 10 minutes before the next prayer
 bool glowBreathing(Duration left) => left > Duration.zero && left <= const Duration(minutes: 10);
