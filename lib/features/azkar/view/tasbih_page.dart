@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
@@ -45,9 +46,11 @@ class _TasbihPageState extends ConsumerState<TasbihPage> {
     if (before == null) return;
     ref.read(tasbihControllerProvider.notifier).tap();
     BmHaptics.bead();
+    BmSounds.bead();
     _taps.value++;
     if (!before.done && before.tap().done) {
       BmHaptics.setComplete();
+      BmSounds.complete();
       SemanticsService.sendAnnouncement(
         View.of(context),
         context.tr(StringsManager.setComplete),
