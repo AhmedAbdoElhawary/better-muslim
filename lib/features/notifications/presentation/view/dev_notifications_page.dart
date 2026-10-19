@@ -9,6 +9,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
@@ -75,7 +76,14 @@ class DevNotificationsPage extends ConsumerWidget {
                     digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
                     location: location,
                   );
-                  await ref.read(notificationSchedulerProvider).testIn1Minute(alert, texts);
+                  await ref
+                      .read(notificationSchedulerProvider)
+                      .testIn1Minute(
+                        alert,
+                        texts,
+                        ref.read(settingsProvider).value?.recordingOf(alert.prayer) ??
+                            AdhanRecording.makkah,
+                      );
                 },
               ),
           ],
