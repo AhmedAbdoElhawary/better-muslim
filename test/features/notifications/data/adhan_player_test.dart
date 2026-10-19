@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:audio_session/audio_session.dart';
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/adhan_player.dart';
@@ -48,8 +50,8 @@ void main() {
       final channel = _FakeChannel();
       final player = NativeAdhanPlayer(channel);
 
-      await player.play(maghrib, texts);
-      await player.play(maghrib, texts);
+      await player.play(maghrib, texts, AdhanRecording.makkah);
+      await player.play(maghrib, texts, AdhanRecording.makkah);
 
       expect(channel.played, hasLength(1));
       expect(channel.played.single['asset'], 'assets/audio/adhan_makkah.m4a');
@@ -74,14 +76,41 @@ void main() {
       expect(playback.position, const Duration(seconds: 42));
       expect(playback.duration, const Duration(minutes: 2, seconds: 56));
     });
+
+    test('no ui sound plays while the adhan does', () async {
+      final channel = _FakeChannel();
+      final player = NativeAdhanPlayer(channel);
+      addTearDown(player.dispose);
+
+      await player.play(maghrib, texts, AdhanRecording.makkah);
+      channel.events.add({'id': maghrib.id, 'playing': true, 'ended': false});
+      await pumpEventQueue();
+      expect(BmSounds.busy, isTrue);
+      channel.events.add({'id': maghrib.id, 'playing': false, 'ended': true});
+      await pumpEventQueue();
+      expect(BmSounds.busy, isFalse);
+    });
   });
 
   group('ios', () {
+    test('no ui sound plays while the adhan does', () async {
+      final audio = _FakeAudioPlayer();
+      final player = JustAudioAdhanPlayer(player: audio, session: Future.value(_FakeSession()));
+
+      await player.play(maghrib, texts, AdhanRecording.makkah);
+      audio.states.add(PlayerState(true, ProcessingState.ready));
+      await pumpEventQueue();
+      expect(BmSounds.busy, isTrue);
+      audio.states.add(PlayerState(true, ProcessingState.completed));
+      await pumpEventQueue();
+      expect(BmSounds.busy, isFalse);
+    });
+
     testWidgets('fades in to full volume over 1.5 s', (tester) async {
       final audio = _FakeAudioPlayer();
       final player = JustAudioAdhanPlayer(player: audio, session: Future.value(_FakeSession()));
 
-      await player.play(maghrib, texts);
+      await player.play(maghrib, texts, AdhanRecording.makkah);
       await tester.pump(const Duration(milliseconds: 750));
       expect(audio.volumes.last, closeTo(.5, .05));
       await tester.pump(const Duration(milliseconds: 800));
@@ -98,7 +127,7 @@ void main() {
       final session = _FakeSession();
       final player = JustAudioAdhanPlayer(player: audio, session: Future.value(session));
 
-      await player.play(maghrib, texts);
+      await player.play(maghrib, texts, AdhanRecording.makkah);
       session.interruptions.add(AudioInterruptionEvent(true, AudioInterruptionType.unknown));
       await tester.pump();
 
@@ -123,7 +152,11 @@ class _FakeChannel extends AdhanChannel {
 
 class _FakeAudioPlayer implements AudioPlayer {
   final volumes = <double>[];
+  final states = StreamController<PlayerState>.broadcast();
   int stops = 0;
+
+  @override
+  Stream<PlayerState> get playerStateStream => states.stream;
 
   @override
   Future<Duration?> setAsset(
