@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/router/app_router.dart';
-import 'package:better_muslim/features/duas/view_model/dua_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -45,7 +45,7 @@ Future<void> pumpAzkar(
   }
 }
 
-/// More › Duas at 393 x 852, the way the temporary button opens it
+/// More › Duas at 393 x 852, the way its tile opens it
 Future<void> pumpDuas(
   WidgetTester tester,
   List<Override> overrides, {
