@@ -104,6 +104,39 @@ abstract final class SpaceManager {
   static const double qiblaCardH = 16;
   static const double qiblaCardLineGap = 2;
   static const double accuracyDotGap = 8;
+
+  /// tasbih (4.08), each gap from the tree's top to the bottom of the element above. the chips'
+  /// 44 pt hit box is 4 taller than the chip on each side
+  static const double tasbihChipsTop = 8;
+  static const double chipGap = 6;
+  static const double tasbihDhikrTop = 24;
+  static const double dhikrLineGap = 2;
+  static const double tasbihAreaTop = 44;
+
+  /// to and from the 36 pt focus ring, the strip's box
+  static const double tasbihStripGap = 40;
+  static const double tasbihHintGap = 24;
+  static const double beadGap = 16;
+  static const double counterGap = 6;
+  static const double barTitleGap = 1;
+  static const double navBadgeTop = 4;
+  static const double navBadgeEnd = 14;
+
+  /// the components' azkar card
+  static const double zikrCardV = 18;
+  static const double zikrFooterTop = 10;
+
+  /// duas (4.14)
+  static const double duaChipSide = 14;
+  static const double duaRowsTop = 44;
+  static const double duaCardBottom = 6;
+  static const double duaActionsTop = 2;
+  static const double duaActionGap = 6;
+  static const double categoryRowEnd = 14;
+
+  /// the share card has no design, inside the arch's shoulders
+  static const double shareCardTop = 96;
+  static const double shareCardSide = 32;
 }
 
 abstract final class RadiusManager {
@@ -120,6 +153,7 @@ abstract final class RadiusManager {
   static const double adhanBar = 2;
   static const double qiblaMarker = 3;
   static const double qiblaNeedle = 1;
+  static const double zikrBar = 2;
 }
 
 abstract final class SizeManager {
@@ -203,6 +237,40 @@ abstract final class SizeManager {
   static const double qiblaRingAligned = 1.5;
   static const double qiblaGlow = 420;
   static const double accuracyDot = 8;
+
+  /// tasbih (4.08), the ring is r 114 with a 5 stroke in its 240 box
+  static const double tasbihRing = 240;
+  static const double tasbihRingArc = 233;
+  static const double tasbihRingStroke = 5;
+  static const double tasbihGlow = 340;
+
+  /// the count keeps inside the ring up to this text scale
+  static const double counterMaxTextScale = 1.3;
+  static const double burstParticle = 6;
+  static const double burstReach = 92;
+  static const double bead = 28;
+  static const double beadFocus = 36;
+  static const double beadFocusStroke = 1.5;
+  static const double beadLine = 1;
+  static const double chip = 36;
+  static const double navBadge = 7;
+  static const double navBadgeRing = 2;
+  static const double toggleKnobOff = 20;
+  static const double toggleKnobOn = 24;
+  static const double toggleRingOff = 1.5;
+
+  /// the components' azkar card
+  static const double zikrBarW = 90;
+  static const double zikrBarH = 3;
+
+  /// duas (4.14) and the components' empty state
+  static const double duaAction = 48;
+  static const double categoryRow = 56;
+  static const double emptyIcon = 56;
+  static const double emptyIconStroke = 1.4;
+
+  /// the shared dua image, at 3x
+  static const double shareCard = 360;
 
   /// the + sheet's count holds 999 without the buttons moving
   static const double countValue = 72;
