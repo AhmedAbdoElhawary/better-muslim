@@ -118,6 +118,15 @@ void main() {
       expect(storeCalls, 0);
     });
 
+    test('tasbih at subhanallah 16, nothing counted or saved (FR-036)', () async {
+      final db = container.read(databaseProvider);
+      final settings = await db.watchSettings().first;
+
+      expect((settings.tasbihDhikr, settings.tasbihCount), (0, 16));
+      expect(await db.select(db.azkarCounts).get(), isEmpty);
+      expect(await db.select(db.savedDuas).get(), isEmpty);
+    });
+
     /// the real PositionSource would throw MissingPluginException in a host test
     test('geolocator is never reached and nothing is saved', () async {
       await container.read(locationControllerProvider).refresh();
