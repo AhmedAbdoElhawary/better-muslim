@@ -58,7 +58,10 @@ From the spec to the code:
    `specs/003-milestone-7-quran/` with Q1 to Q10 open. Until then the Quran tab stays a placeholder.
 8. Azkar, Tasbih and Duas: the Azkar tab, both sets, Tasbih, Duas with save, share and Listen ready
    for clips, the azkar nudges. **Done, waiting for my review.**
-9. to 11. as in `HANDOFF_CLAUDE.md`.
+9. More, Theme and Hijri calendar: every setting, the 8 themes with Follow sky, the calendar with its
+   events and adjustment, the Adhan and reminders page, Reset prayer journey and Credits. **Done,
+   waiting for my review.**
+10. to 11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
 
