@@ -209,4 +209,20 @@ abstract final class StringsManager {
   static const String chosenForCountry = 'chosenForCountry';
   static const String asrCalculation = 'asrCalculation';
   static const String allFivePrayed = 'allFivePrayed';
+  static const String setCardHeader = 'setCardHeader';
+  static const String duaCount = 'duaCount';
+  static const String chipSaved = 'chipSaved';
+  static const String saved = 'saved';
+  static const String removedFromSaved = 'removedFromSaved';
+  static const String noSavedTitle = 'noSavedTitle';
+  static const String noSavedBody = 'noSavedBody';
+  static const String noDuasFound = 'noDuasFound';
+  static const String noDuasFoundBody = 'noDuasFoundBody';
+  static const String countReset = 'countReset';
+  static const String resetCount = 'resetCount';
+  static const String tasbihA11y = 'tasbihA11y';
+  static const String notifAzkarMorningBody = 'notifAzkarMorningBody';
+  static const String azkarReminders = 'azkarReminders';
+  static const String azkarRemindersSub = 'azkarRemindersSub';
+  static const String newAzkarSet = 'newAzkarSet';
 }
