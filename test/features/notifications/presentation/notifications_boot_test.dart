@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:better_muslim/core/app/app.dart';
+import 'package:better_muslim/core/azkar/azkar_content.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
@@ -245,6 +247,27 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('a tap on an azkar nudge opens its set (FR-039)', (tester) async {
+    final at = TZDateTime(makkah().zone, 2026, 10, 15, 15, 47);
+    scheduler.launch = payloadOf(
+      Alert(
+        day: DateTime(2026, 10, 15),
+        prayer: Prayer.asr,
+        kind: AlertKind.azkar,
+        at: at,
+        sound: PrayerSound.silent,
+      ),
+    );
+    await pumpBoot(tester, at.add(const Duration(minutes: 2)));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      containerOf(tester).read(routerProvider).routeInformationProvider.value.uri.toString(),
+      Routes.azkarSet(AzkarSet.evening),
+    );
+    await unmount(tester);
+  });
+
   group('the schedule follows every change (FR-010)', () {
     final noon = DateTime.utc(2026, 10, 15, 9);
 
@@ -278,6 +301,28 @@ void main() {
       await settle(tester, const Duration(milliseconds: 700));
       expect(scheduler.runs, runs + 1);
       expect(scheduler.runs, greaterThan(before));
+      await unmount(tester);
+    });
+
+    testWidgets('the azkar switch and finishing the current set each reschedule once', (
+      tester,
+    ) async {
+      await pumpBoot(tester, noon);
+      await settle(tester, const Duration(milliseconds: 1500));
+      final db = dbOf(tester);
+
+      var runs = scheduler.runs;
+      unawaited(db.updateSettings(const SettingsCompanion(azkarNudges: Value(false))));
+      await settle(tester, const Duration(milliseconds: 700));
+      expect(scheduler.runs, runs + 1);
+
+      runs = scheduler.runs;
+      final content = await tester.runAsync(loadAzkarContent);
+      for (final zikr in content!.morning.items) {
+        await db.setZikrCount(AzkarSet.morning, DateTime(2026, 10, 15), zikr.id, zikr.count);
+      }
+      await settle(tester, const Duration(milliseconds: 700));
+      expect(scheduler.runs, runs + 1);
       await unmount(tester);
     });
 
