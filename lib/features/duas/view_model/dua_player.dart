@@ -1,46 +1,8 @@
 import 'dart:async';
 
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
-
-/// the one thing the tests replace, so no test reaches the phone's audio
-abstract class ClipPlayer {
-  Future<void> play(String asset);
-  Future<void> stop();
-
-  /// a clip played to its end
-  Stream<void> get ended;
-  void dispose();
-}
-
-class JustAudioClipPlayer implements ClipPlayer {
-  final _player = AudioPlayer();
-
-  @override
-  Future<void> play(String asset) async {
-    await _player.setAsset(asset);
-    unawaited(_player.play());
-  }
-
-  @override
-  Future<void> stop() => _player.stop();
-
-  @override
-  Stream<void> get ended => _player.processingStateStream
-      .where((state) => state == ProcessingState.completed)
-      .map((_) {});
-
-  @override
-  void dispose() => _player.dispose();
-}
-
-/// made on the first clip, so a dua page without one never opens an audio player
-final clipPlayerProvider = Provider<ClipPlayer>((ref) {
-  final player = JustAudioClipPlayer();
-  ref.onDispose(player.dispose);
-  return player;
-});
 
 final duaPlayerProvider = NotifierProvider.autoDispose<DuaPlayer, String?>(DuaPlayer.new);
 
