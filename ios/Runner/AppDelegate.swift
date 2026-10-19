@@ -37,6 +37,9 @@ import workmanager_apple
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "Compass") {
       registerCompass(messenger: registrar.messenger())
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "System") {
+      registerSystem(messenger: registrar.messenger())
+    }
   }
 
   /// iCloud backs Application Support up, the store has to stay on this phone (FR-023)
@@ -70,6 +73,41 @@ import workmanager_apple
         return
       }
       result(ProcessInfo.processInfo.isLowPowerModeEnabled)
+    }
+  }
+
+  /// three small calls for More, the app's own channel instead of three packages (R10)
+  private func registerSystem(messenger: FlutterBinaryMessenger) {
+    let channel = FlutterMethodChannel(name: "better_muslim/system", binaryMessenger: messenger)
+    channel.setMethodCallHandler { call, result in
+      switch call.method {
+      case "openNotificationSettings":
+        let settings: String
+        if #available(iOS 16.0, *) {
+          settings = UIApplication.openNotificationSettingsURLString
+        } else {
+          settings = UIApplication.openSettingsURLString
+        }
+        if let url = URL(string: settings) {
+          UIApplication.shared.open(url)
+        }
+        result(nil)
+      case "openUrl":
+        guard let link = (call.arguments as? [String: Any])?["url"] as? String,
+          let url = URL(string: link), url.scheme == "https"
+        else {
+          result(false)
+          return
+        }
+        UIApplication.shared.open(url) { opened in result(opened) }
+      case "version":
+        let info = Bundle.main.infoDictionary
+        let name = info?["CFBundleShortVersionString"] as? String ?? ""
+        let build = info?["CFBundleVersion"] as? String ?? ""
+        result("\(name) (\(build))")
+      default:
+        result(FlutterMethodNotImplemented)
+      }
     }
   }
 
