@@ -46,13 +46,55 @@ void main() {
 
   test('every plural string formats 0 to 12 in both languages', () {
     for (final strings in [arabic, english]) {
-      for (final key in ['qadaTotal', 'missedToMakeUp']) {
+      for (final key in [
+        'qadaTotal',
+        'missedToMakeUp',
+        'duaCount',
+        'notifAzkarBody',
+        'notifAzkarMorningBody',
+      ]) {
         for (var count = 0; count <= 12; count++) {
-          expect(strings.tr(key, {'count': '$count'}), isNot(contains('{')));
-          expect(strings.tr(key, {'count': eastern(count)}), isNot(contains('{')));
+          expect(strings.tr(key, {'count': '$count', 'minutes': '$count'}), isNot(contains('{')));
+          expect(
+            strings.tr(key, {'count': eastern(count), 'minutes': eastern(count)}),
+            isNot(contains('{')),
+          );
         }
       }
     }
+  });
+
+  test('a message with two plurals formats both, the counts in either digit set', () {
+    const english = AppLocalizations({
+      'body':
+          '{count, plural, one{1 remembrance} other{{count} remembrances}}, '
+          'about {minutes, plural, one{1 minute} other{{minutes} minutes}}',
+    });
+    const arabic = AppLocalizations({
+      'body':
+          '{count, plural, one{ذكر واحد} two{ذكران} few{{count} أذكار} other{{count} ذكرًا}}، '
+          'حوالي {minutes, plural, one{دقيقة} two{دقيقتان} few{{minutes} دقائق} other{{minutes} دقيقة}}',
+    }, 'ar');
+
+    expect(english.tr('body', {'count': '1', 'minutes': '24'}), '1 remembrance, about 24 minutes');
+    expect(english.tr('body', {'count': '24', 'minutes': '1'}), '24 remembrances, about 1 minute');
+    expect(arabic.tr('body', {'count': '١', 'minutes': '٢'}), 'ذكر واحد، حوالي دقيقتان');
+    expect(arabic.tr('body', {'count': '٣', 'minutes': '١٠'}), '٣ أذكار، حوالي ١٠ دقائق');
+    expect(arabic.tr('body', {'count': '٢٤', 'minutes': '١١'}), '٢٤ ذكرًا، حوالي ١١ دقيقة');
+  });
+
+  test('the nudge bodies read the set\'s count and minutes in both languages', () {
+    expect(
+      english.tr('notifAzkarBody', {'count': '24', 'minutes': '6'}),
+      'After Asr · 24 remembrances, about 6 minutes',
+    );
+    expect(
+      arabic.tr('notifAzkarBody', {'count': '٢٤', 'minutes': '٦'}),
+      'بعد العصر · ٢٤ ذكرًا، حوالي ٦ دقائق',
+    );
+    expect(arabic.tr('duaCount', {'count': '١'}), 'دعاء واحد');
+    expect(arabic.tr('duaCount', {'count': '٣'}), '٣ أدعية');
+    expect(english.tr('duaCount', {'count': '1'}), '1 dua');
   });
 
   test('english strings without plural syntax come back as they are', () {
