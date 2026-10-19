@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -39,3 +40,26 @@ List<Alert> buildSchedule({
         ],
   ];
 }
+
+/// ios holds 64 pending, the prayers take 60 and the dev test one, so only the next 3 nudges
+const nudgeCount = 3;
+
+/// the next nudges after now, 20 minutes after fajr and asr, none for a window already done.
+/// days as in buildSchedule, done holds (set, window day)
+List<Alert> buildNudges({
+  required DateTime now,
+  required List<DayTimes?> days,
+  required Set<(AzkarSet, DateTime)> done,
+}) => [
+  for (final day in days.nonNulls)
+    for (final set in AzkarSet.values)
+      if (day.timeOf(set.nudgePrayer)?.add(azkarNudgeDelay) case final at?)
+        if (at.isAfter(now) && !done.contains((set, day.date)))
+          Alert(
+            day: day.date,
+            prayer: set.nudgePrayer,
+            kind: AlertKind.azkar,
+            at: at,
+            sound: PrayerSound.silent,
+          ),
+].take(nudgeCount).toList();
