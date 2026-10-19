@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view_model/dua_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
