@@ -326,7 +326,13 @@
   "stop": "Stop",
   "pause": "Pause",
   "play": "Play",
-  "notifAzkarBody": "After Asr · 24 remembrances, about 6 minutes",
+  "notifAzkarBody": "After Asr · {count, plural, one{{count} remembrance} other{{count} remembrances}}, about {minutes, plural, one{{minutes} minute} other{{minutes} minutes}}",
+  "@notifAzkarBody": {
+    "placeholders": {
+      "count": {},
+      "minutes": {}
+    }
+  },
   "liveNextPrayer": "Next prayer · {city}",
   "@liveNextPrayer": {
     "placeholders": {
@@ -465,5 +471,51 @@
   "byCountry": "By country",
   "chosenForCountry": "Chosen for your country",
   "asrCalculation": "Asr calculation",
-  "allFivePrayed": "All five prayed"
+  "allFivePrayed": "All five prayed",
+  "setCardHeader": "{set} · {index} of {total}",
+  "@setCardHeader": {
+    "placeholders": {
+      "set": {},
+      "index": {},
+      "total": {}
+    }
+  },
+  "duaCount": "{count, plural, one{{count} dua} other{{count} duas}}",
+  "@duaCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "chipSaved": "Saved",
+  "saved": "Saved",
+  "removedFromSaved": "Removed from saved",
+  "noSavedTitle": "No duas saved yet",
+  "noSavedBody": "Tap Save on any dua to keep it here.",
+  "noDuasFound": "No duas found",
+  "noDuasFoundBody": "Try another word in English or Arabic.",
+  "countReset": "Count reset",
+  "resetCount": "Reset count",
+  "tasbihA11y": "{dhikr}, {count} of {target}. Tap to count",
+  "@tasbihA11y": {
+    "placeholders": {
+      "dhikr": {},
+      "count": {},
+      "target": {}
+    }
+  },
+  "notifAzkarMorningBody": "After Fajr · {count, plural, one{{count} remembrance} other{{count} remembrances}}, about {minutes, plural, one{{minutes} minute} other{{minutes} minutes}}",
+  "@notifAzkarMorningBody": {
+    "placeholders": {
+      "count": {},
+      "minutes": {}
+    }
+  },
+  "azkarReminders": "Azkar reminders",
+  "azkarRemindersSub": "{minutes} min after Fajr and Asr",
+  "@azkarRemindersSub": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "newAzkarSet": "New azkar set"
 }
