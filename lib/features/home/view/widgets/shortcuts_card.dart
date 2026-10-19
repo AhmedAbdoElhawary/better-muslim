@@ -1,12 +1,12 @@
+import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/shortcut_row.dart';
+import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/home/model/home_samples.dart';
-import 'package:better_muslim/features/home/view/widgets/home_card.dart';
-import 'package:better_muslim/features/home/view/widgets/shortcut_row.dart';
-import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +22,7 @@ class ShortcutsCard extends ConsumerWidget {
     );
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     String number(int value) => context.formatDigits('$value', digits);
-    return HomeCard(
+    return SurfaceCard(
       child: Column(
         children: [
           ShortcutRow(
@@ -49,18 +49,20 @@ class _AzkarRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final morning = ref.watch(morningAzkarProvider);
+    final set = ref.watch(currentAzkarSetProvider);
+    final progress = ref.watch(azkarProgressProvider(set));
+    final digits = ref.watch(
+      settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
+    );
     return ShortcutRow(
       icon: BmIconName.azkar,
-      title: morning ? StringsManager.morningAzkar : StringsManager.eveningAzkar,
-      subtitle: morning ? StringsManager.morningAzkarSub : StringsManager.eveningAzkarSub,
-      args: morning
-          ? {'done': '${HomeSamples.morningAzkarDone}', 'total': '${HomeSamples.morningAzkarTotal}'}
-          : {
-              'done': '${HomeSamples.eveningAzkarDone}',
-              'total': '${HomeSamples.eveningAzkarTotal}',
-            },
-      onTap: () => context.go(Routes.azkar),
+      title: set.titleKey,
+      subtitle: set.subtitleKey,
+      args: {
+        'done': context.formatDigits('${progress.done}', digits),
+        'total': context.formatDigits('${progress.total}', digits),
+      },
+      onTap: () => context.go(Routes.azkarSet(set)),
     );
   }
 }
