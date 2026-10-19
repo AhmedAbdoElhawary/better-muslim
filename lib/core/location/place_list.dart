@@ -201,7 +201,7 @@ class PlaceList {
 
 /// so مكة, مكه and مَكَّة find the same place (FR-005)
 String normalizeArabic(String text) => text
-    .replaceAll(RegExp('[ً-ْٰـ]'), '')
+    .replaceAll(RegExp('[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]'), '')
     .replaceAll(RegExp('[أإآٱ]'), 'ا')
     .replaceAll('ة', 'ه')
     .replaceAll('ى', 'ي')
