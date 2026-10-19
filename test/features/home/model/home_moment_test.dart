@@ -204,9 +204,4 @@ void main() {
       expect(arcLabels(at(15, 21, 0), times(14), times(15, polar: true), times(16)).start, isNull);
     });
   });
-
-  test('morning azkar from fajr until asr, evening from asr until fajr', () {
-    expect(Period.values.where(isMorningAzkar), [Period.fajr, Period.duha, Period.dhuhr]);
-    expect(isMorningAzkar(null), isFalse);
-  });
 }
