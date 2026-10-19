@@ -49,8 +49,12 @@ class SearchField extends StatelessWidget {
                   style: style(ThemeEnum.text),
                   cursorColor: context.getColor(ThemeEnum.primary),
                   textInputAction: TextInputAction.search,
+                  textAlignVertical: TextAlignVertical.top,
                   decoration: InputDecoration(
-                    isCollapsed: true,
+                    isCollapsed: false,
+
+                    /// the whole height is the hit, not only the line of text
+                    constraints: BoxConstraints(minHeight: SizeManager.hit.r),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
                     hintText: context.tr(hint),
