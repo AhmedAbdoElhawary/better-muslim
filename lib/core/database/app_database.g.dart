@@ -262,13 +262,63 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         requiredDuringInsert: false,
         defaultValue: const Constant('tone'),
       ).withConverter<PrayerSound>($SettingsTable.$converterishaSound);
+  @override
+  late final GeneratedColumnWithTypeConverter<AdhanRecording, String> fajrRecording =
+      GeneratedColumn<String>(
+        'fajr_recording',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('makkah'),
+      ).withConverter<AdhanRecording>($SettingsTable.$converterfajrRecording);
+  @override
+  late final GeneratedColumnWithTypeConverter<AdhanRecording, String> dhuhrRecording =
+      GeneratedColumn<String>(
+        'dhuhr_recording',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('makkah'),
+      ).withConverter<AdhanRecording>($SettingsTable.$converterdhuhrRecording);
+  @override
+  late final GeneratedColumnWithTypeConverter<AdhanRecording, String> asrRecording =
+      GeneratedColumn<String>(
+        'asr_recording',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('makkah'),
+      ).withConverter<AdhanRecording>($SettingsTable.$converterasrRecording);
+  @override
+  late final GeneratedColumnWithTypeConverter<AdhanRecording, String> maghribRecording =
+      GeneratedColumn<String>(
+        'maghrib_recording',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('makkah'),
+      ).withConverter<AdhanRecording>($SettingsTable.$convertermaghribRecording);
+  @override
+  late final GeneratedColumnWithTypeConverter<AdhanRecording, String> ishaRecording =
+      GeneratedColumn<String>(
+        'isha_recording',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('makkah'),
+      ).withConverter<AdhanRecording>($SettingsTable.$converterishaRecording);
   static const VerificationMeta _reminderMinutesMeta = const VerificationMeta('reminderMinutes');
   @override
   late final GeneratedColumn<int> reminderMinutes = GeneratedColumn<int>(
     'reminder_minutes',
     aliasedName,
     false,
-    check: () => reminderMinutes.isIn(const [0, 5, 10, 15, 20, 30]),
+    check: () => reminderMinutes.isIn(const [0, 5, 10, 15, 20, 25, 30]),
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(10),
@@ -367,6 +417,11 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     asrSound,
     maghribSound,
     ishaSound,
+    fajrRecording,
+    dhuhrRecording,
+    asrRecording,
+    maghribRecording,
+    ishaRecording,
     reminderMinutes,
     notificationsAsked,
     tasbihDhikr,
@@ -623,6 +678,36 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
           data['${effectivePrefix}isha_sound'],
         )!,
       ),
+      fajrRecording: $SettingsTable.$converterfajrRecording.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}fajr_recording'],
+        )!,
+      ),
+      dhuhrRecording: $SettingsTable.$converterdhuhrRecording.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}dhuhr_recording'],
+        )!,
+      ),
+      asrRecording: $SettingsTable.$converterasrRecording.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}asr_recording'],
+        )!,
+      ),
+      maghribRecording: $SettingsTable.$convertermaghribRecording.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}maghrib_recording'],
+        )!,
+      ),
+      ishaRecording: $SettingsTable.$converterishaRecording.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}isha_recording'],
+        )!,
+      ),
       reminderMinutes: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}reminder_minutes'],
@@ -695,6 +780,16 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<PrayerSound>(PrayerSound.values);
   static JsonTypeConverter2<PrayerSound, String, String> $converterishaSound =
       const EnumNameConverter<PrayerSound>(PrayerSound.values);
+  static JsonTypeConverter2<AdhanRecording, String, String> $converterfajrRecording =
+      const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
+  static JsonTypeConverter2<AdhanRecording, String, String> $converterdhuhrRecording =
+      const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
+  static JsonTypeConverter2<AdhanRecording, String, String> $converterasrRecording =
+      const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
+  static JsonTypeConverter2<AdhanRecording, String, String> $convertermaghribRecording =
+      const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
+  static JsonTypeConverter2<AdhanRecording, String, String> $converterishaRecording =
+      const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
   static TypeConverter<DateTime, String> $convertermorningOpenedOn = const CivilDate();
   static TypeConverter<DateTime?, String?> $convertermorningOpenedOnn = NullAwareTypeConverter.wrap(
     $convertermorningOpenedOn,
@@ -745,6 +840,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final PrayerSound maghribSound;
   final PrayerSound ishaSound;
 
+  /// each prayer's own recording, android fixes a channel's sound so it can't be one for all
+  final AdhanRecording fajrRecording;
+  final AdhanRecording dhuhrRecording;
+  final AdhanRecording asrRecording;
+  final AdhanRecording maghribRecording;
+  final AdhanRecording ishaRecording;
+
   /// minutes before each prayer, 0 is off
   final int reminderMinutes;
 
@@ -786,6 +888,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.asrSound,
     required this.maghribSound,
     required this.ishaSound,
+    required this.fajrRecording,
+    required this.dhuhrRecording,
+    required this.asrRecording,
+    required this.maghribRecording,
+    required this.ishaRecording,
     required this.reminderMinutes,
     required this.notificationsAsked,
     required this.tasbihDhikr,
@@ -867,6 +974,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     {
       map['isha_sound'] = Variable<String>($SettingsTable.$converterishaSound.toSql(ishaSound));
     }
+    {
+      map['fajr_recording'] = Variable<String>(
+        $SettingsTable.$converterfajrRecording.toSql(fajrRecording),
+      );
+    }
+    {
+      map['dhuhr_recording'] = Variable<String>(
+        $SettingsTable.$converterdhuhrRecording.toSql(dhuhrRecording),
+      );
+    }
+    {
+      map['asr_recording'] = Variable<String>(
+        $SettingsTable.$converterasrRecording.toSql(asrRecording),
+      );
+    }
+    {
+      map['maghrib_recording'] = Variable<String>(
+        $SettingsTable.$convertermaghribRecording.toSql(maghribRecording),
+      );
+    }
+    {
+      map['isha_recording'] = Variable<String>(
+        $SettingsTable.$converterishaRecording.toSql(ishaRecording),
+      );
+    }
     map['reminder_minutes'] = Variable<int>(reminderMinutes);
     map['notifications_asked'] = Variable<bool>(notificationsAsked);
     map['tasbih_dhikr'] = Variable<int>(tasbihDhikr);
@@ -917,6 +1049,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       asrSound: Value(asrSound),
       maghribSound: Value(maghribSound),
       ishaSound: Value(ishaSound),
+      fajrRecording: Value(fajrRecording),
+      dhuhrRecording: Value(dhuhrRecording),
+      asrRecording: Value(asrRecording),
+      maghribRecording: Value(maghribRecording),
+      ishaRecording: Value(ishaRecording),
       reminderMinutes: Value(reminderMinutes),
       notificationsAsked: Value(notificationsAsked),
       tasbihDhikr: Value(tasbihDhikr),
@@ -978,6 +1115,21 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       ishaSound: $SettingsTable.$converterishaSound.fromJson(
         serializer.fromJson<String>(json['ishaSound']),
       ),
+      fajrRecording: $SettingsTable.$converterfajrRecording.fromJson(
+        serializer.fromJson<String>(json['fajrRecording']),
+      ),
+      dhuhrRecording: $SettingsTable.$converterdhuhrRecording.fromJson(
+        serializer.fromJson<String>(json['dhuhrRecording']),
+      ),
+      asrRecording: $SettingsTable.$converterasrRecording.fromJson(
+        serializer.fromJson<String>(json['asrRecording']),
+      ),
+      maghribRecording: $SettingsTable.$convertermaghribRecording.fromJson(
+        serializer.fromJson<String>(json['maghribRecording']),
+      ),
+      ishaRecording: $SettingsTable.$converterishaRecording.fromJson(
+        serializer.fromJson<String>(json['ishaRecording']),
+      ),
       reminderMinutes: serializer.fromJson<int>(json['reminderMinutes']),
       notificationsAsked: serializer.fromJson<bool>(json['notificationsAsked']),
       tasbihDhikr: serializer.fromJson<int>(json['tasbihDhikr']),
@@ -1025,6 +1177,21 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
         $SettingsTable.$convertermaghribSound.toJson(maghribSound),
       ),
       'ishaSound': serializer.toJson<String>($SettingsTable.$converterishaSound.toJson(ishaSound)),
+      'fajrRecording': serializer.toJson<String>(
+        $SettingsTable.$converterfajrRecording.toJson(fajrRecording),
+      ),
+      'dhuhrRecording': serializer.toJson<String>(
+        $SettingsTable.$converterdhuhrRecording.toJson(dhuhrRecording),
+      ),
+      'asrRecording': serializer.toJson<String>(
+        $SettingsTable.$converterasrRecording.toJson(asrRecording),
+      ),
+      'maghribRecording': serializer.toJson<String>(
+        $SettingsTable.$convertermaghribRecording.toJson(maghribRecording),
+      ),
+      'ishaRecording': serializer.toJson<String>(
+        $SettingsTable.$converterishaRecording.toJson(ishaRecording),
+      ),
       'reminderMinutes': serializer.toJson<int>(reminderMinutes),
       'notificationsAsked': serializer.toJson<bool>(notificationsAsked),
       'tasbihDhikr': serializer.toJson<int>(tasbihDhikr),
@@ -1062,6 +1229,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     PrayerSound? asrSound,
     PrayerSound? maghribSound,
     PrayerSound? ishaSound,
+    AdhanRecording? fajrRecording,
+    AdhanRecording? dhuhrRecording,
+    AdhanRecording? asrRecording,
+    AdhanRecording? maghribRecording,
+    AdhanRecording? ishaRecording,
     int? reminderMinutes,
     bool? notificationsAsked,
     int? tasbihDhikr,
@@ -1096,6 +1268,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     asrSound: asrSound ?? this.asrSound,
     maghribSound: maghribSound ?? this.maghribSound,
     ishaSound: ishaSound ?? this.ishaSound,
+    fajrRecording: fajrRecording ?? this.fajrRecording,
+    dhuhrRecording: dhuhrRecording ?? this.dhuhrRecording,
+    asrRecording: asrRecording ?? this.asrRecording,
+    maghribRecording: maghribRecording ?? this.maghribRecording,
+    ishaRecording: ishaRecording ?? this.ishaRecording,
     reminderMinutes: reminderMinutes ?? this.reminderMinutes,
     notificationsAsked: notificationsAsked ?? this.notificationsAsked,
     tasbihDhikr: tasbihDhikr ?? this.tasbihDhikr,
@@ -1134,6 +1311,13 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       asrSound: data.asrSound.present ? data.asrSound.value : this.asrSound,
       maghribSound: data.maghribSound.present ? data.maghribSound.value : this.maghribSound,
       ishaSound: data.ishaSound.present ? data.ishaSound.value : this.ishaSound,
+      fajrRecording: data.fajrRecording.present ? data.fajrRecording.value : this.fajrRecording,
+      dhuhrRecording: data.dhuhrRecording.present ? data.dhuhrRecording.value : this.dhuhrRecording,
+      asrRecording: data.asrRecording.present ? data.asrRecording.value : this.asrRecording,
+      maghribRecording: data.maghribRecording.present
+          ? data.maghribRecording.value
+          : this.maghribRecording,
+      ishaRecording: data.ishaRecording.present ? data.ishaRecording.value : this.ishaRecording,
       reminderMinutes: data.reminderMinutes.present
           ? data.reminderMinutes.value
           : this.reminderMinutes,
@@ -1181,6 +1365,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('asrSound: $asrSound, ')
           ..write('maghribSound: $maghribSound, ')
           ..write('ishaSound: $ishaSound, ')
+          ..write('fajrRecording: $fajrRecording, ')
+          ..write('dhuhrRecording: $dhuhrRecording, ')
+          ..write('asrRecording: $asrRecording, ')
+          ..write('maghribRecording: $maghribRecording, ')
+          ..write('ishaRecording: $ishaRecording, ')
           ..write('reminderMinutes: $reminderMinutes, ')
           ..write('notificationsAsked: $notificationsAsked, ')
           ..write('tasbihDhikr: $tasbihDhikr, ')
@@ -1220,6 +1409,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     asrSound,
     maghribSound,
     ishaSound,
+    fajrRecording,
+    dhuhrRecording,
+    asrRecording,
+    maghribRecording,
+    ishaRecording,
     reminderMinutes,
     notificationsAsked,
     tasbihDhikr,
@@ -1258,6 +1452,11 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.asrSound == this.asrSound &&
           other.maghribSound == this.maghribSound &&
           other.ishaSound == this.ishaSound &&
+          other.fajrRecording == this.fajrRecording &&
+          other.dhuhrRecording == this.dhuhrRecording &&
+          other.asrRecording == this.asrRecording &&
+          other.maghribRecording == this.maghribRecording &&
+          other.ishaRecording == this.ishaRecording &&
           other.reminderMinutes == this.reminderMinutes &&
           other.notificationsAsked == this.notificationsAsked &&
           other.tasbihDhikr == this.tasbihDhikr &&
@@ -1294,6 +1493,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<PrayerSound> asrSound;
   final Value<PrayerSound> maghribSound;
   final Value<PrayerSound> ishaSound;
+  final Value<AdhanRecording> fajrRecording;
+  final Value<AdhanRecording> dhuhrRecording;
+  final Value<AdhanRecording> asrRecording;
+  final Value<AdhanRecording> maghribRecording;
+  final Value<AdhanRecording> ishaRecording;
   final Value<int> reminderMinutes;
   final Value<bool> notificationsAsked;
   final Value<int> tasbihDhikr;
@@ -1328,6 +1532,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.asrSound = const Value.absent(),
     this.maghribSound = const Value.absent(),
     this.ishaSound = const Value.absent(),
+    this.fajrRecording = const Value.absent(),
+    this.dhuhrRecording = const Value.absent(),
+    this.asrRecording = const Value.absent(),
+    this.maghribRecording = const Value.absent(),
+    this.ishaRecording = const Value.absent(),
     this.reminderMinutes = const Value.absent(),
     this.notificationsAsked = const Value.absent(),
     this.tasbihDhikr = const Value.absent(),
@@ -1363,6 +1572,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.asrSound = const Value.absent(),
     this.maghribSound = const Value.absent(),
     this.ishaSound = const Value.absent(),
+    this.fajrRecording = const Value.absent(),
+    this.dhuhrRecording = const Value.absent(),
+    this.asrRecording = const Value.absent(),
+    this.maghribRecording = const Value.absent(),
+    this.ishaRecording = const Value.absent(),
     this.reminderMinutes = const Value.absent(),
     this.notificationsAsked = const Value.absent(),
     this.tasbihDhikr = const Value.absent(),
@@ -1398,6 +1612,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? asrSound,
     Expression<String>? maghribSound,
     Expression<String>? ishaSound,
+    Expression<String>? fajrRecording,
+    Expression<String>? dhuhrRecording,
+    Expression<String>? asrRecording,
+    Expression<String>? maghribRecording,
+    Expression<String>? ishaRecording,
     Expression<int>? reminderMinutes,
     Expression<bool>? notificationsAsked,
     Expression<int>? tasbihDhikr,
@@ -1433,6 +1652,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (asrSound != null) 'asr_sound': asrSound,
       if (maghribSound != null) 'maghrib_sound': maghribSound,
       if (ishaSound != null) 'isha_sound': ishaSound,
+      if (fajrRecording != null) 'fajr_recording': fajrRecording,
+      if (dhuhrRecording != null) 'dhuhr_recording': dhuhrRecording,
+      if (asrRecording != null) 'asr_recording': asrRecording,
+      if (maghribRecording != null) 'maghrib_recording': maghribRecording,
+      if (ishaRecording != null) 'isha_recording': ishaRecording,
       if (reminderMinutes != null) 'reminder_minutes': reminderMinutes,
       if (notificationsAsked != null) 'notifications_asked': notificationsAsked,
       if (tasbihDhikr != null) 'tasbih_dhikr': tasbihDhikr,
@@ -1470,6 +1694,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<PrayerSound>? asrSound,
     Value<PrayerSound>? maghribSound,
     Value<PrayerSound>? ishaSound,
+    Value<AdhanRecording>? fajrRecording,
+    Value<AdhanRecording>? dhuhrRecording,
+    Value<AdhanRecording>? asrRecording,
+    Value<AdhanRecording>? maghribRecording,
+    Value<AdhanRecording>? ishaRecording,
     Value<int>? reminderMinutes,
     Value<bool>? notificationsAsked,
     Value<int>? tasbihDhikr,
@@ -1505,6 +1734,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       asrSound: asrSound ?? this.asrSound,
       maghribSound: maghribSound ?? this.maghribSound,
       ishaSound: ishaSound ?? this.ishaSound,
+      fajrRecording: fajrRecording ?? this.fajrRecording,
+      dhuhrRecording: dhuhrRecording ?? this.dhuhrRecording,
+      asrRecording: asrRecording ?? this.asrRecording,
+      maghribRecording: maghribRecording ?? this.maghribRecording,
+      ishaRecording: ishaRecording ?? this.ishaRecording,
       reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       notificationsAsked: notificationsAsked ?? this.notificationsAsked,
       tasbihDhikr: tasbihDhikr ?? this.tasbihDhikr,
@@ -1610,6 +1844,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
         $SettingsTable.$converterishaSound.toSql(ishaSound.value),
       );
     }
+    if (fajrRecording.present) {
+      map['fajr_recording'] = Variable<String>(
+        $SettingsTable.$converterfajrRecording.toSql(fajrRecording.value),
+      );
+    }
+    if (dhuhrRecording.present) {
+      map['dhuhr_recording'] = Variable<String>(
+        $SettingsTable.$converterdhuhrRecording.toSql(dhuhrRecording.value),
+      );
+    }
+    if (asrRecording.present) {
+      map['asr_recording'] = Variable<String>(
+        $SettingsTable.$converterasrRecording.toSql(asrRecording.value),
+      );
+    }
+    if (maghribRecording.present) {
+      map['maghrib_recording'] = Variable<String>(
+        $SettingsTable.$convertermaghribRecording.toSql(maghribRecording.value),
+      );
+    }
+    if (ishaRecording.present) {
+      map['isha_recording'] = Variable<String>(
+        $SettingsTable.$converterishaRecording.toSql(ishaRecording.value),
+      );
+    }
     if (reminderMinutes.present) {
       map['reminder_minutes'] = Variable<int>(reminderMinutes.value);
     }
@@ -1667,6 +1926,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('asrSound: $asrSound, ')
           ..write('maghribSound: $maghribSound, ')
           ..write('ishaSound: $ishaSound, ')
+          ..write('fajrRecording: $fajrRecording, ')
+          ..write('dhuhrRecording: $dhuhrRecording, ')
+          ..write('asrRecording: $asrRecording, ')
+          ..write('maghribRecording: $maghribRecording, ')
+          ..write('ishaRecording: $ishaRecording, ')
           ..write('reminderMinutes: $reminderMinutes, ')
           ..write('notificationsAsked: $notificationsAsked, ')
           ..write('tasbihDhikr: $tasbihDhikr, ')
@@ -2653,6 +2917,11 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<PrayerSound> asrSound,
   Value<PrayerSound> maghribSound,
   Value<PrayerSound> ishaSound,
+  Value<AdhanRecording> fajrRecording,
+  Value<AdhanRecording> dhuhrRecording,
+  Value<AdhanRecording> asrRecording,
+  Value<AdhanRecording> maghribRecording,
+  Value<AdhanRecording> ishaRecording,
   Value<int> reminderMinutes,
   Value<bool> notificationsAsked,
   Value<int> tasbihDhikr,
@@ -2688,6 +2957,11 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<PrayerSound> asrSound,
   Value<PrayerSound> maghribSound,
   Value<PrayerSound> ishaSound,
+  Value<AdhanRecording> fajrRecording,
+  Value<AdhanRecording> dhuhrRecording,
+  Value<AdhanRecording> asrRecording,
+  Value<AdhanRecording> maghribRecording,
+  Value<AdhanRecording> ishaRecording,
   Value<int> reminderMinutes,
   Value<bool> notificationsAsked,
   Value<int> tasbihDhikr,
@@ -2817,6 +3091,36 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
+  ColumnWithTypeConverterFilters<AdhanRecording, AdhanRecording, String> get fajrRecording =>
+      $composableBuilder(
+        column: $table.fajrRecording,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<AdhanRecording, AdhanRecording, String> get dhuhrRecording =>
+      $composableBuilder(
+        column: $table.dhuhrRecording,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<AdhanRecording, AdhanRecording, String> get asrRecording =>
+      $composableBuilder(
+        column: $table.asrRecording,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<AdhanRecording, AdhanRecording, String> get maghribRecording =>
+      $composableBuilder(
+        column: $table.maghribRecording,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<AdhanRecording, AdhanRecording, String> get ishaRecording =>
+      $composableBuilder(
+        column: $table.ishaRecording,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
   ColumnFilters<int> get reminderMinutes => $composableBuilder(
     column: $table.reminderMinutes,
     builder: (column) => ColumnFilters(column),
@@ -2937,6 +3241,29 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<String> get ishaSound =>
       $composableBuilder(column: $table.ishaSound, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get fajrRecording => $composableBuilder(
+    column: $table.fajrRecording,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dhuhrRecording => $composableBuilder(
+    column: $table.dhuhrRecording,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get asrRecording =>
+      $composableBuilder(column: $table.asrRecording, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get maghribRecording => $composableBuilder(
+    column: $table.maghribRecording,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ishaRecording => $composableBuilder(
+    column: $table.ishaRecording,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get reminderMinutes => $composableBuilder(
     column: $table.reminderMinutes,
     builder: (column) => ColumnOrderings(column),
@@ -3052,6 +3379,21 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumnWithTypeConverter<PrayerSound, String> get ishaSound =>
       $composableBuilder(column: $table.ishaSound, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<AdhanRecording, String> get fajrRecording =>
+      $composableBuilder(column: $table.fajrRecording, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AdhanRecording, String> get dhuhrRecording =>
+      $composableBuilder(column: $table.dhuhrRecording, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AdhanRecording, String> get asrRecording =>
+      $composableBuilder(column: $table.asrRecording, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AdhanRecording, String> get maghribRecording =>
+      $composableBuilder(column: $table.maghribRecording, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AdhanRecording, String> get ishaRecording =>
+      $composableBuilder(column: $table.ishaRecording, builder: (column) => column);
+
   GeneratedColumn<int> get reminderMinutes =>
       $composableBuilder(column: $table.reminderMinutes, builder: (column) => column);
 
@@ -3126,6 +3468,11 @@ class $$SettingsTableTableManager
                 Value<PrayerSound> asrSound = const Value.absent(),
                 Value<PrayerSound> maghribSound = const Value.absent(),
                 Value<PrayerSound> ishaSound = const Value.absent(),
+                Value<AdhanRecording> fajrRecording = const Value.absent(),
+                Value<AdhanRecording> dhuhrRecording = const Value.absent(),
+                Value<AdhanRecording> asrRecording = const Value.absent(),
+                Value<AdhanRecording> maghribRecording = const Value.absent(),
+                Value<AdhanRecording> ishaRecording = const Value.absent(),
                 Value<int> reminderMinutes = const Value.absent(),
                 Value<bool> notificationsAsked = const Value.absent(),
                 Value<int> tasbihDhikr = const Value.absent(),
@@ -3160,6 +3507,11 @@ class $$SettingsTableTableManager
                 asrSound: asrSound,
                 maghribSound: maghribSound,
                 ishaSound: ishaSound,
+                fajrRecording: fajrRecording,
+                dhuhrRecording: dhuhrRecording,
+                asrRecording: asrRecording,
+                maghribRecording: maghribRecording,
+                ishaRecording: ishaRecording,
                 reminderMinutes: reminderMinutes,
                 notificationsAsked: notificationsAsked,
                 tasbihDhikr: tasbihDhikr,
@@ -3196,6 +3548,11 @@ class $$SettingsTableTableManager
                 Value<PrayerSound> asrSound = const Value.absent(),
                 Value<PrayerSound> maghribSound = const Value.absent(),
                 Value<PrayerSound> ishaSound = const Value.absent(),
+                Value<AdhanRecording> fajrRecording = const Value.absent(),
+                Value<AdhanRecording> dhuhrRecording = const Value.absent(),
+                Value<AdhanRecording> asrRecording = const Value.absent(),
+                Value<AdhanRecording> maghribRecording = const Value.absent(),
+                Value<AdhanRecording> ishaRecording = const Value.absent(),
                 Value<int> reminderMinutes = const Value.absent(),
                 Value<bool> notificationsAsked = const Value.absent(),
                 Value<int> tasbihDhikr = const Value.absent(),
@@ -3230,6 +3587,11 @@ class $$SettingsTableTableManager
                 asrSound: asrSound,
                 maghribSound: maghribSound,
                 ishaSound: ishaSound,
+                fajrRecording: fajrRecording,
+                dhuhrRecording: dhuhrRecording,
+                asrRecording: asrRecording,
+                maghribRecording: maghribRecording,
+                ishaRecording: ishaRecording,
                 reminderMinutes: reminderMinutes,
                 notificationsAsked: notificationsAsked,
                 tasbihDhikr: tasbihDhikr,
