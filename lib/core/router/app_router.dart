@@ -15,14 +15,19 @@ import 'package:better_muslim/features/azkar/view/tasbih_page.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
 import 'package:better_muslim/features/duas/view/duas_page.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
+import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
+import 'package:better_muslim/features/more/view/credits_page.dart';
+import 'package:better_muslim/features/more/view/licenses_page.dart';
 import 'package:better_muslim/features/more/view/more_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
+import 'package:better_muslim/features/notifications/presentation/view/adhan_settings_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/dev_notifications_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
+import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +42,14 @@ abstract final class Routes {
   static const String qibla = '/qibla';
   static const String tasbih = '/azkar/tasbih';
   static const String duas = '/duas';
+
+  /// more's pages, outside the shell with the compact bar and no tab bar
+  static const String theme = '/theme';
+  static const String hijriCalendar = '/hijri-calendar';
+  static const String adhanSettings = '/adhan-settings';
+  static const String credits = '/credits';
+  static const String licenses = '/credits/licenses';
+  static String license(String package) => '$licenses/${Uri.encodeComponent(package)}';
 
   /// inside the azkar tab, so the tab bar stays
   static String azkarSet(AzkarSet set) => '$azkar/${set.name}';
@@ -147,6 +160,26 @@ final routerProvider = Provider<GoRouter>((ref) {
               return Routes.duas;
             },
             builder: (context, state) => DuaCategoryPage(state.pathParameters['id']!),
+          ),
+        ],
+      ),
+
+      GoRoute(path: Routes.theme, builder: (context, state) => const ThemePage()),
+      GoRoute(path: Routes.adhanSettings, builder: (context, state) => const AdhanSettingsPage()),
+      GoRoute(path: Routes.hijriCalendar, builder: (context, state) => const HijriCalendarPage()),
+      GoRoute(
+        path: Routes.credits,
+        builder: (context, state) => const CreditsPage(),
+        routes: [
+          GoRoute(
+            path: 'licenses',
+            builder: (context, state) => const LicensesPage(),
+            routes: [
+              GoRoute(
+                path: ':package',
+                builder: (context, state) => PackageLicensePage(state.pathParameters['package']!),
+              ),
+            ],
           ),
         ],
       ),
