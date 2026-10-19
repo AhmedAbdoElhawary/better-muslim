@@ -13,10 +13,4 @@ abstract final class HomeSamples {
   static const String readingSurahAr = 'الفاتحة';
   static const int readingAyah = 3;
   static const int readingAyahs = 7;
-
-  // TODO: the counts from azkar (milestone 8)
-  static const int morningAzkarDone = 0;
-  static const int morningAzkarTotal = 12;
-  static const int eveningAzkarDone = 0;
-  static const int eveningAzkarTotal = 24;
 }
