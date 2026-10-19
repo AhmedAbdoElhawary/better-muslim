@@ -7,8 +7,8 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/home/model/home_samples.dart';
-import 'package:better_muslim/features/home/view/widgets/home_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,7 +32,7 @@ class VerseCard extends ConsumerWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => context.go(Routes.quran),
-        child: HomeCard(
+        child: SurfaceCard(
           child: OnlyPadding(
             top: isArabic ? SpaceManager.s3 : SpaceManager.verseCardTop,
             bottom: isArabic ? SpaceManager.verseCardBottomAr : SpaceManager.card,
