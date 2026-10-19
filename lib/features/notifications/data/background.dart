@@ -47,6 +47,7 @@ Future<void> topUp(
   final today = DateTime(at.year, at.month, at.day);
   final first = prayerDayOf(at, today, timesOn(today).fajr);
   final sounds = {for (final prayer in Prayer.values) prayer: settings.soundOf(prayer)};
+  final recordings = {for (final prayer in Prayer.values) prayer: settings.recordingOf(prayer)};
 
   final texts = await AlertTexts.load(
     locale: locale,
@@ -74,6 +75,7 @@ Future<void> topUp(
         ),
     ],
     sounds: sounds,
+    recordings: recordings,
     texts: texts,
   );
 }
