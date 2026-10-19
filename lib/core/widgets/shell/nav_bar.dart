@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -12,9 +13,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NavBar extends StatelessWidget {
-  const NavBar({required this.index, required this.onTap, super.key});
+  const NavBar({required this.index, required this.onTap, this.badge, super.key});
   final int index;
   final ValueChanged<int> onTap;
+
+  /// the tab with the components' dot, null for none
+  final int? badge;
 
   static const _tabs = [
     (BmIconName.home, StringsManager.tabHome),
@@ -67,6 +71,7 @@ class NavBar extends StatelessWidget {
                           icon: icon,
                           label: label,
                           selected: i == index,
+                          badge: i == badge,
                           onTap: () => onTap(i),
                         ),
                       ),
@@ -86,11 +91,13 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.selected,
+    required this.badge,
     required this.onTap,
   });
   final BmIconName icon;
   final String label;
   final bool selected;
+  final bool badge;
   final VoidCallback onTap;
 
   @override
@@ -99,21 +106,27 @@ class _NavItem extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
+      value: badge ? context.tr(StringsManager.newAzkarSet) : null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RSizedBox.square(
-              dimension: SizeManager.navPillH,
-              child: Center(
-                child: BmIcon(
-                  icon,
-                  filled: selected,
-                  size: SizeManager.icon.r,
-                  color: context.getColor(color),
-                ),
+            RSizedBox(
+              width: SizeManager.navPillW,
+              height: SizeManager.navPillH,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  BmIcon(
+                    icon,
+                    filled: selected,
+                    size: SizeManager.icon.r,
+                    color: context.getColor(color),
+                  ),
+                  if (badge) const _Badge(),
+                ],
               ),
             ),
             const RSizedBox.vertical(SpaceManager.navLabelGap),
@@ -121,6 +134,33 @@ class _NavItem extends StatelessWidget {
               SemiBoldText(label, fontSize: FontSizeManager.tabLabelSelected, color: color)
             else
               RegularText(label, fontSize: FontSizeManager.tabLabel, color: color),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// the components' "new azkar set" dot on the pill's top end
+class _Badge extends StatelessWidget {
+  const _Badge();
+
+  @override
+  Widget build(BuildContext context) {
+    return PositionedDirectional(
+      top: SpaceManager.navBadgeTop.r,
+      end: SpaceManager.navBadgeEnd.r,
+      child: Container(
+        width: SizeManager.navBadge.r,
+        height: SizeManager.navBadge.r,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: context.getColor(ThemeEnum.accent),
+          boxShadow: [
+            BoxShadow(
+              color: context.getColor(ThemeEnum.surface),
+              spreadRadius: SizeManager.navBadgeRing.r,
+            ),
           ],
         ),
       ),
