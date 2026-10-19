@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
@@ -11,7 +12,6 @@ import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
 import 'package:better_muslim/features/duas/view/share_dua.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
-import 'package:better_muslim/features/duas/view_model/dua_player.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter/material.dart';
