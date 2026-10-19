@@ -1,0 +1,572 @@
+{
+  "morning": {
+    "minutes": 3,
+    "note": "TODO(ahmed): minutes from the 5.1 copy, set them for the real set",
+    "items": [
+      {
+        "id": "m01",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m02",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m03",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m04",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m05",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m06",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m07",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m08",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m09",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m10",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m11",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "m12",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      }
+    ]
+  },
+  "evening": {
+    "minutes": 6,
+    "note": "TODO(ahmed): minutes from the 5.1 copy, set them for the real set",
+    "items": [
+      {
+        "id": "e01",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e02",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e03",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e04",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e05",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e06",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e07",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e08",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e09",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e10",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e11",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e12",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e13",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e14",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e15",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e16",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e17",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e18",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e19",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e20",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e21",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e22",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e23",
+        "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        "transliteration": "Subhan Allahi wa bihamdihi",
+        "translation": "Glory be to Allah and praise be to Him.",
+        "source": {
+          "en": "Sahih Muslim 2692",
+          "ar": "صحيح مسلم ٢٦٩٢"
+        },
+        "grading": {
+          "en": "Sahih",
+          "ar": "صحيح"
+        },
+        "count": 100,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      },
+      {
+        "id": "e24",
+        "arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+        "transliteration": "Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.",
+        "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+        "source": {
+          "en": "Abu Dawud 5095",
+          "ar": "أبو داود ٥٠٩٥"
+        },
+        "grading": null,
+        "count": 1,
+        "quran": false,
+        "note": "TODO(ahmed): sample, replace with the dataset"
+      }
+    ]
+  }
+}
