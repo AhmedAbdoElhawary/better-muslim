@@ -10,9 +10,9 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/home/view/widgets/card_glow.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
-import 'package:better_muslim/features/home/view/widgets/home_card.dart';
 import 'package:better_muslim/features/home/view/widgets/prayer_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +41,7 @@ class NextPrayerCard extends StatelessWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => context.go(Routes.prayer),
-            child: HomeCard(
+            child: SurfaceCard(
               child: OnlyPadding(
                 top: isArabic ? SpaceManager.nextCardTopAr : SpaceManager.card,
                 bottom: SpaceManager.card,
