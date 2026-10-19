@@ -1,4 +1,6 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/azkar/azkar_content.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -16,6 +18,7 @@ class AlertTexts {
     required this.use24h,
     required this.digits,
     required this.location,
+    this.azkar,
   });
 
   /// flutter_localizations loads the date symbols only inside the app, the background needs them
@@ -32,6 +35,7 @@ class AlertTexts {
       use24h: use24h,
       digits: digits,
       location: location,
+      azkar: await loadAzkarContent(),
     );
   }
 
@@ -40,6 +44,9 @@ class AlertTexts {
   final bool use24h;
   final Digits digits;
   final Location location;
+
+  /// the nudges' count and minutes come from the sets
+  final AzkarContent? azkar;
 
   String get city => (language == 'ar' ? location.placeNameAr : null) ?? location.placeName ?? '';
 
@@ -52,6 +59,7 @@ class AlertTexts {
       'prayer': tr(alert.prayer.nameKey),
       'minutes': formatDigitsIn('${alert.before.inMinutes}', language: language, digits: digits),
     }),
+    AlertKind.azkar => tr(azkarSetOf(alert.prayer).titleKey),
   };
 
   String bodyOf(Alert alert) => switch (alert.kind) {
@@ -63,7 +71,19 @@ class AlertTexts {
       'time': timeOf(alert),
       'city': city,
     }),
+    AlertKind.azkar => _azkarBody(azkarSetOf(alert.prayer)),
   };
+
+  String _azkarBody(AzkarSet set) {
+    final content = azkar?.setOf(set);
+    String digitsOf(int value) => formatDigitsIn('$value', language: language, digits: digits);
+    return l10n.tr(
+      set == AzkarSet.morning
+          ? StringsManager.notifAzkarMorningBody
+          : StringsManager.notifAzkarBody,
+      {'count': digitsOf(content?.total ?? 0), 'minutes': digitsOf(content?.minutes ?? 0)},
+    );
+  }
 
   /// the prayer's time, also on a reminder. the place's own clock, the same time the app shows
   /// for a manual city in another zone
