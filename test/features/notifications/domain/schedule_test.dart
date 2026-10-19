@@ -117,6 +117,17 @@ void main() {
   });
 
   group('reminders', () {
+    test('25 minutes, the slider\'s new step, comes 25 minutes before', () {
+      final alerts = buildSchedule(
+        now: makkah(15, 0, 1),
+        days: daysFrom(DateTime(2026, 10, 15)),
+        sounds: sounds,
+        reminderMinutes: 25,
+      );
+      final reminder = alerts.firstWhere((alert) => alert.kind == AlertKind.reminder);
+      expect(reminder.prayerTime.difference(reminder.at), const Duration(minutes: 25));
+    });
+
     test('come the minutes before each of the five, whatever its sound', () {
       final alerts = buildSchedule(
         now: makkah(15, 0, 1),
