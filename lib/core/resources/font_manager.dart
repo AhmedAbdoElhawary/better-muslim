@@ -95,6 +95,13 @@ abstract final class FontSizeManager {
 
   /// the qibla cards' distance and accuracy
   static const double qiblaValue = 20;
+
+  /// tasbih (4.08), duas (4.14) and the components' azkar card
+  static const double dhikrMeaning = 13.5;
+  static const double dhikrChip = 12.5;
+  static const double duaChip = 13.5;
+  static const double zikrAr = 26;
+  static const double zikrTranslation = 13.5;
 }
 
 abstract final class LineHeightManager {
