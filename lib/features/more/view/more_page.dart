@@ -34,6 +34,9 @@ class MorePage extends ConsumerWidget {
               const RSizedBox.vertical(SpaceManager.s4),
               // TODO: replaced by the 4.09 Qibla tile in milestone 9.
               BmButton.secondary(StringsManager.qibla, onPressed: () => context.push(Routes.qibla)),
+              const RSizedBox.vertical(SpaceManager.s3),
+              // TODO: replaced by the 4.09 Duas tile in milestone 9.
+              BmButton.secondary(StringsManager.duas, onPressed: () => context.push(Routes.duas)),
               if (isDev) const _DevRow(),
             ],
           ),
