@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.steps.dart';
 import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
@@ -75,6 +76,21 @@ class Settings extends Table {
   /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
   BoolColumn get notificationsAsked => boolean().withDefault(const Constant(false))();
 
+  /// 0 subhanallah, 1 alhamdulillah, 2 allahu akbar
+  IntColumn get tasbihDhikr => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(tasbihDhikr.isBetweenValues(0, 2))();
+  IntColumn get tasbihCount => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(tasbihCount.isBiggerOrEqualValue(0))();
+
+  /// the window last opened, the azkar tab's badge goes once it's the current one
+  TextColumn get morningOpenedOn => text().map(const CivilDate()).nullable()();
+  TextColumn get eveningOpenedOn => text().map(const CivilDate()).nullable()();
+  BoolColumn get azkarNudges => boolean().withDefault(const Constant(true))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -101,7 +117,31 @@ class QadaEntries extends Table {
   DateTimeColumn get madeUpAt => dateTime().nullable()();
 }
 
-@DriftDatabase(tables: [Settings, PrayerLog, QadaEntries])
+/// only the latest window of each set, older days go on the first count of a new one
+class AzkarCounts extends Table {
+  TextColumn get setId => textEnum<AzkarSet>()();
+
+  /// the window's prayer day
+  TextColumn get day => text().map(const CivilDate())();
+
+  /// the item's id in azkar.json
+  TextColumn get zikr => text()();
+  IntColumn get count => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {setId, day, zikr};
+}
+
+class SavedDuas extends Table {
+  /// the dua's id in duas.json
+  TextColumn get dua => text()();
+  DateTimeColumn get savedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {dua};
+}
+
+@DriftDatabase(tables: [Settings, PrayerLog, QadaEntries, AzkarCounts, SavedDuas])
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.executor);
 
@@ -179,7 +219,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -205,6 +245,19 @@ class AppDatabase extends _$AppDatabase {
         ]) {
           await m.addColumn(schema.settings, column);
         }
+      },
+      from3To4: (m, schema) async {
+        for (final column in [
+          schema.settings.tasbihDhikr,
+          schema.settings.tasbihCount,
+          schema.settings.morningOpenedOn,
+          schema.settings.eveningOpenedOn,
+          schema.settings.azkarNudges,
+        ]) {
+          await m.addColumn(schema.settings, column);
+        }
+        await m.createTable(schema.azkarCounts);
+        await m.createTable(schema.savedDuas);
       },
     ),
   );
@@ -239,4 +292,33 @@ class AppDatabase extends _$AppDatabase {
   Future<void> unmarkPrayed(DateTime day, Prayer prayer) => (delete(
     prayerLog,
   )..where((row) => row.date.equalsValue(day) & row.prayer.equalsValue(prayer))).go();
+
+  /// a plain call with no riverpod, the background top-up reads it too. zikr id to its count
+  Future<Map<String, int>> zikrCounts(AzkarSet set, DateTime day) async {
+    final rows = await (select(
+      azkarCounts,
+    )..where((row) => row.setId.equalsValue(set) & row.day.equalsValue(day))).get();
+    return {for (final row in rows) row.zikr: row.count};
+  }
+
+  /// nothing reads an older window, so they go here instead of piling up
+  Future<void> setZikrCount(AzkarSet set, DateTime day, String zikr, int count) =>
+      transaction(() async {
+        await (delete(azkarCounts)..where(
+              (row) =>
+                  row.setId.equalsValue(set) &
+                  row.day.isSmallerThanValue(const CivilDate().toSql(day)),
+            ))
+            .go();
+        await into(azkarCounts).insertOnConflictUpdate(
+          AzkarCountsCompanion.insert(setId: set, day: day, zikr: zikr, count: count),
+        );
+      });
+
+  /// undo passes the old savedAt, so the dua goes back to its place in the list
+  Future<void> saveDua(String dua, {DateTime? at}) => into(savedDuas)
+      .insertOnConflictUpdate(SavedDuasCompanion.insert(dua: dua, savedAt: at ?? DateTime.now()));
+
+  Future<void> unsaveDua(String dua) =>
+      (delete(savedDuas)..where((row) => row.dua.equals(dua))).go();
 }
