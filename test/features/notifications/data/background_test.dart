@@ -2,6 +2,7 @@ import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -103,6 +104,24 @@ void main() {
           locationMode: Value(LocationMode.manual),
         ),
       );
+    });
+
+    test('each prayer\'s recording goes to the scheduler', () async {
+      await db.updateSettings(
+        const SettingsCompanion(maghribRecording: Value(AdhanRecording.madinah)),
+      );
+      final scheduler = FakeScheduler();
+      await topUp(
+        db,
+        scheduler: scheduler,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: makkah(9, 0),
+      );
+      final recordings = scheduler.appliedRecordings.single;
+      expect(recordings[Prayer.maghrib], AdhanRecording.madinah);
+      expect(recordings[Prayer.fajr], AdhanRecording.makkah);
     });
 
     test('on by default: 3 quiet nudges, tonight\'s first before asr + 20', () async {
