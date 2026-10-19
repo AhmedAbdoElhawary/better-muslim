@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
@@ -29,6 +30,7 @@ import '../../../helpers/fonts.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
 import '../../../helpers/qibla.dart';
+import '../../../helpers/sounds.dart';
 
 void main() {
   setUpAll(tz.initializeTimeZones);
@@ -367,6 +369,22 @@ void main() {
       expect(find.text('Turn 14° right'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 300));
       expect(ringColor(tester), colorOf(tester, ThemeEnum.outline));
+      await unmount(tester);
+    });
+
+    testWidgets('with ui sounds on aligning plays the aligned sound once', (tester) async {
+      final sounds = FakeSoundOutput();
+      BmSounds.output = sounds;
+      addTearDown(() => BmSounds.enabled = false);
+      await pumpQibla(tester, await designOverrides());
+      await dbOf(tester).updateSettings(const SettingsCompanion(uiSounds: Value(true)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(QiblaDial));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(seconds: 3));
+      expect(sounds.played, ['assets/audio/ui_aligned.m4a']);
       await unmount(tester);
     });
 
