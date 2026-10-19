@@ -63,13 +63,17 @@ class AppLocalizations {
     }
 
     /// arabic has its own form for 1, 2, 3 to 10 and 11 or more, the count comes already formatted
-    final plural = _plural.firstMatch(text);
-    if (plural == null) return text;
-    final count = args[plural[1]]!.replaceAllMapped(
-      RegExp('[٠-٩]'),
-      (match) => '${match[0]!.codeUnitAt(0) - 0x0660}',
-    );
-    return MessageFormat(text, locale: _languageCode).format({plural[1]!: int.parse(count)});
+    final plurals = _plural.allMatches(text).map((match) => match[1]!).toSet();
+    if (plurals.isEmpty) return text;
+    return MessageFormat(text, locale: _languageCode).format({
+      for (final name in plurals)
+        name: int.parse(
+          args[name]!.replaceAllMapped(
+            RegExp('[٠-٩]'),
+            (match) => '${match[0]!.codeUnitAt(0) - 0x0660}',
+          ),
+        ),
+    });
   }
 }
 
