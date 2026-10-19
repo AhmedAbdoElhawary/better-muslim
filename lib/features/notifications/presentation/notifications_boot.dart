@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/azkar/azkar_progress.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
@@ -52,10 +54,17 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.asrSound,
         row?.maghribSound,
         row?.ishaSound,
+        row?.azkarNudges,
       );
     }),
   );
-  return (place, choices);
+
+  /// finishing a set takes back its nudge
+  bool done(AzkarSet set) => ref.watch(
+    azkarProgressProvider(set)
+        .select((progress) => progress.total > 0 && progress.done == progress.total),
+  );
+  return (place, choices, done(AzkarSet.morning), done(AzkarSet.evening));
 });
 
 /// the notifications' wiring around the app: the first ask, rescheduling, taps and cleanup
@@ -225,6 +234,8 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
         if (location != null) await player.play(alert, await _texts(location), from: from);
       case PrayerTarget(:final day, :final prayer):
         router.go(Routes.prayerAt(day, prayer));
+      case AzkarTarget(:final set):
+        router.go(Routes.azkarSet(set));
       case NoTarget():
     }
   }
