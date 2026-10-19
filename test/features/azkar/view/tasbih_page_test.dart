@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
@@ -5,13 +6,16 @@ import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
 import 'package:better_muslim/features/azkar/view/widgets/tasbih_counter.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/azkar.dart';
 import '../../../helpers/fonts.dart';
+import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
+import '../../../helpers/sounds.dart';
 
 void main() {
   setUpAll(tz.initializeTimeZones);
@@ -88,6 +92,33 @@ void main() {
     expect(counter(tester), (count: 1, target: 33));
     expect(find.text('Alhamdulillah'), findsNWidgets(2));
     expect(find.text('of 33'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('with ui sounds on each count plays the bead and the 33rd the complete', (
+    tester,
+  ) async {
+    final sounds = FakeSoundOutput();
+    BmSounds.output = sounds;
+    addTearDown(() => BmSounds.enabled = false);
+    await open(tester);
+    await dbOf(tester).updateSettings(const SettingsCompanion(uiSounds: Value(true)));
+    await tester.pumpAndSettle();
+
+    await tap(tester, 17);
+    await tester.pumpAndSettle();
+    expect(sounds.played.where((asset) => asset.endsWith('ui_bead.m4a')), hasLength(17));
+    expect(sounds.played.where((asset) => asset.endsWith('ui_complete.m4a')), hasLength(1));
+    await unmount(tester);
+  });
+
+  testWidgets('with ui sounds off a count plays nothing', (tester) async {
+    final sounds = FakeSoundOutput();
+    BmSounds.output = sounds;
+    await open(tester);
+    await tap(tester, 1);
+    await tester.pumpAndSettle();
+    expect(sounds.played, isEmpty);
     await unmount(tester);
   });
 
