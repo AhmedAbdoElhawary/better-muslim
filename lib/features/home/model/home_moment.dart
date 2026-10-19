@@ -92,7 +92,3 @@ ArcLabels arcLabels(DateTime now, DayTimes? yesterday, DayTimes today, DayTimes?
     end: evening ? tomorrow?.fajr : today.fajr,
   );
 }
-
-/// morning from fajr until asr, evening from asr until the next fajr
-bool isMorningAzkar(Period? period) =>
-    period == Period.fajr || period == Period.duha || period == Period.dhuhr;
