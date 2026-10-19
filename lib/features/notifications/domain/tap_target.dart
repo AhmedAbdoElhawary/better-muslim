@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -23,6 +24,13 @@ class PrayerTarget extends TapTarget {
   final Prayer prayer;
 }
 
+/// a nudge opens its set where i stopped
+class AzkarTarget extends TapTarget {
+  const AzkarTarget(this.set);
+
+  final AzkarSet set;
+}
+
 /// a reminder, or a payload from before an update, just opens the app
 class NoTarget extends TapTarget {
   const NoTarget();
@@ -31,6 +39,7 @@ class NoTarget extends TapTarget {
 TapTarget tapTarget(String payload, DateTime now, Duration length) {
   final alert = alertFromPayload(payload);
   if (alert == null || alert.kind == AlertKind.reminder) return const NoTarget();
+  if (alert.kind == AlertKind.azkar) return AzkarTarget(azkarSetOf(alert.prayer));
   final elapsed = now.difference(alert.at);
   if (alert.sound == PrayerSound.adhan && elapsed < length) {
     return AdhanTarget(alert.prayer, alert.day, elapsed.isNegative ? Duration.zero : elapsed);
