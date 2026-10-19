@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
@@ -10,7 +8,7 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/core/widgets/ellipse_transform.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,13 +25,7 @@ class PrayerHeader extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        PositionedDirectional(
-          start: -SpaceManager.prayerGlowSide.r,
-          end: -SpaceManager.prayerGlowSide.r,
-          top: -SpaceManager.prayerGlowTop.r,
-          height: SizeManager.prayerGlow.r,
-          child: const IgnorePointer(child: _Glow()),
-        ),
+        const TitleGlow(),
         SafeArea(
           bottom: false,
           child: TopPadding(
@@ -85,32 +77,6 @@ class PrayerHeader extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Glow extends StatelessWidget {
-  const _Glow();
-
-  static const _alpha = .7;
-  static const _stop = .65;
-
-  @override
-  Widget build(BuildContext context) {
-    final sky3 = context.getColor(ThemeEnum.sky3);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          /// css "ellipse at 50% 50%" reaches the corners, half the diagonal of a square
-          radius: math.sqrt1_2,
-          colors: [
-            sky3.withValues(alpha: _alpha),
-            sky3.withValues(alpha: 0),
-          ],
-          stops: const [0, _stop],
-          transform: const EllipseTransform(),
-        ),
-      ),
     );
   }
 }
