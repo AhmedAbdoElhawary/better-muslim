@@ -32,9 +32,10 @@ void main() {
     expect(finder, findsWidgets);
   }
 
-  /// a real phone can be shorter than the design, home's azkar row sits under the fold
+  /// a real phone can be shorter than the design, home's azkar row sits under the fold. centered,
+  /// so more's compact bar never covers it
   Future<void> tap(WidgetTester tester, Finder finder, {int times = 1}) async {
-    await tester.ensureVisible(finder);
+    await Scrollable.ensureVisible(tester.element(finder), alignment: .5);
     await tester.pump();
     for (var i = 0; i < times; i++) {
       await tester.tap(finder);
