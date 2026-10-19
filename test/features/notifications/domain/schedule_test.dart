@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/settings/settings.dart';
@@ -162,6 +163,69 @@ void main() {
 
       final first = alerts.first;
       expect([first.prayer, first.kind], [Prayer.asr, AlertKind.adhan]);
+    });
+  });
+
+  group('azkar nudges (US6)', () {
+    test('at 16:32 the next 3: tomorrow\'s morning and evening, the day after\'s morning', () {
+      final days = daysFrom(DateTime(2026, 10, 15));
+      final nudges = buildNudges(now: makkah(15, 16, 32), days: days, done: const {});
+
+      expect(
+        [for (final nudge in nudges) (nudge.day.day, nudge.prayer)],
+        [(16, Prayer.fajr), (16, Prayer.asr), (17, Prayer.fajr)],
+      );
+      expect(nudges.first.at, days[1].fajr!.add(const Duration(minutes: 20)));
+      expect(nudges.every((nudge) => nudge.kind == AlertKind.azkar), isTrue);
+      expect(nudges.every((nudge) => nudge.sound == PrayerSound.silent), isTrue);
+    });
+
+    test('before asr + 20 today\'s evening nudge comes first', () {
+      final days = daysFrom(DateTime(2026, 10, 15));
+      final nudges = buildNudges(now: makkah(15, 15, 30), days: days, done: const {});
+
+      expect(nudges.first.day, DateTime(2026, 10, 15));
+      expect(nudges.first.prayer, Prayer.asr);
+    });
+
+    test('a done window gets no nudge', () {
+      final nudges = buildNudges(
+        now: makkah(15, 15, 30),
+        days: daysFrom(DateTime(2026, 10, 15)),
+        done: {(AzkarSet.evening, DateTime(2026, 10, 15))},
+      );
+
+      expect(nudges.first.day, DateTime(2026, 10, 16));
+      expect(nudges.first.prayer, Prayer.fajr);
+    });
+
+    test('a day with no fajr or asr time has no nudge for it', () {
+      final day = daysFrom(DateTime(2026, 10, 16)).first;
+      final polar = DayTimes(
+        date: day.date,
+        fajr: null,
+        sunrise: day.sunrise,
+        dhuhr: day.dhuhr,
+        asr: null,
+        maghrib: day.maghrib,
+        isha: day.isha,
+        method: day.method,
+        asrMethod: day.asrMethod,
+      );
+
+      expect(buildNudges(now: makkah(15, 16, 32), days: [polar], done: const {}), isEmpty);
+    });
+
+    test('with the 60 prayer alerts the total stays at 63, under ios\'s 64 (SC-008)', () {
+      final days = daysFrom(DateTime(2026, 10, 15));
+      final now = makkah(15, 4, 0);
+      final total = [
+        ...buildSchedule(now: now, days: days, sounds: sounds, reminderMinutes: 10),
+        ...buildNudges(now: now, days: days, done: const {}),
+      ];
+
+      expect(total, hasLength(63));
+      expect(total.map((alert) => alert.id).toSet(), hasLength(63));
     });
   });
 }
