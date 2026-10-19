@@ -54,7 +54,11 @@ From the spec to the code:
    adhan on Android from `packages/adhan_alarms`, Mark prayed from every notification, the
    background top-up, a dev page from More. **Done, waiting for my review.**
 6. Qibla: compass, alignment, haptics. **Done, waiting for my review.**
-7. to 11. as in `HANDOFF_CLAUDE.md`.
+7. Quran reader: moved to after 11, it's almost an app of its own. The spec waits in
+   `specs/003-milestone-7-quran/` with Q1 to Q10 open. Until then the Quran tab stays a placeholder.
+8. Azkar, Tasbih and Duas: the Azkar tab, both sets, Tasbih, Duas with save, share and Listen ready
+   for clips, the azkar nudges. **Done, waiting for my review.**
+9. to 11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
 
