@@ -57,7 +57,7 @@ class ToggleRow extends StatelessWidget {
                   ),
                 ),
                 const RSizedBox.horizontal(SpaceManager.shortcutGap),
-                _Toggle(value),
+                BmToggle(value),
               ],
             ),
           ),
@@ -67,8 +67,9 @@ class ToggleRow extends StatelessWidget {
   }
 }
 
-class _Toggle extends StatelessWidget {
-  const _Toggle(this.value);
+/// the components' 52 x 32 toggle, drawn only, the row around it takes the tap
+class BmToggle extends StatelessWidget {
+  const BmToggle(this.value, {super.key});
   final bool value;
 
   @override
