@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
@@ -61,8 +62,10 @@ class _CardsState extends ConsumerState<_Cards> with SingleTickerProviderStateMi
     switch (controller.tap()) {
       case SetTap.counted:
         BmHaptics.bead();
+        BmSounds.bead();
       case SetTap.done || SetTap.setDone:
         BmHaptics.setComplete();
+        BmSounds.complete();
       case SetTap.moved:
         final index = ref.read(setControllerProvider(widget.set))!.index;
         if (MediaQuery.disableAnimationsOf(context)) {
