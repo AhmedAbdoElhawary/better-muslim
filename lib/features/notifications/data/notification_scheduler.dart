@@ -198,6 +198,7 @@ class NotificationScheduler {
     final android = _android;
     if (android == null) return;
     await android.createNotificationChannel(_reminders(texts));
+    await android.createNotificationChannel(_azkar(texts));
     await android.createNotificationChannelGroup(
       AndroidNotificationChannelGroup(_group, texts.tr(StringsManager.soundAdhan)),
     );
@@ -229,7 +230,34 @@ class NotificationScheduler {
   static AndroidNotificationChannel _reminders(AlertTexts texts) =>
       AndroidNotificationChannel('reminders', texts.tr(StringsManager.reminders));
 
+  /// the nudges never make a sound or buzz (FR-037)
+  static AndroidNotificationChannel _azkar(AlertTexts texts) => AndroidNotificationChannel(
+    'azkar',
+    texts.tr(StringsManager.tabAzkar),
+    playSound: false,
+    enableVibration: false,
+  );
+
   NotificationDetails _details(Alert alert, AlertTexts texts) {
+    if (alert.kind == AlertKind.azkar) {
+      final channel = _azkar(texts);
+      return NotificationDetails(
+        android: AndroidNotificationDetails(
+          channel.id,
+          channel.name,
+          playSound: false,
+          enableVibration: false,
+          color: _accent,
+          category: AndroidNotificationCategory.reminder,
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentSound: false,
+          presentBanner: true,
+          presentList: true,
+          interruptionLevel: InterruptionLevel.passive,
+        ),
+      );
+    }
     if (alert.kind == AlertKind.reminder) {
       final channel = _reminders(texts);
       return NotificationDetails(
