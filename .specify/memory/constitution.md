@@ -144,7 +144,8 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
   shared_preferences, no hive.
 - Domain packages, each added in its milestone: adhan_dart (not adhan, which stopped in 2023),
   hijri, geolocator, flutter_local_notifications, timezone, flutter_timezone, just_audio,
-  audio_session, workmanager (the background top-up), home_widget, live_activities.
+  audio_session, workmanager (the background top-up), share_plus (the share sheet for the dua
+  card), home_widget, live_activities.
 - The compass is the app's own `better_muslim/compass` channel, true north from the World Magnetic
   Model in Dart.
 - Native code that has to run in every Flutter engine (the app's, a background task's, a headless
@@ -161,7 +162,7 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Ask me every question first, all in one message with a recommendation each. Never fill a gap.
   When everything is answered, write **start building**.
 - Build in the handoff's milestone order (`design_handoff_better_muslim/HANDOFF_CLAUDE.md`), one
-  milestone at a time. Stop after each, I review it by running the app myself (Dev or the design
+  milestone at a time, except the Quran reader (7), which comes after 11. Stop after each, I review it by running the app myself (Dev or the design
   scenario). No screenshots, also for screens the handoff doesn't design.
 - Speckit (specify, plan, tasks) for every milestone. Where the handoff already specs the screen,
   the spec is short: only what the handoff leaves open, the layout stays in the handoff and is
@@ -182,4 +183,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.2.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-18
+**Version**: 3.4.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-19
