@@ -14,14 +14,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// the pill and the no-location card both open it, "use my location" can start right away
-Future<void> showLocationSheet(BuildContext context, {bool useMyLocation = false}) =>
-    showBmSheet(context, builder: (_) => LocationSheet(useMyLocation: useMyLocation));
+/// the pill and the no-location card both open it, "use my location" can start right away.
+/// failed = location was just refused, the sheet opens saying so (milestone 10 FR-020). true when
+/// a place was saved, so 4.11 goes on only then
+Future<bool> showLocationSheet(
+  BuildContext context, {
+  bool useMyLocation = false,
+  bool failed = false,
+}) async =>
+    await showBmSheet<bool>(
+      context,
+      builder: (_) => LocationSheet(useMyLocation: useMyLocation, failed: failed),
+    ) ??
+    false;
 
 /// use my location, or the offline city search over the GeoNames list (R12)
 class LocationSheet extends ConsumerStatefulWidget {
-  const LocationSheet({this.useMyLocation = false, super.key});
+  const LocationSheet({this.useMyLocation = false, this.failed = false, super.key});
   final bool useMyLocation;
+  final bool failed;
 
   @override
   ConsumerState<LocationSheet> createState() => _LocationSheetState();
@@ -30,7 +41,7 @@ class LocationSheet extends ConsumerStatefulWidget {
 class _LocationSheetState extends ConsumerState<LocationSheet> {
   var _query = '';
   var _busy = false;
-  var _failed = false;
+  late var _failed = widget.failed;
 
   @override
   void initState() {
@@ -46,7 +57,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
     final done = await ref.read(locationControllerProvider).useAuto();
     if (!mounted) return;
     if (done) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     } else {
       setState(() {
         _busy = false;
@@ -57,7 +68,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
 
   Future<void> _choose(Place place) async {
     await ref.read(locationControllerProvider).choose(place);
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) Navigator.of(context).pop(true);
   }
 
   @override
@@ -113,19 +124,26 @@ class _UseMyLocationRow extends StatelessWidget {
           constraints: BoxConstraints(minHeight: SizeManager.listRow.r),
           child: SymmetricPadding(
             horizontal: SpaceManager.screen,
-            child: Opacity(
-              opacity: busy ? BmOpacity.disabled : 1,
-              child: Row(
-                children: [
-                  BmIcon(
+            child: Row(
+              children: [
+                AnimatedOpacity(
+                  opacity: busy ? BmOpacity.disabled : 1,
+                  duration: const Duration(microseconds: 300),
+                  child: BmIcon(
                     BmIconName.location,
                     size: SizeManager.iconList.r,
                     color: context.getColor(ThemeEnum.primary),
                   ),
-                  const RSizedBox.horizontal(SpaceManager.s3),
-                  const Expanded(child: MediumText(StringsManager.useMyLocation)),
-                ],
-              ),
+                ),
+                const RSizedBox.horizontal(SpaceManager.s3),
+                Expanded(
+                  child: AnimatedOpacity(
+                    opacity: busy ? BmOpacity.disabled : 1,
+                    duration: const Duration(microseconds: 300),
+                    child: const MediumText(StringsManager.useMyLocation),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
