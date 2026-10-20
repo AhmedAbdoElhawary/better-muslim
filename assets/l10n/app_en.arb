@@ -677,5 +677,44 @@
   "backupRestored": "Backup restored",
   "resetNoticeTitle": "Your saved data couldn't be opened",
   "resetNoticeBody": "The app started fresh on this phone. If you have a backup, you can restore it now.",
-  "startFresh": "Start fresh"
+  "startFresh": "Start fresh",
+  "surfaceNext": "NEXT",
+  "surfaceNextCity": "NEXT · {city}",
+  "@surfaceNextCity": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "surfaceNextShort": "Next · {city}",
+  "@surfaceNextShort": {
+    "placeholders": {
+      "city": {}
+    }
+  },
+  "nameTime": "{prayer} {time}",
+  "@nameTime": {
+    "placeholders": {
+      "prayer": {},
+      "time": {}
+    }
+  },
+  "nameTimePrayed": "{prayer} {time} · prayed",
+  "@nameTimePrayed": {
+    "placeholders": {
+      "prayer": {},
+      "time": {}
+    }
+  },
+  "reminderChip": "Reminder {time}",
+  "@reminderChip": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "prayerCountdown": "Countdown before each prayer",
+  "prayerCountdownLine": "Starts 2 hours before, ends at the adhan",
+  "countdownChannel": "Prayer countdown",
+  "openToSetPlace": "Open Better Muslim to set your place",
+  "openToUpdateTimes": "Open Better Muslim to update the times",
+  "openApp": "Open Better Muslim"
 }

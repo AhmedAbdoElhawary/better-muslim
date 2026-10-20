@@ -5,5 +5,10 @@
 	<!-- TODO(ahmed): turn on Time Sensitive Notifications for the app ids in the Apple developer account, without it iOS delivers adhans as normal notifications. -->
 	<key>com.apple.developer.usernotifications.time-sensitive</key>
 	<true/>
+	<!-- TODO(ahmed): create group.com.elhawary.bettermuslim, .dev and .staging in the Apple developer account and add them to the app ids, else the widgets read nothing. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>$(APP_GROUP)</string>
+	</array>
 </dict>
 </plist>

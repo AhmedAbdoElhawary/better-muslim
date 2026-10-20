@@ -146,12 +146,13 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Domain packages, each added in its milestone: adhan_dart (not adhan, which stopped in 2023),
   hijri, geolocator, flutter_local_notifications, timezone, flutter_timezone, just_audio,
   audio_session, workmanager (the background top-up), share_plus (the share sheet for the dua
-  card), file_picker (picking a backup file to restore), home_widget, live_activities.
+  card), file_picker (picking a backup file to restore).
 - The compass is the app's own `better_muslim/compass` channel, true north from the World Magnetic
   Model in Dart.
 - Native code that has to run in every Flutter engine (the app's, a background task's, a headless
-  one) is a local plugin in `packages/`, like `packages/adhan_alarms`, so Flutter registers it in
-  each engine by itself.
+  one) is a local plugin in `packages/`, like `packages/adhan_alarms` and `packages/prayer_surfaces`
+  (the widgets' data, the Live Activity and the Android countdown), so Flutter registers it in each
+  engine by itself.
 - Place names and city search come from a GeoNames list shipped in the app (every country, places
   over 1,000 people plus capitals and region seats), never from geocoding, which needs internet.
 - Any other package: check pub.dev maintenance and popularity first, then ask me.
@@ -184,4 +185,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.5.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-20
+**Version**: 3.6.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-20

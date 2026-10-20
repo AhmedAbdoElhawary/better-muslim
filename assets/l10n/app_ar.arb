@@ -361,5 +361,17 @@
   "backupRestored": "تمت استعادة النسخة",
   "resetNoticeTitle": "تعذّر فتح بياناتك المحفوظة",
   "resetNoticeBody": "بدأ التطبيق من جديد على هذا الهاتف. إن كانت لديك نسخة احتياطية فيمكنك استعادتها الآن.",
-  "startFresh": "البدء من جديد"
+  "startFresh": "البدء من جديد",
+  "surfaceNext": "التالية",
+  "surfaceNextCity": "التالية · {city}",
+  "surfaceNextShort": "التالية · {city}",
+  "nameTime": "{prayer} {time}",
+  "nameTimePrayed": "{prayer} {time} · صلّيت",
+  "reminderChip": "تذكير {time}",
+  "prayerCountdown": "العد التنازلي قبل كل صلاة",
+  "prayerCountdownLine": "يبدأ قبل الصلاة بساعتين وينتهي عند الأذان",
+  "countdownChannel": "العد التنازلي للصلاة",
+  "openToSetPlace": "افتح مسلم أفضل لتحديد مكانك",
+  "openToUpdateTimes": "افتح مسلم أفضل لتحديث المواقيت",
+  "openApp": "افتح مسلم أفضل"
 }
