@@ -10,6 +10,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
@@ -27,6 +28,7 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _title = 'Notifications (dev)';
   static const _openAdhan = 'Open adhan screen';
   static const _testIn1Minute = 'Test notification in 1 min';
+  static const _replayOnboarding = 'Replay onboarding';
 
   /// the next prayer as an alert, on its own prayer day
   static Alert? nextAlert(WidgetRef ref) {
@@ -86,6 +88,15 @@ class DevNotificationsPage extends ConsumerWidget {
                       );
                 },
               ),
+
+            /// from the first screen, nothing is cleared (FR-004)
+            _Row(
+              _replayOnboarding,
+              onTap: () {
+                ref.read(onboardingProvider.notifier).replay();
+                context.go(Routes.onboarding);
+              },
+            ),
           ],
         ),
       ),
