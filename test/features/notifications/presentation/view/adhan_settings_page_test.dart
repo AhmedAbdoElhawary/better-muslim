@@ -1,10 +1,12 @@
 import 'package:better_muslim/core/audio/clip_player.dart';
+import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -15,6 +17,7 @@ import '../../../../helpers/azkar.dart';
 import '../../../../helpers/fonts.dart';
 import '../../../../helpers/more.dart';
 import '../../../../helpers/notifications.dart';
+import '../../../../helpers/prayer.dart';
 import '../../../../helpers/providers.dart';
 
 void main() {
@@ -33,13 +36,14 @@ void main() {
   Future<void> open(
     WidgetTester tester, {
     bool allowed = true,
+    FakeScheduler? scheduler,
     Locale locale = const Locale('en'),
     double textScale = 1,
   }) async => pumpMore(
     tester,
     <Override>[
       ...await designOverrides(),
-      notificationSchedulerProvider.overrideWithValue(FakeScheduler(allowed: allowed)),
+      notificationSchedulerProvider.overrideWithValue(scheduler ?? FakeScheduler(allowed: allowed)),
       clipPlayerProvider.overrideWithValue(clips),
     ],
     push: Routes.adhanSettings,
@@ -158,11 +162,37 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('notifications off: the line shows and opens the phone\'s settings', (tester) async {
-    await open(tester, allowed: false);
+  /// ios has no switch for an app that never asked (milestone 10 FR-026)
+  testWidgets('notifications off, never asked: the line asks first and remembers it', (
+    tester,
+  ) async {
+    final scheduler = FakeScheduler(allowed: false);
+    await open(tester, scheduler: scheduler);
     expect(find.text('Notifications are off for this app.'), findsOneWidget);
     await tester.tap(find.text('Open settings'));
     await tester.pumpAndSettle();
+
+    expect(scheduler.asks, 1);
+    expect(scheduler.alarmAsks, 1);
+    expect((await settingsOf(tester)).notificationsAsked, isTrue);
+    expect(system.map((call) => call.method), isNot(contains('openNotificationSettings')));
+    expect(find.text('Notifications are off for this app.'), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('notifications off, asked before: the line opens the phone\'s settings', (
+    tester,
+  ) async {
+    final scheduler = FakeScheduler(allowed: false);
+    await open(tester, scheduler: scheduler);
+    await containerOf(tester)
+        .read(databaseProvider)
+        .updateSettings(const SettingsCompanion(notificationsAsked: Value(true)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open settings'));
+    await tester.pumpAndSettle();
+
+    expect(scheduler.asks, 0);
     expect(system.map((call) => call.method), contains('openNotificationSettings'));
     await unmount(tester);
   });
