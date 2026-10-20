@@ -7,6 +7,7 @@ import 'package:better_muslim/core/monitoring/monitoring.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/presentation/notifications_boot.dart';
+import 'package:better_muslim/features/surfaces/presentation/surfaces_boot.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,7 +58,7 @@ Future<void> _boot(FlavorConfig config) async {
         onboardingProvider.overrideWith(() => OnboardingNotifier(done: settings.onboarded)),
         if (config.isDesignScenario) ...designScenarioOverrides(),
       ],
-      child: const NotificationsBoot(child: App()),
+      child: const NotificationsBoot(child: SurfacesBoot(child: App())),
     ),
   );
 }

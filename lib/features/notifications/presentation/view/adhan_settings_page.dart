@@ -5,6 +5,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/countdown_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/notifications_off_line.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_row.dart';
@@ -12,8 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// every prayer's sound and recording and the reminder, each kept at once. the boot remakes the
-/// schedule from the store (FR-026 to FR-030)
+/// every prayer's sound and recording, the reminder and the countdown, each kept at once. the
+/// boot remakes the schedule from the store (FR-026 to FR-030)
 class AdhanSettingsPage extends ConsumerStatefulWidget {
   const AdhanSettingsPage({super.key});
 
@@ -89,6 +90,8 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
                 ),
                 const RSizedBox.vertical(SpaceManager.s3),
                 const GroupedSection(children: [ReminderRow()]),
+                const RSizedBox.vertical(SpaceManager.s3),
+                const GroupedSection(children: [CountdownRow()]),
               ],
             ),
           ),

@@ -105,6 +105,9 @@ class Settings extends Table {
   TextColumn get eveningOpenedOn => text().map(const CivilDate()).nullable()();
   BoolColumn get azkarNudges => boolean().withDefault(const Constant(true))();
 
+  /// Countdown before each prayer
+  BoolColumn get prayerCountdown => boolean().withDefault(const Constant(true))();
+
   /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
   BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
 
@@ -251,7 +254,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -314,6 +317,9 @@ class AppDatabase extends _$AppDatabase {
 
         /// an install from before onboarding with a place has already set the app up (FR-001)
         await customStatement('update settings set onboarded = 1 where latitude is not null');
+      },
+      from6To7: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.prayerCountdown);
       },
     ),
   );

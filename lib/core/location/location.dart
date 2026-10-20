@@ -101,4 +101,7 @@ class Location {
   final String? countryCode;
   final tz.Location zone;
   final LocationMode mode;
+
+  /// the arabic name when there is one, the notifications and the surfaces show the same
+  String nameIn(String language) => (language == 'ar' ? placeNameAr : null) ?? placeName ?? '';
 }

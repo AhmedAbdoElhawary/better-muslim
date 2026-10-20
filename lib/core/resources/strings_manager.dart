@@ -322,4 +322,16 @@ abstract final class StringsManager {
   static const String resetNoticeTitle = 'resetNoticeTitle';
   static const String resetNoticeBody = 'resetNoticeBody';
   static const String startFresh = 'startFresh';
+  static const String surfaceNext = 'surfaceNext';
+  static const String surfaceNextCity = 'surfaceNextCity';
+  static const String surfaceNextShort = 'surfaceNextShort';
+  static const String nameTime = 'nameTime';
+  static const String nameTimePrayed = 'nameTimePrayed';
+  static const String reminderChip = 'reminderChip';
+  static const String prayerCountdown = 'prayerCountdown';
+  static const String prayerCountdownLine = 'prayerCountdownLine';
+  static const String countdownChannel = 'countdownChannel';
+  static const String openToSetPlace = 'openToSetPlace';
+  static const String openToUpdateTimes = 'openToUpdateTimes';
+  static const String openApp = 'openApp';
 }

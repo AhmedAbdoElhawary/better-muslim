@@ -1308,12 +1308,221 @@ i1.GeneratedColumn<int> _column_50(String aliasedName) =>
       $customConstraints: 'NOT NULL DEFAULT 0 CHECK (onboarded IN (0, 1))',
       defaultValue: const i1.CustomExpression('0'),
     );
+
+final class Schema7 extends i0.VersionedSchema {
+  Schema7({required super.database}) : super(version: 7);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    settings,
+    prayerLog,
+    qadaEntries,
+    azkarCounts,
+    savedDuas,
+    qadaDay,
+  ];
+  late final Shape9 settings = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+        _column_44,
+        _column_45,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+        _column_32,
+        _column_33,
+        _column_34,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_51,
+        _column_50,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 prayerLog = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'prayer_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(date, prayer)'],
+      columns: [_column_21, _column_22],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 qadaEntries = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'qada_entries',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_23, _column_22, _column_24, _column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 azkarCounts = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'azkar_counts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(set_id, day, zikr)'],
+      columns: [_column_38, _column_39, _column_40, _column_41],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 savedDuas = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'saved_duas',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(dua)'],
+      columns: [_column_42, _column_43],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index qadaDay = i1.Index(
+    'qada_day',
+    'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
+  );
+}
+
+class Shape9 extends i0.VersionedTable {
+  Shape9({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get latitude =>
+      columnsByName['latitude']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get longitude =>
+      columnsByName['longitude']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get placeName =>
+      columnsByName['place_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get placeNameAr =>
+      columnsByName['place_name_ar']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get regionName =>
+      columnsByName['region_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get regionNameAr =>
+      columnsByName['region_name_ar']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get countryCode =>
+      columnsByName['country_code']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get timeZone =>
+      columnsByName['time_zone']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get locationMode =>
+      columnsByName['location_mode']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get method =>
+      columnsByName['method']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get asrMethod =>
+      columnsByName['asr_method']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get hijriAdjust =>
+      columnsByName['hijri_adjust']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get digits =>
+      columnsByName['digits']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get theme =>
+      columnsByName['theme']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get themeMode =>
+      columnsByName['theme_mode']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get reduceMotion =>
+      columnsByName['reduce_motion']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get haptics =>
+      columnsByName['haptics']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get uiSounds =>
+      columnsByName['ui_sounds']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get storeResetPending =>
+      columnsByName['store_reset_pending']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get firstUse =>
+      columnsByName['first_use']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fajrSound =>
+      columnsByName['fajr_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get dhuhrSound =>
+      columnsByName['dhuhr_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get asrSound =>
+      columnsByName['asr_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get maghribSound =>
+      columnsByName['maghrib_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get ishaSound =>
+      columnsByName['isha_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fajrRecording =>
+      columnsByName['fajr_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get dhuhrRecording =>
+      columnsByName['dhuhr_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get asrRecording =>
+      columnsByName['asr_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get maghribRecording =>
+      columnsByName['maghrib_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get ishaRecording =>
+      columnsByName['isha_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get reminderMinutes =>
+      columnsByName['reminder_minutes']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get notificationsAsked =>
+      columnsByName['notifications_asked']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get tasbihDhikr =>
+      columnsByName['tasbih_dhikr']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get tasbihCount =>
+      columnsByName['tasbih_count']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get morningOpenedOn =>
+      columnsByName['morning_opened_on']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get eveningOpenedOn =>
+      columnsByName['evening_opened_on']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get azkarNudges =>
+      columnsByName['azkar_nudges']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get prayerCountdown =>
+      columnsByName['prayer_countdown']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get onboarded =>
+      columnsByName['onboarded']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_51(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'prayer_countdown',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints:
+          'NOT NULL DEFAULT 1 CHECK (prayer_countdown IN (0, 1))',
+      defaultValue: const i1.CustomExpression('1'),
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -1342,6 +1551,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from5To6(migrator, schema);
         return 6;
+      case 6:
+        final schema = Schema7(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from6To7(migrator, schema);
+        return 7;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -1354,6 +1568,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -1361,5 +1576,6 @@ i1.OnUpgrade stepByStep({
     from3To4: from3To4,
     from4To5: from4To5,
     from5To6: from5To6,
+    from6To7: from6To7,
   ),
 );

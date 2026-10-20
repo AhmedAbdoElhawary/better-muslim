@@ -389,6 +389,17 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("azkar_nudges" IN (0, 1))'),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _prayerCountdownMeta = const VerificationMeta('prayerCountdown');
+  @override
+  late final GeneratedColumn<bool> prayerCountdown = GeneratedColumn<bool>(
+    'prayer_countdown',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("prayer_countdown" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _onboardedMeta = const VerificationMeta('onboarded');
   @override
   late final GeneratedColumn<bool> onboarded = GeneratedColumn<bool>(
@@ -440,6 +451,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    prayerCountdown,
     onboarded,
   ];
   @override
@@ -566,6 +578,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _azkarNudgesMeta,
         azkarNudges.isAcceptableOrUnknown(data['azkar_nudges']!, _azkarNudgesMeta),
+      );
+    }
+    if (data.containsKey('prayer_countdown')) {
+      context.handle(
+        _prayerCountdownMeta,
+        prayerCountdown.isAcceptableOrUnknown(data['prayer_countdown']!, _prayerCountdownMeta),
       );
     }
     if (data.containsKey('onboarded')) {
@@ -758,6 +776,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}azkar_nudges'],
       )!,
+      prayerCountdown: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}prayer_countdown'],
+      )!,
       onboarded: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}onboarded'],
@@ -872,7 +894,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   /// minutes before each prayer, 0 is off
   final int reminderMinutes;
 
-  /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
+  /// true once 4.12 or the off line asked the phone, after that the off line opens settings
   final bool notificationsAsked;
 
   /// 0 subhanallah, 1 alhamdulillah, 2 allahu akbar
@@ -883,6 +905,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final DateTime? morningOpenedOn;
   final DateTime? eveningOpenedOn;
   final bool azkarNudges;
+
+  /// Countdown before each prayer
+  final bool prayerCountdown;
 
   /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
   final bool onboarded;
@@ -925,6 +950,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     this.morningOpenedOn,
     this.eveningOpenedOn,
     required this.azkarNudges,
+    required this.prayerCountdown,
     required this.onboarded,
   });
   @override
@@ -1040,6 +1066,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       );
     }
     map['azkar_nudges'] = Variable<bool>(azkarNudges);
+    map['prayer_countdown'] = Variable<bool>(prayerCountdown);
     map['onboarded'] = Variable<bool>(onboarded);
     return map;
   }
@@ -1092,6 +1119,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? const Value.absent()
           : Value(eveningOpenedOn),
       azkarNudges: Value(azkarNudges),
+      prayerCountdown: Value(prayerCountdown),
       onboarded: Value(onboarded),
     );
   }
@@ -1165,6 +1193,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       morningOpenedOn: serializer.fromJson<DateTime?>(json['morningOpenedOn']),
       eveningOpenedOn: serializer.fromJson<DateTime?>(json['eveningOpenedOn']),
       azkarNudges: serializer.fromJson<bool>(json['azkarNudges']),
+      prayerCountdown: serializer.fromJson<bool>(json['prayerCountdown']),
       onboarded: serializer.fromJson<bool>(json['onboarded']),
     );
   }
@@ -1228,6 +1257,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'morningOpenedOn': serializer.toJson<DateTime?>(morningOpenedOn),
       'eveningOpenedOn': serializer.toJson<DateTime?>(eveningOpenedOn),
       'azkarNudges': serializer.toJson<bool>(azkarNudges),
+      'prayerCountdown': serializer.toJson<bool>(prayerCountdown),
       'onboarded': serializer.toJson<bool>(onboarded),
     };
   }
@@ -1271,6 +1301,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     Value<DateTime?> morningOpenedOn = const Value.absent(),
     Value<DateTime?> eveningOpenedOn = const Value.absent(),
     bool? azkarNudges,
+    bool? prayerCountdown,
     bool? onboarded,
   }) => AppSettings(
     id: id ?? this.id,
@@ -1311,6 +1342,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     morningOpenedOn: morningOpenedOn.present ? morningOpenedOn.value : this.morningOpenedOn,
     eveningOpenedOn: eveningOpenedOn.present ? eveningOpenedOn.value : this.eveningOpenedOn,
     azkarNudges: azkarNudges ?? this.azkarNudges,
+    prayerCountdown: prayerCountdown ?? this.prayerCountdown,
     onboarded: onboarded ?? this.onboarded,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
@@ -1365,6 +1397,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.eveningOpenedOn.value
           : this.eveningOpenedOn,
       azkarNudges: data.azkarNudges.present ? data.azkarNudges.value : this.azkarNudges,
+      prayerCountdown: data.prayerCountdown.present
+          ? data.prayerCountdown.value
+          : this.prayerCountdown,
       onboarded: data.onboarded.present ? data.onboarded.value : this.onboarded,
     );
   }
@@ -1410,6 +1445,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
           ..write('azkarNudges: $azkarNudges, ')
+          ..write('prayerCountdown: $prayerCountdown, ')
           ..write('onboarded: $onboarded')
           ..write(')'))
         .toString();
@@ -1455,6 +1491,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    prayerCountdown,
     onboarded,
   ]);
   @override
@@ -1499,6 +1536,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.morningOpenedOn == this.morningOpenedOn &&
           other.eveningOpenedOn == this.eveningOpenedOn &&
           other.azkarNudges == this.azkarNudges &&
+          other.prayerCountdown == this.prayerCountdown &&
           other.onboarded == this.onboarded);
 }
 
@@ -1541,6 +1579,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<DateTime?> morningOpenedOn;
   final Value<DateTime?> eveningOpenedOn;
   final Value<bool> azkarNudges;
+  final Value<bool> prayerCountdown;
   final Value<bool> onboarded;
   const SettingsCompanion({
     this.id = const Value.absent(),
@@ -1581,6 +1620,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.prayerCountdown = const Value.absent(),
     this.onboarded = const Value.absent(),
   });
   SettingsCompanion.insert({
@@ -1622,6 +1662,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.prayerCountdown = const Value.absent(),
     this.onboarded = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
@@ -1663,6 +1704,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? morningOpenedOn,
     Expression<String>? eveningOpenedOn,
     Expression<bool>? azkarNudges,
+    Expression<bool>? prayerCountdown,
     Expression<bool>? onboarded,
   }) {
     return RawValuesInsertable({
@@ -1704,6 +1746,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (morningOpenedOn != null) 'morning_opened_on': morningOpenedOn,
       if (eveningOpenedOn != null) 'evening_opened_on': eveningOpenedOn,
       if (azkarNudges != null) 'azkar_nudges': azkarNudges,
+      if (prayerCountdown != null) 'prayer_countdown': prayerCountdown,
       if (onboarded != null) 'onboarded': onboarded,
     });
   }
@@ -1747,6 +1790,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<DateTime?>? morningOpenedOn,
     Value<DateTime?>? eveningOpenedOn,
     Value<bool>? azkarNudges,
+    Value<bool>? prayerCountdown,
     Value<bool>? onboarded,
   }) {
     return SettingsCompanion(
@@ -1788,6 +1832,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       morningOpenedOn: morningOpenedOn ?? this.morningOpenedOn,
       eveningOpenedOn: eveningOpenedOn ?? this.eveningOpenedOn,
       azkarNudges: azkarNudges ?? this.azkarNudges,
+      prayerCountdown: prayerCountdown ?? this.prayerCountdown,
       onboarded: onboarded ?? this.onboarded,
     );
   }
@@ -1937,6 +1982,9 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (azkarNudges.present) {
       map['azkar_nudges'] = Variable<bool>(azkarNudges.value);
     }
+    if (prayerCountdown.present) {
+      map['prayer_countdown'] = Variable<bool>(prayerCountdown.value);
+    }
     if (onboarded.present) {
       map['onboarded'] = Variable<bool>(onboarded.value);
     }
@@ -1984,6 +2032,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
           ..write('azkarNudges: $azkarNudges, ')
+          ..write('prayerCountdown: $prayerCountdown, ')
           ..write('onboarded: $onboarded')
           ..write(')'))
         .toString();
@@ -2976,6 +3025,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> prayerCountdown,
   Value<bool> onboarded,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
@@ -3017,6 +3067,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> prayerCountdown,
   Value<bool> onboarded,
 });
 
@@ -3201,6 +3252,11 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
   ColumnFilters<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get prayerCountdown => $composableBuilder(
+    column: $table.prayerCountdown,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get onboarded =>
       $composableBuilder(column: $table.onboarded, builder: (column) => ColumnFilters(column));
 }
@@ -3345,6 +3401,11 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get prayerCountdown => $composableBuilder(
+    column: $table.prayerCountdown,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get onboarded =>
       $composableBuilder(column: $table.onboarded, builder: (column) => ColumnOrderings(column));
 }
@@ -3470,6 +3531,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => column);
 
+  GeneratedColumn<bool> get prayerCountdown =>
+      $composableBuilder(column: $table.prayerCountdown, builder: (column) => column);
+
   GeneratedColumn<bool> get onboarded =>
       $composableBuilder(column: $table.onboarded, builder: (column) => column);
 }
@@ -3538,6 +3602,7 @@ class $$SettingsTableTableManager
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> prayerCountdown = const Value.absent(),
                 Value<bool> onboarded = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
@@ -3578,6 +3643,7 @@ class $$SettingsTableTableManager
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                prayerCountdown: prayerCountdown,
                 onboarded: onboarded,
               ),
           createCompanionCallback:
@@ -3620,6 +3686,7 @@ class $$SettingsTableTableManager
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> prayerCountdown = const Value.absent(),
                 Value<bool> onboarded = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
@@ -3660,6 +3727,7 @@ class $$SettingsTableTableManager
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                prayerCountdown: prayerCountdown,
                 onboarded: onboarded,
               ),
           withReferenceMapper: (p0) => p0

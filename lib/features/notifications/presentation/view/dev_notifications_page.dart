@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
@@ -12,6 +13,8 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
+import 'package:better_muslim/core/surfaces/write_surfaces.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
@@ -29,6 +32,8 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _openAdhan = 'Open adhan screen';
   static const _testIn1Minute = 'Test notification in 1 min';
   static const _replayOnboarding = 'Replay onboarding';
+  static const _refreshWidgets = 'Refresh widgets';
+  static const _startCountdown = 'Start countdown now';
 
   /// the next prayer as an alert, on its own prayer day
   static Alert? nextAlert(WidgetRef ref) {
@@ -65,7 +70,7 @@ class DevNotificationsPage extends ConsumerWidget {
                 if (alert != null) context.push(Routes.adhan(alert.prayer, alert.day));
               },
             ),
-            if (!isScenario)
+            if (!isScenario) ...[
               _Row(
                 _testIn1Minute,
                 onTap: () async {
@@ -88,6 +93,23 @@ class DevNotificationsPage extends ConsumerWidget {
                       );
                 },
               ),
+
+              /// past the plugin's equal check, so the widgets reload even with the same data
+              _Row(
+                _refreshWidgets,
+                onTap: () => writeSurfaces(
+                  ref.read(databaseProvider),
+                  channel: ref.read(surfacesChannelProvider),
+                  locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
+                  use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+                  phoneZone: ref.read(phoneZoneProvider),
+                  force: true,
+                ),
+              ),
+
+              /// the next prayer's countdown whatever the 2 hours, so it shows without waiting
+              _Row(_startCountdown, onTap: () => ref.read(surfacesChannelProvider).startNow()),
+            ],
 
             /// from the first screen, nothing is cleared (FR-004)
             _Row(
