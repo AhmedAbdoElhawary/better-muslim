@@ -1,9 +1,9 @@
 import 'package:better_muslim/core/clock/clock.dart';
-import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,12 +26,6 @@ final stripProvider = Provider<List<StripEntry>>((ref) {
       if (stripCellState(prayer, period, prayed) case (:final current, :final logged, :final past))
         (prayer: prayer, time: times?.timeOf(prayer), current: current, logged: logged, past: past),
   ];
-});
-
-/// null = the theme's base sky: no location, or the design scenario so home matches the PNGs
-final skyStateProvider = Provider<BmSkyState?>((ref) {
-  if (ref.watch(flavorProvider.select((config) => config.isDesignScenario))) return null;
-  return skyState(ref.watch(periodProvider));
 });
 
 /// the sunrise, dhuhr and asr skies, where the header text turns white over a scrim
