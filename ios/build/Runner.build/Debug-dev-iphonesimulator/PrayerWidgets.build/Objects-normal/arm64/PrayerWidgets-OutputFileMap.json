@@ -1,0 +1,149 @@
+{
+  "" : {
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgets-primary.dia",
+    "emit-module-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgets-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgets-primary-emit-module.dia",
+    "pch" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgets-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgets-primary.swiftdeps"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/Accessories.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Accessories~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/CountdownActivity.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/CountdownActivity~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/LargeWidget.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/LargeWidget~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/MediumWidget.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MediumWidget~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/MessageView.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/MessageView~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/PrayerCountdownAttributes.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerCountdownAttributes~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/PrayerWidgetsBundle.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/PrayerWidgetsBundle~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/SmallWidget.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SmallWidget~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/SurfaceColors.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceColors~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/SurfaceData.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceData~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/SurfaceFonts.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceFonts~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/SurfaceIcons.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/SurfaceIcons~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/Timeline.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/Timeline~partial.swiftmodule"
+  },
+  "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/build/Runner.build/Debug-dev-iphonesimulator/PrayerWidgets.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}
