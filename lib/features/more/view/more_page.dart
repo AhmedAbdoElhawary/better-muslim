@@ -21,6 +21,7 @@ import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/method_sheet.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/more/view/widgets/about_section.dart';
+import 'package:better_muslim/features/more/view/widgets/backup_rows.dart';
 import 'package:better_muslim/features/more/view/widgets/mode_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/more_tiles.dart';
 import 'package:better_muslim/features/more/view/widgets/reset_row.dart';
@@ -61,7 +62,7 @@ class MorePage extends ConsumerWidget {
                   const RSizedBox.vertical(SpaceManager.sectionGap),
                   const GroupedSection(
                     label: StringsManager.sectionYourData,
-                    children: [ResetRow()],
+                    children: [BackupRow(), RestoreRow(), ResetRow()],
                   ),
                   const RSizedBox.vertical(SpaceManager.sectionGap),
                   const AboutSection(),
