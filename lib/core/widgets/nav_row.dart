@@ -109,7 +109,7 @@ class NavRow extends StatelessWidget {
                   ),
                   if (!stacked && valueText != null) ...[
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
-                    Flexible(child: valueText),
+                    Expanded(child: valueText),
                   ],
                   if (toggled != null) ...[
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
