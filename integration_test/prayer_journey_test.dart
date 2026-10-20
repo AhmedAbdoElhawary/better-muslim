@@ -4,6 +4,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_complete.dart';
@@ -53,6 +54,7 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          onboardingProvider.overrideWith(() => OnboardingNotifier(done: true)),
           flavorProvider.overrideWithValue(
             const FlavorConfig(
               flavor: Flavor.dev,
