@@ -57,7 +57,17 @@ class _CardsState extends ConsumerState<_Cards> with SingleTickerProviderStateMi
     super.dispose();
   }
 
-  void _tap() {
+  void moveNext() {
+    final index = ref.read(setControllerProvider(widget.set))!.index;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pages.jumpToPage(index);
+      _fade.forward(from: 0);
+    } else {
+      _pages.animateToPage(index, duration: BmMotion.standard, curve: BmMotion.standardCurve);
+    }
+  }
+
+  Future<void> _tap() async {
     final controller = ref.read(setControllerProvider(widget.set).notifier);
     switch (controller.tap()) {
       case SetTap.counted:
@@ -67,13 +77,7 @@ class _CardsState extends ConsumerState<_Cards> with SingleTickerProviderStateMi
         BmHaptics.setComplete();
         BmSounds.complete();
       case SetTap.moved:
-        final index = ref.read(setControllerProvider(widget.set))!.index;
-        if (MediaQuery.disableAnimationsOf(context)) {
-          _pages.jumpToPage(index);
-          _fade.forward(from: 0);
-        } else {
-          _pages.animateToPage(index, duration: BmMotion.standard, curve: BmMotion.standardCurve);
-        }
+        moveNext();
       case SetTap.none:
         break;
     }
