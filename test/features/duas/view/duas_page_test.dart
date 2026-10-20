@@ -6,11 +6,12 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
+import 'package:better_muslim/core/system/share.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
-import 'package:better_muslim/features/duas/view/share_dua.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -242,6 +243,7 @@ void main() {
           ),
         ),
         ...designScenarioOverrides(),
+        onboardingProvider.overrideWith(() => OnboardingNotifier(done: true)),
       ];
       await pumpDuas(tester, overrides);
       await tester.tap(action('Save'));
