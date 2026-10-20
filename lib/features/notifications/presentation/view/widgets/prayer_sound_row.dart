@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/extensions/window_size.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -32,49 +33,58 @@ class PrayerSoundRow extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final name = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        RegularText(
+          prayer.nameKey,
+          font: FontEnum.display,
+          fontSize: FontSizeManager.notifPrayerName,
+        ),
+        if (time != null)
+          RegularText(
+            context.formatTime(time, digits),
+            translate: false,
+            fontSize: FontSizeManager.label,
+            color: ThemeEnum.text2,
+            tabularFigures: true,
+          ),
+      ],
+    );
+    final segmented = Segmented(
+      values: PrayerSound.values,
+      selected: sound,
+      small: true,
+      labelOf: (sound) => switch (sound) {
+        PrayerSound.adhan => StringsManager.soundAdhan,
+        PrayerSound.tone => StringsManager.soundTone,
+        PrayerSound.silent => StringsManager.soundSilent,
+      },
+      onChanged: (sound) => ref.read(databaseProvider).updateSettings(soundChoice(prayer, sound)),
+    );
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: SizeManager.pickerRow.r),
       child: OnlyPadding(
         start: SpaceManager.s4,
         end: SpaceManager.segmentSmallSide,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+
+        /// large text puts the segments under the name, like the prayer rows stack
+        child: context.isLargeText
+            ? VerticalPadding(
+                padding: SpaceManager.s2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [name, const RSizedBox.vertical(SpaceManager.s1), segmented],
+                ),
+              )
+            : Row(
                 children: [
-                  RegularText(
-                    prayer.nameKey,
-                    font: FontEnum.display,
-                    fontSize: FontSizeManager.notifPrayerName,
-                  ),
-                  if (time != null)
-                    RegularText(
-                      context.formatTime(time, digits),
-                      translate: false,
-                      fontSize: FontSizeManager.label,
-                      color: ThemeEnum.text2,
-                      tabularFigures: true,
-                    ),
+                  Expanded(child: name),
+                  const RSizedBox.horizontal(SpaceManager.s3),
+                  segmented,
                 ],
               ),
-            ),
-            const RSizedBox.horizontal(SpaceManager.s3),
-            Segmented(
-              values: PrayerSound.values,
-              selected: sound,
-              small: true,
-              labelOf: (sound) => switch (sound) {
-                PrayerSound.adhan => StringsManager.soundAdhan,
-                PrayerSound.tone => StringsManager.soundTone,
-                PrayerSound.silent => StringsManager.soundSilent,
-              },
-              onChanged: (sound) =>
-                  ref.read(databaseProvider).updateSettings(soundChoice(prayer, sound)),
-            ),
-          ],
-        ),
       ),
     );
   }
