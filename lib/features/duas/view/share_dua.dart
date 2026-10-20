@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:better_muslim/core/system/share.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/widgets/share_card.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
-
-/// the phone's share sheet, the tests replace it
-final shareProvider = Provider<Future<void> Function(ShareParams params)>(
-  (ref) =>
-      (params) async => SharePlus.instance.share(params),
-);
 
 /// paints the card once off screen with the app's fonts and theme, then shares it as a png.
 /// button is the share action's context, ipad anchors the sheet to it
