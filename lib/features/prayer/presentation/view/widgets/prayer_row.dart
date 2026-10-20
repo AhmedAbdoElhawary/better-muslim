@@ -58,6 +58,8 @@ class PrayerRow extends ConsumerWidget {
                       const RSizedBox.horizontal(SpaceManager.prayerRowGap),
                       Expanded(child: name),
                       clock,
+                      const RSizedBox.horizontal(SpaceManager.s2),
+
                       RSizedBox(
                         width: SizeManager.rowTrailing,
                         height: SizeManager.hit,
@@ -106,6 +108,7 @@ class SunriseRow extends ConsumerWidget {
                 ),
               ),
               _Time(time: time, minor: true),
+              const RSizedBox.horizontal(SpaceManager.s2),
               if (!context.isLargeText) const RSizedBox.horizontal(SizeManager.rowTrailing),
             ],
           ),
@@ -182,7 +185,7 @@ class _Name extends StatelessWidget {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final color = open ? ThemeEnum.onPrimaryContainer : ThemeEnum.text;
     return Row(
-      crossAxisAlignment: isArabic ? CrossAxisAlignment.center : CrossAxisAlignment.baseline,
+      crossAxisAlignment: CrossAxisAlignment.center,
       textBaseline: TextBaseline.alphabetic,
       children: [
         Flexible(
