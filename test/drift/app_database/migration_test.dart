@@ -9,6 +9,7 @@ import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
+import 'generated/schema_v6.dart' as v6;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -251,6 +252,103 @@ void main() {
           newDb.update(newDb.settings).write(const v5.SettingsCompanion(reminderMinutes: Value(7))),
           throwsA(anything),
         );
+      },
+    );
+  });
+
+  test('v5 to v6 keeps every row, a row with a place reads onboarded', () async {
+    const placed = v5.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 0,
+      digits: 'eastern',
+      theme: 'iznik',
+      themeMode: 'dark',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      fajrRecording: 'makkah',
+      dhuhrRecording: 'madinah',
+      asrRecording: 'makkah',
+      maghribRecording: 'makkah',
+      ishaRecording: 'makkah',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+      tasbihDhikr: 1,
+      tasbihCount: 5,
+      azkarNudges: 1,
+    );
+    const prayed = v5.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 5,
+      newVersion: 6,
+      createOld: v5.DatabaseAtV5.new,
+      createNew: v6.DatabaseAtV6.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, placed)
+          ..insert(oldDb.prayerLog, prayed);
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(row.toJson(), {...placed.toJson(), 'onboarded': 1});
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+      },
+    );
+  });
+
+  test('v5 to v6 without a place reads not onboarded', () async {
+    const fresh = v5.SettingsData(
+      id: 1,
+      hijriAdjust: 0,
+      digits: 'eastern',
+      theme: 'qiyamEmerald',
+      themeMode: 'followSky',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      fajrSound: 'adhan',
+      dhuhrSound: 'tone',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      fajrRecording: 'makkah',
+      dhuhrRecording: 'makkah',
+      asrRecording: 'makkah',
+      maghribRecording: 'makkah',
+      ishaRecording: 'makkah',
+      reminderMinutes: 10,
+      notificationsAsked: 0,
+      tasbihDhikr: 0,
+      tasbihCount: 0,
+      azkarNudges: 1,
+    );
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 5,
+      newVersion: 6,
+      createOld: v5.DatabaseAtV5.new,
+      createNew: v6.DatabaseAtV6.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(oldDb.settings, fresh),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(row.toJson(), {...fresh.toJson(), 'onboarded': 0});
       },
     );
   });
