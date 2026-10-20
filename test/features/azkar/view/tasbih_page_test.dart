@@ -4,6 +4,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
 import 'package:better_muslim/features/azkar/view/widgets/tasbih_counter.dart';
 import 'package:drift/drift.dart' show Value;
@@ -200,6 +201,7 @@ void main() {
         ),
       ),
       ...designScenarioOverrides(),
+      onboardingProvider.overrideWith(() => OnboardingNotifier(done: true)),
     ];
     await pumpAzkar(tester, overrides, location: Routes.tasbih);
     await tester.tap(find.text('Allahu Akbar').first);
