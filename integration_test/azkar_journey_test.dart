@@ -3,6 +3,7 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/features/duas/view/duas_page.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
@@ -54,6 +55,7 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          onboardingProvider.overrideWith(() => OnboardingNotifier(done: true)),
           flavorProvider.overrideWithValue(
             const FlavorConfig(
               flavor: Flavor.dev,
