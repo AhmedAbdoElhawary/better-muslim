@@ -20,6 +20,8 @@ abstract final class BmHaptics {
   static Future<void> selection() => _run(
     HapticFeedback.selectionClick,
   ); // toggles, segmented, sheet detents, page settle (off by default)
+  static Future<void> sunLetGo() =>
+      _run(HapticFeedback.lightImpact); // the sun let go on the first screen, or sunk back on 4.10
   static Future<void> _run(Future<void> Function() f) async {
     if (enabled) await f();
   }
