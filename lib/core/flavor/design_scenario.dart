@@ -69,7 +69,13 @@ Future<AppDatabase> designScenarioStore() async {
     /// 4.08 shows subhanallah at 16 of 33
     batch.insert(
       db.settings,
-      SettingsCompanion(firstUse: Value(october(1)), tasbihCount: const Value(16)),
+      SettingsCompanion(
+        firstUse: Value(october(1)),
+        tasbihCount: const Value(16),
+
+        /// the scenario opens on home, replay shows onboarding with its values (FR-004)
+        onboarded: const Value(true),
+      ),
     );
     batch.insertAll(db.prayerLog, [
       for (final day in [11, 12, 14])
