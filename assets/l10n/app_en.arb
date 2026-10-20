@@ -641,5 +641,41 @@
   "themeIznik": "Iznik",
   "themeAndalus": "Andalus",
   "themeMoonlight": "Moonlight",
-  "themeQiyamRose": "Qiyam Rose"
+  "themeQiyamRose": "Qiyam Rose",
+  "firstHeadline": "Every prayer, in its time.",
+  "swipeToBegin": "Swipe up to begin",
+  "letGoToBegin": "Let go to begin",
+  "sunHint": "Sun. Drag it up past the horizon and let go to begin.",
+  "sunBackHint": "Sun. Drag it down to go back.",
+  "stepOf": "Step {step} of {total}",
+  "@stepOf": {
+    "placeholders": {
+      "step": {},
+      "total": {}
+    }
+  },
+  "backUp": "Back up",
+  "password": "Password",
+  "confirmPassword": "Confirm password",
+  "passwordNote": "Keep this password safe. Without it the backup can't be opened.",
+  "passwordTooShort": "Use at least {count} characters.",
+  "@passwordTooShort": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "passwordsDontMatch": "The passwords don't match.",
+  "saveBackup": "Save backup",
+  "restorePasswordNote": "Enter the password you chose for this backup.",
+  "restore": "Restore",
+  "wrongPassword": "Wrong password. Check it and try again.",
+  "notABackup": "This file isn't a Better Muslim backup.",
+  "damagedBackup": "This backup is damaged and can't be opened.",
+  "newerBackup": "This backup is from a newer version. Update the app, then restore.",
+  "restoreTitle": "Restore this backup?",
+  "restoreBody": "It replaces everything on this phone. It can't be undone.",
+  "backupRestored": "Backup restored",
+  "resetNoticeTitle": "Your saved data couldn't be opened",
+  "resetNoticeBody": "The app started fresh on this phone. If you have a backup, you can restore it now.",
+  "startFresh": "Start fresh"
 }
