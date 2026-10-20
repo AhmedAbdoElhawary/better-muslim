@@ -206,6 +206,47 @@ abstract final class SpaceManager {
   static const double dialogBodyTop = 10;
   static const double dialogActionsTop = 22;
   static const double dialogShadowY = 20;
+
+  /// welcome (4.10) and the first screen, positions are in the 393 x 852 frame of the mockup
+  static const double welcomeHorizon = 452;
+  static const double welcomeMarkTop = 248;
+  static const double welcomeTitleTop = 500;
+  static const double welcomeTaglineGap = 12;
+  static const double welcomeTextSide = 24;
+  static const double welcomeButtonsSide = 20;
+  static const double welcomeButtonsBottom = 46;
+  static const double welcomeButtonGap = 8;
+
+  /// around the sun's rest spot, so a thumb that lands a little off still grabs it
+  static const double welcomeGrabMargin = 22;
+
+  /// the first screen's "swipe up to begin" over the home indicator
+  static const double swipeHintBottom = 22;
+  static const double swipeHintMinInset = 12;
+
+  /// the steps (4.11, 4.12), in the same frame
+  static const double stepRise = 14;
+  static const double stepDotsTop = 66;
+  static const double stepDotGap = 6;
+  static const double stepContentTop = 118;
+  static const double stepContentSide = 24;
+  static const double stepTitleGap = 12;
+  static const double stepIconTitleGap = 8;
+
+  /// from the body to the card, so the card lands at the tree's 372 (4.11) and 288 (4.12)
+  static const double stepBodyCardGap = 36;
+  static const double stepCardSide = 16;
+  static const double stepCardGap = 12;
+  static const double stepRowV = 14;
+  static const double stepButtonsSide = 20;
+  static const double stepButtonsBottom = 46;
+  static const double locationButtonGap = 10;
+  static const double notificationsButtonGap = 8;
+  static const double locationFootnoteTop = 4;
+
+  /// the components' text field (03 Inputs)
+  static const double textFieldSide = 16;
+  static const double textFieldGap = 7;
 }
 
 abstract final class RadiusManager {
@@ -234,6 +275,8 @@ abstract final class RadiusManager {
   static const double dayCell = 14;
   static const double dialog = 28;
   static const double dialogAction = 12;
+  static const double stepDot = 3;
+  static const double stepIconTile = 20;
 }
 
 abstract final class SizeManager {
@@ -270,6 +313,7 @@ abstract final class SizeManager {
   static const double toast = 52;
   static const double pickerRow = 60;
   static const double pickerCheck = 22;
+  static const double circleIndicatorSize = 14;
 
   /// prayer (4.04, 4.17)
   static const double rowTrailing = 96;
@@ -401,6 +445,25 @@ abstract final class SizeManager {
   static const double playButton = 44;
   static const double sliderTrack = 4;
   static const double sliderThumb = 22;
+
+  /// welcome (4.10)
+  static const double welcomeSun = 44;
+  static const double welcomeSunBlur = 40;
+  static const double welcomeSunSpread = 14;
+  static const double welcomeMark = 88;
+  static const double welcomeArcRadius = 100.5;
+  static const double welcomeTaglineWidth = 300;
+
+  /// the steps (4.11, 4.12)
+  static const double stepDot = 6;
+  static const double stepDotWide = 22;
+  static const double stepIconTile = 64;
+  static const double stepIcon = 30;
+  static const double stepRowIcon = 40;
+
+  /// the components' text field (03 Inputs)
+  static const double textField = 52;
+  static const double textFieldFocus = 2;
 
   /// tablets and foldables get the phone layout stretched to this, until they have their own design
   static const double maxContentWidth = 480;
