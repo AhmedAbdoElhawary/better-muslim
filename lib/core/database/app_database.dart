@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/azkar/azkar_window.dart';
@@ -13,6 +14,7 @@ import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -85,7 +87,7 @@ class Settings extends Table {
       // ignore: recursive_getters, drift reads the column inside its own check
       .check(reminderMinutes.isIn(const [0, 5, 10, 15, 20, 25, 30]))();
 
-  /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
+  /// true once 4.12 or the off line asked the phone, after that the off line opens settings
   BoolColumn get notificationsAsked => boolean().withDefault(const Constant(false))();
 
   /// 0 subhanallah, 1 alhamdulillah, 2 allahu akbar
@@ -102,6 +104,9 @@ class Settings extends Table {
   TextColumn get morningOpenedOn => text().map(const CivilDate()).nullable()();
   TextColumn get eveningOpenedOn => text().map(const CivilDate()).nullable()();
   BoolColumn get azkarNudges => boolean().withDefault(const Constant(true))();
+
+  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
+  BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -216,6 +221,21 @@ class AppDatabase extends _$AppDatabase {
     return db;
   }
 
+  /// a backup's store, locked with the password (contracts/backup-file.md). hex, so any password
+  /// works with no quoting
+  static AppDatabase backup(File file, String password) {
+    final key = utf8.encode(password).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+    return AppDatabase._(
+      NativeDatabase.createInBackground(
+        file,
+        setup: (db) => db
+          ..execute("pragma cipher = 'chacha20'")
+          ..execute('pragma kdf_iter = 600000')
+          ..execute("pragma hexkey = '$key'"),
+      ),
+    );
+  }
+
   /// its own function, so the setup closure sent to drift's isolate captures only sendable values
   static AppDatabase _connect(File file, String key) => AppDatabase._(
     driftDatabase(
@@ -231,7 +251,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -288,6 +308,12 @@ class AppDatabase extends _$AppDatabase {
             ],
           ),
         );
+      },
+      from5To6: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.onboarded);
+
+        /// an install from before onboarding with a place has already set the app up (FR-001)
+        await customStatement('update settings set onboarded = 1 where latitude is not null');
       },
     ),
   );
