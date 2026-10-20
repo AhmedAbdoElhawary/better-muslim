@@ -34,6 +34,8 @@ dependencies:
     sdk: flutter
   adhan_alarms:
     path: packages/adhan_alarms
+  prayer_surfaces:
+    path: packages/prayer_surfaces
   adhan_dart: ^2.0.1
   audio_session: ^0.2.4
   drift: ^2.35.2

@@ -41,6 +41,28 @@ place or old times, the Android countdown, how the data stays private and how I 
 - Q: What does a tap open? → A: Home, except a prayer on the medium, large and Android widgets,
   which opens the Prayer tab at that prayer.
 
+### Session 2026-10-20 (plan)
+
+- Q: Android widgets can't use bundled fonts (Glance or XML layouts). → A: The widget is drawn in
+  code in the app's fonts.
+- Q: A Live Activity can't move the sun along the bar with the app closed. → A: The system's timer
+  bar in gold, always right, no sun dot on iOS.
+- Q: A Live Activity can't show a live h:mm. → A: The compact island shows h:mm:ss like the lock
+  screen card.
+- Q: Countdowns the system draws use the phone's digits. → A: Accepted, only Arabic with Western
+  digits can differ.
+- Q: home_widget and live_activities from the constitution? → A: Not used, a local plugin instead,
+  the constitution changes with it.
+- Q: After Isha the next Fajr isn't in the shown day. → A: No cell is highlighted.
+- Q: iOS 16.1 has no stale date. → A: The Live Activity starts from iOS 16.2.
+
+### Session 2026-10-20 (analyze)
+
+- Q: The large widget's rows are 40 pt, under the constitution's 44 pt hit target. → A: Kept as the
+  tree, approved as a break: each row's tap area takes in the gaps around it (42 pt).
+- Q: iOS 26 with the app closed: Maghrib's "Now" card can stay next to Isha's countdown when Isha's
+  starts at the adhan. → A: Accepted, until I open the app or mark a prayer from a notification.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - The day on my home screen (Priority: P1)
@@ -85,7 +107,7 @@ widget moves on to the one after. On Android add the 4 x 2, then resize it to 2 
 ### User Story 2 - A countdown before each prayer (Priority: P1)
 
 Two hours before a prayer a countdown shows on my lock screen: the next prayer, the time left to
-the second, and the sun moving along a bar from the last prayer. On an iPhone with the Dynamic
+the second, and a bar filling from the last prayer (with the sun on it on Android 16). On an iPhone with the Dynamic
 Island it sits there too, and a long press shows the reminder time and the method. On Android it is
 an ongoing notification with the same countdown. At the adhan it goes.
 
@@ -102,13 +124,13 @@ ends in "· prayed". At the prayer time it goes. On Android the same with the on
 
 1. **Given** the countdown is on and a place is set, **When** it is 2 hours before a prayer, or the
    previous prayer's time when that is later, **Then** the countdown starts with no sound and no
-   vibration, by itself on Android and on iOS 26 and later, and on iOS 16.1 to 18 when I open the
+   vibration, by itself on Android and on iOS 26 and later, and on iOS 16.2 to 18 when I open the
    app inside that window.
 2. **Given** the Live Activity on the lock screen, **Then** it shows the 5.3 card: the mark, "Next
    prayer · {city}", the prayer, the h:mm:ss countdown, "at {time}", the bar from the last prayer to
-   this one with the sun where Home's bar is, and the two times under it, the last one ending in
+   this one filled as Home's bar (no sun dot), and the two times under it, the last one ending in
    "· prayed" when it is logged.
-3. **Given** the Dynamic Island, **Then** compact shows the star and the h:mm countdown, minimal the
+3. **Given** the Dynamic Island, **Then** compact shows the star and the h:mm:ss countdown, minimal the
    star alone, and expanded the 5.4 layout with "{city} · {method}" and the "Reminder {time}" chip,
    the chip only while the reminder is on.
 4. **Given** Android, **Then** an ongoing, silent notification shows the prayer and its time, "Next
@@ -155,9 +177,9 @@ so instead of showing wrong times.
 **Why this priority**: A widget with yesterday's times or the wrong city is worse than none.
 
 **Independent Test**: Dev: with all widgets added, switch from Makkah to Istanbul, Umm al-Qura to
-Turkey, Western digits on, 12 hour time on: every surface follows within seconds. Clear the place
-from the dev page: they show the empty state. Set the phone's date 8 days ahead: they show the
-out of date state.
+Turkey, Western digits on, 12 hour time on: every surface follows within seconds. Install fresh
+and add a widget before onboarding ends: the empty state. Set the phone's date 8 days ahead: they
+show the out of date state.
 
 **Acceptance Scenarios**:
 
@@ -181,6 +203,9 @@ out of date state.
 - Dhuhr's bar starts at sunrise like Home's bar, so its label is "Sunrise 06:15" with no
   "· prayed". Fajr's bar starts at last night's Isha.
 - Maghrib to Isha is under 2 hours: Isha's countdown starts the moment Maghrib's ends.
+- iOS 26 with the app closed and Isha's countdown starting at Maghrib's adhan: Maghrib's "Now" card
+  can stay next to it until I open the app or mark a prayer from a notification. Nothing ends it
+  sooner without a server.
 - The reminder notification comes while the countdown runs: both show, the countdown stays.
 - A day the method can't give a time for (high latitude): milestone 2's rule, the surfaces show what
   Home shows.
@@ -230,7 +255,8 @@ out of date state.
 - **FR-006**: The small widget MUST follow the 5.6 small tree. The sun sits on its arc at Home's sun
   share (sunrise to Maghrib), and by night the arc shows what Home's arc shows.
 - **FR-007**: The medium widget MUST follow the 5.6 medium tree: the next prayer highlighted, a tick
-  under each logged prayer of the shown day, nothing under the others.
+  under each logged prayer of the shown day, nothing under the others. After Isha, when the next
+  Fajr belongs to the next day, no cell is highlighted, on the large and Android widgets too.
 - **FR-008**: The large widget MUST follow the 5.6 large tree: a tick on each logged row, an empty
   ring on the others, the next one highlighted, "{n} of 5 prayed today" and the short date with
   the Hijri date at the bottom.
@@ -258,14 +284,16 @@ out of date state.
 - **FR-014**: The countdown MUST start 2 hours before each of the five prayers, or at the previous
   prayer's time when that is later, with no sound and no vibration. Fajr's starts in the night too.
 - **FR-015**: On Android and on iOS 26 and later the countdown MUST start by itself, for as long as
-  the schedule lasts (the 6 days of milestone 5, topped up the same way). On iOS 16.1 to 18 it
+  the schedule lasts (the 6 days of milestone 5, topped up the same way). On iOS 16.2 to 18 it
   starts when I open the app inside the window, since iOS lets an app start one only while it is
   open there.
 - **FR-016**: The Live Activity MUST follow the 5.3 card: the mark, "Next prayer · {city}", the
-  prayer, the h:mm:ss countdown, "at {time}", the bar from the period's start to the prayer with
-  the sun at Home's bar share, the start label ("{prayer} {time}", ending in "· prayed" when that
+  prayer, the h:mm:ss countdown, "at {time}", the bar from the period's start to the prayer filled
+  at Home's bar share (the system's timer bar in gold, with no sun dot, since nothing else moves
+  with the app closed), the start label ("{prayer} {time}", ending in "· prayed" when that
   prayer is logged) and "{prayer} {time}" at the end.
-- **FR-017**: The Dynamic Island MUST follow 5.4: compact with the star and the h:mm countdown,
+- **FR-017**: The Dynamic Island MUST follow 5.4: compact with the star and the h:mm:ss countdown
+  (the system can't draw a live h:mm there),
   minimal with the star, expanded with the 5.3 content plus "{city} · {method}" and the "Reminder
   {time}" chip, shown only while the reminder is on.
 - **FR-018**: On Android the countdown MUST be an ongoing, silent notification on its own low
@@ -277,8 +305,8 @@ out of date state.
   countdown with the bar full, and end as soon as the app can: the prayer gets marked, the app
   opens, or the next countdown starts. It MUST never show a countdown below zero or stuck at
   0:00:00.
-- **FR-020**: Only one countdown MUST run at a time, the next prayer's. Turning the switch off MUST
-  end it at once and start no other.
+- **FR-020**: Only one countdown MUST run at a time, the next prayer's, except the iOS 26 case in
+  Edge Cases. Turning the switch off MUST end it at once and start no other.
 - **FR-021**: No countdown starts without a place, on Android without the notification permission,
   or on iOS with Live Activities turned off for the app in Settings.
 
@@ -308,9 +336,11 @@ out of date state.
   rules, the five prayers run in the same direction as Home's strip, and the arc, the bar, the ring
   and clock times are never mirrored. The names use Reem Kufi where the trees use Marcellus, and
   Noto Sans Arabic for the rest, as in the app.
-- **FR-027**: Every number MUST follow the digits setting and every time the 12/24 hour setting, the
-  countdowns the system draws too.
-- **FR-028**: The surfaces MUST use the design's fonts.
+- **FR-027**: Every number MUST follow the digits setting and every time the 12/24 hour setting.
+  The countdowns the system draws (the Live Activity's, the Android notification's and its status
+  bar chip) follow it where the system lets the app set it, else they show the phone's own digits.
+- **FR-028**: The surfaces MUST use the design's fonts. The Android countdown is a system
+  notification and uses the system's font, like every notification.
 - **FR-029**: The surfaces keep the design's sizes at every text size, since their boxes don't grow.
   Nothing is cut except a long city name, with an ellipsis.
 - **FR-030**: With VoiceOver and TalkBack each surface MUST read as one line in reading order (the
@@ -321,7 +351,8 @@ out of date state.
 **Platforms**
 
 - **FR-032**: The home screen widgets MUST work on every iOS the app supports, the accessories from
-  iOS 16, the Live Activity from iOS 16.1, the Dynamic Island on iPhones that have it. The Android
+  iOS 16, the Live Activity from iOS 16.2 (16.1 has no stale date, FR-019), the Dynamic Island on
+  iPhones that have it. The Android
   widget and countdown MUST work on every Android the app supports, the Live Update from Android 16.
 
 **Checking it**
@@ -354,12 +385,13 @@ out of date state.
   Reused as they are: "Next prayer", "Next prayer · {city}", "in {duration}", "at {time}",
   "{count} of 5 prayed today", "Now", "{time} · {city}", the prayer, sunrise and Hijri month
   names. The gallery and picker texts live with the native code, the system reads them before the
-  app ever runs. The dev page buttons stay English, like the rest of that page.
+  app ever runs. So does a copy of "Open Better Muslim to set your place", shown before the app has
+  written anything. The dev page buttons stay English, like the rest of that page.
 
 ### Key Entities
 
-- **Surface data**: the 7 prayer days of FR-001 and when they were written. Made from the store,
-  belongs to the phone, never in a backup.
+- **Surface data**: the 7 prayer days of FR-001. Made from the store, belongs to the phone, never
+  in a backup.
 - **Countdown switch**: on or off, a setting like the reminder, kept in the store and in the backup.
 - **Countdown**: one at a time, for the next prayer, from its start (FR-014) to the prayer time.
 
@@ -387,8 +419,8 @@ out of date state.
 
 - The surfaces always use the dark Qiyam Emerald night sky (TOKENS.md, OVERVIEW.md). So Motion 03's
   sky change doesn't reach the widgets, they move on with the system's own transition.
-- "cd" is h:mm:ss (the Live Activity and the expanded island), "cdS" is h:mm (the widgets, the
-  compact island and the accessories), as in the handoff's 07 script.
+- "cd" is h:mm:ss (the Live Activity, the compact and the expanded island), "cdS" is h:mm (the
+  widgets and the accessories), as in the handoff's 07 script, except the compact island (plan Q3).
 - 5.5 and 5.1 show the surfaces in place. The status bar, the other apps, the flashlight and camera
   buttons are the system's, nothing to build from them.
 - iOS 26 needs an alert to start a Live Activity ahead of time. It is made silent. If iOS still
@@ -397,8 +429,10 @@ out of date state.
   fits inside that.
 - The Android countdown uses milestone 5's notification permission, and its moves at prayer times
   use milestone 5's exact alarms.
-- The handoff names Jetpack Glance for Android. If Glance can't draw the app's fonts, the plan says
-  how close it gets and what it uses instead before anything is built.
+- The handoff names Jetpack Glance for Android. Glance and widget layouts can only use system
+  fonts, so the widget is drawn in code in the app's fonts instead (plan R8).
+- The handoff names home_widget and live_activities. A local plugin does their job instead (plan
+  R2), and the constitution's stack line changes with it.
 - The App Group and the widget extension ids for dev, staging and production need my Apple developer
   account. They get a `TODO(ahmed)` where the ids go.
 - No widget settings (no choice of prayer or place per widget). Every widget shows the app's place.

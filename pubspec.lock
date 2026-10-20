@@ -995,6 +995,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.2"
+  prayer_surfaces:
+    dependency: "direct main"
+    description:
+      path: "packages/prayer_surfaces"
+      relative: true
+    source: path
+    version: "1.0.0"
   process:
     dependency: transitive
     description:

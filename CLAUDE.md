@@ -64,7 +64,9 @@ From the spec to the code:
 10. Onboarding and backup: the sunrise first screen in liquid glass, the welcome, location,
     notifications and theme steps, the backup file with Back up and Restore, the store reset notice.
     **Done, waiting for my review.**
-11. as in `HANDOFF_CLAUDE.md`.
+11. Widgets and Live Activity: the iOS home widgets and lock screen accessories, the Android widget,
+    the countdown before each prayer as a Live Activity with the Dynamic Island and as an Android
+    ongoing notification, all fed by `packages/prayer_surfaces`. **Done, waiting for my review.**
 
 ## Run
 
