@@ -1,5 +1,4 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
-import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:timezone/timezone.dart';
 
@@ -19,23 +18,6 @@ bool glowBreathing(Duration left) => left > Duration.zero && left <= const Durat
     past: period != null && own.index < period.index,
   );
 }
-
-/// null = no period, the sky shows the theme's own base sky
-BmSkyState? skyState(Period? period) => switch (period) {
-  null => null,
-  Period.fajr => BmSkyState.fajr,
-  Period.duha => BmSkyState.sunrise,
-  Period.dhuhr => BmSkyState.dhuhr,
-  Period.asr => BmSkyState.asr,
-  Period.maghrib => BmSkyState.maghrib,
-  Period.isha => BmSkyState.isha,
-};
-
-bool starsOn(BmSkyState? state) =>
-    state == null ||
-    state == BmSkyState.fajr ||
-    state == BmSkyState.maghrib ||
-    state == BmSkyState.isha;
 
 /// rounded, so the sun moves about every 40 s instead of every second
 double? sunShare(DateTime now, DateTime? sunrise, DateTime? maghrib) {
