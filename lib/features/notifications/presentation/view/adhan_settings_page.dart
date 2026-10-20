@@ -1,15 +1,13 @@
-import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
-import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/notifications_off_line.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
-import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_sheet.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,6 +31,12 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
 
     /// a permission given in the phone's settings shows when the app comes back
     _lifecycle = AppLifecycleListener(onResume: _check);
+
+    /// the off line's first ask answers here, with no trip to the background on some phones
+    ref.listenManual(
+      settingsProvider.select((settings) => settings.value?.notificationsAsked),
+      (_, _) => _check(),
+    );
     _check();
   }
 
@@ -84,32 +88,12 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
                   ],
                 ),
                 const RSizedBox.vertical(SpaceManager.s3),
-                const GroupedSection(children: [_ReminderRow()]),
+                const GroupedSection(children: [ReminderRow()]),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ReminderRow extends ConsumerWidget {
-  const _ReminderRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final minutes = ref.watch(
-      settingsProvider.select((settings) => settings.value?.reminderMinutes ?? 10),
-    );
-    final digits = ref.watch(
-      settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
-    );
-    return NavRow(
-      title: StringsManager.reminderBefore,
-      value: minutes == 0 ? StringsManager.reminderOff : StringsManager.reminderValue,
-      args: {'minutes': context.formatDigits('$minutes', digits)},
-      onTap: () => showReminderSheet(context),
     );
   }
 }
