@@ -389,6 +389,17 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("azkar_nudges" IN (0, 1))'),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _onboardedMeta = const VerificationMeta('onboarded');
+  @override
+  late final GeneratedColumn<bool> onboarded = GeneratedColumn<bool>(
+    'onboarded',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("onboarded" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -429,6 +440,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    onboarded,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -554,6 +566,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _azkarNudgesMeta,
         azkarNudges.isAcceptableOrUnknown(data['azkar_nudges']!, _azkarNudgesMeta),
+      );
+    }
+    if (data.containsKey('onboarded')) {
+      context.handle(
+        _onboardedMeta,
+        onboarded.isAcceptableOrUnknown(data['onboarded']!, _onboardedMeta),
       );
     }
     return context;
@@ -740,6 +758,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}azkar_nudges'],
       )!,
+      onboarded: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}onboarded'],
+      )!,
     );
   }
 
@@ -861,6 +883,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final DateTime? morningOpenedOn;
   final DateTime? eveningOpenedOn;
   final bool azkarNudges;
+
+  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
+  final bool onboarded;
   const AppSettings({
     required this.id,
     this.latitude,
@@ -900,6 +925,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     this.morningOpenedOn,
     this.eveningOpenedOn,
     required this.azkarNudges,
+    required this.onboarded,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1014,6 +1040,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       );
     }
     map['azkar_nudges'] = Variable<bool>(azkarNudges);
+    map['onboarded'] = Variable<bool>(onboarded);
     return map;
   }
 
@@ -1065,6 +1092,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? const Value.absent()
           : Value(eveningOpenedOn),
       azkarNudges: Value(azkarNudges),
+      onboarded: Value(onboarded),
     );
   }
 
@@ -1137,6 +1165,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       morningOpenedOn: serializer.fromJson<DateTime?>(json['morningOpenedOn']),
       eveningOpenedOn: serializer.fromJson<DateTime?>(json['eveningOpenedOn']),
       azkarNudges: serializer.fromJson<bool>(json['azkarNudges']),
+      onboarded: serializer.fromJson<bool>(json['onboarded']),
     );
   }
   @override
@@ -1199,6 +1228,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'morningOpenedOn': serializer.toJson<DateTime?>(morningOpenedOn),
       'eveningOpenedOn': serializer.toJson<DateTime?>(eveningOpenedOn),
       'azkarNudges': serializer.toJson<bool>(azkarNudges),
+      'onboarded': serializer.toJson<bool>(onboarded),
     };
   }
 
@@ -1241,6 +1271,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     Value<DateTime?> morningOpenedOn = const Value.absent(),
     Value<DateTime?> eveningOpenedOn = const Value.absent(),
     bool? azkarNudges,
+    bool? onboarded,
   }) => AppSettings(
     id: id ?? this.id,
     latitude: latitude.present ? latitude.value : this.latitude,
@@ -1280,6 +1311,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     morningOpenedOn: morningOpenedOn.present ? morningOpenedOn.value : this.morningOpenedOn,
     eveningOpenedOn: eveningOpenedOn.present ? eveningOpenedOn.value : this.eveningOpenedOn,
     azkarNudges: azkarNudges ?? this.azkarNudges,
+    onboarded: onboarded ?? this.onboarded,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
     return AppSettings(
@@ -1333,6 +1365,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.eveningOpenedOn.value
           : this.eveningOpenedOn,
       azkarNudges: data.azkarNudges.present ? data.azkarNudges.value : this.azkarNudges,
+      onboarded: data.onboarded.present ? data.onboarded.value : this.onboarded,
     );
   }
 
@@ -1376,7 +1409,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('tasbihCount: $tasbihCount, ')
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
-          ..write('azkarNudges: $azkarNudges')
+          ..write('azkarNudges: $azkarNudges, ')
+          ..write('onboarded: $onboarded')
           ..write(')'))
         .toString();
   }
@@ -1421,6 +1455,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    onboarded,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1463,7 +1498,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.tasbihCount == this.tasbihCount &&
           other.morningOpenedOn == this.morningOpenedOn &&
           other.eveningOpenedOn == this.eveningOpenedOn &&
-          other.azkarNudges == this.azkarNudges);
+          other.azkarNudges == this.azkarNudges &&
+          other.onboarded == this.onboarded);
 }
 
 class SettingsCompanion extends UpdateCompanion<AppSettings> {
@@ -1505,6 +1541,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<DateTime?> morningOpenedOn;
   final Value<DateTime?> eveningOpenedOn;
   final Value<bool> azkarNudges;
+  final Value<bool> onboarded;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.latitude = const Value.absent(),
@@ -1544,6 +1581,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.onboarded = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1584,6 +1622,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.onboarded = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
     Expression<int>? id,
@@ -1624,6 +1663,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? morningOpenedOn,
     Expression<String>? eveningOpenedOn,
     Expression<bool>? azkarNudges,
+    Expression<bool>? onboarded,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1664,6 +1704,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (morningOpenedOn != null) 'morning_opened_on': morningOpenedOn,
       if (eveningOpenedOn != null) 'evening_opened_on': eveningOpenedOn,
       if (azkarNudges != null) 'azkar_nudges': azkarNudges,
+      if (onboarded != null) 'onboarded': onboarded,
     });
   }
 
@@ -1706,6 +1747,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<DateTime?>? morningOpenedOn,
     Value<DateTime?>? eveningOpenedOn,
     Value<bool>? azkarNudges,
+    Value<bool>? onboarded,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -1746,6 +1788,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       morningOpenedOn: morningOpenedOn ?? this.morningOpenedOn,
       eveningOpenedOn: eveningOpenedOn ?? this.eveningOpenedOn,
       azkarNudges: azkarNudges ?? this.azkarNudges,
+      onboarded: onboarded ?? this.onboarded,
     );
   }
 
@@ -1894,6 +1937,9 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (azkarNudges.present) {
       map['azkar_nudges'] = Variable<bool>(azkarNudges.value);
     }
+    if (onboarded.present) {
+      map['onboarded'] = Variable<bool>(onboarded.value);
+    }
     return map;
   }
 
@@ -1937,7 +1983,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('tasbihCount: $tasbihCount, ')
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
-          ..write('azkarNudges: $azkarNudges')
+          ..write('azkarNudges: $azkarNudges, ')
+          ..write('onboarded: $onboarded')
           ..write(')'))
         .toString();
   }
@@ -2929,6 +2976,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> onboarded,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> id,
@@ -2969,6 +3017,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> onboarded,
 });
 
 class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -3151,6 +3200,9 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
 
   ColumnFilters<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get onboarded =>
+      $composableBuilder(column: $table.onboarded, builder: (column) => ColumnFilters(column));
 }
 
 class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -3292,6 +3344,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
 
   ColumnOrderings<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get onboarded =>
+      $composableBuilder(column: $table.onboarded, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -3414,6 +3469,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumn<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => column);
+
+  GeneratedColumn<bool> get onboarded =>
+      $composableBuilder(column: $table.onboarded, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -3480,6 +3538,7 @@ class $$SettingsTableTableManager
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> onboarded = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 latitude: latitude,
@@ -3519,6 +3578,7 @@ class $$SettingsTableTableManager
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                onboarded: onboarded,
               ),
           createCompanionCallback:
               ({
@@ -3560,6 +3620,7 @@ class $$SettingsTableTableManager
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> onboarded = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 latitude: latitude,
@@ -3599,6 +3660,7 @@ class $$SettingsTableTableManager
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                onboarded: onboarded,
               ),
           withReferenceMapper: (p0) => p0
               .map(
