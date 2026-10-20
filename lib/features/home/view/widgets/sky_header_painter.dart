@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
+import 'package:better_muslim/core/widgets/ambient.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -74,7 +75,7 @@ class SkyHeaderPainter extends CustomPainter {
     /// 0 = the still state, so a restarted loop blends in instead of jumping
     final strength = ms == null ? 0.0 : (ms / _fadeIn).clamp(0.0, 1.0);
     final t = ms ?? 0;
-    final drift = strength * _breathe(t, BmMotion.skyLoop.inMilliseconds.toDouble());
+    final drift = strength * ambientBreathe(t, BmMotion.skyLoop.inMilliseconds.toDouble());
 
     final sky = Rect.fromLTWH(0, 0, s.width, s.height + overlap);
     c.drawRect(
@@ -86,7 +87,7 @@ class SkyHeaderPainter extends CustomPainter {
       final list = rtl ? starsRtl : stars;
       for (var i = 0; i < list.length; i++) {
         final st = list[i];
-        final twinkle = .15 + .85 * _breathe(t + (i % 5) * 600, 1800 + (i % 7) * 410.0);
+        final twinkle = .15 + .85 * ambientBreathe(t + (i % 5) * 600, 1800 + (i % 7) * 410.0);
         final opacity = starOpacity * starsStrength * (1 + strength * (twinkle - 1));
         c.drawCircle(
           Offset((st[0] + st[2] / 2) * unit, (st[1] + st[2] / 2) * unit),
@@ -137,7 +138,7 @@ class SkyHeaderPainter extends CustomPainter {
       );
       final a = math.pi * (1 - f);
       final p = Offset(cx + rad * math.cos(a), cy - rad * math.sin(a));
-      final pulse = 1 + strength * .12 * _breathe(t, _sunPulse);
+      final pulse = 1 + strength * .12 * ambientBreathe(t, _sunPulse);
       final r = BmSunArc.sunSize / 2 * unit * pulse;
       // glow: box-shadow 0 0 22px 8px sun@50%
       c.drawCircle(
@@ -149,12 +150,6 @@ class SkyHeaderPainter extends CustomPainter {
       );
       c.drawCircle(p, r, Paint()..color = sun);
     }
-  }
-
-  /// an alternate loop of [half] ms each way on the breathe curve, 0..1
-  static double _breathe(double ms, double half) {
-    final phase = ms % (2 * half) / half;
-    return BmMotion.breathe.transform(phase <= 1 ? phase : 2 - phase);
   }
 
   @override
