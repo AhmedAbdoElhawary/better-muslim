@@ -7,8 +7,10 @@ import 'package:better_muslim/core/monitoring/monitoring.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/shell/app_shell.dart';
 import 'package:better_muslim/core/widgets/shell/tab_switcher.dart';
+import 'package:better_muslim/core/widgets/step/step_scope.dart';
 import 'package:better_muslim/features/azkar/view/azkar_page.dart';
 import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
 import 'package:better_muslim/features/azkar/view/tasbih_page.dart';
@@ -23,6 +25,9 @@ import 'package:better_muslim/features/more/view/more_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_settings_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/dev_notifications_page.dart';
+import 'package:better_muslim/features/notifications/presentation/view/notifications_step_page.dart';
+import 'package:better_muslim/features/onboarding/view/location_step_page.dart';
+import 'package:better_muslim/features/onboarding/view/welcome_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
@@ -78,6 +83,12 @@ abstract final class Routes {
   /// dev builds only
   static const String devNotifications = '/dev/notifications';
 
+  /// the first launch, each step pushed on the one before so back goes to it (FR-018)
+  static const String onboarding = '/onboarding';
+  static const String onboardingLocation = '/onboarding/location';
+  static const String onboardingNotifications = '/onboarding/notifications';
+  static const String onboardingTheme = '/onboarding/theme';
+
   static const _date = CivilDate();
 }
 
@@ -87,13 +98,32 @@ DateTime? _dayParam(String? value) {
   return const CivilDate().fromSql(value);
 }
 
+/// onboarding until it's finished, the adhan still covers it (contracts/onboarding-routes.md)
+String? onboardingRedirect(Onboarding onboarding, String location) {
+  final path = Uri.parse(location).path;
+  final inOnboarding = path == Routes.onboarding || path.startsWith('${Routes.onboarding}/');
+  if (!onboarding.done || onboarding.replay) {
+    return inOnboarding || path == Routes.adhanPath ? null : Routes.onboarding;
+  }
+  return inOnboarding ? Routes.home : null;
+}
+
 /// one router per ProviderScope, so tests never share a location
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     observers: Monitoring.navigatorObservers,
+    redirect: (context, state) =>
+        onboardingRedirect(ref.read(onboardingProvider), state.uri.toString()),
     routes: [
       StatefulShellRoute(
-        builder: (context, state, shell) => AppShell(shell: shell),
+        /// home fades in over the theme step on apply. a cold start has nothing to fade from
+        pageBuilder: (context, state, shell) => CustomTransitionPage(
+          key: state.pageKey,
+          transitionDuration: BmMotion.standard,
+          child: AppShell(shell: shell),
+          transitionsBuilder: (context, animation, _, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
         navigatorContainerBuilder: (context, shell, children) =>
             TabSwitcher(index: shell.currentIndex, children: children),
         branches: [
@@ -191,6 +221,36 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => const DevNotificationsPage(),
         ),
 
+      /// the first route on a new install, so it has no transition of its own. its scope gives the
+      /// welcome the steps' secondary animation (FR-015)
+      GoRoute(
+        path: Routes.onboarding,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          child: const WelcomePage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              StepScope(animation: animation, secondaryAnimation: secondaryAnimation, child: child),
+        ),
+        routes: [
+          GoRoute(
+            path: 'location',
+            pageBuilder: (context, state) => _stepPage(context, state, const LocationStepPage()),
+          ),
+          GoRoute(
+            path: 'notifications',
+            pageBuilder: (context, state) =>
+                _stepPage(context, state, const NotificationsStepPage()),
+          ),
+          GoRoute(
+            path: 'theme',
+            pageBuilder: (context, state) =>
+                _stepPage(context, state, const ThemePage(onboarding: true)),
+          ),
+        ],
+      ),
+
       /// outside the shell, so it covers the nav bar too
       GoRoute(
         path: Routes.adhanPath,
@@ -209,9 +269,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  ref.listen(onboardingProvider, (_, _) => router.refresh());
   ref.onDispose(router.dispose);
   return router;
 });
+
+/// a step's build is its route's transition (R8): 900 ms in, 150 ms out, 300 ms crossfade with
+/// reduce motion
+Page<void> _stepPage(BuildContext context, GoRouterState state, Widget child) {
+  final reduce = MediaQuery.disableAnimationsOf(context);
+  return CustomTransitionPage(
+    key: state.pageKey,
+    transitionDuration: reduce ? BmMotion.standard : stepBuild,
+    reverseTransitionDuration: reduce ? BmMotion.standard : BmMotion.micro,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        StepScope(animation: animation, secondaryAnimation: secondaryAnimation, child: child),
+  );
+}
+
+const stepBuild = Duration(milliseconds: 900);
 
 /// MOTION 06: a circle from the sun opens the screen, a 300 ms fade with reduce motion
 Page<void> _adhanPage(BuildContext context, GoRouterState state, Widget child) {
