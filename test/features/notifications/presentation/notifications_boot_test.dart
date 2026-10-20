@@ -14,6 +14,7 @@ import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -89,6 +90,7 @@ void main() {
     DateTime start, {
     bool scenario = false,
     AppDatabase? store,
+    bool onboarded = true,
   }) async {
     final origin = tester.binding.clock.now();
     await pumpHome(
@@ -119,6 +121,7 @@ void main() {
         locationProvider.overrideWithValue(makkah()),
         notificationSchedulerProvider.overrideWithValue(scheduler),
         adhanPlayerProvider.overrideWithValue(player),
+        onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
       ],
       app: const NotificationsBoot(child: App()),
       settle: false,
@@ -342,47 +345,81 @@ void main() {
     });
   });
 
-  group('asked once (FR-004 to FR-006)', () {
+  /// 4.12 asks now, after saying why (milestone 10 FR-002)
+  group('never asks at launch', () {
     final noon = DateTime.utc(2026, 10, 15, 9);
 
-    testWidgets('the first launch asks after the location, then for alarms', (tester) async {
+    testWidgets('the first launch asks nothing, an allowed phone still gets its schedule', (
+      tester,
+    ) async {
       await pumpBoot(tester, noon);
       await settle(tester, const Duration(milliseconds: 700));
 
-      expect(scheduler.asks, 1);
-      expect(scheduler.alarmAsks, 1);
-      expect(containerOf(tester).read(settingsProvider).value?.notificationsAsked, isTrue);
+      expect(scheduler.asks, 0);
+      expect(scheduler.alarmAsks, 0);
+      expect(containerOf(tester).read(settingsProvider).value?.notificationsAsked, isFalse);
       expect(scheduler.runs, greaterThan(0));
       await unmount(tester);
     });
 
-    testWidgets('refused schedules nothing, never asks again, a later grant is picked up', (
+    testWidgets('notifications asked remakes the schedule, a later grant is picked up', (
       tester,
     ) async {
-      scheduler = FakeScheduler(allowed: false, grants: false);
-      driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-      final store = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(store.close);
-      await pumpBoot(tester, noon, store: store);
+      scheduler = FakeScheduler(allowed: false);
+      await pumpBoot(tester, noon);
       await settle(tester, const Duration(milliseconds: 700));
-
-      expect(scheduler.asks, 1);
-      expect(scheduler.alarmAsks, 0);
-      expect(scheduler.runs, 0);
-      await unmount(tester);
-
-      /// the app opened again
-      scheduler = FakeScheduler(allowed: false, grants: false);
-      await pumpBoot(tester, noon, store: store);
-      await settle(tester, const Duration(milliseconds: 700));
-      expect(scheduler.asks, 0);
       expect(scheduler.runs, 0);
 
-      /// allowed in the phone's settings, then back to the app
+      /// 4.12's allow: the answer first, then the column
       scheduler.allowed = true;
-      backToFront(tester);
+      unawaited(
+        dbOf(tester).updateSettings(const SettingsCompanion(notificationsAsked: Value(true))),
+      );
       await settle(tester, const Duration(milliseconds: 700));
       expect(scheduler.runs, 1);
+      expect(scheduler.asks, 0);
+      await unmount(tester);
+    });
+  });
+
+  /// a go would drop the steps (R18)
+  group('while onboarding', () {
+    testWidgets('a tap on a tone prayer waits, the welcome stays', (tester) async {
+      final at = maghrib();
+      scheduler.launch = payloadOf(
+        Alert(
+          day: DateTime(2026, 10, 15),
+          prayer: Prayer.maghrib,
+          kind: AlertKind.adhan,
+          at: TZDateTime.from(at, makkah().zone),
+          sound: PrayerSound.tone,
+        ),
+      );
+      await pumpBoot(tester, at.add(const Duration(seconds: 40)), onboarded: false);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(
+        containerOf(tester).read(routerProvider).routeInformationProvider.value.uri.toString(),
+        Routes.onboarding,
+      );
+      await unmount(tester);
+    });
+
+    testWidgets('a tap on an adhan still opens the adhan screen', (tester) async {
+      final at = maghrib();
+      scheduler.launch = payloadOf(
+        Alert(
+          day: DateTime(2026, 10, 15),
+          prayer: Prayer.maghrib,
+          kind: AlertKind.adhan,
+          at: TZDateTime.from(at, makkah().zone),
+          sound: PrayerSound.adhan,
+        ),
+      );
+      await pumpBoot(tester, at.add(const Duration(seconds: 40)), onboarded: false);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(AdhanPage), findsOneWidget);
       await unmount(tester);
     });
   });
