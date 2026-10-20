@@ -61,7 +61,10 @@ From the spec to the code:
 9. More, Theme and Hijri calendar: every setting, the 8 themes with Follow sky, the calendar with its
    events and adjustment, the Adhan and reminders page, Reset prayer journey and Credits. **Done,
    waiting for my review.**
-10. to 11. as in `HANDOFF_CLAUDE.md`.
+10. Onboarding and backup: the sunrise first screen in liquid glass, the welcome, location,
+    notifications and theme steps, the backup file with Back up and Restore, the store reset notice.
+    **Done, waiting for my review.**
+11. as in `HANDOFF_CLAUDE.md`.
 
 ## Run
 
