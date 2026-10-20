@@ -1,9 +1,13 @@
+import 'dart:ui' show Tristate;
+
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:drift/drift.dart' show Value;
@@ -197,9 +201,40 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('the countdown switch is on, each flip writes it with the selection haptic', (
+    tester,
+  ) async {
+    await open(tester);
+    final phone = recordPhone();
+    await tester.scrollUntilVisible(find.text('Countdown before each prayer'), 100);
+    expect(find.text('Starts 2 hours before, ends at the adhan'), findsOneWidget);
+    expect(
+      find.ancestor(
+        of: find.text('Countdown before each prayer'),
+        matching: find.byType(GroupedSection),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.getSemantics(find.byType(ToggleRow)).flagsCollection.isToggled, Tristate.isTrue);
+
+    await tester.tap(find.text('Countdown before each prayer'));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).prayerCountdown, isFalse);
+    expect(phone.haptics, [selection]);
+
+    await tester.tap(find.text('Countdown before each prayer'));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).prayerCountdown, isTrue);
+    await unmount(tester);
+  });
+
   for (final (name, locale) in [('english', const Locale('en')), ('arabic', const Locale('ar'))]) {
     testWidgets('$name at text scale 2.0, nothing cut', (tester) async {
       await open(tester, locale: locale, textScale: 2, allowed: false);
+      await tester.scrollUntilVisible(
+        find.text(name == 'english' ? 'Countdown before each prayer' : 'العد التنازلي قبل كل صلاة'),
+        100,
+      );
       expect(tester.takeException(), isNull);
       await unmount(tester);
     });

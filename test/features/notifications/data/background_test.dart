@@ -15,6 +15,7 @@ import 'package:timezone/timezone.dart';
 
 import '../../../helpers/notifications.dart';
 import '../../../helpers/phone_storage.dart';
+import '../../../helpers/surfaces.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +70,79 @@ void main() {
     await markFromPayload(payload(Prayer.maghrib, DateTime(2026, 10, 15)));
 
     expect(folder.listSync(), isEmpty);
+  });
+
+  group('the surfaces from the background (US4)', () {
+    setUp(() async {
+      muteAdhanChannel();
+      await db.updateSettings(
+        const SettingsCompanion(
+          latitude: Value(21.4225),
+          longitude: Value(39.8262),
+          placeName: Value('Makkah'),
+          countryCode: Value('SA'),
+          timeZone: Value('Asia/Riyadh'),
+          locationMode: Value(LocationMode.manual),
+        ),
+      );
+    });
+
+    test('mark prayed from a notification writes them once after the mark', () async {
+      final surfaces = FakeSurfacesChannel();
+
+      await markFromPayload(
+        payload(Prayer.maghrib, DateTime(2026, 10, 15)),
+        db: db,
+        surfaces: surfaces,
+      );
+
+      expect((await log()).single.prayer, Prayer.maghrib);
+      expect(surfaces.updates, hasLength(1));
+    });
+
+    test('without the channel nothing is written, the app\'s boot does it', () async {
+      final surfaces = FakeSurfacesChannel();
+
+      await markFromPayload(payload(Prayer.maghrib, DateTime(2026, 10, 15)), db: db);
+
+      expect(surfaces.updates, isEmpty);
+    });
+
+    test('the top-up writes them before the permission check', () async {
+      final scheduler = FakeScheduler(allowed: false);
+      final surfaces = FakeSurfacesChannel();
+
+      await backgroundTopUp(
+        db,
+        scheduler: scheduler,
+        surfaces: surfaces,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 16, 32),
+      );
+
+      expect(surfaces.updates, hasLength(1));
+      expect(scheduler.applied, isEmpty);
+    });
+
+    test('allowed, the top-up schedules too', () async {
+      final scheduler = FakeScheduler();
+      final surfaces = FakeSurfacesChannel();
+
+      await backgroundTopUp(
+        db,
+        scheduler: scheduler,
+        surfaces: surfaces,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 16, 32),
+      );
+
+      expect(surfaces.updates, hasLength(1));
+      expect(scheduler.applied, hasLength(1));
+    });
   });
 
   group('the azkar nudges in the top-up (US6)', () {

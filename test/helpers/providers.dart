@@ -4,12 +4,15 @@ import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
+import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+
+import 'surfaces.dart';
 
 const devConfig = FlavorConfig(
   flavor: Flavor.dev,
@@ -18,8 +21,8 @@ const devConfig = FlavorConfig(
   sentryDsn: '',
 );
 
-/// an in-memory store, the dev flavor and no gps, so a widget test never reaches the phone.
-/// onboarded, so the app opens on home unless a test says otherwise
+/// an in-memory store, the dev flavor, no gps and no surfaces plugin, so a widget test never
+/// reaches the phone. onboarded, so the app opens on home unless a test says otherwise
 List<Override> testOverrides({
   PositionSource? positionSource,
   FlavorConfig flavor = devConfig,
@@ -29,6 +32,7 @@ List<Override> testOverrides({
   flavorProvider.overrideWithValue(flavor),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
   onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
+  surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
 ];
 
 /// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store. onboarded
@@ -52,6 +56,7 @@ Future<List<Override>> designOverrides({bool onboarded = true}) async {
     ),
     ...designScenarioOverrides(),
     onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
+    surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
   ];
 }
 

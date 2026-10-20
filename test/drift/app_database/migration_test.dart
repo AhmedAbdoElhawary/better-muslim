@@ -10,6 +10,7 @@ import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
+import 'generated/schema_v7.dart' as v7;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -349,6 +350,62 @@ void main() {
       validateItems: (newDb) async {
         final row = await newDb.select(newDb.settings).getSingle();
         expect(row.toJson(), {...fresh.toJson(), 'onboarded': 0});
+      },
+    );
+  });
+
+  test('v6 to v7 keeps every row, the countdown reads on', () async {
+    const placed = v6.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 1,
+      digits: 'western',
+      theme: 'iznik',
+      themeMode: 'dark',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      fajrRecording: 'makkah',
+      dhuhrRecording: 'madinah',
+      asrRecording: 'makkah',
+      maghribRecording: 'makkah',
+      ishaRecording: 'makkah',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+      tasbihDhikr: 1,
+      tasbihCount: 5,
+      azkarNudges: 0,
+      onboarded: 1,
+    );
+    const prayed = v6.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 6,
+      newVersion: 7,
+      createOld: v6.DatabaseAtV6.new,
+      createNew: v7.DatabaseAtV7.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, placed)
+          ..insert(oldDb.prayerLog, prayed);
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(row.toJson(), {...placed.toJson(), 'prayerCountdown': 1});
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
       },
     );
   });
