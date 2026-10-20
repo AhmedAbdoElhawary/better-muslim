@@ -30,6 +30,28 @@ void main() {
     ))!;
   }
 
+  group('your data', () {
+    testWidgets('back up, restore from backup, then reset prayer journey', (tester) async {
+      await pumpMore(tester, await designOverrides());
+      await scrollTo(tester, 'Reset prayer journey');
+      final backUp = tester.getRect(find.text('Back up')).top;
+      final restore = tester.getRect(find.text('Restore from backup')).top;
+      final reset = tester.getRect(find.text('Reset prayer journey')).top;
+      expect(backUp, lessThan(restore));
+      expect(restore, lessThan(reset));
+      expect(tester.getRect(find.text('YOUR DATA')).top, lessThan(backUp));
+      await unmount(tester);
+    });
+
+    testWidgets('back up opens its sheet', (tester) async {
+      await pumpMore(tester, await designOverrides());
+      await tapText(tester, 'Back up');
+      expect(find.text('Save backup'), findsOneWidget);
+      expect(find.text('Confirm password'), findsOneWidget);
+      await unmount(tester);
+    });
+  });
+
   group('reset prayer journey', () {
     testWidgets('cancel keeps the log', (tester) async {
       await pumpMore(tester, await designOverrides());
