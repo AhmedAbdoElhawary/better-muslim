@@ -4,6 +4,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/monitoring/monitoring.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/presentation/notifications_boot.dart';
 import 'package:flutter/foundation.dart';
@@ -33,6 +34,10 @@ Future<void> _boot(FlavorConfig config) async {
   final db = config.isDesignScenario ? await designScenarioStore() : await AppDatabase.open();
   final phoneZone = await PhoneZone.read();
 
+  /// before the first frame, so a new install never flashes home and a set up one never the
+  /// welcome (R2)
+  final settings = await db.watchSettings().first;
+
   /// keep, so every launch doesn't push the next run 12 hours away
   if (!config.isDesignScenario) {
     await Workmanager().initialize(callbackDispatcher);
@@ -49,6 +54,7 @@ Future<void> _boot(FlavorConfig config) async {
         databaseProvider.overrideWithValue(db),
         flavorProvider.overrideWithValue(config),
         phoneZoneProvider.overrideWith(() => PhoneZone(phoneZone)),
+        onboardingProvider.overrideWith(() => OnboardingNotifier(done: settings.onboarded)),
         if (config.isDesignScenario) ...designScenarioOverrides(),
       ],
       child: const NotificationsBoot(child: App()),
