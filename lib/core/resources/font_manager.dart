@@ -116,6 +116,9 @@ abstract final class FontSizeManager {
   static const double weekday = 11.5;
   static const double calendarGregorian = 10.5;
   static const double dialogBody = 14.5;
+
+  /// the components' text field error line (03 Inputs)
+  static const double fieldError = 12.5;
 }
 
 abstract final class LineHeightManager {
@@ -160,6 +163,9 @@ abstract final class LineHeightManager {
   static const double comingUpDay = 1.2;
   static const double dialogTitle = 1.25;
   static const double dialogBody = 1.55;
+
+  /// 4.11 and 4.12's body under the title
+  static const double stepBody = 1.6;
 }
 
 abstract final class LetterSpacingManager {
