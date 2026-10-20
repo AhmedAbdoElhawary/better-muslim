@@ -40,6 +40,7 @@ class _TasbihCounterState extends State<TasbihCounter> with SingleTickerProvider
 
   /// MOTION cnt, each count starts this much larger and scales back
   static const _pulse = .06;
+  static const _rest = 1.0;
 
   bool get _done => widget.count >= widget.target;
 
@@ -102,7 +103,7 @@ class _TasbihCounterState extends State<TasbihCounter> with SingleTickerProvider
                 children: [
                   TweenAnimationBuilder<double>(
                     key: ValueKey(widget.count),
-                    tween: Tween(begin: reduceMotion ? 0 : _pulse, end: 0),
+                    tween: Tween(begin: reduceMotion ? _rest : _rest + _pulse, end: _rest),
                     duration: BmMotion.micro,
                     curve: BmMotion.standardCurve,
                     builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
