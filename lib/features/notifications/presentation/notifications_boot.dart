@@ -9,12 +9,12 @@ import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
-import 'package:better_muslim/core/location/location_controller.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
@@ -23,7 +23,7 @@ import 'package:better_muslim/features/notifications/data/notification_scheduler
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:better_muslim/features/notifications/domain/tap_target.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
-import 'package:drift/drift.dart' show TableUpdateQuery, Value;
+import 'package:drift/drift.dart' show TableUpdateQuery;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,6 +62,9 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.maghribRecording,
         row?.ishaRecording,
         row?.azkarNudges,
+
+        /// written after 4.12's answer, so a grant there schedules at once (R10)
+        row?.notificationsAsked,
       );
     }),
   );
@@ -74,7 +77,7 @@ final _scheduleInputsProvider = Provider((ref) {
   return (place, choices, done(AzkarSet.morning), done(AzkarSet.evening));
 });
 
-/// the notifications' wiring around the app: the first ask, rescheduling, taps and cleanup
+/// the notifications' wiring around the app: rescheduling, taps and cleanup. 4.12 asks
 class NotificationsBoot extends ConsumerStatefulWidget {
   const NotificationsBoot({required this.child, super.key});
 
@@ -149,17 +152,6 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final launched = await scheduler.launchPayload() ?? await channel.launchPayload();
     if (launched != null) await _open(launched);
     if (_isScenario || !mounted) return;
-
-    /// after the location dialog, never on top of it (FR-004)
-    await ref.read(locationControllerProvider).firstLocate;
-    if (!mounted) return;
-    final db = ref.read(databaseProvider);
-    final settings = await db.watchSettings().first;
-    if (!settings.notificationsAsked) {
-      /// stored before asking, so a refusal or a killed app never asks again
-      await db.updateSettings(const SettingsCompanion(notificationsAsked: Value(true)));
-      if (await scheduler.askPermission()) await scheduler.askExactAlarms();
-    }
     await _reschedule();
     await _cleanUp();
   }
@@ -235,6 +227,10 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     if (!mounted) return;
     final target = tapTarget(payload, ref.read(clockProvider)(), length);
     final router = ref.read(routerProvider);
+
+    /// a go would drop the steps, only the adhan covers onboarding (R18)
+    final onboarding = ref.read(onboardingProvider);
+    if ((!onboarding.done || onboarding.replay) && target is! AdhanTarget) return;
     switch (target) {
       case AdhanTarget(:final prayer, :final day, :final from):
         router.push(Routes.adhan(prayer, day, from: from));
