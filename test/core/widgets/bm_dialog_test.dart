@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/widgets.dart';
 
 void main() {
-  Future<Future<bool>> open(WidgetTester tester) async {
+  Future<Future<bool>> open(
+    WidgetTester tester, {
+    String cancel = StringsManager.cancel,
+    bool destructive = true,
+  }) async {
     late Future<bool> answer;
     await pumpCoreWidget(
       tester,
@@ -17,6 +22,8 @@ void main() {
             title: StringsManager.resetJourneyTitle,
             body: StringsManager.resetJourneyBody,
             action: StringsManager.reset,
+            cancel: cancel,
+            destructive: destructive,
           ),
           child: const SizedBox.square(dimension: 44),
         ),
@@ -48,5 +55,28 @@ void main() {
     await tester.tap(find.text('Reset'));
     await tester.pumpAndSettle();
     expect(await answer, isTrue);
+  });
+
+  Color? actionFill(WidgetTester tester, String text) {
+    final box = tester.widget<DecoratedBox>(
+      find.ancestor(of: find.text(text), matching: find.byType(DecoratedBox)).first,
+    );
+    return (box.decoration as BoxDecoration).color;
+  }
+
+  testWidgets('the action is tinted red by default', (tester) async {
+    await open(tester);
+    final error = bmThemes[BmThemeId.qiyamEmerald]!.dark.error;
+    expect(actionFill(tester, 'Reset'), error.withValues(alpha: .16));
+  });
+
+  testWidgets('a plain action and its own cancel, for the reset notice', (tester) async {
+    final answer = await open(tester, cancel: StringsManager.startFresh, destructive: false);
+    expect(find.text('Start fresh'), findsOneWidget);
+    expect(find.text('Cancel'), findsNothing);
+    expect(actionFill(tester, 'Reset'), isNull);
+    await tester.tap(find.text('Start fresh'));
+    await tester.pumpAndSettle();
+    expect(await answer, isFalse);
   });
 }
