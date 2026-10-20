@@ -3,6 +3,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/widgets.dart';
@@ -17,15 +18,22 @@ const devConfig = FlavorConfig(
   sentryDsn: '',
 );
 
-/// an in-memory store, the dev flavor and no gps, so a widget test never reaches the phone
-List<Override> testOverrides({PositionSource? positionSource, FlavorConfig flavor = devConfig}) => [
+/// an in-memory store, the dev flavor and no gps, so a widget test never reaches the phone.
+/// onboarded, so the app opens on home unless a test says otherwise
+List<Override> testOverrides({
+  PositionSource? positionSource,
+  FlavorConfig flavor = devConfig,
+  bool onboarded = true,
+}) => [
   _memoryDatabase(),
   flavorProvider.overrideWithValue(flavor),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
+  onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
 ];
 
-/// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store
-Future<List<Override>> designOverrides() async {
+/// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store. onboarded
+/// false is a replay
+Future<List<Override>> designOverrides({bool onboarded = true}) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final db = await designScenarioStore();
   return [
@@ -43,6 +51,7 @@ Future<List<Override>> designOverrides() async {
       ),
     ),
     ...designScenarioOverrides(),
+    onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
   ];
 }
 
