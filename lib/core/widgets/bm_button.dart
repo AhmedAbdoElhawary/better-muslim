@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -57,8 +58,9 @@ class BmButton extends StatelessWidget {
             borderRadius: radius,
             highlightColor: context.getColor(textColor).withValues(alpha: BmOpacity.pressed),
             child: Center(
-              child: Opacity(
+              child: AnimatedOpacity(
                 opacity: busy ? BmOpacity.disabled : 1,
+                duration: BmMotion.micro,
                 child: MediumText(label, color: textColor, textAlign: TextAlign.center),
               ),
             ),
