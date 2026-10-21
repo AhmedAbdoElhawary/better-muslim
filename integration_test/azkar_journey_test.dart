@@ -5,6 +5,7 @@ import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/features/azkar/view/widgets/tasbih_counter.dart';
 import 'package:better_muslim/features/duas/view/duas_page.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
 import 'package:flutter/material.dart';
@@ -84,8 +85,16 @@ void main() {
     await waitFor(tester, find.text('After Asr · 1 of 24'));
 
     await tap(tester, find.text('Tasbih'));
-    await waitFor(tester, find.text('16'));
-    await tap(tester, find.text('Tap anywhere to count'), times: 17);
+
+    /// the count rolls digit by digit, so it's read off the counter, not one text
+    await waitFor(tester, find.byWidgetPredicate((w) => w is TasbihCounter && w.count == 16));
+
+    /// a set is 33, 33 and 34, each done dhikr hands over to the next one at 0
+    for (final times in [17, 33, 34]) {
+      await tap(tester, find.text('Tap anywhere to count'), times: times);
+      if (times == 34) break;
+      await waitFor(tester, find.byWidgetPredicate((w) => w is TasbihCounter && w.count == 0));
+    }
     await waitFor(tester, find.text('Set complete'));
 
     await tap(tester, find.text('More'));
