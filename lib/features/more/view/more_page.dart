@@ -21,7 +21,10 @@ import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/method_sheet.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/more/view/widgets/about_section.dart';
+import 'package:better_muslim/features/more/view/widgets/adjustment_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/backup_rows.dart';
+import 'package:better_muslim/features/more/view/widgets/contact_section.dart';
+import 'package:better_muslim/features/more/view/widgets/language_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/mode_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/more_tiles.dart';
 import 'package:better_muslim/features/more/view/widgets/reset_row.dart';
@@ -39,39 +42,42 @@ class MorePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDev = ref.watch(flavorProvider.select((config) => config.flavor.isDev));
     return Scaffold(
-      body: LargeTitleScrollView(
-        title: StringsManager.more,
-        slivers: [
-          const SliverToBoxAdapter(child: _Header()),
-          SliverToBoxAdapter(
-            child: OnlyPadding(
-              top: SpaceManager.moreTilesTop,
-              start: SpaceManager.screen,
-              end: SpaceManager.screen,
-              bottom: SpaceManager.s6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const MoreTiles(),
-                  const RSizedBox.vertical(SpaceManager.moreSectionsTop),
-                  const _PrayerSection(),
-                  const RSizedBox.vertical(SpaceManager.sectionGap),
-                  const _AppearanceSection(),
-                  const RSizedBox.vertical(SpaceManager.sectionGap),
-                  const _SoundSection(),
-                  const RSizedBox.vertical(SpaceManager.sectionGap),
-                  const GroupedSection(
-                    label: StringsManager.sectionYourData,
-                    children: [BackupRow(), RestoreRow(), ResetRow()],
-                  ),
-                  const RSizedBox.vertical(SpaceManager.sectionGap),
-                  const AboutSection(),
-                  if (isDev) const _DevRow(),
-                ],
+      body: TitleGlow(
+        child: LargeTitleScrollView(
+          title: StringsManager.more,
+          slivers: [
+            const SliverToBoxAdapter(child: _Header()),
+            SliverToBoxAdapter(
+              child: OnlyPadding(
+                top: SpaceManager.moreTilesTop,
+                start: SpaceManager.screen,
+                end: SpaceManager.screen,
+                bottom: SpaceManager.s6,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const MoreTiles(),
+                    const RSizedBox.vertical(SpaceManager.moreSectionsTop),
+                    const _PrayerSection(),
+                    const RSizedBox.vertical(SpaceManager.sectionGap),
+                    const _AppearanceSection(),
+                    const RSizedBox.vertical(SpaceManager.sectionGap),
+                    const _SoundSection(),
+                    const RSizedBox.vertical(SpaceManager.sectionGap),
+                    const GroupedSection(
+                      label: StringsManager.sectionYourData,
+                      children: [BackupRow(), RestoreRow(), ResetRow()],
+                    ),
+                    const RSizedBox.vertical(SpaceManager.sectionGap),
+                    const ContactSection(),
+                    const AboutSection(),
+                    if (isDev) const _DevRow(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -83,34 +89,29 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Stack(
-      clipBehavior: Clip.none,
-      children: [
-        TitleGlow(),
-        SafeArea(
-          bottom: false,
-          child: TopPadding(
-            padding: SpaceManager.s1,
-            child: SymmetricPadding(
-              horizontal: SpaceManager.s5,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RSizedBox.vertical(SizeManager.hit + SpaceManager.moreTitleTop),
-                  RegularText(
-                    StringsManager.more,
-                    font: FontEnum.display,
-                    fontSize: FontSizeManager.largeTitle,
-                    height: LineHeightManager.largeTitle,
-                  ),
-                  RSizedBox.vertical(SpaceManager.moreSubtitleTop),
-                  RegularText(StringsManager.storedOnDevice, color: ThemeEnum.text2),
-                ],
+    return const SafeArea(
+      bottom: false,
+      child: TopPadding(
+        padding: SpaceManager.s1,
+        child: SymmetricPadding(
+          horizontal: SpaceManager.s5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RSizedBox.vertical(SizeManager.hit + SpaceManager.moreTitleTop),
+              LargeTitle(
+                StringsManager.more,
+                fontSize: FontSizeManager.largeTitle,
+                height: LineHeightManager.largeTitle,
               ),
-            ),
+              RSizedBox.vertical(SpaceManager.moreSubtitleTop),
+              LargeTitleSubtitle(
+                child: RegularText(StringsManager.storedOnDevice, color: ThemeEnum.text2),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -142,7 +143,18 @@ class _PrayerSection extends ConsumerWidget {
           title: StringsManager.adhanAndReminders,
           value: minutes == 0 ? StringsManager.reminderOff : StringsManager.minBefore,
           args: {'minutes': context.formatDigits('$minutes', digits)},
+          heroTag: Routes.adhanSettings,
           onTap: () => context.push(Routes.adhanSettings),
+        ),
+        NavRow(
+          icon: BmIcon(BmIconName.hijri, size: SizeManager.iconList.r),
+          title: StringsManager.hijriDateAdjustment,
+          value: context.adjustment(
+            ref.watch(settingsProvider.select((settings) => settings.value?.hijriAdjust ?? 0)),
+            digits,
+          ),
+          translateValue: false,
+          onTap: () => showAdjustmentSheet(context),
         ),
         const _LocationRow(),
       ],
@@ -190,6 +202,10 @@ class _AppearanceSection extends ConsumerWidget {
     final reduceMotion = ref.watch(
       settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
     );
+    final topGlow = ref.watch(topGlowProvider);
+    final language = ref.watch(
+      settingsProvider.select((settings) => settings.value?.language ?? Language.phone),
+    );
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
@@ -199,9 +215,16 @@ class _AppearanceSection extends ConsumerWidget {
       label: StringsManager.sectionAppearance,
       children: [
         NavRow(
+          icon: BmIcon.ui(BmUiIcon.language, size: SizeManager.iconList.r),
+          title: StringsManager.language,
+          value: language.nameKey,
+          onTap: () => showLanguageSheet(context),
+        ),
+        NavRow(
           icon: BmIcon.ui(BmUiIcon.palette, size: SizeManager.iconList.r),
           title: StringsManager.theme,
           value: theme.nameKey,
+          heroTag: Routes.theme,
           onTap: () => context.push(Routes.theme),
         ),
         NavRow(
@@ -215,6 +238,12 @@ class _AppearanceSection extends ConsumerWidget {
           title: StringsManager.reduceMotion,
           toggled: reduceMotion,
           onTap: () => db.updateSettings(SettingsCompanion(reduceMotion: Value(!reduceMotion))),
+        ),
+        NavRow(
+          icon: BmIcon.ui(BmUiIcon.sun, size: SizeManager.iconList.r),
+          title: StringsManager.topGlow,
+          toggled: topGlow,
+          onTap: () => db.updateSettings(SettingsCompanion(topGlow: Value(!topGlow))),
         ),
         if (isArabic)
           NavRow(
