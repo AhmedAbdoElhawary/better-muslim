@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
@@ -5,9 +7,12 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/azkar/model/set_state.dart';
 import 'package:better_muslim/features/azkar/view/widgets/zikr_card.dart';
 import 'package:better_muslim/features/azkar/view_model/set_controller.dart';
@@ -24,11 +29,13 @@ class AzkarSetPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loaded = ref.watch(setControllerProvider(set).select((state) => state != null));
     return Scaffold(
-      body: Column(
-        children: [
-          CompactAppBar(set.titleKey),
-          Expanded(child: loaded ? _Cards(set) : const SizedBox.shrink()),
-        ],
+      body: TitleGlow(
+        child: Column(
+          children: [
+            CompactAppBar(set.titleKey, heroTag: Routes.azkarSet(set)),
+            Expanded(child: BmSwitcher(child: loaded ? _Cards(set) : const SizedBox.shrink())),
+          ],
+        ),
       ),
     );
   }
@@ -50,8 +57,12 @@ class _CardsState extends ConsumerState<_Cards> with SingleTickerProviderStateMi
   /// with reduce motion the next card fades in where it is instead of sliding
   late final _fade = AnimationController(vsync: this, duration: BmMotion.micro, value: 1);
 
+  /// a done card moves on by itself after the completion moment (FR-024)
+  Timer? _advance;
+
   @override
   void dispose() {
+    _advance?.cancel();
     _pages.dispose();
     _fade.dispose();
     super.dispose();
@@ -67,13 +78,18 @@ class _CardsState extends ConsumerState<_Cards> with SingleTickerProviderStateMi
     }
   }
 
-  Future<void> _tap() async {
+  void _tap() {
+    _advance?.cancel();
     final controller = ref.read(setControllerProvider(widget.set).notifier);
     switch (controller.tap()) {
       case SetTap.counted:
         BmHaptics.bead();
         BmSounds.bead();
-      case SetTap.done || SetTap.setDone:
+      case SetTap.done:
+        BmHaptics.setComplete();
+        BmSounds.complete();
+        _advance = Timer(BmMotion.completionPause, _tap);
+      case SetTap.setDone:
         BmHaptics.setComplete();
         BmSounds.complete();
       case SetTap.moved:
@@ -97,7 +113,10 @@ class _CardsState extends ConsumerState<_Cards> with SingleTickerProviderStateMi
       child: PageView.builder(
         controller: _pages,
         itemCount: items.length,
-        onPageChanged: controller.moveTo,
+        onPageChanged: (index) {
+          _advance?.cancel();
+          controller.moveTo(index);
+        },
         itemBuilder: (context, index) => GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _tap,
