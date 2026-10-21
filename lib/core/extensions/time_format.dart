@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/hijri/hijri_date.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter/widgets.dart';
@@ -15,6 +16,10 @@ extension TimeFormatExtension on BuildContext {
 
   String formatDigits(String text, Digits digits) =>
       formatDigitsIn(text, language: Localizations.localeOf(this).languageCode, digits: digits);
+
+  /// "4 Jumada I 1448", the calendar's and the adjustment sheet's
+  String hijriFull(HijriDate date, Digits digits) =>
+      formatDigits('${date.day} ${tr(date.monthKey)} ${date.year}', digits);
 }
 
 /// the same as the context extension, for notifications built with no context
