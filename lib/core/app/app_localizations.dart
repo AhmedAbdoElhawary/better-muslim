@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:ui';
+
+import 'package:better_muslim/core/settings/settings.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -31,6 +34,13 @@ class AppLocalizations {
     }
     return supportedLocales.first;
   }
+
+  /// the language picked in More, or the phone's
+  static Locale localeOf(Language? language) => switch (language) {
+    Language.english => const Locale('en'),
+    Language.arabic => const Locale('ar'),
+    Language.phone || null => localeFor(PlatformDispatcher.instance.locales),
+  };
 
   static AppLocalizations of(BuildContext context) =>
       Localizations.of<AppLocalizations>(context, AppLocalizations)!;
