@@ -6,14 +6,15 @@ import 'package:better_muslim/core/location/place_list.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/rolling_digits.dart';
 import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
-import 'package:better_muslim/features/home/view/widgets/countdown_digit.dart';
 import 'package:better_muslim/features/home/view/widgets/next_prayer_card.dart';
 import 'package:better_muslim/features/home/view/widgets/no_location_card.dart';
 import 'package:better_muslim/features/home/view/widgets/now_block.dart';
@@ -25,7 +26,8 @@ import 'package:better_muslim/features/home/view/widgets/strip_cell.dart';
 import 'package:better_muslim/features/home/view/widgets/strip_row.dart';
 import 'package:better_muslim/features/home/view/widgets/verse_card.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
-import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
+import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -47,10 +49,8 @@ void main() {
   /// the real fonts, the square test font is far wider and would overflow where the app doesn't
   setUpAll(loadAppFonts);
 
-  String countdown(WidgetTester tester) => tester
-      .widgetList<CountdownDigit>(find.byType(CountdownDigit))
-      .map((digit) => digit.digit)
-      .join();
+  String countdown(WidgetTester tester) =>
+      tester.widgetList<RollingDigit>(find.byType(RollingDigit)).map((digit) => digit.digit).join();
 
   Finder checkIn(int cell) => find.descendant(
     of: find.byWidgetPredicate((widget) => widget is StripCell && widget.index == cell),
@@ -335,8 +335,6 @@ void main() {
       final taps = <(Finder, Type)>[
         (find.byType(NextPrayerCard), PrayerPage),
         (find.byWidgetPredicate((widget) => widget is StripCell && widget.index == 0), PrayerPage),
-        (find.byType(VerseCard), QuranPage),
-        (find.text('Continue reading'), QuranPage),
         (find.text('Evening azkar'), AzkarSetPage),
       ];
       for (final (target, page) in taps) {
@@ -347,6 +345,27 @@ void main() {
 
         expect(find.byType(page), findsOneWidget, reason: '$target');
         expect(find.byType(HomePage), findsNothing);
+        await unmount(tester);
+      }
+    });
+
+    testWidgets('the verse opens its page with the ayah selected, continue reading the last read', (
+      tester,
+    ) async {
+      final reads = [
+        (find.byType(VerseCard), const AyahKey(1, 5)),
+        (find.text('Continue reading'), null),
+      ];
+      for (final (target, ayah) in reads) {
+        await pumpHome(tester, await designOverrides());
+        final container = containerOf(tester);
+        await tester.ensureVisible(target);
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+
+        final reader = tester.widget<ReaderPage>(find.byType(ReaderPage));
+        expect((reader.page, reader.ayah), (1, ayah), reason: '$target');
+        expect(container.read(selectionProvider), ayah);
         await unmount(tester);
       }
     });
