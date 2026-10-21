@@ -1,89 +1,139 @@
 import 'package:better_muslim/core/hijri/hijri_date.dart';
-import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/hijri_calendar/model/calendar_month.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 
-const _count = 3;
+/// what is left of the selected day's year, or the next year's when nothing is (FR-012, FR-016)
+class ComingUp {
+  const ComingUp({required this.year, required this.next, required this.groups});
 
-/// a little over a year, so ten events always give three items
-const _reach = 400;
+  /// hijri in hijri mode, gregorian in gregorian mode
+  final int year;
+  final bool next;
 
-/// how the item's date line reads (FR-022)
-enum ComingUpLine { whiteDays, inMonth, sighting, estimated }
+  /// empty past the table's end, "No more events"
+  final List<ComingUpGroup> groups;
+}
+
+class ComingUpGroup {
+  const ComingUpGroup({
+    required this.year,
+    required this.month,
+    required this.current,
+    required this.items,
+  });
+
+  /// in the mode's calendar
+  final int year;
+  final int month;
+
+  /// the selected day's month, "This month"
+  final bool current;
+  final List<ComingUpItem> items;
+}
 
 class ComingUpItem {
   const ComingUpItem({
+    required this.event,
+    required this.first,
     required this.hijri,
-    required this.titleKey,
-    required this.start,
-    required this.end,
-    required this.line,
-    this.monthKey,
+    required this.daysAway,
+    required this.estimated,
   });
 
-  /// the left column: the hijri day and its short month
+  final HijriEvent event;
+  final DateTime first;
   final HijriDate hijri;
 
-  /// a StringsManager key, monthBegins takes the month's name
-  final String titleKey;
-  final String? monthKey;
-  final DateTime start;
-  final DateTime end;
-  final ComingUpLine line;
+  /// from the selected day, at least 1
+  final int daysAway;
+
+  /// a later hijri month than today's, its start waits on the moon sighting
+  final bool estimated;
+
+  DateTime get last => DateTime(first.year, first.month, first.day + event.to - event.from);
 }
 
-/// the next three things from today, whatever month the calendar shows. the white days show once,
-/// the nearest, as 4.13 does
-List<ComingUpItem> comingUp(DateTime today, int adjust) {
-  final current = HijriDate.of(today, adjust);
-  final items = <ComingUpItem>[];
-  var whiteDays = false;
-  var sighting = false;
-  for (var i = 0; i < _reach && items.length < _count; i++) {
-    final day = DateTime(today.year, today.month, today.day + i);
+ComingUp comingUp(DateTime selected, DateTime today, int adjust, CalendarMode mode) {
+  final hijri = HijriDate.of(selected, adjust);
+  final year = mode == CalendarMode.hijri ? hijri.year : selected.year;
+  final groups = _walk(
+    DateTime(selected.year, selected.month, selected.day + 1),
+    year,
+    selected: selected,
+    today: HijriDate.of(today, adjust),
+    adjust: adjust,
+    mode: mode,
+  );
+  if (groups.isNotEmpty) return ComingUp(year: year, next: false, groups: groups);
+  final next = year + 1;
+  final start = switch (mode) {
+    CalendarMode.hijri when next <= HijriMonth.last.year => HijriMonth(next, 1).start(adjust),
+    CalendarMode.gregorian => DateTime(next),
+    _ => null,
+  };
+  return ComingUp(
+    year: next,
+    next: true,
+    groups: start == null
+        ? const []
+        : _walk(
+            start,
+            next,
+            selected: selected,
+            today: HijriDate.of(today, adjust),
+            adjust: adjust,
+            mode: mode,
+          ),
+  );
+}
+
+/// from start to the last day of year, never past the table's last day
+List<ComingUpGroup> _walk(
+  DateTime start,
+  int year, {
+  required DateTime selected,
+  required HijriDate today,
+  required int adjust,
+  required CalendarMode mode,
+}) {
+  final end = HijriMonth.last.days(adjust).last;
+  final selectedMonth = CalendarMonth.of(selected, mode, adjust);
+  final groups = <ComingUpGroup>[];
+  for (var day = start; !day.isAfter(end); day = DateTime(day.year, day.month, day.day + 1)) {
     final hijri = HijriDate.of(day, adjust);
-    final inMonth = hijri.month == current.month && hijri.year == current.year;
-
-    ComingUpLine lineFor({required bool monthStart}) {
-      if (inMonth) return ComingUpLine.inMonth;
-      if (monthStart && !sighting) {
-        sighting = true;
-        return ComingUpLine.sighting;
-      }
-      return ComingUpLine.estimated;
-    }
-
-    /// on today an event that already started still counts, after it only its first day does
-    final starting = [
+    final (dayYear, dayMonth) = mode == CalendarMode.hijri
+        ? (hijri.year, hijri.month)
+        : (day.year, day.month);
+    if (dayYear != year) break;
+    final items = [
       for (final event in hijriEvents)
-        if (event.covers(hijri) && (i == 0 || hijri.day == event.from)) event,
+        if (event.covers(hijri) && hijri.day == event.from)
+          ComingUpItem(
+            event: event,
+            first: day,
+            hijri: hijri,
+            daysAway: _utc(day).difference(_utc(selected)).inDays,
+            estimated: hijri.year * 12 + hijri.month > today.year * 12 + today.month,
+          ),
     ];
-    if (hijri.day == 1 && !starting.any((event) => event.from == 1)) {
-      items.add(
-        ComingUpItem(
-          hijri: hijri,
-          titleKey: StringsManager.monthBegins,
-          monthKey: hijri.monthKey,
-          start: day,
-          end: day,
-          line: lineFor(monthStart: true),
-        ),
-      );
-    }
-    for (final event in starting) {
-      final isWhite = event.look == DayLook.whiteDay;
-      if (isWhite && whiteDays) continue;
-      whiteDays = whiteDays || isWhite;
-      final first = DateTime(day.year, day.month, day.day - (hijri.day - event.from));
-      items.add(
-        ComingUpItem(
-          hijri: HijriDate.of(first, adjust),
-          titleKey: event.nameKey,
-          start: first,
-          end: DateTime(first.year, first.month, first.day + event.to - event.from),
-          line: isWhite ? ComingUpLine.whiteDays : lineFor(monthStart: event.from == 1),
+    if (items.isEmpty) continue;
+    final last = groups.lastOrNull;
+    if (last != null && last.year == dayYear && last.month == dayMonth) {
+      last.items.addAll(items);
+    } else {
+      groups.add(
+        ComingUpGroup(
+          year: dayYear,
+          month: dayMonth,
+          current: selectedMonth.year == dayYear && selectedMonth.month == dayMonth,
+          items: items,
         ),
       );
     }
   }
-  return items.take(_count).toList();
+  return groups;
 }
+
+/// a daylight saving night is 23 or 25 hours, utc days are always 24
+DateTime _utc(DateTime day) => DateTime.utc(day.year, day.month, day.day);
