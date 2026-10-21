@@ -40,7 +40,11 @@ Future<void> pumpMore(
 }
 
 /// what the page asked the phone through better_muslim/system
-List<MethodCall> mockSystemChannel({String version = '1.0.0 (12)', bool opened = true}) {
+List<MethodCall> mockSystemChannel({
+  String version = '1.0.0 (12)',
+  bool opened = true,
+  bool mailed = true,
+}) {
   final calls = <MethodCall>[];
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
     const MethodChannel('better_muslim/system'),
@@ -49,6 +53,8 @@ List<MethodCall> mockSystemChannel({String version = '1.0.0 (12)', bool opened =
       return switch (call.method) {
         'version' => version,
         'openUrl' => opened,
+        'mail' => mailed,
+        'device' => {'model': 'Google Pixel 8', 'os': 'Android 16'},
         _ => null,
       };
     },
