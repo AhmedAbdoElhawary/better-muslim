@@ -189,6 +189,7 @@
   "more": "More",
   "storedOnDevice": "Stored on this device · no account needed",
   "hijriCalendar": "Hijri calendar",
+  "calendar": "Calendar",
   "duas": "Duas",
   "sectionPrayer": "PRAYER",
   "calculationMethod": "Calculation method",
@@ -242,33 +243,13 @@
   "reminderBefore": "Reminder before each prayer",
   "allowNotifications": "Allow notifications",
   "notNow": "Not now",
-  "comingUp": "COMING UP",
   "ayyamAlBid": "Ayyam al-Bid",
-  "ayyamAlBidSub": "White days, fasting recommended · {range}",
-  "@ayyamAlBidSub": {
-    "placeholders": {
-      "range": {}
-    }
-  },
-  "monthBegins": "{month} begins",
-  "@monthBegins": {
-    "placeholders": {
-      "month": {}
-    }
-  },
   "estimated": "Estimated {date}",
   "@estimated": {
     "placeholders": {
       "date": {}
     }
   },
-  "estimatedSighting": "Estimated {date} · confirmed by moon sighting",
-  "@estimatedSighting": {
-    "placeholders": {
-      "date": {}
-    }
-  },
-  "dateAdjustment": "Date adjustment",
   "days": "{sign}{n, plural, one{{n} day} other{{n} days}}",
   "@days": {
     "placeholders": {
@@ -572,7 +553,6 @@
   "noteFasting": "Fasting recommended",
   "noteQadr": "Seek Laylat al-Qadr",
   "noteNoFasting": "No fasting",
-  "sectionEvents": "EVENTS",
   "adhanSound": "Adhan sound",
   "forPrayer": "For {prayer}",
   "@forPrayer": {
@@ -619,8 +599,7 @@
   "cancel": "Cancel",
   "reset": "Reset",
   "sectionAbout": "ABOUT",
-  "credits": "Credits",
-  "openSourceLicenses": "Open source licenses",
+  "openSourceLicenses": "OPEN SOURCE LICENSES",
   "usePlaceNames": "Place names",
   "useFonts": "Fonts",
   "useAzkarDuas": "Azkar and duas",
@@ -716,5 +695,281 @@
   "countdownChannel": "Prayer countdown",
   "openToSetPlace": "Open Better Muslim to set your place",
   "openToUpdateTimes": "Open Better Muslim to update the times",
-  "openApp": "Open Better Muslim"
+  "openApp": "Open Better Muslim",
+  "gregorianCalendar": "Gregorian calendar",
+  "showMonths": "Show months",
+  "showYears": "Show years",
+  "showDays": "Show days",
+  "previousYear": "Previous year",
+  "nextYear": "Next year",
+  "previousYears": "Previous years",
+  "nextYears": "Next years",
+  "yearSpan": "{first} – {last}",
+  "@yearSpan": {
+    "placeholders": {
+      "first": {},
+      "last": {}
+    }
+  },
+  "tabPrayerTimes": "Prayer times",
+  "tabComingUp": "Coming up",
+  "tabEvents": "Events",
+  "comingUpThisYear": "This year ({year})",
+  "@comingUpThisYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "comingUpNextYear": "Next year ({year})",
+  "@comingUpNextYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "thisMonth": "This month",
+  "noMoreEvents": "No more events",
+  "noEventsOnDay": "No events on this day",
+  "hijriDateAdjustment": "Hijri date adjustment",
+  "topGlow": "Top glow",
+  "sectionContact": "CONTACT",
+  "sendFeedback": "Send feedback",
+  "rateApp": "Rate Better Muslim",
+  "shareApp": "Share Better Muslim",
+  "developer": "Developer",
+  "feedbackSubject": "Better Muslim feedback",
+  "feedbackBody": "Version {version} · {device} · {os}",
+  "@feedbackBody": {
+    "placeholders": {
+      "version": {},
+      "device": {},
+      "os": {}
+    }
+  },
+  "shareLine": "Prayer times, Quran, azkar and qibla, on your phone and offline. {link}",
+  "@shareLine": {
+    "placeholders": {
+      "link": {}
+    }
+  },
+  "noMailApp": "No mail app. Write to {email}",
+  "@noMailApp": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "language": "Language",
+  "followPhone": "Follow phone",
+  "english": "English",
+  "arabic": "العربية",
+  "mushafHafs": "Madinah Mushaf · Hafs",
+  "quranAyahN": "{surah} · Ayah {n}",
+  "@quranAyahN": {
+    "placeholders": {
+      "surah": {},
+      "n": {}
+    }
+  },
+  "pageJuzWhen": "Page {p} · Juz {j} · {when}",
+  "@pageJuzWhen": {
+    "placeholders": {
+      "p": {},
+      "j": {},
+      "when": {}
+    }
+  },
+  "pageJuz": "Page {p} · Juz {j}",
+  "@pageJuz": {
+    "placeholders": {
+      "p": {},
+      "j": {}
+    }
+  },
+  "todayAt": "Today {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "bookmarks": "Bookmarks",
+  "notes": "Notes",
+  "surah": "Surah",
+  "juz": "Juz",
+  "page": "Page",
+  "juzN": "Juz {n}",
+  "@juzN": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "pageN": "Page {n}",
+  "@pageN": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "surahRow": "{place} · {n} ayahs · p. {page}",
+  "@surahRow": {
+    "placeholders": {
+      "place": {},
+      "n": {},
+      "page": {}
+    }
+  },
+  "meccan": "Meccan",
+  "medinan": "Medinan",
+  "juzHizbPage": "Juz {j} · Hizb {h} · Page {p}",
+  "@juzHizbPage": {
+    "placeholders": {
+      "j": {},
+      "h": {},
+      "p": {}
+    }
+  },
+  "quranIndex": "Index",
+  "translation": "Translation",
+  "display": "Display",
+  "playFromHere": "Play from here",
+  "tafsir": "Tafsir",
+  "bookmark": "Bookmark",
+  "note": "Note",
+  "copy": "Copy",
+  "copied": "Copied",
+  "bookmarkRemoved": "Bookmark removed",
+  "noteDeleted": "Note deleted",
+  "addNote": "Add note",
+  "private": "Private",
+  "comingSoon": "Coming soon",
+  "juzPagePlace": "Juz {j} · Page {p} · {place}",
+  "@juzPagePlace": {
+    "placeholders": {
+      "j": {},
+      "p": {},
+      "place": {}
+    }
+  },
+  "murattalDownloaded": "Murattal · Hafs · downloaded",
+  "ayahOf": "Ayah {n} of {total}",
+  "@ayahOf": {
+    "placeholders": {
+      "n": {},
+      "total": {}
+    }
+  },
+  "repeatEachAyah": "Repeat each ayah",
+  "nTimes": "{n} times",
+  "@nTimes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "range": "Range",
+  "ayahRange": "Ayah {from} – {to}",
+  "@ayahRange": {
+    "placeholders": {
+      "from": {},
+      "to": {}
+    }
+  },
+  "pauseBetweenAyahs": "Pause between ayahs",
+  "nSeconds": "{n} s",
+  "@nSeconds": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "nMinutes": "{n} min",
+  "@nMinutes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "sleepTimer": "Sleep timer",
+  "endOfSurah": "End of surah",
+  "speed": "Speed",
+  "reciterName": "Mishary Rashid Alafasy",
+  "reciterRate": "Mishary Alafasy · {rate}×",
+  "@reciterRate": {
+    "placeholders": {
+      "rate": {}
+    }
+  },
+  "reciterInitials": "MA",
+  "murattalHafs": "Murattal · Hafs",
+  "off": "Off",
+  "savedTitle": "Saved",
+  "lastRead": "Last read",
+  "auto": "AUTO",
+  "rename": "Rename",
+  "color": "Color",
+  "moveHere": "Move here",
+  "noBookmarks": "No bookmarks yet",
+  "noBookmarksBody": "Tap Bookmark on any ayah to keep your place.",
+  "recentNote": "RECENT NOTE",
+  "shareAyah": "Share ayah",
+  "includeTranslation": "Include translation",
+  "showAppName": "Show app name",
+  "paper": "Paper",
+  "night": "Night",
+  "emerald": "Emerald",
+  "sky": "Sky",
+  "cream": "Cream",
+  "appliesToEveryPage": "Applies to every page",
+  "pageSection": "PAGE",
+  "layout": "Layout",
+  "mushaf": "Mushaf",
+  "both": "Both",
+  "pageTurn": "Page turn",
+  "book": "Book",
+  "slide": "Slide",
+  "keepScreenOn": "Keep screen on",
+  "madinahHafs": "Madinah · Hafs",
+  "recitationOffline": "Connect to the internet to download this recitation.",
+  "recitationFailed": "The recitation couldn't download.",
+  "tryAgain": "Try again",
+  "loading": "Loading",
+  "juzRow": "{surah} {ayah} · p. {page}",
+  "pageRow": "Juz {juz} · {surah}",
+  "continueReadingTag": "CONTINUE READING",
+  "sahihInternational": "Sahih International",
+  "alMuyassar": "Al-Muyassar",
+  "ibnKathir": "Ibn Kathir",
+  "asSadi": "As-Sa'di",
+  "clearQuran": "Clear Quran (Khattab)",
+  "muyassarSummary": "Arabic · Al-Muyassar summary",
+  "muyassarCredit": "At-Tafsir al-Muyassar · King Fahd Complex",
+  "previousAyah": "Previous ayah",
+  "nextAyah": "Next ayah",
+  "close": "Close",
+  "rate": "{rate}×",
+  "@rate": {
+    "placeholders": {
+      "rate": {}
+    }
+  },
+  "bookmarkRef": "{surah} {s}:{a} · Page {p}",
+  "pageRef": "{surah} · Page {p}",
+  "noteRef": "{s}:{a}",
+  "whenPrivate": "{when} · Private",
+  "noNotes": "No notes yet",
+  "noNotesBody": "Tap Note on any ayah to write one only you can see.",
+  "removeBookmark": "Remove bookmark",
+  "deleteNote": "Delete note",
+  "noteHint": "Write a private note",
+  "bookmarkName": "Name",
+  "ribbonPrimary": "Main",
+  "ribbonAccent": "Accent",
+  "ribbonNeutral": "Neutral",
+  "shareSquare": "Square",
+  "shareStory": "Story",
+  "shareAyahRef": "{surah} · {n}",
+  "arabicSize": "Arabic size",
+  "translationSize": "Translation size",
+  "smaller": "Smaller",
+  "larger": "Larger",
+  "useMushafText": "Mushaf text and layout",
+  "useTranslation": "Translation",
+  "useTafsir": "Tafsir",
+  "useRecitation": "Recitation",
+  "recitationPlaying": "Playing",
+  "recitationPaused": "Paused"
 }
