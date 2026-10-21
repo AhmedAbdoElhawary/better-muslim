@@ -9,10 +9,10 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
-import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/shortcut_row.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -27,31 +27,33 @@ class AzkarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: LargeTitleScrollView(
-        title: StringsManager.tabAzkar,
-        slivers: [
-          SliverToBoxAdapter(child: _Header()),
-          SliverToBoxAdapter(
-            child: AllPadding(
-              padding: SpaceManager.screen,
-              child: Column(
-                children: [
-                  SurfaceCard(
-                    child: Column(
-                      children: [
-                        _SetRow(AzkarSet.morning, icon: BmIconName.sunrise),
-                        _SetRow(AzkarSet.evening, icon: BmIconName.night),
-                        _TasbihRow(),
-                      ],
+      body: TitleGlow(
+        child: LargeTitleScrollView(
+          title: StringsManager.tabAzkar,
+          slivers: [
+            SliverToBoxAdapter(child: _Header()),
+            SliverToBoxAdapter(
+              child: AllPadding(
+                padding: SpaceManager.screen,
+                child: Column(
+                  children: [
+                    SurfaceCard(
+                      child: Column(
+                        children: [
+                          _SetRow(AzkarSet.morning, icon: BmIconName.sunrise),
+                          _SetRow(AzkarSet.evening, icon: BmIconName.night),
+                          _TasbihRow(),
+                        ],
+                      ),
                     ),
-                  ),
-                  RSizedBox.vertical(SpaceManager.s4),
-                  SurfaceCard(child: _NudgesRow()),
-                ],
+                    RSizedBox.vertical(SpaceManager.s4),
+                    SurfaceCard(child: _NudgesRow()),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -72,9 +74,8 @@ class _Header extends StatelessWidget {
         end: SpaceManager.s5,
         child: Align(
           alignment: AlignmentDirectional.centerStart,
-          child: RegularText(
+          child: LargeTitle(
             StringsManager.tabAzkar,
-            font: FontEnum.display,
             fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.largeTitle,
             height: isArabic ? LineHeightManager.titleAr : LineHeightManager.largeTitle,
           ),
@@ -104,6 +105,7 @@ class _SetRow extends ConsumerWidget {
         'total': context.formatDigits('${progress.total}', digits),
       },
       divider: true,
+      heroTag: Routes.azkarSet(set),
       onTap: () => context.go(Routes.azkarSet(set)),
     );
   }
@@ -118,6 +120,7 @@ class _TasbihRow extends StatelessWidget {
       icon: BmIconName.tasbih,
       title: StringsManager.tasbih,
       subtitle: StringsManager.afterPrayer,
+      heroTag: Routes.tasbih,
       onTap: () => context.go(Routes.tasbih),
     );
   }
