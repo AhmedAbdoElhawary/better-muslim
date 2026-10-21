@@ -8,6 +8,7 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
@@ -64,13 +65,22 @@ class LocationPill extends ConsumerWidget {
                           ),
                           const RSizedBox.horizontal(SpaceManager.s1),
                           Flexible(
-                            child: name == null
-                                ? RegularText(
-                                    StringsManager.noLocationYet,
-                                    color: color,
-                                    maxLines: 1,
-                                  )
-                                : RegularText(name, translate: false, color: color, maxLines: 1),
+                            child: BmSwitcher(
+                              child: name == null
+                                  ? RegularText(
+                                      StringsManager.noLocationYet,
+                                      key: const ValueKey(null),
+                                      color: color,
+                                      maxLines: 1,
+                                    )
+                                  : RegularText(
+                                      name,
+                                      key: ValueKey(name),
+                                      translate: false,
+                                      color: color,
+                                      maxLines: 1,
+                                    ),
+                            ),
                           ),
                         ],
                       ),
