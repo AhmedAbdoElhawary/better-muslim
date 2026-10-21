@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/hijri/hijri_date.dart';
-import 'package:better_muslim/features/hijri_calendar/model/hijri_month.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/hijri_calendar/model/calendar_month.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hijri/hijri_calendar.dart';
 
@@ -54,5 +55,55 @@ void main() {
     }
     expect(() => HijriMonth.first.previous.days(0), throwsArgumentError);
     expect(() => HijriMonth.last.next.days(0), throwsArgumentError);
+  });
+
+  group('gregorian', () {
+    test('october 2026: 31 days, 4 blanks before thursday the 1st', () {
+      const month = GregorianMonth(2026, 10);
+      expect(month.days(0), hasLength(31));
+      expect(month.days(0).first, DateTime(2026, 10));
+      expect(month.blanks(0), 4);
+      expect(month.days(2), month.days(0), reason: 'the adjustment moves only hijri days');
+      expect(const GregorianMonth(2028, 2).days(0), hasLength(29));
+      expect(const GregorianMonth(2026, 12).next, const GregorianMonth(2027, 1));
+      expect(const GregorianMonth(2026, 1).previous, const GregorianMonth(2025, 12));
+    });
+
+    test('of finds the month holding a day in both modes, kept inside the range', () {
+      final day = DateTime(2026, 10, 15);
+      expect(CalendarMonth.of(day, CalendarMode.hijri, 0), const HijriMonth(1448, 5));
+      expect(CalendarMonth.of(day, CalendarMode.gregorian, 0), const GregorianMonth(2026, 10));
+      expect(
+        CalendarMonth.of(DateTime(1937, 3, 20), CalendarMode.gregorian, 0),
+        GregorianMonth.first,
+      );
+      expect(
+        CalendarMonth.of(DateTime(2077, 11, 10), CalendarMode.gregorian, 0),
+        GregorianMonth.last,
+      );
+      expect(const HijriMonth(1448, 5) == const GregorianMonth(1448, 5), isFalse);
+    });
+
+    test('april 1937 and october 2077 are the ends, every day converts with each adjustment', () {
+      expect(GregorianMonth.first.canGoBack, isFalse);
+      expect(GregorianMonth.first.canGoForward, isTrue);
+      expect(GregorianMonth.last.canGoForward, isFalse);
+      expect(GregorianMonth.last.canGoBack, isTrue);
+      for (final month in [GregorianMonth.first, GregorianMonth.last]) {
+        for (var adjust = -2; adjust <= 2; adjust++) {
+          for (final day in month.days(adjust)) {
+            expect(() => HijriDate.of(day, adjust), returnsNormally, reason: '$day $adjust');
+          }
+        }
+      }
+    });
+
+    test('the order of months, for the slide', () {
+      expect(
+        const GregorianMonth(2026, 11).compareTo(const GregorianMonth(2026, 10)),
+        greaterThan(0),
+      );
+      expect(const HijriMonth(1447, 12).compareTo(const HijriMonth(1448, 1)), lessThan(0));
+    });
   });
 }
