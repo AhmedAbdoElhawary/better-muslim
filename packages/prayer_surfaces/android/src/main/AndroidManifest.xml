@@ -16,6 +16,28 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_info"/>
         </receiver>
+        <receiver
+            android:name=".NextPrayerWidget"
+            android:exported="false"
+            android:label="@string/surfaces_next_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/next_prayer_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".PrayerTimesWidget"
+            android:exported="false"
+            android:label="@string/surfaces_times_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_times_widget_info"/>
+        </receiver>
         <!-- android drops every alarm on restart and update, and a new clock or zone moves the times -->
         <receiver
             android:name=".SurfacesReceiver"
