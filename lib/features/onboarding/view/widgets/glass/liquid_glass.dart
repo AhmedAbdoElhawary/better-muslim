@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/onboarding/model/lens_spec.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
