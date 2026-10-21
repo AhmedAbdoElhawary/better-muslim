@@ -2,12 +2,14 @@ import 'package:better_muslim/core/location/location_controller.dart';
 import 'package:better_muslim/core/location/place.dart';
 import 'package:better_muslim/core/location/place_list.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:flutter/material.dart';
@@ -84,11 +86,14 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
           ),
           const RSizedBox.vertical(SpaceManager.s2),
           _UseMyLocationRow(busy: _busy, onTap: _useMyLocation),
-          if (_failed)
-            const SymmetricPadding(
-              horizontal: SpaceManager.screen,
-              child: RegularText(StringsManager.locationFailed, color: ThemeEnum.error),
-            ),
+          BmSwitcher(
+            child: _failed
+                ? const SymmetricPadding(
+                    horizontal: SpaceManager.screen,
+                    child: RegularText(StringsManager.locationFailed, color: ThemeEnum.error),
+                  )
+                : const SizedBox.shrink(),
+          ),
           const RSizedBox.vertical(SpaceManager.s3),
           HorizontalPadding(
             padding: SpaceManager.screen,
@@ -160,20 +165,29 @@ class _Results extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final places = ref.watch(placeListProvider).value;
-    if (places == null || query.trim().isEmpty) return const SizedBox.shrink();
-    final results = places.search(query);
-    if (results.isEmpty) {
-      return const SymmetricPadding(
-        horizontal: SpaceManager.screen,
-        vertical: SpaceManager.s4,
-        child: RegularText(StringsManager.noPlacesFound, color: ThemeEnum.text2),
-      );
-    }
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: results.length,
-      itemBuilder: (context, index) =>
-          _PlaceRow(place: results[index], onTap: () => onChoose(results[index])),
+    final results = places == null || query.trim().isEmpty ? null : places.search(query);
+
+    /// keyed by what shows, so typing doesn't fade the list on every letter
+    return AnimatedSwitcher(
+      duration: BmMotion.micro,
+      layoutBuilder: (current, previous) =>
+          Stack(alignment: AlignmentDirectional.topStart, children: [...previous, ?current]),
+      child: results == null
+          ? const RSizedBox.vertical(SpaceManager.s8)
+          : results.isEmpty
+          ? const SymmetricPadding(
+              key: ValueKey(false),
+              horizontal: SpaceManager.screen,
+              vertical: SpaceManager.s4,
+              child: RegularText(StringsManager.noPlacesFound, color: ThemeEnum.text2),
+            )
+          : ListView.builder(
+              key: const ValueKey(true),
+              shrinkWrap: true,
+              itemCount: results.length,
+              itemBuilder: (context, index) =>
+                  _PlaceRow(place: results[index], onTap: () => onChoose(results[index])),
+            ),
     );
   }
 }
