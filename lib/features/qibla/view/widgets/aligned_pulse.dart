@@ -47,7 +47,7 @@ class _AlignedPulseState extends ConsumerState<AlignedPulse> with SingleTickerPr
           builder: (context, child) {
             if (!_pulse.isAnimating) return const SizedBox.shrink();
             final t = BmMotion.decelerate.transform(_pulse.value);
-            return Opacity(
+            return CustomOpacity(
               opacity: _opacity * (1 - t),
               child: Transform.scale(scale: 1 + _scale * t, child: child),
             );
