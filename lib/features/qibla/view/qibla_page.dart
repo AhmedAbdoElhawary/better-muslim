@@ -5,6 +5,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_bar.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_cards.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dial.dart';
@@ -37,34 +38,39 @@ class QiblaPage extends ConsumerWidget {
     });
     return Scaffold(
       backgroundColor: context.getColor(ThemeEnum.bg),
-      body: const SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            QiblaBar(),
+      body: const TitleGlow(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              QiblaBar(),
 
-            /// text scale 2.0 makes the page taller than the phone, it scrolls instead of cutting
-            Expanded(
-              child: SingleChildScrollView(
-                child: SafeArea(
-                  top: false,
-                  child: Column(
-                    children: [
-                      RSizedBox.vertical(SpaceManager.qiblaTitleTop),
-                      QiblaTitle(),
-                      RSizedBox.vertical(SpaceManager.qiblaDialTop),
-                      QiblaDial(),
-                      RSizedBox.vertical(SpaceManager.qiblaCardsTop),
-                      HorizontalPadding(padding: SpaceManager.qiblaCardsSide, child: QiblaCards()),
-                      RSizedBox.vertical(SpaceManager.qiblaHintTop),
-                      HorizontalPadding(padding: SpaceManager.qiblaHintSide, child: QiblaHint()),
-                      RSizedBox.vertical(SpaceManager.screen),
-                    ],
+              /// text scale 2.0 makes the page taller than the phone, it scrolls instead of cutting
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SafeArea(
+                    top: false,
+                    child: Column(
+                      children: [
+                        RSizedBox.vertical(SpaceManager.qiblaTitleTop),
+                        QiblaTitle(),
+                        RSizedBox.vertical(SpaceManager.qiblaDialTop),
+                        QiblaDial(),
+                        RSizedBox.vertical(SpaceManager.qiblaCardsTop),
+                        HorizontalPadding(
+                          padding: SpaceManager.qiblaCardsSide,
+                          child: QiblaCards(),
+                        ),
+                        RSizedBox.vertical(SpaceManager.qiblaHintTop),
+                        HorizontalPadding(padding: SpaceManager.qiblaHintSide, child: QiblaHint()),
+                        RSizedBox.vertical(SpaceManager.screen),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
