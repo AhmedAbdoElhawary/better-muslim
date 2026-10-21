@@ -32,12 +32,10 @@ uniform sampler2D uTexture;
 
 out vec4 fragColor;
 
-// the backdrop at a logical position
+// the backdrop at a logical position. no gles y flip, the backdrop already comes the right way up
+// there and the flip the ImageFilter.shader docs ask for turned the screen upside down
 vec4 sampleScreen(vec2 logical) {
   vec2 uv = clamp(logical / uScreen, vec2(0.0), vec2(1.0));
-#ifdef IMPELLER_TARGET_OPENGLES
-  uv.y = 1.0 - uv.y; // gles textures are y flipped (ImageFilter.shader docs)
-#endif
   return texture(uTexture, uv);
 }
 
