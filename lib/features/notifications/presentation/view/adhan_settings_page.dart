@@ -1,9 +1,14 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/countdown_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/notifications_off_line.dart';
@@ -69,33 +74,57 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
     );
     final onAdhan = [adhan.$1, adhan.$2, adhan.$3, adhan.$4, adhan.$5];
     return Scaffold(
-      body: Column(
-        children: [
-          const CompactAppBar(StringsManager.adhanAndReminders),
-          Expanded(
-            child: ListView(
-              padding: REdgeInsets.all(SpaceManager.screen),
-              children: [
-                if (!_allowed) ...[
-                  const NotificationsOffLine(),
-                  const RSizedBox.vertical(SpaceManager.s3),
-                ],
-                GroupedSection(
-                  children: [
-                    for (final (index, prayer) in Prayer.values.indexed) ...[
-                      PrayerSoundRow(prayer),
-                      if (onAdhan[index]) RecordingRow(prayer),
+      body: TitleGlow(
+        child: Column(
+          children: [
+            const CompactAppBar(StringsManager.adhanAndReminders, heroTag: Routes.adhanSettings),
+            Expanded(
+              child: ListView(
+                padding: REdgeInsets.all(SpaceManager.screen),
+                children: [
+                  BmSwitcher(
+                    child: _allowed
+                        ? const SizedBox.shrink()
+                        : const BottomPadding(
+                            padding: SpaceManager.s3,
+                            child: NotificationsOffLine(),
+                          ),
+                  ),
+                  GroupedSection(
+                    children: [
+                      for (final (index, prayer) in Prayer.values.indexed)
+                        Column(
+                          children: [
+                            PrayerSoundRow(prayer),
+
+                            /// in the same section child, so the row can grow in with its divider
+                            BmSwitcher(
+                              child: onAdhan[index]
+                                  ? Column(
+                                      children: [
+                                        Divider(
+                                          height: SizeManager.divider,
+                                          thickness: SizeManager.divider,
+                                          color: context.getColor(ThemeEnum.outline),
+                                        ),
+                                        RecordingRow(prayer),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ),
                     ],
-                  ],
-                ),
-                const RSizedBox.vertical(SpaceManager.s3),
-                const GroupedSection(children: [ReminderRow()]),
-                const RSizedBox.vertical(SpaceManager.s3),
-                const GroupedSection(children: [CountdownRow()]),
-              ],
+                  ),
+                  const RSizedBox.vertical(SpaceManager.s3),
+                  const GroupedSection(children: [ReminderRow()]),
+                  const RSizedBox.vertical(SpaceManager.s3),
+                  const GroupedSection(children: [CountdownRow()]),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
