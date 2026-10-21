@@ -3,7 +3,15 @@ import 'package:drift/drift.dart';
 
 /// every table a backup carries. a new table must be added here and to copyTables, the restore
 /// test fails until it is
-const backupTables = ['settings', 'prayer_log', 'qada_entries', 'azkar_counts', 'saved_duas'];
+const backupTables = [
+  'settings',
+  'prayer_log',
+  'qada_entries',
+  'azkar_counts',
+  'saved_duas',
+  'quran_bookmarks',
+  'quran_notes',
+];
 
 /// the backup's data in place of this phone's, all or nothing. the columns that belong to the
 /// phone stay (data-model.md)
@@ -31,6 +39,8 @@ Future<void> copyTables(AppDatabase from, AppDatabase into) async {
   final qada = await from.select(from.qadaEntries).get();
   final azkar = await from.select(from.azkarCounts).get();
   final duas = await from.select(from.savedDuas).get();
+  final bookmarks = await from.select(from.quranBookmarks).get();
+  final notes = await from.select(from.quranNotes).get();
   await into.batch((batch) {
     if (settings != null) batch.insert(into.settings, settings, mode: InsertMode.insertOrReplace);
     batch
@@ -38,9 +48,13 @@ Future<void> copyTables(AppDatabase from, AppDatabase into) async {
       ..deleteAll(into.qadaEntries)
       ..deleteAll(into.azkarCounts)
       ..deleteAll(into.savedDuas)
+      ..deleteAll(into.quranBookmarks)
+      ..deleteAll(into.quranNotes)
       ..insertAll(into.prayerLog, log)
       ..insertAll(into.qadaEntries, qada)
       ..insertAll(into.azkarCounts, azkar)
-      ..insertAll(into.savedDuas, duas);
+      ..insertAll(into.savedDuas, duas)
+      ..insertAll(into.quranBookmarks, bookmarks)
+      ..insertAll(into.quranNotes, notes);
   });
 }
