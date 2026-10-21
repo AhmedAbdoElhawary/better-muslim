@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +28,7 @@ class MoreTiles extends StatelessWidget {
           Expanded(
             child: _Tile(
               icon: BmUiIcon.calendar,
-              label: StringsManager.hijriCalendar,
+              label: StringsManager.calendar,
               route: Routes.hijriCalendar,
             ),
           ),
@@ -87,7 +88,10 @@ class _Tile extends StatelessWidget {
                     ),
                   ),
                   const RSizedBox.vertical(SpaceManager.tileGap),
-                  MediumText(label, fontSize: FontSizeManager.secondary),
+                  TitleHero(
+                    tag: route,
+                    child: MediumText(label, fontSize: FontSizeManager.secondary),
+                  ),
                 ],
               ),
             ),
