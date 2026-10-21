@@ -2,6 +2,7 @@ import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -22,7 +23,7 @@ Future<AppDatabase> seededStore() async {
       theme: const Value(BmThemeId.iznik),
       dhuhrSound: const Value(PrayerSound.silent),
       reminderMinutes: const Value(15),
-      tasbihCount: const Value(21),
+      subhanallahCount: const Value(21),
       firstUse: Value(DateTime(2026, 10, 1)),
       onboarded: const Value(true),
       notificationsAsked: const Value(true),
@@ -43,5 +44,26 @@ Future<AppDatabase> seededStore() async {
   await db.into(db.qadaEntries).insert(QadaEntriesCompanion.insert(prayer: Prayer.fajr));
   await db.setZikrCount(AzkarSet.morning, DateTime(2026, 10, 15), 'ayat-kursi', 1);
   await db.saveDua('travel-1', at: DateTime.utc(2026, 10, 12, 9));
+  await db
+      .into(db.quranBookmarks)
+      .insert(
+        QuranBookmarksCompanion.insert(
+          surah: const Value(2),
+          ayah: const Value(255),
+          page: 42,
+          color: RibbonColor.accent,
+          createdAt: DateTime.utc(2026, 10, 18, 7),
+        ),
+      );
+  await db
+      .into(db.quranNotes)
+      .insert(
+        QuranNotesCompanion.insert(
+          surah: 1,
+          ayah: 5,
+          note: 'remember this one',
+          updatedAt: DateTime.utc(2026, 10, 19, 21),
+        ),
+      );
   return db;
 }
