@@ -12,10 +12,15 @@ Future<void> pumpCoreWidget(
   Widget child, {
   Locale locale = const Locale('en'),
   double textScale = 1,
+  bool reduceMotion = false,
+
+  /// false for a loop, which never settles
+  bool settle = true,
 }) async {
   await tester.pumpWidget(
     MediaQuery(
-      data: MediaQueryData.fromView(tester.view).copyWith(textScaler: TextScaler.linear(textScale)),
+      data: MediaQueryData.fromView(tester.view)
+          .copyWith(textScaler: TextScaler.linear(textScale), disableAnimations: reduceMotion),
       child: AppScreenUtilInit(
         child: MaterialApp(
           theme: AppTheme.dark(BmThemeId.qiyamEmerald),
@@ -27,7 +32,7 @@ Future<void> pumpCoreWidget(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  settle ? await tester.pumpAndSettle() : await tester.pump();
 }
 
 /// the haptics the app asked for, by type
