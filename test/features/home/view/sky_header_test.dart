@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/power/power_saving.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -34,15 +35,24 @@ void main() {
     tester,
   ) async {
     await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
-    expect(same(painter(tester).stops, bmSkyQiyamEmerald[BmSkyState.asr]!), isTrue);
+    expect(same(painter(tester).stops, themeSky(BmThemeId.qiyamEmerald)[BmSkyState.asr]!), isTrue);
     expect(painter(tester).starsStrength, 0);
     expect(painter(tester).sunFraction, isNotNull);
     await unmount(tester);
 
     await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 18)));
-    expect(same(painter(tester).stops, bmSkyQiyamEmerald[BmSkyState.isha]!), isTrue);
+    expect(same(painter(tester).stops, themeSky(BmThemeId.qiyamEmerald)[BmSkyState.isha]!), isTrue);
     expect(painter(tester).starsStrength, 1);
     expect(painter(tester).sunFraction, isNull);
+    await unmount(tester);
+  });
+
+  testWidgets('another theme paints its own sky for the state', (tester) async {
+    await pumpHome(
+      tester,
+      makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32), theme: BmThemeId.andalus),
+    );
+    expect(same(painter(tester).stops, themeSky(BmThemeId.andalus)[BmSkyState.asr]!), isTrue);
     await unmount(tester);
   });
 
@@ -61,8 +71,8 @@ void main() {
         settle: false,
       );
       await tester.pump();
-      final asr = bmSkyQiyamEmerald[BmSkyState.asr]!;
-      final maghrib = bmSkyQiyamEmerald[BmSkyState.maghrib]!;
+      final asr = themeSky(BmThemeId.qiyamEmerald)[BmSkyState.asr]!;
+      final maghrib = themeSky(BmThemeId.qiyamEmerald)[BmSkyState.maghrib]!;
       expect(same(painter(tester).stops, asr), isTrue);
 
       await tester.pump(const Duration(seconds: 1));
