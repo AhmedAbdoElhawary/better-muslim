@@ -52,27 +52,33 @@ class StateChip extends StatelessWidget {
               ? Border.all(color: context.getColor(ThemeEnum.outlineStrong))
               : null,
         ),
-        child: SymmetricPadding(
-          horizontal: SpaceManager.chipSide,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (check) ...[
-                CheckMark(
-                  progress: checkProgress,
-                  size: SizeManager.iconChip,
-                  color: context.getColor(color),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+
+          child: SymmetricPadding(
+            horizontal: SpaceManager.chipSide,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (check) ...[
+                  FittedBox(
+                    child: CheckMark(
+                      progress: checkProgress,
+                      size: SizeManager.iconChip,
+                      color: context.getColor(color),
+                    ),
+                  ),
+                  const RSizedBox.horizontal(SpaceManager.s1),
+                ],
+                MediumText(
+                  label,
+                  args: args,
+                  fontSize: FontSizeManager.chip,
+                  color: color,
+                  tabularFigures: look == ChipLook.accent,
                 ),
-                const RSizedBox.horizontal(SpaceManager.s1),
               ],
-              MediumText(
-                label,
-                args: args,
-                fontSize: FontSizeManager.chip,
-                color: color,
-                tabularFigures: look == ChipLook.accent,
-              ),
-            ],
+            ),
           ),
         ),
       ),
