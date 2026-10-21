@@ -12,6 +12,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
