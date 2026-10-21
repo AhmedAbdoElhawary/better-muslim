@@ -49,6 +49,7 @@ app.*.map.json
 
 # design exports, kept local
 *.zip
+/Living Sky prayer app branding 2/
 
 # store screenshots, only needed at release
 /design_handoff_better_muslim/store/
@@ -64,3 +65,6 @@ app.*.map.json
 /test/coverage_helper_test.dart
 # geonames downloads for tool/places/build_places.dart, about 220 MB
 /tool/places/.cache/
+
+# tanzil and qul downloads for tool/quran/build_quran.dart
+/tool/quran/.cache/
