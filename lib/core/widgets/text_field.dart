@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -21,6 +22,9 @@ class BmTextField extends StatefulWidget {
     this.enabled = true,
     this.textInputAction,
     this.onSubmitted,
+    this.initial,
+    this.maxLines = 1,
+    this.autofocus = false,
     super.key,
   });
 
@@ -36,12 +40,20 @@ class BmTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
 
+  /// the text it opens with, a bookmark's name or a note being changed
+  final String? initial;
+
+  /// null grows with the text, a note
+  final int? maxLines;
+  final bool autofocus;
+
   @override
   State<BmTextField> createState() => _BmTextFieldState();
 }
 
 class _BmTextFieldState extends State<BmTextField> {
   final _focus = FocusNode();
+  late final _controller = TextEditingController(text: widget.initial);
 
   @override
   void initState() {
@@ -52,6 +64,7 @@ class _BmTextFieldState extends State<BmTextField> {
   @override
   void dispose() {
     _focus.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -70,7 +83,7 @@ class _BmTextFieldState extends State<BmTextField> {
         : _focus.hasFocus
         ? (ThemeEnum.primary, SizeManager.textFieldFocus)
         : (ThemeEnum.outlineStrong, SizeManager.divider);
-    return Opacity(
+    return CustomOpacity(
       opacity: widget.enabled ? 1 : BmOpacity.disabled,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -94,7 +107,14 @@ class _BmTextFieldState extends State<BmTextField> {
                 padding: SpaceManager.textFieldSide,
                 child: Center(
                   child: TextField(
+                    controller: _controller,
                     focusNode: _focus,
+                    autofocus: widget.autofocus,
+                    maxLines: widget.maxLines,
+                    keyboardType: widget.maxLines == 1 ? null : TextInputType.multiline,
+                    textCapitalization: widget.obscure
+                        ? TextCapitalization.none
+                        : TextCapitalization.sentences,
                     enabled: widget.enabled,
                     obscureText: widget.obscure,
                     autocorrect: !widget.obscure,
@@ -107,7 +127,9 @@ class _BmTextFieldState extends State<BmTextField> {
                     decoration: InputDecoration(
                       isDense: true,
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                      contentPadding: widget.maxLines == 1
+                          ? EdgeInsets.zero
+                          : REdgeInsets.symmetric(vertical: SpaceManager.s3),
                       hintText: widget.hint == null ? null : context.tr(widget.hint!),
                       hintStyle: style(ThemeEnum.text3),
                     ),
@@ -116,18 +138,23 @@ class _BmTextFieldState extends State<BmTextField> {
               ),
             ),
           ),
-          if (error != null) ...[
-            const RSizedBox.vertical(SpaceManager.textFieldGap),
-            Semantics(
-              liveRegion: true,
-              child: RegularText(
-                error,
-                args: widget.errorArgs,
-                fontSize: FontSizeManager.fieldError,
-                color: ThemeEnum.error,
-              ),
-            ),
-          ],
+          BmSwitcher(
+            child: error == null
+                ? const SizedBox.shrink()
+                : TopPadding(
+                    key: ValueKey(error),
+                    padding: SpaceManager.textFieldGap,
+                    child: Semantics(
+                      liveRegion: true,
+                      child: RegularText(
+                        error,
+                        args: widget.errorArgs,
+                        fontSize: FontSizeManager.fieldError,
+                        color: ThemeEnum.error,
+                      ),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
