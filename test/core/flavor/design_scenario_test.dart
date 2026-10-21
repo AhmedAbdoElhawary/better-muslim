@@ -142,7 +142,7 @@ void main() {
       final db = container.read(databaseProvider);
       final settings = await db.watchSettings().first;
 
-      expect((settings.tasbihDhikr, settings.tasbihCount), (0, 16));
+      expect((settings.tasbihDhikr, settings.subhanallahCount), (0, 16));
       expect(await db.select(db.azkarCounts).get(), isEmpty);
       expect(await db.select(db.savedDuas).get(), isEmpty);
     });
