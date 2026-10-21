@@ -37,6 +37,8 @@ dependencies:
   prayer_surfaces:
     path: packages/prayer_surfaces
   adhan_dart: ^2.0.1
+  animations: ^3.0.0
+  audio_service: ^0.18.19
   audio_session: ^0.2.4
   drift: ^2.35.2
   drift_flutter: ^0.3.1
@@ -96,11 +98,13 @@ flutter:
     - assets/icons/ui/
     - assets/brand/
     - assets/ornaments/
-    - assets/fonts/licenses/
     - assets/l10n/
     - assets/places/
     - assets/azkar/
     - assets/duas/
+    - assets/quran/
+    - assets/quran/pages/
+    - assets/quran/surahs/
     # TODO(ahmed): replace the placeholder adhan files in assets/audio/ with the licensed recordings, same names.
     - assets/audio/
     - shorebird.yaml
