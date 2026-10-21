@@ -6,7 +6,9 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/qada.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/qada_row.dart';
 import 'package:flutter/material.dart';
@@ -28,38 +30,43 @@ class QadaPage extends ConsumerWidget {
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
     return Scaffold(
-      body: Column(
-        children: [
-          const CompactAppBar(StringsManager.qadaList),
-          Expanded(
-            child: ListView(
-              padding: REdgeInsets.all(SpaceManager.screen),
-              children: [
-                HorizontalPadding(
-                  padding: SpaceManager.s4,
-                  child: MediumText(
-                    StringsManager.qadaTotal,
-                    args: {'count': context.formatDigits('$total', digits)},
+      body: TitleGlow(
+        child: Column(
+          children: [
+            const CompactAppBar(StringsManager.qadaList),
+            Expanded(
+              child: ListView(
+                padding: REdgeInsets.all(SpaceManager.screen),
+                children: [
+                  HorizontalPadding(
+                    padding: SpaceManager.s4,
+                    child: BmSwitcher(
+                      child: MediumText(
+                        StringsManager.qadaTotal,
+                        key: ValueKey(total),
+                        args: {'count': context.formatDigits('$total', digits)},
+                      ),
+                    ),
                   ),
-                ),
-                const RSizedBox.vertical(SpaceManager.s3),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.getColor(ThemeEnum.surface),
-                    borderRadius: BorderRadius.circular(RadiusManager.lg.r),
-                    border: Border.all(color: context.getColor(ThemeEnum.outline)),
+                  const RSizedBox.vertical(SpaceManager.s3),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.getColor(ThemeEnum.surface),
+                      borderRadius: BorderRadius.circular(RadiusManager.lg.r),
+                      border: Border.all(color: context.getColor(ThemeEnum.outline)),
+                    ),
+                    child: Column(
+                      children: [
+                        for (final prayer in Prayer.values)
+                          QadaRow(prayer, divider: prayer != Prayer.isha),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      for (final prayer in Prayer.values)
-                        QadaRow(prayer, divider: prayer != Prayer.isha),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
