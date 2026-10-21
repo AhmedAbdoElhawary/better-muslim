@@ -90,7 +90,7 @@ class _TabLayer extends StatelessWidget {
         enabled: visible,
         child: IgnorePointer(
           ignoring: !active,
-          child: Opacity(
+          child: CustomOpacity(
             opacity: opacity,
             child: Transform.translate(offset: Offset(0, offset), child: child),
           ),
