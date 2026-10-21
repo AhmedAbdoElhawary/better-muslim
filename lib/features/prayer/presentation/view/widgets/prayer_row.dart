@@ -10,6 +10,8 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/row_state.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
@@ -34,7 +36,7 @@ class PrayerRow extends ConsumerWidget {
     final trailing = RowTrailing(day: day, prayer: prayer, state: state);
     final icon = isOpen ? ThemeEnum.onPrimaryContainer : ThemeEnum.text2;
     return MergeSemantics(
-      child: DecoratedBox(
+      child: AnimatedDecoratedBox(
         decoration: BoxDecoration(
           color: isOpen ? context.getColor(ThemeEnum.primaryContainer) : null,
           borderRadius: BorderRadius.circular(RadiusManager.row.r),
@@ -197,15 +199,19 @@ class _Name extends StatelessWidget {
             maxLines: 1,
           ),
         ),
-        if (open) ...[
-          const RSizedBox.horizontal(SpaceManager.nowTagGap),
-          RegularText(
-            StringsManager.now,
-            fontSize: isArabic ? FontSizeManager.label : FontSizeManager.nowTag,
-            letterSpacing: isArabic ? null : LetterSpacingManager.nowTag,
-            color: ThemeEnum.onPrimaryContainer,
-          ),
-        ],
+        BmSwitcher(
+          child: open
+              ? StartPadding(
+                  padding: SpaceManager.nowTagGap,
+                  child: RegularText(
+                    StringsManager.now,
+                    fontSize: isArabic ? FontSizeManager.label : FontSizeManager.nowTag,
+                    letterSpacing: isArabic ? null : LetterSpacingManager.nowTag,
+                    color: ThemeEnum.onPrimaryContainer,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ],
     );
   }
