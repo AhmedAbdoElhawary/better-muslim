@@ -550,7 +550,7 @@ credits then the licenses. PRAYER has Hijri date adjustment, changing it moves H
   | Screen | Change |
   | --- | --- |
   | Home | the no location card and the next prayer card; the sky labels appearing with a place; the strip's current and logged marks; the location pill's text; the bright state scrim |
-  | Prayer | a row opening and closing; the state chip's check; the week strip jumping to a linked day; the day dots filling; Qada rows joining and leaving |
+  | Prayer | a row opening and closing; the state chip's check; the week strip jumping to a linked day; the day dots filling; Qada rows joining and leaving; the shown day in the week strip; the summary card's two lines; the Qada counts and Made one up dimming (the plan's second read: the five Qada rows never join or leave, their counts change) |
   | Azkar sets | the card's counter |
   | Tasbih | the chip selection; the Arabic line, name and meaning changing dhikr; the count area appearing after loading |
   | Duas | the chip selection; results, saved and empty states swapping; search results changing |
@@ -558,8 +558,8 @@ credits then the licenses. PRAYER has Hijri date adjustment, changing it moves H
   | Theme | the selection ring moving between swatches; the preview restyling; the Dark, Light and Follow sky selection |
   | Adhan and reminders | the notifications off line appearing; the recording row appearing when a prayer is set to Adhan; the segment selections |
   | More | the values changing after a sheet closes |
-  | Sheets | the location sheet's results; the method sheet's check; the picker rows' check; backup and restore going from working to done |
-  | Shared | the segmented control's highlight; a row's value; toasts sliding and fading in from the bottom and fading out |
+  | Sheets | the location sheet's results; the method sheet's check; the picker rows' check; backup and restore going from working to done; the location sheet's could not find you line |
+  | Shared | the segmented control's highlight; a row's value; toasts sliding and fading in from the bottom and fading out; a text field's error line; a button dimming while it works |
 
 - **FR-037**: Every animation in this spec MUST have its reduce motion fallback (a crossfade or
   instant, MOTION.md's rule) and follow both the phone's setting and the Reduce motion switch in
