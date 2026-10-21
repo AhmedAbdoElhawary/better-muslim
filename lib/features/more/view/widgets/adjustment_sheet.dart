@@ -1,4 +1,6 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/hijri/hijri_date.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
@@ -11,9 +13,9 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
-import 'package:better_muslim/features/hijri_calendar/view/widgets/calendar_format.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// the store's check, -2 to 2 days
 const _most = 2;
+
+extension AdjustmentFormat on BuildContext {
+  /// "+1 day", "−2 days", "0 days"
+  String adjustment(int adjust, Digits digits) => tr(StringsManager.days, {
+    'sign': adjust > 0 ? '+' : (adjust < 0 ? '−' : ''),
+    'n': formatDigits('${adjust.abs()}', digits),
+  });
+}
 
 Future<void> showAdjustmentSheet(BuildContext context) =>
     showBmSheet(context, builder: (_) => const _AdjustmentSheet());
@@ -53,7 +63,7 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SheetTitle(StringsManager.dateAdjustment),
+            const SheetTitle(StringsManager.hijriDateAdjustment),
             const HorizontalPadding(
               padding: SpaceManager.s5,
               child: RegularText(StringsManager.adjustmentBody, color: ThemeEnum.text2),
@@ -127,7 +137,7 @@ class _StepButton extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: Opacity(
+        child: CustomOpacity(
           opacity: onTap == null ? BmOpacity.disabled : 1,
           child: RSizedBox.square(
             dimension: SizeManager.playButton,
