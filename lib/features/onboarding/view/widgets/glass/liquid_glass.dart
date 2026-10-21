@@ -220,7 +220,7 @@ class FallbackGlass extends StatelessWidget {
             children: [
               Positioned.fromRect(
                 rect: spec.bounds,
-                child: Opacity(
+                child: CustomOpacity(
                   opacity: spec.opacity,
                   child: ClipOval(
                     child: BackdropFilter(
