@@ -1,4 +1,6 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -31,7 +33,12 @@ class VerseCard extends ConsumerWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.go(Routes.quran),
+        onTap: () async {
+          const ayah = AyahKey(HomeSamples.verseSurahNumber, HomeSamples.verseAyah);
+          final assets = await ref.read(quranAssetsProvider.future);
+          if (!context.mounted) return;
+          await context.push(Routes.quranPage(assets.pageOf(ayah), ayah: ayah));
+        },
         child: SurfaceCard(
           child: OnlyPadding(
             top: isArabic ? SpaceManager.s3 : SpaceManager.verseCardTop,
