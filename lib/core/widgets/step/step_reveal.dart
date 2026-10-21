@@ -42,14 +42,14 @@ class StepReveal extends StatelessWidget {
       animation: Listenable.merge([scope.animation, secondary]),
       builder: (context, child) {
         final t = enter.transform(scope.animation.value);
-        if (slot == StepSlot.background) return Opacity(opacity: t, child: child);
+        if (slot == StepSlot.background) return CustomOpacity(opacity: t, child: child);
 
         /// a pop is the next step's 150 ms out, so the content comes back over all of it
         final out = secondary.status == AnimationStatus.reverse
             ? secondary.value
             : _covered.transform(secondary.value);
         final opacity = t * (1 - out);
-        return Opacity(
+        return CustomOpacity(
           opacity: opacity,
           child: slot.rises && !reduce
               ? Transform.translate(
