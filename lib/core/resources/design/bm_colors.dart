@@ -33,6 +33,13 @@ class BmPalette {
   final Color onSky;
   final Color sun;
   final double starOpacity;
+
+  /// only the reader's palettes have it, the app themes take paper or night by brightness
+  final BmPageColors? page;
+
+  /// outside the reader a page color follows the app's mode (research R5)
+  BmPageColors get pageColors =>
+      page ?? (bg.computeLuminance() < .5 ? BmPagePalette.night.page! : BmPagePalette.paper.page!);
   const BmPalette({
     required this.bg,
     required this.surface,
@@ -61,6 +68,7 @@ class BmPalette {
     required this.onSky,
     required this.sun,
     required this.starOpacity,
+    this.page,
   });
 
   /// Used for the parked alternate themes, which were designed with 14 key colors.
@@ -144,6 +152,143 @@ class BmPalette {
     onSky: Color.lerp(a.onSky, b.onSky, t)!,
     sun: Color.lerp(a.sun, b.sun, t)!,
     starOpacity: lerpDouble(a.starOpacity, b.starOpacity, t)!,
+    page: BmPageColors.lerp(a.pageColors, b.pageColors, t),
+  );
+}
+
+/// the mushaf's own roles from K.PAGE in _gen/kit.js
+@immutable
+class BmPageColors {
+  final Color page;
+  final Color ink;
+  final Color ink2;
+  final Color ornament;
+  final Color ornamentSoft;
+  final Color selectionWash;
+  final Color followWash;
+  final Color hidden;
+  final Color gutter;
+  const BmPageColors({
+    required this.page,
+    required this.ink,
+    required this.ink2,
+    required this.ornament,
+    required this.ornamentSoft,
+    required this.selectionWash,
+    required this.followWash,
+    required this.hidden,
+    required this.gutter,
+  });
+
+  static BmPageColors lerp(BmPageColors a, BmPageColors b, double t) => BmPageColors(
+    page: Color.lerp(a.page, b.page, t)!,
+    ink: Color.lerp(a.ink, b.ink, t)!,
+    ink2: Color.lerp(a.ink2, b.ink2, t)!,
+    ornament: Color.lerp(a.ornament, b.ornament, t)!,
+    ornamentSoft: Color.lerp(a.ornamentSoft, b.ornamentSoft, t)!,
+    selectionWash: Color.lerp(a.selectionWash, b.selectionWash, t)!,
+    followWash: Color.lerp(a.followWash, b.followWash, t)!,
+    hidden: Color.lerp(a.hidden, b.hidden, t)!,
+    gutter: Color.lerp(a.gutter, b.gutter, t)!,
+  );
+}
+
+/// the oil drop loader's gradient, the same in every theme (11 Motion v2)
+const bmOilLight = Color(0xFFD9BE86);
+const bmOilDark = Color(0xFF8C7444);
+const bmOilRipple = Color(0xFFF1E3C4);
+
+/// 4.30's emerald and sky backgrounds for a shared ayah, the same in every theme
+const bmShareEmerald = Color(0xFF10382E);
+const bmShareSky1 = Color(0xFF14121C);
+const bmShareSky2 = Color(0xFF6A4436);
+const bmShareSky3 = Color(0xFFC98E5E);
+
+/// the reader's palettes, K.PAGE in _gen/kit.js. roles K.PAGE leaves out come from Qiyam Emerald
+abstract final class BmPagePalette {
+  static const paper = BmPalette(
+    bg: Color(0xFFE9E2D1),
+    surface: Color(0xFFFBF7EE),
+    raised: Color(0xFFF4EEE0),
+    variant: Color(0xFFEAE2CF),
+    outline: Color(0xFFDDD3BC),
+    outlineStrong: Color(0xFF9A917D),
+    text: Color(0xFF1C1A15),
+    text2: Color(0xFF5C5648),
+    text3: Color(0xFF6A6456),
+    primary: Color(0xFF10382E),
+    onPrimary: Color(0xFFE9D7AE),
+    primaryContainer: Color(0xFFE8DCBC),
+    onPrimaryContainer: Color(0xFF43361A),
+    accent: Color(0xFF7F6738),
+    accentContainer: Color(0xFFEFE4CB),
+    onAccentContainer: Color(0xFF5C4A26),
+    success: Color(0xFF2E6B4A),
+    warning: Color(0xFF8A5A12),
+    error: Color(0xFFA33A2E),
+    onError: Color(0xFFFFFFFF),
+    glow: Color(0xFFA88A52),
+    sky1: Color(0xFF0E1A16),
+    sky2: Color(0xFF1F3A30),
+    sky3: Color(0xFF8F7A52),
+    onSky: Color(0xFFE9D7AE),
+    sun: Color(0xFFE9D7AE),
+    starOpacity: 0.6,
+    page: BmPageColors(
+      page: Color(0xFFF6F0E1),
+      ink: Color(0xFF1B1912),
+      ink2: Color(0xFF6B6352),
+      ornament: Color(0xFFA88A52),
+      ornamentSoft: Color(0xFFCDBB92),
+      selectionWash: Color(0x42A88A52),
+      followWash: Color(0x1A10382E),
+      hidden: Color(0xFFE9DFC8),
+      gutter: Color(0x29503C14),
+    ),
+  );
+
+  // TODO(ahmed): cream's colors from the designer, 09 Quran names Cream but K.PAGE has no values.
+  static const cream = paper;
+
+  static const night = BmPalette(
+    bg: Color(0xFF000000),
+    surface: Color(0xFF07100D),
+    raised: Color(0xFF0C1814),
+    variant: Color(0xFF13221D),
+    outline: Color(0xFF1C2C26),
+    outlineStrong: Color(0xFF4C5E57),
+    text: Color(0xFFD9D3C2),
+    text2: Color(0xFF878C82),
+    text3: Color(0xFF7B8079),
+    primary: Color(0xFFA88A52),
+    onPrimary: Color(0xFF000000),
+    primaryContainer: Color(0xFF221C10),
+    onPrimaryContainer: Color(0xFFD9C08A),
+    accent: Color(0xFF4E9C80),
+    accentContainer: Color(0xFF0E2620),
+    onAccentContainer: Color(0xFF8FCDB4),
+    success: Color(0xFF5FB389),
+    warning: Color(0xFFD2A04F),
+    error: Color(0xFFE07A6A),
+    onError: Color(0xFF000000),
+    glow: Color(0xFFA88A52),
+    sky1: Color(0xFF000000),
+    sky2: Color(0xFF04100C),
+    sky3: Color(0xFF173328),
+    onSky: Color(0xFFD9D3C2),
+    sun: Color(0xFFCDB27A),
+    starOpacity: 0.8,
+    page: BmPageColors(
+      page: Color(0xFF070B09),
+      ink: Color(0xFFD9D3C2),
+      ink2: Color(0xFF878C82),
+      ornament: Color(0xFF8C7444),
+      ornamentSoft: Color(0xFF3A3222),
+      selectionWash: Color(0x38A88A52),
+      followWash: Color(0x294E9C80),
+      hidden: Color(0xFF17211C),
+      gutter: Color(0x99000000),
+    ),
   );
 }
 
