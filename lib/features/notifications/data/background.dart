@@ -115,7 +115,7 @@ Future<void> markFromPayload(String payload, {AppDatabase? db, SurfacesChannel? 
       await writeSurfaces(
         store,
         channel: surfaces,
-        locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
+        locale: AppLocalizations.localeOf((await store.watchSettings().first).language),
         use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
         phoneZone: await PhoneZone.read(),
       );
@@ -131,6 +131,7 @@ Future<void> onNotificationActionInBackground(NotificationResponse response) asy
   final payload = response.payload;
   if (response.actionId != markPrayedAction || payload == null) return;
   DartPluginRegistrant.ensureInitialized();
+  tz.initializeTimeZones();
   await markFromPayload(payload, surfaces: SurfacesChannel());
 }
 
@@ -139,6 +140,7 @@ Future<void> onNotificationActionInBackground(NotificationResponse response) asy
 Future<void> markPrayedInBackground(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
+  tz.initializeTimeZones();
   try {
     await markFromPayload(args.first, surfaces: SurfacesChannel());
   } finally {
@@ -189,7 +191,7 @@ void callbackDispatcher() {
     final db = await AppDatabase.openExisting();
     if (db == null) return true;
     try {
-      final locale = AppLocalizations.localeFor(PlatformDispatcher.instance.locales);
+      final locale = AppLocalizations.localeOf((await db.watchSettings().first).language);
       final l10n = await AppLocalizations.load(locale);
       final scheduler = NotificationScheduler(AdhanChannel());
       await scheduler.init(markPrayed: l10n.tr(StringsManager.markPrayed, const {}));
