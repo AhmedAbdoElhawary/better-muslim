@@ -17,6 +17,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/bookmark_actions.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/display_sheet.dart';
