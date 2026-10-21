@@ -222,7 +222,12 @@ class _LargeTitleScrollViewState extends State<LargeTitleScrollView> {
               valueListenable: _collapsed,
               builder: (context, collapsed, _) => IgnorePointer(
                 ignoring: !collapsed,
-                child: CompactAppBar(widget.title, back: false, collapsed: collapsed),
+                child: CompactAppBar(
+                  widget.title,
+                  back: false,
+                  heroTag: "More",
+                  collapsed: collapsed,
+                ),
               ),
             ),
           ),
@@ -334,7 +339,10 @@ class _LargeTitleState extends State<LargeTitle> {
               alignment: Alignment.center,
               clipBehavior: Clip.none,
               children: [
-                CustomOpacity(opacity: 1 - font, child: child),
+                TitleHero(
+                  tag: "More",
+                  child: CustomOpacity(opacity: 1 - font, child: child),
+                ),
 
                 /// only built once it shows, a resting title stays one text
                 if (font > 0)
