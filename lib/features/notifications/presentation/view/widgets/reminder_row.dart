@@ -24,6 +24,8 @@ class ReminderRow extends ConsumerWidget {
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
     return NavRow(
+      startFlex: 4,
+      endFlex: 3,
       icon: icon ? BmIcon(BmIconName.adhan, size: SizeManager.iconList.r) : null,
       title: StringsManager.reminderBefore,
       value: minutes == 0 ? StringsManager.reminderOff : StringsManager.reminderValue,
