@@ -8,7 +8,7 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,61 +22,52 @@ class PrayerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const TitleGlow(),
-        SafeArea(
-          bottom: false,
-          child: TopPadding(
-            padding: SpaceManager.s1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                EndPadding(
-                  padding: SpaceManager.s2,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      _HeaderButton(
-                        icon: BmIconName.location,
-                        label: StringsManager.location,
-                        onTap: onPin,
-                      ),
-                      _HeaderButton(
-                        icon: BmIconName.settings,
-                        label: StringsManager.calculationMethod,
-                        onTap: onSliders,
-                      ),
-                    ],
+    return SafeArea(
+      bottom: false,
+      child: TopPadding(
+        padding: SpaceManager.s1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            EndPadding(
+              padding: SpaceManager.s2,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _HeaderButton(
+                    icon: BmIconName.location,
+                    label: StringsManager.location,
+                    onTap: onPin,
                   ),
-                ),
-                SymmetricPadding(
-                  horizontal: SpaceManager.s5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (!isArabic) const RSizedBox.vertical(SpaceManager.prayerTitleTop),
-                      RegularText(
-                        StringsManager.prayerTimes,
-                        font: FontEnum.display,
-                        fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.largeTitle,
-                        height: isArabic ? LineHeightManager.titleAr : LineHeightManager.largeTitle,
-                      ),
-                      RSizedBox.vertical(
-                        isArabic
-                            ? SpaceManager.prayerSubtitleTopAr
-                            : SpaceManager.prayerSubtitleTop,
-                      ),
-                      const _Subtitle(),
-                    ],
+                  _HeaderButton(
+                    icon: BmIconName.settings,
+                    label: StringsManager.calculationMethod,
+                    onTap: onSliders,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            SymmetricPadding(
+              horizontal: SpaceManager.s5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isArabic) const RSizedBox.vertical(SpaceManager.prayerTitleTop),
+                  LargeTitle(
+                    StringsManager.prayerTimes,
+                    fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.largeTitle,
+                    height: isArabic ? LineHeightManager.titleAr : LineHeightManager.largeTitle,
+                  ),
+                  RSizedBox.vertical(
+                    isArabic ? SpaceManager.prayerSubtitleTopAr : SpaceManager.prayerSubtitleTop,
+                  ),
+                  const LargeTitleSubtitle(child: _Subtitle()),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
