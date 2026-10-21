@@ -7,10 +7,4 @@ abstract final class HomeSamples {
   static const int verseAyah = 5;
   static const String verseText = 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ';
   static const String verseTranslation = 'It is You we worship and You we ask for help.';
-
-  // TODO: the last read position from the reader (milestone 7)
-  static const String readingSurah = 'Al-Fatiha';
-  static const String readingSurahAr = 'الفاتحة';
-  static const int readingAyah = 3;
-  static const int readingAyahs = 7;
 }
