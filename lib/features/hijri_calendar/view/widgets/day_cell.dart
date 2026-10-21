@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -7,11 +8,11 @@ import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// the hijri day large, the gregorian day small, one look (FR-018, FR-019)
+/// the mode's day large, the other calendar's day small, one look (FR-002, FR-003, FR-019)
 class DayCell extends StatelessWidget {
   const DayCell({
-    required this.hijriDay,
-    required this.gregorian,
+    required this.day,
+    required this.other,
     required this.look,
     required this.semantics,
     required this.onTap,
@@ -19,8 +20,8 @@ class DayCell extends StatelessWidget {
   });
 
   /// already in the app's digits
-  final String hijriDay;
-  final String gregorian;
+  final String day;
+  final String other;
   final DayLook look;
 
   /// the full hijri and gregorian date with the marks
@@ -45,14 +46,6 @@ class DayCell extends StatelessWidget {
             decoration: BoxDecoration(
               color: today ? context.getColor(ThemeEnum.primary) : null,
               borderRadius: BorderRadius.circular(RadiusManager.dayCell.r),
-
-              /// selected takes the components' ring, so it never looks like today's fill
-              border: look == DayLook.selected
-                  ? Border.all(
-                      color: context.getColor(ThemeEnum.primary),
-                      width: SizeManager.todayRing.r,
-                    )
-                  : null,
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -61,17 +54,17 @@ class DayCell extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (today)
-                      SemiBoldText(hijriDay, translate: false, color: ink, tabularFigures: true)
+                      SemiBoldText(day, translate: false, color: ink, tabularFigures: true)
                     else
                       MediumText(
-                        hijriDay,
+                        day,
                         translate: false,
                         fontSize: FontSizeManager.title,
                         color: ink,
                         tabularFigures: true,
                       ),
                     RegularText(
-                      gregorian,
+                      other,
                       translate: false,
                       fontSize: FontSizeManager.calendarGregorian,
                       color: today ? ink : ThemeEnum.text2,
@@ -80,7 +73,13 @@ class DayCell extends StatelessWidget {
                     ),
                   ],
                 ),
-                PositionedDirectional(top: SizeManager.dayMarkTop.r, child: _Mark(look)),
+                PositionedDirectional(
+                  top: SizeManager.dayMarkTop.r,
+                  child: AnimatedSwitcher(
+                    duration: BmMotion.micro,
+                    child: _Mark(look, key: ValueKey(look)),
+                  ),
+                ),
               ],
             ),
           ),
@@ -90,9 +89,27 @@ class DayCell extends StatelessWidget {
   }
 }
 
+/// the selected day's ring, it slides from cell to cell over the grid (FR-009)
+class DayRing extends StatelessWidget {
+  const DayRing({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(RadiusManager.dayCell.r),
+        border: Border.all(
+          color: context.getColor(ThemeEnum.primary),
+          width: SizeManager.todayRing.r,
+        ),
+      ),
+    );
+  }
+}
+
 /// a cell shows one look, so today and selected show no mark
 class _Mark extends StatelessWidget {
-  const _Mark(this.look);
+  const _Mark(this.look, {super.key});
   final DayLook look;
 
   @override
