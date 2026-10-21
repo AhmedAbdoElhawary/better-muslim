@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,18 @@ enum LocationMode { auto, manual }
 
 /// only read when the app is in arabic
 enum Digits { eastern, western }
+
+enum CalendarMode { hijri, gregorian }
+
+/// the names stay in their own language, so the one you need is findable in the other
+enum Language {
+  phone(StringsManager.followPhone),
+  english(StringsManager.english),
+  arabic(StringsManager.arabic);
+
+  const Language(this.nameKey);
+  final String nameKey;
+}
 
 /// how each prayer reaches the phone. silent still shows the notification, with no sound
 enum PrayerSound { adhan, tone, silent }
