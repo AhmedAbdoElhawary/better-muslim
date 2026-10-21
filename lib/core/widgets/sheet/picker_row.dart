@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -14,6 +15,7 @@ class PickerRow extends StatelessWidget {
     required this.title,
     required this.selected,
     required this.onTap,
+    this.args = const {},
     this.subtitle,
     this.value,
     super.key,
@@ -21,6 +23,7 @@ class PickerRow extends StatelessWidget {
 
   /// StringsManager keys
   final String title;
+  final Map<String, String> args;
   final String? subtitle;
   final String? value;
   final bool selected;
@@ -52,7 +55,7 @@ class PickerRow extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RegularText(title, fontSize: FontSizeManager.body),
+                      RegularText(title, args: args, fontSize: FontSizeManager.body),
                       if (subtitle != null) ...[
                         const RSizedBox.vertical(SpaceManager.rowLineGap),
                         RegularText(
@@ -71,7 +74,11 @@ class PickerRow extends StatelessWidget {
                 const RSizedBox.horizontal(SpaceManager.s3),
                 RSizedBox.square(
                   dimension: SizeManager.pickerCheck,
-                  child: selected ? const _Check() : null,
+                  child: AnimatedOpacity(
+                    opacity: selected ? 1 : 0,
+                    duration: BmMotion.micro,
+                    child: const _Check(),
+                  ),
                 ),
               ],
             ),
