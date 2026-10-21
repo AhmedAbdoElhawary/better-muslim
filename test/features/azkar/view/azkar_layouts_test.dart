@@ -77,7 +77,7 @@ void main() {
       locale: const Locale('ar'),
     );
 
-    expect(find.text('١٦'), findsOneWidget);
+    expect(tester.widget<TasbihCounter>(find.byType(TasbihCounter)).label, '١٦');
     expect(find.text('سبحان الله'), findsOneWidget);
     expect(find.text('SubhanAllah'), findsNothing);
     expect(find.text('Glory be to Allah'), findsNothing);
