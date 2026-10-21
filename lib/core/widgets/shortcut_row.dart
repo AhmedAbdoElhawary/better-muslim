@@ -3,6 +3,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -15,6 +16,7 @@ class ShortcutRow extends StatelessWidget {
     required this.onTap,
     this.args = const {},
     this.divider = false,
+    this.heroTag,
     super.key,
   });
   final BmIconName icon;
@@ -25,6 +27,9 @@ class ShortcutRow extends StatelessWidget {
 
   /// the line under every row but the last
   final bool divider;
+
+  /// the route its title flies into, see TitleHero
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +74,7 @@ class ShortcutRow extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        MediumText(title),
+                        TitleHero(tag: heroTag, child: MediumText(title)),
                         RSizedBox.vertical(
                           isArabic ? SpaceManager.shortcutTextGapAr : SpaceManager.shortcutTextGap,
                         ),
