@@ -1,17 +1,15 @@
 import SwiftUI
 import WidgetKit
 
+/// no if #available in here, WidgetBundleBuilder.buildLimitedAvailability traps and the gallery
+/// gets no widgets at all. the extension targets 16.2 instead, the app still runs on 15
 @main
 struct PrayerWidgetsBundle: WidgetBundle {
   var body: some Widget {
     NextPrayerWidget()
     TodaysPrayersWidget()
-    if #available(iOS 16.0, *) {
-      LockScreenWidget()
-    }
-    if #available(iOS 16.2, *) {
-      CountdownActivity()
-    }
+    LockScreenWidget()
+    CountdownActivity()
   }
 }
 
@@ -42,7 +40,6 @@ struct TodaysPrayersWidget: Widget {
 }
 
 /// 5.7, its own kind because the lock screen has its own gallery text (research R6)
-@available(iOS 16.0, *)
 struct LockScreenWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "LockScreen", provider: SurfaceTimeline()) { entry in
