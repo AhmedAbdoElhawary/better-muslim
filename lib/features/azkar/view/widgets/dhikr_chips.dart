@@ -5,15 +5,20 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/sliding_selection.dart';
 import 'package:better_muslim/features/azkar/model/tasbih_dhikr.dart';
 import 'package:better_muslim/features/azkar/view_model/tasbih_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// 4.08's three chips, centered, scrolling sideways once large text no longer fits them
+/// 4.08's three chips, centered, scrolling sideways once large text no longer fits them. the
+/// fill slides to the shown dhikr
 class DhikrChips extends ConsumerWidget {
-  const DhikrChips({super.key});
+  const DhikrChips({required this.onChanged, super.key});
+
+  /// the page's, a chip cancels its automatic move
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,20 +29,29 @@ class DhikrChips extends ConsumerWidget {
         padding: REdgeInsets.symmetric(horizontal: SpaceManager.s4),
         child: ConstrainedBox(
           constraints: BoxConstraints(minWidth: constraints.maxWidth - 2 * SpaceManager.s4.r),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: SlidingSelection(
+            selected: selected,
+            highlight: const _Fill(),
+            layout: (children) => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (final (i, chip) in children.indexed) ...[
+                  if (i > 0) const RSizedBox.horizontal(SpaceManager.chipGap),
+                  chip,
+                ],
+              ],
+            ),
             children: [
-              for (final (i, dhikr) in tasbihDhikr.indexed) ...[
-                if (i > 0) const RSizedBox.horizontal(SpaceManager.chipGap),
+              for (final (i, dhikr) in tasbihDhikr.indexed)
                 _DhikrChip(
                   dhikr: dhikr,
                   selected: i == selected,
                   onTap: () {
+                    if (i == selected) return;
                     BmHaptics.selection();
-                    ref.read(tasbihControllerProvider.notifier).select(i);
+                    onChanged(i);
                   },
                 ),
-              ],
             ],
           ),
         ),
@@ -71,12 +85,9 @@ class _DhikrChip extends ConsumerWidget {
               constraints: BoxConstraints(minHeight: SizeManager.chip.r),
               padding: REdgeInsets.symmetric(horizontal: SpaceManager.chipSide),
               decoration: BoxDecoration(
-                color: selected ? context.getColor(ThemeEnum.primaryContainer) : null,
                 borderRadius: BorderRadius.circular(RadiusManager.pill.r),
                 border: Border.all(
-                  color: selected
-                      ? context.getColor(ThemeEnum.primary).withValues(alpha: .4)
-                      : context.getColor(ThemeEnum.outline),
+                  color: context.getColor(selected ? ThemeEnum.transparent : ThemeEnum.outline),
                 ),
               ),
               child: Row(
@@ -98,6 +109,28 @@ class _DhikrChip extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// the selected chip's look, the chip's height inside the 44 pt target
+class _Fill extends StatelessWidget {
+  const _Fill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: RSizedBox(
+        height: SizeManager.chip,
+        width: double.infinity,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.getColor(ThemeEnum.primaryContainer),
+            borderRadius: BorderRadius.circular(RadiusManager.pill.r),
+            border: Border.all(color: context.getColor(ThemeEnum.primary).withValues(alpha: .4)),
           ),
         ),
       ),
