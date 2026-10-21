@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/sliding_selection.dart';
 import 'package:better_muslim/features/theme_picker/view_model/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,30 +24,33 @@ class ThemeSwatches extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final picked = ref.watch(themePreviewProvider.select((pick) => pick.theme));
-    final rows = [
-      for (var start = 0; start < bmThemeOrder.length; start += _columns)
-        bmThemeOrder.sublist(start, start + _columns),
-    ];
-    return Column(
-      children: [
-        for (final (index, row) in rows.indexed) ...[
-          if (index > 0) const RSizedBox.vertical(SpaceManager.swatchRowGap),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final (index, id) in row.indexed) ...[
-                if (index > 0) const RSizedBox.horizontal(SpaceManager.swatchColumnGap),
-                Expanded(
-                  child: _Swatch(
-                    id,
-                    selected: id == picked,
-                    onTap: () => ref.read(themePreviewProvider.notifier).pickTheme(id),
-                  ),
-                ),
+    return SlidingSelection(
+      selected: bmThemeOrder.indexOf(picked),
+      front: true,
+      highlight: const _Ring(),
+      layout: (children) => Column(
+        children: [
+          for (var start = 0; start < children.length; start += _columns) ...[
+            if (start > 0) const RSizedBox.vertical(SpaceManager.swatchRowGap),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = start; i < start + _columns; i++) ...[
+                  if (i > start) const RSizedBox.horizontal(SpaceManager.swatchColumnGap),
+                  Expanded(child: children[i]),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
         ],
+      ),
+      children: [
+        for (final id in bmThemeOrder)
+          _Swatch(
+            id,
+            selected: id == picked,
+            onTap: () => ref.read(themePreviewProvider.notifier).pickTheme(id),
+          ),
       ],
     );
   }
@@ -84,33 +88,11 @@ class _Swatch extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: radius,
-                  child: Stack(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(child: _Half(theme.dark, dark: true)),
-                          Expanded(child: _Half(theme.light, dark: false)),
-                        ],
-                      ),
-                      if (selected) ...[
-                        Positioned.fill(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              borderRadius: radius,
-                              border: Border.all(
-                                color: context.getColor(ThemeEnum.primary),
-                                width: SizeManager.swatchRing.r,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const PositionedDirectional(
-                          top: 0,
-                          end: 0,
-                          child: AllPadding(padding: SpaceManager.swatchCheck, child: _Check()),
-                        ),
-                      ],
+                      Expanded(child: _Half(theme.dark, dark: true)),
+                      Expanded(child: _Half(theme.light, dark: false)),
                     ],
                   ),
                 ),
@@ -121,6 +103,43 @@ class _Swatch extends StatelessWidget {
               id.nameKey,
               fontSize: FontSizeManager.swatchName,
               textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// the picked swatch's ring and check, sliding over the swatch part of the cell
+class _Ring extends StatelessWidget {
+  const _Ring();
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(RadiusManager.md.r);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: RSizedBox(
+        height: SizeManager.swatch,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: radius,
+                  border: Border.all(
+                    color: context.getColor(ThemeEnum.primary),
+                    width: SizeManager.swatchRing.r,
+                  ),
+                ),
+              ),
+            ),
+            const PositionedDirectional(
+              top: 0,
+              end: 0,
+              child: AllPadding(padding: SpaceManager.swatchCheck, child: _Check()),
             ),
           ],
         ),
