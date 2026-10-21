@@ -4,7 +4,7 @@ import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/features/home/view/widgets/countdown_digit.dart';
+import 'package:better_muslim/core/widgets/rolling_digits.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +44,7 @@ class Countdown extends ConsumerWidget {
           children: [
             /// keyed from the end, so the seconds keep their slot when the hours lose a digit
             for (final (index, digit) in text.split('').indexed)
-              CountdownDigit(digit, key: ValueKey(text.length - index)),
+              RollingDigit(digit, key: ValueKey(text.length - index)),
           ],
         ),
       ),
