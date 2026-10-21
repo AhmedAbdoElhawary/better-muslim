@@ -71,10 +71,14 @@ Future<AppDatabase> designScenarioStore() async {
       db.settings,
       SettingsCompanion(
         firstUse: Value(october(1)),
-        tasbihCount: const Value(16),
+        subhanallahCount: const Value(16),
 
         /// the scenario opens on home, replay shows onboarding with its values (FR-004)
         onboarded: const Value(true),
+
+        /// 4.18's continue reading, al-fatiha 3 read today at 14:10 makkah
+        lastReadAyah: const Value(3),
+        lastReadAt: Value(DateTime.utc(2026, 10, 15, 11, 10)),
       ),
     );
     batch.insertAll(db.prayerLog, [
