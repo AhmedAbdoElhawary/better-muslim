@@ -7,6 +7,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/method_sheet.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_header.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_row.dart';
@@ -64,19 +65,21 @@ class _PrayerPageState extends ConsumerState<PrayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LargeTitleScrollView(
-        title: StringsManager.prayerTimes,
-        slivers: [
-          SliverToBoxAdapter(
-            child: PrayerHeader(
-              onPin: () => showLocationSheet(context),
-              onSliders: () => showMethodSheet(context),
+      body: TitleGlow(
+        child: LargeTitleScrollView(
+          title: StringsManager.prayerTimes,
+          slivers: [
+            SliverToBoxAdapter(
+              child: PrayerHeader(
+                onPin: () => showLocationSheet(context),
+                onSliders: () => showMethodSheet(context),
+              ),
             ),
-          ),
-          const SliverToBoxAdapter(child: WeekStrip()),
-          const SliverToBoxAdapter(child: SummaryCard()),
-          SliverToBoxAdapter(child: _Rows(_rows)),
-        ],
+            const SliverToBoxAdapter(child: WeekStrip()),
+            const SliverToBoxAdapter(child: SummaryCard()),
+            SliverToBoxAdapter(child: _Rows(_rows)),
+          ],
+        ),
       ),
     );
   }
