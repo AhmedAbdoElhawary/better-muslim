@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:flutter/material.dart';
@@ -78,5 +79,68 @@ void main() {
     await tester.tap(find.text('Start fresh'));
     await tester.pumpAndSettle();
     expect(await answer, isFalse);
+  });
+
+  group('the way in (FR-034)', () {
+    Future<void> tapOpen(WidgetTester tester, {bool reduceMotion = false}) async {
+      await pumpCoreWidget(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showBmDialog(
+              context,
+              title: StringsManager.resetJourneyTitle,
+              body: StringsManager.resetJourneyBody,
+              action: StringsManager.reset,
+            ),
+            child: const SizedBox.square(dimension: 44),
+          ),
+        ),
+        reduceMotion: reduceMotion,
+      );
+      await tester.tap(find.byType(TextButton));
+      await tester.pump();
+    }
+
+    Finder scale() => find.ancestor(
+      of: find.text('Reset prayer journey?'),
+      matching: find.byType(ScaleTransition),
+    );
+
+    double opacity(WidgetTester tester) => tester
+        .widget<FadeTransition>(
+          find
+              .ancestor(
+                of: find.text('Reset prayer journey?'),
+                matching: find.byType(FadeTransition),
+              )
+              .first,
+        )
+        .opacity
+        .value;
+
+    testWidgets('scales from a little larger to its size while it fades in', (tester) async {
+      await tapOpen(tester);
+      expect(tester.widget<ScaleTransition>(scale()).scale.value, BmMotion.dialogFrom);
+      expect(opacity(tester), 0);
+
+      await tester.pump(BmMotion.standard);
+      expect(tester.widget<ScaleTransition>(scale()).scale.value, 1);
+      expect(opacity(tester), 1);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pump();
+      await tester.pump(BmMotion.micro);
+      expect(opacity(tester), 0, reason: 'out in 150 ms');
+      expect(tester.widget<ScaleTransition>(scale()).scale.value, 1);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('reduce motion fades in 150 ms with no scale', (tester) async {
+      await tapOpen(tester, reduceMotion: true);
+      expect(scale(), findsNothing);
+      await tester.pump(BmMotion.micro);
+      expect(opacity(tester), 1);
+    });
   });
 }
