@@ -1,0 +1,40 @@
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// wcag's ratio of the lighter to the darker relative luminance
+double _ratio(Color a, Color b) {
+  final (light, dark) = (a.computeLuminance(), b.computeLuminance());
+  return light > dark ? (light + .05) / (dark + .05) : (dark + .05) / (light + .05);
+}
+
+void main() {
+  const texts = [ThemeEnum.ink, ThemeEnum.ink2, ThemeEnum.text2, ThemeEnum.text3];
+  const unders = [ThemeEnum.page, ThemeEnum.surface, ThemeEnum.bg];
+
+  for (final (name, palette) in [
+    ('paper', BmPagePalette.paper),
+    ('cream', BmPagePalette.cream),
+    ('night', BmPagePalette.night),
+  ]) {
+    test('$name meets AA for the reader text (SC-008)', () {
+      for (final text in texts) {
+        for (final under in unders) {
+          expect(
+            _ratio(text.resolve(palette), under.resolve(palette)),
+            greaterThanOrEqualTo(4.5),
+            reason: '${text.name} on ${under.name}',
+          );
+        }
+      }
+    });
+  }
+
+  test('an app palette without page colors falls back by brightness', () {
+    final dark = bmThemes[BmThemeId.qiyam]!.dark;
+    final light = bmThemes[BmThemeId.noor]!.light;
+    expect(ThemeEnum.page.resolve(dark), BmPagePalette.night.page!.page);
+    expect(ThemeEnum.page.resolve(light), BmPagePalette.paper.page!.page);
+  });
+}
