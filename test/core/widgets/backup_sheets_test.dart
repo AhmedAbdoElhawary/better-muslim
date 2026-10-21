@@ -154,7 +154,7 @@ void main() {
     await realTap(tester, find.text('Restore'));
 
     expect(find.text('Wrong password. Check it and try again.'), findsOneWidget);
-    expect((await settingsOf(tester)).tasbihCount, 16);
+    expect((await settingsOf(tester)).subhanallahCount, 16);
     await unmount(tester);
   });
 
@@ -172,7 +172,7 @@ void main() {
     expect(find.text('Restore this backup?'), findsOneWidget);
     await realTap(tester, find.text('Cancel'), 500);
     expect(find.byType(RestoreSheet), findsNothing);
-    expect((await settingsOf(tester)).tasbihCount, 16);
+    expect((await settingsOf(tester)).subhanallahCount, 16);
 
     await tapText(tester, 'Restore from backup');
     await work(tester, 500);
@@ -182,7 +182,7 @@ void main() {
     await realTap(tester, find.widgetWithText(GestureDetector, 'Restore').last);
 
     final settings = await settingsOf(tester);
-    expect((settings.tasbihCount, settings.placeName), (21, 'Makkah'));
+    expect((settings.subhanallahCount, settings.placeName), (21, 'Makkah'));
     expect(find.text('Backup restored'), findsOneWidget);
     await unmount(tester);
   });
