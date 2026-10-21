@@ -5,6 +5,8 @@ import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +83,7 @@ class _SkyHeaderState extends ConsumerState<SkyHeader> with SingleTickerProvider
             context.getColor(ThemeEnum.sky2),
             context.getColor(ThemeEnum.sky3),
           )
-        : bmSkyQiyamEmerald[state]!;
+        : themeSky(ref.watch(themeIdProvider))[state]!;
     final last = _stops;
     final stops =
         last != null && last.top == next.top && last.mid == next.mid && last.bottom == next.bottom
