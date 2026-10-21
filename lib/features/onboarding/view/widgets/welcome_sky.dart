@@ -5,6 +5,8 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/widgets/ambient.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
 import 'package:flutter/foundation.dart';
@@ -43,7 +45,7 @@ class WelcomeSky extends ConsumerWidget {
             context.getColor(ThemeEnum.sky2),
             context.getColor(ThemeEnum.sky3),
           )
-        : bmSkyQiyamEmerald[state]!;
+        : themeSky(ref.watch(themeIdProvider))[state]!;
     return CustomPaint(
       painter: WelcomeSkyPainter(
         ch: ch,
