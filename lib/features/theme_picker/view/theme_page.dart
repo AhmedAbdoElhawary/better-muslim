@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -12,6 +13,7 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/step/step_reveal.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/mode_control.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_snippet.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_swatches.dart';
@@ -42,61 +44,60 @@ class ThemePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CompactAppBar(StringsManager.theme, back: !onboarding, heroTag: Routes.theme),
+        const Expanded(
+          child: SingleChildScrollView(
+            child: HorizontalPadding(
+              padding: SpaceManager.screen,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  RSizedBox.vertical(SpaceManager.previewTop),
+                  StepReveal(slot: StepSlot.title, child: _Preview()),
+                  RSizedBox.vertical(SpaceManager.modeTop),
+                  StepReveal(slot: StepSlot.body, child: ModeControl()),
+                  RSizedBox.vertical(SpaceManager.swatchesTop),
+                  StepReveal(slot: StepSlot.cards, child: ThemeSwatches()),
+                  RSizedBox.vertical(SpaceManager.themeNoteTop),
+                  HorizontalPadding(
+                    padding: SpaceManager.s1,
+                    child: RegularText(
+                      StringsManager.followSkyNote,
+                      fontSize: FontSizeManager.cardNote,
+                      height: LineHeightManager.body,
+                      color: ThemeEnum.text2,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  RSizedBox.vertical(SpaceManager.s4),
+                ],
+              ),
+            ),
+          ),
+        ),
+        StepReveal(
+          slot: StepSlot.buttons,
+          child: SafeArea(
+            top: false,
+            child: OnlyPadding(
+              start: SpaceManager.s5,
+              end: SpaceManager.s5,
+              bottom: SpaceManager.s3,
+              child: BmButton.primary(
+                StringsManager.applyTheme,
+                onPressed: () => _apply(context, ref),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
     return StepReveal(
       slot: StepSlot.background,
-      child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CompactAppBar(StringsManager.theme, back: !onboarding),
-            const Expanded(
-              child: SingleChildScrollView(
-                child: HorizontalPadding(
-                  padding: SpaceManager.screen,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      RSizedBox.vertical(SpaceManager.previewTop),
-                      StepReveal(slot: StepSlot.title, child: _Preview()),
-                      RSizedBox.vertical(SpaceManager.modeTop),
-                      StepReveal(slot: StepSlot.body, child: ModeControl()),
-                      RSizedBox.vertical(SpaceManager.swatchesTop),
-                      StepReveal(slot: StepSlot.cards, child: ThemeSwatches()),
-                      RSizedBox.vertical(SpaceManager.themeNoteTop),
-                      HorizontalPadding(
-                        padding: SpaceManager.s1,
-                        child: RegularText(
-                          StringsManager.followSkyNote,
-                          fontSize: FontSizeManager.cardNote,
-                          height: LineHeightManager.body,
-                          color: ThemeEnum.text2,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      RSizedBox.vertical(SpaceManager.s4),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            StepReveal(
-              slot: StepSlot.buttons,
-              child: SafeArea(
-                top: false,
-                child: OnlyPadding(
-                  start: SpaceManager.s5,
-                  end: SpaceManager.s5,
-                  bottom: SpaceManager.s3,
-                  child: BmButton.primary(
-                    StringsManager.applyTheme,
-                    onPressed: () => _apply(context, ref),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: Scaffold(body: onboarding ? content : TitleGlow(child: content)),
     );
   }
 }
@@ -143,8 +144,12 @@ class _Preview extends ConsumerWidget {
                       child: OverflowBox(
                         alignment: Alignment.topCenter,
                         maxHeight: double.infinity,
-                        child: Theme(
+                        child: AnimatedTheme(
                           data: light ? AppTheme.light(pick.theme) : AppTheme.dark(pick.theme),
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? BmMotion.micro
+                              : BmMotion.standard,
+                          curve: BmMotion.standardCurve,
                           child: const ThemeSnippet(),
                         ),
                       ),
