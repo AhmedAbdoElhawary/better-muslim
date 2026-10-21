@@ -68,7 +68,7 @@ class _CardGlowState extends ConsumerState<CardGlow> with SingleTickerProviderSt
         child: box,
         builder: (context, child) {
           final t = breathing ? BmMotion.breathe.transform(_controller.value) : 1.0;
-          return Opacity(
+          return CustomOpacity(
             opacity: lerpDouble(.45, 1, t)!,
             child: Transform.scale(scale: breathing ? lerpDouble(.98, 1.03, t)! : 1, child: child),
           );
