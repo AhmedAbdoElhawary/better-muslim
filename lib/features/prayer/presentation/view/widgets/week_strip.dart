@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
@@ -47,7 +48,12 @@ class _WeekStripState extends ConsumerState<WeekStrip> {
     /// a deep link or fajr can move the shown day to another week
     ref.listen(shownDayProvider, (_, day) {
       final page = _pageOf(day);
-      if (_controller.hasClients && _controller.page?.round() != page) _controller.jumpToPage(page);
+      if (!_controller.hasClients || _controller.page?.round() == page) return;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _controller.jumpToPage(page);
+      } else {
+        _controller.animateToPage(page, duration: BmMotion.standard, curve: BmMotion.standardCurve);
+      }
     });
     return OnlyPadding(
       top: Localizations.localeOf(context).languageCode == 'ar'
