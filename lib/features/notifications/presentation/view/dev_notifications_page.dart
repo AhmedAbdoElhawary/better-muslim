@@ -15,7 +15,11 @@ import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
 import 'package:better_muslim/core/surfaces/write_surfaces.dart';
+import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -57,69 +61,73 @@ class DevNotificationsPage extends ConsumerWidget {
     /// the design scenario never schedules a real notification (FR-013)
     final isScenario = ref.watch(flavorProvider.select((config) => config.isDesignScenario));
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: REdgeInsets.all(SpaceManager.screen),
-          children: [
-            const SemiBoldText(_title, translate: false),
-            const RSizedBox.vertical(SpaceManager.s4),
-            _Row(
-              _openAdhan,
-              onTap: () {
-                final alert = nextAlert(ref);
-                if (alert != null) context.push(Routes.adhan(alert.prayer, alert.day));
-              },
-            ),
-            if (!isScenario) ...[
+      body: TitleGlow(
+        child: SafeArea(
+          child: ListView(
+            padding: REdgeInsets.all(SpaceManager.screen),
+            children: [
+              const SemiBoldText(_title, translate: false),
+              const RSizedBox.vertical(SpaceManager.s4),
               _Row(
-                _testIn1Minute,
-                onTap: () async {
+                _openAdhan,
+                onTap: () {
                   final alert = nextAlert(ref);
-                  final location = ref.read(locationProvider);
-                  if (alert == null || location == null) return;
-                  final texts = await AlertTexts.load(
-                    locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
-                    use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
-                    digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
-                    location: location,
-                  );
-                  await ref
-                      .read(notificationSchedulerProvider)
-                      .testIn1Minute(
-                        alert,
-                        texts,
-                        ref.read(settingsProvider).value?.recordingOf(alert.prayer) ??
-                            AdhanRecording.makkah,
-                      );
+                  if (alert != null) context.push(Routes.adhan(alert.prayer, alert.day));
                 },
               ),
-
-              /// past the plugin's equal check, so the widgets reload even with the same data
-              _Row(
-                _refreshWidgets,
-                onTap: () => writeSurfaces(
-                  ref.read(databaseProvider),
-                  channel: ref.read(surfacesChannelProvider),
-                  locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
-                  use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
-                  phoneZone: ref.read(phoneZoneProvider),
-                  force: true,
+              if (!isScenario) ...[
+                _Row(
+                  _testIn1Minute,
+                  onTap: () async {
+                    final alert = nextAlert(ref);
+                    final location = ref.read(locationProvider);
+                    if (alert == null || location == null) return;
+                    final texts = await AlertTexts.load(
+                      locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
+                      use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+                      digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
+                      location: location,
+                    );
+                    await ref
+                        .read(notificationSchedulerProvider)
+                        .testIn1Minute(
+                          alert,
+                          texts,
+                          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ??
+                              AdhanRecording.makkah,
+                        );
+                  },
                 ),
+
+                /// past the plugin's equal check, so the widgets reload even with the same data
+                _Row(
+                  _refreshWidgets,
+                  onTap: () => writeSurfaces(
+                    ref.read(databaseProvider),
+                    channel: ref.read(surfacesChannelProvider),
+                    locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
+                    use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+                    phoneZone: ref.read(phoneZoneProvider),
+                    force: true,
+                  ),
+                ),
+
+                /// the next prayer's countdown whatever the 2 hours, so it shows without waiting
+                _Row(_startCountdown, onTap: () => ref.read(surfacesChannelProvider).startNow()),
+              ],
+
+              /// from the first screen, nothing is cleared (FR-004)
+              _Row(
+                _replayOnboarding,
+                onTap: () {
+                  ref.read(onboardingProvider.notifier).replay();
+                  context.go(Routes.onboarding);
+                },
               ),
-
-              /// the next prayer's countdown whatever the 2 hours, so it shows without waiting
-              _Row(_startCountdown, onTap: () => ref.read(surfacesChannelProvider).startNow()),
+              const RSizedBox.vertical(SpaceManager.sectionGap),
+              const _Loader(),
             ],
-
-            /// from the first screen, nothing is cleared (FR-004)
-            _Row(
-              _replayOnboarding,
-              onTap: () {
-                ref.read(onboardingProvider.notifier).replay();
-                context.go(Routes.onboarding);
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -152,6 +160,59 @@ class _Row extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// the oil drop at its three sizes and one following a slider (FR-059). shut until tapped, its
+/// loops would keep the page from ever settling
+class _Loader extends StatefulWidget {
+  const _Loader();
+
+  @override
+  State<_Loader> createState() => _LoaderState();
+}
+
+class _LoaderState extends State<_Loader> {
+  static const _label = 'Loader';
+  static const _sizes = [SizeManager.oilDrop, SizeManager.oilDropInline, SizeManager.oilDropSmall];
+
+  double _progress = .43;
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Row(_label, onTap: () => setState(() => _open = !_open)),
+        if (_open)
+          GroupedSection(
+            children: [
+              AllPadding(
+                padding: SpaceManager.card,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [for (final size in _sizes) BmOilDrop(size: size)],
+                ),
+              ),
+              AllPadding(
+                padding: SpaceManager.card,
+                child: Row(
+                  children: [
+                    BmOilDrop(progress: _progress),
+                    Expanded(
+                      child: Slider(
+                        value: _progress,
+                        onChanged: (value) => setState(() => _progress = value),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 }
