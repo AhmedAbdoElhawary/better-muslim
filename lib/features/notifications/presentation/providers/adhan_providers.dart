@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/adhan_player.dart';
@@ -16,7 +17,16 @@ final adhanPlayerProvider = Provider<AdhanPlayer>((ref) {
   } else {
     player = JustAudioAdhanPlayer();
   }
-  ref.onDispose(player.dispose);
+
+  /// the players have no ref, so the claim is made here from what they play
+  final claims = player.playback.listen((state) {
+    final use = ref.read(audioUseProvider.notifier);
+    state.playing && !state.ended ? use.claim(AudioUse.adhan) : use.release(AudioUse.adhan);
+  });
+  ref.onDispose(() {
+    claims.cancel();
+    player.dispose();
+  });
   return player;
 });
 
