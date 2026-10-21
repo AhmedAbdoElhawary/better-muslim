@@ -71,7 +71,7 @@ class _Sheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const VerticalPadding(padding: SpaceManager.s2, child: _Grabber()),
+            const VerticalPadding(padding: SpaceManager.s2, child: Grabber()),
             Flexible(child: child),
           ],
         ),
@@ -82,8 +82,9 @@ class _Sheet extends StatelessWidget {
   }
 }
 
-class _Grabber extends StatelessWidget {
-  const _Grabber();
+/// the sheets' handle, the reader's own sheets use it too
+class Grabber extends StatelessWidget {
+  const Grabber({super.key});
 
   @override
   Widget build(BuildContext context) {
