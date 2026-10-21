@@ -3,12 +3,16 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
+import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
+import 'package:better_muslim/features/azkar/view/widgets/bead_strip.dart';
 import 'package:better_muslim/features/azkar/view/widgets/tasbih_counter.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -49,6 +53,21 @@ void main() {
     }
   }
 
+  /// the bead in focus, the strip's painter reads it every frame
+  double focus(WidgetTester tester) {
+    final paint = find.descendant(of: find.byType(BeadStrip), matching: find.byType(CustomPaint));
+    final painter = tester.widget<CustomPaint>(paint).painter! as dynamic;
+    return (painter.focus as Animation<double>).value;
+  }
+
+  /// the azkar tab first, so the round can be written before tasbih reads it
+  Future<void> openWith(WidgetTester tester, SettingsCompanion round, {Locale? locale}) async {
+    await pumpAzkar(tester, await designOverrides(), locale: locale ?? const Locale('en'));
+    await tester.runAsync(() => dbOf(tester).updateSettings(round));
+    containerOf(tester).read(routerProvider).push(Routes.tasbih);
+    await tester.pumpAndSettle();
+  }
+
   ({int count, int target}) counter(WidgetTester tester) {
     final widget = tester.widget<TasbihCounter>(find.byType(TasbihCounter));
     return (count: widget.count, target: widget.target);
@@ -65,7 +84,6 @@ void main() {
       '34',
       'سُبْحَانَ اللَّهِ',
       'Glory be to Allah',
-      '16',
       'of 33',
       'Tap anywhere to count',
     ]) {
@@ -73,26 +91,127 @@ void main() {
     }
     expect(find.text('SubhanAllah'), findsNWidgets(2));
     expect(find.text('33'), findsNWidgets(2));
+    expect(counter(tester), (count: 16, target: 33));
     expect(tester.widget<NavBar>(find.byType(NavBar)).index, 3);
     await unmount(tester);
   });
 
-  testWidgets('17 taps finish the set once, the next starts alhamdulillah at 1', (tester) async {
+  testWidgets('17 taps finish subhanallah once, a second later alhamdulillah at 0', (tester) async {
     await open(tester);
     await tap(tester, 17);
-    await tester.pumpAndSettle();
+    await tester.pump(BmMotion.completionPause - const Duration(milliseconds: 100));
 
-    expect(find.text('Set complete'), findsOneWidget);
-    expect(find.text('33'), findsWidgets);
+    expect(counter(tester), (count: 33, target: 33));
     expect(phone.haptics.where((haptic) => haptic == bead), hasLength(17));
     expect(phone.haptics.where((haptic) => haptic == complete), hasLength(2));
+    expect(phone.announcements, isEmpty, reason: 'only a complete round is announced');
+
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 0, target: 33));
+    expect(find.text('Alhamdulillah'), findsNWidgets(2));
+    expect(find.text('of 33'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('a tap in the wait counts 1 on the next dhikr, nothing moves after', (tester) async {
+    await open(tester);
+    await tap(tester, 17);
+    await tap(tester, 1);
+    await tester.pump(BmMotion.completionPause * 2);
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 1, target: 33));
+    expect(find.text('Alhamdulillah'), findsNWidgets(2));
+    await unmount(tester);
+  });
+
+  testWidgets('a chip in the wait cancels the move and shows its own count', (tester) async {
+    await open(tester);
+    await tap(tester, 17);
+    await tester.tap(find.text('Allahu Akbar').first);
+    await tester.pump(BmMotion.completionPause * 2);
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 0, target: 34));
+
+    await tester.tap(find.text('SubhanAllah').first);
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 33, target: 33));
+    await unmount(tester);
+  });
+
+  testWidgets('all done says set complete, the next tap starts a round at subhanallah 1', (
+    tester,
+  ) async {
+    await openWith(
+      tester,
+      const SettingsCompanion(
+        tasbihDhikr: Value(2),
+        subhanallahCount: Value(33),
+        alhamdulillahCount: Value(33),
+        allahuAkbarCount: Value(33),
+      ),
+    );
+    await tap(tester, 1);
+    await tester.pump(BmMotion.completionPause * 2);
+    await tester.pumpAndSettle();
+    expect(find.text('Set complete'), findsOneWidget);
+    expect(counter(tester), (count: 34, target: 34));
     expect(phone.announcements, ['Set complete']);
+    expect(focus(tester), 101);
 
     await tap(tester, 1);
     await tester.pumpAndSettle();
     expect(counter(tester), (count: 1, target: 33));
-    expect(find.text('Alhamdulillah'), findsNWidgets(2));
-    expect(find.text('of 33'), findsOneWidget);
+    expect(find.text('SubhanAllah'), findsNWidgets(2));
+    expect(find.text('Set complete'), findsNothing);
+    expect(focus(tester), 0);
+    await unmount(tester);
+  });
+
+  testWidgets('the string starts before bead 0, a marker sits between the dhikr', (tester) async {
+    await openWith(tester, const SettingsCompanion(subhanallahCount: Value(0)));
+    expect(focus(tester), -1);
+
+    await tester.tap(find.text('Alhamdulillah').first);
+    await tester.pumpAndSettle();
+    expect(focus(tester), 33);
+
+    await tap(tester, 1);
+    await tester.pumpAndSettle();
+    expect(focus(tester), 34);
+    await unmount(tester);
+  });
+
+  testWidgets('the counts and the dhikr come back after leaving the page', (tester) async {
+    await open(tester);
+    await tester.tap(find.text('Alhamdulillah').first);
+    await tap(tester, 2);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BarBackButton));
+    await tester.pumpAndSettle();
+    containerOf(tester).read(routerProvider).push(Routes.tasbih);
+    await tester.pumpAndSettle();
+
+    expect(counter(tester), (count: 2, target: 33));
+    await tester.tap(find.text('SubhanAllah').first);
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 16, target: 33));
+    await unmount(tester);
+  });
+
+  testWidgets('arabic: the string steps the same way, never mirrored', (tester) async {
+    await openWith(
+      tester,
+      const SettingsCompanion(subhanallahCount: Value(0)),
+      locale: const Locale('ar'),
+    );
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.byType(BeadStrip));
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    expect(focus(tester), 2);
+    expect(Directionality.of(tester.element(find.byType(BeadStrip))), TextDirection.rtl);
     await unmount(tester);
   });
 
@@ -138,9 +257,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('reset goes to subhanallah 0 with a toast, undo brings back the count', (
-    tester,
-  ) async {
+  testWidgets('reset sets all three to 0 with a toast, undo brings back the round', (tester) async {
     await open(tester);
     await tester.tap(find.text('Alhamdulillah').first);
     await tap(tester, 5);
@@ -149,11 +266,18 @@ void main() {
     expect(counter(tester), (count: 0, target: 33));
     expect(find.text('SubhanAllah'), findsNWidgets(2));
     expect(find.text('Count reset'), findsOneWidget);
+    expect(focus(tester), -1);
+    await tester.tap(find.text('Alhamdulillah').first);
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 0, target: 33));
 
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
     expect(counter(tester), (count: 5, target: 33));
     expect(find.text('Alhamdulillah'), findsNWidgets(2));
+    await tester.tap(find.text('SubhanAllah').first);
+    await tester.pumpAndSettle();
+    expect(counter(tester), (count: 16, target: 33));
     await unmount(tester);
   });
 
@@ -219,7 +343,8 @@ void main() {
     await tap(tester, 17);
     await tester.pump();
 
-    expect(find.text('Set complete'), findsOneWidget);
+    expect(counter(tester), (count: 33, target: 33));
+    expect(focus(tester), 32);
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     /// the set complete haptic's second tap
