@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:flutter/widgets.dart';
 
 /// a title that flies from the row it was tapped on into the pushed page's bar (FR-033). the tag
