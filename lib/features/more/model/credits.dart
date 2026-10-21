@@ -54,6 +54,33 @@ const credits = [
     license: _ofl,
     link: 'https://fonts.google.com/specimen/Amiri',
   ),
+  Credit(
+    source: 'Amiri Quran',
+    useKey: StringsManager.useFonts,
+    license: _ofl,
+    link: 'https://fonts.google.com/specimen/Amiri+Quran',
+  ),
+  // TODO(ahmed): QUL's exact credit line and license for the Madinah V2 layout and QPC Hafs words, a wrong credit breaks their terms.
+  Credit(
+    source: 'Quranic Universal Library (QUL)',
+    useKey: StringsManager.useMushafText,
+    link: 'https://qul.tarteel.ai',
+  ),
+  Credit(
+    source: 'Tanzil · Sahih International',
+    useKey: StringsManager.useTranslation,
+    link: 'https://tanzil.net',
+  ),
+  Credit(
+    source: 'Tanzil · Tafsir al-Muyassar',
+    useKey: StringsManager.useTafsir,
+    link: 'https://tanzil.net',
+  ),
+  Credit(
+    source: 'EveryAyah · Mishary Rashid Alafasy',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
   // TODO(ahmed): confirm the source of the azkar and duas text and translation, add its license and https link, a wrong credit breaks the license.
   Credit(source: 'Hisn al-Muslim', useKey: StringsManager.useAzkarDuas),
   // TODO(ahmed): the adhan recordings' source, license and https link once the licensed files are in.
