@@ -1,8 +1,10 @@
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/features/home/view/widgets/date_line.dart';
 import 'package:better_muslim/features/home/view/widgets/location_pill.dart';
 import 'package:better_muslim/features/home/view/widgets/next_prayer_card.dart';
@@ -36,15 +38,22 @@ class HomePage extends ConsumerWidget {
               const _Sky(),
               HorizontalPadding(
                 padding: SpaceManager.screen,
-                child: hasLocation ? const NextPrayerCard() : const NoLocationCard(),
-              ),
-              if (hasLocation)
-                const OnlyPadding(
-                  top: SpaceManager.s4,
-                  start: SpaceManager.stripSide,
-                  end: SpaceManager.stripSide,
-                  child: PrayerStrip(),
+                child: BmSwitcher(
+                  child: hasLocation
+                      ? const NextPrayerCard(key: ValueKey(true))
+                      : const NoLocationCard(key: ValueKey(false)),
                 ),
+              ),
+              BmSwitcher(
+                child: hasLocation
+                    ? const OnlyPadding(
+                        top: SpaceManager.s4,
+                        start: SpaceManager.stripSide,
+                        end: SpaceManager.stripSide,
+                        child: PrayerStrip(),
+                      )
+                    : const SizedBox.shrink(),
+              ),
               const OnlyPadding(
                 top: SpaceManager.homeCardGap,
                 start: SpaceManager.screen,
@@ -85,7 +94,14 @@ class _Sky extends ConsumerWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned.fill(child: SkyHeader(overlap: SpaceManager.homeCardOverlap.r)),
-          if (hasLocation) const Positioned.fill(child: SkyLabels()),
+          Positioned.fill(
+            child: AnimatedSwitcher(
+              duration: BmMotion.standard,
+              layoutBuilder: (current, previous) =>
+                  Stack(fit: StackFit.expand, children: [...previous, ?current]),
+              child: hasLocation ? const SkyLabels() : null,
+            ),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -118,8 +134,9 @@ class _HeaderText extends ConsumerWidget {
       children: [
         /// bm_sky: a 0 → 28% black scrim behind the header text on the bright skies. it fades out
         /// below the text instead of ending on a hard line
-        if (bright) ...[
-          Positioned.fill(
+        Positioned.fill(
+          child: _Scrim(
+            bright: bright,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -130,11 +147,14 @@ class _HeaderText extends ConsumerWidget {
               ),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: -SizeManager.skyScrimFade.r,
-            height: SizeManager.skyScrimFade.r,
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: -SizeManager.skyScrimFade.r,
+          height: SizeManager.skyScrimFade.r,
+          child: _Scrim(
+            bright: bright,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -145,7 +165,7 @@ class _HeaderText extends ConsumerWidget {
               ),
             ),
           ),
-        ],
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -159,17 +179,36 @@ class _HeaderText extends ConsumerWidget {
                 children: [LocationPill(), DateLine()],
               ),
             ),
-            if (hasLocation)
-              OnlyPadding(
-                top: (isArabic ? SpaceManager.nowTopAr : SpaceManager.nowTop) - _hitInset,
-                start: SpaceManager.s5,
-                end: SpaceManager.s5,
-                child: const NowBlock(),
-              ),
+            BmSwitcher(
+              child: hasLocation
+                  ? OnlyPadding(
+                      top: (isArabic ? SpaceManager.nowTopAr : SpaceManager.nowTop) - _hitInset,
+                      start: SpaceManager.s5,
+                      end: SpaceManager.s5,
+                      child: const NowBlock(),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             const RSizedBox.vertical(SpaceManager.s4),
           ],
         ),
       ],
+    );
+  }
+}
+
+/// the bright skies' scrim fades with the sky instead of popping in
+class _Scrim extends StatelessWidget {
+  const _Scrim({required this.bright, required this.child});
+  final bool bright;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: bright ? 1 : 0,
+      duration: MediaQuery.disableAnimationsOf(context) ? BmMotion.micro : BmMotion.standard,
+      child: child,
     );
   }
 }
