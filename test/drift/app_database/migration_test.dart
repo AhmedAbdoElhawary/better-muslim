@@ -5,12 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
+import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
+import 'generated/schema_v8.dart' as v8;
+import 'generated/schema_v9.dart' as v9;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -406,6 +409,232 @@ void main() {
         final row = await newDb.select(newDb.settings).getSingle();
         expect(row.toJson(), {...placed.toJson(), 'prayerCountdown': 1});
         expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+      },
+    );
+  });
+
+  test('v7 to v8 moves the count to the shown dhikr, Hijri and the glow on', () async {
+    const placed = v7.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 1,
+      digits: 'western',
+      theme: 'iznik',
+      themeMode: 'dark',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      fajrRecording: 'makkah',
+      dhuhrRecording: 'madinah',
+      asrRecording: 'makkah',
+      maghribRecording: 'makkah',
+      ishaRecording: 'makkah',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+      tasbihDhikr: 1,
+      tasbihCount: 12,
+      azkarNudges: 0,
+      prayerCountdown: 0,
+      onboarded: 1,
+    );
+    const prayed = v7.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 7,
+      newVersion: 8,
+      createOld: v7.DatabaseAtV7.new,
+      createNew: v8.DatabaseAtV8.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, placed)
+          ..insert(oldDb.prayerLog, prayed);
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        final old = placed.toJson()..remove('tasbihCount');
+        expect(row.toJson(), {
+          ...old,
+          'subhanallahCount': 0,
+          'alhamdulillahCount': 12,
+          'allahuAkbarCount': 0,
+          'calendarMode': 'hijri',
+          'topGlow': 1,
+        });
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+      },
+    );
+  });
+
+  test('v7 to v8 gives allahu akbar its count', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 7,
+      newVersion: 8,
+      createOld: v7.DatabaseAtV7.new,
+      createNew: v8.DatabaseAtV8.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v7.SettingsCompanion(tasbihDhikr: Value(2), tasbihCount: Value(34)),
+      ),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(
+          (row.subhanallahCount, row.alhamdulillahCount, row.allahuAkbarCount, row.tasbihDhikr),
+          (0, 0, 34, 2),
+        );
+      },
+    );
+  });
+
+  test('v8 to v9 keeps every row, the language follows the phone', () async {
+    const placed = v8.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 1,
+      digits: 'western',
+      theme: 'iznik',
+      themeMode: 'dark',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      fajrRecording: 'makkah',
+      dhuhrRecording: 'madinah',
+      asrRecording: 'makkah',
+      maghribRecording: 'makkah',
+      ishaRecording: 'makkah',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+      tasbihDhikr: 1,
+      subhanallahCount: 0,
+      alhamdulillahCount: 12,
+      allahuAkbarCount: 0,
+      azkarNudges: 0,
+      prayerCountdown: 0,
+      calendarMode: 'gregorian',
+      topGlow: 0,
+      onboarded: 1,
+    );
+    const prayed = v8.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 8,
+      newVersion: 9,
+      createOld: v8.DatabaseAtV8.new,
+      createNew: v9.DatabaseAtV9.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, placed)
+          ..insert(oldDb.prayerLog, prayed);
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(row.toJson(), {...placed.toJson(), 'language': 'phone'});
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+      },
+    );
+  });
+
+  test('v9 to v10 keeps every row, reads the quran defaults and two empty tables', () async {
+    const placed = v9.SettingsData(
+      id: 1,
+      latitude: 21.4225,
+      longitude: 39.8262,
+      placeName: 'Makkah',
+      countryCode: 'SA',
+      timeZone: 'Asia/Riyadh',
+      locationMode: 'auto',
+      hijriAdjust: 1,
+      digits: 'western',
+      theme: 'iznik',
+      themeMode: 'dark',
+      reduceMotion: 0,
+      haptics: 1,
+      uiSounds: 0,
+      storeResetPending: 0,
+      firstUse: '2026-10-01',
+      fajrSound: 'adhan',
+      dhuhrSound: 'silent',
+      asrSound: 'tone',
+      maghribSound: 'adhan',
+      ishaSound: 'tone',
+      fajrRecording: 'makkah',
+      dhuhrRecording: 'madinah',
+      asrRecording: 'makkah',
+      maghribRecording: 'makkah',
+      ishaRecording: 'makkah',
+      reminderMinutes: 15,
+      notificationsAsked: 1,
+      tasbihDhikr: 1,
+      subhanallahCount: 0,
+      alhamdulillahCount: 12,
+      allahuAkbarCount: 0,
+      azkarNudges: 0,
+      prayerCountdown: 0,
+      calendarMode: 'gregorian',
+      topGlow: 0,
+      language: 'arabic',
+      onboarded: 1,
+    );
+    const prayed = v9.PrayerLogData(date: '2026-10-14', prayer: 'asr');
+
+    await verifier.testWithDataIntegrity(
+      oldVersion: 9,
+      newVersion: 10,
+      createOld: v9.DatabaseAtV9.new,
+      createNew: v10.DatabaseAtV10.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch
+          ..insert(oldDb.settings, placed)
+          ..insert(oldDb.prayerLog, prayed);
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(row.toJson(), {
+          ...placed.toJson(),
+          'lastReadSurah': 1,
+          'lastReadAyah': 1,
+          'lastReadPage': 1,
+          'lastReadAt': null,
+          'pageColor': 'followSky',
+          'quranLayout': 'mushaf',
+          'pageTurn': 'book',
+          'keepScreenOn': 0,
+          'quranArabicSize': 0,
+          'quranTranslationSize': 0,
+          'reciteSpeed': 1.0,
+          'reciteRepeat': 1,
+          'recitePause': 0,
+        });
+        expect((await newDb.select(newDb.prayerLog).get()).single.toJson(), prayed.toJson());
+        expect(await newDb.select(newDb.quranBookmarks).get(), isEmpty);
+        expect(await newDb.select(newDb.quranNotes).get(), isEmpty);
       },
     );
   });
