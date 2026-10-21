@@ -3,6 +3,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
 import 'package:drift/drift.dart';
@@ -27,8 +28,9 @@ List<Override> testOverrides({
   PositionSource? positionSource,
   FlavorConfig flavor = devConfig,
   bool onboarded = true,
+  BmThemeId? theme,
 }) => [
-  _memoryDatabase(),
+  _memoryDatabase(theme),
   flavorProvider.overrideWithValue(flavor),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
   onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
@@ -37,9 +39,10 @@ List<Override> testOverrides({
 
 /// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store. onboarded
 /// false is a replay
-Future<List<Override>> designOverrides({bool onboarded = true}) async {
+Future<List<Override>> designOverrides({bool onboarded = true, BmThemeId? theme}) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final db = await designScenarioStore();
+  if (theme != null) await db.updateSettings(SettingsCompanion(theme: Value(theme)));
   return [
     databaseProvider.overrideWith((ref) {
       ref.onDispose(db.close);
@@ -60,10 +63,13 @@ Future<List<Override>> designOverrides({bool onboarded = true}) async {
   ];
 }
 
-Override _memoryDatabase() => databaseProvider.overrideWith((ref) {
+Override _memoryDatabase(BmThemeId? theme) => databaseProvider.overrideWith((ref) {
   /// every test gets its own in-memory store, so drift's shared executor warning doesn't apply
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final db = AppDatabase.forTesting(NativeDatabase.memory());
+
+  /// queued before the first settings read, so the app never shows the default theme
+  if (theme != null) db.updateSettings(SettingsCompanion(theme: Value(theme)));
   ref.onDispose(db.close);
   return db;
 });
