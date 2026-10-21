@@ -95,7 +95,7 @@ void main() {
     }
     await waitFor(tester, find.text('Ramadan 1448'));
     final first = tester.widget<DayCell>(
-      find.byWidgetPredicate((widget) => widget is DayCell && widget.hijriDay == '1'),
+      find.byWidgetPredicate((widget) => widget is DayCell && widget.day == '1'),
     );
     expect(first.look, DayLook.event);
     await tap(tester, find.byType(BarBackButton));
