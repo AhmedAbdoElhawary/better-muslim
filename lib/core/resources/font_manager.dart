@@ -119,6 +119,35 @@ abstract final class FontSizeManager {
 
   /// the components' text field error line (03 Inputs)
   static const double fieldError = 12.5;
+
+  /// quran (09 Quran). pages 3 to 604 step down from quranPage until the widest line fits
+  static const double quranPage = 22.5;
+  static const double mushafHeader = 15;
+  static const double ayahMarker = 13;
+  static const double quranTag = 11;
+  static const double cartouche = 19;
+  static const double surahName = 15.5;
+  static const double surahNameAr = 21;
+  static const double quranStudy = 24;
+  static const double tafsir = 19;
+  static const double tafsirChip = 13.5;
+
+  /// the mini player and recitation (4.25)
+  static const double miniPlayerTitle = 14.5;
+  static const double reciterInitials = 16;
+  static const double repeatBadge = 10;
+
+  /// 4.30's card in design points, scaled down by SizeManager.shareFit to fit the whole ayah
+  static const double shareAyah = 25;
+  static const double shareTranslation = 14;
+  static const double shareFooter = 11;
+
+  /// the translation layout (4.07). each display step moves the arabic by 2 and the translation by 1
+  static const double surahHeader = 28;
+  static const double verseMarker = 12;
+  static const double verseTranslation = 14;
+  static const double arabicStep = 2;
+  static const double translationStep = 1;
 }
 
 abstract final class LineHeightManager {
@@ -166,6 +195,18 @@ abstract final class LineHeightManager {
 
   /// 4.11 and 4.12's body under the title
   static const double stepBody = 1.6;
+
+  /// 58 pt mushaf lines at 22.5 pt
+  static const double quranPage = 58 / 22.5;
+  static const double quranStudy = 2;
+  static const double tafsir = 1.95;
+
+  static const double shareAyah = 1.9;
+  static const double shareTranslation = 1.5;
+
+  static const double surahHeader = 1.5;
+  static const double verseCell = 1.55;
+  static const double verseMarker = 1;
 }
 
 abstract final class LetterSpacingManager {
@@ -184,4 +225,10 @@ abstract final class LetterSpacingManager {
 
   /// the snippet's countdown, .01em of 22 pt
   static const double snippetCountdown = .22;
+
+  /// .12em of 4.18's 11 pt continue reading tag
+  static const double quranTag = 1.32;
+
+  /// .06em of 4.29's 11 pt AUTO tag
+  static const double autoTag = .66;
 }
