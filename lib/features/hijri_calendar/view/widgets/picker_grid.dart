@@ -9,6 +9,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/sliding_selection.dart';
 import 'package:better_muslim/features/hijri_calendar/model/calendar_month.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/calendar_format.dart';
