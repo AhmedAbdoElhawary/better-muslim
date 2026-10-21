@@ -62,6 +62,7 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.maghribRecording,
         row?.ishaRecording,
         row?.azkarNudges,
+        row?.language,
 
         /// written after 4.12's answer, so a grant there schedules at once (R10)
         row?.notificationsAsked,
@@ -101,7 +102,7 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
 
   bool get _isScenario => ref.read(flavorProvider).isDesignScenario;
 
-  Locale get _locale => AppLocalizations.localeFor(PlatformDispatcher.instance.locales);
+  Locale get _locale => AppLocalizations.localeOf(ref.read(settingsProvider).value?.language);
 
   @override
   void initState() {
@@ -115,6 +116,8 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       },
     );
     ref.listenManual(_scheduleInputsProvider, (_, _) {
+      /// the mark prayed button keeps the language init gave it
+      if (_initLocale != null && _locale != _initLocale) _init();
       _debounce?.cancel();
       _debounce = Timer(_debounceTime, _reschedule);
     });
