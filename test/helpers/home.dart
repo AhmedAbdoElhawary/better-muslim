@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,10 +58,15 @@ Location makkah() => Location(
 
 /// makkah with the real calculation (maghrib is 17:56 there too) and a clock that moves with the
 /// test's fake time
-List<Override> makkahAt(WidgetTester tester, DateTime start, {List<Override> extra = const []}) {
+List<Override> makkahAt(
+  WidgetTester tester,
+  DateTime start, {
+  BmThemeId? theme,
+  List<Override> extra = const [],
+}) {
   final origin = tester.binding.clock.now();
   return [
-    ...testOverrides(),
+    ...testOverrides(theme: theme),
     clockProvider.overrideWithValue(() => start.add(tester.binding.clock.now().difference(origin))),
     locationProvider.overrideWithValue(makkah()),
     ...extra,
