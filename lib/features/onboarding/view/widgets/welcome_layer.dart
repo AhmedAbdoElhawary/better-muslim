@@ -72,7 +72,7 @@ class WelcomeLayer extends ConsumerWidget {
                       padding: SpaceManager.welcomeTextSide,
                       child: Column(
                         children: [
-                          Opacity(
+                          CustomOpacity(
                             opacity: ch.titleOpacity(b) * out(WelcomePart.title),
                             child: RegularText(
                               StringsManager.appName,
@@ -84,7 +84,7 @@ class WelcomeLayer extends ConsumerWidget {
                             ),
                           ),
                           const RSizedBox.vertical(SpaceManager.welcomeTaglineGap),
-                          Opacity(
+                          CustomOpacity(
                             opacity:
                                 _taglineAlpha *
                                 ink *
@@ -157,7 +157,7 @@ class _Rise extends StatelessWidget {
     /// a button works once it shows (FR-013)
     return IgnorePointer(
       ignoring: shown < .5,
-      child: Opacity(
+      child: CustomOpacity(
         opacity: shown,
         child: Transform.translate(
           offset: Offset(0, (1 - shown) * SpaceManager.stepRise.r),
