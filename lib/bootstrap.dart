@@ -1,12 +1,18 @@
 import 'package:better_muslim/core/app/app.dart';
+import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/monitoring/monitoring.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/presentation/notifications_boot.dart';
+import 'package:better_muslim/features/quran/data/audio_service_recitation.dart';
+import 'package:better_muslim/features/quran/data/recitation_files.dart';
+import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
+import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
 import 'package:better_muslim/features/surfaces/presentation/surfaces_boot.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +55,15 @@ Future<void> _boot(FlavorConfig config) async {
       existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
     );
   }
+
+  /// here and not in a provider, audio_service starts once and only in the app's own engine
+  final recitation = config.isDesignScenario
+      ? null
+      : await AudioServiceRecitation.init(
+          RecitationFiles(),
+          channel: (await AppLocalizations.load(AppLocalizations.localeOf(settings.language)))
+              .tr(StringsManager.tabQuran, const {}),
+        );
   runApp(
     ProviderScope(
       overrides: [
@@ -57,8 +72,11 @@ Future<void> _boot(FlavorConfig config) async {
         phoneZoneProvider.overrideWith(() => PhoneZone(phoneZone)),
         onboardingProvider.overrideWith(() => OnboardingNotifier(done: settings.onboarded)),
         if (config.isDesignScenario) ...designScenarioOverrides(),
+        if (recitation != null) recitationProvider.overrideWithValue(recitation),
       ],
-      child: const NotificationsBoot(child: SurfacesBoot(child: App())),
+      child: const NotificationsBoot(
+        child: SurfacesBoot(child: RecitationBoot(child: App())),
+      ),
     ),
   );
 }
