@@ -12,6 +12,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const _shadowAlpha = .5;
 const _actionAlpha = .16;
+const _rest = 1.0;
+
+/// the route has one length, so the way out fades in its first half and keeps its size
+const _fadeOut = Interval(.5, 1);
+const _keepSize = Threshold(0);
 
 /// the components' destructive confirmation. true only when the action is tapped
 Future<bool> showBmDialog(
@@ -33,10 +38,25 @@ Future<bool> showBmDialog(
         .getColor(ThemeEnum.scrim)
         .withValues(alpha: context.isThemeDark ? BmOpacity.scrimDark : BmOpacity.scrimLight),
     transitionDuration: reduceMotion ? BmMotion.micro : BmMotion.standard,
-    transitionBuilder: (context, animation, _, child) => FadeTransition(
-      opacity: CurvedAnimation(parent: animation, curve: BmMotion.standardCurve),
-      child: child,
-    ),
+    transitionBuilder: (context, animation, _, child) {
+      final fade = FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: BmMotion.standardCurve,
+          reverseCurve: _fadeOut,
+        ),
+        child: child,
+      );
+      if (reduceMotion) return fade;
+
+      /// apple's alert, in from a little larger (FR-034)
+      return ScaleTransition(
+        scale: Tween(begin: BmMotion.dialogFrom, end: _rest).animate(
+          CurvedAnimation(parent: animation, curve: BmMotion.decelerate, reverseCurve: _keepSize),
+        ),
+        child: fade,
+      );
+    },
     pageBuilder: (context, _, _) =>
         _Dialog(title: title, body: body, action: action, cancel: cancel, destructive: destructive),
   );
