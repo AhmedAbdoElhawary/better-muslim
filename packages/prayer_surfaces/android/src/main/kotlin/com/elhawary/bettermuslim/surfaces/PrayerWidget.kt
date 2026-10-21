@@ -3,16 +3,19 @@ package com.elhawary.bettermuslim.surfaces
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
 
-// the home screen widget, 4 x 2 with the band and the five times, 2 x 2 and 4 x 1 when resized
-class PrayerWidget : AppWidgetProvider() {
+// the home screen widget, 4 x 2 with the band and the five times, 2 x 2 and 4 x 1 when resized.
+// the two below are the same widget, their own picker entry starts them at the smaller sizes
+open class PrayerWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         draw(context, manager, ids)
         SurfaceTicks.arm(context)
@@ -33,8 +36,18 @@ class PrayerWidget : AppWidgetProvider() {
             R.id.surfaces_cell_0, R.id.surfaces_cell_1, R.id.surfaces_cell_2, R.id.surfaces_cell_3, R.id.surfaces_cell_4,
         )
 
-        fun ids(context: Context): IntArray =
-            AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, PrayerWidget::class.java))
+        // each picker entry with the size its preview is drawn at
+        private val PROVIDERS = listOf(
+            Triple(PrayerWidget::class.java, 250f, 110f),
+            Triple(NextPrayerWidget::class.java, 110f, 110f),
+            Triple(PrayerTimesWidget::class.java, 250f, 60f),
+        )
+
+        fun ids(context: Context): IntArray {
+            val manager = AppWidgetManager.getInstance(context)
+            return PROVIDERS.flatMap { (provider) -> manager.getAppWidgetIds(ComponentName(context, provider)).asList() }
+                .toIntArray()
+        }
 
         fun refresh(context: Context) = draw(context, AppWidgetManager.getInstance(context), ids(context))
 
@@ -59,7 +72,21 @@ class PrayerWidget : AppWidgetProvider() {
             val now = System.currentTimeMillis()
             val state = SurfaceState.of(SurfaceData.load(context), now)
             for (id in ids) manager.updateAppWidget(id, views(context, painter(context, manager, id), state, now))
+            if (drawn(state) != prefs(context).getLong(DRAWN, -1)) preview(context, manager, state, now)
             prefs(context).edit().putLong(DRAWN, drawn(state)).apply()
+        }
+
+        // android 15 shows this in the picker, before only the app icon. the launcher allows a few
+        // an hour, so only a new entry sends them
+        private fun preview(context: Context, manager: AppWidgetManager, state: SurfaceState, now: Long) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
+            for ((provider, width, height) in PROVIDERS) {
+                manager.setWidgetPreview(
+                    ComponentName(context, provider),
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                    views(context, WidgetPainter(context, width, height), state, now),
+                )
+            }
         }
 
         private fun views(context: Context, painter: WidgetPainter, state: SurfaceState, now: Long): RemoteViews {
@@ -127,3 +154,7 @@ class PrayerWidget : AppWidgetProvider() {
         private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     }
 }
+
+class NextPrayerWidget : PrayerWidget()
+
+class PrayerTimesWidget : PrayerWidget()
