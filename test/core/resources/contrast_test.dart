@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +64,28 @@ void main() {
             _ratio(text.resolve(palette), under.resolve(palette)),
             greaterThanOrEqualTo(4.5),
             reason: '${text.name} on ${under.name}',
+          );
+        }
+      });
+
+      /// the glass bar over the glow's strongest point and over a card under it, the card's text
+      /// blurred away by the bar (FR-041)
+      test('${id.name} $mode: the bar title over the glow meets AA', () {
+        Color glass(Color under) => Color.alphaBlend(
+          ThemeEnum.surface.resolve(palette).withValues(alpha: BmGlass.surfaceOpacity),
+          under,
+        );
+        final bg = ThemeEnum.bg.resolve(palette);
+        final glow = Color.alphaBlend(ThemeEnum.sky3.resolve(palette).withValues(alpha: .7), bg);
+        for (final (name, under) in [
+          ('glow', glow),
+          ('bg', bg),
+          ('raised', ThemeEnum.raised.resolve(palette)),
+        ]) {
+          expect(
+            _ratio(ThemeEnum.text.resolve(palette), glass(under)),
+            greaterThanOrEqualTo(4.5),
+            reason: 'text on the glass over $name',
           );
         }
       });
