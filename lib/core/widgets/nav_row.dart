@@ -1,10 +1,12 @@
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,12 +26,17 @@ class NavRow extends StatelessWidget {
     this.translateValue = true,
     this.toggled,
     this.onTap,
+    this.heroTag,
+    this.startFlex = 2,
+    this.endFlex = 3,
     super.key,
   });
 
   /// a StringsManager key, or a name like a credit's source with translateTitle false
   final String title;
   final bool translateTitle;
+  final int startFlex;
+  final int endFlex;
 
   /// a BmIcon at the list size, tinted text2 here
   final Widget? icon;
@@ -45,6 +52,9 @@ class NavRow extends StatelessWidget {
   /// null draws the value with no chevron and no tap (Version)
   final VoidCallback? onTap;
 
+  /// the route its title flies into, see TitleHero
+  final String? heroTag;
+
   @override
   Widget build(BuildContext context) {
     final icon = this.icon;
@@ -52,21 +62,35 @@ class NavRow extends StatelessWidget {
     final toggled = this.toggled;
     final onTap = this.onTap;
     final stacked = MediaQuery.textScalerOf(context).scale(1) > _stackAt;
+
+    /// a new value after a sheet closes crossfades in place, no slide
     final valueText = value == null
         ? null
-        : RegularText(
-            value,
-            args: args,
-            translate: translateValue,
-            fontSize: FontSizeManager.secondary,
-            color: ThemeEnum.text2,
-            textAlign: stacked ? null : TextAlign.end,
+        : AnimatedSwitcher(
+            duration: BmMotion.micro,
+            layoutBuilder: (current, previous) => Stack(
+              alignment: stacked
+                  ? AlignmentDirectional.centerStart
+                  : AlignmentDirectional.centerEnd,
+              children: [...previous, ?current],
+            ),
+            child: RegularText(
+              value,
+              key: ValueKey('$value$args'),
+              args: args,
+              translate: translateValue,
+              fontSize: FontSizeManager.secondary,
+              color: ThemeEnum.text2,
+              textAlign: stacked ? null : TextAlign.end,
+            ),
           );
-    final title = RegularText(
-      this.title,
-      translate: translateTitle,
-      fontSize: FontSizeManager.body,
-    );
+    final text = RegularText(this.title, translate: translateTitle, fontSize: FontSizeManager.body);
+    final title = heroTag == null
+        ? text
+        : Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TitleHero(tag: heroTag, child: text),
+          );
     return MergeSemantics(
       child: Semantics(
         button: onTap != null && toggled == null,
@@ -96,6 +120,7 @@ class NavRow extends StatelessWidget {
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
                   ],
                   Expanded(
+                    flex: startFlex,
                     child: stacked && valueText != null
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +134,7 @@ class NavRow extends StatelessWidget {
                   ),
                   if (!stacked && valueText != null) ...[
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
-                    Expanded(child: valueText),
+                    Expanded(flex: endFlex, child: valueText),
                   ],
                   if (toggled != null) ...[
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
