@@ -63,7 +63,7 @@ class IntroLayer extends ConsumerWidget {
             child: Center(
               child: HorizontalPadding(
                 padding: SpaceManager.welcomeTextSide,
-                child: Opacity(
+                child: CustomOpacity(
                   opacity: opacity,
                   child: ImageFiltered(
                     enabled: blur > .05,
@@ -91,7 +91,7 @@ class IntroLayer extends ConsumerWidget {
           left: 0,
           right: 0,
           bottom: inset + SpaceManager.swipeHintBottom.r,
-          child: Opacity(
+          child: CustomOpacity(
             opacity: ch.hintOpacity(lift, b) * shown,
             child: Center(
               child: Semantics(
