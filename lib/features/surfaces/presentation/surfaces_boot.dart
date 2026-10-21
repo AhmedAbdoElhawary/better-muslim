@@ -39,6 +39,7 @@ final _surfaceInputsProvider = Provider((ref) {
         row?.digits,
         row?.reminderMinutes,
         row?.prayerCountdown,
+        row?.language,
       );
     }),
   );
@@ -112,7 +113,7 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
       final next = await writeSurfaces(
         db,
         channel: channel,
-        locale: AppLocalizations.localeFor(PlatformDispatcher.instance.locales),
+        locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
         use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
         phoneZone: phoneZone,
         now: clock(),
