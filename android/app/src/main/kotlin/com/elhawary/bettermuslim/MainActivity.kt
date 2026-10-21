@@ -6,12 +6,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import io.flutter.embedding.android.FlutterActivity
+import android.view.WindowManager
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity : FlutterActivity() {
+// audio_service's activity, so the recitation's engine is this one (research R10)
+class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -25,7 +27,7 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        // three small calls for More, the app's own channel instead of three packages (R10)
+        // the small calls for More, the app's own channel instead of five packages (R10)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "better_muslim/system")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -59,6 +61,34 @@ class MainActivity : FlutterActivity() {
                             info.versionCode.toLong()
                         }
                         result.success("${info.versionName} ($build)")
+                    }
+                    "mail" -> {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
+                            .putExtra(Intent.EXTRA_EMAIL, arrayOf(call.argument<String>("to") ?: ""))
+                            .putExtra(Intent.EXTRA_SUBJECT, call.argument<String>("subject") ?: "")
+                            .putExtra(Intent.EXTRA_TEXT, call.argument<String>("body") ?: "")
+                        try {
+                            startActivity(intent)
+                            result.success(true)
+                        } catch (_: ActivityNotFoundException) {
+                            result.success(false)
+                        }
+                    }
+                    "device" -> {
+                        val model = if (Build.MODEL.startsWith(Build.MANUFACTURER, ignoreCase = true)) {
+                            Build.MODEL
+                        } else {
+                            "${Build.MANUFACTURER} ${Build.MODEL}"
+                        }
+                        result.success(mapOf("model" to model, "os" to "Android ${Build.VERSION.RELEASE}"))
+                    }
+                    "keepScreenOn" -> {
+                        if (call.argument<Boolean>("on") == true) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        }
+                        result.success(null)
                     }
                     else -> result.notImplemented()
                 }
