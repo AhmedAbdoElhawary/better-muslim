@@ -10,18 +10,141 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// 4.30's four backgrounds. the text takes paper's colors on paper, night's on the dark three
+enum ShareBackgroundStyle { page, emerald, sky, solid, gradient }
+
 enum ShareBackground {
-  paper(StringsManager.paper),
-  night(StringsManager.night),
-  emerald(StringsManager.emerald),
-  sky(StringsManager.sky);
+  // Original backgrounds.
+  paper(
+    StringsManager.paper,
+    style: ShareBackgroundStyle.page,
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  night(StringsManager.night, style: ShareBackgroundStyle.page),
+  emerald(StringsManager.emerald, style: ShareBackgroundStyle.emerald),
+  sky(StringsManager.sky, style: ShareBackgroundStyle.sky),
 
-  const ShareBackground(this.label);
+  // Dark backgrounds.
+  midnight(
+    StringsManager.midnight,
+    colors: [Color(0xFF050816), Color(0xFF101B3A), Color(0xFF1B2C52)],
+  ),
+  ocean(StringsManager.ocean, colors: [Color(0xFF061A2B), Color(0xFF0A354B), Color(0xFF105264)]),
+  deepSea(StringsManager.deepSea, style: ShareBackgroundStyle.solid, colors: [Color(0xFF062C30)]),
+  aurora(StringsManager.aurora, colors: [Color(0xFF101629), Color(0xFF1D3546), Color(0xFF244D49)]),
+  forest(StringsManager.forest, style: ShareBackgroundStyle.solid, colors: [Color(0xFF12372A)]),
+  pine(StringsManager.pine, colors: [Color(0xFF071F18), Color(0xFF10382B), Color(0xFF174936)]),
+  ruby(StringsManager.ruby, colors: [Color(0xFF260D1A), Color(0xFF45172B), Color(0xFF68233A)]),
+  berry(StringsManager.berry, style: ShareBackgroundStyle.solid, colors: [Color(0xFF401638)]),
+  plum(StringsManager.plum, colors: [Color(0xFF1C1028), Color(0xFF30203F), Color(0xFF493052)]),
+  indigo(StringsManager.indigo, colors: [Color(0xFF101433), Color(0xFF1A2452), Color(0xFF2B356D)]),
+  cobalt(StringsManager.cobalt, style: ShareBackgroundStyle.solid, colors: [Color(0xFF123B63)]),
+  slate(StringsManager.slate, colors: [Color(0xFF101820), Color(0xFF263746), Color(0xFF334A5B)]),
+  charcoal(StringsManager.charcoal, style: ShareBackgroundStyle.solid, colors: [Color(0xFF202124)]),
+  obsidian(
+    StringsManager.obsidian,
+    colors: [Color(0xFF080808), Color(0xFF151515), Color(0xFF242424)],
+  ),
+  copper(StringsManager.copper, colors: [Color(0xFF21140E), Color(0xFF3B2519), Color(0xFF573826)]),
+  golden(StringsManager.golden, style: ShareBackgroundStyle.solid, colors: [Color(0xFF302516)]),
+  teal(StringsManager.teal, colors: [Color(0xFF062729), Color(0xFF0B4142), Color(0xFF145351)]),
+  roseDark(
+    StringsManager.roseDark,
+    colors: [Color(0xFF24121C), Color(0xFF421E2D), Color(0xFF5D2B3D)],
+  ),
+  lavenderNight(
+    StringsManager.lavenderNight,
+    colors: [Color(0xFF1C172B), Color(0xFF302341), Color(0xFF443056)],
+  ),
+  firelight(
+    StringsManager.firelight,
+    colors: [Color(0xFF21120D), Color(0xFF3D2015), Color(0xFF5A2F1D)],
+  ),
+  storm(StringsManager.storm, colors: [Color(0xFF121B28), Color(0xFF222F42), Color(0xFF344456)]),
 
+  // Light backgrounds.
+  cream(
+    StringsManager.cream,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFFBF6E9)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  sand(
+    StringsManager.sand,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFF1E3C7)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  sage(
+    StringsManager.sage,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFE4EBDD)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  blush(
+    StringsManager.blush,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFF8E7EC)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  lavender(
+    StringsManager.lavender,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFECE7FA)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  mint(
+    StringsManager.mint,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFE2F3EA)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  skyLight(
+    StringsManager.skyLight,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFE5F0FA)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  ),
+  pearl(
+    StringsManager.pearl,
+    style: ShareBackgroundStyle.solid,
+    colors: [Color(0xFFF3F0E9)],
+    pageColor: PageColor.paper,
+    isLight: true,
+  );
+
+  const ShareBackground(
+    this.label, {
+    this.style = ShareBackgroundStyle.gradient,
+    this.colors = const [],
+    this.pageColor = PageColor.night,
+    this.isLight = false,
+  });
+
+  /// Localization key displayed in the background picker.
   final String label;
 
-  PageColor get page => this == paper ? PageColor.paper : PageColor.night;
+  /// How the background is painted.
+  final ShareBackgroundStyle style;
+
+  /// One color for solid backgrounds, three for gradients.
+  final List<Color> colors;
+
+  /// Palette used for the ayah card's foreground and theme.
+  final PageColor pageColor;
+
+  /// Whether the background needs dark foreground text.
+  final bool isLight;
+
+  /// Compatibility with ShareCard's existing API.
+  PageColor get page => pageColor;
 }
 
 enum ShareSize {
@@ -187,13 +310,12 @@ class ShareBackgroundFill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (background) {
-      ShareBackground.paper ||
-      ShareBackground.night => ColoredBox(color: context.getColor(ThemeEnum.page)),
-      ShareBackground.emerald => ColoredBox(color: context.getColor(ThemeEnum.shareEmerald)),
+    return switch (background.style) {
+      ShareBackgroundStyle.page => ColoredBox(color: context.getColor(ThemeEnum.page)),
 
-      /// css 160deg, a picture so never mirrored
-      ShareBackground.sky => DecoratedBox(
+      ShareBackgroundStyle.emerald => ColoredBox(color: context.getColor(ThemeEnum.shareEmerald)),
+
+      ShareBackgroundStyle.sky => DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: const Alignment(-.34, -.94),
@@ -204,6 +326,18 @@ class ShareBackgroundFill extends StatelessWidget {
               context.getColor(ThemeEnum.shareSky2),
               context.getColor(ThemeEnum.shareSky3),
             ],
+          ),
+        ),
+      ),
+
+      ShareBackgroundStyle.solid => ColoredBox(color: background.colors.single),
+
+      ShareBackgroundStyle.gradient => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: const Alignment(-.34, -.94),
+            end: const Alignment(.34, .94),
+            colors: background.colors,
           ),
         ),
       ),
