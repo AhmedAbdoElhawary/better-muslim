@@ -4,6 +4,7 @@ import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -15,6 +16,7 @@ import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart' show showToast;
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/share_card.dart';
@@ -27,7 +29,7 @@ import 'package:share_plus/share_plus.dart';
 
 /// 4.30, the ayah as a still image on a brand background (FR-041)
 Future<void> showShareSheet(BuildContext context, AyahKey ayah) =>
-    showBmSheet(context, builder: (_) => _ShareSheet(ayah));
+    showBmSheet(context, maxSheetHeight: true, builder: (_) => _ShareSheet(ayah));
 
 class _ShareSheet extends ConsumerStatefulWidget {
   const _ShareSheet(this.ayah);
@@ -142,19 +144,42 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
               ),
               TopPadding(
                 padding: SpaceManager.shareSwatchTop,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (final (i, background) in ShareBackground.values.indexed) ...[
-                      if (i > 0) const RSizedBox.horizontal(SpaceManager.shareSwatchGap),
-                      Swatch(
-                        label: background.label,
-                        selected: background == _background,
-                        onTap: () => setState(() => _background = background),
-                        fill: _Fill(background),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Container(
+                      constraints: BoxConstraints(maxHeight: 80.r),
+                      child: CustomScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: 100.r),
+
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  for (final (i, background) in ShareBackground.values.indexed) ...[
+                                    if (i == 0)
+                                      const RSizedBox.horizontal(SpaceManager.shareSwatchGap),
+
+                                    Swatch(
+                                      label: background.label,
+                                      selected: background == _background,
+                                      onTap: () => setState(() => _background = background),
+                                      fill: _Fill(background),
+                                    ),
+                                    const RSizedBox.horizontal(SpaceManager.shareSwatchGap),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ],
+                    );
+                  },
                 ),
               ),
               OnlyPadding(
@@ -170,7 +195,14 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
                       labelOf: (size) => size.label,
                       muted: squareFits ? const {} : const {ShareSize.square},
                       onChanged: (size) {
-                        if (size == ShareSize.square && !squareFits) return;
+                        if (size == ShareSize.square && !squareFits) {
+                          showToast(
+                            context,
+                            StringsManager.turnOffTranslation,
+                            icon: BmIconName.adhan,
+                          );
+                          return;
+                        }
                         setState(() => _size = size);
                       },
                     ),
