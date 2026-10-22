@@ -97,7 +97,7 @@ class BmPalette {
       surface: surface,
       raised: mix(surface, text, dark ? .04 : .02),
       variant: mix(surface, text, dark ? .08 : .06),
-      outline: mix(surface, text, dark ? .12 : .14),
+      outline: mix(surface, text, dark ? .04 : .1),
       outlineStrong: mix(surface, text, dark ? .32 : .42),
       text: text,
       text2: text2,
