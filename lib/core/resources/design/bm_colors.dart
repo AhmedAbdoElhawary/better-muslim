@@ -250,6 +250,58 @@ abstract final class BmPagePalette {
   // TODO(ahmed): cream's colors from the designer, 09 Quran names Cream but K.PAGE has no values.
   static const cream = paper;
 
+  /// base in another app theme: the paper and ink stay, the tints come from theme. qiyam emerald
+  /// is the theme K.PAGE was drawn in, so it gets base back exactly
+  static BmPalette tint(BmPalette base, BmPalette theme) {
+    if (theme.primary == base.primary && theme.accent == base.accent && theme.glow == base.glow) {
+      return base;
+    }
+    final page = base.page!;
+    final dark = base.bg.computeLuminance() < .5;
+    return BmPalette(
+      bg: base.bg,
+      surface: base.surface,
+      raised: base.raised,
+      variant: base.variant,
+      outline: base.outline,
+      outlineStrong: base.outlineStrong,
+      text: base.text,
+      text2: base.text2,
+      text3: base.text3,
+      primary: theme.primary,
+      onPrimary: theme.onPrimary,
+      primaryContainer: theme.primaryContainer,
+      onPrimaryContainer: theme.onPrimaryContainer,
+      accent: theme.accent,
+      accentContainer: theme.accentContainer,
+      onAccentContainer: theme.onAccentContainer,
+      success: base.success,
+      warning: base.warning,
+      error: base.error,
+      onError: base.onError,
+      glow: theme.glow,
+      sky1: base.sky1,
+      sky2: base.sky2,
+      sky3: base.sky3,
+      onSky: base.onSky,
+      sun: base.sun,
+      starOpacity: base.starOpacity,
+      page: BmPageColors(
+        page: page.page,
+        ink: page.ink,
+        ink2: page.ink2,
+
+        /// the mixes K.PAGE's ornaments are of qiyam emerald's glow and the page
+        ornament: dark ? Color.lerp(theme.glow, page.page, .18)! : theme.glow,
+        ornamentSoft: Color.lerp(theme.glow, page.page, dark ? .68 : .47)!,
+        selectionWash: theme.glow.withValues(alpha: page.selectionWash.a),
+        followWash: (dark ? theme.accent : theme.primary).withValues(alpha: page.followWash.a),
+        hidden: page.hidden,
+        gutter: page.gutter,
+      ),
+    );
+  }
+
   static const night = BmPalette(
     bg: Color(0xFF000000),
     surface: Color(0xFF07100D),
