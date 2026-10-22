@@ -126,7 +126,7 @@ class _Player extends ConsumerWidget {
       child: ReaderGlass(
         radius: RadiusManager.miniPlayer,
         child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: SizeManager.miniPlayer.r),
+          constraints: BoxConstraints(maxHeight: SizeManager.ayahAction.r),
           child: OnlyPadding(
             start: SpaceManager.miniPlayerStart,
             end: SpaceManager.miniPlayerEnd,
