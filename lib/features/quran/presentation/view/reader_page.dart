@@ -9,6 +9,7 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/system/system_channel.dart';
@@ -276,7 +277,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final color = ref.watch(pageColorProvider);
+    final color = ref.watch(pageColorProvider).resolve(dark: context.isThemeDark);
+    final themeId = ref.watch(themeIdProvider);
     final book = ref.watch(
       settingsProvider.select((settings) => settings.value?.pageTurn ?? PageTurn.book),
     );
@@ -294,7 +296,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: color == PageColor.night ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         child: AnimatedTheme(
-          data: AppTheme.page(color),
+          data: AppTheme.page(color, themeId),
           duration: bmMotion(reduce, BmMotion.skyChange),
           curve: BmMotion.sacred,
           child: _Reader(
