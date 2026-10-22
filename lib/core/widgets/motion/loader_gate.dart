@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
 import 'package:flutter/material.dart';
 
@@ -83,7 +84,23 @@ class _BmLoaderGateState extends State<BmLoaderGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_shown) return widget.loader;
-    return widget.loading ? const SizedBox.shrink() : widget.child;
+    if (_shown) {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.getColor(ThemeEnum.surface),
+          shape: BoxShape.circle,
+        ),
+        child: widget.loader,
+      );
+    }
+    return widget.loading
+        ? const SizedBox.shrink()
+        : DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.getColor(ThemeEnum.primary),
+              shape: BoxShape.circle,
+            ),
+            child: widget.child,
+          );
   }
 }
