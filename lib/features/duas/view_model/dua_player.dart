@@ -22,16 +22,21 @@ class DuaPlayer extends Notifier<String?> {
   }
 
   /// a dua without a clip does nothing until the clips are in the app
-  Future<void> toggle(Dua dua) async {
+  Future<bool> toggle(Dua dua) async {
     final audio = dua.audio;
-    if (audio == null) return;
-    if (state == dua.id) return stop();
+    if (audio == null) return false;
+
+    if (state == dua.id) {
+      stop();
+      return true;
+    }
     final ClipPlayer player = _player ?? ref.read(clipPlayerProvider);
     _player = player;
     _ended ??= player.ended.listen((_) => state = null);
     if (state != null) await player.stop();
     state = dua.id;
     await player.play(audio);
+    return true;
   }
 
   Future<void> stop() async {
