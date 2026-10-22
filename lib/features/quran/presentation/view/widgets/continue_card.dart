@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -159,9 +160,9 @@ class _Thumbnail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = ref.watch(pageColorProvider);
+    final color = ref.watch(pageColorProvider).resolve(dark: context.isThemeDark);
     return Theme(
-      data: AppTheme.page(color),
+      data: AppTheme.page(color, ref.watch(themeIdProvider)),
       child: Builder(
         builder: (context) => Container(
           width: SizeManager.pageThumbW.r,
