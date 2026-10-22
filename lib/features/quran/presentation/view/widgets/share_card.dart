@@ -169,11 +169,7 @@ class ShareCard extends StatelessWidget {
                 start: SpaceManager.shareFooterSide.r,
                 end: SpaceManager.shareFooterSide.r,
                 bottom: SpaceManager.shareFooterBottom.r,
-                child: _Footer(
-                  reference: reference,
-                  appName: appName,
-                  dark: background != ShareBackground.paper,
-                ),
+                child: _Footer(reference: reference, appName: appName, background: background),
               ),
             ],
           ),
@@ -296,15 +292,19 @@ class _ShareText extends CustomPainter {
 
 /// "Al-Fatiha · 5" and, when it's on, the symbol with the app's name
 class _Footer extends StatelessWidget {
-  const _Footer({required this.reference, required this.appName, required this.dark});
+  const _Footer({required this.reference, required this.appName, required this.background});
 
   final String reference;
   final bool appName;
-  final bool dark;
+  final ShareBackground background;
 
   @override
   Widget build(BuildContext context) {
-    final gold = dark ? ThemeEnum.primary : ThemeEnum.ornament;
+    final gold = switch (background) {
+      ShareBackground.paper => ThemeEnum.ornament,
+      ShareBackground.sky => ThemeEnum.surface,
+      _ => ThemeEnum.primary,
+    };
     return Row(
       children: [
         Expanded(
