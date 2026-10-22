@@ -147,6 +147,8 @@ class _PrayerSection extends ConsumerWidget {
           onTap: () => context.push(Routes.adhanSettings),
         ),
         NavRow(
+          startFlex: 4,
+          endFlex: 3,
           icon: BmIcon(BmIconName.hijri, size: SizeManager.iconList.r),
           title: StringsManager.hijriDateAdjustment,
           value: context.adjustment(
