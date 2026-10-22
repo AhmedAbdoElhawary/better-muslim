@@ -147,14 +147,14 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return Container(
-                      constraints: BoxConstraints(maxHeight: 80.r),
+                      constraints: BoxConstraints(maxHeight: 90.r),
                       child: CustomScrollView(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         slivers: [
                           SliverToBoxAdapter(
                             child: ConstrainedBox(
-                              constraints: BoxConstraints(minHeight: 100.r),
+                              constraints: BoxConstraints(minHeight: 90.r),
 
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
