@@ -64,6 +64,11 @@ Every unknown in the plan's Technical Context, with the decision taken.
   the app mode (FR-010). New `ThemeEnum` roles: `page`, `ink`, `ink2`, `ornament`, `ornamentSoft`,
   `selectionWash`, `followWash`, `pageHidden`, `gutter`. Outside the reader they resolve to paper or
   night by the app's brightness.
+- **Themes** (added 2026-10-22): the page follows the app's theme. `BmPagePalette.tint` keeps the
+  paper, ink, chrome surfaces and text, and takes primary, accent, their containers and glow from
+  the active theme. Ornament, soft ornament, selection and follow washes are the same mixes K.PAGE
+  makes from Qiyam Emerald, made from the theme's glow, primary and accent. Qiyam Emerald gets K.PAGE
+  back exactly. The share card keeps its designed palettes.
 - **Cream**: the design names it (4.31) but `K.PAGE` has no cream values. Until the designer sends
   them, Cream uses paper's values with a `TODO(ahmed)` in the palette file.
 
@@ -73,10 +78,11 @@ Every unknown in the plan's Technical Context, with the decision taken.
 
 ## R6. Follow the sky
 
-- **Decision**: paper from Fajr to Isha, night from Isha to Fajr, read from the prayer times the app
-  already has (`core/prayer_times`). The reader listens to the period change while open and
-  crossfades the palette over `BmMotion.skyChange` (1.8 s) with the sacred curve. No location yet:
-  paper.
+- **Decision** (changed 2026-10-22): the page's Follow sky follows the app's own mode, paper when
+  the app is light and night when it's dark. The app's Follow sky already switches at sunrise and
+  Maghrib, so one rule drives both, and a picked Dark or Light or the phone's mode is respected.
+  Before it was paper from Fajr to Isha and night from Isha to Fajr, read from the prayer period.
+  `PageColor.resolve` in `core/settings/quran.dart`.
 
 ## R7. Page turn
 
