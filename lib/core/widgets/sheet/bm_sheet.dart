@@ -15,6 +15,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 Future<T?> showBmSheet<T>(
   BuildContext context, {
   bool applyBlur = true,
+  bool maxSheetHeight = false,
   required WidgetBuilder builder,
 }) {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -39,14 +40,15 @@ Future<T?> showBmSheet<T>(
   const still = Threshold(0);
   final route = _BlurredModalBottomSheetRoute<T>(
     applyBlur: applyBlur,
-    builder: (context) => _Sheet(fade: reduceMotion, child: builder(context)),
+    builder: (context) =>
+        _Sheet(fade: reduceMotion, enableCustomCurve: !maxSheetHeight, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: context.getColor(ThemeEnum.transparent),
     elevation: 0,
-    constraints: BoxConstraints(maxHeight: 740.r),
+    constraints: maxSheetHeight ? null : BoxConstraints(maxHeight: 740.r),
     modalBarrierColor: context.getColor(ThemeEnum.scrim).withValues(alpha: BmOpacity.pressed),
     transitionAnimationController: controller,
     sheetAnimationStyle: AnimationStyle(
@@ -100,10 +102,10 @@ class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
 }
 
 class _Sheet extends StatelessWidget {
-  const _Sheet({required this.fade, required this.child});
+  const _Sheet({this.enableCustomCurve = true, required this.fade, required this.child});
   final bool fade;
   final Widget child;
-
+  final bool enableCustomCurve;
   @override
   Widget build(BuildContext context) {
     final sheet = KeyboardPadding(
@@ -131,7 +133,7 @@ class _Sheet extends StatelessWidget {
     final position = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
       CurvedAnimation(
         parent: animation,
-        curve: const _OvershootCurve(),
+        curve: enableCustomCurve ? const _OvershootCurve() : Curves.easeOutExpo,
         reverseCurve: Curves.easeInCubic,
       ),
     );
