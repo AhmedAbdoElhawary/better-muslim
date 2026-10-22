@@ -439,6 +439,7 @@ abstract final class StringsManager {
   static const String madinahHafs = 'madinahHafs';
   static const String recitationOffline = 'recitationOffline';
   static const String recitationFailed = 'recitationFailed';
+  static const String duaFailed = 'duaFailed';
   static const String tryAgain = 'tryAgain';
   static const String loading = 'loading';
   static const String juzRow = 'juzRow';

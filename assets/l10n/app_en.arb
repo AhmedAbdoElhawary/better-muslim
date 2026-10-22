@@ -925,6 +925,7 @@
   "madinahHafs": "Madinah · Hafs",
   "recitationOffline": "Connect to the internet to download this recitation.",
   "recitationFailed": "The recitation couldn't download.",
+  "duaFailed": "The dua couldn't download.",
   "tryAgain": "Try again",
   "loading": "Loading",
   "juzRow": "{surah} {ayah} · p. {page}",

@@ -477,6 +477,7 @@
   "madinahHafs": "المدينة · حفص",
   "recitationOffline": "اتصل بالإنترنت لتنزيل هذه التلاوة.",
   "recitationFailed": "تعذّر تنزيل التلاوة.",
+  "duaFailed": "تعذّر تنزيل الدعاء.",
   "tryAgain": "حاول مرة أخرى",
   "loading": "جارٍ التحميل",
   "juzRow": "{surah} {ayah} · ص {page}",
