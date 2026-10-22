@@ -148,7 +148,16 @@ class AudioServiceRecitation implements Recitation {
       return;
     }
     if (session != _session) return;
-    await _player.setAudioSources([AudioSource.file(first.path)]);
+    try {
+      await _player.setAudioSources([AudioSource.file(first.path)]);
+    } on PlayerException {
+      /// the system can't open it, so it is deleted and the next play downloads it again
+      if (first.existsSync()) first.deleteSync();
+      if (session == _session) {
+        _emit(_state.copyWith(status: RecitationStatus.idle, failure: RecitationFailure.failed));
+      }
+      return;
+    }
     _added = 1;
     _files.ahead({for (final item in _queue.skip(1)) recitationFile(item)});
     unawaited(_feed(session));
@@ -173,7 +182,12 @@ class AudioServiceRecitation implements Recitation {
         return;
       }
       if (session != _session) return;
-      await _player.addAudioSource(AudioSource.file(file.path));
+      try {
+        await _player.addAudioSource(AudioSource.file(file.path));
+      } on PlayerException {
+        if (file.existsSync()) file.deleteSync();
+        return;
+      }
       _added++;
       if (_waiting) {
         _waiting = false;
