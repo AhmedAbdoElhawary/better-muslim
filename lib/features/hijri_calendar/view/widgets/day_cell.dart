@@ -71,14 +71,11 @@ class DayCell extends StatelessWidget {
                       tabularFigures: true,
                       maxLines: 1,
                     ),
+                    AnimatedSwitcher(
+                      duration: BmMotion.micro,
+                      child: _Mark(look, key: ValueKey(look)),
+                    ),
                   ],
-                ),
-                PositionedDirectional(
-                  top: SizeManager.dayMarkTop.r,
-                  child: AnimatedSwitcher(
-                    duration: BmMotion.micro,
-                    child: _Mark(look, key: ValueKey(look)),
-                  ),
                 ),
               ],
             ),
@@ -118,7 +115,7 @@ class _Mark extends StatelessWidget {
       DayLook.whiteDay => const _Dot(ThemeEnum.accent),
       DayLook.event => const _Dot(ThemeEnum.primary),
       DayLook.sunnahFast => const _Crescent(),
-      _ => const SizedBox.shrink(),
+      _ => const SizedBox.square(dimension: SizeManager.dayMark),
     };
   }
 }
