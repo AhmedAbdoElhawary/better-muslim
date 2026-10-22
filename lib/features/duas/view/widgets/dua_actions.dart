@@ -37,6 +37,19 @@ class DuaActions extends ConsumerWidget {
     );
   }
 
+  Future<void> _onTapPlay(BuildContext context, WidgetRef ref) async {
+    final isPlayed = await ref.read(duaPlayerProvider.notifier).toggle(dua);
+    if (!isPlayed && context.mounted) {
+      showToast(
+        context,
+        StringsManager.duaFailed,
+        icon: BmIconName.listen,
+        action: StringsManager.tryAgain,
+        onUndo: () => _onTapPlay(context, ref),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playing = ref.watch(duaPlayerProvider.select((id) => id == dua.id));
@@ -46,7 +59,7 @@ class DuaActions extends ConsumerWidget {
         _Action(
           icon: playing ? BmIcon.ui(BmUiIcon.stop) : BmIcon(BmIconName.listen),
           label: playing ? StringsManager.stop : StringsManager.listen,
-          onTap: () => ref.read(duaPlayerProvider.notifier).toggle(dua),
+          onTap: () => _onTapPlay(context, ref),
         ),
         const RSizedBox.horizontal(SpaceManager.s1),
         _Action(
