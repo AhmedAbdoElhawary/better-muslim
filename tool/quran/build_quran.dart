@@ -19,8 +19,8 @@ const _translation = 'https://tanzil.net/trans/?transID=en.sahih&type=txt-2';
 const _tafsir = 'https://tanzil.net/trans/?transID=ar.muyassar&type=txt-2';
 
 // TODO(ahmed): download madinah_v2_layout.sqlite and qpc_hafs_words.sqlite from qul.tarteel.ai into tool/quran/.cache/ and confirm QUL's license and credit line, the reader has only page 1 without them.
-const _layout = '$_cache/madinah_v2_layout.sqlite';
-const _words = '$_cache/qpc_hafs_words.sqlite';
+const _layout = '$_cache/madinah_v2_layout.db';
+const _words = '$_cache/qpc_hafs_words.db';
 
 const _pageCount = 604;
 const _linesPerPage = 15;
@@ -211,7 +211,7 @@ Future<void> main() async {
   stdout.writeln('Wrote $_out/index.json and 114 surah files.');
 
   if (!File(_layout).existsSync() || !File(_words).existsSync()) {
-    _fail('no QUL files in $_cache, download madinah_v2_layout.sqlite and qpc_hafs_words.sqlite');
+    _fail('no QUL files in $_cache, download madinah_v2_layout.db and qpc_hafs_words.db');
   }
   final words = <int, List<Object>>{};
   for (final row in await _query(_words, 'select id, surah, ayah, text from words order by id')) {
