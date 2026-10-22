@@ -74,7 +74,7 @@ class StripCell extends ConsumerWidget {
 
   /// the current cell's inset ring, primary at 35%
   static Color currentBorder(BuildContext context) =>
-      context.getColor(ThemeEnum.primary).withValues(alpha: .35);
+      context.getColor(ThemeEnum.primary).withValues(alpha: .15);
 }
 
 /// the time, or a dash on a polar day that has none
