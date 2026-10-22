@@ -37,4 +37,31 @@ void main() {
     expect(ThemeEnum.page.resolve(dark), BmPagePalette.night.page!.page);
     expect(ThemeEnum.page.resolve(light), BmPagePalette.paper.page!.page);
   });
+
+  test('qiyam emerald gets the designed page back exactly', () {
+    final theme = bmThemes[BmThemeId.qiyamEmerald]!;
+    expect(BmPagePalette.tint(BmPagePalette.paper, theme.light), same(BmPagePalette.paper));
+    expect(BmPagePalette.tint(BmPagePalette.night, theme.dark), same(BmPagePalette.night));
+  });
+
+  for (final id in BmThemeId.values) {
+    test('${id.name} tints the page but keeps its paper and ink', () {
+      for (final (base, theme) in [
+        (BmPagePalette.paper, bmThemes[id]!.light),
+        (BmPagePalette.night, bmThemes[id]!.dark),
+      ]) {
+        final tinted = BmPagePalette.tint(base, theme);
+        expect(tinted.primary, theme.primary);
+        expect(tinted.glow, theme.glow);
+        for (final role in [...texts, ...unders]) {
+          expect(role.resolve(tinted), role.resolve(base), reason: role.name);
+        }
+        expect(
+          _ratio(ThemeEnum.onPrimary.resolve(tinted), ThemeEnum.primary.resolve(tinted)),
+          greaterThanOrEqualTo(4.5),
+          reason: 'onPrimary on primary',
+        );
+      }
+    });
+  }
 }
