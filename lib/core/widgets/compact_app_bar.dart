@@ -28,31 +28,24 @@ class CompactAppBar extends ConsumerWidget {
     this.titleChild,
     this.heroTag,
     this.collapsed = true,
+    this.titleKey,
     super.key,
   });
 
-  /// a StringsManager key, or content like a category's name with translate false
   final String title;
   final bool back;
   final bool translate;
-
-  /// a 44 x 44 button at the end, the calendar's today
   final Widget? action;
-
-  /// in place of the title text, the calendar's mode switch
   final Widget? titleChild;
-
-  /// the route the title flies in from, see TitleHero
   final String? heroTag;
-
-  /// false on a large title page until its title arrives: no glass, no title. the title shows in
-  /// the same frame the flying one hides, so only the glass fades
   final bool collapsed;
+  final GlobalKey? titleKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final opacity = ref.watch(topGlowProvider) ? BmGlass.surfaceOpacity : _plainOpacity;
     final reduce = MediaQuery.disableAnimationsOf(context);
+
     return Stack(
       children: [
         Positioned.fill(
@@ -88,12 +81,11 @@ class CompactAppBar extends ConsumerWidget {
                   Expanded(
                     child: AnimatedOpacity(
                       opacity: collapsed ? 1 : 0,
-
-                      /// with reduce motion no title flies in, so this one fades
                       duration: reduce ? BmMotion.micro : Duration.zero,
                       child:
                           titleChild ??
                           Center(
+                            key: titleKey,
                             child: TitleHero(
                               tag: heroTag,
                               child: SemiBoldText(
@@ -148,12 +140,9 @@ class BarBackButton extends StatelessWidget {
   }
 }
 
-/// a large title page: the header's LargeTitle follows the finger into the bar and becomes its
-/// title, the bar's glass fades in under it (FR-039)
 class LargeTitleScrollView extends StatefulWidget {
   const LargeTitleScrollView({required this.title, required this.slivers, super.key});
 
-  /// a StringsManager key, the compact bar's title
   final String title;
   final List<Widget> slivers;
 
@@ -166,28 +155,36 @@ class _LargeTitleScrollViewState extends State<LargeTitleScrollView> {
   final _offset = ValueNotifier(0.0);
   final _collapsed = ValueNotifier(false);
   final _view = GlobalKey();
+  final _barTitleKey = GlobalKey();
 
-  /// the header's button row and the large title, scaled like the layout
   double get _collapseAt =>
       SizeManager.hit.r + (FontSizeManager.largeTitle * LineHeightManager.largeTitle).sp;
 
   bool _onScroll(ScrollNotification notification) {
-    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) return false;
+    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+
     final pixels = notification.metrics.pixels;
+
     _offset.value = pixels;
     _collapsed.value = pixels >= _collapseAt;
+
     if (notification is ScrollEndNotification && !MediaQuery.disableAnimationsOf(context)) {
       _snap(pixels);
     }
+
     return false;
   }
 
-  /// a scroll left half way opens or closes the title, like the iOS bar
   void _snap(double pixels) {
     if (pixels <= 0 || pixels >= _collapseAt) return;
+
     final to = pixels < _collapseAt / 2 ? 0.0 : _collapseAt;
+
     Future.microtask(() {
       if (!_controller.hasClients) return;
+
       _controller.animateTo(to, duration: BmMotion.standard, curve: BmMotion.standardCurve);
     });
   }
@@ -207,6 +204,7 @@ class _LargeTitleScrollViewState extends State<LargeTitleScrollView> {
       collapsed: _collapsed,
       collapseAt: _collapseAt,
       view: _view,
+      barTitleKey: _barTitleKey,
       child: Stack(
         key: _view,
         children: [
@@ -218,12 +216,19 @@ class _LargeTitleScrollViewState extends State<LargeTitleScrollView> {
             top: 0,
             start: 0,
             end: 0,
-            child: ValueListenableBuilder(
+            child: ValueListenableBuilder<bool>(
               valueListenable: _collapsed,
-              builder: (context, collapsed, _) => IgnorePointer(
-                ignoring: !collapsed,
-                child: CompactAppBar(widget.title, back: false, collapsed: collapsed),
-              ),
+              builder: (context, collapsed, _) {
+                return IgnorePointer(
+                  ignoring: !collapsed,
+                  child: CompactAppBar(
+                    widget.title,
+                    back: false,
+                    collapsed: collapsed,
+                    titleKey: _barTitleKey,
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -238,16 +243,15 @@ class _LargeTitleScope extends InheritedWidget {
     required this.collapsed,
     required this.collapseAt,
     required this.view,
+    required this.barTitleKey,
     required super.child,
   });
 
-  /// the list's scroll offset, the title and subtitles read it every frame
   final ValueNotifier<double> offset;
   final ValueNotifier<bool> collapsed;
   final double collapseAt;
-
-  /// the view's stack, where the title measures itself and the bar
   final GlobalKey view;
+  final GlobalKey barTitleKey;
 
   static _LargeTitleScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_LargeTitleScope>();
@@ -273,58 +277,80 @@ class LargeTitle extends StatefulWidget {
 class _LargeTitleState extends State<LargeTitle> {
   final _box = GlobalKey();
 
-  /// the title's center with the list at the top, and the bar title's center, in the view
   (Offset, Offset)? _ends;
 
-  /// the bar's font comes in over this last part of the move
   static const _fontFrom = .7;
 
   void _measure(Duration _) {
     final scope = _LargeTitleScope.maybeOf(context);
-    final view = scope?.view.currentContext?.findRenderObject() as RenderBox?;
-    final box = _box.currentContext?.findRenderObject() as RenderBox?;
-    if (!mounted || scope == null || view == null || box == null || !box.hasSize) return;
 
-    /// the box is the transform's, its own transform isn't in this
+    final view = scope?.view.currentContext?.findRenderObject() as RenderBox?;
+
+    final box = _box.currentContext?.findRenderObject() as RenderBox?;
+
+    final titleBox = scope?.barTitleKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (!mounted ||
+        scope == null ||
+        view == null ||
+        box == null ||
+        titleBox == null ||
+        !box.hasSize ||
+        !titleBox.hasSize) {
+      return;
+    }
+
+    // The large title's resting center in the scroll content.
     final center = box.localToGlobal(box.size.center(Offset.zero), ancestor: view);
+
     final rest = center + Offset(0, scope.offset.value);
-    final bar = Offset(
-      view.size.width / 2,
-      MediaQuery.paddingOf(context).top + SizeManager.appBar.r / 2,
-    );
-    if ((rest, bar) != _ends) setState(() => _ends = (rest, bar));
+
+    // Measure the actual app-bar title center.
+    final bar = titleBox.localToGlobal(titleBox.size.center(Offset.zero), ancestor: view);
+
+    if ((rest, bar) != _ends) {
+      setState(() => _ends = (rest, bar));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final scope = _LargeTitleScope.maybeOf(context);
+
     final large = RegularText(
       widget.title,
       font: FontEnum.display,
       fontSize: widget.fontSize,
       height: widget.height,
     );
-    if (scope == null || MediaQuery.disableAnimationsOf(context)) return large;
+
+    if (scope == null || MediaQuery.disableAnimationsOf(context)) {
+      return large;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback(_measure);
+
     final ends = _ends;
     final small = FontSizeManager.title / widget.fontSize;
-    return ValueListenableBuilder(
+
+    return ValueListenableBuilder<double>(
       valueListenable: scope.offset,
       builder: (context, offset, child) {
         final progress = (offset / scope.collapseAt).clamp(0.0, 1.0);
+
         final font = ((progress - _fontFrom) / (1 - _fontFrom)).clamp(0.0, 1.0);
+
         final scale = 1 + (small - 1) * progress;
 
-        /// cancels the scroll and moves toward the bar, so the title is at the bar at 1
         final shift = ends == null
             ? Offset.zero
             : (ends.$2 - ends.$1) * progress + Offset(0, offset.clamp(0, double.infinity));
 
-        /// hidden in the frame the bar's own title shows, at the same spot and size
-        return ValueListenableBuilder(
+        return ValueListenableBuilder<bool>(
           valueListenable: scope.collapsed,
-          builder: (context, collapsed, child) =>
-              CustomOpacity(opacity: collapsed ? 0 : 1, child: child),
+          builder: (context, collapsed, child) {
+            return CustomOpacity(opacity: collapsed ? 0 : 1, child: child);
+          },
           child: Transform(
             key: _box,
             alignment: Alignment.center,
@@ -335,8 +361,6 @@ class _LargeTitleState extends State<LargeTitle> {
               clipBehavior: Clip.none,
               children: [
                 CustomOpacity(opacity: 1 - font, child: child),
-
-                /// only built once it shows, a resting title stays one text
                 if (font > 0)
                   CustomOpacity(
                     opacity: font,
