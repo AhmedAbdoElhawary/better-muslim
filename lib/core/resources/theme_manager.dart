@@ -158,12 +158,25 @@ abstract final class AppTheme {
   static ThemeData light(BmThemeId id) => _build(bmThemes[id]!.light, Brightness.light);
   static ThemeData dark(BmThemeId id) => _build(bmThemes[id]!.dark, Brightness.dark);
 
-  /// the reader's chrome takes the page's palette, not the app's (research R5)
-  static ThemeData page(PageColor color) => switch (color) {
-    PageColor.night => _build(BmPagePalette.night, Brightness.dark),
-    PageColor.cream => _build(BmPagePalette.cream, Brightness.light),
-    PageColor.paper || PageColor.followSky => _build(BmPagePalette.paper, Brightness.light),
-  };
+  /// the reader's chrome takes the page's palette tinted by the app's theme (research R5).
+  /// follow sky is resolved before, see PageColor.resolve
+  static ThemeData page(PageColor color, [BmThemeId id = BmThemeId.qiyamEmerald]) {
+    final theme = bmThemes[id]!;
+    return switch (color) {
+      PageColor.night => _build(
+        BmPagePalette.tint(BmPagePalette.night, theme.dark),
+        Brightness.dark,
+      ),
+      PageColor.cream => _build(
+        BmPagePalette.tint(BmPagePalette.cream, theme.light),
+        Brightness.light,
+      ),
+      PageColor.paper || PageColor.followSky => _build(
+        BmPagePalette.tint(BmPagePalette.paper, theme.light),
+        Brightness.light,
+      ),
+    };
+  }
 
   /// BmText.body and material 3 typography fill line height and letter spacing into every text
   /// that leaves them empty, where the specs mean the font's own metrics
