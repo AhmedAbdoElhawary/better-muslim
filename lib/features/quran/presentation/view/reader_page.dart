@@ -340,7 +340,11 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
               PageChrome(page: _page, card: _card, shown: _chrome, onListen: _listen),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: MiniPlayer(card: _card, onOpen: _openRecitation),
+                child: MiniPlayer(
+                  card: _card,
+                  activeDy: _chrome ? .1 : -.2,
+                  onOpen: _openRecitation,
+                ),
               ),
               _Dim(study: _study, onTap: _close),
               if (ayah != null) ...[
