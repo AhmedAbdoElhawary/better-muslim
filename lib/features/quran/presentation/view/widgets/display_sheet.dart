@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
@@ -283,16 +284,16 @@ class _PageSwatch extends StatelessWidget {
   }
 }
 
-/// the page color under its own palette, whatever the reader shows now
-class _PageFill extends StatelessWidget {
+/// the page color under its own palette in the app's theme, whatever the reader shows now
+class _PageFill extends ConsumerWidget {
   const _PageFill(this.page);
 
   final PageColor page;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Theme(
-      data: AppTheme.page(page),
+      data: AppTheme.page(page, ref.watch(themeIdProvider)),
       child: Builder(builder: (context) => ColoredBox(color: context.getColor(ThemeEnum.page))),
     );
   }
