@@ -98,5 +98,5 @@ class DayCell extends ConsumerWidget {
 
   /// the shown cell's inset ring, primary at 35%
   static Color shownBorder(BuildContext context) =>
-      context.getColor(ThemeEnum.primary).withValues(alpha: .35);
+      context.getColor(ThemeEnum.primary).withValues(alpha: .15);
 }
