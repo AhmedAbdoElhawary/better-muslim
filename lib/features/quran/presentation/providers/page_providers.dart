@@ -1,5 +1,3 @@
-import 'package:better_muslim/core/prayer_times/day_times.dart';
-import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -31,13 +29,9 @@ final quranSamplesProvider = FutureProvider.autoDispose<Map<String, Map<String, 
   (ref) async => (await ref.watch(quranAssetsProvider.future)).samples(),
 );
 
-/// the page's color now, never followSky
-final pageColorProvider = Provider<PageColor>((ref) {
-  final picked = ref.watch(
+/// what the reader picked, follow sky is resolved with the app's mode where it's drawn
+final pageColorProvider = Provider<PageColor>(
+  (ref) => ref.watch(
     settingsProvider.select((settings) => settings.value?.pageColor ?? PageColor.followSky),
-  );
-  if (picked != PageColor.followSky) return picked;
-
-  /// fajr to isha is paper, isha to fajr night. no location yet is paper
-  return ref.watch(periodProvider) == Period.isha ? PageColor.night : PageColor.paper;
-});
+  ),
+);
