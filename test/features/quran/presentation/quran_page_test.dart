@@ -84,13 +84,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(openedPage(tester), 1);
 
-    /// isha and fajr crossfade the palette over the sky's 1.8 s
+    /// a mode change crossfades the palette over the sky's 1.8 s
     final theme = tester.widget<AnimatedTheme>(
       find.descendant(of: find.byType(ReaderPage), matching: find.byType(AnimatedTheme)),
     );
     expect(theme.duration, BmMotion.skyChange);
     expect(theme.curve, BmMotion.sacred);
-    expect(theme.data.brightness, Brightness.light, reason: 'asr follows the sky on paper');
+    expect(
+      theme.data.brightness,
+      Brightness.dark,
+      reason: 'follow sky takes the dark app on night',
+    );
     await unmount(tester);
   });
 }
