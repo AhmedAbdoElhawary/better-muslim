@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
@@ -31,7 +33,7 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
 
   /// the sheet stays put while the barrier and the content fade
   const still = Threshold(0);
-  final route = ModalBottomSheetRoute<T>(
+  final route = _BlurredModalBottomSheetRoute<T>(
     builder: (context) => _Sheet(fade: reduceMotion, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
@@ -39,10 +41,8 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
     useSafeArea: true,
     backgroundColor: context.getColor(ThemeEnum.transparent),
     elevation: 0,
-    constraints: BoxConstraints(maxHeight: 750.r),
-    modalBarrierColor: context
-        .getColor(ThemeEnum.scrim)
-        .withValues(alpha: context.isThemeDark ? BmOpacity.scrimDark : BmOpacity.scrimLight),
+    constraints: BoxConstraints(maxHeight: 740.r),
+    modalBarrierColor: context.getColor(ThemeEnum.scrim).withValues(alpha: BmOpacity.pressed),
     transitionAnimationController: controller,
     sheetAnimationStyle: AnimationStyle(
       curve: reduceMotion ? still : _SpringCurve(BmMotion.gentle, BmMotion.emphasized),
@@ -53,6 +53,42 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
   /// the route lets go of the controller only once its exit animation is over
   route.completed.whenComplete(controller.dispose);
   return navigator.push(route);
+}
+
+class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
+  _BlurredModalBottomSheetRoute({
+    required super.builder,
+    super.capturedThemes,
+    super.barrierLabel,
+    required super.isScrollControlled,
+    super.useSafeArea,
+    super.backgroundColor,
+    super.elevation,
+    super.constraints,
+    super.modalBarrierColor,
+    super.transitionAnimationController,
+    super.sheetAnimationStyle,
+  });
+
+  static const double _blurSigma = 10;
+
+  @override
+  Widget buildModalBarrier() {
+    final routeAnimation = animation!;
+
+    return AnimatedBuilder(
+      animation: routeAnimation,
+      child: super.buildModalBarrier(),
+      builder: (context, barrier) {
+        final sigma = (_blurSigma * routeAnimation.value).clamp(0.0, _blurSigma).toDouble();
+
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: barrier,
+        );
+      },
+    );
+  }
 }
 
 class _Sheet extends StatelessWidget {
@@ -78,8 +114,38 @@ class _Sheet extends StatelessWidget {
         ),
       ),
     );
-    if (!fade) return sheet;
-    return FadeTransition(opacity: ModalRoute.of(context)!.animation!, child: sheet);
+    final animation = ModalRoute.of(context)!.animation!;
+
+    if (fade) {
+      return FadeTransition(opacity: animation, child: sheet);
+    }
+
+    final position = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: animation,
+        curve: const _OvershootCurve(),
+        reverseCurve: Curves.easeInCubic,
+      ),
+    );
+
+    return SlideTransition(position: position, child: sheet);
+  }
+}
+
+class _OvershootCurve extends Curve {
+  const _OvershootCurve();
+
+  @override
+  double transformInternal(double t) {
+    final value = t.clamp(0.0, 1.0).toDouble();
+
+    if (value < 0.7) {
+      return 1.08 * Curves.easeOutCubic.transform(value / 0.7);
+    }
+
+    final progress = Curves.easeInOut.transform((value - 0.7) / 0.3);
+
+    return 1.08 - (0.08 * progress);
   }
 }
 
