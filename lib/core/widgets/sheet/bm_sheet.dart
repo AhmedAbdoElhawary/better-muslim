@@ -12,7 +12,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// MOTION 15: in on the gentle spring, out in 300 ms accelerate. with reduce motion the sheet
 /// stays in place and fades for 150 ms. a release that snaps it back open gives the detent haptic
-Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}) {
+Future<T?> showBmSheet<T>(
+  BuildContext context, {
+  bool applyBlur = true,
+  required WidgetBuilder builder,
+}) {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
   /// the root one, so the sheet and its scrim cover the nav bar too
@@ -34,6 +38,7 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
   /// the sheet stays put while the barrier and the content fade
   const still = Threshold(0);
   final route = _BlurredModalBottomSheetRoute<T>(
+    applyBlur: applyBlur,
     builder: (context) => _Sheet(fade: reduceMotion, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
@@ -68,12 +73,15 @@ class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
     super.modalBarrierColor,
     super.transitionAnimationController,
     super.sheetAnimationStyle,
+    this.applyBlur = true,
   });
-
+  final bool applyBlur;
   static const double _blurSigma = 10;
 
   @override
   Widget buildModalBarrier() {
+    if (!applyBlur) return super.buildModalBarrier();
+
     final routeAnimation = animation!;
 
     return AnimatedBuilder(
