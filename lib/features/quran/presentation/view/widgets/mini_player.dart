@@ -54,12 +54,12 @@ class PlayingTitle extends ConsumerWidget {
 /// rises from below when a recitation starts and over the dock when the controls show (FR-025).
 /// media controls stay left to right in arabic (FR-029)
 class MiniPlayer extends ConsumerWidget {
-  const MiniPlayer({required this.card, required this.onOpen, super.key});
+  const MiniPlayer({required this.card, this.activeDy = 0, required this.onOpen, super.key});
 
   /// the page's card spring, the dock is up at 1
   final Animation<double> card;
   final VoidCallback onOpen;
-
+  final double activeDy;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(
@@ -89,7 +89,7 @@ class MiniPlayer extends ConsumerWidget {
       child: reduce
           ? AnimatedOpacity(opacity: active ? 1 : 0, duration: BmMotion.micro, child: player)
           : AnimatedSlide(
-              offset: Offset(0, active ? 0 : 2),
+              offset: Offset(0, active ? activeDy : 3),
               duration: BmMotion.standard,
               curve: active ? BmMotion.decelerate : BmMotion.accelerate,
               child: player,
@@ -214,20 +214,14 @@ class PlayButton extends ConsumerWidget {
         onTap: playing ? recitation.pause : recitation.resume,
         child: RSizedBox.square(
           dimension: size,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: context.getColor(ThemeEnum.primary),
-              shape: BoxShape.circle,
-            ),
-            child: BmLoaderGate(
-              loading: status == RecitationStatus.loading,
-              loader: const Center(child: BmOilDrop(size: SizeManager.oilDropSmall)),
-              child: Center(
-                child: BmIcon.ui(
-                  playing ? BmUiIcon.pause : BmUiIcon.play,
-                  size: icon.r,
-                  color: color,
-                ),
+          child: BmLoaderGate(
+            loading: status == RecitationStatus.loading,
+            loader: const Center(child: BmOilDrop(size: SizeManager.oilDropSmall)),
+            child: Center(
+              child: BmIcon.ui(
+                playing ? BmUiIcon.pause : BmUiIcon.play,
+                size: icon.r,
+                color: color,
               ),
             ),
           ),
