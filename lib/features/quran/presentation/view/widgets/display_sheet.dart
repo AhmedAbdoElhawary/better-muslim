@@ -252,8 +252,8 @@ class _PageSwatch extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: radius,
-                  child: RSizedBox(
-                    height: SizeManager.displaySwatch,
+                  child: RSizedBox.square(
+                    dimension: SizeManager.displaySwatch,
                     child: page == PageColor.followSky
                         ? const Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
