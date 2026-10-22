@@ -49,6 +49,6 @@ abstract final class BmShadow {
 
 abstract final class BmGlass {
   static const blurSigma = 20.0;
-  static const surfaceOpacity = .30; // on the sky: Color(0xFF07100D) at 55%
+  static const surfaceOpacity = .20; // on the sky: Color(0xFF07100D) at 55%
   static const highlightOpacity = .12; // 1px top inner highlight, white
 }
