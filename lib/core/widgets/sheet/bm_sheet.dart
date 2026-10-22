@@ -39,6 +39,7 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
     useSafeArea: true,
     backgroundColor: context.getColor(ThemeEnum.transparent),
     elevation: 0,
+    constraints: BoxConstraints(maxHeight: 750.r),
     modalBarrierColor: context
         .getColor(ThemeEnum.scrim)
         .withValues(alpha: context.isThemeDark ? BmOpacity.scrimDark : BmOpacity.scrimLight),
