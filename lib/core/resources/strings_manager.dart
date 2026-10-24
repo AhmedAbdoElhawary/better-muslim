@@ -422,6 +422,7 @@ abstract final class StringsManager {
   static const String shareAyah = 'shareAyah';
   static const String includeTranslation = 'includeTranslation';
   static const String showAppName = 'showAppName';
+  static const String showSurahName = 'showSurahName';
   static const String paper = 'paper';
   static const String night = 'night';
   static const String emerald = 'emerald';

@@ -196,6 +196,7 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
                       muted: squareFits ? const {} : const {ShareSize.square},
                       onChanged: (size) {
                         if (size == ShareSize.square && !squareFits) {
+                          /// todo: show this toast above the current bottom sheet not under it using context i think
                           showToast(
                             context,
                             StringsManager.turnOffTranslation,
