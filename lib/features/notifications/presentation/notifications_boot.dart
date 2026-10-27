@@ -100,7 +100,8 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   /// one apply at a time, two at once would cancel each other's notifications
   Future<void> _running = Future.value();
 
-  bool get _isScenario => ref.read(flavorProvider).isDesignScenario;
+  /// a fast day would schedule fake times on the phone
+  bool get _isScenario => ref.read(flavorProvider).isDesignScenario || ref.read(fastDayProvider);
 
   Locale get _locale => AppLocalizations.localeOf(ref.read(settingsProvider).value?.language);
 
@@ -125,6 +126,11 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     /// only a change, opening the app a minute after a prayer shows no adhan screen
     ref.listenManual(periodProvider, (previous, next) {
       if (previous != null && next != null && previous != next) _onPeriod(next);
+    });
+
+    /// what changed during a fast day is scheduled on real times once it is off
+    ref.listenManual(fastDayProvider, (_, on) {
+      if (!on) _reschedule();
     });
     _start();
   }
@@ -197,6 +203,9 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final location = ref.read(locationProvider);
     final at = ref.read(todayTimesProvider)?.timeOf(prayer);
     if (sound != PrayerSound.adhan || location == null || at == null) return;
+
+    /// a jump back from a fast day is a period change too, only a prayer that just began plays
+    if (ref.read(clockProvider)().difference(at) > const Duration(minutes: 1)) return;
     final day = ref.read(prayerDayProvider);
     final alert = Alert(
       day: day,
