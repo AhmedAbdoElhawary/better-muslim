@@ -934,7 +934,6 @@
   "pageSection": "PAGE",
   "layout": "Layout",
   "mushaf": "Mushaf",
-  "both": "Both",
   "pageTurn": "Page turn",
   "book": "Book",
   "slide": "Slide",
@@ -1040,5 +1039,10 @@
   "sepia": "Sepia",
   "green": "Green",
   "navy": "Navy",
-  "fontSection": "FONT"
+  "fontSection": "FONT",
+  "mushafSize": "Mushaf size",
+  "percent": "{n}%",
+  "prayedOfFive": "{count} of 5 prayed",
+  "notifQuietTitle": "Keep the adhan coming",
+  "notifQuietBody": "Open the app so the next days' prayers are scheduled."
 }
