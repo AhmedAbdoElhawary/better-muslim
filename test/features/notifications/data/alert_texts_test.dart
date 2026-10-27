@@ -56,12 +56,12 @@ void main() {
     final arabic = await texts('ar');
 
     expect(english.titleOf(nudge(Prayer.asr)), 'Evening azkar');
-    expect(english.bodyOf(nudge(Prayer.asr)), 'After Asr · 24 remembrances, about 6 minutes');
+    expect(english.bodyOf(nudge(Prayer.asr)), 'After Asr · 20 remembrances, about 10 minutes');
     expect(english.titleOf(nudge(Prayer.fajr)), 'Morning azkar');
-    expect(english.bodyOf(nudge(Prayer.fajr)), 'After Fajr · 12 remembrances, about 3 minutes');
+    expect(english.bodyOf(nudge(Prayer.fajr)), 'After Fajr · 23 remembrances, about 24 minutes');
     expect(arabic.titleOf(nudge(Prayer.asr)), 'أذكار المساء');
-    expect(arabic.bodyOf(nudge(Prayer.asr)), 'بعد العصر · ٢٤ ذكرًا، حوالي ٦ دقائق');
-    expect(arabic.bodyOf(nudge(Prayer.fajr)), 'بعد الفجر · ١٢ ذكرًا، حوالي ٣ دقائق');
+    expect(arabic.bodyOf(nudge(Prayer.asr)), 'بعد العصر · ٢٠ ذكرًا، حوالي ١٠ دقائق');
+    expect(arabic.bodyOf(nudge(Prayer.fajr)), 'بعد الفجر · ٢٣ ذكرًا، حوالي ٢٤ دقيقة');
   });
 
   test('english', () async {
