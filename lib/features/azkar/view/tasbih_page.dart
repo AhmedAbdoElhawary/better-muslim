@@ -111,7 +111,10 @@ class _TasbihPageState extends ConsumerState<TasbihPage> {
               ),
 
               /// the rest of the screen is the tap target, at text scale 2.0 the page scrolls instead
-              SliverFillRemaining(hasScrollBody: false, child: _CountArea(onTap: _tap)),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: SafeArea(top: false, child: _CountArea(onTap: _tap)),
+              ),
             ],
           ),
         ),
