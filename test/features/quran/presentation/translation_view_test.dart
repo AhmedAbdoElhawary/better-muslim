@@ -100,11 +100,11 @@ void main() {
     expect(rect.bottom, lessThanOrEqualTo(screen.height));
   }
 
-  testWidgets('translation is the page as 4.07 cells with the surah header', (tester) async {
+  testWidgets('translation is the page then 4.07 cells with the surah header', (tester) async {
     await pumpReader(tester);
 
     expect(view, findsOneWidget);
-    expect(find.byType(MushafPageView), findsNothing);
+    await scrollTo(tester, 'سورة الفاتحة');
     expect(cellText('سورة الفاتحة'), findsOneWidget);
     expect(cellText('Al-Fatiha · Meccan · 7 ayahs'), findsOneWidget);
     for (var ayah = 1; ayah <= 7; ayah++) {
@@ -117,8 +117,8 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('both is the mushaf page with its cells under it', (tester) async {
-    await pumpReader(tester, layout: QuranLayout.both);
+  testWidgets('translation is the mushaf page with its cells under it', (tester) async {
+    await pumpReader(tester);
 
     final page = find.descendant(of: view, matching: find.byType(MushafPageView));
     expect(page, findsOneWidget);
@@ -154,12 +154,8 @@ void main() {
     await tester.tapAt(mushaf.localToGlobal(mushaf.washBounds(const AyahKey(1, 5))!.center));
     await tester.pumpAndSettle();
 
+    /// the page itself is on screen with the ayah washed on it
     await setLayout(tester, QuranLayout.translation);
-    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
-    expectOnScreen(tester, cellText(translation(5)));
-
-    /// in Both the page itself is on screen with the ayah washed on it
-    await setLayout(tester, QuranLayout.both);
     expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(const AyahKey(1, 5)) != null,
@@ -170,9 +166,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the dock switches mushaf and translation, both goes back to the mushaf', (
-    tester,
-  ) async {
+  testWidgets('the dock switches mushaf and translation', (tester) async {
     await pumpReader(tester, layout: QuranLayout.mushaf);
     Future<void> tapTranslation() async {
       await tester.tapAt(const Offset(385, 400));
@@ -186,11 +180,6 @@ void main() {
     expect(view, findsOneWidget);
 
     /// the controls still show, a tap off them hides them
-    await tester.tap(find.text('Translation'));
-    await tester.pumpAndSettle();
-    expect(settingsOf(tester).quranLayout, QuranLayout.mushaf);
-
-    await setLayout(tester, QuranLayout.both);
     await tester.tap(find.text('Translation'));
     await tester.pumpAndSettle();
     expect(settingsOf(tester).quranLayout, QuranLayout.mushaf);
