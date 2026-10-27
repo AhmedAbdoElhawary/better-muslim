@@ -5,10 +5,12 @@ import 'dart:typed_data';
 import 'package:better_muslim/core/backup/backup_file.dart';
 import 'package:better_muslim/core/backup/restore.dart';
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../drift/app_database/generated/schema_v10.dart' as v10;
 import '../../drift/app_database/generated/schema_v7.dart' as v7;
 import '../../helpers/backup.dart';
 import '../../helpers/phone_storage.dart';
@@ -42,7 +44,7 @@ void main() {
     expect(ascii.decode(bytes.sublist(0, 8)), 'BMBACKUP');
     final header = ByteData.sublistView(bytes, 0, 19);
     expect(header.getUint8(8), 1);
-    expect(header.getUint16(9), 10);
+    expect(header.getUint16(9), 11);
     expect(header.getUint64(11), bytes.length - 19);
   });
 
@@ -126,10 +128,12 @@ void main() {
     await store.close();
   });
 
-  test('a v7 backup moves its count to the shown dhikr (R4)', () async {
-    final payload = File('${phone.path}/v7.db');
+  /// the old store locked like a backup, ready to write at its own schema
+  (File, NativeDatabase) olderStore(int version) {
+    final payload = File('${phone.path}/v$version.db');
     final key = utf8.encode('test1234').map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    final old = v7.DatabaseAtV7(
+    return (
+      payload,
       NativeDatabase(
         payload,
         setup: (db) => db
@@ -138,14 +142,14 @@ void main() {
           ..execute("pragma hexkey = '$key'"),
       ),
     );
-    await old
-        .into(old.settings)
-        .insert(const v7.SettingsCompanion(tasbihDhikr: Value(0), tasbihCount: Value(20)));
-    await old.close();
+  }
+
+  /// the old store behind a header, restored into the phone's store
+  Future<void> restoreOlder(int version, File payload) async {
     final bytes = payload.readAsBytesSync();
     final header = ByteData(19)
       ..setUint8(8, 1)
-      ..setUint16(9, 7)
+      ..setUint16(9, version)
       ..setUint64(11, bytes.length);
     final head = header.buffer.asUint8List()..setAll(0, ascii.encode('BMBACKUP'));
 
@@ -157,11 +161,31 @@ void main() {
     expect(error, isNull);
     await restore(from, store!);
     await closeBackup(store);
+  }
+
+  test('a v7 backup moves its count to the shown dhikr (R4)', () async {
+    final (payload, executor) = olderStore(7);
+    final old = v7.DatabaseAtV7(executor);
+    await old
+        .into(old.settings)
+        .insert(const v7.SettingsCompanion(tasbihDhikr: Value(0), tasbihCount: Value(20)));
+    await old.close();
+    await restoreOlder(7, payload);
     final settings = await from.select(from.settings).getSingle();
     expect(
       (settings.subhanallahCount, settings.alhamdulillahCount, settings.allahuAkbarCount),
       (20, 0, 0),
     );
+  });
+
+  test('a v10 backup restores with amiri and its page color', () async {
+    final (payload, executor) = olderStore(10);
+    final old = v10.DatabaseAtV10(executor);
+    await old.into(old.settings).insert(const v10.SettingsCompanion(pageColor: Value('night')));
+    await old.close();
+    await restoreOlder(10, payload);
+    final settings = await from.select(from.settings).getSingle();
+    expect((settings.quranFont, settings.pageColor), (QuranFont.amiri, PageColor.night));
   });
 
   test('the temp files are gone after every call', () async {
