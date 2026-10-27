@@ -7,16 +7,17 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
+import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
-import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,17 +25,24 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// 4.07, the ayahs starting on a mushaf page as verse cells, so the layouts share the page and its
 /// last read. Both puts the page itself above them
 class TranslationView extends ConsumerWidget {
-  const TranslationView(this.page, {required this.onAyah, this.mushaf, super.key});
+  const TranslationView(
+    this.page, {
+    required this.onAyah,
+    required this.onLongAyah,
+    this.mushaf,
+    super.key,
+  });
 
   final int page;
   final ValueChanged<AyahKey> onAyah;
+  final ValueChanged<AyahKey> onLongAyah;
   final Widget? mushaf;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ayahs = ref.watch(quranAssetsProvider).value?.pageAyahs(page) ?? const [];
     final marked =
-        ref.watch(selectionProvider.select((key) => key != null)) ||
+        ref.watch(selectionProvider.select((selection) => selection.sheet != null)) ||
         ref.watch(playingAyahProvider.select((key) => key != null));
     final mushaf = this.mushaf;
     return ColoredBox(
@@ -50,7 +58,7 @@ class TranslationView extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (key.ayah == 1) _SurahHeader(key.surah),
-                  _VerseCell(key, onTap: () => onAyah(key)),
+                  _VerseCell(key, onTap: () => onAyah(key), onLongPress: () => onLongAyah(key)),
                 ],
               ),
             ),
@@ -182,10 +190,11 @@ class _OrnamentPainter extends CustomPainter {
 /// scrolls into view when it takes either, when the layout switches to it and when the text size
 /// changes under it
 class _VerseCell extends ConsumerStatefulWidget {
-  const _VerseCell(this.ayah, {required this.onTap});
+  const _VerseCell(this.ayah, {required this.onTap, required this.onLongPress});
 
   final AyahKey ayah;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   @override
   ConsumerState<_VerseCell> createState() => _VerseCellState();
@@ -204,7 +213,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
 
   bool _marked() {
     final playing = ref.read(playingAyahProvider);
-    return ref.read(selectionProvider) == widget.ayah ||
+    return ref.read(selectionProvider).sheet == widget.ayah ||
         (playing != null && readAyah(playing) == widget.ayah);
   }
 
@@ -225,7 +234,11 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
   @override
   Widget build(BuildContext context) {
     final ayah = widget.ayah;
-    final selected = ref.watch(selectionProvider.select((key) => key == ayah));
+    final selected = ref.watch(
+      selectionProvider.select(
+        (selection) => selection.sheet == ayah || selection.chosen.contains(ayah),
+      ),
+    );
     final playing = ref.watch(
       playingAyahProvider.select((key) => key != null && readAyah(key) == ayah),
     );
@@ -235,8 +248,11 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
             (settings.value?.quranArabicSize ?? 0, settings.value?.quranTranslationSize ?? 0),
       ),
     );
+    final font = ref.watch(
+      settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.amiri),
+    );
     ref
-      ..listen(selectionProvider.select((key) => key == ayah), (_, on) {
+      ..listen(selectionProvider.select((selection) => selection.sheet == ayah), (_, on) {
         if (on) _show();
       })
       ..listen(playingAyahProvider.select((key) => key != null && readAyah(key) == ayah), (_, on) {
@@ -274,7 +290,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
-        onLongPress: widget.onTap,
+        onLongPress: widget.onLongPress,
         child: AnimatedDecoratedBox(
           decoration: BoxDecoration(
             color: context.getColor(wash),
@@ -297,7 +313,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
                       RegularText(
                         arabic,
                         translate: false,
-                        font: FontEnum.quran,
+                        font: font.font,
                         fontSize: FontSizeManager.quranAr + arabicStep * FontSizeManager.arabicStep,
                         height: LineHeightManager.quranAr,
                         color: ThemeEnum.ink,
