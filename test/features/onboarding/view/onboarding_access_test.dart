@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/step/step_reveal.dart';
@@ -96,8 +97,8 @@ void main() {
     );
     await frames(tester, const Duration(milliseconds: 200));
     expect(find.byType(LocationStepPage), findsOneWidget);
-    final opacity = tester.widget<Opacity>(
-      find.descendant(of: title.first, matching: find.byType(Opacity)).first,
+    final opacity = tester.widget<CustomOpacity>(
+      find.descendant(of: title.first, matching: find.byType(CustomOpacity)).first,
     );
     expect(opacity.opacity, 1);
     await unmount(tester);
