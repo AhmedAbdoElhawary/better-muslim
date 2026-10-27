@@ -3,6 +3,7 @@ import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/design/bm_text.dart' show bmStackedLayoutTextScale;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -150,14 +151,17 @@ class _Player extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const PlayingTitle(),
-                              const RSizedBox.vertical(SpaceManager.miniPlayerLineGap),
-                              RegularText(
-                                StringsManager.reciterRate,
-                                fontSize: FontSizeManager.label,
-                                color: ThemeEnum.text2,
-                                maxLines: 1,
-                                args: {'rate': speedLabel(context, speed, digits)},
-                              ),
+                              if (MediaQuery.textScalerOf(context).scale(1) <=
+                                  bmStackedLayoutTextScale) ...[
+                                const RSizedBox.vertical(SpaceManager.miniPlayerLineGap),
+                                RegularText(
+                                  StringsManager.reciterRate,
+                                  fontSize: FontSizeManager.label,
+                                  color: ThemeEnum.text2,
+                                  maxLines: 1,
+                                  args: {'rate': speedLabel(context, speed, digits)},
+                                ),
+                              ],
                             ],
                           ),
                         ),
