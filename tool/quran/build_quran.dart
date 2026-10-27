@@ -5,10 +5,17 @@
 // Downloads Tanzil's metadata, Sahih International and Al-Muyassar into tool/quran/.cache/ once,
 // delete the folder to refresh them. Reads the two QUL files from the same folder with sqlite3.
 //
-// TODO(ahmed): Ibn Kathir, As-Sa'di and Clear Quran are only 09 Quran's Al-Fatiha samples in assets/quran/samples.json, supply them once licensed.
+//   dart run tool/quran/build_quran.dart --tafsir
+//
+// Builds the downloadable tafsirs into build/tafsir/ instead, from quran.com's api into the same
+// cache, see specs/008-enhancements/contracts/tafsir-files.md.
+//
+// TODO(ahmed): Clear Quran is only an empty sample in assets/quran/samples.json, supply it once licensed.
 
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:crypto/crypto.dart';
 
 const _cache = 'tool/quran/.cache';
 const _out = 'assets/quran';
@@ -143,7 +150,8 @@ const _englishNames = [
   'An-Nas',
 ];
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  if (args.contains('--tafsir')) return _tafsirs();
   await _download(_metadata, 'quran-data.js');
   await _download(_translation, 'en.sahih.txt');
   await _download(_tafsir, 'ar.muyassar.txt');
@@ -194,7 +202,6 @@ Future<void> main() async {
         },
     ],
   };
-  _write('$_out/index.json', index);
 
   final translation = _lines('en.sahih.txt');
   final tafsir = _lines('ar.muyassar.txt');
@@ -208,7 +215,7 @@ Future<void> main() async {
       'tafsir': [for (var ayah = 1; ayah <= count; ayah++) line(tafsir, ayah)],
     });
   }
-  stdout.writeln('Wrote $_out/index.json and 114 surah files.');
+  stdout.writeln('Wrote 114 surah files.');
 
   if (!File(_layout).existsSync() || !File(_words).existsSync()) {
     _fail('no QUL files in $_cache, download madinah_v2_layout.db and qpc_hafs_words.db');
@@ -218,6 +225,17 @@ Future<void> main() async {
     final text = row['text'] as String;
     words[row['id'] as int] = [row['surah'] as int, row['ayah'] as int, text, ?_endMarker(text)];
   }
+
+  /// home's verse of the day picks ayahs by length
+  final counts = [for (final surah in surahs) List.filled(surah[1] as int, 0)];
+  for (final [surah as int, ayah as int, _, ...end] in words.values) {
+    if (end.isEmpty) counts[surah - 1][ayah - 1]++;
+  }
+  for (final (i, surah) in (index['surahs']! as List).cast<Map<String, Object>>().indexed) {
+    surah['words'] = counts[i];
+  }
+  _write('$_out/index.json', index);
+  stdout.writeln('Wrote $_out/index.json.');
   final rows = await _query(
     _layout,
     'select page_number, line_number, line_type, is_centered, first_word_id, last_word_id, '
@@ -254,6 +272,68 @@ Future<void> main() async {
   }
   stdout.writeln('Wrote $_pageCount pages.');
 }
+
+/// one gzipped file per tafsir, `{"1": [ayah 1, ...], ...}`
+Future<void> _tafsirs() async {
+  final index = jsonDecode(File('$_out/index.json').readAsStringSync()) as Map<String, dynamic>;
+  final counts = [for (final surah in index['surahs'] as List) surah['ayahs'] as int];
+  for (final name in ['ibn_kathir', 'saadi']) {
+    final rows = await _apiTafsir(name, counts.length);
+    final surahs = <String, List<String>>{};
+    for (final (i, count) in counts.indexed) {
+      final texts = <String>[];
+      for (var ayah = 1; ayah <= count; ayah++) {
+        /// quran.com leaves out some grouped ayahs, the ayah before already covers them
+        final text = rows['${i + 1}:$ayah'];
+        texts.add(
+          text != null
+              ? _plain(text)
+              : ayah > 1
+              ? texts.last
+              : _fail('$name has no ${i + 1}:$ayah'),
+        );
+      }
+      surahs['${i + 1}'] = texts;
+    }
+    final bytes = gzip.encode(utf8.encode(jsonEncode(surahs)));
+    File('build/tafsir/$name.json.gz')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(bytes);
+    stdout.writeln('$name.json.gz ${bytes.length} bytes sha256 ${sha256.convert(bytes)}');
+  }
+}
+
+/// quran.com's ids, the same texts qul exports
+const _tafsirIds = {'ibn_kathir': 14, 'saadi': 91};
+
+/// ayah key to text
+Future<Map<String, String>> _apiTafsir(String name, int surahs) async {
+  final texts = <String, String>{};
+  for (var surah = 1; surah <= surahs; surah++) {
+    final file = '${name}_${_three(surah)}.json';
+    await _download(
+      'https://api.quran.com/api/v4/tafsirs/${_tafsirIds[name]}/by_chapter/$surah?per_page=300',
+      file,
+    );
+    final json = jsonDecode(File('$_cache/$file').readAsStringSync()) as Map<String, dynamic>;
+    for (final row in json['tafsirs'] as List) {
+      texts[row['verse_key'] as String] = row['text'] as String;
+    }
+  }
+  return texts;
+}
+
+/// qul's html without tags and footnote markers
+String _plain(String html) => html
+    .replaceAll(RegExp(r'<sup[^>]*>.*?</sup>', dotAll: true), '')
+    .replaceAll(RegExp(r'<br\s*/?>|</p>'), '\n')
+    .replaceAll(RegExp('<[^>]+>'), '')
+    .replaceAll('&nbsp;', ' ')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&amp;', '&')
+    .replaceAll(RegExp(r'[ \t]+'), ' ')
+    .replaceAll(RegExp(r'\s*\n\s*'), '\n')
+    .trim();
 
 /// qpc hafs puts the ayah number as its own word, written in arabic-indic digits
 int? _endMarker(String text) => RegExp(r'^[٠-٩]+$').hasMatch(text) ? 1 : null;
