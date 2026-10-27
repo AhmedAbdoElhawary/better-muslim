@@ -28,9 +28,9 @@ void main() {
     expect(find.text('Azkar'), findsWidgets);
     for (final text in [
       'Morning azkar',
-      'After Fajr · 0 of 12',
+      'After Fajr · 0 of 23',
       'Evening azkar',
-      'After Asr · 0 of 24',
+      'After Asr · 0 of 20',
       'Tasbih',
       'After prayer',
     ]) {
