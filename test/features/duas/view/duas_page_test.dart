@@ -9,6 +9,7 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/system/share.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
@@ -317,24 +318,35 @@ void main() {
     });
 
     for (final locale in [const Locale('en'), const Locale('ar')]) {
-      testWidgets('share sends one 1080 px wide png (${locale.languageCode})', (tester) async {
-        final shared = <ShareParams>[];
-        await pumpDuas(tester, [
-          ...await designOverrides(),
-          shareProvider.overrideWithValue((params) async => shared.add(params)),
-        ], locale: locale);
-        await tester.tap(action(locale.languageCode == 'ar' ? 'مشاركة' : 'Share'));
-        await tester.pump();
-        await tester.runAsync(() => Future<void>.delayed(const Duration(seconds: 1)));
-        await tester.pump();
+      testWidgets(
+        'share opens the sheet, its share sends one 1080 px wide png (${locale.languageCode})',
+        (tester) async {
+          final shared = <ShareParams>[];
+          await pumpDuas(tester, [
+            ...await designOverrides(),
+            shareProvider.overrideWithValue((params) async => shared.add(params)),
+          ], locale: locale);
+          final share = locale.languageCode == 'ar' ? 'مشاركة' : 'Share';
+          await tester.tap(action(share));
+          await tester.pumpAndSettle();
 
-        expect(shared, hasLength(1));
-        final [file] = shared.single.files!;
-        expect(file.mimeType, 'image/png');
-        final png = await tester.runAsync(file.readAsBytes) ?? Uint8List(0);
-        expect(ByteData.sublistView(png).getUint32(16), 360 * 3);
-        await unmount(tester);
-      });
+          /// the dua's own share sheet, then its Share button
+          final button = find.descendant(of: find.byType(ShareSheet), matching: find.text(share));
+          await tester.ensureVisible(button);
+          await tester.pumpAndSettle();
+          await tester.tap(button);
+          await tester.pump();
+          await tester.runAsync(() => Future<void>.delayed(const Duration(seconds: 1)));
+          await tester.pump();
+
+          expect(shared, hasLength(1));
+          final [file] = shared.single.files!;
+          expect(file.mimeType, 'image/png');
+          final png = await tester.runAsync(file.readAsBytes) ?? Uint8List(0);
+          expect(ByteData.sublistView(png).getUint32(16), 360 * 3);
+          await unmount(tester);
+        },
+      );
     }
   });
 }
