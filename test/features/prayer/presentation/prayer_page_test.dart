@@ -2,7 +2,8 @@ import 'dart:ui' show CheckedState;
 
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
-import 'package:better_muslim/features/prayer/presentation/view/widgets/day_dots.dart';
+import 'package:better_muslim/core/widgets/day_dots.dart';
+import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/mark_button.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_header.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/progress_ring.dart';
@@ -79,6 +80,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Asr unmarked'), findsNothing);
     expect(find.text('2 of 5 prayed today'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('the calendar button opens the hijri calendar', (tester) async {
+    await pumpPrayer(tester, await designOverrides());
+
+    await tester.tap(find.bySemanticsLabel('Hijri calendar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(HijriCalendarPage), findsOneWidget);
     await unmount(tester);
   });
 
