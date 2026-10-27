@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:flutter/material.dart';
@@ -134,6 +135,19 @@ void main() {
       expect(opacity(tester), 0, reason: 'out in 150 ms');
       expect(tester.widget<ScaleTransition>(scale()).scale.value, 1);
       await tester.pumpAndSettle();
+    });
+
+    testWidgets('the page behind blurs in with it', (tester) async {
+      double sigma() =>
+          (tester.widget<BackdropFilter>(find.byType(BackdropFilter)).filter as dynamic).sigmaX
+              as double;
+
+      await tapOpen(tester);
+      expect(sigma(), 0);
+      await tester.pump(BmMotion.standard ~/ 2);
+      expect(sigma(), inExclusiveRange(0, SizeManager.backdropBlur));
+      await tester.pumpAndSettle();
+      expect(sigma(), SizeManager.backdropBlur);
     });
 
     testWidgets('reduce motion fades in 150 ms with no scale', (tester) async {
