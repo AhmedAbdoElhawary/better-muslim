@@ -1,10 +1,13 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
+import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -24,10 +27,10 @@ void main() {
   late List<MethodCall> calls;
   setUp(() => calls = mockSystemChannel());
 
-  Future<void> pumpReader(WidgetTester tester, {double textScale = 1}) async {
+  Future<void> pumpReader(WidgetTester tester, {double textScale = 1, int page = 1}) async {
     await pumpHome(tester, await designOverrides(), textScale: textScale, settle: false);
     await tester.pump();
-    containerOf(tester).read(routerProvider).push(Routes.quranPage(1));
+    containerOf(tester).read(routerProvider).push(Routes.quranPage(page));
     await tester.pumpAndSettle();
   }
 
@@ -80,7 +83,7 @@ void main() {
     ]) {
       expect(find.text(text), findsWidgets, reason: text);
     }
-    for (final label in ['Mushaf', 'Translation', 'Both']) {
+    for (final label in ['Mushaf', 'Translation']) {
       expect(segment<QuranLayout>(label), findsOneWidget, reason: label);
     }
 
@@ -102,8 +105,8 @@ void main() {
     expect(settingsOf(tester).pageTurn, PageTurn.slide);
     expect(tester.widget<PageTurner>(find.byType(PageTurner)).book, isFalse);
 
-    await tapInSheet(tester, segment<QuranLayout>('Both'));
-    expect(settingsOf(tester).quranLayout, QuranLayout.both);
+    await tapInSheet(tester, segment<QuranLayout>('Translation'));
+    expect(settingsOf(tester).quranLayout, QuranLayout.translation);
 
     /// the sheet reopens on what was picked
     await tester.tapAt(const Offset(200, 40));
@@ -111,7 +114,7 @@ void main() {
     await tester.tap(find.text('Display'));
     await tester.pumpAndSettle();
     final picked = tester.widget<Segmented<QuranLayout>>(find.byType(Segmented<QuranLayout>));
-    expect(picked.selected, QuranLayout.both);
+    expect(picked.selected, QuranLayout.translation);
     await unmount(tester);
   });
 
@@ -144,7 +147,7 @@ void main() {
 
     final larger = find.bySemanticsLabel('Larger');
     final smaller = find.bySemanticsLabel('Smaller');
-    await tapInSheet(tester, larger.first);
+    await tapInSheet(tester, larger.at(1));
     expect(settingsOf(tester).quranArabicSize, 1);
     expect(find.text('28'), findsOneWidget);
 
@@ -153,6 +156,46 @@ void main() {
     }
     expect(settingsOf(tester).quranTranslationSize, -2);
     expect(find.text('12'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('mushaf size steps from 80% to 150%, above 100% the page rewraps and scrolls', (
+    tester,
+  ) async {
+    await pumpReader(tester, page: 3);
+    await openDisplay(tester);
+    expect(find.text('Mushaf size'), findsOneWidget);
+    expect(find.text('100%'), findsOneWidget);
+
+    final larger = find.bySemanticsLabel('Larger').first;
+    final smaller = find.bySemanticsLabel('Smaller').first;
+    for (var i = 0; i < 3; i++) {
+      await tapInSheet(tester, smaller);
+    }
+    expect(settingsOf(tester).mushafSize, -2);
+    expect(find.text('80%'), findsOneWidget);
+    for (var i = 0; i < 8; i++) {
+      await tapInSheet(tester, larger);
+    }
+    expect(settingsOf(tester).mushafSize, 5);
+    expect(find.text('150%'), findsOneWidget);
+
+    await tester.tapAt(const Offset(200, 40));
+    await tester.pumpAndSettle();
+    final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
+      (page) => page.washBounds(const AyahKey(2, 16)) != null,
+    );
+    final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(page.size.height, greaterThan(screen.height));
+    expect(page.reflow, isTrue);
+
+    /// the last ayah is under the fold, the page scrolls to it and a tap still finds it
+    final last = page.washBounds(const AyahKey(2, 16))!;
+    page.showOnScreen(rect: last);
+    await tester.pumpAndSettle();
+    await tester.tapAt(page.localToGlobal(last.center));
+    await tester.pumpAndSettle();
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(2, 16));
     await unmount(tester);
   });
 
@@ -198,7 +241,7 @@ void main() {
   testWidgets('survives text scale 2.0', (tester) async {
     await pumpReader(tester, textScale: 2);
     await openDisplay(tester);
-    await tapInSheet(tester, segment<QuranLayout>('Both'));
+    await tapInSheet(tester, segment<QuranLayout>('Translation'));
     await tester.ensureVisible(find.text('Madinah · Hafs'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
