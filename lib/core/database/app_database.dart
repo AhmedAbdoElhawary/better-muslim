@@ -137,7 +137,13 @@ class Settings extends Table {
   TextColumn get quranLayout => textEnum<QuranLayout>().withDefault(const Constant('mushaf'))();
   TextColumn get pageTurn => textEnum<PageTurn>().withDefault(const Constant('book'))();
   BoolColumn get keepScreenOn => boolean().withDefault(const Constant(false))();
-  TextColumn get quranFont => textEnum<QuranFont>().withDefault(const Constant('amiri'))();
+  TextColumn get quranFont => textEnum<QuranFont>().withDefault(const Constant('kfgqpc'))();
+
+  /// 10% steps around the printed page, above 0 the lines rewrap
+  IntColumn get mushafSize => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(mushafSize.isBetweenValues(-2, 5))();
 
   /// steps around 4.07's size
   IntColumn get quranArabicSize => integer()
@@ -345,7 +351,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -460,6 +466,21 @@ class AppDatabase extends _$AppDatabase {
       },
       from10To11: (m, schema) async {
         await m.addColumn(schema.settings, schema.settings.quranFont);
+      },
+      from11To12: (m, schema) async {
+        /// sqlite can't change a default in place, the table is remade with every row kept. Both
+        /// is gone, Translation shows the page now
+        await m.alterTable(
+          TableMigration(
+            schema.settings,
+            newColumns: [schema.settings.mushafSize],
+            columnTransformer: {
+              schema.settings.quranLayout: const CustomExpression<String>(
+                "case when quran_layout = 'both' then 'translation' else quran_layout end",
+              ),
+            },
+          ),
+        );
       },
     ),
   );
