@@ -183,8 +183,9 @@ void main() {
 
     await tapAndStore(tester, find.text('Bookmark'));
     expect(find.text('Bookmark removed'), findsOneWidget);
-    expect(tester.widget<SnackBar>(find.byType(SnackBar)).duration, const Duration(seconds: 4));
     expect(ribbon(), findsNothing);
+    await tester.pump(const Duration(milliseconds: 3800));
+    expect(find.text('Undo'), findsOneWidget, reason: 'undo stays for 4 s');
 
     await tapAndStore(tester, find.text('Undo'));
     expect(ribbon(), findsWidgets);
