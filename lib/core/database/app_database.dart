@@ -137,6 +137,7 @@ class Settings extends Table {
   TextColumn get quranLayout => textEnum<QuranLayout>().withDefault(const Constant('mushaf'))();
   TextColumn get pageTurn => textEnum<PageTurn>().withDefault(const Constant('book'))();
   BoolColumn get keepScreenOn => boolean().withDefault(const Constant(false))();
+  TextColumn get quranFont => textEnum<QuranFont>().withDefault(const Constant('amiri'))();
 
   /// steps around 4.07's size
   IntColumn get quranArabicSize => integer()
@@ -344,7 +345,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -456,6 +457,9 @@ class AppDatabase extends _$AppDatabase {
         await m.createIndex(schema.quranBookmarkAyah);
         await m.createIndex(schema.quranBookmarkPage);
         await m.createTable(schema.quranNotes);
+      },
+      from10To11: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.quranFont);
       },
     ),
   );
