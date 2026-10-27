@@ -141,7 +141,7 @@ void main() {
     await scrollTo(tester, translation(5));
     await tester.tap(cellText(translation(5)));
     await tester.pumpAndSettle();
-    expect(containerOf(tester).read(selectionProvider), const AyahKey(1, 5));
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
     expectOnScreen(tester, cellText(translation(5)));
     await unmount(tester);
   });
@@ -155,12 +155,12 @@ void main() {
     await tester.pumpAndSettle();
 
     await setLayout(tester, QuranLayout.translation);
-    expect(containerOf(tester).read(selectionProvider), const AyahKey(1, 5));
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
     expectOnScreen(tester, cellText(translation(5)));
 
     /// in Both the page itself is on screen with the ayah washed on it
     await setLayout(tester, QuranLayout.both);
-    expect(containerOf(tester).read(selectionProvider), const AyahKey(1, 5));
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(const AyahKey(1, 5)) != null,
     );
