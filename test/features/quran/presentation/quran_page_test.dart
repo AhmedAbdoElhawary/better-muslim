@@ -1,6 +1,10 @@
+import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
+import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -10,6 +14,7 @@ import '../../../helpers/home.dart';
 import '../../../helpers/more.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
+import '../../../helpers/quran.dart';
 
 void main() {
   setUpAll(tz.initializeTimeZones);
@@ -52,6 +57,26 @@ void main() {
     expect(find.text('Quran'), findsWidgets);
     expect(find.text('Memorize'), findsNothing);
     expect(find.textContaining('Khatmah'), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('listen opens the last read page reciting from its ayah', (tester) async {
+    final recitation = FakeRecitation();
+    await pumpHome(
+      tester,
+      [...await designOverrides(), recitationProvider.overrideWithValue(recitation)],
+      settle: false,
+      app: const RecitationBoot(child: App()),
+    );
+    await tester.pump();
+    containerOf(tester).read(routerProvider).go(Routes.quran);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Listen'));
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'play 1:3 1:7');
+    expect(openedPage(tester), 1);
+    expect(find.byType(MiniPlayer), findsOneWidget);
     await unmount(tester);
   });
 
