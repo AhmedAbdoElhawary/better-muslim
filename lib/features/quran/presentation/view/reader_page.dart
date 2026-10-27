@@ -19,13 +19,16 @@ import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_share.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/choosing_bar.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/recitation_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/translation_view.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +106,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   Future<void> _turned() async {
     final page = _page.value;
     _pages.removeWhere((n, _) => (n - page).abs() > 1);
-    final key = ref.read(selectionProvider);
+    final key = ref.read(selectionProvider).sheet;
     if (key != null && !(ref.read(mushafPageProvider(page)).value?.has(key) ?? false)) _close();
     final assets = await _assets;
     if (!mounted || page != _page.value) return;
@@ -195,7 +198,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
   /// a tap off the text closes the sheet, or the page springs to a card and back
   void _tap(TapUpDetails _) {
-    if (ref.read(selectionProvider) != null) {
+    if (ref.read(selectionProvider).choosing) return;
+    if (ref.read(selectionProvider).sheet != null) {
       _close();
       return;
     }
@@ -205,6 +209,54 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     }
     setState(() => _chrome = !_chrome);
     springTo(context, _card, _chrome ? 1 : 0);
+  }
+
+  /// while choosing a tap checks or unchecks the ayah
+  void _tapAyah(int page, AyahKey key) {
+    if (ref.read(selectionProvider).choosing) {
+      _toggle(key);
+      return;
+    }
+    _select(page, key);
+  }
+
+  /// a long press starts choosing ayahs to share with this one checked (FR-015)
+  void _longAyah(int page, AyahKey key) {
+    final selection = ref.read(selectionProvider);
+    if (selection.choosing) {
+      if (!selection.chosen.contains(key)) _toggle(key);
+      return;
+    }
+    if (page != _page.value) return;
+    _close();
+    BmHaptics.ayahSelect();
+    ref.read(selectionProvider.notifier).startChoosing(key);
+    setState(() => _chrome = false);
+    springTo(context, _card, 0);
+  }
+
+  /// an ayah is added only while all of them still fit the card (FR-018)
+  Future<void> _toggle(AyahKey key) async {
+    final chosen = ref.read(selectionProvider).chosen;
+    if (!chosen.contains(key)) {
+      final assets = await _assets;
+      final arabic = {
+        for (final key in {...chosen, key}) key: await assets.ayahText(key),
+      };
+      if (!mounted) return;
+      if (!AyahShare.canAdd(context, arabic)) {
+        showToast(context, StringsManager.ayahDoesntFit, icon: BmIconName.quran);
+        return;
+      }
+    }
+    BmHaptics.selection();
+    ref.read(selectionProvider.notifier).toggle(key);
+  }
+
+  void _shareChosen() {
+    final keys = ref.read(selectionProvider).chosen.toList()..sort();
+    ref.read(selectionProvider.notifier).clear();
+    showAyahShare(context, keys);
   }
 
   void _select(int page, AyahKey key) {
@@ -285,7 +337,10 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     final layout = ref.watch(
       settingsProvider.select((settings) => settings.value?.quranLayout ?? QuranLayout.mushaf),
     );
-    final selected = ref.watch(selectionProvider.select((key) => key != null));
+    final selected = ref.watch(
+      selectionProvider.select((selection) => selection.sheet != null || selection.choosing),
+    );
+    final choosing = ref.watch(selectionProvider.select((selection) => selection.choosing));
     final reduce = MediaQuery.disableAnimationsOf(context);
     final ayah = _ayah;
     return PopScope(
@@ -294,7 +349,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
         if (!popped) _close();
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: color == PageColor.night ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        value: color.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         child: AnimatedTheme(
           data: AppTheme.page(color, themeId),
           duration: bmMotion(reduce, BmMotion.skyChange),
@@ -315,21 +370,28 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
                     QuranLayout.mushaf => _MushafPage(
                       n,
                       pageKey: _pages.putIfAbsent(n, GlobalKey.new),
-                      onAyah: (key) => _select(n, key),
+                      onAyah: (key) => _tapAyah(n, key),
+                      onLongAyah: (key) => _longAyah(n, key),
                     ),
-                    QuranLayout.translation => TranslationView(n, onAyah: (key) => _select(n, key)),
+                    QuranLayout.translation => TranslationView(
+                      n,
+                      onAyah: (key) => _tapAyah(n, key),
+                      onLongAyah: (key) => _longAyah(n, key),
+                    ),
 
                     /// the page fills the screen, its cells scroll up under it
                     QuranLayout.both => LayoutBuilder(
                       builder: (context, constraints) => TranslationView(
                         n,
-                        onAyah: (key) => _select(n, key),
+                        onAyah: (key) => _tapAyah(n, key),
+                        onLongAyah: (key) => _longAyah(n, key),
                         mushaf: ConstrainedBox(
                           constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
                           child: _MushafPage(
                             n,
                             pageKey: _pages.putIfAbsent(n, GlobalKey.new),
-                            onAyah: (key) => _select(n, key),
+                            onAyah: (key) => _tapAyah(n, key),
+                            onLongAyah: (key) => _longAyah(n, key),
                           ),
                         ),
                       ),
@@ -375,6 +437,26 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
                 alignment: Alignment.bottomCenter,
                 child: RecitationSheet(key: _reciteSheet, open: _recite, onClose: _closeRecitation),
               ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedSwitcher(
+                  duration: bmMotion(reduce, BmMotion.standard),
+                  switchInCurve: BmMotion.standardCurve,
+                  switchOutCurve: BmMotion.standardCurve,
+                  transitionBuilder: (child, animation) => reduce
+                      ? FadeTransition(opacity: animation, child: child)
+                      : SlideTransition(
+                          position: Tween(
+                            begin: const Offset(0, 1),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                  child: choosing
+                      ? ChoosingBar(onShare: _shareChosen, onCancel: _close)
+                      : const SizedBox.shrink(),
+                ),
+              ),
             ],
           ),
         ),
@@ -385,20 +467,26 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
 /// the mushaf page with its ribbon
 class _MushafPage extends StatelessWidget {
-  const _MushafPage(this.page, {required this.pageKey, required this.onAyah});
+  const _MushafPage(
+    this.page, {
+    required this.pageKey,
+    required this.onAyah,
+    required this.onLongAyah,
+  });
 
   final int page;
 
   /// the reader asks the page where an ayah sits through it
   final GlobalKey pageKey;
   final ValueChanged<AyahKey> onAyah;
+  final ValueChanged<AyahKey> onLongAyah;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        MushafPageView(page, key: pageKey, onAyah: onAyah),
+        MushafPageView(page, key: pageKey, onAyah: onAyah, onLongAyah: onLongAyah),
         PageRibbon(page),
       ],
     );
