@@ -72,17 +72,17 @@ void main() {
       ),
     );
     await settle(tester);
-    await waitFor(tester, find.text('After Asr · 0 of 24'));
+    await waitFor(tester, find.text('After Asr · 0 of 20'));
 
     await tap(tester, find.text('Evening azkar'));
-    await waitFor(tester, find.text('Evening azkar · 1 of 24'));
+    await waitFor(tester, find.text('Evening azkar · 1 of 20'));
 
-    /// card 1 is said 100 times, the next tap moves on
-    await tap(tester, find.text('Tap anywhere to count'), times: 101);
-    await waitFor(tester, find.text('Evening azkar · 2 of 24'));
+    /// card 1 is said once, the next tap moves on
+    await tap(tester, find.text('Tap anywhere to count'), times: 2);
+    await waitFor(tester, find.text('Evening azkar · 2 of 20'));
 
     await tap(tester, find.byType(BarBackButton));
-    await waitFor(tester, find.text('After Asr · 1 of 24'));
+    await waitFor(tester, find.text('After Asr · 1 of 20'));
 
     await tap(tester, find.text('Tasbih'));
 
@@ -99,7 +99,7 @@ void main() {
 
     await tap(tester, find.text('More'));
     await tap(tester, find.text('Duas'));
-    await tester.enterText(find.byType(TextField), 'tawakkaltu');
+    await tester.enterText(find.byType(TextField), 'توكلت');
     await settle(tester);
     await waitFor(tester, find.byType(DuaCard));
 
