@@ -31,7 +31,12 @@ enum PageColor {
   };
 }
 
-enum QuranLayout { mushaf, translation, both }
+enum QuranLayout { mushaf, translation }
+
+/// Display's mushaf size, 10% steps around the printed page
+const mushafSizeSteps = (min: -2, max: 5);
+
+double mushafScale(int step) => 1 + step / 10;
 
 enum PageTurn { book, slide }
 
