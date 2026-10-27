@@ -9,6 +9,7 @@ import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:better_muslim/features/notifications/domain/schedule.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
@@ -155,6 +156,20 @@ class NotificationScheduler {
           body: texts.bodyOf(alert),
           payload: payloadOf(alert),
         );
+      }
+      if (_ios != null) {
+        if (quietNoticeAt(alerts) case final at?) {
+          await _plugin.zonedSchedule(
+            id: quietAlertId,
+            scheduledDate: at,
+            notificationDetails: const NotificationDetails(
+              iOS: DarwinNotificationDetails(presentSound: false),
+            ),
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            title: texts.tr(StringsManager.notifQuietTitle),
+            body: texts.tr(StringsManager.notifQuietBody),
+          );
+        }
       }
       _native = native;
       if (native.isNotEmpty) await _channel.schedule(native);
