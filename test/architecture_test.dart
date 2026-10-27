@@ -12,6 +12,9 @@ const _skyPainter = 'lib/features/home/view/widgets/sky_header_painter.dart';
 /// the adhan screen is always dark, 4.03 gives its own literal colors
 const _adhanColors = 'lib/features/notifications/presentation/view/adhan_colors.dart';
 
+/// the share card's fixed backgrounds look the same in every theme
+const _shareColors = 'lib/core/widgets/share/share_options.dart';
+
 /// the adhan screen keeps emerald's sky in every theme (TOKENS.md)
 const _adhanSky = 'lib/features/notifications/presentation/view/widgets/adhan_sky.dart';
 
@@ -36,7 +39,7 @@ final _rules = [
   _Rule(
     'colors come from context.getColor(ThemeEnum.x)',
     RegExp(r'\bColors\.|\bColor\(0x|\bColor\.from(ARGB|RGBO)\('),
-    allowedIn: [_theme, _skyPainter, _adhanColors],
+    allowedIn: [_theme, _skyPainter, _adhanColors, _shareColors],
   ),
   _Rule(
     'ColorManager is read only by the theme files',
@@ -81,7 +84,12 @@ final _rules = [
     RegExp(r'\bbmSkyQiyamEmerald\b'),
     allowedIn: [_theme, _adhanSky],
   ),
-  _Rule('widgets are classes, not build functions', RegExp(r'\bWidget\s+_?build[A-Z]\w*\(')),
+
+  /// buildModalBarrier is the route's own override
+  _Rule(
+    'widgets are classes, not build functions',
+    RegExp(r'\bWidget\s+_?build(?!ModalBarrier\b)[A-Z]\w*\('),
+  ),
   _Rule(
     'no shared_preferences, use drift or flutter_secure_storage',
     RegExp(r'package:shared_preferences/'),
