@@ -94,7 +94,12 @@ void main() {
   ) async {
     await openShare(tester, const AyahKey(1, 5), 1);
 
-    await tapInSheet(tester, find.text('Ibn Kathir').last);
+    /// the chip spins while it downloads, so this tap can't settle
+    final chip = find.text('Ibn Kathir').last;
+    await tester.ensureVisible(chip);
+    await tester.pumpAndSettle();
+    await tester.tap(chip);
+    await tester.pump();
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pump();
     expect(find.text('Needs internet once'), findsOneWidget);
