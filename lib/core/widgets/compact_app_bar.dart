@@ -1,25 +1,18 @@
-import 'dart:ui';
-
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
-import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
-import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/core/widgets/glass.dart';
 import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// with the top glow off, the bar's plain glass
-const _plainOpacity = .8;
-
 /// the components' 56 pt compact bar on a blurred surface, the back chevron only on pushed pages
-class CompactAppBar extends ConsumerWidget {
+class CompactAppBar extends StatelessWidget {
   const CompactAppBar(
     this.title, {
     this.back = true,
@@ -42,8 +35,7 @@ class CompactAppBar extends ConsumerWidget {
   final GlobalKey? titleKey;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final opacity = ref.watch(topGlowProvider) ? BmGlass.surfaceOpacity : _plainOpacity;
+  Widget build(BuildContext context) {
     final reduce = MediaQuery.disableAnimationsOf(context);
 
     return Stack(
@@ -53,16 +45,8 @@ class CompactAppBar extends ConsumerWidget {
             opacity: collapsed ? 1 : 0,
             duration: reduce ? BmMotion.micro : BmMotion.standard,
             curve: BmMotion.standardCurve,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: BmGlass.blurSigma, sigmaY: BmGlass.blurSigma),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.getColor(ThemeEnum.surface).withValues(alpha: opacity),
-                    border: Border(bottom: BorderSide(color: context.getColor(ThemeEnum.outline))),
-                  ),
-                ),
-              ),
+            child: Glass(
+              border: Border(bottom: BorderSide(color: context.getColor(ThemeEnum.outline))),
             ),
           ),
         ),
@@ -210,7 +194,15 @@ class _LargeTitleScrollViewState extends State<LargeTitleScrollView> {
         children: [
           NotificationListener<ScrollNotification>(
             onNotification: _onScroll,
-            child: CustomScrollView(controller: _controller, slivers: widget.slivers),
+            child: CustomScrollView(
+              controller: _controller,
+              slivers: [
+                ...widget.slivers,
+
+                /// the tab bar's glass covers the bottom, the last row ends above it
+                const SliverSafeArea(top: false, sliver: SliverToBoxAdapter()),
+              ],
+            ),
           ),
           PositionedDirectional(
             top: 0,
@@ -279,7 +271,21 @@ class _LargeTitleState extends State<LargeTitle> {
 
   (Offset, Offset)? _ends;
 
+  TextDirection? _direction;
+
   static const _fontFrom = .7;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final direction = Directionality.of(context);
+
+    /// const headers never rebuild on a language switch, so the old side's ends would stay
+    if (direction != _direction) {
+      _direction = direction;
+      _ends = null;
+    }
+  }
 
   void _measure(Duration _) {
     final scope = _LargeTitleScope.maybeOf(context);
