@@ -129,7 +129,10 @@ class RecitationFiles {
       if (part.existsSync()) part.deleteSync();
       throw const RecitationException(RecitationFailure.failed);
     }
-    if (written != fetched.length || !isMp3(head)) {
+
+    /// no length header, the mp3 check alone decides
+    final length = fetched.length;
+    if ((length != null && written != length) || !isMp3(head)) {
       part.deleteSync();
       throw const RecitationException(RecitationFailure.failed);
     }
