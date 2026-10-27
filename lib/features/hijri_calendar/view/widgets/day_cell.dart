@@ -115,7 +115,7 @@ class _Mark extends StatelessWidget {
       DayLook.whiteDay => const _Dot(ThemeEnum.accent),
       DayLook.event => const _Dot(ThemeEnum.primary),
       DayLook.sunnahFast => const _Crescent(),
-      _ => const SizedBox.square(dimension: SizeManager.dayMark),
+      _ => const RSizedBox.square(dimension: SizeManager.dayMark),
     };
   }
 }
