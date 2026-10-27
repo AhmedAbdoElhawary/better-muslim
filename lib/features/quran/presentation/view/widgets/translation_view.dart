@@ -22,21 +22,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// 4.07, the ayahs starting on a mushaf page as verse cells, so the layouts share the page and its
-/// last read. Both puts the page itself above them
+/// 4.07, the ayahs starting on a mushaf page as verse cells under the page itself, so the layouts
+/// share the page and its last read
 class TranslationView extends ConsumerWidget {
   const TranslationView(
     this.page, {
     required this.onAyah,
     required this.onLongAyah,
-    this.mushaf,
+    required this.mushaf,
     super.key,
   });
 
   final int page;
   final ValueChanged<AyahKey> onAyah;
   final ValueChanged<AyahKey> onLongAyah;
-  final Widget? mushaf;
+  final Widget mushaf;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,13 +44,12 @@ class TranslationView extends ConsumerWidget {
     final marked =
         ref.watch(selectionProvider.select((selection) => selection.sheet != null)) ||
         ref.watch(playingAyahProvider.select((key) => key != null));
-    final mushaf = this.mushaf;
     return ColoredBox(
       color: context.getColor(ThemeEnum.page),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          mushaf ?? const SafeArea(bottom: false, child: RSizedBox.vertical(SpaceManager.s1)),
+          mushaf,
           for (final key in ayahs)
             HorizontalPadding(
               padding: SpaceManager.s3,
@@ -249,7 +248,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
       ),
     );
     final font = ref.watch(
-      settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.amiri),
+      settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.kfgqpc),
     );
     ref
       ..listen(selectionProvider.select((selection) => selection.sheet == ayah), (_, on) {
