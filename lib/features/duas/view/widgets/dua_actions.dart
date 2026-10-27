@@ -4,9 +4,11 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/share/share_options.dart';
+import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
-import 'package:better_muslim/features/duas/view/share_dua.dart';
+import 'package:better_muslim/features/duas/view/widgets/dua_share.dart';
 import 'package:better_muslim/features/duas/view_model/dua_player.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +17,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// listen, save and share under every dua card
 class DuaActions extends ConsumerWidget {
-  const DuaActions({required this.dua, required this.category, super.key});
+  const DuaActions({required this.dua, super.key});
   final Dua dua;
-  final DuaCategory category;
 
   void _toggleSave(BuildContext context, WidgetRef ref) {
     final db = ref.read(databaseProvider);
@@ -69,11 +70,13 @@ class DuaActions extends ConsumerWidget {
           onTap: () => _toggleSave(context, ref),
         ),
         const RSizedBox.horizontal(SpaceManager.s1),
-        Builder(
-          builder: (button) => _Action(
-            icon: BmIcon.ui(BmUiIcon.share),
-            label: StringsManager.share,
-            onTap: () => shareDua(button, ref, dua: dua, category: category),
+        _Action(
+          icon: BmIcon.ui(BmUiIcon.share),
+          label: StringsManager.share,
+          onTap: () => showShareSheet(
+            context,
+            content: DuaShare(dua),
+            ornaments: const [...ShareOrnament.patterns, ShareOrnament.arch],
           ),
         ),
       ],
