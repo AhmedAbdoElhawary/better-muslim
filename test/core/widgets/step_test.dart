@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/step/step_dots.dart';
 import 'package:better_muslim/core/widgets/step/step_reveal.dart';
 import 'package:better_muslim/core/widgets/step/step_scope.dart';
@@ -33,10 +34,10 @@ void main() {
   );
 
   double opacityOf(WidgetTester tester, StepSlot slot) => tester
-      .widget<Opacity>(
+      .widget<CustomOpacity>(
         find.descendant(
           of: find.byWidgetPredicate((widget) => widget is StepReveal && widget.slot == slot),
-          matching: find.byType(Opacity),
+          matching: find.byType(CustomOpacity),
         ),
       )
       .opacity;
@@ -58,7 +59,7 @@ void main() {
       tester,
       const StepReveal(slot: StepSlot.title, child: SizedBox.square(dimension: 10)),
     );
-    expect(find.byType(Opacity), findsNothing);
+    expect(find.byType(CustomOpacity), findsNothing);
   });
 
   testWidgets('each slot fades on its interval, title and buttons rise 14', (tester) async {
