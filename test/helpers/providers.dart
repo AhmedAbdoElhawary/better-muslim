@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
+import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/widgets.dart';
@@ -22,8 +26,8 @@ const devConfig = FlavorConfig(
   sentryDsn: '',
 );
 
-/// an in-memory store, the dev flavor, no gps and no surfaces plugin, so a widget test never
-/// reaches the phone. onboarded, so the app opens on home unless a test says otherwise
+/// an in-memory store, the dev flavor, no gps, no surfaces plugin and no app folder, so a widget
+/// test never reaches the phone. onboarded, so the app opens on home unless a test says otherwise
 List<Override> testOverrides({
   PositionSource? positionSource,
   FlavorConfig flavor = devConfig,
@@ -35,11 +39,16 @@ List<Override> testOverrides({
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
   onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
   surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
+  _tafsirFiles,
 ];
 
 /// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store. onboarded
 /// false is a replay
-Future<List<Override>> designOverrides({bool onboarded = true, BmThemeId? theme}) async {
+Future<List<Override>> designOverrides({
+  bool onboarded = true,
+  BmThemeId? theme,
+  Override? tafsirFiles,
+}) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final db = await designScenarioStore();
   if (theme != null) await db.updateSettings(SettingsCompanion(theme: Value(theme)));
@@ -60,8 +69,19 @@ Future<List<Override>> designOverrides({bool onboarded = true, BmThemeId? theme}
     ...designScenarioOverrides(),
     onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
     surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
+    tafsirFiles ?? _tafsirFiles,
   ];
 }
+
+/// nothing is downloaded and the phone is offline, a test that needs a tafsir overrides this
+final _tafsirFiles = tafsirFilesProvider.overrideWith(
+  (ref) => TafsirFiles(
+    assets: () => ref.read(quranAssetsProvider.future),
+    root: () async => Directory.systemTemp,
+    fetch: (_) async => throw const SocketException('offline'),
+    exclude: (_) async {},
+  ),
+);
 
 Override _memoryDatabase(BmThemeId? theme) => databaseProvider.overrideWith((ref) {
   /// every test gets its own in-memory store, so drift's shared executor warning doesn't apply
