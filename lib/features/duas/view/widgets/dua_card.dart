@@ -47,7 +47,7 @@ class DuaCard extends StatelessWidget {
               ),
               child: TopPadding(
                 padding: SpaceManager.duaActionsTop,
-                child: DuaActions(dua: dua, category: category),
+                child: DuaActions(dua: dua),
               ),
             ),
           ],
