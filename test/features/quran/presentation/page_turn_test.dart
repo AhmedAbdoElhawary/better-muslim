@@ -39,6 +39,10 @@ void main() {
         ),
       ),
     );
+
+    /// the neighbours come one frame each
+    await tester.pump();
+    await tester.pump();
     return page;
   }
 
@@ -132,6 +136,33 @@ void main() {
         });
     return layers;
   }
+
+  testWidgets('the shown page is built first, then one neighbour a frame', (tester) async {
+    built = [];
+    final page = ValueNotifier(5);
+    addTearDown(page.dispose);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.view),
+        child: AppScreenUtilInit(
+          child: MaterialApp(
+            theme: AppTheme.page(PageColor.paper),
+            home: PageTurner(
+              page: page,
+              pageBuilder: (n) => _Page(n, onBuild: built.add),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(built, [5]);
+    await tester.pump();
+    expect(built, [5, 6]);
+    await tester.pump();
+    expect(built, [5, 6, 4]);
+    await tester.pump();
+    expect(built, [5, 6, 4], reason: 'nothing more once both are there');
+  });
 
   testWidgets('a settled page has no transform or opacity above it', (tester) async {
     final book = await pumpTurner(tester, start: 5);
