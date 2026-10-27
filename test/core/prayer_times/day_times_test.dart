@@ -46,6 +46,15 @@ void main() {
     ]);
   });
 
+  test('the last third starts a third of maghrib to fajr before fajr (FR-032)', () {
+    final today = makkah(DateTime(2026, 10, 15));
+    final fajr = makkah(DateTime(2026, 10, 16)).fajr!;
+
+    expect(today.lastThird(fajr), fajr.subtract(fajr.difference(today.maghrib!) ~/ 3));
+    expect(hhmm(today.lastThird(fajr)), '01:18');
+    expect(today.lastThird(null), isNull);
+  });
+
   group('SC-002 fixtures are within 1 minute', () {
     final files = Directory('test/fixtures/prayer_times').listSync().whereType<File>().toList()
       ..sort((a, b) => a.path.compareTo(b.path));
