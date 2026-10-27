@@ -89,7 +89,7 @@ class _ShareSheetState extends ConsumerState<ShareSheet> {
 
   /// starts on the reader's font (FR-011)
   late var _options = ShareOptions(
-    font: ref.read(settingsProvider).value?.quranFont ?? QuranFont.amiri,
+    font: ref.read(settingsProvider).value?.quranFont ?? QuranFont.kfgqpc,
   );
   var _busy = false;
 
