@@ -176,6 +176,9 @@ abstract final class StringsManager {
   static const String ishaAr = 'ishaAr';
   static const String ishaLabel = 'ishaLabel';
   static const String fajrLabel = 'fajrLabel';
+  static const String dhuhrLabel = 'dhuhrLabel';
+  static const String asrLabel = 'asrLabel';
+  static const String lastThirdLabel = 'lastThirdLabel';
   static const String morningAzkar = 'morningAzkar';
   static const String morningAzkarSub = 'morningAzkarSub';
   static const String timeLeftSemantics = 'timeLeftSemantics';
@@ -420,7 +423,6 @@ abstract final class StringsManager {
   static const String noBookmarksBody = 'noBookmarksBody';
   static const String recentNote = 'recentNote';
   static const String shareAyah = 'shareAyah';
-  static const String includeTranslation = 'includeTranslation';
   static const String showAppName = 'showAppName';
   static const String showSurahName = 'showSurahName';
   static const String paper = 'paper';
@@ -472,7 +474,6 @@ abstract final class StringsManager {
   static const String ribbonNeutral = 'ribbonNeutral';
   static const String shareSquare = 'shareSquare';
   static const String shareStory = 'shareStory';
-  static const String shareAyahRef = 'shareAyahRef';
   static const String arabicSize = 'arabicSize';
   static const String translationSize = 'translationSize';
   static const String smaller = 'smaller';
@@ -482,7 +483,6 @@ abstract final class StringsManager {
   static const String useTafsir = 'useTafsir';
   static const String useRecitation = 'useRecitation';
   static const String recitationPlaying = 'recitationPlaying';
-  static const String turnOffTranslation = 'turnOffTranslation';
   static const String recitationPaused = 'recitationPaused'; // Share backgrounds
   static const String midnight = 'midnight';
   static const String ocean = 'ocean';
@@ -512,4 +512,27 @@ abstract final class StringsManager {
   static const String mint = 'mint';
   static const String skyLight = 'skyLight';
   static const String pearl = 'pearl';
+  static const String font = 'font';
+  static const String fontAmiri = 'fontAmiri';
+  static const String fontKfgqpc = 'fontKfgqpc';
+  static const String fontScheherazade = 'fontScheherazade';
+  static const String ornament = 'ornament';
+  static const String solidColor = 'solidColor';
+  static const String patternKhatam = 'patternKhatam';
+  static const String patternStarCross = 'patternStarCross';
+  static const String frameArch = 'frameArch';
+  static const String shareN = 'shareN';
+  static const String tafsirHidden = 'tafsirHidden';
+  static const String ayahDoesntFit = 'ayahDoesntFit';
+  static const String ayahOnly = 'ayahOnly';
+  static const String download = 'download';
+  static const String downloading = 'downloading';
+  static const String needsInternetOnce = 'needsInternetOnce';
+  static const String downloadFailed = 'downloadFailed';
+  static const String shareDua = 'shareDua';
+  static const String shareRun = 'shareRun';
+  static const String sepia = 'sepia';
+  static const String green = 'green';
+  static const String navy = 'navy';
+  static const String fontSection = 'fontSection';
 }
