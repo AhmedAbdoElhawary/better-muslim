@@ -75,6 +75,11 @@ void main() {
     expect(left(), isEmpty);
   });
 
+  test('no size header with an mp3 start is kept', () async {
+    final recitations = files((_) async => (length: null, bytes: Stream.value(_mp3)));
+    expect((await recitations.file(const AyahKey(1, 5))).readAsBytesSync(), _mp3);
+  });
+
   test('wrong first bytes leave no file', () async {
     final recitations = files((_) => serve('<html>not found</html>'.codeUnits));
     expect(await failure(recitations.file(const AyahKey(1, 5))), RecitationFailure.failed);
