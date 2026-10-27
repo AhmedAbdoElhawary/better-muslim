@@ -372,6 +372,24 @@
       "time": {}
     }
   },
+  "dhuhrLabel": "Dhuhr {time}",
+  "@dhuhrLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "asrLabel": "Asr {time}",
+  "@asrLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "lastThirdLabel": "Last third {time}",
+  "@lastThirdLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "morningAzkar": "Morning azkar",
   "morningAzkarSub": "After Fajr · {done} of {total}",
   "@morningAzkarSub": {
@@ -906,7 +924,6 @@
   "noBookmarksBody": "Tap Bookmark on any ayah to keep your place.",
   "recentNote": "RECENT NOTE",
   "shareAyah": "Share ayah",
-  "includeTranslation": "Include translation",
   "showAppName": "Show app name",
   "paper": "Paper",
   "night": "Night",
@@ -962,7 +979,6 @@
   "ribbonNeutral": "Neutral",
   "shareSquare": "Square",
   "shareStory": "Story",
-  "shareAyahRef": "{surah} · {n}",
   "arabicSize": "Arabic size",
   "translationSize": "Translation size",
   "smaller": "Smaller",
@@ -973,7 +989,6 @@
   "useRecitation": "Recitation",
   "showSurahName": "Show surah name",
   "recitationPlaying": "Playing",
-  "turnOffTranslation": "Turn off translation to convert to square",
   "recitationPaused": "Paused",
     "midnight": "Midnight",
     "ocean": "Ocean",
@@ -1002,5 +1017,28 @@
     "lavender": "Lavender",
     "mint": "Mint",
     "skyLight": "Light Sky",
-    "pearl": "Pearl"
+    "pearl": "Pearl",
+  "font": "Font",
+  "fontAmiri": "Amiri Quran",
+  "fontKfgqpc": "KFGQPC Hafs",
+  "fontScheherazade": "Scheherazade",
+  "ornament": "Ornament",
+  "solidColor": "Solid color",
+  "patternKhatam": "Khatam",
+  "patternStarCross": "Star and cross",
+  "frameArch": "Arch",
+  "shareN": "Share ({n})",
+  "tafsirHidden": "{n, plural, one{Tafsir hidden for 1 ayah} other{Tafsir hidden for {n} ayahs}}",
+  "ayahDoesntFit": "This ayah doesn't fit the image",
+  "ayahOnly": "Ayah only",
+  "download": "Download",
+  "downloading": "Downloading",
+  "needsInternetOnce": "Needs internet once",
+  "downloadFailed": "Download failed",
+  "shareDua": "Share dua",
+  "shareRun": "{surah} {ayahs}",
+  "sepia": "Sepia",
+  "green": "Green",
+  "navy": "Navy",
+  "fontSection": "FONT"
 }
