@@ -72,6 +72,12 @@ From the spec to the code:
     pickers, the theme skies, the azkar and Tasbih moves with the 99 bead string, Acknowledgements
     and CONTACT, Apple's push and the title flights, every state change animated, the large titles
     into the bar and the top glow with its switch. **Done, waiting for my review.**
+13. Enhancements after the review (specs/008): the shell and the verse for today, several ayahs on
+    one share card with its own look, Ibn Kathir and As-Sa'di downloads, sharp pages on Android,
+    the Quran font and six page palettes, the page curl, the whole day and night on the Home arc
+    with the turn at maghrib. **Done, waiting for my review.** Phase E (the tafsir host, the Home
+    bar flight, the animated vector splash, the mushaf ink with no layer) **done, waiting for my
+    review**, the tafsir release (T081) is mine.
 
 ## Run
 
