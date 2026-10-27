@@ -167,15 +167,16 @@ class QuranAssets {
   }
 
   Future<SurahText> surahText(int n) async {
-    if (_texts[n] case final text?) return text;
+    if (_texts.remove(n) case final text?) return _texts[n] = text;
     final json = await _json('assets/quran/surahs/${_three(n)}.json') as Map<String, dynamic>;
     final text = SurahText(
       translation: (json['tr'] as List).cast<String>(),
       tafsir: (json['tafsir'] as List).cast<String>(),
     );
-    _texts
-      ..clear()
-      ..[n] = text;
+    _texts[n] = text;
+
+    /// a page or its neighbour can hold two surahs, turning back and forth never decodes again
+    if (_texts.length > 3) _texts.remove(_texts.keys.first);
     return text;
   }
 
