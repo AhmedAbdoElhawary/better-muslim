@@ -39,11 +39,12 @@ class _DisplaySheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final db = ref.watch(databaseProvider);
-    final (color, layout, turn, keepOn) = ref.watch(
+    final (color, font, layout, turn, keepOn) = ref.watch(
       settingsProvider.select((settings) {
         final value = settings.value;
         return (
           value?.pageColor ?? PageColor.followSky,
+          value?.quranFont ?? QuranFont.amiri,
           value?.quranLayout ?? QuranLayout.mushaf,
           value?.pageTurn ?? PageTurn.book,
           value?.keepScreenOn ?? false,
@@ -72,6 +73,56 @@ class _DisplaySheet extends ConsumerWidget {
                   color: ThemeEnum.text3,
                 ),
               ),
+              TopPadding(
+                padding: SpaceManager.displaySwatchesTop,
+
+                /// the rings reach past the swatches, nothing clips them
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  padding: REdgeInsets.symmetric(horizontal: SpaceManager.s4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final (i, page) in _pageColors.indexed) ...[
+                        if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
+                        RSizedBox(
+                          width: SizeManager.displaySlot,
+                          child: _Swatch(
+                            label: page.label,
+                            selected: page == color,
+                            onTap: () =>
+                                db.updateSettings(SettingsCompanion(pageColor: Value(page))),
+                            child: RSizedBox.square(
+                              dimension: SizeManager.displaySwatch,
+                              child: page == PageColor.followSky
+                                  ? const Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(child: _PageFill(PageColor.paper)),
+                                        Expanded(child: _PageFill(PageColor.night)),
+                                      ],
+                                    )
+                                  : _PageFill(page),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const OnlyPadding(
+                top: SpaceManager.displayRowsTop,
+                start: SpaceManager.s4,
+                end: SpaceManager.s4,
+                child: RegularText(
+                  StringsManager.fontSection,
+                  fontSize: FontSizeManager.sectionLabel,
+                  letterSpacing: LetterSpacingManager.sectionLabel,
+                  color: ThemeEnum.text3,
+                ),
+              ),
               OnlyPadding(
                 top: SpaceManager.displaySwatchesTop,
                 start: SpaceManager.s4,
@@ -79,13 +130,29 @@ class _DisplaySheet extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (final (i, page) in _pageColors.indexed) ...[
+                    for (final (i, choice) in QuranFont.values.indexed) ...[
                       if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
                       Expanded(
-                        child: _PageSwatch(
-                          page,
-                          selected: page == color,
-                          onTap: () => db.updateSettings(SettingsCompanion(pageColor: Value(page))),
+                        child: _Swatch(
+                          label: choice.label,
+                          selected: choice == font,
+                          onTap: () =>
+                              db.updateSettings(SettingsCompanion(quranFont: Value(choice))),
+                          child: ColoredBox(
+                            color: context.getColor(ThemeEnum.variant),
+                            child: RSizedBox(
+                              height: SizeManager.displayFontSwatch,
+                              child: Center(
+                                child: RegularText(
+                                  _sample,
+                                  translate: false,
+                                  font: choice.font,
+                                  fontSize: FontSizeManager.fontSample,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -167,7 +234,18 @@ class _DisplaySheet extends ConsumerWidget {
 }
 
 /// the design's order, follow sky last
-const _pageColors = [PageColor.paper, PageColor.cream, PageColor.night, PageColor.followSky];
+const _pageColors = [
+  PageColor.paper,
+  PageColor.cream,
+  PageColor.sepia,
+  PageColor.green,
+  PageColor.night,
+  PageColor.navy,
+  PageColor.followSky,
+];
+
+/// the same words in each font, so the difference shows in either language
+const _sample = 'بِسْمِ ٱللَّهِ';
 
 /// a label in a fixed column, then its control
 class _ChoiceRow extends StatelessWidget {
@@ -196,24 +274,24 @@ class _ChoiceRow extends StatelessWidget {
   }
 }
 
-/// the page's own color over its name, ringed in primary when picked. follow sky is half paper
-/// and half night
-class _PageSwatch extends StatelessWidget {
-  const _PageSwatch(this.page, {required this.selected, required this.onTap});
+/// a page color or a font over its name, ringed in primary when picked
+class _Swatch extends StatelessWidget {
+  const _Swatch({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.child,
+  });
 
-  final PageColor page;
+  /// a StringsManager key
+  final String label;
   final bool selected;
   final VoidCallback onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(RadiusManager.displaySwatch.r);
-    final label = switch (page) {
-      PageColor.followSky => StringsManager.followSky,
-      PageColor.paper => StringsManager.paper,
-      PageColor.cream => StringsManager.cream,
-      PageColor.night => StringsManager.night,
-    };
     return MergeSemantics(
       child: Semantics(
         button: true,
@@ -250,21 +328,7 @@ class _PageSwatch extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: radius,
-                  child: RSizedBox.square(
-                    dimension: SizeManager.displaySwatch,
-                    child: page == PageColor.followSky
-                        ? const Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(child: _PageFill(PageColor.paper)),
-                              Expanded(child: _PageFill(PageColor.night)),
-                            ],
-                          )
-                        : _PageFill(page),
-                  ),
-                ),
+                child: ClipRRect(borderRadius: radius, child: child),
               ),
               const RSizedBox.vertical(SpaceManager.shareSwatchLabelGap),
               if (selected)
