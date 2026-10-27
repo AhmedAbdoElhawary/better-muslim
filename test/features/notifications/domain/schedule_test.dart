@@ -239,4 +239,17 @@ void main() {
       expect(total.map((alert) => alert.id).toSet(), hasLength(63));
     });
   });
+
+  test('the quiet notice comes half an hour after the latest alert, none without alerts', () {
+    final alerts = buildSchedule(
+      now: makkah(15, 10, 0),
+      days: daysFrom(DateTime(2026, 10, 15)),
+      sounds: sounds,
+      reminderMinutes: 10,
+    );
+
+    expect(quietNoticeAt(alerts), alerts.last.at.add(quietNoticeDelay));
+    expect(quietNoticeAt(alerts)!.day, 20);
+    expect(quietNoticeAt([]), isNull);
+  });
 }
