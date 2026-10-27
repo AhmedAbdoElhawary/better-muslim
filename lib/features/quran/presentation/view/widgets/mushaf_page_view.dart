@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/extensions/l10n.dart';
@@ -10,13 +11,14 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
-import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_star.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -60,10 +62,11 @@ String ayahLabel(
 /// one page of the mushaf as printed (4.19), painted by one render object instead of a widget
 /// per word, so a turn only paints. a tap or a long press on a word gives its ayah
 class MushafPageView extends ConsumerStatefulWidget {
-  const MushafPageView(this.number, {this.onAyah, super.key});
+  const MushafPageView(this.number, {this.onAyah, this.onLongAyah, super.key});
 
   final int number;
   final ValueChanged<AyahKey>? onAyah;
+  final ValueChanged<AyahKey>? onLongAyah;
 
   @override
   ConsumerState<MushafPageView> createState() => _MushafPageViewState();
@@ -80,9 +83,9 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
   @override
   void initState() {
     super.initState();
-    _washed = ref.read(selectionProvider);
+    _washed = ref.read(selectionProvider).sheet;
     _wash.value = _washed == null ? 0 : 1;
-    ref.listenManual(selectionProvider, (_, key) {
+    ref.listenManual(selectionProvider.select((selection) => selection.sheet), (_, key) {
       if (key == null) {
         _wash.reverse();
         return;
@@ -125,10 +128,12 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       unit: ScreenUtil().scaleWidth,
       selected: _washed,
       wash: _wash,
+      chosen: ref.watch(selectionProvider.select((selection) => selection.chosen)),
 
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
       onAyah: widget.onAyah,
+      onLongAyah: widget.onLongAyah,
       labels: {
         if (assets != null)
           for (final key in keys)
@@ -141,6 +146,11 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
             ),
       },
       direction: Directionality.of(context),
+      family: ref.watch(
+        settingsProvider.select(
+          (settings) => (settings.value?.quranFont ?? QuranFont.amiri).family,
+        ),
+      ),
       colors: (
         page: context.getColor(ThemeEnum.page),
         ink: context.getColor(ThemeEnum.ink),
@@ -167,10 +177,13 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.unit,
     required this.selected,
     required this.wash,
+    required this.chosen,
     required this.following,
     required this.onAyah,
+    required this.onLongAyah,
     required this.labels,
     required this.direction,
+    required this.family,
     required this.colors,
   });
 
@@ -184,10 +197,13 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final double unit;
   final AyahKey? selected;
   final Animation<double> wash;
+  final Set<AyahKey> chosen;
   final AyahKey? following;
   final ValueChanged<AyahKey>? onAyah;
+  final ValueChanged<AyahKey>? onLongAyah;
   final Map<AyahKey, String> labels;
   final TextDirection direction;
+  final String family;
   final MushafColors colors;
 
   @override
@@ -202,10 +218,13 @@ class _MushafPaper extends LeafRenderObjectWidget {
     unit: unit,
     selected: selected,
     wash: wash,
+    chosen: chosen,
     following: following,
     onAyah: onAyah,
+    onLongAyah: onLongAyah,
     labels: labels,
     direction: direction,
+    family: family,
     colors: colors,
   );
 
@@ -222,16 +241,19 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..unit = unit
       ..selected = selected
       ..wash = wash
+      ..chosen = chosen
       ..following = following
       ..onAyah = onAyah
+      ..onLongAyah = onLongAyah
       ..labels = labels
       ..direction = direction
+      ..family = family
       ..colors = colors;
   }
 }
 
-/// laid out once per page and size and kept while the page lives. the ink text is painted in one
-/// layer tinted with the ink, so the isha crossfade only repaints
+/// laid out once per page and size and kept while the page lives. an ink crossfade only repaints,
+/// the text is laid out in the new ink once it ends
 class RenderMushafPage extends RenderBox {
   RenderMushafPage({
     required this._page,
@@ -244,10 +266,13 @@ class RenderMushafPage extends RenderBox {
     required this._unit,
     required this._selected,
     required this._wash,
+    required this._chosen,
     required this._following,
     required this.onAyah,
+    required this.onLongAyah,
     required this._labels,
     required this._direction,
+    required this._family,
     required this._colors,
   });
 
@@ -323,6 +348,14 @@ class RenderMushafPage extends RenderBox {
     markNeedsPaint();
   }
 
+  /// the ayahs picked for sharing, washed in full
+  Set<AyahKey> _chosen;
+  set chosen(Set<AyahKey> value) {
+    if (setEquals(value, _chosen)) return;
+    _chosen = value;
+    markNeedsPaint();
+  }
+
   AyahKey? _following;
   AyahKey? get following => _following;
   set following(AyahKey? value) {
@@ -332,6 +365,9 @@ class RenderMushafPage extends RenderBox {
   }
 
   ValueChanged<AyahKey>? onAyah;
+
+  /// starts choosing ayahs to share, a tap selects when it's null
+  ValueChanged<AyahKey>? onLongAyah;
 
   /// what a screen reader reads for each ayah on the page
   Map<AyahKey, String> _labels;
@@ -348,15 +384,30 @@ class RenderMushafPage extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// another font measures every word again
+  String _family;
+  set family(String value) {
+    if (value == _family) return;
+    _family = value;
+    _relayout();
+  }
+
   MushafColors _colors;
   set colors(MushafColors value) {
     if (value == _colors) return;
     if (value.ink2 != _colors.ink2) _header = null;
+    if (value.ink != _colors.ink) {
+      _settle?.cancel();
+      _settle = Timer(BmMotion.standard, _relayout);
+    }
     _colors = value;
     markNeedsPaint();
   }
 
   _Laid? _laid;
+
+  /// the text takes a new ink once the crossfade stops, laying it out every frame is too heavy
+  Timer? _settle;
   (TextPainter, TextPainter)? _header;
 
   void _relayout() {
@@ -394,17 +445,22 @@ class RenderMushafPage extends RenderBox {
     super.detach();
   }
 
-  /// the ayah under the pointer when it went down, a tap and a long press both select it
+  /// the ayah under the pointer when it went down
   AyahKey? _down;
   late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = _select;
-  late final _long = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _select;
+  late final _long = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _choose;
 
   void _select() {
     if (_down case final key?) onAyah?.call(key);
   }
 
+  void _choose() {
+    if (_down case final key?) (onLongAyah ?? onAyah)?.call(key);
+  }
+
   @override
   void dispose() {
+    _settle?.cancel();
     _tap.dispose();
     _long.dispose();
     super.dispose();
@@ -532,15 +588,18 @@ class RenderMushafPage extends RenderBox {
     _paintWash(canvas, laid);
     _paintMarkers(canvas, laid);
 
-    /// everything in ink in one layer: the words, the marker digits, the names and the number
-    canvas.saveLayer(
-      Offset.zero & size,
-      Paint()..colorFilter = ColorFilter.mode(_colors.ink, BlendMode.srcIn),
-    );
+    /// the text carries its own ink, an offscreen layer makes it soft on android (T085). only while
+    /// the ink crossfades a layer tints the text laid out in the old one
+    final tinted = laid.ink != _colors.ink;
+    if (tinted) {
+      canvas.saveLayer(
+        Offset.zero & size,
+        Paint()..colorFilter = ColorFilter.mode(_colors.ink, BlendMode.srcIn),
+      );
+    }
     _paintInk(canvas, laid);
-    canvas
-      ..restore()
-      ..restore();
+    if (tinted) canvas.restore();
+    canvas.restore();
   }
 
   Paint _stroke(Color color, double width) => Paint()
@@ -733,6 +792,9 @@ class RenderMushafPage extends RenderBox {
     }
 
     if (_following case final key?) wash(key, _colors.follow);
+    for (final key in _chosen) {
+      wash(key, _colors.selection);
+    }
     final key = _selected;
     if (key != null && _wash.value > 0) {
       wash(key, _colors.selection.withValues(alpha: _colors.selection.a * _wash.value));
@@ -814,6 +876,7 @@ class _Laid {
     required this.basmallahs,
     required this.number,
     required this.textHeight,
+    required this.ink,
   });
 
   factory _Laid.of(RenderMushafPage box) {
@@ -878,11 +941,7 @@ class _Laid {
     TextPainter quran(String text, double fontSize) => TextPainter(
       text: TextSpan(
         text: text,
-        style: GetRegularStyle(
-          fontSize: fontSize,
-          fontFamily: FontFamilyManager.quran,
-          color: box._colors.ink,
-        ),
+        style: GetRegularStyle(fontSize: fontSize, fontFamily: box._family, color: box._colors.ink),
       ),
       textDirection: TextDirection.rtl,
     )..layout();
@@ -931,8 +990,16 @@ class _Laid {
       text: TextSpan(
         text: text,
         style: bold
-            ? GetBoldStyle(fontSize: fontSize, fontFamily: FontFamilyManager.dua)
-            : GetRegularStyle(fontSize: fontSize, fontFamily: FontFamilyManager.dua),
+            ? GetBoldStyle(
+                fontSize: fontSize,
+                fontFamily: FontFamilyManager.dua,
+                color: box._colors.ink,
+              )
+            : GetRegularStyle(
+                fontSize: fontSize,
+                fontFamily: FontFamilyManager.dua,
+                color: box._colors.ink,
+              ),
       ),
       textDirection: TextDirection.rtl,
     )..layout();
@@ -989,6 +1056,7 @@ class _Laid {
       basmallahs: basmallahs,
       number: amiri(box._number, FontSizeManager.mushafHeader * unit),
       textHeight: quran(' ', fontSize).height,
+      ink: box._colors.ink,
     );
   }
 
@@ -1009,6 +1077,9 @@ class _Laid {
 
   /// a line's text box, the wash is this plus its padding
   final double textHeight;
+
+  /// the color the text was laid out in
+  final Color ink;
 
   final double unit;
 
