@@ -61,8 +61,15 @@ void main() {
       'PAGE',
       'Paper',
       'Cream',
+      'Sepia',
+      'Green',
       'Night',
+      'Navy',
       'Follow sky',
+      'FONT',
+      'Amiri Quran',
+      'KFGQPC Hafs',
+      'Scheherazade',
       'Layout',
       'Page turn',
       'Book',
@@ -105,6 +112,23 @@ void main() {
     await tester.pumpAndSettle();
     final picked = tester.widget<Segmented<QuranLayout>>(find.byType(Segmented<QuranLayout>));
     expect(picked.selected, QuranLayout.both);
+    await unmount(tester);
+  });
+
+  testWidgets('a font and the palettes past the edge are kept in settings', (tester) async {
+    await pumpReader(tester);
+    await openDisplay(tester);
+
+    /// one sample per font, each drawn in its own
+    expect(find.text('بِسْمِ ٱللَّهِ'), findsNWidgets(QuranFont.values.length));
+
+    await tapInSheet(tester, find.text('Scheherazade'));
+    expect(settingsOf(tester).quranFont, QuranFont.scheherazade);
+
+    await tapInSheet(tester, find.text('Navy'));
+    expect(settingsOf(tester).pageColor, PageColor.navy);
+    await tapInSheet(tester, find.text('Sepia'));
+    expect(containerOf(tester).read(pageColorProvider), PageColor.sepia);
     await unmount(tester);
   });
 
