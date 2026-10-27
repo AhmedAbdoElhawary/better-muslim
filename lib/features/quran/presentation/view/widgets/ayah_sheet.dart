@@ -327,7 +327,7 @@ class AyahSheet extends ConsumerWidget {
         () => toggleAyahBookmark(context, ref, ayah),
       ),
       (BmIcon.ui(BmUiIcon.note), StringsManager.note, () => onStudy(StudyTab.notes)),
-      (BmIcon.ui(BmUiIcon.share), StringsManager.share, () => showShareSheet(context, ayah)),
+      (BmIcon.ui(BmUiIcon.share), StringsManager.share, () => showAyahShare(context, [ayah])),
       (BmIcon.ui(BmUiIcon.copy), StringsManager.copy, copy),
     ];
     return ReaderSheet(
