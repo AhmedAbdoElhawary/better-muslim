@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -9,10 +10,15 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
+import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
+import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
+import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -28,20 +34,16 @@ enum StudyTab {
   final String label;
 }
 
-/// the tafsir chips, the two samples are keys of samples.json
-enum _Tafsir {
-  muyassar(StringsManager.alMuyassar),
-  ibnKathir(StringsManager.ibnKathir, sample: 'ibnKathir'),
-  saadi(StringsManager.asSadi, sample: 'saadi');
-
-  const _Tafsir(this.label, {this.sample});
-
-  final String label;
-  final String? sample;
+extension on TafsirSource {
+  String get label => switch (this) {
+    TafsirSource.muyassar => StringsManager.alMuyassar,
+    TafsirSource.ibnKathir => StringsManager.ibnKathir,
+    TafsirSource.saadi => StringsManager.asSadi,
+  };
 }
 
 /// 4.23 under its header: the ayah on its page color, then Tafsir, Translation and Notes
-class StudyTabs extends StatefulWidget {
+class StudyTabs extends ConsumerStatefulWidget {
   const StudyTabs({required this.ayah, required this.tab, required this.onTab, super.key});
 
   final AyahKey ayah;
@@ -49,13 +51,32 @@ class StudyTabs extends StatefulWidget {
   final ValueChanged<StudyTab> onTab;
 
   @override
-  State<StudyTabs> createState() => _StudyTabsState();
+  ConsumerState<StudyTabs> createState() => _StudyTabsState();
 }
 
-class _StudyTabsState extends State<StudyTabs> {
+class _StudyTabsState extends ConsumerState<StudyTabs> {
   /// the pane comes in from the side of the tab it moves toward
   AxisDirection _from = AxisDirection.down;
-  _Tafsir _tafsir = _Tafsir.muyassar;
+  TafsirSource _tafsir = TafsirSource.muyassar;
+
+  /// downloaded on the first pick, offline or failed goes back to al-muyassar (FR-022)
+  Future<void> _pickTafsir(TafsirSource tafsir) async {
+    setState(() => _tafsir = tafsir);
+    try {
+      await ref.read(tafsirStatusProvider(tafsir).notifier).download();
+    } on TafsirException catch (error) {
+      if (!mounted) return;
+      if (_tafsir == tafsir) setState(() => _tafsir = TafsirSource.muyassar);
+      if (error.failure == TafsirFailure.cancelled) return;
+      showToast(
+        context,
+        error.failure == TafsirFailure.offline
+            ? StringsManager.needsInternetOnce
+            : StringsManager.downloadFailed,
+        icon: BmIconName.quran,
+      );
+    }
+  }
 
   @override
   void didUpdateWidget(StudyTabs old) {
@@ -100,7 +121,7 @@ class _StudyTabsState extends State<StudyTabs> {
                     StudyTab.tafsir => _TafsirPane(
                       ayah: ayah,
                       tafsir: _tafsir,
-                      onTafsir: (tafsir) => setState(() => _tafsir = tafsir),
+                      onTafsir: _pickTafsir,
                     ),
                     StudyTab.translation => _TranslationPane(ayah),
                     StudyTab.notes => _NotesPane(ayah),
@@ -160,15 +181,13 @@ class _TafsirPane extends ConsumerWidget {
   const _TafsirPane({required this.ayah, required this.tafsir, required this.onTafsir});
 
   final AyahKey ayah;
-  final _Tafsir tafsir;
-  final ValueChanged<_Tafsir> onTafsir;
+  final TafsirSource tafsir;
+  final ValueChanged<TafsirSource> onTafsir;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sample = tafsir.sample;
-    final text = sample == null
-        ? ref.watch(surahTextProvider(ayah.surah)).value?.tafsir[ayah.ayah - 1] ?? ''
-        : ref.watch(quranSamplesProvider).value?[sample]?['$ayah'];
+    final status = ref.watch(tafsirStatusProvider(tafsir));
+    final text = status.ready ? ref.watch(tafsirTextProvider((tafsir, ayah))).value : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -181,9 +200,14 @@ class _TafsirPane extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              for (final (i, chip) in _Tafsir.values.indexed) ...[
+              for (final (i, chip) in TafsirSource.values.indexed) ...[
                 if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
-                _Chip(chip.label, selected: chip == tafsir, onTap: () => onTafsir(chip)),
+                TafsirChip(
+                  chip.label,
+                  selected: chip == tafsir,
+                  status: ref.watch(tafsirStatusProvider(chip)),
+                  onTap: () => onTafsir(chip),
+                ),
               ],
             ],
           ),
@@ -192,12 +216,15 @@ class _TafsirPane extends ConsumerWidget {
           top: SpaceManager.tafsirTextTop,
           start: SpaceManager.tafsirTextSide,
           end: SpaceManager.tafsirTextSide,
-          child: text == null
-              ? const RegularText(StringsManager.comingSoon, color: ThemeEnum.text2)
+          child: status.downloading
+              ? _Downloading(
+                  progress: status.progress,
+                  onCancel: ref.read(tafsirStatusProvider(tafsir).notifier).cancel,
+                )
               : Directionality(
                   textDirection: TextDirection.rtl,
                   child: RegularText(
-                    text,
+                    text ?? '',
                     translate: false,
                     font: FontEnum.dua,
                     fontSize: FontSizeManager.tafsir,
@@ -206,7 +233,7 @@ class _TafsirPane extends ConsumerWidget {
                   ),
                 ),
         ),
-        if (tafsir == _Tafsir.muyassar)
+        if (tafsir == TafsirSource.muyassar)
           const OnlyPadding(
             top: SpaceManager.tafsirCreditTop,
             start: SpaceManager.tafsirTextSide,
@@ -222,57 +249,22 @@ class _TafsirPane extends ConsumerWidget {
   }
 }
 
-/// K.chip of _gen/kit.js
-class _Chip extends StatelessWidget {
-  const _Chip(this.label, {required this.selected, required this.onTap});
+/// the tafsir's download in the pane, it can be stopped
+class _Downloading extends StatelessWidget {
+  const _Downloading({required this.progress, required this.onCancel});
 
-  /// a StringsManager key
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
+  final double? progress;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
-    final primary = context.getColor(ThemeEnum.primary);
-    return Semantics(
-      button: true,
-      selected: selected,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: SizeManager.hit.r),
-          child: Center(
-            child: Container(
-              constraints: BoxConstraints(minHeight: SizeManager.tafsirChip.r),
-              padding: REdgeInsets.symmetric(horizontal: SpaceManager.duaChipSide),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: context.getColor(
-                  selected ? ThemeEnum.primaryContainer : ThemeEnum.transparent,
-                ),
-                borderRadius: BorderRadius.circular(RadiusManager.pill.r),
-                border: Border.all(
-                  color: selected
-                      ? primary.withValues(alpha: .5)
-                      : context.getColor(ThemeEnum.outline),
-                ),
-              ),
-              child: selected
-                  ? SemiBoldText(
-                      label,
-                      fontSize: FontSizeManager.tafsirChip,
-                      color: ThemeEnum.onPrimaryContainer,
-                    )
-                  : RegularText(
-                      label,
-                      fontSize: FontSizeManager.tafsirChip,
-                      color: ThemeEnum.text2,
-                    ),
-            ),
-          ),
-        ),
-      ),
+    return Row(
+      children: [
+        BmOilDrop(size: SizeManager.oilDropInline, progress: progress),
+        const RSizedBox.horizontal(SpaceManager.s2),
+        const Expanded(child: RegularText(StringsManager.downloading, color: ThemeEnum.text2)),
+        BmButton.text(StringsManager.cancel, onPressed: onCancel),
+      ],
     );
   }
 }
