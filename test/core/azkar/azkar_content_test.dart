@@ -25,10 +25,10 @@ void main() {
     }
   });
 
-  test('the samples fill the designed counts, each marked for my dataset', () async {
+  test('hisn al-muslim\'s sets, each marked for my english', () async {
     final content = await loadAzkarContent();
-    expect(content.morning.total, 12);
-    expect(content.evening.total, 24);
+    expect(content.morning.total, 23);
+    expect(content.evening.total, 20);
 
     final json = jsonDecode(File('assets/azkar/azkar.json').readAsStringSync()) as Map;
     for (final set in json.values) {
@@ -40,8 +40,8 @@ void main() {
 
   test('the source and grading pick their language', () async {
     final zikr = (await loadAzkarContent()).morning.items.first;
-    expect(zikr.source.inLanguage('en'), 'Sahih Muslim 2692');
-    expect(zikr.source.inLanguage('ar'), 'صحيح مسلم ٢٦٩٢');
-    expect(zikr.grading?.inLanguage('en'), 'Sahih');
+    expect(zikr.source.inLanguage('en'), 'Al-Hakim 1/562');
+    expect(zikr.source.inLanguage('ar'), 'الحاكم ١/٥٦٢');
+    expect(zikr.grading, isNull);
   });
 }
