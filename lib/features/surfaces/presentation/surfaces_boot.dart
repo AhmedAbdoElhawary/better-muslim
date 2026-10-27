@@ -70,7 +70,8 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
   /// one write at a time, the plugin compares each with the file the last one left
   Future<void> _running = Future.value();
 
-  bool get _isScenario => ref.read(flavorProvider).isDesignScenario;
+  /// a fast day would schedule fake times on the phone
+  bool get _isScenario => ref.read(flavorProvider).isDesignScenario || ref.read(fastDayProvider);
 
   @override
   void initState() {
@@ -78,6 +79,9 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
     _lifecycle = AppLifecycleListener(onResume: _write);
     ref.listenManual(_surfaceInputsProvider, (previous, _) {
       if (previous != null) _later();
+    });
+    ref.listenManual(fastDayProvider, (_, on) {
+      if (!on) _write();
     });
 
     /// a mark anywhere in the app, reset prayer journey and restore all land in this table
