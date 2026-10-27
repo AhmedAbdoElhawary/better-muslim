@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/onboarding/view/location_step_page.dart';
 import 'package:better_muslim/features/onboarding/view/welcome_page.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/glass/liquid_glass.dart';
@@ -26,15 +27,26 @@ void main() {
   late List<String> haptics;
   setUp(() => haptics = recordHaptics());
 
-  /// the product of every opacity above it, 0 when it isn't there
+  /// the product of every opacity above it, 0 when it isn't there. a custom opacity counts by the
+  /// value it is given, not by the 300 ms it takes to get there
   double seen(WidgetTester tester, Finder finder) {
     if (finder.evaluate().isEmpty) return 0;
     var opacity = 1.0;
     for (final element in find.ancestor(of: finder, matching: find.byType(Opacity)).evaluate()) {
       opacity *= (element.widget as Opacity).opacity;
     }
+    for (final element
+        in find.ancestor(of: finder, matching: find.byType(CustomOpacity)).evaluate()) {
+      opacity *= (element.widget as CustomOpacity).opacity;
+    }
     final fades = find.ancestor(of: finder, matching: find.byType(FadeTransition)).evaluate();
     for (final element in fades) {
+      final above = <Widget>[];
+      element.visitAncestorElements((ancestor) {
+        above.add(ancestor.widget);
+        return above.length < 2;
+      });
+      if (above.length == 2 && above[0] is AnimatedOpacity && above[1] is CustomOpacity) continue;
       opacity *= (element.widget as FadeTransition).opacity.value;
     }
     return opacity;
