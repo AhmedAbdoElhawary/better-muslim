@@ -9,6 +9,7 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/glass.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -34,11 +35,8 @@ class NavBar extends StatelessWidget {
 
     /// the design's 30 pt sits 4 pt inside the 34 pt home indicator inset
     final bottom = max(SpaceManager.s2, MediaQuery.paddingOf(context).bottom - SpaceManager.s1);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.getColor(ThemeEnum.surface),
-        border: Border(top: BorderSide(color: context.getColor(ThemeEnum.outline))),
-      ),
+    return Glass(
+      border: Border(top: BorderSide(color: context.getColor(ThemeEnum.outline))),
       child: OnlyPadding(
         top: SpaceManager.s2,
         start: SpaceManager.navBarSide,
