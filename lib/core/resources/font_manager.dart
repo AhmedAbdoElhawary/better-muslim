@@ -8,7 +8,12 @@ abstract final class FontFamilyManager {
   static const String bodyAr = BmFont.bodyAr;
   static const String dua = BmFont.dua;
   static const String quran = BmFont.quran;
+  static const String kfgqpc = 'KfgqpcHafs';
+  static const String scheherazade = 'ScheherazadeNew';
 }
+
+// TODO(ahmed): flip to true once assets/fonts/KfgqpcHafs.ttf is in and its family is in pubspec.yaml.
+const bool kfgqpcShipped = false;
 
 /// the text widgets pick the latin or arabic family by the app language
 enum FontEnum {
@@ -21,7 +26,14 @@ enum FontEnum {
   dua(latin: FontFamilyManager.dua, arabic: FontFamilyManager.dua),
 
   // TODO(ahmed): switch to KFGQPC Hafs once licensed, the mushaf text must render in the licensed font.
-  quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran);
+  quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran),
+
+  /// amiri quran stands in until the file is shipped
+  kfgqpc(
+    latin: kfgqpcShipped ? FontFamilyManager.kfgqpc : FontFamilyManager.quran,
+    arabic: kfgqpcShipped ? FontFamilyManager.kfgqpc : FontFamilyManager.quran,
+  ),
+  scheherazade(latin: FontFamilyManager.scheherazade, arabic: FontFamilyManager.scheherazade);
 
   const FontEnum({required this.latin, required this.arabic});
   final String latin;
@@ -45,6 +57,9 @@ abstract final class FontSizeManager {
   static const double cardTitle = 32;
   static const double qiblaTitle = 30;
   static const double monthTitle = 24;
+
+  /// each font's sample in Display
+  static const double fontSample = 22;
   static const double prayerName = 21;
   static const double prayerNameMinor = 17;
   static const double notifPrayerName = 18;
