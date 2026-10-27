@@ -4,10 +4,12 @@ import 'dart:typed_data';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/system/share.dart';
-import 'package:better_muslim/core/widgets/segmented.dart';
+import 'package:better_muslim/core/widgets/share/share_frame.dart';
+import 'package:better_muslim/core/widgets/share/share_options.dart';
+import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_share.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
-import 'package:better_muslim/features/quran/presentation/view/widgets/share_card.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,10 +48,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  ShareCard cardOf(WidgetTester tester) => tester.widget<ShareCard>(find.byType(ShareCard));
+  AyahShare shareOf(WidgetTester tester) =>
+      tester.widget<ShareSheet>(find.byType(ShareSheet)).content as AyahShare;
 
   Finder onCard(String text) =>
-      find.descendant(of: find.byType(ShareCard), matching: find.text(text));
+      find.descendant(of: find.byType(ShareFrame), matching: find.text(text));
 
   Future<void> tapInSheet(WidgetTester tester, Finder finder) async {
     await tester.ensureVisible(finder);
@@ -58,63 +61,60 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the preview shows the ayah, its marker, the reference and the app', (tester) async {
+  testWidgets('the preview shows the ayah with its translation, the reference and the app', (
+    tester,
+  ) async {
     await openShare(tester, const AyahKey(1, 5), 1);
 
     expect(find.text('Share ayah'), findsOneWidget);
-    final card = cardOf(tester);
-    expect(card.text.arabic, isNotEmpty);
-    expect(card.text.marker, '﴿٥﴾');
-    expect(card.text.translation, 'It is You we worship and You we ask for help.');
-    expect(card.reference, 'Al-Fatiha · 5');
-    expect(onCard('Al-Fatiha · 5'), findsOneWidget);
+    final share = shareOf(tester);
+    expect(share.keys, [const AyahKey(1, 5)]);
+    expect(share.arabic.values.single, isNotEmpty);
+    expect(share.source, ShareTextSource.translation);
+    expect(share.texts.values.single, 'It is You we worship and You we ask for help.');
+    expect(onCard('Al-Fatiha 5'), findsOneWidget);
     expect(onCard('Better Muslim'), findsOneWidget);
-    expect((card.background, card.size, card.scale), (ShareBackground.paper, ShareSize.square, 1));
     await unmount(tester);
   });
 
-  testWidgets('backgrounds, size and the two switches change the preview', (tester) async {
+  testWidgets('the text row picks what goes under the ayah', (tester) async {
     await openShare(tester, const AyahKey(1, 5), 1);
 
-    for (final (label, background) in [
-      ('Night', ShareBackground.night),
-      ('Emerald', ShareBackground.emerald),
-      ('Sky', ShareBackground.sky),
-      ('Paper', ShareBackground.paper),
-    ]) {
-      await tapInSheet(tester, find.text(label));
-      expect(cardOf(tester).background, background, reason: label);
-    }
-
-    await tapInSheet(tester, find.text('Story'));
-    expect(cardOf(tester).size, ShareSize.story);
-    await tapInSheet(tester, find.text('Square'));
-    expect(cardOf(tester).size, ShareSize.square);
-
-    await tapInSheet(tester, find.text('Include translation'));
-    expect(cardOf(tester).text.translation, isNull);
-    await tapInSheet(tester, find.text('Show app name'));
-    expect(onCard('Better Muslim'), findsNothing);
+    await tapInSheet(tester, find.text('Ayah only'));
+    expect(shareOf(tester).source, ShareTextSource.none);
+    expect(shareOf(tester).texts, isEmpty);
+    await tapInSheet(tester, find.text('Al-Muyassar').last);
+    expect(shareOf(tester).source, ShareTextSource.muyassar);
+    expect(shareOf(tester).texts.values.single, isNotEmpty);
     await unmount(tester);
   });
 
-  testWidgets('al-baqarah 282 shrinks and moves to story, square muted', (tester) async {
-    /// only page 1 ships laid out, so the sheet opens straight from the reader
+  testWidgets('a tafsir not on the phone needs internet once, the card keeps its text', (
+    tester,
+  ) async {
     await openShare(tester, const AyahKey(1, 5), 1);
-    Navigator.of(tester.element(find.byType(ShareCard))).pop();
+
+    await tapInSheet(tester, find.text('Ibn Kathir').last);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pump();
+    expect(find.text('Needs internet once'), findsOneWidget);
+    expect(shareOf(tester).source, ShareTextSource.translation);
+    await tester.pump(const Duration(seconds: 5));
+    await unmount(tester);
+  });
+
+  testWidgets('al-baqarah 282 moves to story with its translation hidden', (tester) async {
+    /// only the sheet matters here, so it opens straight from the reader
+    await openShare(tester, const AyahKey(1, 5), 1);
+    Navigator.of(tester.element(find.byType(ShareSheet))).pop();
     await tester.pumpAndSettle();
-    unawaited(showShareSheet(tester.element(find.byType(ReaderPage)), const AyahKey(2, 282)));
+    unawaited(showAyahShare(tester.element(find.byType(ReaderPage)), [const AyahKey(2, 282)]));
     await tester.pump();
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
     await tester.pumpAndSettle();
 
-    expect(cardOf(tester).size, ShareSize.story);
-    expect(cardOf(tester).scale, lessThan(1));
-    final segmented = tester.widget<Segmented<ShareSize>>(find.byType(Segmented<ShareSize>));
-    expect(segmented.muted, {ShareSize.square});
-
-    await tapInSheet(tester, find.text('Square'));
-    expect(cardOf(tester).size, ShareSize.story, reason: 'square never crops it');
+    expect(tester.widget<ShareFrame>(find.byType(ShareFrame)).size, ShareSize.story);
+    expect(find.text('Tafsir hidden for 1 ayah'), findsOneWidget);
     await unmount(tester);
   });
 
