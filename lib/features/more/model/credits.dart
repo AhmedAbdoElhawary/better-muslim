@@ -60,6 +60,18 @@ const credits = [
     license: _ofl,
     link: 'https://fonts.google.com/specimen/Amiri+Quran',
   ),
+  Credit(
+    source: 'Scheherazade New',
+    useKey: StringsManager.useFonts,
+    license: _ofl,
+    link: 'https://software.sil.org/scheherazade',
+  ),
+  // TODO(ahmed): KFGQPC Hafs's exact credit and license once its file is in, a wrong credit breaks its terms.
+  Credit(
+    source: 'KFGQPC Uthmanic Script Hafs',
+    useKey: StringsManager.useFonts,
+    link: 'https://qul.tarteel.ai',
+  ),
   // TODO(ahmed): QUL's exact credit line and license for the Madinah V2 layout and QPC Hafs words, a wrong credit breaks their terms.
   Credit(
     source: 'Quranic Universal Library (QUL)',
@@ -75,6 +87,11 @@ const credits = [
     source: 'Tanzil · Tafsir al-Muyassar',
     useKey: StringsManager.useTafsir,
     link: 'https://tanzil.net',
+  ),
+  Credit(
+    source: "Quran.com · Tafsir Ibn Kathir · Tafsir as-Sa'di",
+    useKey: StringsManager.useTafsir,
+    link: 'https://quran.com',
   ),
   Credit(
     source: 'EveryAyah · Mishary Rashid Alafasy',
