@@ -89,6 +89,24 @@ void main() {
           );
         }
       });
+
+      /// the tab labels on the glass nav bar over the pages and cards under it, the sky is only at
+      /// home's top (FR-003)
+      test('${id.name} $mode: the nav labels on the glass meet AA', () {
+        Color glass(Color under) => Color.alphaBlend(
+          ThemeEnum.surface.resolve(palette).withValues(alpha: BmGlass.surfaceOpacity),
+          under,
+        );
+        for (final under in [ThemeEnum.bg, ThemeEnum.raised]) {
+          for (final label in [ThemeEnum.primary, ThemeEnum.text2]) {
+            expect(
+              _ratio(label.resolve(palette), glass(under.resolve(palette))),
+              greaterThanOrEqualTo(4.5),
+              reason: '${label.name} on the glass over ${under.name}',
+            );
+          }
+        }
+      });
     }
   }
 }
