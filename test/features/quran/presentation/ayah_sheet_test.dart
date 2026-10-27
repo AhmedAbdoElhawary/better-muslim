@@ -64,7 +64,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  AyahKey? selected(WidgetTester tester) => containerOf(tester).read(selectionProvider);
+  AyahKey? selected(WidgetTester tester) => containerOf(tester).read(selectionProvider).sheet;
 
   testWidgets('the medium detent shows the ayah, its translation and six actions', (tester) async {
     await pumpReader(tester);
@@ -114,10 +114,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(selected(tester), const AyahKey(1, 5));
 
-    /// ibn kathir has no shipped text for this ayah yet
+    /// ibn kathir downloads on its first pick, the test phone is offline
     await tapIn(tester, StudySheet, find.text('Ibn Kathir'));
-    expect(inSheet(StudySheet, find.text('Coming soon')), findsOneWidget);
-    expect(inSheet(StudySheet, find.text(tafsir(5))), findsNothing);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+    expect(find.text('Needs internet once'), findsOneWidget);
+    expect(inSheet(StudySheet, find.text(tafsir(5))), findsOneWidget);
 
     await tapIn(tester, StudySheet, find.text('Translation'));
     for (final text in [
@@ -171,7 +173,7 @@ void main() {
 
     final parts = copied!.split('\n\n');
     expect(parts, hasLength(3));
-    expect(parts[0], startsWith('إِيَّاكَ'));
+    expect(parts[0], startsWith('إِيَّاكَ'));
     expect(parts[1], translation(5));
     expect(parts[2], 'Al-Fatiha 1:5');
     expect(find.text('Copied'), findsOneWidget);
