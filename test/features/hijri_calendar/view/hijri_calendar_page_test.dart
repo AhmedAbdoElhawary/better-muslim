@@ -1,7 +1,9 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/day_dots.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
@@ -74,6 +76,36 @@ void main() {
       expect(cell(tester, '4').semantics, contains('4 Jumada I 1448'));
       expect(cell(tester, '4').semantics, contains('Today'));
       expect(cell(tester, '13').semantics, contains('Ayyam al-Bid'));
+      await unmount(tester);
+    });
+
+    testWidgets('a full day is filled, a part day outlined, the details show the five dots', (
+      tester,
+    ) async {
+      await open(tester);
+
+      BoxDecoration box(String big) =>
+          tester
+                  .widget<DecoratedBox>(
+                    find.descendant(of: day(big), matching: find.byType(DecoratedBox)).first,
+                  )
+                  .decoration
+              as BoxDecoration;
+      expect(cell(tester, '3').prayed, 5);
+      expect(box('3').color, isNotNull);
+      expect(box('3').border, isNull);
+      expect(cell(tester, '2').prayed, 4);
+      expect(box('2').color, isNull);
+      expect(box('2').border, isNotNull);
+      expect(cell(tester, '2').semantics, contains('4 of 5 prayed'));
+      expect(box('16').color, isNull);
+      expect(box('16').border, isNull);
+      expect(tester.widget<DayDots>(find.byType(DayDots)).prayed, {Prayer.fajr, Prayer.dhuhr});
+
+      await tap(tester, day('3'));
+      expect(tester.widget<DayDots>(find.byType(DayDots)).prayed, Prayer.values.toSet());
+      await tap(tester, day('16'));
+      expect(find.byType(DayDots), findsNothing);
       await unmount(tester);
     });
 
