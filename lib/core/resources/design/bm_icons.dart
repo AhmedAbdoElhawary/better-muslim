@@ -67,6 +67,7 @@ enum BmUiIcon {
   spread,
   timer,
   chevron_down,
+  download,
 }
 
 class BmIcon extends StatelessWidget {
