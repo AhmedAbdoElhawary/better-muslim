@@ -61,6 +61,10 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
   /// one key per page on its boundary, so a page keeps its element when its wrappers change
   final _keys = <int, GlobalKey>{};
 
+  /// the pages built so far. a page measures every word, so a frame takes at most one new one
+  final _ready = <int>{};
+  bool _warming = false;
+
   /// the leaf's picture while it curls, and which page it is
   final _leaf = ValueNotifier<(int, ui.Image)?>(null);
 
@@ -101,6 +105,30 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
       if (boundary is! RenderRepaintBoundary || !boundary.hasSize) return;
       _leaf.value?.$2.dispose();
       _leaf.value = (leaf, boundary.toImageSync(pixelRatio: _ratio));
+    });
+  }
+
+  /// the neighbours come one per frame after the shown page, once the reader is open
+  void _warm() {
+    if (_warming) return;
+    _warming = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _warming = false;
+      if (!mounted) return;
+
+      /// not while the reader opens, its transition would drop the frames
+      if (ModalRoute.of(context)?.animation?.isCompleted == false) {
+        _warm();
+        SchedulerBinding.instance.scheduleFrame();
+        return;
+      }
+      final page = widget.page.value;
+      for (final n in [page + 1, page - 1]) {
+        if (n >= 1 && n <= quranPageCount && !_ready.contains(n)) {
+          setState(() => _ready.add(n));
+          return;
+        }
+      }
     });
   }
 
@@ -198,6 +226,10 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
             valueListenable: widget.page,
             builder: (context, page, _) {
               _keys.removeWhere((n, _) => (n - page).abs() > 1);
+              _ready
+                ..removeWhere((n) => (n - page).abs() > 1)
+                ..add(page);
+              _warm();
               return _Pages(
                 turn: _turn,
                 card: widget.card,
@@ -211,7 +243,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
                 width: _width,
                 pages: {
                   for (final n in [page - 1, page, page + 1])
-                    if (n >= 1 && n <= quranPageCount)
+                    if (_ready.contains(n))
                       n: RepaintBoundary(
                         key: _keys.putIfAbsent(n, GlobalKey.new),
                         child: widget.pageBuilder(n),
