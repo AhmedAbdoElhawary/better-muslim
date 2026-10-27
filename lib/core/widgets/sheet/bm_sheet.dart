@@ -48,7 +48,7 @@ Future<T?> showBmSheet<T>(
     useSafeArea: true,
     backgroundColor: context.getColor(ThemeEnum.transparent),
     elevation: 0,
-    constraints: maxSheetHeight ? null : BoxConstraints(maxHeight: 740.r),
+    constraints: maxSheetHeight ? null : BoxConstraints(maxHeight: SizeManager.sheetMax.r),
     modalBarrierColor: context.getColor(ThemeEnum.scrim).withValues(alpha: BmOpacity.pressed),
     transitionAnimationController: controller,
     sheetAnimationStyle: AnimationStyle(
@@ -78,7 +78,6 @@ class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
     this.applyBlur = true,
   });
   final bool applyBlur;
-  static const double _blurSigma = 10;
 
   @override
   Widget buildModalBarrier() {
@@ -90,7 +89,9 @@ class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
       animation: routeAnimation,
       child: super.buildModalBarrier(),
       builder: (context, barrier) {
-        final sigma = (_blurSigma * routeAnimation.value).clamp(0.0, _blurSigma).toDouble();
+        final sigma = (SizeManager.backdropBlur * routeAnimation.value)
+            .clamp(0.0, SizeManager.backdropBlur)
+            .toDouble();
 
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
