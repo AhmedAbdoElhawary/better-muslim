@@ -1,7 +1,10 @@
+import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -111,6 +114,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(pixels(tester), 0);
     expect(subtitle(tester), 1);
+    await unmount(tester);
+  });
+
+  testWidgets('after a language switch the title flies from its new side', (tester) async {
+    await pumpMore(tester, await designOverrides());
+    await writeSettings(tester, const SettingsCompanion(language: Value(Language.arabic)));
+    Finder large() =>
+        find.descendant(of: find.byType(LargeTitle), matching: find.byType(Text)).first;
+    final rest = tester.getRect(large());
+    expect(rest.center.dx, greaterThan(bar(tester).dx), reason: 'arabic rests on the right');
+
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable).first));
+    for (var i = 0; i < 6; i++) {
+      await gesture.moveBy(const Offset(0, -10));
+      await tester.pump();
+    }
+    final progress = pixels(tester) / collapseAt;
+    final expected = Offset.lerp(rest.center, bar(tester), progress)!;
+    expect(tester.getRect(large()).center.dx, closeTo(expected.dx, 1));
+    await gesture.up();
     await unmount(tester);
   });
 
