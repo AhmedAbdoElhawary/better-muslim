@@ -263,7 +263,7 @@ void main() {
         texts: texts,
       );
 
-      final details = ios.scheduled.single.details!;
+      final details = ios.scheduled.first.details!;
       expect(details.interruptionLevel, InterruptionLevel.passive);
       expect(
         [details.presentSound, details.sound, details.categoryIdentifier],
@@ -278,7 +278,7 @@ void main() {
           .apply(alerts: alerts, sounds: sounds, recordings: recordings, texts: texts);
 
       expect(ios.calls.first, 'cancelAllPending');
-      final [asr, maghrib, isha] = ios.scheduled.map((call) => call.details!).toList();
+      final [asr, maghrib, isha, _] = ios.scheduled.map((call) => call.details!).toList();
       expect(maghrib.sound, '${AdhanRecording.makkah.clipOf(Prayer.maghrib)}.caf');
       expect(
         [maghrib.presentSound, maghrib.presentBanner, maghrib.presentList],
@@ -306,6 +306,19 @@ void main() {
       expect(maghrib.body, 'It is time for Maghrib in Makkah. Tap to mark it prayed.');
       expect(maghrib.payload, payloadOf(alerts[1]));
       expect(maghrib.payload, isNot(contains('Makkah')));
+    });
+
+    test('half an hour after the last alert one asks to open the app', () async {
+      final ios = useIos();
+
+      await NotificationScheduler(channel)
+          .apply(alerts: alerts, sounds: sounds, recordings: recordings, texts: texts);
+
+      final quiet = ios.scheduled.last;
+      expect(quiet.id, quietAlertId);
+      expect(quiet.title, 'Keep the adhan coming');
+      expect(quiet.payload, isNull);
+      expect(ios.scheduled, hasLength(alerts.length + 1));
     });
   });
 }
