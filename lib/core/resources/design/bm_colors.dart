@@ -1,5 +1,6 @@
 // GENERATED from the design files. Do not edit values by hand; they are the approved design.
 // Main theme: #9 Qiyam Emerald (exact values). Other themes: parked alternates, derived roles.
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
@@ -247,8 +248,102 @@ abstract final class BmPagePalette {
     ),
   );
 
-  // TODO(ahmed): cream's colors from the designer, 09 Quran names Cream but K.PAGE has no values.
-  static const cream = paper;
+  /// cream, sepia, green and navy have no design, they're mine to check on the phone (R12)
+  static final cream = _on(
+    paper,
+    page: const Color(0xFFF4E9CF),
+    ink: const Color(0xFF1E1A10),
+    ink2: const Color(0xFF665A3E),
+    hidden: const Color(0xFFE7D9B8),
+    gutter: const Color(0x2E5A4416),
+  );
+
+  static final sepia = _on(
+    paper,
+    page: const Color(0xFFE9D8BA),
+    ink: const Color(0xFF2A1D0E),
+    ink2: const Color(0xFF5E4A30),
+    hidden: const Color(0xFFDCC7A3),
+    gutter: const Color(0x33583A18),
+  );
+
+  static final green = _on(
+    paper,
+    page: const Color(0xFFE5EDDD),
+    ink: const Color(0xFF13201A),
+    ink2: const Color(0xFF46594C),
+    hidden: const Color(0xFFD3DFCB),
+    gutter: const Color(0x29284A30),
+  );
+
+  static final navy = _on(
+    night,
+    page: const Color(0xFF0B1322),
+    ink: const Color(0xFFD6DCE8),
+    ink2: const Color(0xFF8A93A6),
+    hidden: const Color(0xFF17223A),
+    gutter: const Color(0x99000000),
+  );
+
+  /// paper or night on another page: its chrome moves by the page's own step so the reader's
+  /// bars keep their relation to the page, the ornaments mix like tint below
+  static BmPalette _on(
+    BmPalette from, {
+    required Color page,
+    required Color ink,
+    required Color ink2,
+    required Color hidden,
+    required Color gutter,
+  }) {
+    final was = from.page!;
+    Color shift(Color color) => Color.from(
+      alpha: color.a,
+      red: (color.r + page.r - was.page.r).clamp(0, 1),
+      green: (color.g + page.g - was.page.g).clamp(0, 1),
+      blue: (color.b + page.b - was.page.b).clamp(0, 1),
+    );
+    final dark = from.bg.computeLuminance() < .5;
+    return BmPalette(
+      bg: shift(from.bg),
+      surface: shift(from.surface),
+      raised: shift(from.raised),
+      variant: shift(from.variant),
+      outline: shift(from.outline),
+      outlineStrong: shift(from.outlineStrong),
+      text: shift(from.text),
+      text2: shift(from.text2),
+      text3: shift(from.text3),
+      primary: from.primary,
+      onPrimary: from.onPrimary,
+      primaryContainer: from.primaryContainer,
+      onPrimaryContainer: from.onPrimaryContainer,
+      accent: from.accent,
+      accentContainer: from.accentContainer,
+      onAccentContainer: from.onAccentContainer,
+      success: from.success,
+      warning: from.warning,
+      error: from.error,
+      onError: from.onError,
+      glow: from.glow,
+      sky1: from.sky1,
+      sky2: from.sky2,
+      sky3: from.sky3,
+      onSky: from.onSky,
+      sun: from.sun,
+      starOpacity: from.starOpacity,
+      page: BmPageColors(
+        page: page,
+        ink: ink,
+        ink2: ink2,
+        ornament: _legible(dark ? Color.lerp(from.glow, page, .18)! : from.glow, page, ink),
+        ornamentSoft: Color.lerp(from.glow, page, dark ? .68 : .47)!,
+        selectionWash: was.selectionWash,
+        followWash: was.followWash,
+        hidden: hidden,
+        gutter: gutter,
+      ),
+    );
+  }
 
   /// base in another app theme: the paper and ink stay, the tints come from theme. qiyam emerald
   /// is the theme K.PAGE was drawn in, so it gets base back exactly
@@ -258,6 +353,7 @@ abstract final class BmPagePalette {
     }
     final page = base.page!;
     final dark = base.bg.computeLuminance() < .5;
+    final ornament = dark ? Color.lerp(theme.glow, page.page, .18)! : theme.glow;
     return BmPalette(
       bg: base.bg,
       surface: base.surface,
@@ -292,7 +388,9 @@ abstract final class BmPagePalette {
         ink2: page.ink2,
 
         /// the mixes K.PAGE's ornaments are of qiyam emerald's glow and the page
-        ornament: dark ? Color.lerp(theme.glow, page.page, .18)! : theme.glow,
+        ornament: identical(base, paper) || identical(base, night)
+            ? ornament
+            : _legible(ornament, page.page, page.ink),
         ornamentSoft: Color.lerp(theme.glow, page.page, dark ? .68 : .47)!,
         selectionWash: theme.glow.withValues(alpha: page.selectionWash.a),
         followWash: (dark ? theme.accent : theme.primary).withValues(alpha: page.followWash.a),
@@ -300,6 +398,21 @@ abstract final class BmPagePalette {
         gutter: page.gutter,
       ),
     );
+  }
+
+  /// my palettes have no design to keep, so their ornament goes toward the ink until 3:1
+  static Color _legible(Color ornament, Color page, Color ink) {
+    final paper = page.computeLuminance();
+    double ratio(Color color) {
+      final luminance = color.computeLuminance();
+      return (math.max(luminance, paper) + .05) / (math.min(luminance, paper) + .05);
+    }
+
+    var color = ornament;
+    for (var t = .05; ratio(color) < 3 && t <= 1; t += .05) {
+      color = Color.lerp(ornament, ink, t)!;
+    }
+    return color;
   }
 
   static const night = BmPalette(
