@@ -40,6 +40,9 @@ AzkarSet azkarSetOf(Prayer prayer) => prayer == Prayer.fajr ? AzkarSet.morning :
 /// the dev page's test notification, far from any real day
 const testAlertId = 1000000;
 
+/// ios's "open the app" after the last alert
+const quietAlertId = testAlertId + 1;
+
 final _firstDay = DateTime.utc(2020);
 
 /// an id gives back its day and prayer, so cleaning up a delivered one needs no payload
