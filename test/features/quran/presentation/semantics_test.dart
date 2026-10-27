@@ -83,7 +83,7 @@ void main() {
     /// a screen reader's double tap selects it like a finger
     tester.semantics.tap(ayahNode('Al-Fatiha · Ayah 5', translation(5)));
     await tester.pumpAndSettle();
-    expect(containerOf(tester).read(selectionProvider), const AyahKey(1, 5));
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
     await unmount(tester);
     handle.dispose();
   });
@@ -95,7 +95,7 @@ void main() {
     expect(ayahNode('Al-Fatiha · Ayah 1', translation(1)), findsOne);
     tester.semantics.tap(ayahNode('Al-Fatiha · Ayah 2', translation(2)));
     await tester.pumpAndSettle();
-    expect(containerOf(tester).read(selectionProvider), const AyahKey(1, 2));
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 2));
     await unmount(tester);
     handle.dispose();
   });
