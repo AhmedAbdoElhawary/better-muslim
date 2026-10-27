@@ -34,24 +34,27 @@ void main() {
     }
   });
 
-  test('the five sample categories in the 4.14 order, each dua marked for my dataset', () async {
-    final categories = await loadDuas();
-    expect(
-      [for (final category in categories) (category.name.en, category.duas.length)],
-      [
-        ('Leaving the home', 1),
-        ('Waking up', 1),
-        ('Before sleeping', 3),
-        ('Entering and leaving the mosque', 2),
-        ('Before and after eating', 2),
-      ],
-    );
+  test(
+    'the five categories in the 4.14 order from hisn al-muslim, each marked for my english',
+    () async {
+      final categories = await loadDuas();
+      expect(
+        [for (final category in categories) (category.name.en, category.duas.length)],
+        [
+          ('Leaving the home', 2),
+          ('Waking up', 3),
+          ('Before sleeping', 9),
+          ('Entering and leaving the mosque', 2),
+          ('Before and after eating', 4),
+        ],
+      );
 
-    final json = jsonDecode(File('assets/duas/duas.json').readAsStringSync()) as Map;
-    for (final category in json['categories'] as List) {
-      for (final dua in (category as Map)['duas'] as List) {
-        expect((dua as Map)['note'], contains('TODO(ahmed)'), reason: '${dua['id']}');
+      final json = jsonDecode(File('assets/duas/duas.json').readAsStringSync()) as Map;
+      for (final category in json['categories'] as List) {
+        for (final dua in (category as Map)['duas'] as List) {
+          expect((dua as Map)['note'], contains('TODO(ahmed)'), reason: '${dua['id']}');
+        }
       }
-    }
-  });
+    },
+  );
 }
