@@ -4,10 +4,13 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/choosing_bar.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
-import 'package:flutter/widgets.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -106,7 +109,7 @@ void main() {
     Finder inSheet(String text) =>
         find.descendant(of: find.byType(AyahSheet), matching: find.text(text));
 
-    AyahKey? selected(WidgetTester tester) => containerOf(tester).read(selectionProvider);
+    AyahKey? selected(WidgetTester tester) => containerOf(tester).read(selectionProvider).sheet;
 
     testWidgets('a tap on a word selects its ayah with the light haptic', (tester) async {
       await pumpReader(tester);
@@ -126,13 +129,108 @@ void main() {
       await unmount(tester);
     });
 
-    testWidgets('a long press selects too', (tester) async {
-      await pumpReader(tester);
+    group('select mode', () {
+      Future<void> pumpAt(WidgetTester tester, int page) async {
+        await pumpHome(tester, await designOverrides(), settle: false);
+        await tester.pump();
+        containerOf(tester).read(routerProvider).push(Routes.quranPage(page));
+        await tester.pumpAndSettle();
+      }
 
-      await tester.longPressAt(ayahAt(tester, 4));
-      await tester.pumpAndSettle();
-      expect(selected(tester), const AyahKey(1, 4));
-      await unmount(tester);
+      Offset at(WidgetTester tester, AyahKey key) {
+        final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
+          (page) => page.washBounds(key) != null,
+        );
+        return page.localToGlobal(page.washBounds(key)!.center);
+      }
+
+      /// the fit check reads the ayah's page off the bundle
+      Future<void> settle(WidgetTester tester) async {
+        await tester.pump();
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+        await tester.pumpAndSettle();
+      }
+
+      /// the mushaf turns right to left, a drag to the right opens the next page
+      Future<void> nextPage(WidgetTester tester) async {
+        await tester.timedDrag(
+          find.byType(PageTurner),
+          const Offset(393 * .8, 0),
+          const Duration(seconds: 2),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      Set<AyahKey> chosen(WidgetTester tester) =>
+          containerOf(tester).read(selectionProvider).chosen;
+
+      testWidgets('a long press starts it, taps toggle, the bar counts', (tester) async {
+        await pumpReader(tester);
+        await tester.longPressAt(ayahAt(tester, 4));
+        await tester.pumpAndSettle();
+        expect(chosen(tester), {const AyahKey(1, 4)});
+        expect(selected(tester), isNull);
+        expect(find.byType(AyahSheet), findsNothing);
+        expect(find.text('Share (1)'), findsOneWidget);
+
+        await tester.tapAt(ayahAt(tester, 5));
+        await settle(tester);
+        expect(chosen(tester), {const AyahKey(1, 4), const AyahKey(1, 5)});
+        expect(find.text('Share (2)'), findsOneWidget);
+        expect(find.byType(AyahSheet), findsNothing);
+
+        await tester.tapAt(ayahAt(tester, 4));
+        await settle(tester);
+        expect(chosen(tester), {const AyahKey(1, 5)});
+        await unmount(tester);
+      });
+
+      testWidgets('cancel and back both end it', (tester) async {
+        await pumpReader(tester);
+        await tester.longPressAt(ayahAt(tester, 4));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(chosen(tester), isEmpty);
+        expect(find.byType(ChoosingBar), findsNothing);
+
+        await tester.longPressAt(ayahAt(tester, 4));
+        await tester.pumpAndSettle();
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(chosen(tester), isEmpty);
+        expect(
+          find.byType(ReaderPage),
+          findsOneWidget,
+          reason: 'back ended choosing, not the page',
+        );
+        await unmount(tester);
+      });
+
+      testWidgets('turning the page keeps the choices', (tester) async {
+        await pumpReader(tester);
+        await tester.longPressAt(ayahAt(tester, 4));
+        await tester.pumpAndSettle();
+        await nextPage(tester);
+        expect(chosen(tester), {const AyahKey(1, 4)});
+        expect(find.text('Share (1)'), findsOneWidget);
+        await unmount(tester);
+      });
+
+      testWidgets("2:282 alone always starts it, 2:283 doesn't fit beside it", (tester) async {
+        await pumpAt(tester, 48);
+        await tester.longPressAt(at(tester, const AyahKey(2, 282)));
+        await tester.pumpAndSettle();
+        expect(chosen(tester), {const AyahKey(2, 282)});
+
+        await nextPage(tester);
+        await tester.tapAt(at(tester, const AyahKey(2, 283)));
+        await settle(tester);
+        expect(chosen(tester), {const AyahKey(2, 282)});
+        expect(find.text("This ayah doesn't fit the image"), findsOneWidget);
+        await tester.pump(const Duration(seconds: 5));
+        await unmount(tester);
+      });
     });
 
     testWidgets('a tap off the text toggles the controls, or closes the sheet', (tester) async {
