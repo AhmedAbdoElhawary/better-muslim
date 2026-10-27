@@ -49,17 +49,20 @@ class QadaPage extends ConsumerWidget {
                     ),
                   ),
                   const RSizedBox.vertical(SpaceManager.s3),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.getColor(ThemeEnum.surface),
-                      borderRadius: BorderRadius.circular(RadiusManager.lg.r),
-                      border: Border.all(color: context.getColor(ThemeEnum.outline)),
-                    ),
-                    child: Column(
-                      children: [
-                        for (final prayer in Prayer.values)
-                          QadaRow(prayer, divider: prayer != Prayer.isha),
-                      ],
+                  SafeArea(
+                    top: false,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: context.getColor(ThemeEnum.surface),
+                        borderRadius: BorderRadius.circular(RadiusManager.lg.r),
+                        border: Border.all(color: context.getColor(ThemeEnum.outline)),
+                      ),
+                      child: Column(
+                        children: [
+                          for (final prayer in Prayer.values)
+                            QadaRow(prayer, divider: prayer != Prayer.isha),
+                        ],
+                      ),
                     ),
                   ),
                 ],
