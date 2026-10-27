@@ -471,7 +471,6 @@
   "pageSection": "الصفحة",
   "layout": "التخطيط",
   "mushaf": "المصحف",
-  "both": "كلاهما",
   "pageTurn": "قلب الصفحة",
   "book": "كتاب",
   "slide": "انزلاق",
@@ -572,5 +571,10 @@
   "sepia": "بنّي",
   "green": "أخضر",
   "navy": "كحلي",
-  "fontSection": "الخط"
+  "fontSection": "الخط",
+  "mushafSize": "حجم المصحف",
+  "percent": "{n}٪",
+  "prayedOfFive": "{count} من ٥ صلوات",
+  "notifQuietTitle": "ليستمر الأذان",
+  "notifQuietBody": "افتح التطبيق لتُجدول صلوات الأيام القادمة."
 }
