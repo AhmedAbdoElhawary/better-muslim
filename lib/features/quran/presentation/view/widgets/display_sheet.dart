@@ -44,7 +44,7 @@ class _DisplaySheet extends ConsumerWidget {
         final value = settings.value;
         return (
           value?.pageColor ?? PageColor.followSky,
-          value?.quranFont ?? QuranFont.amiri,
+          value?.quranFont ?? QuranFont.kfgqpc,
           value?.quranLayout ?? QuranLayout.mushaf,
           value?.pageTurn ?? PageTurn.book,
           value?.keepScreenOn ?? false,
@@ -174,7 +174,6 @@ class _DisplaySheet extends ConsumerWidget {
                         labelOf: (layout) => switch (layout) {
                           QuranLayout.mushaf => StringsManager.mushaf,
                           QuranLayout.translation => StringsManager.translation,
-                          QuranLayout.both => StringsManager.both,
                         },
                         onChanged: (layout) =>
                             db.updateSettings(SettingsCompanion(quranLayout: Value(layout))),
@@ -203,6 +202,7 @@ class _DisplaySheet extends ConsumerWidget {
                 end: SpaceManager.s4,
                 child: GroupedSection(
                   children: [
+                    const _MushafSizeRow(),
                     if (layout != QuranLayout.mushaf) ...[
                       const _SizeRow(arabic: true),
                       const _SizeRow(arabic: false),
@@ -384,11 +384,71 @@ class _SizeRow extends ConsumerWidget {
     final size = arabic
         ? FontSizeManager.quranAr + step * FontSizeManager.arabicStep
         : FontSizeManager.verseTranslation + step * FontSizeManager.translationStep;
-    void change(int by) => db.updateSettings(
-      arabic
-          ? SettingsCompanion(quranArabicSize: Value(step + by))
-          : SettingsCompanion(quranTranslationSize: Value(step + by)),
+    return _StepRow(
+      label: arabic ? StringsManager.arabicSize : StringsManager.translationSize,
+      value: RegularText(
+        context.formatDigits('${size.round()}', digits),
+        translate: false,
+        fontSize: FontSizeManager.secondary,
+        color: ThemeEnum.text2,
+        tabularFigures: true,
+      ),
+      smaller: step > quranSizeSteps.min,
+      larger: step < quranSizeSteps.max,
+      onStep: (by) => db.updateSettings(
+        arabic
+            ? SettingsCompanion(quranArabicSize: Value(step + by))
+            : SettingsCompanion(quranTranslationSize: Value(step + by)),
+      ),
     );
+  }
+}
+
+/// the mushaf page's size in percent of print, in every layout
+class _MushafSizeRow extends ConsumerWidget {
+  const _MushafSizeRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final db = ref.watch(databaseProvider);
+    final step = ref.watch(settingsProvider.select((settings) => settings.value?.mushafSize ?? 0));
+    final digits = ref.watch(
+      settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
+    );
+    return _StepRow(
+      label: StringsManager.mushafSize,
+      value: RegularText(
+        StringsManager.percent,
+        args: {'n': context.formatDigits('${(mushafScale(step) * 100).round()}', digits)},
+        fontSize: FontSizeManager.secondary,
+        color: ThemeEnum.text2,
+        tabularFigures: true,
+      ),
+      smaller: step > mushafSizeSteps.min,
+      larger: step < mushafSizeSteps.max,
+      onStep: (by) => db.updateSettings(SettingsCompanion(mushafSize: Value(step + by))),
+    );
+  }
+}
+
+/// a label, then − value +
+class _StepRow extends StatelessWidget {
+  const _StepRow({
+    required this.label,
+    required this.value,
+    required this.smaller,
+    required this.larger,
+    required this.onStep,
+  });
+
+  final String label;
+  final Widget value;
+  final bool smaller;
+  final bool larger;
+  final ValueChanged<int> onStep;
+
+  @override
+  Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: SizeManager.listRow.r),
       child: OnlyPadding(
@@ -396,30 +456,19 @@ class _SizeRow extends ConsumerWidget {
         end: SpaceManager.s1,
         child: Row(
           children: [
-            Expanded(
-              child: RegularText(
-                arabic ? StringsManager.arabicSize : StringsManager.translationSize,
-                fontSize: FontSizeManager.body,
-              ),
-            ),
+            Expanded(child: RegularText(label, fontSize: FontSizeManager.body)),
             StepButton(
               icon: BmUiIcon.minus,
               label: StringsManager.smaller,
-              enabled: step > quranSizeSteps.min,
-              onStep: () => change(-1),
+              enabled: smaller,
+              onStep: () => onStep(-1),
             ),
-            RegularText(
-              context.formatDigits('${size.round()}', digits),
-              translate: false,
-              fontSize: FontSizeManager.secondary,
-              color: ThemeEnum.text2,
-              tabularFigures: true,
-            ),
+            value,
             StepButton(
               icon: BmUiIcon.plus,
               label: StringsManager.larger,
-              enabled: step < quranSizeSteps.max,
-              onStep: () => change(1),
+              enabled: larger,
+              onStep: () => onStep(1),
             ),
           ],
         ),
