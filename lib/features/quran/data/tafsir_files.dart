@@ -33,7 +33,6 @@ enum TafsirSource {
   final String sha256;
 
   /// a public repo of its own, this one is private and its releases need a token
-  // TODO(ahmed): run `gh repo create AhmedAbdoElhawary/better-muslim-content --public --add-readme` then `gh release create tafsir-v1 build/tafsir/*.json.gz --repo AhmedAbdoElhawary/better-muslim-content`, upload exactly these built files or the hashes above won't match and every download is thrown away.
   static final base = Uri.parse(
     'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/tafsir-v1/',
   );
