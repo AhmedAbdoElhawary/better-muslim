@@ -26,6 +26,7 @@ abstract final class SpaceManager {
   static const double skyLabelStart = 94;
   static const double skyLabelEndAr = 100;
   static const double skyLabelEdge = 14;
+  static const double arcLabelGap = 6;
   static const double homeCardOverlap = 60;
   static const double homeGlowInset = 18;
   static const double homeCardGap = 14;
@@ -383,6 +384,8 @@ abstract final class SpaceManager {
   static const double shareSwatchGap = 18;
   static const double shareSwatchLabelGap = 6;
   static const double shareButtonsTop = 14;
+  static const double shareNoteTop = 10;
+  static const double choosingBarV = 10;
 
   /// the ayah keeps clear of the footer by this much from the card's bottom
   static const double shareFooterReserve = 44;
@@ -471,6 +474,11 @@ abstract final class SizeManager {
   static const double prayerBar = 3;
   static const double homeGlowBlur = 6;
   static const double skyScrimFade = 48;
+  static const double arcPointDot = 4;
+
+  /// the night marker's three stars, each this far from the marker's point
+  static const double arcStar = 7;
+  static const double arcStarSpread = 5;
   static const double stripMarkSlot = 12;
   static const double stripDot = 5;
   static const double shortcutIconBox = 40;
@@ -607,6 +615,9 @@ abstract final class SizeManager {
   static const double todayRing = 1.5;
   static const double comingUpDay = 46;
 
+  /// the blur behind an open sheet or dialog
+  static const double backdropBlur = 10;
+
   /// the components' dialog and the adhan sound sheet
   static const double dialog = 320;
   static const double dialogShadowBlur = 60;
@@ -691,8 +702,16 @@ abstract final class SizeManager {
   static const double pageCardShadowY = 30;
   static const double pageCardShadowSpread = -24;
   static const double pageRecede = .92;
+
+  /// the book turn's curl (research R13): fold radius, how much darker the back is, how high the
+  /// corner lifts at mid turn, the shadow on the page underneath
+  static const double curlRadius = 32;
+  static const double curlBackShade = .06;
+  static const double curlTilt = 72;
+  static const double curlShadow = .35;
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
+  static const double sheetMax = 740;
   static const double ayahSheet = 400;
   static const double recitationSheet = 452;
   static const double miniPlayer = 64;
@@ -761,17 +780,27 @@ abstract final class SizeManager {
   static const double shareStar = 16;
   static const double shareLogo = 14;
   static const double shareSwatch = 44;
+  static const double shareSwatchRow = 90;
   static const double shareSwatchRing = 2;
   static const double shareSwatchGapRing = 3;
   static const double sharePreviewShadowY = 20;
   static const double sharePreviewShadowBlur = 40;
   static const double sharePreviewShadowSpread = -20;
 
-  /// the card's text shrinks in these steps to fit the whole ayah, story below the last
-  static const List<double> shareFit = [1, .9, .8, .7, .6];
+  /// the card's text shrinks in these steps, then story, then tafsir goes (FR-017)
+  static const List<double> shareFit = [1, .9, .8, .7];
+
+  /// below the last step only a first ayah that fits nowhere keeps shrinking (FR-018)
+  static const double shareFitStep = .05;
+  static const double shareOrnamentOpacity = .10;
+  static const double shareDivider = 10;
 
   /// display (4.31)
   static const double displaySwatch = 76;
+
+  /// each page swatch's width in the scrolling row, so seven of them still peek past the edge
+  static const double displaySlot = 84;
+  static const double displayFontSwatch = 56;
   static const double displayLabel = 84;
   static const double displayRing = 4;
   static const double displayRingGap = 2;
