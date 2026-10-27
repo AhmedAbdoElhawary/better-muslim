@@ -340,7 +340,7 @@ void main() {
       expect(find.text('Continue reading'), findsOneWidget);
       expect(find.text('Al-Fatiha · ayah 3 of 7'), findsOneWidget);
       expect(find.text('Evening azkar'), findsOneWidget);
-      expect(find.text('After Asr · 0 of 24'), findsOneWidget);
+      expect(find.text('After Asr · 0 of 20'), findsOneWidget);
       await unmount(tester);
     });
 
@@ -351,9 +351,9 @@ void main() {
       final container = containerOf(tester);
       await container
           .read(databaseProvider)
-          .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e02', 1);
+          .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e01', 1);
       await tester.pumpAndSettle();
-      expect(find.text('After Asr · 1 of 24'), findsOneWidget);
+      expect(find.text('After Asr · 1 of 20'), findsOneWidget);
 
       /// at rest the row sits under the glass tab bar
       await tester.fling(find.byType(Scrollable).first, const Offset(0, -1000), 3000);
@@ -371,7 +371,7 @@ void main() {
       await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 5)));
 
       expect(find.text('Morning azkar'), findsOneWidget);
-      expect(find.text('After Fajr · 0 of 12'), findsOneWidget);
+      expect(find.text('After Fajr · 0 of 23'), findsOneWidget);
       await unmount(tester);
     });
 
