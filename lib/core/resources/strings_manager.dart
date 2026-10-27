@@ -434,7 +434,6 @@ abstract final class StringsManager {
   static const String pageSection = 'pageSection';
   static const String layout = 'layout';
   static const String mushaf = 'mushaf';
-  static const String both = 'both';
   static const String pageTurn = 'pageTurn';
   static const String book = 'book';
   static const String slide = 'slide';
@@ -535,4 +534,9 @@ abstract final class StringsManager {
   static const String green = 'green';
   static const String navy = 'navy';
   static const String fontSection = 'fontSection';
+  static const String mushafSize = 'mushafSize';
+  static const String percent = 'percent';
+  static const String prayedOfFive = 'prayedOfFive';
+  static const String notifQuietTitle = 'notifQuietTitle';
+  static const String notifQuietBody = 'notifQuietBody';
 }
