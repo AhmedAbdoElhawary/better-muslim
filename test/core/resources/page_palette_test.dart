@@ -16,7 +16,10 @@ void main() {
   for (final (name, palette) in [
     ('paper', BmPagePalette.paper),
     ('cream', BmPagePalette.cream),
+    ('sepia', BmPagePalette.sepia),
+    ('green', BmPagePalette.green),
     ('night', BmPagePalette.night),
+    ('navy', BmPagePalette.navy),
   ]) {
     test('$name meets AA for the reader text (SC-008)', () {
       for (final text in texts) {
