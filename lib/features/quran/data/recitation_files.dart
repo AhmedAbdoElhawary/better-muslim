@@ -28,7 +28,6 @@ class RecitationFiles {
        _fetch = fetch ?? download,
        _exclude = exclude ?? BackupExclusion.exclude;
 
-  // TODO(ahmed): the recitation's address, EveryAyah's Alafasy 128 kbps until I pick the final source.
   static final base = Uri.parse('https://everyayah.com/data/Alafasy_128kbps/');
 
   final Future<Directory> Function() _root;
