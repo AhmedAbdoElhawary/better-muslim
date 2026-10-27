@@ -66,11 +66,13 @@ const credits = [
     license: _ofl,
     link: 'https://software.sil.org/scheherazade',
   ),
-  // TODO(ahmed): KFGQPC Hafs's exact credit and license once its file is in, a wrong credit breaks its terms.
+
+  /// its license lets it be used and shipped for free, never sold or modified
   Credit(
-    source: 'KFGQPC Uthmanic Script Hafs',
+    source: 'KFGQPC HAFS Uthmanic Script, King Fahd Glorious Quran Printing Complex',
     useKey: StringsManager.useFonts,
-    link: 'https://qul.tarteel.ai',
+    license: 'KFGQPC EULA',
+    link: 'https://fonts.qurancomplex.gov.sa',
   ),
   // TODO(ahmed): QUL's exact credit line and license for the Madinah V2 layout and QPC Hafs words, a wrong credit breaks their terms.
   Credit(
@@ -98,8 +100,12 @@ const credits = [
     useKey: StringsManager.useRecitation,
     link: 'https://everyayah.com',
   ),
-  // TODO(ahmed): confirm the source of the azkar and duas text and translation, add its license and https link, a wrong credit breaks the license.
-  Credit(source: 'Hisn al-Muslim', useKey: StringsManager.useAzkarDuas),
+  // TODO(ahmed): the english translation's credit and license once picked, and the book's license line if hisnmuslim.com gives one.
+  Credit(
+    source: "Hisn al-Muslim · Sa'id al-Qahtani",
+    useKey: StringsManager.useAzkarDuas,
+    link: 'https://www.hisnmuslim.com',
+  ),
   // TODO(ahmed): the adhan recordings' source, license and https link once the licensed files are in.
   Credit(source: 'Adhan of Makkah', useKey: StringsManager.useAdhanRecordings),
 ];
