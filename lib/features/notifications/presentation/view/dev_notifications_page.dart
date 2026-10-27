@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
@@ -19,6 +20,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
@@ -114,6 +116,7 @@ class DevNotificationsPage extends ConsumerWidget {
 
                 /// the next prayer's countdown whatever the 2 hours, so it shows without waiting
                 _Row(_startCountdown, onTap: () => ref.read(surfacesChannelProvider).startNow()),
+                const _FastDayRow(),
               ],
 
               /// from the first screen, nothing is cleared (FR-004)
@@ -160,6 +163,28 @@ class _Row extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// no notifications or widgets are scheduled while it runs, so its fake times stay in the app
+class _FastDayRow extends ConsumerWidget {
+  const _FastDayRow();
+
+  static const _label = 'Fast day (24 h in 5 min)';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(fastDayProvider);
+    return GroupedSection(
+      children: [
+        NavRow(
+          title: _label,
+          translateTitle: false,
+          toggled: on,
+          onTap: () => ref.read(fastDayProvider.notifier).set(!on),
+        ),
+      ],
     );
   }
 }
