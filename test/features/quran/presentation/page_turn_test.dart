@@ -3,6 +3,7 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/page_curl.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,6 +116,82 @@ void main() {
     await drag(tester, 393 * .6);
     expect(page.value, 6);
     expect(built, [7], reason: 'the pages already there keep their elements');
+  });
+
+  /// the layers between the turner and the page, the ones that soften it on android (R11)
+  List<Widget> layersAbove(WidgetTester tester, int n) {
+    final layers = <Widget>[];
+    tester
+        .element(find.byWidgetPredicate((widget) => widget is _Page && widget.n == n))
+        .visitAncestorElements((element) {
+          if (element.widget is PageTurner) return false;
+          if (element.widget case Transform() || Opacity() || AnimatedOpacity()) {
+            layers.add(element.widget);
+          }
+          return true;
+        });
+    return layers;
+  }
+
+  testWidgets('a settled page has no transform or opacity above it', (tester) async {
+    final book = await pumpTurner(tester, start: 5);
+    expect(layersAbove(tester, 5), isEmpty);
+    await drag(tester, 393 * .6);
+    expect(book.value, 6);
+    expect(layersAbove(tester, 6), isEmpty);
+
+    final slide = await pumpTurner(tester, start: 5, book: false);
+    built.clear();
+    await drag(tester, 393 * .6);
+    expect(slide.value, 6);
+    expect(layersAbove(tester, 6), isEmpty);
+    expect(built, [7], reason: 'the wrappers come and go, the pages stay');
+  });
+
+  testWidgets('book curls a picture of the leaf and lets it go when the page settles', (
+    tester,
+  ) async {
+    final page = await pumpTurner(tester, start: 5);
+    final gesture = await tester.startGesture(const Offset(200, 600));
+    for (var i = 0; i < 6; i++) {
+      await gesture.moveBy(const Offset(20, 0));
+      await tester.pump();
+    }
+    expect(find.byType(PageCurl), findsOneWidget);
+    final image = tester.widget<PageCurl>(find.byType(PageCurl)).image;
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(page.value, 5, reason: 'a short drag still falls back with the curl');
+    expect(find.byType(PageCurl), findsNothing);
+    expect(image.debugDisposed, isTrue);
+  });
+
+  testWidgets('the turn back curls the previous page too', (tester) async {
+    final page = await pumpTurner(tester, start: 5);
+    final gesture = await tester.startGesture(const Offset(200, 600));
+    for (var i = 0; i < 12; i++) {
+      await gesture.moveBy(const Offset(-20, 0));
+      await tester.pump();
+    }
+    expect(find.byType(PageCurl), findsOneWidget);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(page.value, 4);
+    expect(find.byType(PageCurl), findsNothing);
+  });
+
+  testWidgets('slide and reduce motion never curl', (tester) async {
+    for (final (book, reduce) in [(false, false), (true, true)]) {
+      await pumpTurner(tester, start: 5, book: book, reduceMotion: reduce);
+      final gesture = await tester.startGesture(const Offset(200, 600));
+      for (var i = 0; i < 6; i++) {
+        await gesture.moveBy(const Offset(20, 0));
+        await tester.pump();
+      }
+      expect(find.byType(PageCurl), findsNothing);
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
   });
 }
 
