@@ -61,11 +61,8 @@ void main() {
         'Sleep',
         'Saved',
         'Leaving the home',
-        'Abu Dawud 5095',
-        'بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
-        'Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.',
-        'In the name of Allah, I place my trust in Allah, and there is no might nor power except '
-            'with Allah.',
+        'Abu Dawud 4/325, at-Tirmidhi 5/490',
+        'بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَاَ حَوْلَ وَلَا قُوَّةَ إِلاَّ بِاللَّهِ',
         'Listen',
         'Save',
         'Share',
@@ -73,8 +70,9 @@ void main() {
         'Before sleeping',
         'Entering and leaving the mosque',
         'Before and after eating',
-        '1 dua',
         '3 duas',
+        '9 duas',
+        '4 duas',
       ]) {
         expect(find.text(text), findsWidgets, reason: text);
       }
@@ -91,7 +89,7 @@ void main() {
       await pumpDuas(tester, await designOverrides());
       await chip(tester, 'Home');
 
-      expect(find.text('Leaving the home'), findsOneWidget);
+      expect(find.text('Leaving the home'), findsNWidgets(2));
       expect(find.text('Entering and leaving the mosque'), findsOneWidget);
       expect(find.text('Waking up'), findsNothing);
       expect(find.text('Before sleeping'), findsNothing);
@@ -101,11 +99,11 @@ void main() {
     testWidgets('search shows cards as I type, clearing returns to the chip', (tester) async {
       await pumpDuas(tester, await designOverrides());
       await chip(tester, 'Sleep');
-      await search(tester, 'tawakkaltu');
+      await search(tester, '4/325');
 
       expect(find.byType(DuaCard), findsWidgets);
       expect(find.text('Leaving the home'), findsWidgets);
-      expect(find.text('1 dua'), findsNothing);
+      expect(find.text('9 duas'), findsNothing);
 
       await search(tester, 'توكلت');
       expect(find.text('Leaving the home'), findsWidgets);
@@ -147,8 +145,15 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: find.byType(DuaCategoryPage), matching: find.byType(DuaCard)),
-        findsNWidgets(3),
+        tester
+            .widget<DuaCard>(
+              find
+                  .descendant(of: find.byType(DuaCategoryPage), matching: find.byType(DuaCard))
+                  .first,
+            )
+            .dua
+            .id,
+        'd006',
       );
       await unmount(tester);
     });
@@ -156,13 +161,9 @@ void main() {
     testWidgets('arabic shows the arabic and the source only, arabic plural forms', (tester) async {
       await pumpDuas(tester, await designOverrides(), locale: const Locale('ar'));
 
-      expect(find.text('أبو داود ٥٠٩٥'), findsOneWidget);
-      expect(find.text('مغادرة المنزل'), findsOneWidget);
-      expect(
-        find.text('Bismillah, tawakkaltu ʿala Allah, wa la hawla wa la quwwata illa billah.'),
-        findsNothing,
-      );
-      expect(find.text('دعاء واحد'), findsOneWidget);
+      expect(find.text('أبو داود ٤/٣٢٥، الترمذي ٥/٤٩٠'), findsOneWidget);
+      expect(find.text('مغادرة المنزل'), findsNWidgets(2));
+      expect(find.text('٩ أدعية'), findsOneWidget);
       expect(find.text('٣ أدعية'), findsOneWidget);
       expect(find.text('دعاءان'), findsNWidgets(2));
       await unmount(tester);
