@@ -114,4 +114,67 @@ void main() {
     expect(regularBands(height), hasLength(mushafLines));
     expect(regularBands(height).first, greaterThanOrEqualTo(SizeManager.hit));
   });
+
+  group('reflowMushaf', () {
+    List<String> texts(MushafLine line) => [for (final word in line.words) word.text];
+
+    test('the words flow into lines as wide as the width, in order', () {
+      final page = MushafPage(number: 3, lines: [_ayah(3), _ayah(2)]);
+      final flowed = reflowMushaf(
+        page,
+        widths: [
+          [100, 100, 100],
+          [100, 100],
+        ],
+        width: 220,
+        gap: gap,
+      );
+      expect(flowed.lines.map(texts), [
+        ['0', '1'],
+        ['2', '0'],
+        ['1'],
+      ]);
+      expect(flowed.lines.map((line) => line.centered), [false, false, true]);
+    });
+
+    test('a surah name and the basmallah keep their own lines', () {
+      const name = MushafLine(type: MushafLineType.surahName, surah: 3);
+      const basmallah = MushafLine(type: MushafLineType.basmallah);
+      final page = MushafPage(number: 50, lines: [_ayah(2), name, basmallah, _ayah(1)]);
+      final flowed = reflowMushaf(
+        page,
+        widths: [
+          [50, 50],
+          [],
+          [],
+          [50],
+        ],
+        width: 300,
+        gap: gap,
+      );
+      expect(flowed.lines.map((line) => line.type), [
+        MushafLineType.ayah,
+        MushafLineType.surahName,
+        MushafLineType.basmallah,
+        MushafLineType.ayah,
+      ]);
+      expect(flowed.lines.first.centered, isTrue, reason: 'the run before the name ends there');
+      expect(flowed.lines[1].surah, 3);
+    });
+
+    test('a word wider than the line gets a line of its own', () {
+      final flowed = reflowMushaf(
+        MushafPage(number: 3, lines: [_ayah(2)]),
+        widths: [
+          [400, 50],
+        ],
+        width: 300,
+        gap: gap,
+      );
+      expect(flowed.lines.map(texts), [
+        ['0'],
+        ['1'],
+      ]);
+    });
+  });
 }
