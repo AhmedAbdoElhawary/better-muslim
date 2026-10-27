@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
+import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,6 +104,50 @@ void main() {
       await unmount(tester);
     });
 
+    /// 282 alone, four ayahs over two surahs, and 22 short ayahs over four surahs for the longest
+    /// footer under the title
+    for (final keys in [
+      [const AyahKey(2, 282)],
+      [for (var ayah = 255; ayah <= 257; ayah++) AyahKey(2, ayah), const AyahKey(3, 18)],
+      [
+        for (var ayah = 1; ayah <= 7; ayah++) AyahKey(1, ayah),
+        for (final (surah, count) in const [(112, 4), (113, 5), (114, 6)])
+          for (var ayah = 1; ayah <= count; ayah++) AyahKey(surah, ayah),
+      ],
+    ]) {
+      testWidgets('the share sheet with ${keys.length} ayahs from ${keys.first}, ${name(at)}', (
+        tester,
+      ) async {
+        await pumpApp(tester, at);
+        await open(tester, Routes.quranPage(1));
+        unawaited(showAyahShare(tester.element(find.byType(ReaderPage)), keys));
+        await tester.pump();
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
+        await tester.pumpAndSettle();
+        expect(find.byType(ShareSheet), findsOneWidget);
+        expect(tester.takeException(), isNull);
+
+        /// story and every font, then the share button at the bottom is still reachable
+        for (final label in ['Story', 'Square']) {
+          final finder = find.text(at.$1.languageCode == 'ar' ? _ar[label]! : label);
+          await tester.ensureVisible(finder.last);
+          await tester.pumpAndSettle();
+          await tester.tap(finder.last);
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        }
+        final share = find.descendant(
+          of: find.byType(ShareSheet),
+          matching: find.text(at.$1.languageCode == 'ar' ? _ar['Share']! : 'Share'),
+        );
+        await tester.ensureVisible(share);
+        await tester.pumpAndSettle();
+        expect(tester.getRect(share).bottom, lessThanOrEqualTo(at.$3.height));
+        expect(tester.takeException(), isNull);
+        await unmount(tester);
+      });
+    }
+
     testWidgets('the index down to its longest names, ${name(at)}', (tester) async {
       await pumpApp(tester, at);
       containerOf(tester).read(routerProvider).go(Routes.quran);
@@ -113,3 +161,5 @@ void main() {
     });
   }
 }
+
+const _ar = {'Story': 'قصة', 'Square': 'مربع', 'Share': 'مشاركة'};
