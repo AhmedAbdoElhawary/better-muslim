@@ -162,20 +162,17 @@ abstract final class AppTheme {
   /// follow sky is resolved before, see PageColor.resolve
   static ThemeData page(PageColor color, [BmThemeId id = BmThemeId.qiyamEmerald]) {
     final theme = bmThemes[id]!;
-    return switch (color) {
-      PageColor.night => _build(
-        BmPagePalette.tint(BmPagePalette.night, theme.dark),
-        Brightness.dark,
-      ),
-      PageColor.cream => _build(
-        BmPagePalette.tint(BmPagePalette.cream, theme.light),
-        Brightness.light,
-      ),
-      PageColor.paper || PageColor.followSky => _build(
-        BmPagePalette.tint(BmPagePalette.paper, theme.light),
-        Brightness.light,
-      ),
+    final base = switch (color) {
+      PageColor.paper || PageColor.followSky => BmPagePalette.paper,
+      PageColor.cream => BmPagePalette.cream,
+      PageColor.sepia => BmPagePalette.sepia,
+      PageColor.green => BmPagePalette.green,
+      PageColor.night => BmPagePalette.night,
+      PageColor.navy => BmPagePalette.navy,
     };
+    return color.dark
+        ? _build(BmPagePalette.tint(base, theme.dark), Brightness.dark)
+        : _build(BmPagePalette.tint(base, theme.light), Brightness.light);
   }
 
   /// BmText.body and material 3 typography fill line height and letter spacing into every text
