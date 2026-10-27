@@ -29,6 +29,16 @@ void main() {
     expect(assets.pageOf(const AyahKey(114, 6)), quranPageCount);
   });
 
+  test('verse candidates are 6 to 40 words, an ayah\'s text is its words', () async {
+    final assets = await QuranAssets.load();
+    final candidates = assets.verseCandidates();
+    expect(candidates, contains(const AyahKey(1, 7)));
+    expect(candidates, isNot(contains(const AyahKey(1, 5))), reason: '4 words');
+    expect(candidates, isNot(contains(const AyahKey(2, 282))), reason: 'the longest ayah');
+    expect((await assets.ayahText(const AyahKey(1, 5))).split(' '), hasLength(4));
+    expect((await assets.ayahText(const AyahKey(2, 255))).split(' '), hasLength(50));
+  });
+
   test('every shipped page has 15 lines of known types, ayahs in order', () async {
     final assets = await QuranAssets.load();
     expect(_shipped, contains(1));
