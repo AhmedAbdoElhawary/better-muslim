@@ -1,6 +1,6 @@
-import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/step/step_reveal.dart';
 import 'package:better_muslim/features/onboarding/view/location_step_page.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_sun.dart';
