@@ -545,6 +545,16 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("keep_screen_on" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<QuranFont, String> quranFont =
+      GeneratedColumn<String>(
+        'quran_font',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('amiri'),
+      ).withConverter<QuranFont>($SettingsTable.$converterquranFont);
   static const VerificationMeta _quranArabicSizeMeta = const VerificationMeta('quranArabicSize');
   @override
   late final GeneratedColumn<int> quranArabicSize = GeneratedColumn<int>(
@@ -657,6 +667,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     quranLayout,
     pageTurn,
     keepScreenOn,
+    quranFont,
     quranArabicSize,
     quranTranslationSize,
     reciteSpeed,
@@ -1133,6 +1144,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}keep_screen_on'],
       )!,
+      quranFont: $SettingsTable.$converterquranFont.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}quran_font'],
+        )!,
+      ),
       quranArabicSize: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}quran_arabic_size'],
@@ -1221,6 +1238,8 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<QuranLayout>(QuranLayout.values);
   static JsonTypeConverter2<PageTurn, String, String> $converterpageTurn =
       const EnumNameConverter<PageTurn>(PageTurn.values);
+  static JsonTypeConverter2<QuranFont, String, String> $converterquranFont =
+      const EnumNameConverter<QuranFont>(QuranFont.values);
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -1305,6 +1324,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final QuranLayout quranLayout;
   final PageTurn pageTurn;
   final bool keepScreenOn;
+  final QuranFont quranFont;
 
   /// steps around 4.07's size
   final int quranArabicSize;
@@ -1370,6 +1390,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.quranLayout,
     required this.pageTurn,
     required this.keepScreenOn,
+    required this.quranFont,
     required this.quranArabicSize,
     required this.quranTranslationSize,
     required this.reciteSpeed,
@@ -1520,6 +1541,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       map['page_turn'] = Variable<String>($SettingsTable.$converterpageTurn.toSql(pageTurn));
     }
     map['keep_screen_on'] = Variable<bool>(keepScreenOn);
+    {
+      map['quran_font'] = Variable<String>($SettingsTable.$converterquranFont.toSql(quranFont));
+    }
     map['quran_arabic_size'] = Variable<int>(quranArabicSize);
     map['quran_translation_size'] = Variable<int>(quranTranslationSize);
     map['recite_speed'] = Variable<double>(reciteSpeed);
@@ -1591,6 +1615,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranLayout: Value(quranLayout),
       pageTurn: Value(pageTurn),
       keepScreenOn: Value(keepScreenOn),
+      quranFont: Value(quranFont),
       quranArabicSize: Value(quranArabicSize),
       quranTranslationSize: Value(quranTranslationSize),
       reciteSpeed: Value(reciteSpeed),
@@ -1693,6 +1718,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
         serializer.fromJson<String>(json['pageTurn']),
       ),
       keepScreenOn: serializer.fromJson<bool>(json['keepScreenOn']),
+      quranFont: $SettingsTable.$converterquranFont.fromJson(
+        serializer.fromJson<String>(json['quranFont']),
+      ),
       quranArabicSize: serializer.fromJson<int>(json['quranArabicSize']),
       quranTranslationSize: serializer.fromJson<int>(json['quranTranslationSize']),
       reciteSpeed: serializer.fromJson<double>(json['reciteSpeed']),
@@ -1779,6 +1807,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       ),
       'pageTurn': serializer.toJson<String>($SettingsTable.$converterpageTurn.toJson(pageTurn)),
       'keepScreenOn': serializer.toJson<bool>(keepScreenOn),
+      'quranFont': serializer.toJson<String>($SettingsTable.$converterquranFont.toJson(quranFont)),
       'quranArabicSize': serializer.toJson<int>(quranArabicSize),
       'quranTranslationSize': serializer.toJson<int>(quranTranslationSize),
       'reciteSpeed': serializer.toJson<double>(reciteSpeed),
@@ -1841,6 +1870,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     QuranLayout? quranLayout,
     PageTurn? pageTurn,
     bool? keepScreenOn,
+    QuranFont? quranFont,
     int? quranArabicSize,
     int? quranTranslationSize,
     double? reciteSpeed,
@@ -1900,6 +1930,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranLayout: quranLayout ?? this.quranLayout,
     pageTurn: pageTurn ?? this.pageTurn,
     keepScreenOn: keepScreenOn ?? this.keepScreenOn,
+    quranFont: quranFont ?? this.quranFont,
     quranArabicSize: quranArabicSize ?? this.quranArabicSize,
     quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
     reciteSpeed: reciteSpeed ?? this.reciteSpeed,
@@ -1981,6 +2012,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranLayout: data.quranLayout.present ? data.quranLayout.value : this.quranLayout,
       pageTurn: data.pageTurn.present ? data.pageTurn.value : this.pageTurn,
       keepScreenOn: data.keepScreenOn.present ? data.keepScreenOn.value : this.keepScreenOn,
+      quranFont: data.quranFont.present ? data.quranFont.value : this.quranFont,
       quranArabicSize: data.quranArabicSize.present
           ? data.quranArabicSize.value
           : this.quranArabicSize,
@@ -2049,6 +2081,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('quranLayout: $quranLayout, ')
           ..write('pageTurn: $pageTurn, ')
           ..write('keepScreenOn: $keepScreenOn, ')
+          ..write('quranFont: $quranFont, ')
           ..write('quranArabicSize: $quranArabicSize, ')
           ..write('quranTranslationSize: $quranTranslationSize, ')
           ..write('reciteSpeed: $reciteSpeed, ')
@@ -2113,6 +2146,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranLayout,
     pageTurn,
     keepScreenOn,
+    quranFont,
     quranArabicSize,
     quranTranslationSize,
     reciteSpeed,
@@ -2176,6 +2210,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.quranLayout == this.quranLayout &&
           other.pageTurn == this.pageTurn &&
           other.keepScreenOn == this.keepScreenOn &&
+          other.quranFont == this.quranFont &&
           other.quranArabicSize == this.quranArabicSize &&
           other.quranTranslationSize == this.quranTranslationSize &&
           other.reciteSpeed == this.reciteSpeed &&
@@ -2237,6 +2272,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<QuranLayout> quranLayout;
   final Value<PageTurn> pageTurn;
   final Value<bool> keepScreenOn;
+  final Value<QuranFont> quranFont;
   final Value<int> quranArabicSize;
   final Value<int> quranTranslationSize;
   final Value<double> reciteSpeed;
@@ -2296,6 +2332,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranLayout = const Value.absent(),
     this.pageTurn = const Value.absent(),
     this.keepScreenOn = const Value.absent(),
+    this.quranFont = const Value.absent(),
     this.quranArabicSize = const Value.absent(),
     this.quranTranslationSize = const Value.absent(),
     this.reciteSpeed = const Value.absent(),
@@ -2356,6 +2393,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranLayout = const Value.absent(),
     this.pageTurn = const Value.absent(),
     this.keepScreenOn = const Value.absent(),
+    this.quranFont = const Value.absent(),
     this.quranArabicSize = const Value.absent(),
     this.quranTranslationSize = const Value.absent(),
     this.reciteSpeed = const Value.absent(),
@@ -2416,6 +2454,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? quranLayout,
     Expression<String>? pageTurn,
     Expression<bool>? keepScreenOn,
+    Expression<String>? quranFont,
     Expression<int>? quranArabicSize,
     Expression<int>? quranTranslationSize,
     Expression<double>? reciteSpeed,
@@ -2476,6 +2515,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (quranLayout != null) 'quran_layout': quranLayout,
       if (pageTurn != null) 'page_turn': pageTurn,
       if (keepScreenOn != null) 'keep_screen_on': keepScreenOn,
+      if (quranFont != null) 'quran_font': quranFont,
       if (quranArabicSize != null) 'quran_arabic_size': quranArabicSize,
       if (quranTranslationSize != null) 'quran_translation_size': quranTranslationSize,
       if (reciteSpeed != null) 'recite_speed': reciteSpeed,
@@ -2538,6 +2578,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<QuranLayout>? quranLayout,
     Value<PageTurn>? pageTurn,
     Value<bool>? keepScreenOn,
+    Value<QuranFont>? quranFont,
     Value<int>? quranArabicSize,
     Value<int>? quranTranslationSize,
     Value<double>? reciteSpeed,
@@ -2598,6 +2639,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       quranLayout: quranLayout ?? this.quranLayout,
       pageTurn: pageTurn ?? this.pageTurn,
       keepScreenOn: keepScreenOn ?? this.keepScreenOn,
+      quranFont: quranFont ?? this.quranFont,
       quranArabicSize: quranArabicSize ?? this.quranArabicSize,
       quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
       reciteSpeed: reciteSpeed ?? this.reciteSpeed,
@@ -2802,6 +2844,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (keepScreenOn.present) {
       map['keep_screen_on'] = Variable<bool>(keepScreenOn.value);
     }
+    if (quranFont.present) {
+      map['quran_font'] = Variable<String>(
+        $SettingsTable.$converterquranFont.toSql(quranFont.value),
+      );
+    }
     if (quranArabicSize.present) {
       map['quran_arabic_size'] = Variable<int>(quranArabicSize.value);
     }
@@ -2876,6 +2923,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('quranLayout: $quranLayout, ')
           ..write('pageTurn: $pageTurn, ')
           ..write('keepScreenOn: $keepScreenOn, ')
+          ..write('quranFont: $quranFont, ')
           ..write('quranArabicSize: $quranArabicSize, ')
           ..write('quranTranslationSize: $quranTranslationSize, ')
           ..write('reciteSpeed: $reciteSpeed, ')
@@ -4577,6 +4625,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<QuranLayout> quranLayout,
   Value<PageTurn> pageTurn,
   Value<bool> keepScreenOn,
+  Value<QuranFont> quranFont,
   Value<int> quranArabicSize,
   Value<int> quranTranslationSize,
   Value<double> reciteSpeed,
@@ -4637,6 +4686,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<QuranLayout> quranLayout,
   Value<PageTurn> pageTurn,
   Value<bool> keepScreenOn,
+  Value<QuranFont> quranFont,
   Value<int> quranArabicSize,
   Value<int> quranTranslationSize,
   Value<double> reciteSpeed,
@@ -4890,6 +4940,11 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
   ColumnFilters<bool> get keepScreenOn =>
       $composableBuilder(column: $table.keepScreenOn, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<QuranFont, QuranFont, String> get quranFont => $composableBuilder(
+    column: $table.quranFont,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<int> get quranArabicSize => $composableBuilder(
     column: $table.quranArabicSize,
     builder: (column) => ColumnFilters(column),
@@ -5105,6 +5160,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<bool> get keepScreenOn =>
       $composableBuilder(column: $table.keepScreenOn, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get quranFont =>
+      $composableBuilder(column: $table.quranFont, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get quranArabicSize => $composableBuilder(
     column: $table.quranArabicSize,
     builder: (column) => ColumnOrderings(column),
@@ -5291,6 +5349,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<bool> get keepScreenOn =>
       $composableBuilder(column: $table.keepScreenOn, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<QuranFont, String> get quranFont =>
+      $composableBuilder(column: $table.quranFont, builder: (column) => column);
+
   GeneratedColumn<int> get quranArabicSize =>
       $composableBuilder(column: $table.quranArabicSize, builder: (column) => column);
 
@@ -5386,6 +5447,7 @@ class $$SettingsTableTableManager
                 Value<QuranLayout> quranLayout = const Value.absent(),
                 Value<PageTurn> pageTurn = const Value.absent(),
                 Value<bool> keepScreenOn = const Value.absent(),
+                Value<QuranFont> quranFont = const Value.absent(),
                 Value<int> quranArabicSize = const Value.absent(),
                 Value<int> quranTranslationSize = const Value.absent(),
                 Value<double> reciteSpeed = const Value.absent(),
@@ -5445,6 +5507,7 @@ class $$SettingsTableTableManager
                 quranLayout: quranLayout,
                 pageTurn: pageTurn,
                 keepScreenOn: keepScreenOn,
+                quranFont: quranFont,
                 quranArabicSize: quranArabicSize,
                 quranTranslationSize: quranTranslationSize,
                 reciteSpeed: reciteSpeed,
@@ -5506,6 +5569,7 @@ class $$SettingsTableTableManager
                 Value<QuranLayout> quranLayout = const Value.absent(),
                 Value<PageTurn> pageTurn = const Value.absent(),
                 Value<bool> keepScreenOn = const Value.absent(),
+                Value<QuranFont> quranFont = const Value.absent(),
                 Value<int> quranArabicSize = const Value.absent(),
                 Value<int> quranTranslationSize = const Value.absent(),
                 Value<double> reciteSpeed = const Value.absent(),
@@ -5565,6 +5629,7 @@ class $$SettingsTableTableManager
                 quranLayout: quranLayout,
                 pageTurn: pageTurn,
                 keepScreenOn: keepScreenOn,
+                quranFont: quranFont,
                 quranArabicSize: quranArabicSize,
                 quranTranslationSize: quranTranslationSize,
                 reciteSpeed: reciteSpeed,
