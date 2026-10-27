@@ -80,7 +80,9 @@ class _AppState extends ConsumerState<App> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: SizeManager.maxContentWidth.w),
-                  child: child,
+
+                  /// the outermost overlay, toasts go in it to stay above every route and sheet
+                  child: Overlay.wrap(child: child!),
                 ),
               ),
             ),
