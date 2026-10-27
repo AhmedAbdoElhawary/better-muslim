@@ -17,6 +17,7 @@ class QuranSurah {
     required this.medinan,
     required this.ayahs,
     required this.page,
+    required this.words,
   });
 
   final int n;
@@ -27,6 +28,9 @@ class QuranSurah {
 
   /// the page its first ayah is on
   final int page;
+
+  /// each ayah's word count, without its number
+  final List<int> words;
 
   /// as the mushaf heads it, arabic in both languages
   String get title => 'سورة $ar';
@@ -73,6 +77,7 @@ class QuranAssets {
             medinan: surah['place'] == 'medinan',
             ayahs: surah['ayahs'] as int,
             page: surah['page'] as int,
+            words: (surah['words'] as List).cast<int>(),
           ),
       ],
       [
@@ -133,7 +138,21 @@ class QuranAssets {
     return ayahs.isEmpty ? [start] : ayahs;
   }
 
-  /// the page's lines, null while the page isn't shipped yet (only page 1 until the QUL files)
+  /// home's verse of the day, ayahs short enough for its card and long enough to say something
+  List<AyahKey> verseCandidates() => [
+    for (final surah in surahs)
+      for (final (i, words) in surah.words.indexed)
+        if (words >= 6 && words <= 40) AyahKey(surah.n, i + 1),
+  ];
+
+  /// the madinah pages always end on an ayah's end, so its page has all its words
+  Future<String> ayahText(AyahKey key) async => [
+    for (final line in ((await page(pageOf(key)))?['lines'] as List? ?? []).cast<Map>())
+      for (final word in (line['w'] as List? ?? []).cast<List<dynamic>>())
+        if (word[0] == key.surah && word[1] == key.ayah && word.length == 3) word[2] as String,
+  ].join(' ');
+
+  /// the page's lines, null when its file is missing
   Future<Map<String, dynamic>?> page(int n) async {
     if (_pages.containsKey(n)) return _pages[n] = _pages.remove(n);
     Map<String, dynamic>? json;
@@ -168,8 +187,8 @@ class QuranAssets {
   };
 }
 
-/// the provider keeps what it needs, and a cached load hangs the next widget test
+/// loadString sends files over 50 kb to an isolate, slower for these than decoding them here
 Future<Object?> _json(String path) async =>
-    jsonDecode(await rootBundle.loadString(path, cache: false));
+    jsonDecode(utf8.decode((await rootBundle.load(path)).buffer.asUint8List()));
 
 String _three(int n) => '$n'.padLeft(3, '0');
