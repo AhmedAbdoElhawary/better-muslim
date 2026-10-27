@@ -138,7 +138,27 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
       if (!ref.read(followingProvider)) return;
       _page.value = page;
     }
-    if (_recite.value > .5) _liftOver(ayah, _reciteSheet);
+    if (_recite.value > .5) {
+      _liftOver(ayah, _reciteSheet);
+    } else {
+      _reveal(readAyah(ayah));
+    }
+  }
+
+  /// a page above 100% scrolls to the ayah being recited, the cells do it themselves
+  void _reveal(AyahKey ayah) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final page = _pages[_page.value]?.currentContext?.findRenderObject();
+      if (!mounted || page is! RenderMushafPage || !page.reflow) return;
+      if (ref.read(settingsProvider).value?.quranLayout != QuranLayout.mushaf) return;
+      if (page.washBounds(ayah) case final bounds?) {
+        page.showOnScreen(
+          rect: bounds,
+          duration: bmMotion(MediaQuery.disableAnimationsOf(context), BmMotion.standard),
+          curve: BmMotion.standardCurve,
+        );
+      }
+    });
   }
 
   /// for screen readers, the page number on each turn and play and pause (FR-052)
@@ -277,9 +297,16 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   double _liftFor(AyahKey key, GlobalKey sheetKey) {
     final layout = ref.read(settingsProvider).value?.quranLayout ?? QuranLayout.mushaf;
     if (layout != QuranLayout.mushaf) return 0;
-    final page = _pages[_page.value]?.currentContext?.findRenderObject();
-    final bounds = page is RenderMushafPage ? page.washBounds(key) : null;
+    final context = _pages[_page.value]?.currentContext;
+    final page = context?.findRenderObject();
+    var bounds = page is RenderMushafPage ? page.washBounds(key) : null;
     if (bounds == null) return 0;
+
+    /// a page above 100% scrolls, the ayah comes into view first
+    if (Scrollable.maybeOf(context!)?.position case final scroll?) {
+      page!.showOnScreen(rect: bounds);
+      bounds = bounds.shift(Offset(0, -scroll.pixels));
+    }
     final sheet = sheetKey.currentContext?.size?.height ?? SizeManager.ayahSheet.r;
     return ayahLift(
       bottom: bounds.bottom,
@@ -373,25 +400,21 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
                       onAyah: (key) => _tapAyah(n, key),
                       onLongAyah: (key) => _longAyah(n, key),
                     ),
-                    QuranLayout.translation => TranslationView(
-                      n,
-                      onAyah: (key) => _tapAyah(n, key),
-                      onLongAyah: (key) => _longAyah(n, key),
-                    ),
 
                     /// the page fills the screen, its cells scroll up under it
-                    QuranLayout.both => LayoutBuilder(
+                    QuranLayout.translation => LayoutBuilder(
                       builder: (context, constraints) => TranslationView(
                         n,
                         onAyah: (key) => _tapAyah(n, key),
                         onLongAyah: (key) => _longAyah(n, key),
                         mushaf: ConstrainedBox(
-                          constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
+                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
                           child: _MushafPage(
                             n,
                             pageKey: _pages.putIfAbsent(n, GlobalKey.new),
                             onAyah: (key) => _tapAyah(n, key),
                             onLongAyah: (key) => _longAyah(n, key),
+                            scrolls: false,
                           ),
                         ),
                       ),
@@ -465,13 +488,14 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   }
 }
 
-/// the mushaf page with its ribbon
-class _MushafPage extends StatelessWidget {
+/// the mushaf page with its ribbon. above 100% the page is taller than the screen and scrolls
+class _MushafPage extends ConsumerWidget {
   const _MushafPage(
     this.page, {
     required this.pageKey,
     required this.onAyah,
     required this.onLongAyah,
+    this.scrolls = true,
   });
 
   final int page;
@@ -481,15 +505,27 @@ class _MushafPage extends StatelessWidget {
   final ValueChanged<AyahKey> onAyah;
   final ValueChanged<AyahKey> onLongAyah;
 
+  /// false in the translation list, which scrolls it already
+  final bool scrolls;
+
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        MushafPageView(page, key: pageKey, onAyah: onAyah, onLongAyah: onLongAyah),
-        PageRibbon(page),
-      ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reflow = ref.watch(
+      settingsProvider.select((settings) => (settings.value?.mushafSize ?? 0) > 0),
     );
+    Widget view = MushafPageView(page, key: pageKey, onAyah: onAyah, onLongAyah: onLongAyah);
+    if (reflow && scrolls) {
+      final child = view;
+      view = LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: child,
+          ),
+        ),
+      );
+    }
+    return Stack(fit: StackFit.passthrough, children: [view, PageRibbon(page)]);
   }
 }
 
