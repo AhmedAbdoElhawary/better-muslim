@@ -8,6 +8,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/sheet/location_choices.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/qibla/model/compass_source.dart';
@@ -167,7 +168,7 @@ void main() {
   }
 
   bool pulsing(WidgetTester tester) => find
-      .descendant(of: find.byType(AlignedPulse), matching: find.byType(Opacity))
+      .descendant(of: find.byType(AlignedPulse), matching: find.byType(CustomOpacity))
       .evaluate()
       .isNotEmpty;
 

@@ -2,6 +2,7 @@ import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -10,6 +11,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/prayer/data/qada_repository.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/qada.dart';
@@ -68,10 +70,13 @@ class QadaRow extends ConsumerWidget {
                         fontSize: FontSizeManager.prayerNameMinor,
                       ),
                       const RSizedBox.vertical(SpaceManager.rowLineGap),
-                      RegularText(
-                        StringsManager.qadaLeft,
-                        args: {'count': context.formatDigits('$left', digits)},
-                        color: ThemeEnum.text2,
+                      BmSwitcher(
+                        child: RegularText(
+                          StringsManager.qadaLeft,
+                          key: ValueKey(left),
+                          args: {'count': context.formatDigits('$left', digits)},
+                          color: ThemeEnum.text2,
+                        ),
                       ),
                     ],
                   ),
@@ -122,8 +127,9 @@ class _MadeOneUp extends StatelessWidget {
           constraints: BoxConstraints(minHeight: SizeManager.hit.r),
           child: Center(
             widthFactor: 1,
-            child: Opacity(
+            child: AnimatedOpacity(
               opacity: enabled ? 1 : BmOpacity.disabled,
+              duration: BmMotion.micro,
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: SizeManager.markChip.r),
                 child: DecoratedBox(

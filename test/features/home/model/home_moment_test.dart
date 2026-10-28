@@ -1,7 +1,6 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
-import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -131,28 +130,7 @@ void main() {
     });
   });
 
-  test('each period has its sky state, no period is the theme base', () {
-    expect(Period.values.map(skyState), [
-      BmSkyState.fajr,
-      BmSkyState.sunrise,
-      BmSkyState.dhuhr,
-      BmSkyState.asr,
-      BmSkyState.maghrib,
-      BmSkyState.isha,
-    ]);
-    expect(skyState(null), isNull);
-  });
-
-  test('stars only on the fajr, maghrib and isha skies, always on the theme base', () {
-    expect(BmSkyState.values.where(starsOn), [
-      BmSkyState.fajr,
-      BmSkyState.maghrib,
-      BmSkyState.isha,
-    ]);
-    expect(starsOn(null), isTrue);
-  });
-
-  group('sun share', () {
+  group('arc share', () {
     late TZDateTime sunrise;
     late TZDateTime maghrib;
     setUp(() {
@@ -160,49 +138,100 @@ void main() {
       maghrib = at(15, 17, 56);
     });
 
-    test('0 at sunrise, 1 at maghrib, rounded to 0.001', () {
-      expect(sunShare(sunrise, sunrise, maghrib), 0);
-      expect(sunShare(maghrib, sunrise, maghrib), 1);
-      expect(sunShare(at(15, 16, 32), sunrise, maghrib), .88);
+    test('0 at the start, 1 at the end, rounded to 0.001', () {
+      expect(arcShare(sunrise, sunrise, maghrib), 0);
+      expect(arcShare(maghrib, sunrise, maghrib), 1);
+      expect(arcShare(at(15, 16, 32), sunrise, maghrib), .88);
     });
 
-    test('null at night or without sunrise or maghrib', () {
-      expect(sunShare(at(15, 5, 0), sunrise, maghrib), isNull);
-      expect(sunShare(at(15, 21, 0), sunrise, maghrib), isNull);
-      expect(sunShare(at(15, 12, 0), null, maghrib), isNull);
+    test('null outside the arc or without an end', () {
+      expect(arcShare(at(15, 5, 0), sunrise, maghrib), isNull);
+      expect(arcShare(at(15, 21, 0), sunrise, maghrib), isNull);
+      expect(arcShare(at(15, 12, 0), null, maghrib), isNull);
     });
   });
 
-  group('arc labels', () {
-    test('sunrise and maghrib by day', () {
-      expect(arcLabels(at(15, 16, 32), times(14), times(15), times(16)), (
-        startKey: StringsManager.sunriseLabel,
-        start: at(15, 6, 15),
-        endKey: StringsManager.maghribLabel,
-        end: at(15, 17, 56),
-      ));
+  group('arc points', () {
+    List<String> names(ArcPoints points) => [for (final point in points.points) point.name];
+
+    test('by day sunrise, dhuhr, asr and maghrib, dhuhr near the top', () {
+      final arc = arcPoints(at(15, 16, 32), times(14), times(15), times(16))!;
+
+      expect(arc.kind, ArcKind.day);
+      expect(names(arc), [
+        StringsManager.sunriseLabel,
+        StringsManager.dhuhrLabel,
+        StringsManager.asrLabel,
+        StringsManager.maghribLabel,
+      ]);
+      expect(arc.points.first.share, 0);
+      expect(arc.points[1].share, closeTo(.5, .01));
+      expect(arc.points.last.share, 1);
+      expect(arcShare(at(15, 16, 32), arc.start, arc.end), greaterThan(arc.points[2].share));
     });
 
-    test('after maghrib, tonight\'s isha and tomorrow\'s fajr', () {
-      expect(arcLabels(at(15, 21, 0), times(14), times(15), times(16)), (
-        startKey: StringsManager.ishaLabel,
-        start: at(15, 19, 26),
-        endKey: StringsManager.fajrLabel,
-        end: at(16, 4, 58),
-      ));
+    test('at 23:00 the night to tomorrow\'s sunrise, the marker between isha and last third', () {
+      final now = at(15, 23, 0);
+      final arc = arcPoints(now, times(14), times(15), times(16))!;
+
+      expect(arc.kind, ArcKind.night);
+      expect(names(arc), [
+        StringsManager.maghribLabel,
+        StringsManager.ishaLabel,
+        StringsManager.lastThirdLabel,
+        StringsManager.fajrLabel,
+        StringsManager.sunriseLabel,
+      ]);
+      expect(arc.start, at(15, 17, 56));
+      expect(arc.end, at(16, 6, 15));
+      expect(arc.points[2].time, at(16, 4, 58).subtract(const Duration(minutes: 662) ~/ 3));
+      final shares = [for (final point in arc.points) point.share];
+      expect(shares, [...shares]..sort());
+      final marker = arcShare(now, arc.start, arc.end)!;
+      expect(marker, greaterThan(arc.points[1].share));
+      expect(marker, lessThan(arc.points[2].share));
     });
 
-    test('after midnight, the prayer day\'s isha and today\'s fajr', () {
-      expect(arcLabels(at(16, 1, 0), times(15), times(16), times(17)), (
-        startKey: StringsManager.ishaLabel,
-        start: at(15, 19, 26),
-        endKey: StringsManager.fajrLabel,
-        end: at(16, 4, 58),
-      ));
+    test('at 05:00 the night is yesterday\'s maghrib to today\'s sunrise', () {
+      final arc = arcPoints(at(16, 5, 0), times(15), times(16), times(17))!;
+
+      expect(arc.kind, ArcKind.night);
+      expect(arc.start, at(15, 17, 56));
+      expect(arc.end, at(16, 6, 15));
+      expect(arc.points[1].time, at(15, 19, 26));
+      expect(arc.points[3].time, at(16, 4, 58));
     });
 
-    test('a time that is null has no label', () {
-      expect(arcLabels(at(15, 21, 0), times(14), times(15, polar: true), times(16)).start, isNull);
+    test('a null time drops its point, a null end drops the arc', () {
+      final polar = DayTimes(
+        date: DateTime(2026, 10, 15),
+        fajr: at(15, 4, 58),
+        sunrise: at(15, 6, 15),
+        dhuhr: at(15, 12, 5),
+        asr: null,
+        maghrib: at(15, 17, 56),
+        isha: null,
+        method: PrayerMethod.ummAlQura,
+        asrMethod: AsrMethod.standard,
+      );
+
+      expect(names(arcPoints(at(15, 16, 32), times(14), polar, times(16))!), [
+        StringsManager.sunriseLabel,
+        StringsManager.dhuhrLabel,
+        StringsManager.maghribLabel,
+      ]);
+      expect(
+        names(arcPoints(at(15, 21, 0), times(14), polar, times(16))!),
+        isNot(contains(StringsManager.ishaLabel)),
+      );
+      expect(arcPoints(at(15, 21, 0), times(14), times(15), null), isNull);
+    });
+
+    test('the same times are equal, so the provider only notifies at sunrise and maghrib', () {
+      expect(
+        arcPoints(at(15, 16, 32), times(14), times(15), times(16)),
+        arcPoints(at(15, 16, 33), times(14), times(15), times(16)),
+      );
     });
   });
 }

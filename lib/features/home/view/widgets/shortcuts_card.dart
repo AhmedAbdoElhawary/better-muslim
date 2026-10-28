@@ -1,12 +1,13 @@
 import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/quran/last_read.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/shortcut_row.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
-import 'package:better_muslim/features/home/model/home_samples.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,10 @@ class ShortcutsCard extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final (ayah, page) = ref.watch(
+      lastReadProvider.select((lastRead) => (lastRead.ayah, lastRead.page)),
+    );
+    final surah = ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     String number(int value) => context.formatDigits('$value', digits);
     return SurfaceCard(
@@ -30,12 +35,12 @@ class ShortcutsCard extends ConsumerWidget {
             title: StringsManager.continueReading,
             subtitle: StringsManager.continueReadingSub,
             args: {
-              'surah': isArabic ? HomeSamples.readingSurahAr : HomeSamples.readingSurah,
-              'ayah': number(HomeSamples.readingAyah),
-              'total': number(HomeSamples.readingAyahs),
+              'surah': surah == null ? '' : (isArabic ? surah.ar : surah.en),
+              'ayah': number(ayah.ayah),
+              'total': number(surah?.ayahs ?? 0),
             },
             divider: !isArabic,
-            onTap: () => context.go(Routes.quran),
+            onTap: () => context.push(Routes.quranPage(page)),
           ),
           if (!isArabic) const _AzkarRow(),
         ],

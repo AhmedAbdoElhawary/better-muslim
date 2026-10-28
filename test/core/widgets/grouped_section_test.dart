@@ -32,9 +32,9 @@ void main() {
   testWidgets('no label, only the card', (tester) async {
     await pumpCoreWidget(
       tester,
-      const GroupedSection(children: [NavRow(title: StringsManager.dateAdjustment)]),
+      const GroupedSection(children: [NavRow(title: StringsManager.hijriDateAdjustment)]),
     );
     expect(find.byType(Divider), findsNothing);
-    expect(find.text('Date adjustment'), findsOneWidget);
+    expect(find.text('Hijri date adjustment'), findsOneWidget);
   });
 }

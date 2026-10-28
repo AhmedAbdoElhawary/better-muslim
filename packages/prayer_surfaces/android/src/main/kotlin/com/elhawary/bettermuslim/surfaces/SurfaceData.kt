@@ -1,0 +1,130 @@
+package com.elhawary.bettermuslim.surfaces
+
+import android.content.Context
+import org.json.JSONObject
+import java.io.File
+import java.io.IOException
+import kotlin.math.roundToLong
+
+// surfaces.json as the app writes it (contracts/surface-data.md). every text is final, only the
+// countdown numbers and the shares are worked out here, as the ios extension does
+class SurfaceData(private val json: JSONObject) {
+    val version get() = json.optInt("version")
+    val place get() = json.optBoolean("place")
+    val isArabic get() = json.optString("language") == "ar"
+    val eastern get() = json.optBoolean("eastern")
+    val countdown get() = json.optBoolean("countdown")
+    val until get() = json.optLong("until")
+    val texts: JSONObject get() = json.getJSONObject("texts")
+    val entries: List<JSONObject> = json.optJSONArray("entries").let { array ->
+        List(array?.length() ?: 0) { array!!.getJSONObject(it) }
+    }
+    val countdowns: List<JSONObject> = json.optJSONArray("countdowns").let { array ->
+        List(array?.length() ?: 0) { array!!.getJSONObject(it) }
+    }
+
+    fun text(key: String): String = texts.optString(key)
+
+    fun entryAt(now: Long): JSONObject? = entries.lastOrNull { it.getLong("from") <= now }
+
+    fun minutesLeft(entry: JSONObject, now: Long): Long =
+        Math.floorDiv(entry.getLong("at") - now, MINUTE).coerceAtLeast(0)
+
+    // "1:23", the countdowns' h:mm
+    fun hm(entry: JSONObject, now: Long): String {
+        val minutes = minutesLeft(entry, now)
+        return digits("${minutes / 60}:${(minutes % 60).toString().padStart(2, '0')}")
+    }
+
+    fun inDuration(entry: JSONObject, now: Long): String = text("inDuration").replace("{duration}", hm(entry, now))
+
+    // home's bar share, null without the period's start
+    fun barShare(entry: JSONObject, now: Long): Float? {
+        if (entry.isNull("barFrom")) return null
+        val from = entry.getLong("barFrom")
+        val at = entry.getLong("at")
+        if (at <= from) return null
+        return ((now - from).toFloat() / (at - from)).coerceIn(0f, 1f)
+    }
+
+    // home's sun share, only between sunrise and maghrib
+    fun sunShare(entry: JSONObject, now: Long): Float? {
+        if (entry.isNull("sunrise") || entry.isNull("maghrib")) return null
+        val sunrise = entry.getLong("sunrise")
+        val maghrib = entry.getLong("maghrib")
+        if (maghrib <= sunrise || now < sunrise || now > maghrib) return null
+        return ((now - sunrise).toDouble() / (maghrib - sunrise) * 1000).roundToLong() / 1000f
+    }
+
+    // the prayer, the time left, its time and the place, as one line for talkback
+    fun spoken(entry: JSONObject, now: Long): String {
+        val minutes = minutesLeft(entry, now)
+        val left = text("timeLeft")
+            .replace("{hours}", digits("${minutes / 60}"))
+            .replace("{minutes}", digits("${minutes % 60}"))
+            .replace("{prayer}", entry.getString("name"))
+        return "$left, ${entry.getString("timeCity")}"
+    }
+
+    // the next moment anything shown changes: the h:mm flip, the next entry or until
+    fun nextRedraw(now: Long): Long {
+        val moments = mutableListOf(until)
+        entryAt(now)?.let { moments += it.getLong("at") - minutesLeft(it, now) * MINUTE }
+        entries.firstOrNull { it.getLong("from") > now }?.let { moments += it.getLong("from") }
+        return moments.filter { it > now }.minOrNull() ?: until
+    }
+
+    // the countdown window covering now, at most one
+    fun windowAt(now: Long): JSONObject? = countdowns.firstOrNull { it.getLong("start") <= now && now < it.getLong("end") }
+
+    fun digits(text: String): String {
+        if (!eastern) return text
+        return text.map { if (it in '0'..'9') '٠' + (it - '0') else it }.joinToString("")
+    }
+
+    companion object {
+        private const val NAME = "surfaces.json"
+        private const val MINUTE = 60_000L
+
+        // filesDir, which allowBackup and data_extraction_rules keep out of every backup
+        private fun file(context: Context) = File(context.filesDir, NAME)
+
+        fun load(context: Context): SurfaceData? {
+            val file = file(context)
+            if (!file.exists()) return null
+            return runCatching { SurfaceData(JSONObject(file.readText())) }.getOrNull()
+        }
+
+        // false when the file already holds the same, so no widget redraws for nothing (R5)
+        fun update(context: Context, json: String, force: Boolean): Boolean {
+            val file = file(context)
+            if (!force && file.exists() && file.readText() == json) return false
+            val temp = File(context.filesDir, "$NAME.tmp")
+            temp.writeText(json)
+            // a rename is atomic, a reader never sees half a file
+            if (!temp.renameTo(file)) throw IOException("rename")
+            return true
+        }
+    }
+}
+
+// what a surface shows at a moment. a null message means no file yet, the string resource then
+sealed interface SurfaceState {
+    data class NoPlace(val message: String?) : SurfaceState
+
+    data class Outdated(val message: String?) : SurfaceState
+
+    data class Ready(val data: SurfaceData, val entry: JSONObject) : SurfaceState
+
+    companion object {
+        fun of(data: SurfaceData?, now: Long): SurfaceState {
+            if (data == null) return NoPlace(null)
+            // an app newer than this code may write a shape it can't read
+            if (data.version > 1) return Outdated(null)
+            if (!data.place) return NoPlace(data.text("noPlace"))
+            val entry = data.entryAt(now)
+            if (now >= data.until || entry == null) return Outdated(data.text("outdated"))
+            return Ready(data, entry)
+        }
+    }
+}

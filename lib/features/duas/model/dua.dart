@@ -26,6 +26,7 @@ class Dua {
     required this.source,
     this.grading,
     this.audio,
+    this.quran = false,
   });
 
   factory Dua.fromJson(Map<String, dynamic> json) => Dua(
@@ -36,6 +37,7 @@ class Dua {
     source: bilingualFrom(json['source']),
     grading: json['grading'] == null ? null : bilingualFrom(json['grading']),
     audio: json['audio'] as String?,
+    quran: json['quran'] as bool? ?? false,
   );
 
   final String id;
@@ -47,6 +49,9 @@ class Dua {
 
   /// an asset path, null = listen does nothing
   final String? audio;
+
+  /// a verse keeps the quran font
+  final bool quran;
 
   /// the 4.14 sample has no grading, so its source only
   String sourceIn(String languageCode) => sourceLine(source, grading, languageCode);

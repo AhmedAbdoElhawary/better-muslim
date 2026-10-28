@@ -5,9 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final calls = <MethodCall>[];
+  Object? mailAnswer = true;
+  Object? deviceAnswer = {'model': 'iPhone15,2', 'os': 'iOS 26.1'};
 
   setUp(() {
     calls.clear();
+    mailAnswer = true;
+    deviceAnswer = {'model': 'iPhone15,2', 'os': 'iOS 26.1'};
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('better_muslim/system'),
       (call) async {
@@ -15,6 +19,8 @@ void main() {
         return switch (call.method) {
           'openUrl' => true,
           'version' => '1.0.0 (12)',
+          'mail' => mailAnswer,
+          'device' => deviceAnswer,
           _ => null,
         };
       },
@@ -39,5 +45,22 @@ void main() {
 
   test('reads the version and build', () async {
     expect(await SystemChannel.version(), '1.0.0 (12)');
+  });
+
+  test('mail sends the draft and answers what the phone says', () async {
+    expect(await SystemChannel.mail(to: 'me@example.com', subject: 'Hi', body: 'سلام'), isTrue);
+    expect(calls.single.method, 'mail');
+    expect(calls.single.arguments, {'to': 'me@example.com', 'subject': 'Hi', 'body': 'سلام'});
+
+    mailAnswer = false;
+    expect(await SystemChannel.mail(to: 'a', subject: 'b', body: 'c'), isFalse);
+    mailAnswer = null;
+    expect(await SystemChannel.mail(to: 'a', subject: 'b', body: 'c'), isFalse);
+  });
+
+  test('device reads the model and os, empty when the phone answers nothing', () async {
+    expect(await SystemChannel.device(), (model: 'iPhone15,2', os: 'iOS 26.1'));
+    deviceAnswer = null;
+    expect(await SystemChannel.device(), (model: '', os: ''));
   });
 }

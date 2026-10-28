@@ -1,3 +1,5 @@
+import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/hijri/hijri_date.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +16,10 @@ extension TimeFormatExtension on BuildContext {
 
   String formatDigits(String text, Digits digits) =>
       formatDigitsIn(text, language: Localizations.localeOf(this).languageCode, digits: digits);
+
+  /// "4 Jumada I 1448", the calendar's and the adjustment sheet's
+  String hijriFull(HijriDate date, Digits digits) =>
+      formatDigits('${date.day} ${tr(date.monthKey)} ${date.year}', digits);
 }
 
 /// the same as the context extension, for notifications built with no context
@@ -38,4 +44,16 @@ String formatDigitsIn(String text, {required String language, required Digits di
     RegExp('[0-9]'),
     (match) => String.fromCharCode(0x0660 + int.parse(match[0]!)),
   );
+}
+
+/// "4 Jumada I 1448", the month already translated. digits are left to the caller
+String hijriLineIn(HijriDate hijri, String month, {bool year = true}) =>
+    year ? '${hijri.day} $month ${hijri.year}' : '${hijri.day} $month';
+
+/// english "Thu 15 Oct · {hijri}", arabic the full weekday and the hijri line (4.16)
+String dateLineIn(DateTime date, String hijriLine, String language) {
+  final day = language == 'ar'
+      ? DateFormat.EEEE(language).format(date)
+      : DateFormat('EEE d MMM', language).format(date);
+  return '$day · $hijriLine';
 }

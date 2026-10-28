@@ -47,14 +47,16 @@ void main() {
   }
 
   /// the sheet's list builds only what is on screen
-  Future<void> reveal(WidgetTester tester, Finder finder, {double delta = 100}) =>
-      tester.scrollUntilVisible(
-        finder,
-        delta,
-        scrollable: find
-            .ancestor(of: find.byType(PickerRow).first, matching: find.byType(Scrollable))
-            .first,
-      );
+  Future<void> reveal(WidgetTester tester, Finder finder, {double delta = 100}) async {
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      finder,
+      delta,
+      scrollable: find
+          .ancestor(of: find.byType(PickerRow).first, matching: find.byType(Scrollable))
+          .first,
+    );
+  }
 
   Future<void> pick(WidgetTester tester, Finder finder, {double delta = 100}) async {
     await reveal(tester, finder, delta: delta);

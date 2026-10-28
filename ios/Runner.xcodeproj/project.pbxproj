@@ -7,18 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06CA80D31B78662780C31C1F /* LargeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349DD1AB3A617251FD502E9E /* LargeWidget.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		1B2ED2F26AC99DD01E096C4C /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FE643C14340F42E93C7655 /* Timeline.swift */; };
+		2EF1627B200B622DFFC9A2F2 /* SchibstedGrotesk-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ADE7BA1497266BA8CA474069 /* SchibstedGrotesk-Variable.ttf */; };
+		32511CF8BE76F88B696F00F3 /* PrayerCountdownAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12901E3958DB8687458F74A /* PrayerCountdownAttributes.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
+		3AADB63F662A4151E44FC9D3 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D8A96F0AEF5D9AF75C745B /* MessageView.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		41D0A80656B70B4FC3292F78 /* Marcellus-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F517E02DA630F5781530AFD5 /* Marcellus-Regular.ttf */; };
+		557B94472B0DB45F9C34FE1B /* SmallWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9000099EE1AE8BF051E3D9F /* SmallWidget.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		812CE70129694D5E12D1C71B /* NotoSansArabic-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0D7B6D4DA5D829737559BC1C /* NotoSansArabic-Variable.ttf */; };
+		843F1C4D70DC2B51EE7E514E /* MediumWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0081ABBE324E825C3F0A61 /* MediumWidget.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A31C7299B3B2C8C89E4C399F /* Accessories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDE50ADAE2E42B4996F6927 /* Accessories.swift */; };
+		A60E9D455874E32D45D5577A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA79A52321116EB1F692ECEE /* Assets.xcassets */; };
+		ABA391B2BBBC4B2E25159014 /* PrayerWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8823D0B614CDF3E210F5D238 /* PrayerWidgetsBundle.swift */; };
 		B1A000012F00000000000001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B1A000022F00000000000001 /* InfoPlist.strings */; };
+		B55D3D1B67CD284373F3C53B /* CountdownActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C09B9A7459A41FF743AEEB7 /* CountdownActivity.swift */; };
+		B5A0ECA132D16D588AE1F5A8 /* ReemKufi-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0037BAE9848733D3511C594F /* ReemKufi-Variable.ttf */; };
+		B946F3A339671A48A0AF3E38 /* SurfaceIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E60C5E0BBBA12032C0245B7F /* SurfaceIcons.swift */; };
 		CF9FC525E985492713D23A1E /* adhan_makkah_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5F45266AC54B882DEF248600 /* adhan_makkah_clip.caf */; };
+		D9FE579ECDF0781B59F056B2 /* silence.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0BD67DACB14DF9B7FD3FBC96 /* silence.caf */; };
+		DB9B76081F8AD02E2E377E57 /* PrayerWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F92EAFE292C7BA865842C9E1 /* PrayerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DDCD013CF7C62693EB2C794C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B5BFDEB01BBC80F6FF090226 /* Localizable.strings */; };
+		E8FF188D4B9C733FC7519D74 /* SurfaceFonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF784FE3092E6757742FC06 /* SurfaceFonts.swift */; };
 		F702FD8337D3DBD10BEC10C1 /* adhan_makkah_fajr_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2B24F090FB64DD309ED84CA7 /* adhan_makkah_fajr_clip.caf */; };
+		F879F260AC7A62538BD9AA49 /* SurfaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54CFDAE9CEA55BA10713CC9E /* SurfaceData.swift */; };
+		FACC4BD99E02D9B3F6AF27B2 /* SurfaceColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA7F813360CD304792CF628 /* SurfaceColors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +49,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		C36A3F2BA6FDEB68A9B120E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13F277A5F6737ED9C01CEAB2;
+			remoteInfo = PrayerWidgets;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -42,22 +70,48 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B7F59FE547629D1F5DFF2605 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DB9B76081F8AD02E2E377E57 /* PrayerWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0037BAE9848733D3511C594F /* ReemKufi-Variable.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "ReemKufi-Variable.ttf"; sourceTree = "<group>"; };
+		0BD67DACB14DF9B7FD3FBC96 /* silence.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = silence.caf; sourceTree = "<group>"; };
+		0CF784FE3092E6757742FC06 /* SurfaceFonts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurfaceFonts.swift; sourceTree = "<group>"; };
+		0D7B6D4DA5D829737559BC1C /* NotoSansArabic-Variable.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "NotoSansArabic-Variable.ttf"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		2B24F090FB64DD309ED84CA7 /* adhan_makkah_fajr_clip.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = adhan_makkah_fajr_clip.caf; sourceTree = "<group>"; };
+		2C09B9A7459A41FF743AEEB7 /* CountdownActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CountdownActivity.swift; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		349DD1AB3A617251FD502E9E /* LargeWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LargeWidget.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		4B0081ABBE324E825C3F0A61 /* MediumWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediumWidget.swift; sourceTree = "<group>"; };
+		54CFDAE9CEA55BA10713CC9E /* SurfaceData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurfaceData.swift; sourceTree = "<group>"; };
 		5F45266AC54B882DEF248600 /* adhan_makkah_clip.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = adhan_makkah_clip.caf; sourceTree = "<group>"; };
+		63273EF50DA8AB06B9A9DD26 /* ar */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		81FE643C14340F42E93C7655 /* Timeline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
+		8823D0B614CDF3E210F5D238 /* PrayerWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrayerWidgetsBundle.swift; sourceTree = "<group>"; };
+		8BDE50ADAE2E42B4996F6927 /* Accessories.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Accessories.swift; sourceTree = "<group>"; };
 		8E68AE301413B121C34FCE98 /* Runner.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		8FA8B27284C4B5000036E93E /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		94D8A96F0AEF5D9AF75C745B /* MessageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
+		95822713A55CC946CFCCA2BC /* PrayerWidgets.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = PrayerWidgets.entitlements; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,11 +119,27 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A9000099EE1AE8BF051E3D9F /* SmallWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SmallWidget.swift; sourceTree = "<group>"; };
+		ADE7BA1497266BA8CA474069 /* SchibstedGrotesk-Variable.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "SchibstedGrotesk-Variable.ttf"; sourceTree = "<group>"; };
 		B1A000032F00000000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B1A000042F00000000000001 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C12901E3958DB8687458F74A /* PrayerCountdownAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrayerCountdownAttributes.swift; sourceTree = "<group>"; };
+		E60C5E0BBBA12032C0245B7F /* SurfaceIcons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurfaceIcons.swift; sourceTree = "<group>"; };
+		E7DCE961D22B56B11E8D30F6 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		EA79A52321116EB1F692ECEE /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F517E02DA630F5781530AFD5 /* Marcellus-Regular.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Marcellus-Regular.ttf"; sourceTree = "<group>"; };
+		F92EAFE292C7BA865842C9E1 /* PrayerWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrayerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDA7F813360CD304792CF628 /* SurfaceColors.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurfaceColors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		064E6AD243B1D235D1B39789 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -89,14 +159,53 @@
 			path = RunnerTests;
 			sourceTree = "<group>";
 		};
+		417A0588D1446896C5E8E2F5 /* PrayerWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				8823D0B614CDF3E210F5D238 /* PrayerWidgetsBundle.swift */,
+				54CFDAE9CEA55BA10713CC9E /* SurfaceData.swift */,
+				81FE643C14340F42E93C7655 /* Timeline.swift */,
+				A9000099EE1AE8BF051E3D9F /* SmallWidget.swift */,
+				4B0081ABBE324E825C3F0A61 /* MediumWidget.swift */,
+				349DD1AB3A617251FD502E9E /* LargeWidget.swift */,
+				8BDE50ADAE2E42B4996F6927 /* Accessories.swift */,
+				94D8A96F0AEF5D9AF75C745B /* MessageView.swift */,
+				2C09B9A7459A41FF743AEEB7 /* CountdownActivity.swift */,
+				C12901E3958DB8687458F74A /* PrayerCountdownAttributes.swift */,
+				FDA7F813360CD304792CF628 /* SurfaceColors.swift */,
+				0CF784FE3092E6757742FC06 /* SurfaceFonts.swift */,
+				EA79A52321116EB1F692ECEE /* Assets.xcassets */,
+				8FA8B27284C4B5000036E93E /* Info.plist */,
+				95822713A55CC946CFCCA2BC /* PrayerWidgets.entitlements */,
+				B5BFDEB01BBC80F6FF090226 /* Localizable.strings */,
+				935C11B7680269E6D5101829 /* Fonts */,
+				E60C5E0BBBA12032C0245B7F /* SurfaceIcons.swift */,
+			);
+			name = PrayerWidgets;
+			path = PrayerWidgets;
+			sourceTree = "<group>";
+		};
 		933D3050E17D2C4729A62FFA /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
 				5F45266AC54B882DEF248600 /* adhan_makkah_clip.caf */,
 				2B24F090FB64DD309ED84CA7 /* adhan_makkah_fajr_clip.caf */,
+				0BD67DACB14DF9B7FD3FBC96 /* silence.caf */,
 			);
 			name = Sounds;
 			path = Sounds;
+			sourceTree = "<group>";
+		};
+		935C11B7680269E6D5101829 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				ADE7BA1497266BA8CA474069 /* SchibstedGrotesk-Variable.ttf */,
+				F517E02DA630F5781530AFD5 /* Marcellus-Regular.ttf */,
+				0D7B6D4DA5D829737559BC1C /* NotoSansArabic-Variable.ttf */,
+				0037BAE9848733D3511C594F /* ReemKufi-Variable.ttf */,
+			);
+			name = Fonts;
+			path = ../../assets/fonts;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -118,6 +227,7 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
+				417A0588D1446896C5E8E2F5 /* PrayerWidgets */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,6 +236,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				F92EAFE292C7BA865842C9E1 /* PrayerWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -152,6 +263,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		13F277A5F6737ED9C01CEAB2 /* PrayerWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1B0D31EA51FA34CF1BA714E /* Build configuration list for PBXNativeTarget "PrayerWidgets" */;
+			buildPhases = (
+				D11A5601E0BDFAEE383A5706 /* Sources */,
+				064E6AD243B1D235D1B39789 /* Frameworks */,
+				0696C9171F48C9D958B1163A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PrayerWidgets;
+			productName = PrayerWidgets;
+			productReference = F92EAFE292C7BA865842C9E1 /* PrayerWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		331C8080294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
@@ -178,11 +306,13 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				B7F59FE547629D1F5DFF2605 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1967A74D990EB3CB07CAD554 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -223,7 +353,7 @@
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
 			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
@@ -231,11 +361,25 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				13F277A5F6737ED9C01CEAB2 /* PrayerWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0696C9171F48C9D958B1163A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A60E9D455874E32D45D5577A /* Assets.xcassets in Resources */,
+				DDCD013CF7C62693EB2C794C /* Localizable.strings in Resources */,
+				2EF1627B200B622DFFC9A2F2 /* SchibstedGrotesk-Variable.ttf in Resources */,
+				41D0A80656B70B4FC3292F78 /* Marcellus-Regular.ttf in Resources */,
+				812CE70129694D5E12D1C71B /* NotoSansArabic-Variable.ttf in Resources */,
+				B5A0ECA132D16D588AE1F5A8 /* ReemKufi-Variable.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C807F294A63A400263BE5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -254,6 +398,7 @@
 				B1A000012F00000000000001 /* InfoPlist.strings in Resources */,
 				CF9FC525E985492713D23A1E /* adhan_makkah_clip.caf in Resources */,
 				F702FD8337D3DBD10BEC10C1 /* adhan_makkah_fajr_clip.caf in Resources */,
+				D9FE579ECDF0781B59F056B2 /* silence.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,9 +457,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D11A5601E0BDFAEE383A5706 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ABA391B2BBBC4B2E25159014 /* PrayerWidgetsBundle.swift in Sources */,
+				F879F260AC7A62538BD9AA49 /* SurfaceData.swift in Sources */,
+				1B2ED2F26AC99DD01E096C4C /* Timeline.swift in Sources */,
+				557B94472B0DB45F9C34FE1B /* SmallWidget.swift in Sources */,
+				843F1C4D70DC2B51EE7E514E /* MediumWidget.swift in Sources */,
+				06CA80D31B78662780C31C1F /* LargeWidget.swift in Sources */,
+				A31C7299B3B2C8C89E4C399F /* Accessories.swift in Sources */,
+				3AADB63F662A4151E44FC9D3 /* MessageView.swift in Sources */,
+				B55D3D1B67CD284373F3C53B /* CountdownActivity.swift in Sources */,
+				32511CF8BE76F88B696F00F3 /* PrayerCountdownAttributes.swift in Sources */,
+				FACC4BD99E02D9B3F6AF27B2 /* SurfaceColors.swift in Sources */,
+				E8FF188D4B9C733FC7519D74 /* SurfaceFonts.swift in Sources */,
+				B946F3A339671A48A0AF3E38 /* SurfaceIcons.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1967A74D990EB3CB07CAD554 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = PrayerWidgets;
+			target = 13F277A5F6737ED9C01CEAB2 /* PrayerWidgets */;
+			targetProxy = C36A3F2BA6FDEB68A9B120E7 /* PBXContainerItemProxy */;
+		};
 		331C8086294A63A400263BE5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
@@ -348,6 +519,15 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
+		B5BFDEB01BBC80F6FF090226 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E7DCE961D22B56B11E8D30F6 /* en */,
+				63273EF50DA8AB06B9A9DD26 /* ar */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -356,6 +536,7 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -379,6 +560,7 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim Dev";
+				APP_GROUP = group.com.elhawary.bettermuslim.dev;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -455,6 +637,7 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -470,6 +653,35 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Profile;
+		};
+		27465209D6048B03AD95B256 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Profile;
 		};
@@ -523,6 +735,35 @@
 				SUPPORTED_PLATFORMS = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+			};
+			name = "Profile-dev";
+		};
+		2B414BA18CCAADD03C4522E3 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim Dev";
+				APP_GROUP = group.com.elhawary.bettermuslim.dev;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.dev.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = "Profile-dev";
 		};
@@ -681,11 +922,41 @@
 			};
 			name = "Release-production";
 		};
+		4A9F330E7703B16AA3509915 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		4BD635348DDEEB3AFDFF9E18 /* Release-staging */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim Stag";
+				APP_GROUP = group.com.elhawary.bettermuslim.staging;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -726,6 +997,7 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -749,6 +1021,7 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -773,6 +1046,7 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim Stag";
+				APP_GROUP = group.com.elhawary.bettermuslim.staging;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -790,6 +1064,63 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = "Profile-staging";
+		};
+		5E598FFB286BC85B4F749458 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		65710C9A5F0A171912FB7813 /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim Dev";
+				APP_GROUP = group.com.elhawary.bettermuslim.dev;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.dev.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Release-dev";
 		};
 		6CAF7FCA711ADF4BAFD3D717 /* Debug-dev */ = {
 			isa = XCBuildConfiguration;
@@ -849,11 +1180,41 @@
 			};
 			name = "Debug-dev";
 		};
+		727AAE61825D89D5E77BCA1B /* Release-production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Release-production";
+		};
 		78725F386793A1426B0BC56E /* Profile-dev */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim Dev";
+				APP_GROUP = group.com.elhawary.bettermuslim.dev;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -935,6 +1296,7 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim Stag";
+				APP_GROUP = group.com.elhawary.bettermuslim.staging;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -953,6 +1315,35 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = "Debug-staging";
+		};
+		8A38C740C91A8C01601B2DD6 /* Profile-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim Stag";
+				APP_GROUP = group.com.elhawary.bettermuslim.staging;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.staging.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Profile-staging";
 		};
 		8F097C86EBB71338DED0ECA0 /* Release-dev */ = {
 			isa = XCBuildConfiguration;
@@ -1038,6 +1429,34 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
 			};
 			name = "Profile-production";
+		};
+		9404D934F0837F5DD2AE89AC /* Debug-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim Stag";
+				APP_GROUP = group.com.elhawary.bettermuslim.staging;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.staging.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Debug-staging";
 		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1157,6 +1576,7 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -1181,6 +1601,7 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -1199,11 +1620,41 @@
 			};
 			name = Release;
 		};
+		A214B9F6F69ED6B950D82B5E /* Profile-production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Profile-production";
+		};
 		AA457CB97B257C743EC7808D /* Debug-dev */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "Better Muslim Dev";
+				APP_GROUP = group.com.elhawary.bettermuslim.dev;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -1223,6 +1674,34 @@
 			};
 			name = "Debug-dev";
 		};
+		B546065365A3A6A0F127C2FC /* Debug-production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim";
+				APP_GROUP = group.com.elhawary.bettermuslim;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Debug-production";
+		};
 		B77FBDF84844E7CFA08B1C2A /* Release-production */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1237,6 +1716,35 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
 			};
 			name = "Release-production";
+		};
+		BD7030EC012FAC1FA375C9EC /* Release-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim Stag";
+				APP_GROUP = group.com.elhawary.bettermuslim.staging;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.staging.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Release-staging";
 		};
 		C3B625F090FD09C2C8C4D127 /* Debug-production */ = {
 			isa = XCBuildConfiguration;
@@ -1483,6 +1991,34 @@
 			};
 			name = "Release-dev";
 		};
+		FB42F32E50BCA9DE76B779A3 /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Better Muslim Dev";
+				APP_GROUP = group.com.elhawary.bettermuslim.dev;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgets/PrayerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.elhawary.bettermuslim.dev.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Debug-dev";
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1543,10 +2079,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		E1B0D31EA51FA34CF1BA714E /* Build configuration list for PBXNativeTarget "PrayerWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5E598FFB286BC85B4F749458 /* Debug */,
+				4A9F330E7703B16AA3509915 /* Release */,
+				27465209D6048B03AD95B256 /* Profile */,
+				FB42F32E50BCA9DE76B779A3 /* Debug-dev */,
+				9404D934F0837F5DD2AE89AC /* Debug-staging */,
+				B546065365A3A6A0F127C2FC /* Debug-production */,
+				65710C9A5F0A171912FB7813 /* Release-dev */,
+				BD7030EC012FAC1FA375C9EC /* Release-staging */,
+				727AAE61825D89D5E77BCA1B /* Release-production */,
+				2B414BA18CCAADD03C4522E3 /* Profile-dev */,
+				8A38C740C91A8C01601B2DD6 /* Profile-staging */,
+				A214B9F6F69ED6B950D82B5E /* Profile-production */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};

@@ -48,7 +48,7 @@ class AlertTexts {
   /// the nudges' count and minutes come from the sets
   final AzkarContent? azkar;
 
-  String get city => (language == 'ar' ? location.placeNameAr : null) ?? location.placeName ?? '';
+  String get city => location.nameIn(language);
 
   String titleOf(Alert alert) => switch (alert.kind) {
     AlertKind.adhan => l10n.tr(StringsManager.notifAdhanTitle, {

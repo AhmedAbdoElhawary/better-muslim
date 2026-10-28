@@ -1,62 +1,72 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/features/azkar/view_model/tasbih_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// MOTION 11: one bead step per tap on a spring, a tap during the spring retargets it from where
-/// it is. never mirrored in arabic
-class BeadStrip extends StatefulWidget {
-  const BeadStrip({required this.taps, super.key});
+/// the markers after subhanallah's and alhamdulillah's 33, then the head bead (FR-030)
+const _markers = {33, 67};
+const _head = 101;
 
-  /// taps since the page opened, each new one is a step
-  final int taps;
+/// MOTION 11 on one finite string: the bead in focus slides to its place on a spring, a new place
+/// during the spring retargets it from where it is. never mirrored in arabic
+class BeadStrip extends ConsumerStatefulWidget {
+  const BeadStrip({super.key});
 
   @override
-  State<BeadStrip> createState() => _BeadStripState();
+  ConsumerState<BeadStrip> createState() => _BeadStripState();
 }
 
-class _BeadStripState extends State<BeadStrip> with SingleTickerProviderStateMixin {
-  /// the strip's offset in design points, the beads repeat every step so it never runs out
-  late final _offset = AnimationController.unbounded(vsync: this);
+class _BeadStripState extends ConsumerState<BeadStrip> with SingleTickerProviderStateMixin {
+  /// the bead in focus, between beads while it moves
+  late final _focus = AnimationController.unbounded(
+    vsync: this,
+    value: (ref.read(tasbihControllerProvider)?.position ?? -1).toDouble(),
+  );
 
-  /// a quarter point, or a third of one a frame, can't be seen. the default keeps it going past 400 ms
-  static const _rest = Tolerance(distance: .25, velocity: 20);
-  double _target = 0;
+  /// a hundredth of a bead, or a third of a point a frame, can't be seen. the default keeps it
+  /// going past 400 ms
+  static const _rest = Tolerance(distance: .01, velocity: .5);
 
-  @override
-  void didUpdateWidget(BeadStrip old) {
-    super.didUpdateWidget(old);
-    if (widget.taps <= old.taps || MediaQuery.disableAnimationsOf(context)) return;
-    const step = BmMotion.beadStep;
-    final velocity = _offset.velocity;
-    var value = _offset.value;
-
-    /// the beads repeat every step, so a backlog of whole steps goes without a visible jump
-    final behind = value - _target;
-    if (behind > step) value -= step * (behind ~/ step);
-    _target -= step;
-    _offset.animateWith(
-      SpringSimulation(BmMotion.snappy, value, _target, velocity, tolerance: _rest),
-    );
+  void _moveTo(int? before, int? position) {
+    if (position == null) return;
+    if (before == null || MediaQuery.disableAnimationsOf(context)) {
+      _focus.value = position.toDouble();
+      return;
+    }
+    _focus
+        .animateWith(
+          SpringSimulation(
+            BmMotion.snappy,
+            _focus.value,
+            position.toDouble(),
+            _focus.velocity,
+            tolerance: _rest,
+          ),
+        )
+        /// the spring stops inside its tolerance, a hair before the bead
+        .then((_) => _focus.value = position.toDouble());
   }
 
   @override
   void dispose() {
-    _offset.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int?>(tasbihControllerProvider.select((state) => state?.position), _moveTo);
     return RepaintBoundary(
       child: RSizedBox(
-        height: SizeManager.beadFocus,
+        height: SizeManager.beadHead,
         width: double.infinity,
         child: CustomPaint(
           painter: _BeadPainter(
-            offset: _offset,
+            focus: _focus,
             bead: Color.lerp(
               context.getColor(ThemeEnum.raised),
               context.getColor(ThemeEnum.primary),
@@ -64,7 +74,8 @@ class _BeadStripState extends State<BeadStrip> with SingleTickerProviderStateMix
             )!,
             raised: context.getColor(ThemeEnum.raised),
             line: context.getColor(ThemeEnum.outlineStrong),
-            focus: context.getColor(ThemeEnum.primary),
+            ring: context.getColor(ThemeEnum.primary),
+            accent: context.getColor(ThemeEnum.accent),
           ),
         ),
       ),
@@ -74,52 +85,78 @@ class _BeadStripState extends State<BeadStrip> with SingleTickerProviderStateMix
 
 class _BeadPainter extends CustomPainter {
   _BeadPainter({
-    required this.offset,
+    required this.focus,
     required this.bead,
     required this.raised,
     required this.line,
-    required this.focus,
-  }) : super(repaint: offset);
+    required this.ring,
+    required this.accent,
+  }) : super(repaint: focus);
 
-  final Animation<double> offset;
+  final Animation<double> focus;
   final Color bead;
   final Color raised;
   final Color line;
-  final Color focus;
+  final Color ring;
+  final Color accent;
 
   @override
   void paint(Canvas canvas, Size size) {
-    /// the box is the focus ring's height, everything else is in the tree's points from it
-    final scale = size.height / SizeManager.beadFocus;
+    /// the box is the head bead's height, everything else is in the tree's points from it
+    final scale = size.height / SizeManager.beadHead;
     final center = size.center(Offset.zero);
     final step = BmMotion.beadStep * scale;
-    final radius = SizeManager.bead * scale / 2;
-    canvas.drawLine(
-      Offset(0, center.dy),
-      Offset(size.width, center.dy),
-      Paint()
-        ..color = line
-        ..strokeWidth = SizeManager.beadLine * scale,
-    );
-    final ring = Paint()
+
+    /// the spring may overshoot, the string still stops at its ends
+    final at = focus.value.clamp(-1.0, _head.toDouble());
+    double x(num index) => center.dx + (index - at) * step;
+    final stroke = SizeManager.beadLine * scale;
+    final tasselEnd = x(_head) + (SizeManager.beadHead / 2 + SizeManager.tassel) * scale;
+
+    /// the free end shows a step before bead 0, the tassel hangs past the head bead
+    canvas
+      ..drawLine(
+        Offset(x(-1), center.dy),
+        Offset(x(_head), center.dy),
+        Paint()
+          ..color = line
+          ..strokeWidth = stroke,
+      )
+      ..drawLine(
+        Offset(x(_head), center.dy),
+        Offset(tasselEnd, center.dy),
+        Paint()
+          ..color = accent
+          ..strokeWidth = stroke * 3
+          ..strokeCap = StrokeCap.round,
+      );
+    final outline = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = SizeManager.beadLine * scale
+      ..strokeWidth = stroke
       ..color = line;
-    final shift = offset.value * scale % step;
-    final count = (size.width / 2 / step).ceil() + 1;
-    for (var i = -count; i <= count; i++) {
-      final at = Offset(center.dx + i * step + shift, center.dy);
-      final rect = Rect.fromCircle(center: at, radius: radius);
+    final reach = (size.width / 2 / step).ceil() + 1;
+    final first = (at - reach).floor().clamp(0, _head);
+    final last = (at + reach).ceil().clamp(0, _head);
+    for (var i = first; i <= last; i++) {
+      final place = Offset(x(i), center.dy);
+      final special = i == _head || _markers.contains(i);
+      final diameter = i == _head
+          ? SizeManager.beadHead
+          : special
+          ? SizeManager.beadMarker
+          : SizeManager.bead;
+      final radius = diameter * scale / 2;
+      final rect = Rect.fromCircle(center: place, radius: radius);
 
       /// css radial-gradient(circle at 35% 30%), out to the farthest corner
       final shader = RadialGradient(
         center: const Alignment(-.3, -.4),
         radius: .96,
-        colors: [bead, raised],
+        colors: [if (special) accent else bead, raised],
       ).createShader(rect);
       canvas
-        ..drawCircle(at, radius, Paint()..shader = shader)
-        ..drawCircle(at, radius + ring.strokeWidth / 2, ring);
+        ..drawCircle(place, radius, Paint()..shader = shader)
+        ..drawCircle(place, radius + stroke / 2, outline);
     }
     canvas.drawCircle(
       center,
@@ -127,15 +164,16 @@ class _BeadPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = SizeManager.beadFocusStroke * scale
-        ..color = focus,
+        ..color = ring,
     );
   }
 
   @override
   bool shouldRepaint(_BeadPainter old) =>
-      old.offset != offset ||
+      old.focus != focus ||
       old.bead != bead ||
       old.raised != raised ||
       old.line != line ||
-      old.focus != focus;
+      old.ring != ring ||
+      old.accent != accent;
 }

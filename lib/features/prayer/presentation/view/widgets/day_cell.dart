@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_dots.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,7 @@ class DayCell extends ConsumerWidget {
           final today = ref.read(prayerDayProvider);
           ref.read(selectedDayProvider.notifier).select(day == today ? null : day);
         },
-        child: DecoratedBox(
+        child: AnimatedDecoratedBox(
           decoration: BoxDecoration(
             color: shown ? context.getColor(ThemeEnum.primaryContainer) : null,
             borderRadius: BorderRadius.circular(RadiusManager.md.r),
@@ -84,6 +85,7 @@ class DayCell extends ConsumerWidget {
                       ),
                     RSizedBox.vertical(isArabic ? SpaceManager.s1 : SpaceManager.weekCellGap),
                     DayDots(prayed),
+                    const RSizedBox(height: SpaceManager.weekCellGap),
                   ],
                 ),
               ),
@@ -96,5 +98,5 @@ class DayCell extends ConsumerWidget {
 
   /// the shown cell's inset ring, primary at 35%
   static Color shownBorder(BuildContext context) =>
-      context.getColor(ThemeEnum.primary).withValues(alpha: .35);
+      context.getColor(ThemeEnum.primary).withValues(alpha: .15);
 }

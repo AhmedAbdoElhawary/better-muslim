@@ -148,6 +148,13 @@ class DayTimes {
     return [...after, tomorrow?.fajr].nonNulls.firstOrNull;
   }
 
+  /// the night is maghrib to fajr, so the caller passes the next day's fajr
+  TZDateTime? lastThird(TZDateTime? nextFajr) {
+    final start = maghrib;
+    if (start == null || nextFajr == null) return null;
+    return nextFajr.subtract(nextFajr.difference(start) ~/ 3);
+  }
+
   /// after isha it is tomorrow's fajr, so the caller passes tomorrow's times
   (Prayer, TZDateTime)? next(DateTime now, DayTimes? tomorrow) {
     for (final day in [this, ?tomorrow]) {

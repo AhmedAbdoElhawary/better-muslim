@@ -4,6 +4,7 @@ import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -60,7 +61,7 @@ class RowTrailing extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return switch (state) {
+    final child = switch (state) {
       PrayerRowState.mark || PrayerRowState.prayed => MarkButton(
         prayed: state == PrayerRowState.prayed,
         onTap: () => state == PrayerRowState.prayed ? _unmark(context, ref) : _mark(context, ref),
@@ -84,6 +85,15 @@ class RowTrailing extends ConsumerWidget {
       PrayerRowState.madeUp => const StateChip(StringsManager.madeUp, check: true),
       PrayerRowState.unavailable => const SizedBox.shrink(),
     };
+    return AnimatedSwitcher(
+      duration: BmMotion.micro,
+
+      /// mark and prayed keep one key, the button draws its own check (Motion 07)
+      child: KeyedSubtree(
+        key: ValueKey(state == PrayerRowState.prayed ? PrayerRowState.mark : state),
+        child: child,
+      ),
+    );
   }
 }
 

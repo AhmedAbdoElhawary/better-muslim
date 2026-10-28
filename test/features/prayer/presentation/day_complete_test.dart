@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_complete.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -112,7 +113,7 @@ void main() {
   /// the star fades in from 700 ms over 300 ms, without reduce motion it starts at 950 ms
   testWidgets('with reduce motion the star fades in over 300 ms', (tester) async {
     double starOpacity() => tester
-        .widget<Opacity>(
+        .widget<CustomOpacity>(
           find
               .ancestor(
                 of: find.byWidgetPredicate(
@@ -120,7 +121,7 @@ void main() {
                       widget is CustomPaint &&
                       widget.painter.runtimeType.toString() == '_StarPainter',
                 ),
-                matching: find.byType(Opacity),
+                matching: find.byType(CustomOpacity),
               )
               .first,
         )

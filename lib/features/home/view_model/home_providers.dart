@@ -1,11 +1,13 @@
 import 'package:better_muslim/core/clock/clock.dart';
-import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/prayer_times/sky_state.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
+import 'package:better_muslim/features/home/model/verse_of_day.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart';
 
@@ -28,12 +30,6 @@ final stripProvider = Provider<List<StripEntry>>((ref) {
   ];
 });
 
-/// null = the theme's base sky: no location, or the design scenario so home matches the PNGs
-final skyStateProvider = Provider<BmSkyState?>((ref) {
-  if (ref.watch(flavorProvider.select((config) => config.isDesignScenario))) return null;
-  return skyState(ref.watch(periodProvider));
-});
-
 /// the sunrise, dhuhr and asr skies, where the header text turns white over a scrim
 final skyBrightProvider = Provider<bool>((ref) {
   final state = ref.watch(skyStateProvider);
@@ -42,22 +38,33 @@ final skyBrightProvider = Provider<bool>((ref) {
 
 final starsOnProvider = Provider<bool>((ref) => starsOn(ref.watch(skyStateProvider)));
 
-final sunShareProvider = Provider<double?>((ref) {
-  final times = ref.watch(todayTimesProvider);
-  if (times == null) return null;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
-  return sunShare(now, times.sunrise, times.maghrib);
-});
-
-final arcLabelsProvider = Provider<ArcLabels?>((ref) {
+/// only notifies when the arc changes, at sunrise and maghrib
+final arcPointsProvider = Provider<ArcPoints?>((ref) {
   final today = ref.watch(todayProvider);
   final times = ref.watch(dayTimesProvider(today));
   if (times == null) return null;
   final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
-  return arcLabels(
+  return arcPoints(
     now,
     ref.watch(dayTimesProvider(DateTime(today.year, today.month, today.day - 1))),
     times,
     ref.watch(dayTimesProvider(DateTime(today.year, today.month, today.day + 1))),
   );
+});
+
+/// the sun by day, the three stars by night
+final markerShareProvider = Provider<double?>((ref) {
+  final points = ref.watch(arcPointsProvider);
+  if (points == null) return null;
+  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  return arcShare(now, points.start, points.end);
+});
+
+final verseOfDayProvider = FutureProvider<VerseOfDay>((ref) async {
+  final today = ref.watch(todayProvider);
+  final assets = await ref.watch(quranAssetsProvider.future);
+  final key = verseOfDay(today, assets.verseCandidates());
+  final text = await assets.ayahText(key);
+  final translation = (await assets.surahText(key.surah)).translation[key.ayah - 1];
+  return VerseOfDay(key: key, surah: assets.surah(key.surah), text: text, translation: translation);
 });

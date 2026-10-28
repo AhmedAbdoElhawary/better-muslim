@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,7 +48,7 @@ class _AlignedPulseState extends ConsumerState<AlignedPulse> with SingleTickerPr
           builder: (context, child) {
             if (!_pulse.isAnimating) return const SizedBox.shrink();
             final t = BmMotion.decelerate.transform(_pulse.value);
-            return Opacity(
+            return CustomOpacity(
               opacity: _opacity * (1 - t),
               child: Transform.scale(scale: 1 + _scale * t, child: child),
             );

@@ -54,14 +54,30 @@ From the spec to the code:
    adhan on Android from `packages/adhan_alarms`, Mark prayed from every notification, the
    background top-up, a dev page from More. **Done, waiting for my review.**
 6. Qibla: compass, alignment, haptics. **Done, waiting for my review.**
-7. Quran reader: moved to after 11, it's almost an app of its own. The spec waits in
-   `specs/003-milestone-7-quran/` with Q1 to Q10 open. Until then the Quran tab stays a placeholder.
+7. 7a. Quran reader: the Mushaf page by page, ayah sheet, tafsir and translation, recitation,
+   bookmarks and notes, share, display, with the Motion v2 loader and container transform first.
+   **Done, waiting for my review.** 7b (word by word, memorise, search, khatmah) comes next.
 8. Azkar, Tasbih and Duas: the Azkar tab, both sets, Tasbih, Duas with save, share and Listen ready
    for clips, the azkar nudges. **Done, waiting for my review.**
 9. More, Theme and Hijri calendar: every setting, the 8 themes with Follow sky, the calendar with its
    events and adjustment, the Adhan and reminders page, Reset prayer journey and Credits. **Done,
    waiting for my review.**
-10. to 11. as in `HANDOFF_CLAUDE.md`.
+10. Onboarding and backup: the sunrise first screen in liquid glass, the welcome, location,
+    notifications and theme steps, the backup file with Back up and Restore, the store reset notice.
+    **Done, waiting for my review.**
+11. Widgets and Live Activity: the iOS home widgets and lock screen accessories, the Android widget,
+    the countdown before each prayer as a Live Activity with the Dynamic Island and as an Android
+    ongoing notification, all fed by `packages/prayer_surfaces`. **Done, waiting for my review.**
+12. Polish and motion, before the Quran reader (7): the calendar's day area, Gregorian mode and
+    pickers, the theme skies, the azkar and Tasbih moves with the 99 bead string, Acknowledgements
+    and CONTACT, Apple's push and the title flights, every state change animated, the large titles
+    into the bar and the top glow with its switch. **Done, waiting for my review.**
+13. Enhancements after the review (specs/008): the shell and the verse for today, several ayahs on
+    one share card with its own look, Ibn Kathir and As-Sa'di downloads, sharp pages on Android,
+    the Quran font and six page palettes, the page curl, the whole day and night on the Home arc
+    with the turn at maghrib. **Done, waiting for my review.** Phase E (the tafsir host, the Home
+    bar flight, the animated vector splash, the mushaf ink with no layer) **done, waiting for my
+    review**, the tafsir release (T081) is mine.
 
 ## Run
 

@@ -10,6 +10,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
+import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,10 +54,16 @@ class CategoryRows extends ConsumerWidget {
                       child: Row(
                         children: [
                           Expanded(
-                            child: RegularText(
-                              category.name.inLanguage(language),
-                              translate: false,
-                              fontSize: FontSizeManager.body,
+                            child: Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TitleHero(
+                                tag: Routes.duaCategory(category.id),
+                                child: RegularText(
+                                  category.name.inLanguage(language),
+                                  translate: false,
+                                  fontSize: FontSizeManager.body,
+                                ),
+                              ),
                             ),
                           ),
                           const RSizedBox.horizontal(SpaceManager.shortcutGap),

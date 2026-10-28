@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/azkar/azkar_window.dart';
@@ -11,8 +12,10 @@ import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -85,7 +88,7 @@ class Settings extends Table {
       // ignore: recursive_getters, drift reads the column inside its own check
       .check(reminderMinutes.isIn(const [0, 5, 10, 15, 20, 25, 30]))();
 
-  /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
+  /// true once 4.12 or the off line asked the phone, after that the off line opens settings
   BoolColumn get notificationsAsked => boolean().withDefault(const Constant(false))();
 
   /// 0 subhanallah, 1 alhamdulillah, 2 allahu akbar
@@ -93,15 +96,74 @@ class Settings extends Table {
       .withDefault(const Constant(0))
       // ignore: recursive_getters, drift reads the column inside its own check
       .check(tasbihDhikr.isBetweenValues(0, 2))();
-  IntColumn get tasbihCount => integer()
+  IntColumn get subhanallahCount => integer()
       .withDefault(const Constant(0))
       // ignore: recursive_getters, drift reads the column inside its own check
-      .check(tasbihCount.isBiggerOrEqualValue(0))();
+      .check(subhanallahCount.isBiggerOrEqualValue(0))();
+  IntColumn get alhamdulillahCount => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(alhamdulillahCount.isBiggerOrEqualValue(0))();
+  IntColumn get allahuAkbarCount => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(allahuAkbarCount.isBiggerOrEqualValue(0))();
 
   /// the window last opened, the azkar tab's badge goes once it's the current one
   TextColumn get morningOpenedOn => text().map(const CivilDate()).nullable()();
   TextColumn get eveningOpenedOn => text().map(const CivilDate()).nullable()();
   BoolColumn get azkarNudges => boolean().withDefault(const Constant(true))();
+
+  /// Countdown before each prayer
+  BoolColumn get prayerCountdown => boolean().withDefault(const Constant(true))();
+
+  TextColumn get calendarMode => textEnum<CalendarMode>().withDefault(const Constant('hijri'))();
+  BoolColumn get topGlow => boolean().withDefault(const Constant(true))();
+  TextColumn get language => textEnum<Language>().withDefault(const Constant('phone'))();
+
+  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
+  BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
+
+  IntColumn get lastReadSurah => integer().withDefault(const Constant(1))();
+  IntColumn get lastReadAyah => integer().withDefault(const Constant(1))();
+  IntColumn get lastReadPage => integer()
+      .withDefault(const Constant(1))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(lastReadPage.isBetweenValues(1, 604))();
+
+  /// null = never read, the card shows no time
+  DateTimeColumn get lastReadAt => dateTime().nullable()();
+  TextColumn get pageColor => textEnum<PageColor>().withDefault(const Constant('followSky'))();
+  TextColumn get quranLayout => textEnum<QuranLayout>().withDefault(const Constant('mushaf'))();
+  TextColumn get pageTurn => textEnum<PageTurn>().withDefault(const Constant('book'))();
+  BoolColumn get keepScreenOn => boolean().withDefault(const Constant(false))();
+  TextColumn get quranFont => textEnum<QuranFont>().withDefault(const Constant('amiri'))();
+
+  /// steps around 4.07's size
+  IntColumn get quranArabicSize => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(quranArabicSize.isBetweenValues(-2, 3))();
+  IntColumn get quranTranslationSize => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(quranTranslationSize.isBetweenValues(-2, 3))();
+  RealColumn get reciteSpeed => real()
+      .withDefault(const Constant(1.0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(reciteSpeed.isIn(const [0.75, 1.0, 1.25, 1.5]))();
+
+  /// 1 is off
+  IntColumn get reciteRepeat => integer()
+      .withDefault(const Constant(1))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10]))();
+
+  /// seconds between ayahs
+  IntColumn get recitePause => integer()
+      .withDefault(const Constant(0))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(recitePause.isIn(const [0, 1, 2, 3, 5]))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -153,7 +215,44 @@ class SavedDuas extends Table {
   Set<Column<Object>> get primaryKey => {dua};
 }
 
-@DriftDatabase(tables: [Settings, PrayerLog, QadaEntries, AzkarCounts, SavedDuas])
+/// sqlite nulls are distinct, so page bookmarks need their own index
+@TableIndex(name: 'quran_bookmark_ayah', columns: {#surah, #ayah}, unique: true)
+@TableIndex.sql(
+  'create unique index quran_bookmark_page on quran_bookmarks (page) where surah is null',
+)
+class QuranBookmarks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// null for a page bookmark
+  IntColumn get surah => integer().nullable()();
+  IntColumn get ayah => integer().nullable()();
+
+  /// always set, the ayah's page for an ayah bookmark
+  // ignore: recursive_getters, drift reads the column inside its own check
+  IntColumn get page => integer().check(page.isBetweenValues(1, 604))();
+
+  /// null shows the reference
+  TextColumn get name => text().nullable()();
+  TextColumn get color => textEnum<RibbonColor>()();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+/// one note per ayah
+class QuranNotes extends Table {
+  IntColumn get surah => integer()();
+  IntColumn get ayah => integer()();
+
+  // ignore: recursive_getters, drift reads the column inside its own check
+  TextColumn get note => text().check(note.trim().length.isBiggerThanValue(0))();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {surah, ayah};
+}
+
+@DriftDatabase(
+  tables: [Settings, PrayerLog, QadaEntries, AzkarCounts, SavedDuas, QuranBookmarks, QuranNotes],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.executor);
 
@@ -216,6 +315,21 @@ class AppDatabase extends _$AppDatabase {
     return db;
   }
 
+  /// a backup's store, locked with the password (contracts/backup-file.md). hex, so any password
+  /// works with no quoting
+  static AppDatabase backup(File file, String password) {
+    final key = utf8.encode(password).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+    return AppDatabase._(
+      NativeDatabase.createInBackground(
+        file,
+        setup: (db) => db
+          ..execute("pragma cipher = 'chacha20'")
+          ..execute('pragma kdf_iter = 600000')
+          ..execute("pragma hexkey = '$key'"),
+      ),
+    );
+  }
+
   /// its own function, so the setup closure sent to drift's isolate captures only sendable values
   static AppDatabase _connect(File file, String key) => AppDatabase._(
     driftDatabase(
@@ -231,7 +345,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -288,6 +402,64 @@ class AppDatabase extends _$AppDatabase {
             ],
           ),
         );
+      },
+      from5To6: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.onboarded);
+
+        /// an install from before onboarding with a place has already set the app up (FR-001)
+        await customStatement('update settings set onboarded = 1 where latitude is not null');
+      },
+      from6To7: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.prayerCountdown);
+      },
+      from7To8: (m, schema) async {
+        /// sqlite can't drop a column with a check, the table is remade with every row kept
+        await m.alterTable(
+          TableMigration(
+            schema.settings,
+            newColumns: [schema.settings.calendarMode, schema.settings.topGlow],
+            columnTransformer: {
+              schema.settings.subhanallahCount: const CustomExpression<int>(
+                'case when tasbih_dhikr = 0 then tasbih_count else 0 end',
+              ),
+              schema.settings.alhamdulillahCount: const CustomExpression<int>(
+                'case when tasbih_dhikr = 1 then tasbih_count else 0 end',
+              ),
+              schema.settings.allahuAkbarCount: const CustomExpression<int>(
+                'case when tasbih_dhikr = 2 then tasbih_count else 0 end',
+              ),
+            },
+          ),
+        );
+      },
+      from8To9: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.language);
+      },
+      from9To10: (m, schema) async {
+        for (final column in [
+          schema.settings.lastReadSurah,
+          schema.settings.lastReadAyah,
+          schema.settings.lastReadPage,
+          schema.settings.lastReadAt,
+          schema.settings.pageColor,
+          schema.settings.quranLayout,
+          schema.settings.pageTurn,
+          schema.settings.keepScreenOn,
+          schema.settings.quranArabicSize,
+          schema.settings.quranTranslationSize,
+          schema.settings.reciteSpeed,
+          schema.settings.reciteRepeat,
+          schema.settings.recitePause,
+        ]) {
+          await m.addColumn(schema.settings, column);
+        }
+        await m.createTable(schema.quranBookmarks);
+        await m.createIndex(schema.quranBookmarkAyah);
+        await m.createIndex(schema.quranBookmarkPage);
+        await m.createTable(schema.quranNotes);
+      },
+      from10To11: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.quranFont);
       },
     ),
   );

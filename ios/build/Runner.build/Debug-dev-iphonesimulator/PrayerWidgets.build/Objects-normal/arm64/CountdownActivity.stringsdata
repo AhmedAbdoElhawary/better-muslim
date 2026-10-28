@@ -1,0 +1,16 @@
+{
+  "source": "/Users/ahmedelhawary/Documents/side_projects/flutter_projects/projects/better-muslim/ios/PrayerWidgets/CountdownActivity.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "0:00:00",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 176
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:audio_session/audio_session.dart';
 import 'package:better_muslim/core/audio/ui_sounds.dart';
+import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
@@ -144,7 +145,14 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
       (state) =>
           BmSounds.busy = state.playing && state.processingState != ProcessingState.completed,
     );
-    await _player.setAsset(recording.fullAsset(alert.prayer));
+    try {
+      await _player.setAsset(recording.fullAsset(alert.prayer));
+    } on PlayerException catch (error, stack) {
+      /// the adhan screen is already open, it stays open silent instead of crashing
+      _id = null;
+      await _report(error, stack, 'adhan play');
+      return;
+    }
     await _player.seek(from);
     await _player.setVolume(0);
     await session.setActive(true);
@@ -179,10 +187,20 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
     final reader = AudioPlayer();
     try {
       return _lengths[asset] = await reader.setAsset(asset) ?? Duration.zero;
+    } on PlayerException catch (error, stack) {
+      await _report(error, stack, 'adhan length');
+
+      /// zero would send a fresh adhan tap to the prayer tab, the label is close enough
+      final [minutes, seconds] = recording.lengthLabel.split(':').map(int.parse).toList();
+      return Duration(minutes: minutes, seconds: seconds);
     } finally {
       await reader.dispose();
     }
   }
+
+  /// ios cold starting from a tap can refuse the file (-11800)
+  Future<void> _report(PlayerException error, StackTrace stack, String reason) =>
+      CrashReporter.instance.recordError(error, stack, context: {'reason': reason});
 
   @override
   Stream<Playback> get playback {

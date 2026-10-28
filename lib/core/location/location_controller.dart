@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
@@ -24,15 +22,11 @@ class LocationController {
 
   final Ref _ref;
   DateTime? _lastRefresh;
-  final _firstLocate = Completer<void>();
 
   static const _minMoveMeters = 30000.0;
   static const _refreshEvery = Duration(minutes: 30);
 
   Future<void> refresh() => _locate(force: false);
-
-  /// done once the first locate ends, saved, refused or no fix. the notification ask waits for it
-  Future<void> get firstLocate => _firstLocate.future;
 
   Future<void> choose(Place place) =>
       _save(place, (latitude: place.latitude, longitude: place.longitude), LocationMode.manual);
@@ -67,14 +61,6 @@ class LocationController {
   }
 
   Future<void> _locate({required bool force}) async {
-    try {
-      await _locateOnce(force: force);
-    } finally {
-      if (!_firstLocate.isCompleted) _firstLocate.complete();
-    }
-  }
-
-  Future<void> _locateOnce({required bool force}) async {
     _lastRefresh = _ref.read(clockProvider)();
 
     /// riverpod pauses a provider nobody listens to, so settingsProvider.future could wait forever
@@ -83,12 +69,9 @@ class LocationController {
     /// a place picked by hand is never replaced by gps
     if (settings.locationMode == LocationMode.manual) return;
     final source = _ref.read(positionSourceProvider);
-    var permission = await source.permission();
 
-    /// android says denied before the first ask too, so with a location saved the app never nags
-    if (permission == LocationPermission.denied && settings.latitude == null) {
-      permission = await source.request();
-    }
+    /// never asks, the location step asks after saying why (milestone 10 FR-002)
+    final permission = await source.permission();
     if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
       return;
     }

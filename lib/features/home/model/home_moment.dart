@@ -1,6 +1,6 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
-import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:timezone/timezone.dart';
 
 /// MOTION 05, the final 10 minutes before the next prayer
@@ -20,52 +20,88 @@ bool glowBreathing(Duration left) => left > Duration.zero && left <= const Durat
   );
 }
 
-/// null = no period, the sky shows the theme's own base sky
-BmSkyState? skyState(Period? period) => switch (period) {
-  null => null,
-  Period.fajr => BmSkyState.fajr,
-  Period.duha => BmSkyState.sunrise,
-  Period.dhuhr => BmSkyState.dhuhr,
-  Period.asr => BmSkyState.asr,
-  Period.maghrib => BmSkyState.maghrib,
-  Period.isha => BmSkyState.isha,
-};
-
-bool starsOn(BmSkyState? state) =>
-    state == null ||
-    state == BmSkyState.fajr ||
-    state == BmSkyState.maghrib ||
-    state == BmSkyState.isha;
-
-/// rounded, so the sun moves about every 40 s instead of every second
-double? sunShare(DateTime now, DateTime? sunrise, DateTime? maghrib) {
-  if (sunrise == null || maghrib == null || now.isBefore(sunrise) || now.isAfter(maghrib)) {
-    return null;
-  }
-  final share = now.difference(sunrise).inSeconds / maghrib.difference(sunrise).inSeconds;
+/// 0 at the arc's start, 1 at its end. rounded, so the marker moves about every 40 s instead of
+/// every second
+double? arcShare(DateTime now, DateTime? start, DateTime? end) {
+  if (start == null || end == null || now.isBefore(start) || now.isAfter(end)) return null;
+  final share = now.difference(start).inSeconds / end.difference(start).inSeconds;
   return (share * 1000).round() / 1000;
 }
 
-typedef ArcLabels = ({String startKey, TZDateTime? start, String endKey, TZDateTime? end});
+enum ArcKind { day, night }
 
-/// by night the isha that started it and the fajr that ends it, so after midnight isha is
-/// yesterday's
-ArcLabels arcLabels(DateTime now, DayTimes? yesterday, DayTimes today, DayTimes? tomorrow) {
+typedef ArcPoint = ({String name, TZDateTime time, double share});
+
+class ArcPoints {
+  const ArcPoints({
+    required this.kind,
+    required this.start,
+    required this.end,
+    required this.points,
+  });
+
+  final ArcKind kind;
+  final TZDateTime start;
+  final TZDateTime end;
+
+  /// in time order, the first and last are the arc's feet
+  final List<ArcPoint> points;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ArcPoints &&
+      other.kind == kind &&
+      other.start == start &&
+      other.end == end &&
+      listEquals(other.points, points);
+
+  @override
+  int get hashCode => Object.hash(kind, start, end, Object.hashAll(points));
+}
+
+/// sunrise to maghrib by day, maghrib to the next sunrise by night, so before sunrise the night
+/// is yesterday's. null without both ends (polar)
+ArcPoints? arcPoints(DateTime now, DayTimes? yesterday, DayTimes today, DayTimes? tomorrow) {
   final sunrise = today.sunrise;
   final maghrib = today.maghrib;
   if (sunrise != null && maghrib != null && !now.isBefore(sunrise) && now.isBefore(maghrib)) {
-    return (
-      startKey: StringsManager.sunriseLabel,
-      start: sunrise,
-      endKey: StringsManager.maghribLabel,
-      end: maghrib,
-    );
+    return _points(ArcKind.day, sunrise, maghrib, [
+      (StringsManager.sunriseLabel, sunrise),
+      (StringsManager.dhuhrLabel, today.dhuhr),
+      (StringsManager.asrLabel, today.asr),
+      (StringsManager.maghribLabel, maghrib),
+    ]);
   }
   final evening = maghrib != null && !now.isBefore(maghrib);
-  return (
-    startKey: StringsManager.ishaLabel,
-    start: evening ? today.isha : yesterday?.isha,
-    endKey: StringsManager.fajrLabel,
-    end: evening ? tomorrow?.fajr : today.fajr,
+  final night = evening ? today : yesterday;
+  final start = night?.maghrib;
+  final end = evening ? tomorrow?.sunrise : sunrise;
+  final fajr = evening ? tomorrow?.fajr : today.fajr;
+  if (start == null || end == null) return null;
+  return _points(ArcKind.night, start, end, [
+    (StringsManager.maghribLabel, start),
+    (StringsManager.ishaLabel, night?.isha),
+    (StringsManager.lastThirdLabel, night?.lastThird(fajr)),
+    (StringsManager.fajrLabel, fajr),
+    (StringsManager.sunriseLabel, end),
+  ]);
+}
+
+ArcPoints _points(
+  ArcKind kind,
+  TZDateTime start,
+  TZDateTime end,
+  List<(String, TZDateTime?)> times,
+) {
+  final length = end.difference(start).inSeconds;
+  return ArcPoints(
+    kind: kind,
+    start: start,
+    end: end,
+    points: [
+      for (final (name, time) in times)
+        if (time != null && !time.isBefore(start) && !time.isAfter(end))
+          (name: name, time: time, share: time.difference(start).inSeconds / length),
+    ]..sort((a, b) => a.share.compareTo(b.share)),
   );
 }

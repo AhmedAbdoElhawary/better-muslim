@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -7,8 +8,10 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/motion/skeleton.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
-import 'package:better_muslim/features/home/model/home_samples.dart';
+import 'package:better_muslim/features/home/model/verse_of_day.dart';
+import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,15 +26,27 @@ class VerseCard extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final verse = ref.watch(verseOfDayProvider.select((verse) => verse.value));
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final reference = isArabic
-        ? context.formatDigits('${HomeSamples.verseSurahAr} ${HomeSamples.verseAyah}', digits)
-        : '${HomeSamples.verseSurah} ${HomeSamples.verseSurahNumber}:${HomeSamples.verseAyah}';
+    final reference = switch (verse) {
+      null => '',
+      VerseOfDay(:final surah, :final key) when isArabic => context.formatDigits(
+        '${surah.ar} ${key.ayah}',
+        digits,
+      ),
+      VerseOfDay(:final surah, :final key) => '${surah.en} ${key.surah}:${key.ayah}',
+    };
     return Semantics(
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.go(Routes.quran),
+        onTap: () async {
+          if (verse == null) return;
+          final ayah = verse.key;
+          final assets = await ref.read(quranAssetsProvider.future);
+          if (!context.mounted) return;
+          await context.push(Routes.quranPage(assets.pageOf(ayah), ayah: ayah));
+        },
         child: SurfaceCard(
           child: OnlyPadding(
             top: isArabic ? SpaceManager.s3 : SpaceManager.verseCardTop,
@@ -61,27 +76,42 @@ class VerseCard extends ConsumerWidget {
                   ],
                 ),
                 RSizedBox.vertical(isArabic ? SpaceManager.s1 : SpaceManager.verseGap),
-                const Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: RegularText(
-                    HomeSamples.verseText,
-                    translate: false,
-                    font: FontEnum.quran,
-                    fontSize: FontSizeManager.quranAr,
-                    height: LineHeightManager.quranAr,
-                    textAlign: TextAlign.center,
+                BmSkeletonSwitch(
+                  loading: verse == null,
+                  skeleton: const Column(
+                    children: [
+                      BmSkeleton(height: FontSizeManager.quranAr),
+                      RSizedBox.vertical(SpaceManager.verseGap),
+                      BmSkeleton(height: FontSizeManager.verseTranslation),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: RegularText(
+                          verse?.text ?? '',
+                          translate: false,
+                          font: FontEnum.quran,
+                          fontSize: FontSizeManager.quranAr,
+                          height: LineHeightManager.quranAr,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      if (!isArabic) ...[
+                        const RSizedBox.vertical(SpaceManager.verseGap),
+                        RegularText(
+                          verse?.translation ?? '',
+                          translate: false,
+                          height: LineHeightManager.verseTranslation,
+                          textAlign: TextAlign.center,
+                          color: ThemeEnum.text2,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                if (!isArabic) ...[
-                  const RSizedBox.vertical(SpaceManager.verseGap),
-                  const RegularText(
-                    HomeSamples.verseTranslation,
-                    translate: false,
-                    height: LineHeightManager.verseTranslation,
-                    textAlign: TextAlign.center,
-                    color: ThemeEnum.text2,
-                  ),
-                ],
               ],
             ),
           ),

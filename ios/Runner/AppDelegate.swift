@@ -76,7 +76,7 @@ import workmanager_apple
     }
   }
 
-  /// three small calls for More, the app's own channel instead of three packages (R10)
+  /// the small calls for More, the app's own channel instead of five packages (R10)
   private func registerSystem(messenger: FlutterBinaryMessenger) {
     let channel = FlutterMethodChannel(name: "better_muslim/system", binaryMessenger: messenger)
     channel.setMethodCallHandler { call, result in
@@ -105,6 +105,32 @@ import workmanager_apple
         let name = info?["CFBundleShortVersionString"] as? String ?? ""
         let build = info?["CFBundleVersion"] as? String ?? ""
         result("\(name) (\(build))")
+      case "mail":
+        let args = call.arguments as? [String: Any]
+        // query items encode the spaces and the arabic, a hand built string wouldn't
+        var mail = URLComponents()
+        mail.scheme = "mailto"
+        mail.path = args?["to"] as? String ?? ""
+        mail.queryItems = [
+          URLQueryItem(name: "subject", value: args?["subject"] as? String ?? ""),
+          URLQueryItem(name: "body", value: args?["body"] as? String ?? ""),
+        ]
+        guard let url = mail.url else {
+          result(false)
+          return
+        }
+        UIApplication.shared.open(url) { opened in result(opened) }
+      case "device":
+        var info = utsname()
+        uname(&info)
+        let model = withUnsafeBytes(of: &info.machine) { bytes in
+          String(decoding: bytes.prefix(while: { $0 != 0 }), as: UTF8.self)
+        }
+        result(["model": model, "os": "iOS \(UIDevice.current.systemVersion)"])
+      case "keepScreenOn":
+        UIApplication.shared.isIdleTimerDisabled =
+          (call.arguments as? [String: Any])?["on"] as? Bool ?? false
+        result(nil)
       default:
         result(FlutterMethodNotImplemented)
       }

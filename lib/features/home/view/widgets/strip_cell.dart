@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -8,6 +9,7 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +32,7 @@ class StripCell extends ConsumerWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => context.go(Routes.prayerAt(ref.read(prayerDayProvider), cell.prayer)),
-        child: DecoratedBox(
+        child: AnimatedDecoratedBox(
           decoration: BoxDecoration(
             color: cell.current ? context.getColor(ThemeEnum.primaryContainer) : null,
             borderRadius: BorderRadius.circular(RadiusManager.md.r),
@@ -72,7 +74,7 @@ class StripCell extends ConsumerWidget {
 
   /// the current cell's inset ring, primary at 35%
   static Color currentBorder(BuildContext context) =>
-      context.getColor(ThemeEnum.primary).withValues(alpha: .35);
+      context.getColor(ThemeEnum.primary).withValues(alpha: .15);
 }
 
 /// the time, or a dash on a polar day that has none
@@ -101,6 +103,21 @@ class StripTime extends ConsumerWidget {
 
 class StripMark extends StatelessWidget {
   const StripMark({required this.cell, super.key});
+  final StripEntry cell;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: BmMotion.micro,
+      layoutBuilder: (current, previous) =>
+          Stack(alignment: Alignment.topCenter, children: [...previous, ?current]),
+      child: _Mark(cell, key: ValueKey((cell.logged, cell.current))),
+    );
+  }
+}
+
+class _Mark extends StatelessWidget {
+  const _Mark(this.cell, {super.key});
   final StripEntry cell;
 
   @override

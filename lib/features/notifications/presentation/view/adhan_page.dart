@@ -4,6 +4,7 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_colors.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_buttons.dart';
@@ -110,7 +111,7 @@ class _Reveal extends StatelessWidget {
     );
     return AnimatedBuilder(
       animation: text,
-      builder: (context, child) => Opacity(
+      builder: (context, child) => CustomOpacity(
         opacity: text.value,
         child: Transform.translate(
           offset: Offset(0, (1 - text.value) * SpaceManager.adhanTextRise.r),

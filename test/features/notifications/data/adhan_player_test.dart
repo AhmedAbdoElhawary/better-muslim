@@ -133,6 +133,18 @@ void main() {
 
       expect(audio.stops, 1);
     });
+
+    test('a file ios refuses to load stays silent instead of throwing', () async {
+      final audio = _FakeAudioPlayer()..loadError = PlayerException(-11800, 'refused', 0);
+      final player = JustAudioAdhanPlayer(player: audio, session: Future.value(_FakeSession()));
+
+      await player.play(maghrib, texts, AdhanRecording.makkah);
+      expect(audio.volumes, isEmpty);
+
+      audio.loadError = null;
+      await player.play(maghrib, texts, AdhanRecording.makkah);
+      expect(audio.volumes, [0]);
+    });
   });
 }
 
@@ -154,6 +166,7 @@ class _FakeAudioPlayer implements AudioPlayer {
   final volumes = <double>[];
   final states = StreamController<PlayerState>.broadcast();
   int stops = 0;
+  PlayerException? loadError;
 
   @override
   Stream<PlayerState> get playerStateStream => states.stream;
@@ -165,7 +178,10 @@ class _FakeAudioPlayer implements AudioPlayer {
     Duration? initialPosition,
     String? package,
     dynamic tag,
-  }) async => const Duration(minutes: 2, seconds: 56);
+  }) async {
+    if (loadError case final error?) throw error;
+    return const Duration(minutes: 2, seconds: 56);
+  }
 
   @override
   Future<void> seek(Duration? position, {int? index}) async {}

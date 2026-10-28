@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- the 5.8 tree's values and the dark qiyam emerald ones, whatever theme the app shows. the
+     always dark exception, the only place the android surfaces hold colors -->
+<resources>
+    <color name="surfaces_surface">#07100D</color>
+    <color name="surfaces_outline">#1C2C26</color>
+    <color name="surfaces_sky_top">#000000</color>
+    <color name="surfaces_sky_middle">#04100C</color>
+    <color name="surfaces_sky_bottom">#173328</color>
+    <color name="surfaces_text">#D9D3C2</color>
+    <color name="surfaces_label">#B9B3A2</color>
+    <color name="surfaces_dim">#878C82</color>
+    <color name="surfaces_gold">#D9C08A</color>
+    <color name="surfaces_primary">#A88A52</color>
+    <color name="surfaces_highlight">#221C10</color>
+</resources>

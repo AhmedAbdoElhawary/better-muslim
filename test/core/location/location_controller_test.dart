@@ -48,13 +48,13 @@ void main() {
       container.read(databaseProvider).watchSettings().first;
 
   test('no location and permission granted saves an auto location, method by country', () async {
-    final source = FakePositionSource(answer: LocationPermission.whileInUse, position: _kaaba);
+    final source = FakePositionSource(granted: LocationPermission.whileInUse, position: _kaaba);
     final container = containerWith(source);
 
     await container.read(locationControllerProvider).refresh();
     final settings = await saved(container);
 
-    expect(source.requests, 1);
+    expect(source.requests, 0);
     expect(settings.latitude, _kaaba.latitude);
     expect(settings.placeName, 'Makkah');
     expect(settings.placeNameAr, 'مكة المكرمة');
@@ -72,6 +72,18 @@ void main() {
 
     await container.read(locationControllerProvider).refresh();
 
+    expect(source.fixes, 0);
+    expect((await saved(container)).latitude, isNull);
+  });
+
+  /// the location step asks after saying why (milestone 10 FR-002)
+  test('no location and not asked yet never shows the dialog at launch', () async {
+    final source = FakePositionSource(answer: LocationPermission.whileInUse, position: _kaaba);
+    final container = containerWith(source);
+
+    await container.read(locationControllerProvider).refresh();
+
+    expect(source.requests, 0);
     expect(source.fixes, 0);
     expect((await saved(container)).latitude, isNull);
   });

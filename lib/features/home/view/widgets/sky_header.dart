@@ -1,9 +1,13 @@
 import 'package:better_muslim/core/power/power_saving.dart';
+import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
+import 'package:better_muslim/features/home/view/widgets/arc_turn.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +33,11 @@ class SkyHeader extends ConsumerStatefulWidget {
         1;
     return box - BmSunArc.horizonY + (box - SpaceManager.skyLabelTop) * growth;
   }
+
+  /// the room above the arc's top for the label of a point near it, in design points
+  static double labelRoom(BuildContext context) =>
+      SpaceManager.arcLabelGap +
+      MediaQuery.textScalerOf(context).scale(FontSizeManager.skyLabel) * LineHeightManager.label;
 
   @override
   ConsumerState<SkyHeader> createState() => _SkyHeaderState();
@@ -59,7 +68,7 @@ class _SkyHeaderState extends ConsumerState<SkyHeader> with SingleTickerProvider
   Widget build(BuildContext context) {
     final state = ref.watch(skyStateProvider);
     final starsOn = ref.watch(starsOnProvider);
-    final sunFraction = ref.watch(sunShareProvider);
+    final markerShare = ref.watch(markerShareProvider);
 
     /// unknown while it is read again on resume, so the loop restarts and fades back in
     final powerSavingOff = ref.watch(
@@ -80,7 +89,7 @@ class _SkyHeaderState extends ConsumerState<SkyHeader> with SingleTickerProvider
             context.getColor(ThemeEnum.sky2),
             context.getColor(ThemeEnum.sky3),
           )
-        : bmSkyQiyamEmerald[state]!;
+        : themeSky(ref.watch(themeIdProvider))[state]!;
     final last = _stops;
     final stops =
         last != null && last.top == next.top && last.mid == next.mid && last.bottom == next.bottom
@@ -97,22 +106,28 @@ class _SkyHeaderState extends ConsumerState<SkyHeader> with SingleTickerProvider
           tween: Tween(end: starsOn ? 1.0 : 0.0),
           duration: duration,
           curve: curve,
-          builder: (context, starsStrength, _) => CustomPaint(
-            painter: SkyHeaderPainter(
-              stops: stops,
-              starsStrength: starsStrength,
-              sunFraction: sunFraction,
-              onSky: context.getColor(ThemeEnum.onSky),
-              sun: context.getColor(ThemeEnum.sun),
-              starOpacity: context.starOpacity,
+          builder: (context, starsStrength, _) => ArcTurn(
+            builder: (context, points, outgoing, turn) => CustomPaint(
+              painter: SkyHeaderPainter(
+                stops: stops,
+                starsStrength: starsStrength,
+                points: points,
+                markerShare: markerShare,
+                outgoing: outgoing,
+                turn: turn,
+                wheel: !reduceMotion,
+                onSky: context.getColor(ThemeEnum.onSky),
+                sun: context.getColor(ThemeEnum.sun),
+                starOpacity: context.starOpacity,
 
-              /// the .r factor every other size uses, so the arc and the labels stay together
-              unit: ScreenUtil().radius(1),
-              horizonAboveBottom: SkyHeader.horizonAboveBottom(context).r,
-              overlap: widget.overlap,
-              bleed: MediaQuery.sizeOf(context).height,
-              rtl: Directionality.of(context) == TextDirection.rtl,
-              elapsed: run ? _elapsed : null,
+                /// the .r factor every other size uses, so the arc and the labels stay together
+                unit: ScreenUtil().radius(1),
+                horizonAboveBottom: SkyHeader.horizonAboveBottom(context).r,
+                overlap: widget.overlap,
+                bleed: MediaQuery.sizeOf(context).height,
+                rtl: Directionality.of(context) == TextDirection.rtl,
+                elapsed: run ? _elapsed : null,
+              ),
             ),
           ),
         ),

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/ellipse_transform.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ class _CardGlowState extends ConsumerState<CardGlow> with SingleTickerProviderSt
         child: box,
         builder: (context, child) {
           final t = breathing ? BmMotion.breathe.transform(_controller.value) : 1.0;
-          return Opacity(
+          return CustomOpacity(
             opacity: lerpDouble(.45, 1, t)!,
             child: Transform.scale(scale: breathing ? lerpDouble(.98, 1.03, t)! : 1, child: child),
           );

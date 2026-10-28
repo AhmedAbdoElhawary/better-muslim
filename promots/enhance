@@ -1,0 +1,37 @@
+i want to edit some stuff (ask me any gaps and don't fill any one by yourself):
+- when switching to another language and scroll down for more page the more title it's movd in oppsite way, i think it's still read the old rtl/ltr values, as it works normally when restart the app
+- in "lib/features/quran/presentation/view/widgets/share_sheet.dart" the "turnOffTranslation" toast when appear it appears under the bottom sheet, i want it and all others taost appear above any widgets and bottom sheets
+- i want to make share dua like aya customizations for colors and others
+- make the nvigation bar blured glass for his under widgets like app bar
+
+For Quran page:
+- i want to be able to share several aya releated/or not releated to each others in same image share
+  - maybe you can make a divider between ayas if it's not belong to each others
+  - show waring message if the additional aya not fit the image share
+  - if aya/ays with tafseer get overflow and there is no place for both, start to remove tafseer to have some space
+- i want to be able to make the ayas customizable fonts
+- the ayas get a little glitch and pixels and not clear and less resolution on runing on android device
+- i want to make the tranistion between pages like real flip of page, get a little wavy and flip (make it the same physics of real flip page)
+- i want to downalod ibn kathir tafseer and as-sa'di tafseer for all qaraun, and can choose between them when i share an aya image (and be carful of overflow text)
+- i want to have different fonts for the quran itself
+- i want to have a different thems for the quran
+- i want to apply a some of Embroider/drwaing background for the ayas and add a switch button to remove it, and also switch button to make a single color rather than gradient
+
+For Home page:
+- i want to show times of praying times along around the rounded half circle, means at the left of the half circle shrouk (as current happend) and at the middle of it show duhr time, and at the right of it show asr time, and at the end show normally maghreb (as you did right now)
+  - same for night time, show isha and fajir as you did, but also show the last a third of the night
+  - i want to make the night circle end with sunrise not fajr, also show fajir time of the half circle
+  - for now night half circle we have maghrab (at the beging of the left) + isha + third of the night + fajri + sunrise (at the end of right)
+  - for now light half circle we have sunrise at the begining of left + durh + asr + maghrab (at the end of the right)
+  - i want the transition between light and night be shooth and like circle transition between them
+  - i want to show three starts as trangle shape around the dots of half circle, and that represent the current time the sunrises
+  - i want to make the sun keeps a little shining when it's appearing, and also the three stars with thier own different
+  - the verse of today, i think it's not realy random, i see it's alwyes show elfatha ayas, i want to make it randomized every day
+
+- the logo when it's appear, it's not clear and less resolution
+
+- make blur glass for popup dialog
+
+
+- just tell me how "Your data" section in more works
+- i want to solve all todo, to make the app finished

@@ -1,8 +1,11 @@
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,12 +60,43 @@ Location makkah() => Location(
 
 /// makkah with the real calculation (maghrib is 17:56 there too) and a clock that moves with the
 /// test's fake time
-List<Override> makkahAt(WidgetTester tester, DateTime start, {List<Override> extra = const []}) {
+List<Override> makkahAt(
+  WidgetTester tester,
+  DateTime start, {
+  BmThemeId? theme,
+  List<Override> extra = const [],
+}) {
   final origin = tester.binding.clock.now();
   return [
-    ...testOverrides(),
+    ...testOverrides(theme: theme),
     clockProvider.overrideWithValue(() => start.add(tester.binding.clock.now().difference(origin))),
     locationProvider.overrideWithValue(makkah()),
     ...extra,
+  ];
+}
+
+/// the arc labels home paints right now, with their text and whether it is a time only label.
+/// the flow keeps both labels of a point and paints one, so this asks its delegate
+List<({Rect rect, String text, bool short})> skyLabels(WidgetTester tester) {
+  final finder = find.descendant(of: find.byType(SkyLabels), matching: find.byType(Flow));
+  if (finder.evaluate().isEmpty) return [];
+  final flow = tester.widget<Flow>(finder);
+  final delegate = flow.delegate as SkyLabelsFlow;
+  final box = tester.renderObject<RenderFlow>(finder);
+  final sizes = <Size>[];
+  box.visitChildren((child) => sizes.add((child as RenderBox).size));
+  final offsets = delegate.place(box.size, sizes);
+  return [
+    for (var i = 0; i < offsets.length; i++)
+      if (offsets[i] case final offset?)
+        (
+          rect: box.localToGlobal(offset) & sizes[i],
+          text: tester
+              .widget<Text>(
+                find.descendant(of: find.byWidget(flow.children[i]), matching: find.byType(Text)),
+              )
+              .data!,
+          short: delegate.slots[i].short,
+        ),
   ];
 }

@@ -9,6 +9,7 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/qada.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/progress_ring.dart';
 import 'package:flutter/material.dart';
@@ -55,22 +56,28 @@ class SummaryCard extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          MediumText(
-                            StringsManager.prayedToday,
-                            args: {'count': context.formatDigits('$count', digits)},
+                          BmSwitcher(
+                            child: MediumText(
+                              StringsManager.prayedToday,
+                              key: ValueKey(count),
+                              args: {'count': context.formatDigits('$count', digits)},
+                            ),
                           ),
                           const RSizedBox.vertical(SpaceManager.rowLineGap),
-                          if (missed == 0)
-                            const RegularText(
-                              StringsManager.nothingToMakeUp,
-                              color: ThemeEnum.text2,
-                            )
-                          else
-                            RegularText(
-                              StringsManager.missedToMakeUp,
-                              args: {'count': context.formatDigits('$missed', digits)},
-                              color: ThemeEnum.text2,
-                            ),
+                          BmSwitcher(
+                            child: missed == 0
+                                ? const RegularText(
+                                    StringsManager.nothingToMakeUp,
+                                    key: ValueKey(0),
+                                    color: ThemeEnum.text2,
+                                  )
+                                : RegularText(
+                                    StringsManager.missedToMakeUp,
+                                    key: ValueKey(missed),
+                                    args: {'count': context.formatDigits('$missed', digits)},
+                                    color: ThemeEnum.text2,
+                                  ),
+                          ),
                         ],
                       ),
                     ),

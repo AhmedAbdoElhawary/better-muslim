@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/hijri/hijri_date.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,6 +83,22 @@ void main() {
     test('digits change only in arabic', () {
       expect(formatDigitsIn('10', language: 'ar', digits: Digits.eastern), '١٠');
       expect(formatDigitsIn('10', language: 'en', digits: Digits.eastern), '10');
+    });
+  });
+
+  group('the date and hijri lines', () {
+    setUpAll(initializeDateFormatting);
+    const hijri = HijriDate(day: 4, month: 5, year: 1448);
+
+    test('the hijri line with and without the year', () {
+      expect(hijriLineIn(hijri, 'Jumada I'), '4 Jumada I 1448');
+      expect(hijriLineIn(hijri, 'Jumada I', year: false), '4 Jumada I');
+    });
+
+    test('english the short day, arabic the full weekday', () {
+      final thursday = DateTime(2026, 10, 15);
+      expect(dateLineIn(thursday, '4 Jumada I', 'en'), 'Thu 15 Oct · 4 Jumada I');
+      expect(dateLineIn(thursday, '4 جمادى الأولى', 'ar'), 'الخميس · 4 جمادى الأولى');
     });
   });
 }

@@ -1,11 +1,7 @@
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
-import 'package:better_muslim/features/more/view/licenses_page.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -15,9 +11,6 @@ import '../../helpers/providers.dart';
 
 void main() {
   setUpAll(tz.initializeTimeZones);
-
-  late List<MethodCall> system;
-  setUp(() => system = mockSystemChannel(version: '1.0.0 (12)'));
 
   Future<(int, int, int)> counts(WidgetTester tester) async {
     final db = dbOf(tester);
@@ -29,6 +22,28 @@ void main() {
       ),
     ))!;
   }
+
+  group('your data', () {
+    testWidgets('back up, restore from backup, then reset prayer journey', (tester) async {
+      await pumpMore(tester, await designOverrides());
+      await scrollTo(tester, 'Reset prayer journey');
+      final backUp = tester.getRect(find.text('Back up')).top;
+      final restore = tester.getRect(find.text('Restore from backup')).top;
+      final reset = tester.getRect(find.text('Reset prayer journey')).top;
+      expect(backUp, lessThan(restore));
+      expect(restore, lessThan(reset));
+      expect(tester.getRect(find.text('YOUR DATA')).top, lessThan(backUp));
+      await unmount(tester);
+    });
+
+    testWidgets('back up opens its sheet', (tester) async {
+      await pumpMore(tester, await designOverrides());
+      await tapText(tester, 'Back up');
+      expect(find.text('Save backup'), findsOneWidget);
+      expect(find.text('Confirm password'), findsOneWidget);
+      await unmount(tester);
+    });
+  });
 
   group('reset prayer journey', () {
     testWidgets('cancel keeps the log', (tester) async {
@@ -47,7 +62,7 @@ void main() {
       final db = dbOf(tester);
       await tester.runAsync(() async {
         await db.saveDua('travel-1');
-        await db.updateSettings(const SettingsCompanion(tasbihCount: Value(16)));
+        await db.updateSettings(const SettingsCompanion(subhanallahCount: Value(16)));
       });
       expect((await counts(tester)).$1, greaterThan(0));
       showToast(
@@ -64,72 +79,9 @@ void main() {
 
       expect(await counts(tester), (0, 0, 1));
       final settings = await settingsOf(tester);
-      expect(settings.tasbihCount, 16);
+      expect(settings.subhanallahCount, 16);
       expect(settings.firstUse, DateTime(2026, 10, 1));
       expect(find.text('Undo'), findsNothing);
-      await unmount(tester);
-    });
-  });
-
-  group('about', () {
-    testWidgets('the version shows and does nothing on tap', (tester) async {
-      await pumpMore(tester, await designOverrides());
-      await scrollTo(tester, 'Version');
-      expect(find.text('1.0.0 (12)'), findsOneWidget);
-      await tester.tap(find.text('Version'));
-      await tester.pumpAndSettle();
-      expect(find.text('Version'), findsOneWidget);
-      await unmount(tester);
-    });
-
-    testWidgets('credits: each source with its use, license and link', (tester) async {
-      await pumpMore(tester, await designOverrides());
-      await tapText(tester, 'Credits');
-
-      expect(find.text('GeoNames'), findsOneWidget);
-      expect(find.text('Place names · CC BY 4.0'), findsOneWidget);
-      for (final font in [
-        'Marcellus',
-        'Schibsted Grotesk',
-        'Reem Kufi',
-        'Noto Sans Arabic',
-        'Amiri',
-      ]) {
-        expect(find.text(font), findsOneWidget, reason: font);
-      }
-      expect(find.text('Fonts · SIL OFL 1.1'), findsNWidgets(5));
-      expect(find.text('Azkar and duas'), findsOneWidget);
-      expect(find.text('Adhan recordings'), findsOneWidget);
-
-      await tester.tap(find.text('GeoNames'));
-      await tester.pumpAndSettle();
-      expect(system.last.method, 'openUrl');
-      expect(system.last.arguments, {'url': 'https://www.geonames.org'});
-      await unmount(tester);
-    });
-
-    testWidgets('the licenses page lists packages and opens one', (tester) async {
-      LicenseRegistry.addLicense(
-        () => Stream.value(const LicenseEntryWithLineBreaks(['better_test_package'], 'The text.')),
-      );
-      await pumpMore(tester, await designOverrides());
-      await tapText(tester, 'Credits');
-      await tapText(tester, 'Open source licenses');
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
-      await tester.pumpAndSettle();
-      expect(find.byType(LicensesPage), findsOneWidget);
-
-      await tapText(tester, 'better_test_package');
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
-      await tester.pumpAndSettle();
-      expect(find.text('The text.'), findsOneWidget);
-      await unmount(tester);
-    });
-
-    testWidgets('arabic', (tester) async {
-      await pumpMore(tester, await designOverrides(), locale: const Locale('ar'));
-      await tapText(tester, 'المصادر والشكر');
-      expect(find.text('أسماء الأماكن · CC BY 4.0'), findsOneWidget);
       await unmount(tester);
     });
   });

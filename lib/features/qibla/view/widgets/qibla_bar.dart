@@ -3,10 +3,12 @@ import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
+import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -24,7 +26,16 @@ class QiblaBar extends StatelessWidget {
           children: [
             BarBackButton(),
             Expanded(
-              child: SemiBoldText(StringsManager.qibla, textAlign: TextAlign.center, maxLines: 1),
+              child: Center(
+                child: TitleHero(
+                  tag: Routes.qibla,
+                  child: SemiBoldText(
+                    StringsManager.qibla,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                  ),
+                ),
+              ),
             ),
             _Gear(),
           ],

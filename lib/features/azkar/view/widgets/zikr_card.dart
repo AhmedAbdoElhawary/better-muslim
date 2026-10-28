@@ -10,7 +10,9 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/dua_text.dart';
+import 'package:better_muslim/core/widgets/rolling_digits.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -63,39 +65,50 @@ class ZikrCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: complete
-                          ? const RegularText(
-                              StringsManager.setComplete,
-                              fontSize: FontSizeManager.label,
-                              color: ThemeEnum.primary,
-                            )
-                          : RegularText(
-                              StringsManager.setCardHeader,
-                              args: {
-                                'set': context.tr(setKey),
-                                'index': digitsOf(index + 1),
-                                'total': digitsOf(total),
-                              },
-                              fontSize: FontSizeManager.label,
-                              color: ThemeEnum.text2,
-                            ),
-                    ),
-                    if (done) ...[
-                      BmIcon.ui(
-                        BmUiIcon.check,
-                        size: SizeManager.iconInline.r,
-                        color: context.getColor(ThemeEnum.primary),
+                      child: BmSwitcher(
+                        child: complete
+                            ? const RegularText(
+                                StringsManager.setComplete,
+                                key: ValueKey(true),
+                                fontSize: FontSizeManager.label,
+                                color: ThemeEnum.primary,
+                              )
+                            : RegularText(
+                                StringsManager.setCardHeader,
+                                key: const ValueKey(false),
+                                args: {
+                                  'set': context.tr(setKey),
+                                  'index': digitsOf(index + 1),
+                                  'total': digitsOf(total),
+                                },
+                                fontSize: FontSizeManager.label,
+                                color: ThemeEnum.text2,
+                              ),
                       ),
-                      const RSizedBox.horizontal(SpaceManager.s1),
-                    ],
+                    ),
+                    BmSwitcher(
+                      child: done
+                          ? EndPadding(
+                              padding: SpaceManager.s1,
+                              child: BmIcon.ui(
+                                BmUiIcon.check,
+                                size: SizeManager.iconInline.r,
+                                color: context.getColor(ThemeEnum.primary),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                     Directionality(
                       textDirection: TextDirection.ltr,
-                      child: MediumText(
+                      child: RollingDigit(
                         progress,
-                        translate: false,
-                        fontSize: FontSizeManager.caption,
-                        color: ThemeEnum.primary,
-                        tabularFigures: true,
+                        child: MediumText(
+                          progress,
+                          translate: false,
+                          fontSize: FontSizeManager.caption,
+                          color: ThemeEnum.primary,
+                          tabularFigures: true,
+                        ),
                       ),
                     ),
                   ],

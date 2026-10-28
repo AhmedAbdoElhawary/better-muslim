@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
@@ -10,7 +12,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// MOTION 15: in on the gentle spring, out in 300 ms accelerate. with reduce motion the sheet
 /// stays in place and fades for 150 ms. a release that snaps it back open gives the detent haptic
-Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}) {
+Future<T?> showBmSheet<T>(
+  BuildContext context, {
+  bool applyBlur = true,
+  bool maxSheetHeight = false,
+  required WidgetBuilder builder,
+}) {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
   /// the root one, so the sheet and its scrim cover the nav bar too
@@ -31,17 +38,18 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
 
   /// the sheet stays put while the barrier and the content fade
   const still = Threshold(0);
-  final route = ModalBottomSheetRoute<T>(
-    builder: (context) => _Sheet(fade: reduceMotion, child: builder(context)),
+  final route = _BlurredModalBottomSheetRoute<T>(
+    applyBlur: applyBlur,
+    builder: (context) =>
+        _Sheet(fade: reduceMotion, enableCustomCurve: !maxSheetHeight, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: context.getColor(ThemeEnum.transparent),
     elevation: 0,
-    modalBarrierColor: context
-        .getColor(ThemeEnum.scrim)
-        .withValues(alpha: context.isThemeDark ? BmOpacity.scrimDark : BmOpacity.scrimLight),
+    constraints: maxSheetHeight ? null : BoxConstraints(maxHeight: SizeManager.sheetMax.r),
+    modalBarrierColor: context.getColor(ThemeEnum.scrim).withValues(alpha: BmOpacity.pressed),
     transitionAnimationController: controller,
     sheetAnimationStyle: AnimationStyle(
       curve: reduceMotion ? still : _SpringCurve(BmMotion.gentle, BmMotion.emphasized),
@@ -54,11 +62,51 @@ Future<T?> showBmSheet<T>(BuildContext context, {required WidgetBuilder builder}
   return navigator.push(route);
 }
 
+class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
+  _BlurredModalBottomSheetRoute({
+    required super.builder,
+    super.capturedThemes,
+    super.barrierLabel,
+    required super.isScrollControlled,
+    super.useSafeArea,
+    super.backgroundColor,
+    super.elevation,
+    super.constraints,
+    super.modalBarrierColor,
+    super.transitionAnimationController,
+    super.sheetAnimationStyle,
+    this.applyBlur = true,
+  });
+  final bool applyBlur;
+
+  @override
+  Widget buildModalBarrier() {
+    if (!applyBlur) return super.buildModalBarrier();
+
+    final routeAnimation = animation!;
+
+    return AnimatedBuilder(
+      animation: routeAnimation,
+      child: super.buildModalBarrier(),
+      builder: (context, barrier) {
+        final sigma = (SizeManager.backdropBlur * routeAnimation.value)
+            .clamp(0.0, SizeManager.backdropBlur)
+            .toDouble();
+
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: barrier,
+        );
+      },
+    );
+  }
+}
+
 class _Sheet extends StatelessWidget {
-  const _Sheet({required this.fade, required this.child});
+  const _Sheet({this.enableCustomCurve = true, required this.fade, required this.child});
   final bool fade;
   final Widget child;
-
+  final bool enableCustomCurve;
   @override
   Widget build(BuildContext context) {
     final sheet = KeyboardPadding(
@@ -71,19 +119,50 @@ class _Sheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const VerticalPadding(padding: SpaceManager.s2, child: _Grabber()),
+            const VerticalPadding(padding: SpaceManager.s2, child: Grabber()),
             Flexible(child: child),
           ],
         ),
       ),
     );
-    if (!fade) return sheet;
-    return FadeTransition(opacity: ModalRoute.of(context)!.animation!, child: sheet);
+    final animation = ModalRoute.of(context)!.animation!;
+
+    if (fade) {
+      return FadeTransition(opacity: animation, child: sheet);
+    }
+
+    final position = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: animation,
+        curve: enableCustomCurve ? const _OvershootCurve() : Curves.easeOutExpo,
+        reverseCurve: Curves.easeInCubic,
+      ),
+    );
+
+    return SlideTransition(position: position, child: sheet);
   }
 }
 
-class _Grabber extends StatelessWidget {
-  const _Grabber();
+class _OvershootCurve extends Curve {
+  const _OvershootCurve();
+
+  @override
+  double transformInternal(double t) {
+    final value = t.clamp(0.0, 1.0).toDouble();
+
+    if (value < 0.7) {
+      return 1.08 * Curves.easeOutCubic.transform(value / 0.7);
+    }
+
+    final progress = Curves.easeInOut.transform((value - 0.7) / 0.3);
+
+    return 1.08 - (0.08 * progress);
+  }
+}
+
+/// the sheets' handle, the reader's own sheets use it too
+class Grabber extends StatelessWidget {
+  const Grabber({super.key});
 
   @override
   Widget build(BuildContext context) {

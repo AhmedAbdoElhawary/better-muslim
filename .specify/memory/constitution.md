@@ -66,7 +66,9 @@ languages keep working.
 - Contrast meets WCAG AA in both modes. Every hit target is at least 44 x 44.
 - Every animation follows `MOTION.md` and has its reduce-motion fallback. Haptics only through
   `BmHaptics`.
-- Quran text is never animated, overlapped, cropped or used as decoration.
+- Quran text is never animated, recolored, overlapped, cropped or used as decoration. The page as
+  a whole may turn, open from a card, recede behind a sheet and peek beside the controls as the
+  handoff designs it, the glyphs never move on their own.
 
 Why: the design is finished and approved, the work is building it exactly.
 
@@ -145,13 +147,15 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
   shared_preferences, no hive.
 - Domain packages, each added in its milestone: adhan_dart (not adhan, which stopped in 2023),
   hijri, geolocator, flutter_local_notifications, timezone, flutter_timezone, just_audio,
-  audio_session, workmanager (the background top-up), share_plus (the share sheet for the dua
-  card), home_widget, live_activities.
+  audio_session, audio_service (the recitation in the background and on the lock screen),
+  workmanager (the background top-up), share_plus (the share sheet for the dua card), animations
+  (the container transform), file_picker (picking a backup file to restore).
 - The compass is the app's own `better_muslim/compass` channel, true north from the World Magnetic
   Model in Dart.
 - Native code that has to run in every Flutter engine (the app's, a background task's, a headless
-  one) is a local plugin in `packages/`, like `packages/adhan_alarms`, so Flutter registers it in
-  each engine by itself.
+  one) is a local plugin in `packages/`, like `packages/adhan_alarms` and `packages/prayer_surfaces`
+  (the widgets' data, the Live Activity and the Android countdown), so Flutter registers it in each
+  engine by itself.
 - Place names and city search come from a GeoNames list shipped in the app (every country, places
   over 1,000 people plus capitals and region seats), never from geocoding, which needs internet.
 - Any other package: check pub.dev maintenance and popularity first, then ask me.
@@ -184,4 +188,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.4.1 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-19
+**Version**: 3.7.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-21

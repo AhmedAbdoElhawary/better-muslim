@@ -5,6 +5,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/features/home/view/widgets/strip_cell.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class StripRow extends ConsumerWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => context.go(Routes.prayerAt(ref.read(prayerDayProvider), cell.prayer)),
-        child: DecoratedBox(
+        child: AnimatedDecoratedBox(
           decoration: BoxDecoration(
             color: cell.current ? context.getColor(ThemeEnum.primaryContainer) : null,
             borderRadius: BorderRadius.circular(RadiusManager.md.r),

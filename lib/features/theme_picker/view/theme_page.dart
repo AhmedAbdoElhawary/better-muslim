@@ -1,14 +1,19 @@
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/appearance.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/step/step_reveal.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/mode_control.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_snippet.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_swatches.dart';
@@ -18,48 +23,64 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-/// 4.15: the preview restyles at once, only apply saves (FR-009 to FR-012)
+/// 4.15: the preview restyles at once, only apply saves (FR-009 to FR-012). the last onboarding
+/// step too, without the back button, building on its route like the other steps
 class ThemePage extends ConsumerWidget {
-  const ThemePage({super.key});
+  const ThemePage({this.onboarding = false, super.key});
+
+  final bool onboarding;
+
+  Future<void> _apply(BuildContext context, WidgetRef ref) async {
+    await ref.read(themePreviewProvider.notifier).apply();
+    if (!onboarding) {
+      if (context.mounted) context.pop();
+      return;
+    }
+
+    /// finishing sends the router home too, the go keeps it on the home tab (FR-027)
+    await ref.read(onboardingProvider.notifier).finish();
+    if (context.mounted) context.go(Routes.home);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const CompactAppBar(StringsManager.theme),
-          const Expanded(
-            child: SingleChildScrollView(
-              child: HorizontalPadding(
-                padding: SpaceManager.screen,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    RSizedBox.vertical(SpaceManager.previewTop),
-                    _Preview(),
-                    RSizedBox.vertical(SpaceManager.modeTop),
-                    ModeControl(),
-                    RSizedBox.vertical(SpaceManager.swatchesTop),
-                    ThemeSwatches(),
-                    RSizedBox.vertical(SpaceManager.themeNoteTop),
-                    HorizontalPadding(
-                      padding: SpaceManager.s1,
-                      child: RegularText(
-                        StringsManager.followSkyNote,
-                        fontSize: FontSizeManager.cardNote,
-                        height: LineHeightManager.body,
-                        color: ThemeEnum.text2,
-                        textAlign: TextAlign.center,
-                      ),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CompactAppBar(StringsManager.theme, back: !onboarding, heroTag: Routes.theme),
+        const Expanded(
+          child: SingleChildScrollView(
+            child: HorizontalPadding(
+              padding: SpaceManager.screen,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  RSizedBox.vertical(SpaceManager.previewTop),
+                  StepReveal(slot: StepSlot.title, child: _Preview()),
+                  RSizedBox.vertical(SpaceManager.modeTop),
+                  StepReveal(slot: StepSlot.body, child: ModeControl()),
+                  RSizedBox.vertical(SpaceManager.swatchesTop),
+                  StepReveal(slot: StepSlot.cards, child: ThemeSwatches()),
+                  RSizedBox.vertical(SpaceManager.themeNoteTop),
+                  HorizontalPadding(
+                    padding: SpaceManager.s1,
+                    child: RegularText(
+                      StringsManager.followSkyNote,
+                      fontSize: FontSizeManager.cardNote,
+                      height: LineHeightManager.body,
+                      color: ThemeEnum.text2,
+                      textAlign: TextAlign.center,
                     ),
-                    RSizedBox.vertical(SpaceManager.s4),
-                  ],
-                ),
+                  ),
+                  RSizedBox.vertical(SpaceManager.s4),
+                ],
               ),
             ),
           ),
-          SafeArea(
+        ),
+        StepReveal(
+          slot: StepSlot.buttons,
+          child: SafeArea(
             top: false,
             child: OnlyPadding(
               start: SpaceManager.s5,
@@ -67,15 +88,16 @@ class ThemePage extends ConsumerWidget {
               bottom: SpaceManager.s3,
               child: BmButton.primary(
                 StringsManager.applyTheme,
-                onPressed: () async {
-                  await ref.read(themePreviewProvider.notifier).apply();
-                  if (context.mounted) context.pop();
-                },
+                onPressed: () => _apply(context, ref),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+    return StepReveal(
+      slot: StepSlot.background,
+      child: Scaffold(body: onboarding ? content : TitleGlow(child: content)),
     );
   }
 }
@@ -122,8 +144,12 @@ class _Preview extends ConsumerWidget {
                       child: OverflowBox(
                         alignment: Alignment.topCenter,
                         maxHeight: double.infinity,
-                        child: Theme(
+                        child: AnimatedTheme(
                           data: light ? AppTheme.light(pick.theme) : AppTheme.dark(pick.theme),
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? BmMotion.micro
+                              : BmMotion.standard,
+                          curve: BmMotion.standardCurve,
                           child: const ThemeSnippet(),
                         ),
                       ),

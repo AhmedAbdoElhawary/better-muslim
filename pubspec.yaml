@@ -34,8 +34,13 @@ dependencies:
     sdk: flutter
   adhan_alarms:
     path: packages/adhan_alarms
+  prayer_surfaces:
+    path: packages/prayer_surfaces
   adhan_dart: ^2.0.1
+  animations: ^3.0.0
+  audio_service: ^0.18.19
   audio_session: ^0.2.4
+  crypto: ^3.0.7
   drift: ^2.35.2
   drift_flutter: ^0.3.1
   flutter_local_notifications: ^22.3.2
@@ -54,6 +59,7 @@ dependencies:
   timezone: ^0.11.2
   workmanager: ^0.10.10
   share_plus: ^13.3.1
+  file_picker: ^13.1.0
 
 dev_dependencies:
   flutter_test:
@@ -70,7 +76,6 @@ dev_dependencies:
   drift_dev: any
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-  flutter_native_splash: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -84,21 +89,28 @@ hooks:
 flutter:
   uses-material-design: true
 
+  shaders:
+    - shaders/liquid_glass.frag
+    - shaders/page_curl.frag
+
   assets:
     - assets/icons/outline/
     - assets/icons/filled/
     - assets/icons/ui/
     - assets/brand/
     - assets/ornaments/
-    - assets/fonts/licenses/
     - assets/l10n/
     - assets/places/
     - assets/azkar/
     - assets/duas/
+    - assets/quran/
+    - assets/quran/pages/
+    - assets/quran/surahs/
     # TODO(ahmed): replace the placeholder adhan files in assets/audio/ with the licensed recordings, same names.
     - assets/audio/
     - shorebird.yaml
 
+  # TODO(ahmed): put KFGQPC Uthmanic Script Hafs (QUL's file) at assets/fonts/KfgqpcHafs.ttf and confirm its license, the kfgqpc font falls back to Amiri Quran until then.
   fonts:
     - family: Marcellus
       fonts:
@@ -120,6 +132,9 @@ flutter:
     - family: AmiriQuran
       fonts:
         - asset: assets/fonts/AmiriQuran-Regular.ttf
+    - family: ScheherazadeNew
+      fonts:
+        - asset: assets/fonts/ScheherazadeNew-Regular.ttf
 
 flutter_launcher_icons:
   ios: true
@@ -132,10 +147,3 @@ flutter_launcher_icons:
   adaptive_icon_foreground: assets/app_icon/png/android_foreground.png
   adaptive_icon_monochrome: assets/app_icon/png/android_monochrome.png
   image_path_android: assets/app_icon/png/play_store_512.png
-
-flutter_native_splash:
-  color: "#000000"
-  image: assets/app_icon/png/splash_symbol.png
-  android_12:
-    color: "#000000"
-    image: assets/app_icon/png/splash_symbol.png

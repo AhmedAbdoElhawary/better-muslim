@@ -9,6 +9,8 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
+import 'package:better_muslim/core/surfaces/write_surfaces.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
@@ -100,14 +102,24 @@ Future<Set<(AzkarSet, DateTime)>> _doneWindows(
 const markPrayedAction = 'mark_prayed';
 
 /// milestone 4's markPrayed, on the payload's prayer day, so isha after midnight lands on the day
-/// it started (FR-038). a store that can't be opened stays as it is, the user can mark in the app
-Future<void> markFromPayload(String payload, {AppDatabase? db}) async {
+/// it started (FR-038). a store that can't be opened stays as it is, the user can mark in the app.
+/// in the app the boot writes the surfaces, in the background `surfaces` does
+Future<void> markFromPayload(String payload, {AppDatabase? db, SurfacesChannel? surfaces}) async {
   final alert = alertFromPayload(payload);
   if (alert == null) return;
   final store = db ?? await AppDatabase.openExisting();
   if (store == null) return;
   try {
     await store.markPrayed(alert.day, alert.prayer);
+    if (surfaces != null) {
+      await writeSurfaces(
+        store,
+        channel: surfaces,
+        locale: AppLocalizations.localeOf((await store.watchSettings().first).language),
+        use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+        phoneZone: await PhoneZone.read(),
+      );
+    }
   } finally {
     if (db == null) await store.close();
   }
@@ -119,7 +131,8 @@ Future<void> onNotificationActionInBackground(NotificationResponse response) asy
   final payload = response.payload;
   if (response.actionId != markPrayedAction || payload == null) return;
   DartPluginRegistrant.ensureInitialized();
-  await markFromPayload(payload);
+  tz.initializeTimeZones();
+  await markFromPayload(payload, surfaces: SurfacesChannel());
 }
 
 /// kotlin's MarkPrayedReceiver runs this in a headless engine, args = [payload]
@@ -127,12 +140,42 @@ Future<void> onNotificationActionInBackground(NotificationResponse response) asy
 Future<void> markPrayedInBackground(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
+  tz.initializeTimeZones();
   try {
-    await markFromPayload(args.first);
+    await markFromPayload(args.first, surfaces: SurfacesChannel());
   } finally {
     /// kotlin destroys the engine on this
     await const MethodChannel('better_muslim/adhan/background').invokeMethod<void>('done');
   }
+}
+
+/// the surfaces first, so the widgets keep their 7 days with notifications refused (FR-002)
+Future<void> backgroundTopUp(
+  AppDatabase db, {
+  required NotificationScheduler scheduler,
+  required SurfacesChannel surfaces,
+  required Locale locale,
+  required bool use24h,
+  required String? phoneZone,
+  DateTime? now,
+}) async {
+  await writeSurfaces(
+    db,
+    channel: surfaces,
+    locale: locale,
+    use24h: use24h,
+    phoneZone: phoneZone,
+    now: now,
+  );
+  if (!await scheduler.isAllowed()) return;
+  await topUp(
+    db,
+    scheduler: scheduler,
+    locale: locale,
+    use24h: use24h,
+    phoneZone: phoneZone,
+    now: now,
+  );
 }
 
 /// the same name on both platforms, ios only runs a task listed in BGTaskSchedulerPermittedIdentifiers
@@ -148,14 +191,14 @@ void callbackDispatcher() {
     final db = await AppDatabase.openExisting();
     if (db == null) return true;
     try {
-      final locale = AppLocalizations.localeFor(PlatformDispatcher.instance.locales);
+      final locale = AppLocalizations.localeOf((await db.watchSettings().first).language);
       final l10n = await AppLocalizations.load(locale);
       final scheduler = NotificationScheduler(AdhanChannel());
       await scheduler.init(markPrayed: l10n.tr(StringsManager.markPrayed, const {}));
-      if (!await scheduler.isAllowed()) return true;
-      await topUp(
+      await backgroundTopUp(
         db,
         scheduler: scheduler,
+        surfaces: SurfacesChannel(),
         locale: locale,
         use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
         phoneZone: await PhoneZone.read(),

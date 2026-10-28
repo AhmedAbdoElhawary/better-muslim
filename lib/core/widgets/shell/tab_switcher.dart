@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:flutter/material.dart';
 
 /// keeps every tab alive like an IndexedStack and plays motion 16: the old tab fades up and out,
@@ -90,7 +91,7 @@ class _TabLayer extends StatelessWidget {
         enabled: visible,
         child: IgnorePointer(
           ignoring: !active,
-          child: Opacity(
+          child: CustomOpacity(
             opacity: opacity,
             child: Transform.translate(offset: Offset(0, offset), child: child),
           ),

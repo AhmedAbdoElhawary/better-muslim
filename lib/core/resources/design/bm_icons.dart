@@ -57,6 +57,17 @@ enum BmUiIcon {
   plus,
   minus,
   more_h,
+  language,
+  contents,
+  translate,
+  words,
+  copy,
+  memorize,
+  prev,
+  spread,
+  timer,
+  chevron_down,
+  download,
 }
 
 class BmIcon extends StatelessWidget {

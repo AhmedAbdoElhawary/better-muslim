@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -34,7 +35,7 @@ class _Dot extends StatelessWidget {
   Widget build(BuildContext context) {
     return RSizedBox.square(
       dimension: SizeManager.dayDot,
-      child: DecoratedBox(
+      child: AnimatedDecoratedBox(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: filled ? context.getColor(ThemeEnum.primary) : null,

@@ -5,6 +5,7 @@ import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
+import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_cell.dart';
@@ -55,6 +56,7 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          onboardingProvider.overrideWith(() => OnboardingNotifier(done: true)),
           flavorProvider.overrideWithValue(
             const FlavorConfig(
               flavor: Flavor.dev,
@@ -93,7 +95,7 @@ void main() {
     }
     await waitFor(tester, find.text('Ramadan 1448'));
     final first = tester.widget<DayCell>(
-      find.byWidgetPredicate((widget) => widget is DayCell && widget.hijriDay == '1'),
+      find.byWidgetPredicate((widget) => widget is DayCell && widget.day == '1'),
     );
     expect(first.look, DayLook.event);
     await tap(tester, find.byType(BarBackButton));

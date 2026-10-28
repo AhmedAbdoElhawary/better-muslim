@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/sliding_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -18,6 +21,7 @@ class Segmented<T> extends StatelessWidget {
     required this.onChanged,
     this.small = false,
     this.muted = const {},
+    this.empty = const {},
     super.key,
   });
 
@@ -32,6 +36,9 @@ class Segmented<T> extends StatelessWidget {
   /// drawn in text2 while not picked, 4.15's Follow sky
   final Set<T> muted;
 
+  /// nothing behind it, drawn in text2 with a close icon even when picked, still tappable
+  final Set<T> empty;
+
   @override
   Widget build(BuildContext context) {
     final height = small ? SizeManager.segmentSmall : SizeManager.segment;
@@ -43,6 +50,7 @@ class Segmented<T> extends StatelessWidget {
       selected: value == selected,
       small: small,
       muted: small || muted.contains(value),
+      empty: empty.contains(value),
       reach: reach,
       onTap: () {
         if (value == selected) return;
@@ -67,14 +75,32 @@ class Segmented<T> extends StatelessWidget {
         ),
         HorizontalPadding(
           padding: SpaceManager.segmentTrack,
-          child: Row(
-            mainAxisSize: small ? MainAxisSize.min : MainAxisSize.max,
-            children: [
-              for (final (index, value) in values.indexed) ...[
-                if (index > 0) const RSizedBox.horizontal(SpaceManager.segmentGap),
-                if (small) segment(value) else Expanded(child: segment(value)),
+          child: SlidingSelection(
+            selected: values.indexOf(selected),
+            highlight: VerticalPadding(
+              padding: reach + SpaceManager.segmentTrack,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.getColor(ThemeEnum.surface),
+                  borderRadius: BorderRadius.circular(
+                    (small ? RadiusManager.segmentSmall : RadiusManager.segment).r,
+                  ),
+                  boxShadow: [
+                    BoxShadow(color: context.getColor(ThemeEnum.outline), spreadRadius: 1),
+                  ],
+                ),
+              ),
+            ),
+            layout: (children) => Row(
+              mainAxisSize: small ? MainAxisSize.min : MainAxisSize.max,
+              children: [
+                for (final (index, child) in children.indexed) ...[
+                  if (index > 0) const RSizedBox.horizontal(SpaceManager.segmentGap),
+                  if (small) child else Expanded(child: child),
+                ],
               ],
-            ],
+            ),
+            children: [for (final value in values) segment(value)],
           ),
         ),
       ],
@@ -88,6 +114,7 @@ class _Segment extends StatelessWidget {
     required this.selected,
     required this.small,
     required this.muted,
+    required this.empty,
     required this.reach,
     required this.onTap,
   });
@@ -96,16 +123,17 @@ class _Segment extends StatelessWidget {
   final bool selected;
   final bool small;
   final bool muted;
+  final bool empty;
   final double reach;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(
-      (small ? RadiusManager.segmentSmall : RadiusManager.segment).r,
-    );
-    final color = selected || !muted ? ThemeEnum.text : ThemeEnum.text2;
+    final color = (selected || !muted) && !empty ? ThemeEnum.text : ThemeEnum.text2;
     final fontSize = small ? FontSizeManager.dhikrChip : FontSizeManager.secondary;
+    final text = selected && small && !empty
+        ? MediumText(label, fontSize: fontSize, textAlign: TextAlign.center)
+        : RegularText(label, fontSize: fontSize, color: color, textAlign: TextAlign.center);
     return Semantics(
       button: true,
       selected: selected,
@@ -119,28 +147,27 @@ class _Segment extends StatelessWidget {
             constraints: BoxConstraints(
               minHeight: (small ? SizeManager.segmentSmall : SizeManager.segment).r,
             ),
-            child: DecoratedBox(
-              decoration: selected
-                  ? BoxDecoration(
-                      color: context.getColor(ThemeEnum.surface),
-                      borderRadius: radius,
-                      boxShadow: [
-                        BoxShadow(color: context.getColor(ThemeEnum.outline), spreadRadius: 1),
-                      ],
-                    )
-                  : const BoxDecoration(),
-              child: HorizontalPadding(
-                padding: small ? SpaceManager.segmentSmallSide : 0,
-                child: Center(
-                  widthFactor: small ? 1 : null,
-                  child: selected && small
-                      ? MediumText(label, fontSize: fontSize, textAlign: TextAlign.center)
-                      : RegularText(
-                          label,
-                          fontSize: fontSize,
-                          color: color,
-                          textAlign: TextAlign.center,
-                        ),
+            child: HorizontalPadding(
+              padding: small ? SpaceManager.segmentSmallSide : 0,
+              child: Center(
+                widthFactor: small ? 1 : null,
+                child: AnimatedSwitcher(
+                  duration: BmMotion.micro,
+                  child: empty
+                      ? Row(
+                          key: const ValueKey(true),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(child: text),
+                            const RSizedBox.horizontal(SpaceManager.segmentIconGap),
+                            BmIcon.ui(
+                              BmUiIcon.close,
+                              size: SizeManager.iconChip.r,
+                              color: context.getColor(ThemeEnum.text2),
+                            ),
+                          ],
+                        )
+                      : KeyedSubtree(key: const ValueKey(false), child: text),
                 ),
               ),
             ),

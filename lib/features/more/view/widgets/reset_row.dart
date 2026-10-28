@@ -4,6 +4,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,7 +19,6 @@ class ResetRow extends ConsumerWidget {
       icon: BmIcon.ui(BmUiIcon.reset, size: SizeManager.iconList.r),
       title: StringsManager.resetJourney,
       onTap: () async {
-        final messenger = ScaffoldMessenger.of(context);
         final confirmed = await showBmDialog(
           context,
           title: StringsManager.resetJourneyTitle,
@@ -29,7 +29,7 @@ class ResetRow extends ConsumerWidget {
         await ref.read(databaseProvider).resetPrayerJourney();
 
         /// an undo from the prayer tab would bring a cleared row back
-        messenger.hideCurrentSnackBar();
+        hideToast();
       },
     );
   }

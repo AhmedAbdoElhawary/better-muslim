@@ -349,13 +349,37 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _tasbihCountMeta = const VerificationMeta('tasbihCount');
+  static const VerificationMeta _subhanallahCountMeta = const VerificationMeta('subhanallahCount');
   @override
-  late final GeneratedColumn<int> tasbihCount = GeneratedColumn<int>(
-    'tasbih_count',
+  late final GeneratedColumn<int> subhanallahCount = GeneratedColumn<int>(
+    'subhanallah_count',
     aliasedName,
     false,
-    check: () => ComparableExpr(tasbihCount).isBiggerOrEqualValue(0),
+    check: () => ComparableExpr(subhanallahCount).isBiggerOrEqualValue(0),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _alhamdulillahCountMeta = const VerificationMeta(
+    'alhamdulillahCount',
+  );
+  @override
+  late final GeneratedColumn<int> alhamdulillahCount = GeneratedColumn<int>(
+    'alhamdulillah_count',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(alhamdulillahCount).isBiggerOrEqualValue(0),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _allahuAkbarCountMeta = const VerificationMeta('allahuAkbarCount');
+  @override
+  late final GeneratedColumn<int> allahuAkbarCount = GeneratedColumn<int>(
+    'allahu_akbar_count',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(allahuAkbarCount).isBiggerOrEqualValue(0),
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
@@ -388,6 +412,205 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("azkar_nudges" IN (0, 1))'),
     defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _prayerCountdownMeta = const VerificationMeta('prayerCountdown');
+  @override
+  late final GeneratedColumn<bool> prayerCountdown = GeneratedColumn<bool>(
+    'prayer_countdown',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("prayer_countdown" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<CalendarMode, String> calendarMode =
+      GeneratedColumn<String>(
+        'calendar_mode',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('hijri'),
+      ).withConverter<CalendarMode>($SettingsTable.$convertercalendarMode);
+  static const VerificationMeta _topGlowMeta = const VerificationMeta('topGlow');
+  @override
+  late final GeneratedColumn<bool> topGlow = GeneratedColumn<bool>(
+    'top_glow',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("top_glow" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Language, String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('phone'),
+  ).withConverter<Language>($SettingsTable.$converterlanguage);
+  static const VerificationMeta _onboardedMeta = const VerificationMeta('onboarded');
+  @override
+  late final GeneratedColumn<bool> onboarded = GeneratedColumn<bool>(
+    'onboarded',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("onboarded" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastReadSurahMeta = const VerificationMeta('lastReadSurah');
+  @override
+  late final GeneratedColumn<int> lastReadSurah = GeneratedColumn<int>(
+    'last_read_surah',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _lastReadAyahMeta = const VerificationMeta('lastReadAyah');
+  @override
+  late final GeneratedColumn<int> lastReadAyah = GeneratedColumn<int>(
+    'last_read_ayah',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _lastReadPageMeta = const VerificationMeta('lastReadPage');
+  @override
+  late final GeneratedColumn<int> lastReadPage = GeneratedColumn<int>(
+    'last_read_page',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(lastReadPage).isBetweenValues(1, 604),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _lastReadAtMeta = const VerificationMeta('lastReadAt');
+  @override
+  late final GeneratedColumn<DateTime> lastReadAt = GeneratedColumn<DateTime>(
+    'last_read_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<PageColor, String> pageColor =
+      GeneratedColumn<String>(
+        'page_color',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('followSky'),
+      ).withConverter<PageColor>($SettingsTable.$converterpageColor);
+  @override
+  late final GeneratedColumnWithTypeConverter<QuranLayout, String> quranLayout =
+      GeneratedColumn<String>(
+        'quran_layout',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('mushaf'),
+      ).withConverter<QuranLayout>($SettingsTable.$converterquranLayout);
+  @override
+  late final GeneratedColumnWithTypeConverter<PageTurn, String> pageTurn = GeneratedColumn<String>(
+    'page_turn',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('book'),
+  ).withConverter<PageTurn>($SettingsTable.$converterpageTurn);
+  static const VerificationMeta _keepScreenOnMeta = const VerificationMeta('keepScreenOn');
+  @override
+  late final GeneratedColumn<bool> keepScreenOn = GeneratedColumn<bool>(
+    'keep_screen_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("keep_screen_on" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<QuranFont, String> quranFont =
+      GeneratedColumn<String>(
+        'quran_font',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('amiri'),
+      ).withConverter<QuranFont>($SettingsTable.$converterquranFont);
+  static const VerificationMeta _quranArabicSizeMeta = const VerificationMeta('quranArabicSize');
+  @override
+  late final GeneratedColumn<int> quranArabicSize = GeneratedColumn<int>(
+    'quran_arabic_size',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(quranArabicSize).isBetweenValues(-2, 3),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _quranTranslationSizeMeta = const VerificationMeta(
+    'quranTranslationSize',
+  );
+  @override
+  late final GeneratedColumn<int> quranTranslationSize = GeneratedColumn<int>(
+    'quran_translation_size',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(quranTranslationSize).isBetweenValues(-2, 3),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _reciteSpeedMeta = const VerificationMeta('reciteSpeed');
+  @override
+  late final GeneratedColumn<double> reciteSpeed = GeneratedColumn<double>(
+    'recite_speed',
+    aliasedName,
+    false,
+    check: () => reciteSpeed.isIn(const [0.75, 1.0, 1.25, 1.5]),
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _reciteRepeatMeta = const VerificationMeta('reciteRepeat');
+  @override
+  late final GeneratedColumn<int> reciteRepeat = GeneratedColumn<int>(
+    'recite_repeat',
+    aliasedName,
+    false,
+    check: () => reciteRepeat.isIn(const [1, 2, 3, 5, 10]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _recitePauseMeta = const VerificationMeta('recitePause');
+  @override
+  late final GeneratedColumn<int> recitePause = GeneratedColumn<int>(
+    'recite_pause',
+    aliasedName,
+    false,
+    check: () => recitePause.isIn(const [0, 1, 2, 3, 5]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -425,10 +648,31 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     reminderMinutes,
     notificationsAsked,
     tasbihDhikr,
-    tasbihCount,
+    subhanallahCount,
+    alhamdulillahCount,
+    allahuAkbarCount,
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    prayerCountdown,
+    calendarMode,
+    topGlow,
+    language,
+    onboarded,
+    lastReadSurah,
+    lastReadAyah,
+    lastReadPage,
+    lastReadAt,
+    pageColor,
+    quranLayout,
+    pageTurn,
+    keepScreenOn,
+    quranFont,
+    quranArabicSize,
+    quranTranslationSize,
+    reciteSpeed,
+    reciteRepeat,
+    recitePause,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -544,16 +788,109 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         tasbihDhikr.isAcceptableOrUnknown(data['tasbih_dhikr']!, _tasbihDhikrMeta),
       );
     }
-    if (data.containsKey('tasbih_count')) {
+    if (data.containsKey('subhanallah_count')) {
       context.handle(
-        _tasbihCountMeta,
-        tasbihCount.isAcceptableOrUnknown(data['tasbih_count']!, _tasbihCountMeta),
+        _subhanallahCountMeta,
+        subhanallahCount.isAcceptableOrUnknown(data['subhanallah_count']!, _subhanallahCountMeta),
+      );
+    }
+    if (data.containsKey('alhamdulillah_count')) {
+      context.handle(
+        _alhamdulillahCountMeta,
+        alhamdulillahCount.isAcceptableOrUnknown(
+          data['alhamdulillah_count']!,
+          _alhamdulillahCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('allahu_akbar_count')) {
+      context.handle(
+        _allahuAkbarCountMeta,
+        allahuAkbarCount.isAcceptableOrUnknown(data['allahu_akbar_count']!, _allahuAkbarCountMeta),
       );
     }
     if (data.containsKey('azkar_nudges')) {
       context.handle(
         _azkarNudgesMeta,
         azkarNudges.isAcceptableOrUnknown(data['azkar_nudges']!, _azkarNudgesMeta),
+      );
+    }
+    if (data.containsKey('prayer_countdown')) {
+      context.handle(
+        _prayerCountdownMeta,
+        prayerCountdown.isAcceptableOrUnknown(data['prayer_countdown']!, _prayerCountdownMeta),
+      );
+    }
+    if (data.containsKey('top_glow')) {
+      context.handle(_topGlowMeta, topGlow.isAcceptableOrUnknown(data['top_glow']!, _topGlowMeta));
+    }
+    if (data.containsKey('onboarded')) {
+      context.handle(
+        _onboardedMeta,
+        onboarded.isAcceptableOrUnknown(data['onboarded']!, _onboardedMeta),
+      );
+    }
+    if (data.containsKey('last_read_surah')) {
+      context.handle(
+        _lastReadSurahMeta,
+        lastReadSurah.isAcceptableOrUnknown(data['last_read_surah']!, _lastReadSurahMeta),
+      );
+    }
+    if (data.containsKey('last_read_ayah')) {
+      context.handle(
+        _lastReadAyahMeta,
+        lastReadAyah.isAcceptableOrUnknown(data['last_read_ayah']!, _lastReadAyahMeta),
+      );
+    }
+    if (data.containsKey('last_read_page')) {
+      context.handle(
+        _lastReadPageMeta,
+        lastReadPage.isAcceptableOrUnknown(data['last_read_page']!, _lastReadPageMeta),
+      );
+    }
+    if (data.containsKey('last_read_at')) {
+      context.handle(
+        _lastReadAtMeta,
+        lastReadAt.isAcceptableOrUnknown(data['last_read_at']!, _lastReadAtMeta),
+      );
+    }
+    if (data.containsKey('keep_screen_on')) {
+      context.handle(
+        _keepScreenOnMeta,
+        keepScreenOn.isAcceptableOrUnknown(data['keep_screen_on']!, _keepScreenOnMeta),
+      );
+    }
+    if (data.containsKey('quran_arabic_size')) {
+      context.handle(
+        _quranArabicSizeMeta,
+        quranArabicSize.isAcceptableOrUnknown(data['quran_arabic_size']!, _quranArabicSizeMeta),
+      );
+    }
+    if (data.containsKey('quran_translation_size')) {
+      context.handle(
+        _quranTranslationSizeMeta,
+        quranTranslationSize.isAcceptableOrUnknown(
+          data['quran_translation_size']!,
+          _quranTranslationSizeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('recite_speed')) {
+      context.handle(
+        _reciteSpeedMeta,
+        reciteSpeed.isAcceptableOrUnknown(data['recite_speed']!, _reciteSpeedMeta),
+      );
+    }
+    if (data.containsKey('recite_repeat')) {
+      context.handle(
+        _reciteRepeatMeta,
+        reciteRepeat.isAcceptableOrUnknown(data['recite_repeat']!, _reciteRepeatMeta),
+      );
+    }
+    if (data.containsKey('recite_pause')) {
+      context.handle(
+        _recitePauseMeta,
+        recitePause.isAcceptableOrUnknown(data['recite_pause']!, _recitePauseMeta),
       );
     }
     return context;
@@ -720,9 +1057,17 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.int,
         data['${effectivePrefix}tasbih_dhikr'],
       )!,
-      tasbihCount: attachedDatabase.typeMapping.read(
+      subhanallahCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}tasbih_count'],
+        data['${effectivePrefix}subhanallah_count'],
+      )!,
+      alhamdulillahCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}alhamdulillah_count'],
+      )!,
+      allahuAkbarCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}allahu_akbar_count'],
       )!,
       morningOpenedOn: $SettingsTable.$convertermorningOpenedOnn.fromSql(
         attachedDatabase.typeMapping.read(
@@ -739,6 +1084,91 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       azkarNudges: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}azkar_nudges'],
+      )!,
+      prayerCountdown: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}prayer_countdown'],
+      )!,
+      calendarMode: $SettingsTable.$convertercalendarMode.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}calendar_mode'],
+        )!,
+      ),
+      topGlow: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}top_glow'],
+      )!,
+      language: $SettingsTable.$converterlanguage.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}language'])!,
+      ),
+      onboarded: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}onboarded'],
+      )!,
+      lastReadSurah: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_read_surah'],
+      )!,
+      lastReadAyah: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_read_ayah'],
+      )!,
+      lastReadPage: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_read_page'],
+      )!,
+      lastReadAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_read_at'],
+      ),
+      pageColor: $SettingsTable.$converterpageColor.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}page_color'],
+        )!,
+      ),
+      quranLayout: $SettingsTable.$converterquranLayout.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}quran_layout'],
+        )!,
+      ),
+      pageTurn: $SettingsTable.$converterpageTurn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}page_turn'],
+        )!,
+      ),
+      keepScreenOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}keep_screen_on'],
+      )!,
+      quranFont: $SettingsTable.$converterquranFont.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}quran_font'],
+        )!,
+      ),
+      quranArabicSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quran_arabic_size'],
+      )!,
+      quranTranslationSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quran_translation_size'],
+      )!,
+      reciteSpeed: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}recite_speed'],
+      )!,
+      reciteRepeat: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recite_repeat'],
+      )!,
+      recitePause: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recite_pause'],
       )!,
     );
   }
@@ -798,6 +1228,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
   static TypeConverter<DateTime?, String?> $convertereveningOpenedOnn = NullAwareTypeConverter.wrap(
     $convertereveningOpenedOn,
   );
+  static JsonTypeConverter2<CalendarMode, String, String> $convertercalendarMode =
+      const EnumNameConverter<CalendarMode>(CalendarMode.values);
+  static JsonTypeConverter2<Language, String, String> $converterlanguage =
+      const EnumNameConverter<Language>(Language.values);
+  static JsonTypeConverter2<PageColor, String, String> $converterpageColor =
+      const EnumNameConverter<PageColor>(PageColor.values);
+  static JsonTypeConverter2<QuranLayout, String, String> $converterquranLayout =
+      const EnumNameConverter<QuranLayout>(QuranLayout.values);
+  static JsonTypeConverter2<PageTurn, String, String> $converterpageTurn =
+      const EnumNameConverter<PageTurn>(PageTurn.values);
+  static JsonTypeConverter2<QuranFont, String, String> $converterquranFont =
+      const EnumNameConverter<QuranFont>(QuranFont.values);
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -850,17 +1292,50 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   /// minutes before each prayer, 0 is off
   final int reminderMinutes;
 
-  /// the first launch asks for notifications once, a refusal is never asked again (FR-004)
+  /// true once 4.12 or the off line asked the phone, after that the off line opens settings
   final bool notificationsAsked;
 
   /// 0 subhanallah, 1 alhamdulillah, 2 allahu akbar
   final int tasbihDhikr;
-  final int tasbihCount;
+  final int subhanallahCount;
+  final int alhamdulillahCount;
+  final int allahuAkbarCount;
 
   /// the window last opened, the azkar tab's badge goes once it's the current one
   final DateTime? morningOpenedOn;
   final DateTime? eveningOpenedOn;
   final bool azkarNudges;
+
+  /// Countdown before each prayer
+  final bool prayerCountdown;
+  final CalendarMode calendarMode;
+  final bool topGlow;
+  final Language language;
+
+  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
+  final bool onboarded;
+  final int lastReadSurah;
+  final int lastReadAyah;
+  final int lastReadPage;
+
+  /// null = never read, the card shows no time
+  final DateTime? lastReadAt;
+  final PageColor pageColor;
+  final QuranLayout quranLayout;
+  final PageTurn pageTurn;
+  final bool keepScreenOn;
+  final QuranFont quranFont;
+
+  /// steps around 4.07's size
+  final int quranArabicSize;
+  final int quranTranslationSize;
+  final double reciteSpeed;
+
+  /// 1 is off
+  final int reciteRepeat;
+
+  /// seconds between ayahs
+  final int recitePause;
   const AppSettings({
     required this.id,
     this.latitude,
@@ -896,10 +1371,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.reminderMinutes,
     required this.notificationsAsked,
     required this.tasbihDhikr,
-    required this.tasbihCount,
+    required this.subhanallahCount,
+    required this.alhamdulillahCount,
+    required this.allahuAkbarCount,
     this.morningOpenedOn,
     this.eveningOpenedOn,
     required this.azkarNudges,
+    required this.prayerCountdown,
+    required this.calendarMode,
+    required this.topGlow,
+    required this.language,
+    required this.onboarded,
+    required this.lastReadSurah,
+    required this.lastReadAyah,
+    required this.lastReadPage,
+    this.lastReadAt,
+    required this.pageColor,
+    required this.quranLayout,
+    required this.pageTurn,
+    required this.keepScreenOn,
+    required this.quranFont,
+    required this.quranArabicSize,
+    required this.quranTranslationSize,
+    required this.reciteSpeed,
+    required this.reciteRepeat,
+    required this.recitePause,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1002,7 +1498,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['reminder_minutes'] = Variable<int>(reminderMinutes);
     map['notifications_asked'] = Variable<bool>(notificationsAsked);
     map['tasbih_dhikr'] = Variable<int>(tasbihDhikr);
-    map['tasbih_count'] = Variable<int>(tasbihCount);
+    map['subhanallah_count'] = Variable<int>(subhanallahCount);
+    map['alhamdulillah_count'] = Variable<int>(alhamdulillahCount);
+    map['allahu_akbar_count'] = Variable<int>(allahuAkbarCount);
     if (!nullToAbsent || morningOpenedOn != null) {
       map['morning_opened_on'] = Variable<String>(
         $SettingsTable.$convertermorningOpenedOnn.toSql(morningOpenedOn),
@@ -1014,6 +1512,43 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       );
     }
     map['azkar_nudges'] = Variable<bool>(azkarNudges);
+    map['prayer_countdown'] = Variable<bool>(prayerCountdown);
+    {
+      map['calendar_mode'] = Variable<String>(
+        $SettingsTable.$convertercalendarMode.toSql(calendarMode),
+      );
+    }
+    map['top_glow'] = Variable<bool>(topGlow);
+    {
+      map['language'] = Variable<String>($SettingsTable.$converterlanguage.toSql(language));
+    }
+    map['onboarded'] = Variable<bool>(onboarded);
+    map['last_read_surah'] = Variable<int>(lastReadSurah);
+    map['last_read_ayah'] = Variable<int>(lastReadAyah);
+    map['last_read_page'] = Variable<int>(lastReadPage);
+    if (!nullToAbsent || lastReadAt != null) {
+      map['last_read_at'] = Variable<DateTime>(lastReadAt);
+    }
+    {
+      map['page_color'] = Variable<String>($SettingsTable.$converterpageColor.toSql(pageColor));
+    }
+    {
+      map['quran_layout'] = Variable<String>(
+        $SettingsTable.$converterquranLayout.toSql(quranLayout),
+      );
+    }
+    {
+      map['page_turn'] = Variable<String>($SettingsTable.$converterpageTurn.toSql(pageTurn));
+    }
+    map['keep_screen_on'] = Variable<bool>(keepScreenOn);
+    {
+      map['quran_font'] = Variable<String>($SettingsTable.$converterquranFont.toSql(quranFont));
+    }
+    map['quran_arabic_size'] = Variable<int>(quranArabicSize);
+    map['quran_translation_size'] = Variable<int>(quranTranslationSize);
+    map['recite_speed'] = Variable<double>(reciteSpeed);
+    map['recite_repeat'] = Variable<int>(reciteRepeat);
+    map['recite_pause'] = Variable<int>(recitePause);
     return map;
   }
 
@@ -1057,7 +1592,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reminderMinutes: Value(reminderMinutes),
       notificationsAsked: Value(notificationsAsked),
       tasbihDhikr: Value(tasbihDhikr),
-      tasbihCount: Value(tasbihCount),
+      subhanallahCount: Value(subhanallahCount),
+      alhamdulillahCount: Value(alhamdulillahCount),
+      allahuAkbarCount: Value(allahuAkbarCount),
       morningOpenedOn: morningOpenedOn == null && nullToAbsent
           ? const Value.absent()
           : Value(morningOpenedOn),
@@ -1065,6 +1602,25 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? const Value.absent()
           : Value(eveningOpenedOn),
       azkarNudges: Value(azkarNudges),
+      prayerCountdown: Value(prayerCountdown),
+      calendarMode: Value(calendarMode),
+      topGlow: Value(topGlow),
+      language: Value(language),
+      onboarded: Value(onboarded),
+      lastReadSurah: Value(lastReadSurah),
+      lastReadAyah: Value(lastReadAyah),
+      lastReadPage: Value(lastReadPage),
+      lastReadAt: lastReadAt == null && nullToAbsent ? const Value.absent() : Value(lastReadAt),
+      pageColor: Value(pageColor),
+      quranLayout: Value(quranLayout),
+      pageTurn: Value(pageTurn),
+      keepScreenOn: Value(keepScreenOn),
+      quranFont: Value(quranFont),
+      quranArabicSize: Value(quranArabicSize),
+      quranTranslationSize: Value(quranTranslationSize),
+      reciteSpeed: Value(reciteSpeed),
+      reciteRepeat: Value(reciteRepeat),
+      recitePause: Value(recitePause),
     );
   }
 
@@ -1133,10 +1689,43 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reminderMinutes: serializer.fromJson<int>(json['reminderMinutes']),
       notificationsAsked: serializer.fromJson<bool>(json['notificationsAsked']),
       tasbihDhikr: serializer.fromJson<int>(json['tasbihDhikr']),
-      tasbihCount: serializer.fromJson<int>(json['tasbihCount']),
+      subhanallahCount: serializer.fromJson<int>(json['subhanallahCount']),
+      alhamdulillahCount: serializer.fromJson<int>(json['alhamdulillahCount']),
+      allahuAkbarCount: serializer.fromJson<int>(json['allahuAkbarCount']),
       morningOpenedOn: serializer.fromJson<DateTime?>(json['morningOpenedOn']),
       eveningOpenedOn: serializer.fromJson<DateTime?>(json['eveningOpenedOn']),
       azkarNudges: serializer.fromJson<bool>(json['azkarNudges']),
+      prayerCountdown: serializer.fromJson<bool>(json['prayerCountdown']),
+      calendarMode: $SettingsTable.$convertercalendarMode.fromJson(
+        serializer.fromJson<String>(json['calendarMode']),
+      ),
+      topGlow: serializer.fromJson<bool>(json['topGlow']),
+      language: $SettingsTable.$converterlanguage.fromJson(
+        serializer.fromJson<String>(json['language']),
+      ),
+      onboarded: serializer.fromJson<bool>(json['onboarded']),
+      lastReadSurah: serializer.fromJson<int>(json['lastReadSurah']),
+      lastReadAyah: serializer.fromJson<int>(json['lastReadAyah']),
+      lastReadPage: serializer.fromJson<int>(json['lastReadPage']),
+      lastReadAt: serializer.fromJson<DateTime?>(json['lastReadAt']),
+      pageColor: $SettingsTable.$converterpageColor.fromJson(
+        serializer.fromJson<String>(json['pageColor']),
+      ),
+      quranLayout: $SettingsTable.$converterquranLayout.fromJson(
+        serializer.fromJson<String>(json['quranLayout']),
+      ),
+      pageTurn: $SettingsTable.$converterpageTurn.fromJson(
+        serializer.fromJson<String>(json['pageTurn']),
+      ),
+      keepScreenOn: serializer.fromJson<bool>(json['keepScreenOn']),
+      quranFont: $SettingsTable.$converterquranFont.fromJson(
+        serializer.fromJson<String>(json['quranFont']),
+      ),
+      quranArabicSize: serializer.fromJson<int>(json['quranArabicSize']),
+      quranTranslationSize: serializer.fromJson<int>(json['quranTranslationSize']),
+      reciteSpeed: serializer.fromJson<double>(json['reciteSpeed']),
+      reciteRepeat: serializer.fromJson<int>(json['reciteRepeat']),
+      recitePause: serializer.fromJson<int>(json['recitePause']),
     );
   }
   @override
@@ -1195,10 +1784,35 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'reminderMinutes': serializer.toJson<int>(reminderMinutes),
       'notificationsAsked': serializer.toJson<bool>(notificationsAsked),
       'tasbihDhikr': serializer.toJson<int>(tasbihDhikr),
-      'tasbihCount': serializer.toJson<int>(tasbihCount),
+      'subhanallahCount': serializer.toJson<int>(subhanallahCount),
+      'alhamdulillahCount': serializer.toJson<int>(alhamdulillahCount),
+      'allahuAkbarCount': serializer.toJson<int>(allahuAkbarCount),
       'morningOpenedOn': serializer.toJson<DateTime?>(morningOpenedOn),
       'eveningOpenedOn': serializer.toJson<DateTime?>(eveningOpenedOn),
       'azkarNudges': serializer.toJson<bool>(azkarNudges),
+      'prayerCountdown': serializer.toJson<bool>(prayerCountdown),
+      'calendarMode': serializer.toJson<String>(
+        $SettingsTable.$convertercalendarMode.toJson(calendarMode),
+      ),
+      'topGlow': serializer.toJson<bool>(topGlow),
+      'language': serializer.toJson<String>($SettingsTable.$converterlanguage.toJson(language)),
+      'onboarded': serializer.toJson<bool>(onboarded),
+      'lastReadSurah': serializer.toJson<int>(lastReadSurah),
+      'lastReadAyah': serializer.toJson<int>(lastReadAyah),
+      'lastReadPage': serializer.toJson<int>(lastReadPage),
+      'lastReadAt': serializer.toJson<DateTime?>(lastReadAt),
+      'pageColor': serializer.toJson<String>($SettingsTable.$converterpageColor.toJson(pageColor)),
+      'quranLayout': serializer.toJson<String>(
+        $SettingsTable.$converterquranLayout.toJson(quranLayout),
+      ),
+      'pageTurn': serializer.toJson<String>($SettingsTable.$converterpageTurn.toJson(pageTurn)),
+      'keepScreenOn': serializer.toJson<bool>(keepScreenOn),
+      'quranFont': serializer.toJson<String>($SettingsTable.$converterquranFont.toJson(quranFont)),
+      'quranArabicSize': serializer.toJson<int>(quranArabicSize),
+      'quranTranslationSize': serializer.toJson<int>(quranTranslationSize),
+      'reciteSpeed': serializer.toJson<double>(reciteSpeed),
+      'reciteRepeat': serializer.toJson<int>(reciteRepeat),
+      'recitePause': serializer.toJson<int>(recitePause),
     };
   }
 
@@ -1237,10 +1851,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     int? reminderMinutes,
     bool? notificationsAsked,
     int? tasbihDhikr,
-    int? tasbihCount,
+    int? subhanallahCount,
+    int? alhamdulillahCount,
+    int? allahuAkbarCount,
     Value<DateTime?> morningOpenedOn = const Value.absent(),
     Value<DateTime?> eveningOpenedOn = const Value.absent(),
     bool? azkarNudges,
+    bool? prayerCountdown,
+    CalendarMode? calendarMode,
+    bool? topGlow,
+    Language? language,
+    bool? onboarded,
+    int? lastReadSurah,
+    int? lastReadAyah,
+    int? lastReadPage,
+    Value<DateTime?> lastReadAt = const Value.absent(),
+    PageColor? pageColor,
+    QuranLayout? quranLayout,
+    PageTurn? pageTurn,
+    bool? keepScreenOn,
+    QuranFont? quranFont,
+    int? quranArabicSize,
+    int? quranTranslationSize,
+    double? reciteSpeed,
+    int? reciteRepeat,
+    int? recitePause,
   }) => AppSettings(
     id: id ?? this.id,
     latitude: latitude.present ? latitude.value : this.latitude,
@@ -1276,10 +1911,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reminderMinutes: reminderMinutes ?? this.reminderMinutes,
     notificationsAsked: notificationsAsked ?? this.notificationsAsked,
     tasbihDhikr: tasbihDhikr ?? this.tasbihDhikr,
-    tasbihCount: tasbihCount ?? this.tasbihCount,
+    subhanallahCount: subhanallahCount ?? this.subhanallahCount,
+    alhamdulillahCount: alhamdulillahCount ?? this.alhamdulillahCount,
+    allahuAkbarCount: allahuAkbarCount ?? this.allahuAkbarCount,
     morningOpenedOn: morningOpenedOn.present ? morningOpenedOn.value : this.morningOpenedOn,
     eveningOpenedOn: eveningOpenedOn.present ? eveningOpenedOn.value : this.eveningOpenedOn,
     azkarNudges: azkarNudges ?? this.azkarNudges,
+    prayerCountdown: prayerCountdown ?? this.prayerCountdown,
+    calendarMode: calendarMode ?? this.calendarMode,
+    topGlow: topGlow ?? this.topGlow,
+    language: language ?? this.language,
+    onboarded: onboarded ?? this.onboarded,
+    lastReadSurah: lastReadSurah ?? this.lastReadSurah,
+    lastReadAyah: lastReadAyah ?? this.lastReadAyah,
+    lastReadPage: lastReadPage ?? this.lastReadPage,
+    lastReadAt: lastReadAt.present ? lastReadAt.value : this.lastReadAt,
+    pageColor: pageColor ?? this.pageColor,
+    quranLayout: quranLayout ?? this.quranLayout,
+    pageTurn: pageTurn ?? this.pageTurn,
+    keepScreenOn: keepScreenOn ?? this.keepScreenOn,
+    quranFont: quranFont ?? this.quranFont,
+    quranArabicSize: quranArabicSize ?? this.quranArabicSize,
+    quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
+    reciteSpeed: reciteSpeed ?? this.reciteSpeed,
+    reciteRepeat: reciteRepeat ?? this.reciteRepeat,
+    recitePause: recitePause ?? this.recitePause,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
     return AppSettings(
@@ -1325,7 +1981,15 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.notificationsAsked.value
           : this.notificationsAsked,
       tasbihDhikr: data.tasbihDhikr.present ? data.tasbihDhikr.value : this.tasbihDhikr,
-      tasbihCount: data.tasbihCount.present ? data.tasbihCount.value : this.tasbihCount,
+      subhanallahCount: data.subhanallahCount.present
+          ? data.subhanallahCount.value
+          : this.subhanallahCount,
+      alhamdulillahCount: data.alhamdulillahCount.present
+          ? data.alhamdulillahCount.value
+          : this.alhamdulillahCount,
+      allahuAkbarCount: data.allahuAkbarCount.present
+          ? data.allahuAkbarCount.value
+          : this.allahuAkbarCount,
       morningOpenedOn: data.morningOpenedOn.present
           ? data.morningOpenedOn.value
           : this.morningOpenedOn,
@@ -1333,6 +1997,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.eveningOpenedOn.value
           : this.eveningOpenedOn,
       azkarNudges: data.azkarNudges.present ? data.azkarNudges.value : this.azkarNudges,
+      prayerCountdown: data.prayerCountdown.present
+          ? data.prayerCountdown.value
+          : this.prayerCountdown,
+      calendarMode: data.calendarMode.present ? data.calendarMode.value : this.calendarMode,
+      topGlow: data.topGlow.present ? data.topGlow.value : this.topGlow,
+      language: data.language.present ? data.language.value : this.language,
+      onboarded: data.onboarded.present ? data.onboarded.value : this.onboarded,
+      lastReadSurah: data.lastReadSurah.present ? data.lastReadSurah.value : this.lastReadSurah,
+      lastReadAyah: data.lastReadAyah.present ? data.lastReadAyah.value : this.lastReadAyah,
+      lastReadPage: data.lastReadPage.present ? data.lastReadPage.value : this.lastReadPage,
+      lastReadAt: data.lastReadAt.present ? data.lastReadAt.value : this.lastReadAt,
+      pageColor: data.pageColor.present ? data.pageColor.value : this.pageColor,
+      quranLayout: data.quranLayout.present ? data.quranLayout.value : this.quranLayout,
+      pageTurn: data.pageTurn.present ? data.pageTurn.value : this.pageTurn,
+      keepScreenOn: data.keepScreenOn.present ? data.keepScreenOn.value : this.keepScreenOn,
+      quranFont: data.quranFont.present ? data.quranFont.value : this.quranFont,
+      quranArabicSize: data.quranArabicSize.present
+          ? data.quranArabicSize.value
+          : this.quranArabicSize,
+      quranTranslationSize: data.quranTranslationSize.present
+          ? data.quranTranslationSize.value
+          : this.quranTranslationSize,
+      reciteSpeed: data.reciteSpeed.present ? data.reciteSpeed.value : this.reciteSpeed,
+      reciteRepeat: data.reciteRepeat.present ? data.reciteRepeat.value : this.reciteRepeat,
+      recitePause: data.recitePause.present ? data.recitePause.value : this.recitePause,
     );
   }
 
@@ -1373,10 +2062,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('reminderMinutes: $reminderMinutes, ')
           ..write('notificationsAsked: $notificationsAsked, ')
           ..write('tasbihDhikr: $tasbihDhikr, ')
-          ..write('tasbihCount: $tasbihCount, ')
+          ..write('subhanallahCount: $subhanallahCount, ')
+          ..write('alhamdulillahCount: $alhamdulillahCount, ')
+          ..write('allahuAkbarCount: $allahuAkbarCount, ')
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
-          ..write('azkarNudges: $azkarNudges')
+          ..write('azkarNudges: $azkarNudges, ')
+          ..write('prayerCountdown: $prayerCountdown, ')
+          ..write('calendarMode: $calendarMode, ')
+          ..write('topGlow: $topGlow, ')
+          ..write('language: $language, ')
+          ..write('onboarded: $onboarded, ')
+          ..write('lastReadSurah: $lastReadSurah, ')
+          ..write('lastReadAyah: $lastReadAyah, ')
+          ..write('lastReadPage: $lastReadPage, ')
+          ..write('lastReadAt: $lastReadAt, ')
+          ..write('pageColor: $pageColor, ')
+          ..write('quranLayout: $quranLayout, ')
+          ..write('pageTurn: $pageTurn, ')
+          ..write('keepScreenOn: $keepScreenOn, ')
+          ..write('quranFont: $quranFont, ')
+          ..write('quranArabicSize: $quranArabicSize, ')
+          ..write('quranTranslationSize: $quranTranslationSize, ')
+          ..write('reciteSpeed: $reciteSpeed, ')
+          ..write('reciteRepeat: $reciteRepeat, ')
+          ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
   }
@@ -1417,10 +2127,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reminderMinutes,
     notificationsAsked,
     tasbihDhikr,
-    tasbihCount,
+    subhanallahCount,
+    alhamdulillahCount,
+    allahuAkbarCount,
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    prayerCountdown,
+    calendarMode,
+    topGlow,
+    language,
+    onboarded,
+    lastReadSurah,
+    lastReadAyah,
+    lastReadPage,
+    lastReadAt,
+    pageColor,
+    quranLayout,
+    pageTurn,
+    keepScreenOn,
+    quranFont,
+    quranArabicSize,
+    quranTranslationSize,
+    reciteSpeed,
+    reciteRepeat,
+    recitePause,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1460,10 +2191,31 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.reminderMinutes == this.reminderMinutes &&
           other.notificationsAsked == this.notificationsAsked &&
           other.tasbihDhikr == this.tasbihDhikr &&
-          other.tasbihCount == this.tasbihCount &&
+          other.subhanallahCount == this.subhanallahCount &&
+          other.alhamdulillahCount == this.alhamdulillahCount &&
+          other.allahuAkbarCount == this.allahuAkbarCount &&
           other.morningOpenedOn == this.morningOpenedOn &&
           other.eveningOpenedOn == this.eveningOpenedOn &&
-          other.azkarNudges == this.azkarNudges);
+          other.azkarNudges == this.azkarNudges &&
+          other.prayerCountdown == this.prayerCountdown &&
+          other.calendarMode == this.calendarMode &&
+          other.topGlow == this.topGlow &&
+          other.language == this.language &&
+          other.onboarded == this.onboarded &&
+          other.lastReadSurah == this.lastReadSurah &&
+          other.lastReadAyah == this.lastReadAyah &&
+          other.lastReadPage == this.lastReadPage &&
+          other.lastReadAt == this.lastReadAt &&
+          other.pageColor == this.pageColor &&
+          other.quranLayout == this.quranLayout &&
+          other.pageTurn == this.pageTurn &&
+          other.keepScreenOn == this.keepScreenOn &&
+          other.quranFont == this.quranFont &&
+          other.quranArabicSize == this.quranArabicSize &&
+          other.quranTranslationSize == this.quranTranslationSize &&
+          other.reciteSpeed == this.reciteSpeed &&
+          other.reciteRepeat == this.reciteRepeat &&
+          other.recitePause == this.recitePause);
 }
 
 class SettingsCompanion extends UpdateCompanion<AppSettings> {
@@ -1501,10 +2253,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<int> reminderMinutes;
   final Value<bool> notificationsAsked;
   final Value<int> tasbihDhikr;
-  final Value<int> tasbihCount;
+  final Value<int> subhanallahCount;
+  final Value<int> alhamdulillahCount;
+  final Value<int> allahuAkbarCount;
   final Value<DateTime?> morningOpenedOn;
   final Value<DateTime?> eveningOpenedOn;
   final Value<bool> azkarNudges;
+  final Value<bool> prayerCountdown;
+  final Value<CalendarMode> calendarMode;
+  final Value<bool> topGlow;
+  final Value<Language> language;
+  final Value<bool> onboarded;
+  final Value<int> lastReadSurah;
+  final Value<int> lastReadAyah;
+  final Value<int> lastReadPage;
+  final Value<DateTime?> lastReadAt;
+  final Value<PageColor> pageColor;
+  final Value<QuranLayout> quranLayout;
+  final Value<PageTurn> pageTurn;
+  final Value<bool> keepScreenOn;
+  final Value<QuranFont> quranFont;
+  final Value<int> quranArabicSize;
+  final Value<int> quranTranslationSize;
+  final Value<double> reciteSpeed;
+  final Value<int> reciteRepeat;
+  final Value<int> recitePause;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.latitude = const Value.absent(),
@@ -1540,10 +2313,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reminderMinutes = const Value.absent(),
     this.notificationsAsked = const Value.absent(),
     this.tasbihDhikr = const Value.absent(),
-    this.tasbihCount = const Value.absent(),
+    this.subhanallahCount = const Value.absent(),
+    this.alhamdulillahCount = const Value.absent(),
+    this.allahuAkbarCount = const Value.absent(),
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.prayerCountdown = const Value.absent(),
+    this.calendarMode = const Value.absent(),
+    this.topGlow = const Value.absent(),
+    this.language = const Value.absent(),
+    this.onboarded = const Value.absent(),
+    this.lastReadSurah = const Value.absent(),
+    this.lastReadAyah = const Value.absent(),
+    this.lastReadPage = const Value.absent(),
+    this.lastReadAt = const Value.absent(),
+    this.pageColor = const Value.absent(),
+    this.quranLayout = const Value.absent(),
+    this.pageTurn = const Value.absent(),
+    this.keepScreenOn = const Value.absent(),
+    this.quranFont = const Value.absent(),
+    this.quranArabicSize = const Value.absent(),
+    this.quranTranslationSize = const Value.absent(),
+    this.reciteSpeed = const Value.absent(),
+    this.reciteRepeat = const Value.absent(),
+    this.recitePause = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1580,10 +2374,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reminderMinutes = const Value.absent(),
     this.notificationsAsked = const Value.absent(),
     this.tasbihDhikr = const Value.absent(),
-    this.tasbihCount = const Value.absent(),
+    this.subhanallahCount = const Value.absent(),
+    this.alhamdulillahCount = const Value.absent(),
+    this.allahuAkbarCount = const Value.absent(),
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.prayerCountdown = const Value.absent(),
+    this.calendarMode = const Value.absent(),
+    this.topGlow = const Value.absent(),
+    this.language = const Value.absent(),
+    this.onboarded = const Value.absent(),
+    this.lastReadSurah = const Value.absent(),
+    this.lastReadAyah = const Value.absent(),
+    this.lastReadPage = const Value.absent(),
+    this.lastReadAt = const Value.absent(),
+    this.pageColor = const Value.absent(),
+    this.quranLayout = const Value.absent(),
+    this.pageTurn = const Value.absent(),
+    this.keepScreenOn = const Value.absent(),
+    this.quranFont = const Value.absent(),
+    this.quranArabicSize = const Value.absent(),
+    this.quranTranslationSize = const Value.absent(),
+    this.reciteSpeed = const Value.absent(),
+    this.reciteRepeat = const Value.absent(),
+    this.recitePause = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
     Expression<int>? id,
@@ -1620,10 +2435,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<int>? reminderMinutes,
     Expression<bool>? notificationsAsked,
     Expression<int>? tasbihDhikr,
-    Expression<int>? tasbihCount,
+    Expression<int>? subhanallahCount,
+    Expression<int>? alhamdulillahCount,
+    Expression<int>? allahuAkbarCount,
     Expression<String>? morningOpenedOn,
     Expression<String>? eveningOpenedOn,
     Expression<bool>? azkarNudges,
+    Expression<bool>? prayerCountdown,
+    Expression<String>? calendarMode,
+    Expression<bool>? topGlow,
+    Expression<String>? language,
+    Expression<bool>? onboarded,
+    Expression<int>? lastReadSurah,
+    Expression<int>? lastReadAyah,
+    Expression<int>? lastReadPage,
+    Expression<DateTime>? lastReadAt,
+    Expression<String>? pageColor,
+    Expression<String>? quranLayout,
+    Expression<String>? pageTurn,
+    Expression<bool>? keepScreenOn,
+    Expression<String>? quranFont,
+    Expression<int>? quranArabicSize,
+    Expression<int>? quranTranslationSize,
+    Expression<double>? reciteSpeed,
+    Expression<int>? reciteRepeat,
+    Expression<int>? recitePause,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1660,10 +2496,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (reminderMinutes != null) 'reminder_minutes': reminderMinutes,
       if (notificationsAsked != null) 'notifications_asked': notificationsAsked,
       if (tasbihDhikr != null) 'tasbih_dhikr': tasbihDhikr,
-      if (tasbihCount != null) 'tasbih_count': tasbihCount,
+      if (subhanallahCount != null) 'subhanallah_count': subhanallahCount,
+      if (alhamdulillahCount != null) 'alhamdulillah_count': alhamdulillahCount,
+      if (allahuAkbarCount != null) 'allahu_akbar_count': allahuAkbarCount,
       if (morningOpenedOn != null) 'morning_opened_on': morningOpenedOn,
       if (eveningOpenedOn != null) 'evening_opened_on': eveningOpenedOn,
       if (azkarNudges != null) 'azkar_nudges': azkarNudges,
+      if (prayerCountdown != null) 'prayer_countdown': prayerCountdown,
+      if (calendarMode != null) 'calendar_mode': calendarMode,
+      if (topGlow != null) 'top_glow': topGlow,
+      if (language != null) 'language': language,
+      if (onboarded != null) 'onboarded': onboarded,
+      if (lastReadSurah != null) 'last_read_surah': lastReadSurah,
+      if (lastReadAyah != null) 'last_read_ayah': lastReadAyah,
+      if (lastReadPage != null) 'last_read_page': lastReadPage,
+      if (lastReadAt != null) 'last_read_at': lastReadAt,
+      if (pageColor != null) 'page_color': pageColor,
+      if (quranLayout != null) 'quran_layout': quranLayout,
+      if (pageTurn != null) 'page_turn': pageTurn,
+      if (keepScreenOn != null) 'keep_screen_on': keepScreenOn,
+      if (quranFont != null) 'quran_font': quranFont,
+      if (quranArabicSize != null) 'quran_arabic_size': quranArabicSize,
+      if (quranTranslationSize != null) 'quran_translation_size': quranTranslationSize,
+      if (reciteSpeed != null) 'recite_speed': reciteSpeed,
+      if (reciteRepeat != null) 'recite_repeat': reciteRepeat,
+      if (recitePause != null) 'recite_pause': recitePause,
     });
   }
 
@@ -1702,10 +2559,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<int>? reminderMinutes,
     Value<bool>? notificationsAsked,
     Value<int>? tasbihDhikr,
-    Value<int>? tasbihCount,
+    Value<int>? subhanallahCount,
+    Value<int>? alhamdulillahCount,
+    Value<int>? allahuAkbarCount,
     Value<DateTime?>? morningOpenedOn,
     Value<DateTime?>? eveningOpenedOn,
     Value<bool>? azkarNudges,
+    Value<bool>? prayerCountdown,
+    Value<CalendarMode>? calendarMode,
+    Value<bool>? topGlow,
+    Value<Language>? language,
+    Value<bool>? onboarded,
+    Value<int>? lastReadSurah,
+    Value<int>? lastReadAyah,
+    Value<int>? lastReadPage,
+    Value<DateTime?>? lastReadAt,
+    Value<PageColor>? pageColor,
+    Value<QuranLayout>? quranLayout,
+    Value<PageTurn>? pageTurn,
+    Value<bool>? keepScreenOn,
+    Value<QuranFont>? quranFont,
+    Value<int>? quranArabicSize,
+    Value<int>? quranTranslationSize,
+    Value<double>? reciteSpeed,
+    Value<int>? reciteRepeat,
+    Value<int>? recitePause,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -1742,10 +2620,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       notificationsAsked: notificationsAsked ?? this.notificationsAsked,
       tasbihDhikr: tasbihDhikr ?? this.tasbihDhikr,
-      tasbihCount: tasbihCount ?? this.tasbihCount,
+      subhanallahCount: subhanallahCount ?? this.subhanallahCount,
+      alhamdulillahCount: alhamdulillahCount ?? this.alhamdulillahCount,
+      allahuAkbarCount: allahuAkbarCount ?? this.allahuAkbarCount,
       morningOpenedOn: morningOpenedOn ?? this.morningOpenedOn,
       eveningOpenedOn: eveningOpenedOn ?? this.eveningOpenedOn,
       azkarNudges: azkarNudges ?? this.azkarNudges,
+      prayerCountdown: prayerCountdown ?? this.prayerCountdown,
+      calendarMode: calendarMode ?? this.calendarMode,
+      topGlow: topGlow ?? this.topGlow,
+      language: language ?? this.language,
+      onboarded: onboarded ?? this.onboarded,
+      lastReadSurah: lastReadSurah ?? this.lastReadSurah,
+      lastReadAyah: lastReadAyah ?? this.lastReadAyah,
+      lastReadPage: lastReadPage ?? this.lastReadPage,
+      lastReadAt: lastReadAt ?? this.lastReadAt,
+      pageColor: pageColor ?? this.pageColor,
+      quranLayout: quranLayout ?? this.quranLayout,
+      pageTurn: pageTurn ?? this.pageTurn,
+      keepScreenOn: keepScreenOn ?? this.keepScreenOn,
+      quranFont: quranFont ?? this.quranFont,
+      quranArabicSize: quranArabicSize ?? this.quranArabicSize,
+      quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
+      reciteSpeed: reciteSpeed ?? this.reciteSpeed,
+      reciteRepeat: reciteRepeat ?? this.reciteRepeat,
+      recitePause: recitePause ?? this.recitePause,
     );
   }
 
@@ -1878,8 +2777,14 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (tasbihDhikr.present) {
       map['tasbih_dhikr'] = Variable<int>(tasbihDhikr.value);
     }
-    if (tasbihCount.present) {
-      map['tasbih_count'] = Variable<int>(tasbihCount.value);
+    if (subhanallahCount.present) {
+      map['subhanallah_count'] = Variable<int>(subhanallahCount.value);
+    }
+    if (alhamdulillahCount.present) {
+      map['alhamdulillah_count'] = Variable<int>(alhamdulillahCount.value);
+    }
+    if (allahuAkbarCount.present) {
+      map['allahu_akbar_count'] = Variable<int>(allahuAkbarCount.value);
     }
     if (morningOpenedOn.present) {
       map['morning_opened_on'] = Variable<String>(
@@ -1893,6 +2798,71 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     }
     if (azkarNudges.present) {
       map['azkar_nudges'] = Variable<bool>(azkarNudges.value);
+    }
+    if (prayerCountdown.present) {
+      map['prayer_countdown'] = Variable<bool>(prayerCountdown.value);
+    }
+    if (calendarMode.present) {
+      map['calendar_mode'] = Variable<String>(
+        $SettingsTable.$convertercalendarMode.toSql(calendarMode.value),
+      );
+    }
+    if (topGlow.present) {
+      map['top_glow'] = Variable<bool>(topGlow.value);
+    }
+    if (language.present) {
+      map['language'] = Variable<String>($SettingsTable.$converterlanguage.toSql(language.value));
+    }
+    if (onboarded.present) {
+      map['onboarded'] = Variable<bool>(onboarded.value);
+    }
+    if (lastReadSurah.present) {
+      map['last_read_surah'] = Variable<int>(lastReadSurah.value);
+    }
+    if (lastReadAyah.present) {
+      map['last_read_ayah'] = Variable<int>(lastReadAyah.value);
+    }
+    if (lastReadPage.present) {
+      map['last_read_page'] = Variable<int>(lastReadPage.value);
+    }
+    if (lastReadAt.present) {
+      map['last_read_at'] = Variable<DateTime>(lastReadAt.value);
+    }
+    if (pageColor.present) {
+      map['page_color'] = Variable<String>(
+        $SettingsTable.$converterpageColor.toSql(pageColor.value),
+      );
+    }
+    if (quranLayout.present) {
+      map['quran_layout'] = Variable<String>(
+        $SettingsTable.$converterquranLayout.toSql(quranLayout.value),
+      );
+    }
+    if (pageTurn.present) {
+      map['page_turn'] = Variable<String>($SettingsTable.$converterpageTurn.toSql(pageTurn.value));
+    }
+    if (keepScreenOn.present) {
+      map['keep_screen_on'] = Variable<bool>(keepScreenOn.value);
+    }
+    if (quranFont.present) {
+      map['quran_font'] = Variable<String>(
+        $SettingsTable.$converterquranFont.toSql(quranFont.value),
+      );
+    }
+    if (quranArabicSize.present) {
+      map['quran_arabic_size'] = Variable<int>(quranArabicSize.value);
+    }
+    if (quranTranslationSize.present) {
+      map['quran_translation_size'] = Variable<int>(quranTranslationSize.value);
+    }
+    if (reciteSpeed.present) {
+      map['recite_speed'] = Variable<double>(reciteSpeed.value);
+    }
+    if (reciteRepeat.present) {
+      map['recite_repeat'] = Variable<int>(reciteRepeat.value);
+    }
+    if (recitePause.present) {
+      map['recite_pause'] = Variable<int>(recitePause.value);
     }
     return map;
   }
@@ -1934,10 +2904,31 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('reminderMinutes: $reminderMinutes, ')
           ..write('notificationsAsked: $notificationsAsked, ')
           ..write('tasbihDhikr: $tasbihDhikr, ')
-          ..write('tasbihCount: $tasbihCount, ')
+          ..write('subhanallahCount: $subhanallahCount, ')
+          ..write('alhamdulillahCount: $alhamdulillahCount, ')
+          ..write('allahuAkbarCount: $allahuAkbarCount, ')
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
-          ..write('azkarNudges: $azkarNudges')
+          ..write('azkarNudges: $azkarNudges, ')
+          ..write('prayerCountdown: $prayerCountdown, ')
+          ..write('calendarMode: $calendarMode, ')
+          ..write('topGlow: $topGlow, ')
+          ..write('language: $language, ')
+          ..write('onboarded: $onboarded, ')
+          ..write('lastReadSurah: $lastReadSurah, ')
+          ..write('lastReadAyah: $lastReadAyah, ')
+          ..write('lastReadPage: $lastReadPage, ')
+          ..write('lastReadAt: $lastReadAt, ')
+          ..write('pageColor: $pageColor, ')
+          ..write('quranLayout: $quranLayout, ')
+          ..write('pageTurn: $pageTurn, ')
+          ..write('keepScreenOn: $keepScreenOn, ')
+          ..write('quranFont: $quranFont, ')
+          ..write('quranArabicSize: $quranArabicSize, ')
+          ..write('quranTranslationSize: $quranTranslationSize, ')
+          ..write('reciteSpeed: $reciteSpeed, ')
+          ..write('reciteRepeat: $reciteRepeat, ')
+          ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
   }
@@ -2864,6 +3855,682 @@ class SavedDuasCompanion extends UpdateCompanion<SavedDua> {
   }
 }
 
+class $QuranBookmarksTable extends QuranBookmarks
+    with TableInfo<$QuranBookmarksTable, QuranBookmark> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuranBookmarksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  static const VerificationMeta _surahMeta = const VerificationMeta('surah');
+  @override
+  late final GeneratedColumn<int> surah = GeneratedColumn<int>(
+    'surah',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ayahMeta = const VerificationMeta('ayah');
+  @override
+  late final GeneratedColumn<int> ayah = GeneratedColumn<int>(
+    'ayah',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pageMeta = const VerificationMeta('page');
+  @override
+  late final GeneratedColumn<int> page = GeneratedColumn<int>(
+    'page',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(page).isBetweenValues(1, 604),
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<RibbonColor, String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<RibbonColor>($QuranBookmarksTable.$convertercolor);
+  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, surah, ayah, page, name, color, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quran_bookmarks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuranBookmark> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('surah')) {
+      context.handle(_surahMeta, surah.isAcceptableOrUnknown(data['surah']!, _surahMeta));
+    }
+    if (data.containsKey('ayah')) {
+      context.handle(_ayahMeta, ayah.isAcceptableOrUnknown(data['ayah']!, _ayahMeta));
+    }
+    if (data.containsKey('page')) {
+      context.handle(_pageMeta, page.isAcceptableOrUnknown(data['page']!, _pageMeta));
+    } else if (isInserting) {
+      context.missing(_pageMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuranBookmark map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuranBookmark(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      surah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}surah']),
+      ayah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}ayah']),
+      page: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}page'])!,
+      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name']),
+      color: $QuranBookmarksTable.$convertercolor.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}color'])!,
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QuranBookmarksTable createAlias(String alias) {
+    return $QuranBookmarksTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<RibbonColor, String, String> $convertercolor =
+      const EnumNameConverter<RibbonColor>(RibbonColor.values);
+}
+
+class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
+  final int id;
+
+  /// null for a page bookmark
+  final int? surah;
+  final int? ayah;
+
+  /// always set, the ayah's page for an ayah bookmark
+  final int page;
+
+  /// null shows the reference
+  final String? name;
+  final RibbonColor color;
+  final DateTime createdAt;
+  const QuranBookmark({
+    required this.id,
+    this.surah,
+    this.ayah,
+    required this.page,
+    this.name,
+    required this.color,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || surah != null) {
+      map['surah'] = Variable<int>(surah);
+    }
+    if (!nullToAbsent || ayah != null) {
+      map['ayah'] = Variable<int>(ayah);
+    }
+    map['page'] = Variable<int>(page);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    {
+      map['color'] = Variable<String>($QuranBookmarksTable.$convertercolor.toSql(color));
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  QuranBookmarksCompanion toCompanion(bool nullToAbsent) {
+    return QuranBookmarksCompanion(
+      id: Value(id),
+      surah: surah == null && nullToAbsent ? const Value.absent() : Value(surah),
+      ayah: ayah == null && nullToAbsent ? const Value.absent() : Value(ayah),
+      page: Value(page),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      color: Value(color),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory QuranBookmark.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuranBookmark(
+      id: serializer.fromJson<int>(json['id']),
+      surah: serializer.fromJson<int?>(json['surah']),
+      ayah: serializer.fromJson<int?>(json['ayah']),
+      page: serializer.fromJson<int>(json['page']),
+      name: serializer.fromJson<String?>(json['name']),
+      color: $QuranBookmarksTable.$convertercolor.fromJson(
+        serializer.fromJson<String>(json['color']),
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'surah': serializer.toJson<int?>(surah),
+      'ayah': serializer.toJson<int?>(ayah),
+      'page': serializer.toJson<int>(page),
+      'name': serializer.toJson<String?>(name),
+      'color': serializer.toJson<String>($QuranBookmarksTable.$convertercolor.toJson(color)),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  QuranBookmark copyWith({
+    int? id,
+    Value<int?> surah = const Value.absent(),
+    Value<int?> ayah = const Value.absent(),
+    int? page,
+    Value<String?> name = const Value.absent(),
+    RibbonColor? color,
+    DateTime? createdAt,
+  }) => QuranBookmark(
+    id: id ?? this.id,
+    surah: surah.present ? surah.value : this.surah,
+    ayah: ayah.present ? ayah.value : this.ayah,
+    page: page ?? this.page,
+    name: name.present ? name.value : this.name,
+    color: color ?? this.color,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  QuranBookmark copyWithCompanion(QuranBookmarksCompanion data) {
+    return QuranBookmark(
+      id: data.id.present ? data.id.value : this.id,
+      surah: data.surah.present ? data.surah.value : this.surah,
+      ayah: data.ayah.present ? data.ayah.value : this.ayah,
+      page: data.page.present ? data.page.value : this.page,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranBookmark(')
+          ..write('id: $id, ')
+          ..write('surah: $surah, ')
+          ..write('ayah: $ayah, ')
+          ..write('page: $page, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, surah, ayah, page, name, color, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuranBookmark &&
+          other.id == this.id &&
+          other.surah == this.surah &&
+          other.ayah == this.ayah &&
+          other.page == this.page &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.createdAt == this.createdAt);
+}
+
+class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
+  final Value<int> id;
+  final Value<int?> surah;
+  final Value<int?> ayah;
+  final Value<int> page;
+  final Value<String?> name;
+  final Value<RibbonColor> color;
+  final Value<DateTime> createdAt;
+  const QuranBookmarksCompanion({
+    this.id = const Value.absent(),
+    this.surah = const Value.absent(),
+    this.ayah = const Value.absent(),
+    this.page = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  QuranBookmarksCompanion.insert({
+    this.id = const Value.absent(),
+    this.surah = const Value.absent(),
+    this.ayah = const Value.absent(),
+    required int page,
+    this.name = const Value.absent(),
+    required RibbonColor color,
+    required DateTime createdAt,
+  }) : page = Value(page),
+       color = Value(color),
+       createdAt = Value(createdAt);
+  static Insertable<QuranBookmark> custom({
+    Expression<int>? id,
+    Expression<int>? surah,
+    Expression<int>? ayah,
+    Expression<int>? page,
+    Expression<String>? name,
+    Expression<String>? color,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (surah != null) 'surah': surah,
+      if (ayah != null) 'ayah': ayah,
+      if (page != null) 'page': page,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  QuranBookmarksCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? surah,
+    Value<int?>? ayah,
+    Value<int>? page,
+    Value<String?>? name,
+    Value<RibbonColor>? color,
+    Value<DateTime>? createdAt,
+  }) {
+    return QuranBookmarksCompanion(
+      id: id ?? this.id,
+      surah: surah ?? this.surah,
+      ayah: ayah ?? this.ayah,
+      page: page ?? this.page,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (surah.present) {
+      map['surah'] = Variable<int>(surah.value);
+    }
+    if (ayah.present) {
+      map['ayah'] = Variable<int>(ayah.value);
+    }
+    if (page.present) {
+      map['page'] = Variable<int>(page.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>($QuranBookmarksTable.$convertercolor.toSql(color.value));
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranBookmarksCompanion(')
+          ..write('id: $id, ')
+          ..write('surah: $surah, ')
+          ..write('ayah: $ayah, ')
+          ..write('page: $page, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, QuranNote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuranNotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _surahMeta = const VerificationMeta('surah');
+  @override
+  late final GeneratedColumn<int> surah = GeneratedColumn<int>(
+    'surah',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ayahMeta = const VerificationMeta('ayah');
+  @override
+  late final GeneratedColumn<int> ayah = GeneratedColumn<int>(
+    'ayah',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(StringExpressionOperators(note).trim().length).isBiggerThanValue(0),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [surah, ayah, note, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quran_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuranNote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('surah')) {
+      context.handle(_surahMeta, surah.isAcceptableOrUnknown(data['surah']!, _surahMeta));
+    } else if (isInserting) {
+      context.missing(_surahMeta);
+    }
+    if (data.containsKey('ayah')) {
+      context.handle(_ayahMeta, ayah.isAcceptableOrUnknown(data['ayah']!, _ayahMeta));
+    } else if (isInserting) {
+      context.missing(_ayahMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(_noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    } else if (isInserting) {
+      context.missing(_noteMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {surah, ayah};
+  @override
+  QuranNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuranNote(
+      surah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}surah'])!,
+      ayah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}ayah'])!,
+      note: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QuranNotesTable createAlias(String alias) {
+    return $QuranNotesTable(attachedDatabase, alias);
+  }
+}
+
+class QuranNote extends DataClass implements Insertable<QuranNote> {
+  final int surah;
+  final int ayah;
+  final String note;
+  final DateTime updatedAt;
+  const QuranNote({
+    required this.surah,
+    required this.ayah,
+    required this.note,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['surah'] = Variable<int>(surah);
+    map['ayah'] = Variable<int>(ayah);
+    map['note'] = Variable<String>(note);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  QuranNotesCompanion toCompanion(bool nullToAbsent) {
+    return QuranNotesCompanion(
+      surah: Value(surah),
+      ayah: Value(ayah),
+      note: Value(note),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory QuranNote.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuranNote(
+      surah: serializer.fromJson<int>(json['surah']),
+      ayah: serializer.fromJson<int>(json['ayah']),
+      note: serializer.fromJson<String>(json['note']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'surah': serializer.toJson<int>(surah),
+      'ayah': serializer.toJson<int>(ayah),
+      'note': serializer.toJson<String>(note),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  QuranNote copyWith({int? surah, int? ayah, String? note, DateTime? updatedAt}) => QuranNote(
+    surah: surah ?? this.surah,
+    ayah: ayah ?? this.ayah,
+    note: note ?? this.note,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  QuranNote copyWithCompanion(QuranNotesCompanion data) {
+    return QuranNote(
+      surah: data.surah.present ? data.surah.value : this.surah,
+      ayah: data.ayah.present ? data.ayah.value : this.ayah,
+      note: data.note.present ? data.note.value : this.note,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranNote(')
+          ..write('surah: $surah, ')
+          ..write('ayah: $ayah, ')
+          ..write('note: $note, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(surah, ayah, note, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuranNote &&
+          other.surah == this.surah &&
+          other.ayah == this.ayah &&
+          other.note == this.note &&
+          other.updatedAt == this.updatedAt);
+}
+
+class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
+  final Value<int> surah;
+  final Value<int> ayah;
+  final Value<String> note;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const QuranNotesCompanion({
+    this.surah = const Value.absent(),
+    this.ayah = const Value.absent(),
+    this.note = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  QuranNotesCompanion.insert({
+    required int surah,
+    required int ayah,
+    required String note,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : surah = Value(surah),
+       ayah = Value(ayah),
+       note = Value(note),
+       updatedAt = Value(updatedAt);
+  static Insertable<QuranNote> custom({
+    Expression<int>? surah,
+    Expression<int>? ayah,
+    Expression<String>? note,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (surah != null) 'surah': surah,
+      if (ayah != null) 'ayah': ayah,
+      if (note != null) 'note': note,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QuranNotesCompanion copyWith({
+    Value<int>? surah,
+    Value<int>? ayah,
+    Value<String>? note,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return QuranNotesCompanion(
+      surah: surah ?? this.surah,
+      ayah: ayah ?? this.ayah,
+      note: note ?? this.note,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (surah.present) {
+      map['surah'] = Variable<int>(surah.value);
+    }
+    if (ayah.present) {
+      map['ayah'] = Variable<int>(ayah.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranNotesCompanion(')
+          ..write('surah: $surah, ')
+          ..write('ayah: $ayah, ')
+          ..write('note: $note, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2872,9 +4539,19 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $QadaEntriesTable qadaEntries = $QadaEntriesTable(this);
   late final $AzkarCountsTable azkarCounts = $AzkarCountsTable(this);
   late final $SavedDuasTable savedDuas = $SavedDuasTable(this);
+  late final $QuranBookmarksTable quranBookmarks = $QuranBookmarksTable(this);
+  late final $QuranNotesTable quranNotes = $QuranNotesTable(this);
   late final Index qadaDay = Index(
     'qada_day',
     'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
+  );
+  late final Index quranBookmarkAyah = Index(
+    'quran_bookmark_ayah',
+    'CREATE UNIQUE INDEX quran_bookmark_ayah ON quran_bookmarks (surah, ayah)',
+  );
+  late final Index quranBookmarkPage = Index(
+    'quran_bookmark_page',
+    'CREATE UNIQUE INDEX quran_bookmark_page ON quran_bookmarks (page) WHERE surah IS NULL',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2886,7 +4563,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     qadaEntries,
     azkarCounts,
     savedDuas,
+    quranBookmarks,
+    quranNotes,
     qadaDay,
+    quranBookmarkAyah,
+    quranBookmarkPage,
   ];
 }
 
@@ -2925,10 +4606,31 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<int> reminderMinutes,
   Value<bool> notificationsAsked,
   Value<int> tasbihDhikr,
-  Value<int> tasbihCount,
+  Value<int> subhanallahCount,
+  Value<int> alhamdulillahCount,
+  Value<int> allahuAkbarCount,
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> prayerCountdown,
+  Value<CalendarMode> calendarMode,
+  Value<bool> topGlow,
+  Value<Language> language,
+  Value<bool> onboarded,
+  Value<int> lastReadSurah,
+  Value<int> lastReadAyah,
+  Value<int> lastReadPage,
+  Value<DateTime?> lastReadAt,
+  Value<PageColor> pageColor,
+  Value<QuranLayout> quranLayout,
+  Value<PageTurn> pageTurn,
+  Value<bool> keepScreenOn,
+  Value<QuranFont> quranFont,
+  Value<int> quranArabicSize,
+  Value<int> quranTranslationSize,
+  Value<double> reciteSpeed,
+  Value<int> reciteRepeat,
+  Value<int> recitePause,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> id,
@@ -2965,10 +4667,31 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> reminderMinutes,
   Value<bool> notificationsAsked,
   Value<int> tasbihDhikr,
-  Value<int> tasbihCount,
+  Value<int> subhanallahCount,
+  Value<int> alhamdulillahCount,
+  Value<int> allahuAkbarCount,
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> prayerCountdown,
+  Value<CalendarMode> calendarMode,
+  Value<bool> topGlow,
+  Value<Language> language,
+  Value<bool> onboarded,
+  Value<int> lastReadSurah,
+  Value<int> lastReadAyah,
+  Value<int> lastReadPage,
+  Value<DateTime?> lastReadAt,
+  Value<PageColor> pageColor,
+  Value<QuranLayout> quranLayout,
+  Value<PageTurn> pageTurn,
+  Value<bool> keepScreenOn,
+  Value<QuranFont> quranFont,
+  Value<int> quranArabicSize,
+  Value<int> quranTranslationSize,
+  Value<double> reciteSpeed,
+  Value<int> reciteRepeat,
+  Value<int> recitePause,
 });
 
 class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -3134,8 +4857,20 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
   ColumnFilters<int> get tasbihDhikr =>
       $composableBuilder(column: $table.tasbihDhikr, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get tasbihCount =>
-      $composableBuilder(column: $table.tasbihCount, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get subhanallahCount => $composableBuilder(
+    column: $table.subhanallahCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get alhamdulillahCount => $composableBuilder(
+    column: $table.alhamdulillahCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get allahuAkbarCount => $composableBuilder(
+    column: $table.allahuAkbarCount,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get morningOpenedOn =>
       $composableBuilder(
@@ -3151,6 +4886,83 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
 
   ColumnFilters<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get prayerCountdown => $composableBuilder(
+    column: $table.prayerCountdown,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<CalendarMode, CalendarMode, String> get calendarMode =>
+      $composableBuilder(
+        column: $table.calendarMode,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<bool> get topGlow =>
+      $composableBuilder(column: $table.topGlow, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Language, Language, String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get onboarded =>
+      $composableBuilder(column: $table.onboarded, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastReadSurah =>
+      $composableBuilder(column: $table.lastReadSurah, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastReadAyah =>
+      $composableBuilder(column: $table.lastReadAyah, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastReadPage =>
+      $composableBuilder(column: $table.lastReadPage, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastReadAt =>
+      $composableBuilder(column: $table.lastReadAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<PageColor, PageColor, String> get pageColor => $composableBuilder(
+    column: $table.pageColor,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<QuranLayout, QuranLayout, String> get quranLayout =>
+      $composableBuilder(
+        column: $table.quranLayout,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<PageTurn, PageTurn, String> get pageTurn => $composableBuilder(
+    column: $table.pageTurn,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get keepScreenOn =>
+      $composableBuilder(column: $table.keepScreenOn, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<QuranFont, QuranFont, String> get quranFont => $composableBuilder(
+    column: $table.quranFont,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get quranArabicSize => $composableBuilder(
+    column: $table.quranArabicSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quranTranslationSize => $composableBuilder(
+    column: $table.quranTranslationSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get reciteSpeed =>
+      $composableBuilder(column: $table.reciteSpeed, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get reciteRepeat =>
+      $composableBuilder(column: $table.reciteRepeat, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get recitePause =>
+      $composableBuilder(column: $table.recitePause, builder: (column) => ColumnFilters(column));
 }
 
 class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -3277,8 +5089,20 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<int> get tasbihDhikr =>
       $composableBuilder(column: $table.tasbihDhikr, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get tasbihCount =>
-      $composableBuilder(column: $table.tasbihCount, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get subhanallahCount => $composableBuilder(
+    column: $table.subhanallahCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get alhamdulillahCount => $composableBuilder(
+    column: $table.alhamdulillahCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get allahuAkbarCount => $composableBuilder(
+    column: $table.allahuAkbarCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get morningOpenedOn => $composableBuilder(
     column: $table.morningOpenedOn,
@@ -3292,6 +5116,71 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
 
   ColumnOrderings<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get prayerCountdown => $composableBuilder(
+    column: $table.prayerCountdown,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calendarMode =>
+      $composableBuilder(column: $table.calendarMode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get topGlow =>
+      $composableBuilder(column: $table.topGlow, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get onboarded =>
+      $composableBuilder(column: $table.onboarded, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastReadSurah => $composableBuilder(
+    column: $table.lastReadSurah,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastReadAyah =>
+      $composableBuilder(column: $table.lastReadAyah, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastReadPage =>
+      $composableBuilder(column: $table.lastReadPage, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastReadAt =>
+      $composableBuilder(column: $table.lastReadAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pageColor =>
+      $composableBuilder(column: $table.pageColor, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get quranLayout =>
+      $composableBuilder(column: $table.quranLayout, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pageTurn =>
+      $composableBuilder(column: $table.pageTurn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get keepScreenOn =>
+      $composableBuilder(column: $table.keepScreenOn, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get quranFont =>
+      $composableBuilder(column: $table.quranFont, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get quranArabicSize => $composableBuilder(
+    column: $table.quranArabicSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quranTranslationSize => $composableBuilder(
+    column: $table.quranTranslationSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get reciteSpeed =>
+      $composableBuilder(column: $table.reciteSpeed, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get reciteRepeat =>
+      $composableBuilder(column: $table.reciteRepeat, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get recitePause =>
+      $composableBuilder(column: $table.recitePause, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $SettingsTable> {
@@ -3403,8 +5292,14 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<int> get tasbihDhikr =>
       $composableBuilder(column: $table.tasbihDhikr, builder: (column) => column);
 
-  GeneratedColumn<int> get tasbihCount =>
-      $composableBuilder(column: $table.tasbihCount, builder: (column) => column);
+  GeneratedColumn<int> get subhanallahCount =>
+      $composableBuilder(column: $table.subhanallahCount, builder: (column) => column);
+
+  GeneratedColumn<int> get alhamdulillahCount =>
+      $composableBuilder(column: $table.alhamdulillahCount, builder: (column) => column);
+
+  GeneratedColumn<int> get allahuAkbarCount =>
+      $composableBuilder(column: $table.allahuAkbarCount, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<DateTime?, String> get morningOpenedOn =>
       $composableBuilder(column: $table.morningOpenedOn, builder: (column) => column);
@@ -3414,6 +5309,63 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumn<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => column);
+
+  GeneratedColumn<bool> get prayerCountdown =>
+      $composableBuilder(column: $table.prayerCountdown, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<CalendarMode, String> get calendarMode =>
+      $composableBuilder(column: $table.calendarMode, builder: (column) => column);
+
+  GeneratedColumn<bool> get topGlow =>
+      $composableBuilder(column: $table.topGlow, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Language, String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
+
+  GeneratedColumn<bool> get onboarded =>
+      $composableBuilder(column: $table.onboarded, builder: (column) => column);
+
+  GeneratedColumn<int> get lastReadSurah =>
+      $composableBuilder(column: $table.lastReadSurah, builder: (column) => column);
+
+  GeneratedColumn<int> get lastReadAyah =>
+      $composableBuilder(column: $table.lastReadAyah, builder: (column) => column);
+
+  GeneratedColumn<int> get lastReadPage =>
+      $composableBuilder(column: $table.lastReadPage, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastReadAt =>
+      $composableBuilder(column: $table.lastReadAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PageColor, String> get pageColor =>
+      $composableBuilder(column: $table.pageColor, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<QuranLayout, String> get quranLayout =>
+      $composableBuilder(column: $table.quranLayout, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PageTurn, String> get pageTurn =>
+      $composableBuilder(column: $table.pageTurn, builder: (column) => column);
+
+  GeneratedColumn<bool> get keepScreenOn =>
+      $composableBuilder(column: $table.keepScreenOn, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<QuranFont, String> get quranFont =>
+      $composableBuilder(column: $table.quranFont, builder: (column) => column);
+
+  GeneratedColumn<int> get quranArabicSize =>
+      $composableBuilder(column: $table.quranArabicSize, builder: (column) => column);
+
+  GeneratedColumn<int> get quranTranslationSize =>
+      $composableBuilder(column: $table.quranTranslationSize, builder: (column) => column);
+
+  GeneratedColumn<double> get reciteSpeed =>
+      $composableBuilder(column: $table.reciteSpeed, builder: (column) => column);
+
+  GeneratedColumn<int> get reciteRepeat =>
+      $composableBuilder(column: $table.reciteRepeat, builder: (column) => column);
+
+  GeneratedColumn<int> get recitePause =>
+      $composableBuilder(column: $table.recitePause, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -3476,10 +5428,31 @@ class $$SettingsTableTableManager
                 Value<int> reminderMinutes = const Value.absent(),
                 Value<bool> notificationsAsked = const Value.absent(),
                 Value<int> tasbihDhikr = const Value.absent(),
-                Value<int> tasbihCount = const Value.absent(),
+                Value<int> subhanallahCount = const Value.absent(),
+                Value<int> alhamdulillahCount = const Value.absent(),
+                Value<int> allahuAkbarCount = const Value.absent(),
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> prayerCountdown = const Value.absent(),
+                Value<CalendarMode> calendarMode = const Value.absent(),
+                Value<bool> topGlow = const Value.absent(),
+                Value<Language> language = const Value.absent(),
+                Value<bool> onboarded = const Value.absent(),
+                Value<int> lastReadSurah = const Value.absent(),
+                Value<int> lastReadAyah = const Value.absent(),
+                Value<int> lastReadPage = const Value.absent(),
+                Value<DateTime?> lastReadAt = const Value.absent(),
+                Value<PageColor> pageColor = const Value.absent(),
+                Value<QuranLayout> quranLayout = const Value.absent(),
+                Value<PageTurn> pageTurn = const Value.absent(),
+                Value<bool> keepScreenOn = const Value.absent(),
+                Value<QuranFont> quranFont = const Value.absent(),
+                Value<int> quranArabicSize = const Value.absent(),
+                Value<int> quranTranslationSize = const Value.absent(),
+                Value<double> reciteSpeed = const Value.absent(),
+                Value<int> reciteRepeat = const Value.absent(),
+                Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 latitude: latitude,
@@ -3515,10 +5488,31 @@ class $$SettingsTableTableManager
                 reminderMinutes: reminderMinutes,
                 notificationsAsked: notificationsAsked,
                 tasbihDhikr: tasbihDhikr,
-                tasbihCount: tasbihCount,
+                subhanallahCount: subhanallahCount,
+                alhamdulillahCount: alhamdulillahCount,
+                allahuAkbarCount: allahuAkbarCount,
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                prayerCountdown: prayerCountdown,
+                calendarMode: calendarMode,
+                topGlow: topGlow,
+                language: language,
+                onboarded: onboarded,
+                lastReadSurah: lastReadSurah,
+                lastReadAyah: lastReadAyah,
+                lastReadPage: lastReadPage,
+                lastReadAt: lastReadAt,
+                pageColor: pageColor,
+                quranLayout: quranLayout,
+                pageTurn: pageTurn,
+                keepScreenOn: keepScreenOn,
+                quranFont: quranFont,
+                quranArabicSize: quranArabicSize,
+                quranTranslationSize: quranTranslationSize,
+                reciteSpeed: reciteSpeed,
+                reciteRepeat: reciteRepeat,
+                recitePause: recitePause,
               ),
           createCompanionCallback:
               ({
@@ -3556,10 +5550,31 @@ class $$SettingsTableTableManager
                 Value<int> reminderMinutes = const Value.absent(),
                 Value<bool> notificationsAsked = const Value.absent(),
                 Value<int> tasbihDhikr = const Value.absent(),
-                Value<int> tasbihCount = const Value.absent(),
+                Value<int> subhanallahCount = const Value.absent(),
+                Value<int> alhamdulillahCount = const Value.absent(),
+                Value<int> allahuAkbarCount = const Value.absent(),
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> prayerCountdown = const Value.absent(),
+                Value<CalendarMode> calendarMode = const Value.absent(),
+                Value<bool> topGlow = const Value.absent(),
+                Value<Language> language = const Value.absent(),
+                Value<bool> onboarded = const Value.absent(),
+                Value<int> lastReadSurah = const Value.absent(),
+                Value<int> lastReadAyah = const Value.absent(),
+                Value<int> lastReadPage = const Value.absent(),
+                Value<DateTime?> lastReadAt = const Value.absent(),
+                Value<PageColor> pageColor = const Value.absent(),
+                Value<QuranLayout> quranLayout = const Value.absent(),
+                Value<PageTurn> pageTurn = const Value.absent(),
+                Value<bool> keepScreenOn = const Value.absent(),
+                Value<QuranFont> quranFont = const Value.absent(),
+                Value<int> quranArabicSize = const Value.absent(),
+                Value<int> quranTranslationSize = const Value.absent(),
+                Value<double> reciteSpeed = const Value.absent(),
+                Value<int> reciteRepeat = const Value.absent(),
+                Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 latitude: latitude,
@@ -3595,10 +5610,31 @@ class $$SettingsTableTableManager
                 reminderMinutes: reminderMinutes,
                 notificationsAsked: notificationsAsked,
                 tasbihDhikr: tasbihDhikr,
-                tasbihCount: tasbihCount,
+                subhanallahCount: subhanallahCount,
+                alhamdulillahCount: alhamdulillahCount,
+                allahuAkbarCount: allahuAkbarCount,
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                prayerCountdown: prayerCountdown,
+                calendarMode: calendarMode,
+                topGlow: topGlow,
+                language: language,
+                onboarded: onboarded,
+                lastReadSurah: lastReadSurah,
+                lastReadAyah: lastReadAyah,
+                lastReadPage: lastReadPage,
+                lastReadAt: lastReadAt,
+                pageColor: pageColor,
+                quranLayout: quranLayout,
+                pageTurn: pageTurn,
+                keepScreenOn: keepScreenOn,
+                quranFont: quranFont,
+                quranArabicSize: quranArabicSize,
+                quranTranslationSize: quranTranslationSize,
+                reciteSpeed: reciteSpeed,
+                reciteRepeat: reciteRepeat,
+                recitePause: recitePause,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4180,6 +6216,363 @@ typedef $$SavedDuasTableProcessedTableManager =
       SavedDua,
       PrefetchHooks Function()
     >;
+typedef $$QuranBookmarksTableCreateCompanionBuilder = QuranBookmarksCompanion Function({
+  Value<int> id,
+  Value<int?> surah,
+  Value<int?> ayah,
+  required int page,
+  Value<String?> name,
+  required RibbonColor color,
+  required DateTime createdAt,
+});
+typedef $$QuranBookmarksTableUpdateCompanionBuilder = QuranBookmarksCompanion Function({
+  Value<int> id,
+  Value<int?> surah,
+  Value<int?> ayah,
+  Value<int> page,
+  Value<String?> name,
+  Value<RibbonColor> color,
+  Value<DateTime> createdAt,
+});
+
+class $$QuranBookmarksTableFilterComposer extends Composer<_$AppDatabase, $QuranBookmarksTable> {
+  $$QuranBookmarksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get surah =>
+      $composableBuilder(column: $table.surah, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get ayah =>
+      $composableBuilder(column: $table.ayah, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get page =>
+      $composableBuilder(column: $table.page, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<RibbonColor, RibbonColor, String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuranBookmarksTableOrderingComposer extends Composer<_$AppDatabase, $QuranBookmarksTable> {
+  $$QuranBookmarksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get surah =>
+      $composableBuilder(column: $table.surah, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get ayah =>
+      $composableBuilder(column: $table.ayah, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get page =>
+      $composableBuilder(column: $table.page, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuranBookmarksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuranBookmarksTable> {
+  $$QuranBookmarksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get surah =>
+      $composableBuilder(column: $table.surah, builder: (column) => column);
+
+  GeneratedColumn<int> get ayah =>
+      $composableBuilder(column: $table.ayah, builder: (column) => column);
+
+  GeneratedColumn<int> get page =>
+      $composableBuilder(column: $table.page, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<RibbonColor, String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$QuranBookmarksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuranBookmarksTable,
+          QuranBookmark,
+          $$QuranBookmarksTableFilterComposer,
+          $$QuranBookmarksTableOrderingComposer,
+          $$QuranBookmarksTableAnnotationComposer,
+          $$QuranBookmarksTableCreateCompanionBuilder,
+          $$QuranBookmarksTableUpdateCompanionBuilder,
+          (QuranBookmark, BaseReferences<_$AppDatabase, $QuranBookmarksTable, QuranBookmark>),
+          QuranBookmark,
+          PrefetchHooks Function()
+        > {
+  $$QuranBookmarksTableTableManager(_$AppDatabase db, $QuranBookmarksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuranBookmarksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuranBookmarksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuranBookmarksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> surah = const Value.absent(),
+                Value<int?> ayah = const Value.absent(),
+                Value<int> page = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<RibbonColor> color = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => QuranBookmarksCompanion(
+                id: id,
+                surah: surah,
+                ayah: ayah,
+                page: page,
+                name: name,
+                color: color,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> surah = const Value.absent(),
+                Value<int?> ayah = const Value.absent(),
+                required int page,
+                Value<String?> name = const Value.absent(),
+                required RibbonColor color,
+                required DateTime createdAt,
+              }) => QuranBookmarksCompanion.insert(
+                id: id,
+                surah: surah,
+                ayah: ayah,
+                page: page,
+                name: name,
+                color: color,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QuranBookmarksTable, QuranBookmark>(table),
+                  BaseReferences<_$AppDatabase, $QuranBookmarksTable, QuranBookmark>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuranBookmarksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuranBookmarksTable,
+      QuranBookmark,
+      $$QuranBookmarksTableFilterComposer,
+      $$QuranBookmarksTableOrderingComposer,
+      $$QuranBookmarksTableAnnotationComposer,
+      $$QuranBookmarksTableCreateCompanionBuilder,
+      $$QuranBookmarksTableUpdateCompanionBuilder,
+      (QuranBookmark, BaseReferences<_$AppDatabase, $QuranBookmarksTable, QuranBookmark>),
+      QuranBookmark,
+      PrefetchHooks Function()
+    >;
+typedef $$QuranNotesTableCreateCompanionBuilder = QuranNotesCompanion Function({
+  required int surah,
+  required int ayah,
+  required String note,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$QuranNotesTableUpdateCompanionBuilder = QuranNotesCompanion Function({
+  Value<int> surah,
+  Value<int> ayah,
+  Value<String> note,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $$QuranNotesTableFilterComposer extends Composer<_$AppDatabase, $QuranNotesTable> {
+  $$QuranNotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get surah =>
+      $composableBuilder(column: $table.surah, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get ayah =>
+      $composableBuilder(column: $table.ayah, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuranNotesTableOrderingComposer extends Composer<_$AppDatabase, $QuranNotesTable> {
+  $$QuranNotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get surah =>
+      $composableBuilder(column: $table.surah, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get ayah =>
+      $composableBuilder(column: $table.ayah, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuranNotesTableAnnotationComposer extends Composer<_$AppDatabase, $QuranNotesTable> {
+  $$QuranNotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get surah =>
+      $composableBuilder(column: $table.surah, builder: (column) => column);
+
+  GeneratedColumn<int> get ayah =>
+      $composableBuilder(column: $table.ayah, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$QuranNotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuranNotesTable,
+          QuranNote,
+          $$QuranNotesTableFilterComposer,
+          $$QuranNotesTableOrderingComposer,
+          $$QuranNotesTableAnnotationComposer,
+          $$QuranNotesTableCreateCompanionBuilder,
+          $$QuranNotesTableUpdateCompanionBuilder,
+          (QuranNote, BaseReferences<_$AppDatabase, $QuranNotesTable, QuranNote>),
+          QuranNote,
+          PrefetchHooks Function()
+        > {
+  $$QuranNotesTableTableManager(_$AppDatabase db, $QuranNotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$QuranNotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$QuranNotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuranNotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> surah = const Value.absent(),
+                Value<int> ayah = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QuranNotesCompanion(
+                surah: surah,
+                ayah: ayah,
+                note: note,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int surah,
+                required int ayah,
+                required String note,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => QuranNotesCompanion.insert(
+                surah: surah,
+                ayah: ayah,
+                note: note,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QuranNotesTable, QuranNote>(table),
+                  BaseReferences<_$AppDatabase, $QuranNotesTable, QuranNote>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuranNotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuranNotesTable,
+      QuranNote,
+      $$QuranNotesTableFilterComposer,
+      $$QuranNotesTableOrderingComposer,
+      $$QuranNotesTableAnnotationComposer,
+      $$QuranNotesTableCreateCompanionBuilder,
+      $$QuranNotesTableUpdateCompanionBuilder,
+      (QuranNote, BaseReferences<_$AppDatabase, $QuranNotesTable, QuranNote>),
+      QuranNote,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4191,4 +6584,8 @@ class $AppDatabaseManager {
   $$AzkarCountsTableTableManager get azkarCounts =>
       $$AzkarCountsTableTableManager(_db, _db.azkarCounts);
   $$SavedDuasTableTableManager get savedDuas => $$SavedDuasTableTableManager(_db, _db.savedDuas);
+  $$QuranBookmarksTableTableManager get quranBookmarks =>
+      $$QuranBookmarksTableTableManager(_db, _db.quranBookmarks);
+  $$QuranNotesTableTableManager get quranNotes =>
+      $$QuranNotesTableTableManager(_db, _db.quranNotes);
 }

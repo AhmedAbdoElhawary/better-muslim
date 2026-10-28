@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- assets/app_icon/splash_symbol.svg as a vector, so it stays sharp on every density -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="symbol"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- the star is 40% of android 12's 288dp splash icon, strokes about 4dp so they hold on 2x screens -->
+    <group
+        android:pivotX="50"
+        android:pivotY="50"
+        android:scaleX="0.4762"
+        android:scaleY="0.4762">
+        <path
+            android:pathData="M50,8L62.3,20.3L79.7,20.3L79.7,37.7L92,50L79.7,62.3L79.7,79.7L62.3,79.7L50,92L37.7,79.7L20.3,79.7L20.3,62.3L8,50L20.3,37.7L20.3,20.3L37.7,20.3Z"
+            android:strokeColor="#A88A52"
+            android:strokeLineJoin="round"
+            android:strokeWidth="2.9" />
+        <path
+            android:pathData="M26,64A24,24 0,0 1,74 64"
+            android:strokeColor="#A88A52"
+            android:strokeLineCap="round"
+            android:strokeWidth="2.9" />
+        <path
+            android:pathData="M20.3,64H79.7"
+            android:strokeColor="#A88A52"
+            android:strokeWidth="2.9" />
+        <path
+            android:fillColor="#CDB27A"
+            android:pathData="M61.86,46.16a4.2,4.2 0,1 0,8.4 0a4.2,4.2 0,1 0,-8.4 0Z" />
+    </group>
+</vector>

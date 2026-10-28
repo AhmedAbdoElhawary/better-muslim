@@ -19,8 +19,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+/// the name and countdown home flies into its bar, the card hides its own while they fly
+class CardFlight {
+  final name = GlobalKey();
+  final countdown = GlobalKey();
+  final flying = ValueNotifier(false);
+}
+
 class NextPrayerCard extends StatelessWidget {
-  const NextPrayerCard({super.key});
+  const NextPrayerCard({this.flight, super.key});
+
+  final CardFlight? flight;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +82,7 @@ class NextPrayerCard extends StatelessWidget {
                         ],
                       ),
                     RSizedBox.vertical(gap),
-                    const _NameAndCountdown(),
+                    _NameAndCountdown(flight: flight),
                     RSizedBox.vertical(gap),
                     const PrayerBar(),
                     RSizedBox.vertical(gap),
@@ -108,34 +117,41 @@ class _NameAr extends ConsumerWidget {
 
 /// side by side as in the PNGs, stacked above text scale 1.4
 class _NameAndCountdown extends ConsumerWidget {
-  const _NameAndCountdown();
+  const _NameAndCountdown({required this.flight});
+
+  final CardFlight? flight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final flight = this.flight;
     final prayer = ref.watch(nextPrayerProvider.select((next) => next?.$1));
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final name = prayer == null
         ? const SizedBox.shrink()
         : RegularText(
             prayer.nameKey,
+            key: flight?.name,
             font: FontEnum.display,
             fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.cardTitle,
             height: isArabic ? LineHeightManager.cardTitleAr : LineHeightManager.cardTitle,
           );
-    if (context.isLargeText) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [name, const Countdown()],
-      );
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: isArabic ? CrossAxisAlignment.center : CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Flexible(child: name),
-        const Countdown(),
-      ],
+    final countdown = Countdown(key: flight?.countdown);
+    final row = context.isLargeText
+        ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [name, countdown])
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: isArabic ? CrossAxisAlignment.center : CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Flexible(child: name),
+              countdown,
+            ],
+          );
+    if (flight == null) return row;
+    return ValueListenableBuilder<bool>(
+      valueListenable: flight.flying,
+      builder: (context, flying, child) => Visibility.maintain(visible: !flying, child: child!),
+      child: row,
     );
   }
 }

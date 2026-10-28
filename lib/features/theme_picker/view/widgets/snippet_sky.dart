@@ -1,8 +1,12 @@
 import 'dart:math' as math;
 
+import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
+import 'package:better_muslim/features/theme_picker/view_model/theme_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// the snippet's svg and dots, in its 300 x 176 box. still: no drift, twinkle or particle loop (R4)
 const _stars = [
@@ -33,17 +37,22 @@ const _gap = 5.0;
 const _sunGlowAlpha = .55;
 const _sky2Stop = .56;
 
-/// the theme's base sky, the colors come from the theme the preview is in
-class SnippetSky extends StatelessWidget {
+/// the previewed theme's sky at this hour, its base sky with no place yet. the other colors come
+/// from the theme the preview is in
+class SnippetSky extends ConsumerWidget {
   const SnippetSky({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(skyStateProvider);
+    final stops = state == null
+        ? null
+        : themeSky(ref.watch(themePreviewProvider.select((pick) => pick.theme)))[state]!;
     return CustomPaint(
       painter: _SkyPainter(
-        sky1: context.getColor(ThemeEnum.sky1),
-        sky2: context.getColor(ThemeEnum.sky2),
-        sky3: context.getColor(ThemeEnum.sky3),
+        sky1: stops?.top ?? context.getColor(ThemeEnum.sky1),
+        sky2: stops?.mid ?? context.getColor(ThemeEnum.sky2),
+        sky3: stops?.bottom ?? context.getColor(ThemeEnum.sky3),
         onSky: context.getColor(ThemeEnum.onSky),
         sun: context.getColor(ThemeEnum.sun),
         star: context.getColor(ThemeEnum.onSkyBright).withValues(alpha: context.starOpacity),

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 /// The six anchor sky states (02 Tokens › Living Sky · BmSky). Three stops each, top to bottom.
@@ -92,11 +90,5 @@ class BmSunArc {
   static double? fraction(DateTime now, DateTime sunrise, DateTime maghrib) {
     if (now.isBefore(sunrise) || now.isAfter(maghrib)) return null;
     return now.difference(sunrise).inSeconds / maghrib.difference(sunrise).inSeconds;
-  }
-
-  static Offset sunCenter(double f, {bool rtl = false}) {
-    final c = rtl ? centerRtl : center;
-    final a = math.pi * (1 - f);
-    return Offset(c.dx + radius * math.cos(a), c.dy - radius * math.sin(a));
   }
 }

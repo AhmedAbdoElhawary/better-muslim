@@ -3,6 +3,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/sliding_selection.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +20,19 @@ class DuaChips extends ConsumerWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: REdgeInsetsDirectional.only(start: SpaceManager.s4, end: SpaceManager.s4),
-      child: Row(
+      child: SlidingSelection(
+        selected: selected.index,
+        highlight: const _Fill(),
+        layout: (children) => Row(
+          children: [
+            for (final (i, chip) in children.indexed) ...[
+              if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
+              chip,
+            ],
+          ],
+        ),
         children: [
-          for (final (i, chip) in DuaChip.values.indexed) ...[
-            if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
+          for (final chip in DuaChip.values)
             _DuaChip(
               chip: chip,
               selected: chip == selected,
@@ -31,7 +41,6 @@ class DuaChips extends ConsumerWidget {
                 ref.read(duaChipProvider.notifier).select(chip);
               },
             ),
-          ],
         ],
       ),
     );
@@ -60,11 +69,12 @@ class _DuaChip extends StatelessWidget {
               padding: REdgeInsets.symmetric(horizontal: SpaceManager.duaChipSide),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? context.getColor(ThemeEnum.primary) : null,
                 borderRadius: BorderRadius.circular(RadiusManager.pill.r),
-                border: selected
-                    ? null
-                    : Border.all(color: context.getColor(ThemeEnum.outlineStrong)),
+                border: Border.all(
+                  color: context.getColor(
+                    selected ? ThemeEnum.transparent : ThemeEnum.outlineStrong,
+                  ),
+                ),
               ),
               child: selected
                   ? MediumText(
@@ -74,6 +84,27 @@ class _DuaChip extends StatelessWidget {
                     )
                   : RegularText(chip.labelKey, fontSize: FontSizeManager.duaChip),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// the selected chip's fill, the chip's height inside the 44 pt target
+class _Fill extends StatelessWidget {
+  const _Fill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: RSizedBox(
+        height: SizeManager.chip,
+        width: double.infinity,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.getColor(ThemeEnum.primary),
+            borderRadius: BorderRadius.circular(RadiusManager.pill.r),
           ),
         ),
       ),

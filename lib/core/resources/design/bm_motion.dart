@@ -37,6 +37,29 @@ abstract final class BmMotion {
   static const burst = Duration(milliseconds: 700);
   static const alignPulse = Duration(milliseconds: 900);
   static const beadStep = 44.0; // px the tasbih strip moves per count
+
+  /// the ring fill and the burst, standard + burst
+  static const completionPause = Duration(milliseconds: 1000);
+  static const shift = 8.0; // design points a swapped child slides
+  static const dialogFrom = 1.08;
+  static const zoomNear = 1.1;
+  static const zoomFar = .9;
+
+  // Motion v2 (11 Motion v2's spec table)
+  static const oilCycle = Duration(milliseconds: 1600);
+  static const loaderDelay = Duration(milliseconds: 400);
+  static const loaderMinimum = Duration(milliseconds: 600);
+  static const shimmer = Duration(milliseconds: 1200);
+  static const staggerStep = Duration(milliseconds: 30);
+  static const staggerMax = 8;
+  static const staggerRise = 12.0;
+  static const pageSlide = standard;
+  static const containerOpen = emphasized;
+  static const pushReverse = Duration(milliseconds: 420);
+
+  /// a page swipe completes past this share of the width or above this speed in px/s
+  static const completeShare = .35;
+  static const completeVelocity = 700.0;
 }
 
 /// Reduce motion = OS setting OR in-app switch (pass the in-app value in via BmPrefs).

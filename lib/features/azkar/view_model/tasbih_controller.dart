@@ -16,12 +16,18 @@ class TasbihController extends Notifier<TasbihState?> {
   @override
   TasbihState? build() {
     ref.read(settingsProvider.future).then((row) {
-      state ??= TasbihState(row.tasbihDhikr, row.tasbihCount);
+      state ??= TasbihState(row.tasbihDhikr, [
+        row.subhanallahCount,
+        row.alhamdulillahCount,
+        row.allahuAkbarCount,
+      ]);
     });
     return null;
   }
 
   void tap() => _set(state?.tap());
+
+  void advance() => _set(state?.advance());
 
   void select(int dhikr) => _set(state?.select(dhikr));
 
@@ -41,7 +47,12 @@ class TasbihController extends Notifier<TasbihState?> {
       ref
           .read(databaseProvider)
           .updateSettings(
-            SettingsCompanion(tasbihDhikr: Value(next.dhikr), tasbihCount: Value(next.count)),
+            SettingsCompanion(
+              tasbihDhikr: Value(next.dhikr),
+              subhanallahCount: Value(next.counts[0]),
+              alhamdulillahCount: Value(next.counts[1]),
+              allahuAkbarCount: Value(next.counts[2]),
+            ),
           ),
     );
   }

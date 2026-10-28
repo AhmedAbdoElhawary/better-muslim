@@ -10,6 +10,7 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,7 +104,7 @@ class _DayCompleteState extends ConsumerState<DayComplete> with TickerProviderSt
       onTap: _done,
       child: AnimatedBuilder(
         animation: Listenable.merge([_timeline, _star]),
-        builder: (context, _) => Opacity(
+        builder: (context, _) => CustomOpacity(
           opacity: 1 - out.value,
           child: ColoredBox(
             color: context.getColor(ThemeEnum.bg).withValues(alpha: _backdrop),
@@ -127,7 +128,7 @@ class _DayCompleteState extends ConsumerState<DayComplete> with TickerProviderSt
                             ),
                             child: Transform.scale(
                               scale: reduce ? 1 : lerpDouble(1, .4, dots.value),
-                              child: Opacity(
+                              child: CustomOpacity(
                                 opacity: 1 - dots.value,
                                 child: _Circle(
                                   size: SizeManager.dayCompleteDot,
@@ -138,7 +139,7 @@ class _DayCompleteState extends ConsumerState<DayComplete> with TickerProviderSt
                             ),
                           ),
                         if (!reduce)
-                          Opacity(
+                          CustomOpacity(
                             opacity: ring.value == 0 ? 0 : .7 * (1 - ring.value),
                             child: Transform.scale(
                               scale: 1 + ring.value,
@@ -149,7 +150,7 @@ class _DayCompleteState extends ConsumerState<DayComplete> with TickerProviderSt
                               ),
                             ),
                           ),
-                        Opacity(
+                        CustomOpacity(
                           opacity: starIn.value,
                           child: Transform.scale(
                             scale: reduce || _star.value == 0 ? 1 : _star.value,
@@ -163,7 +164,7 @@ class _DayCompleteState extends ConsumerState<DayComplete> with TickerProviderSt
                     ),
                   ),
                   const RSizedBox.vertical(SpaceManager.s4),
-                  Opacity(
+                  CustomOpacity(
                     opacity: caption.value,
                     child: Transform.translate(
                       offset: Offset(

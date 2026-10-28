@@ -47,6 +47,7 @@ class _AppState extends ConsumerState<App> {
   @override
   Widget build(BuildContext context) {
     final themeId = ref.watch(themeIdProvider);
+    final language = ref.watch(settingsProvider.select((settings) => settings.value?.language));
     final reduceMotion = ref.watch(
       settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
     );
@@ -61,6 +62,11 @@ class _AppState extends ConsumerState<App> {
         themeAnimationCurve: BmMotion.standardCurve,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+
+        /// null keeps flutter's own pick, which follows a change in the phone's settings
+        locale: language == null || language == Language.phone
+            ? null
+            : AppLocalizations.localeOf(language),
         routerConfig: ref.watch(routerProvider),
 
         /// the in-app switch joins the os flag here, so every widget reads one flag (R4)
@@ -74,7 +80,9 @@ class _AppState extends ConsumerState<App> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: SizeManager.maxContentWidth.w),
-                  child: child,
+
+                  /// the outermost overlay, toasts go in it to stay above every route and sheet
+                  child: Overlay.wrap(child: child!),
                 ),
               ),
             ),

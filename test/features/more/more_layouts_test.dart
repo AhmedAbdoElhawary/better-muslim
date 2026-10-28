@@ -26,7 +26,6 @@ void main() {
     'theme': Routes.theme,
     'the hijri calendar': Routes.hijriCalendar,
     'adhan and reminders': Routes.adhanSettings,
-    'credits': Routes.credits,
   };
 
   for (final (way, brightness, reduceMotion, size) in ways) {

@@ -2,6 +2,8 @@ import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/router/page_transitions.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/material.dart';
 
 /// every color in the app goes through this, the active BmPalette fills it so all 8 themes work
@@ -39,7 +41,24 @@ enum ThemeEnum {
   glassHighlight,
   scrim,
   toastAction,
-  transparent;
+  transparent,
+  page,
+  ink,
+  ink2,
+  ornament,
+  ornamentSoft,
+  selectionWash,
+  followWash,
+  pageHidden,
+  gutter,
+  pageGlass,
+  oilLight,
+  oilDark,
+  oilRipple,
+  shareEmerald,
+  shareSky1,
+  shareSky2,
+  shareSky3;
 
   Color resolve(BmPalette palette) => switch (this) {
     ThemeEnum.bg => palette.bg,
@@ -84,6 +103,25 @@ enum ThemeEnum {
     /// the toast's undo, primary mixed 25% toward bg so it reads on the inverted toast
     ThemeEnum.toastAction => Color.lerp(palette.primary, palette.bg, .25)!,
     ThemeEnum.transparent => Colors.transparent,
+    ThemeEnum.page => palette.pageColors.page,
+    ThemeEnum.ink => palette.pageColors.ink,
+    ThemeEnum.ink2 => palette.pageColors.ink2,
+    ThemeEnum.ornament => palette.pageColors.ornament,
+    ThemeEnum.ornamentSoft => palette.pageColors.ornamentSoft,
+    ThemeEnum.selectionWash => palette.pageColors.selectionWash,
+    ThemeEnum.followWash => palette.pageColors.followWash,
+    ThemeEnum.pageHidden => palette.pageColors.hidden,
+    ThemeEnum.gutter => palette.pageColors.gutter,
+
+    /// GLASS in _gen/quran.js, the reader's bars over the page
+    ThemeEnum.pageGlass => palette.surface.withValues(alpha: .78),
+    ThemeEnum.oilLight => bmOilLight,
+    ThemeEnum.oilDark => bmOilDark,
+    ThemeEnum.oilRipple => bmOilRipple,
+    ThemeEnum.shareEmerald => bmShareEmerald,
+    ThemeEnum.shareSky1 => bmShareSky1,
+    ThemeEnum.shareSky2 => bmShareSky2,
+    ThemeEnum.shareSky3 => bmShareSky3,
   };
 }
 
@@ -120,12 +158,35 @@ abstract final class AppTheme {
   static ThemeData light(BmThemeId id) => _build(bmThemes[id]!.light, Brightness.light);
   static ThemeData dark(BmThemeId id) => _build(bmThemes[id]!.dark, Brightness.dark);
 
+  /// the reader's chrome takes the page's palette tinted by the app's theme (research R5).
+  /// follow sky is resolved before, see PageColor.resolve
+  static ThemeData page(PageColor color, [BmThemeId id = BmThemeId.qiyamEmerald]) {
+    final theme = bmThemes[id]!;
+    final base = switch (color) {
+      PageColor.paper || PageColor.followSky => BmPagePalette.paper,
+      PageColor.cream => BmPagePalette.cream,
+      PageColor.sepia => BmPagePalette.sepia,
+      PageColor.green => BmPagePalette.green,
+      PageColor.night => BmPagePalette.night,
+      PageColor.navy => BmPagePalette.navy,
+    };
+    return color.dark
+        ? _build(BmPagePalette.tint(base, theme.dark), Brightness.dark)
+        : _build(BmPagePalette.tint(base, theme.light), Brightness.light);
+  }
+
   /// BmText.body and material 3 typography fill line height and letter spacing into every text
   /// that leaves them empty, where the specs mean the font's own metrics
   static ThemeData _build(BmPalette palette, Brightness brightness) {
     final theme = bmThemeData(palette, brightness);
     return theme.copyWith(
       typography: Typography.material2014(),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.iOS: BmPageTransitionsBuilder(),
+          TargetPlatform.android: BmPageTransitionsBuilder(),
+        },
+      ),
       textTheme: theme.textTheme.copyWith(
         bodyMedium: TextStyle(
           fontFamily: FontFamilyManager.body,
