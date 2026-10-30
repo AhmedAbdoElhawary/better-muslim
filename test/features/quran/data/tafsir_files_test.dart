@@ -124,10 +124,10 @@ void main() {
       TafsirSource.qurtubi.address.toString(),
       'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/tafsir-v2/qurtubi.json.gz',
     );
-    expect(
-      TafsirSource.ibnKathir.address.pathSegments.reversed.take(2),
-      ['ibn_kathir.json.gz', 'tafsir-v1'],
-    );
+    expect(TafsirSource.ibnKathir.address.pathSegments.reversed.take(2), [
+      'ibn_kathir.json.gz',
+      'tafsir-v1',
+    ]);
     final hashes = {for (final source in TafsirSource.values.skip(1)) source.sha256};
     expect(hashes, hasLength(4));
     expect(hashes.every(RegExp(r'^[0-9a-f]{64}$').hasMatch), isTrue);
