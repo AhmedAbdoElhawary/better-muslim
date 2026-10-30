@@ -117,6 +117,8 @@ abstract final class StringsManager {
   static const String ayyamAlBid = 'ayyamAlBid';
   static const String estimated = 'estimated';
   static const String days = 'days';
+  static const String inDays = 'inDays';
+  static const String daysAgo = 'daysAgo';
   static const String searchDuas = 'searchDuas';
   static const String catAll = 'catAll';
   static const String catMorningEvening = 'catMorningEvening';

@@ -45,7 +45,7 @@ class ComingUpItem {
   final DateTime first;
   final HijriDate hijri;
 
-  /// from the selected day, at least 1
+  /// from today, so 0 is today and below 0 already passed
   final int daysAway;
 
   /// a later hijri month than today's, its start waits on the moon sighting
@@ -61,7 +61,7 @@ ComingUp comingUp(DateTime selected, DateTime today, int adjust, CalendarMode mo
     DateTime(selected.year, selected.month, selected.day + 1),
     year,
     selected: selected,
-    today: HijriDate.of(today, adjust),
+    today: today,
     adjust: adjust,
     mode: mode,
   );
@@ -77,14 +77,7 @@ ComingUp comingUp(DateTime selected, DateTime today, int adjust, CalendarMode mo
     next: true,
     groups: start == null
         ? const []
-        : _walk(
-            start,
-            next,
-            selected: selected,
-            today: HijriDate.of(today, adjust),
-            adjust: adjust,
-            mode: mode,
-          ),
+        : _walk(start, next, selected: selected, today: today, adjust: adjust, mode: mode),
   );
 }
 
@@ -93,10 +86,11 @@ List<ComingUpGroup> _walk(
   DateTime start,
   int year, {
   required DateTime selected,
-  required HijriDate today,
+  required DateTime today,
   required int adjust,
   required CalendarMode mode,
 }) {
+  final todayHijri = HijriDate.of(today, adjust);
   final end = HijriMonth.last.days(adjust).last;
   final selectedMonth = CalendarMonth.of(selected, mode, adjust);
   final groups = <ComingUpGroup>[];
@@ -113,8 +107,8 @@ List<ComingUpGroup> _walk(
             event: event,
             first: day,
             hijri: hijri,
-            daysAway: _utc(day).difference(_utc(selected)).inDays,
-            estimated: hijri.year * 12 + hijri.month > today.year * 12 + today.month,
+            daysAway: _utc(day).difference(_utc(today)).inDays,
+            estimated: hijri.year * 12 + hijri.month > todayHijri.year * 12 + todayHijri.month,
           ),
     ];
     if (items.isEmpty) continue;

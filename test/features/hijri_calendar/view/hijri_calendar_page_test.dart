@@ -139,8 +139,11 @@ void main() {
 
       expect(find.text('This year (1448)'), findsOneWidget);
       expect(find.text('This month'), findsOneWidget);
-      expect(find.text('9 days'), findsOneWidget);
+      expect(find.text('in 9 days'), findsOneWidget);
       expect(find.text('Ayyam al-Bid'), findsWidgets);
+
+      await tap(tester, day('1'));
+      expect(find.text('in 9 days'), findsOneWidget, reason: 'counted from today');
 
       await tap(tester, find.text('Ramadan begins'));
       expect(find.text('Ramadan 1448'), findsOneWidget);
@@ -148,6 +151,19 @@ void main() {
       expect(find.text('1 Ramadan 1448'), findsOneWidget);
       expect(find.text('Ramadan begins'), findsOneWidget, reason: 'events is open');
       expect(find.text('This year (1448)'), findsNothing);
+      await unmount(tester);
+    });
+
+    testWidgets('coming up from a past day shows the passed events muted, in days ago', (
+      tester,
+    ) async {
+      await open(tester);
+      await tap(tester, find.bySemanticsLabel('Previous month'));
+      await tap(tester, day('1'));
+      await tap(tester, find.text('Coming up'));
+
+      expect(find.textContaining(RegExp(r'^\d+ days ago$')), findsOneWidget);
+      expect(find.text('in 9 days'), findsOneWidget);
       await unmount(tester);
     });
 

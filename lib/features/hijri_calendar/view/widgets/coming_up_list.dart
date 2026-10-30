@@ -112,7 +112,7 @@ class _Item extends ConsumerWidget {
       if (item.estimated) context.tr(StringsManager.estimated, {'date': dates}) else dates,
     ].join(' · ');
     final stacked = MediaQuery.textScalerOf(context).scale(1) > _stackAt;
-    final pill = _Pill(context.daysAway(item.daysAway, digits));
+    final pill = _Pill(context.daysAway(item.daysAway, digits), past: item.daysAway < 0);
     return Semantics(
       button: true,
       child: GestureDetector(
@@ -193,10 +193,11 @@ class _Item extends ConsumerWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill(this.label);
+  const _Pill(this.label, {required this.past});
 
   /// already formatted
   final String label;
+  final bool past;
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +206,7 @@ class _Pill extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(RadiusManager.pill.r),
-          color: context.getColor(ThemeEnum.primaryContainer),
+          color: context.getColor(past ? ThemeEnum.variant : ThemeEnum.primaryContainer),
         ),
         child: SymmetricPadding(
           horizontal: SpaceManager.chipSide,
@@ -216,7 +217,7 @@ class _Pill extends StatelessWidget {
               label,
               translate: false,
               fontSize: FontSizeManager.chip,
-              color: ThemeEnum.onPrimaryContainer,
+              color: past ? ThemeEnum.text2 : ThemeEnum.onPrimaryContainer,
               tabularFigures: true,
             ),
           ),

@@ -258,6 +258,18 @@
       "n": {}
     }
   },
+  "inDays": "{n, plural, one{in {n} day} other{in {n} days}}",
+  "@inDays": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "daysAgo": "{n, plural, one{{n} day ago} other{{n} days ago}}",
+  "@daysAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "searchDuas": "Search in English or Arabic",
   "catAll": "All",
   "catMorningEvening": "Morning and evening",

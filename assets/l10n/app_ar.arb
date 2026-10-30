@@ -117,6 +117,8 @@
   "ayyamAlBid": "الأيام البيض",
   "estimated": "تقريبًا {date}",
   "days": "{sign}{n} يوم",
+  "inDays": "{n, plural, one{بعد يوم واحد} two{بعد يومين} few{بعد {n} أيام} other{بعد {n} يومًا}}",
+  "daysAgo": "{n, plural, one{قبل يوم واحد} two{قبل يومين} few{قبل {n} أيام} other{قبل {n} يومًا}}",
   "searchDuas": "ابحث بالعربية أو الإنجليزية",
   "catAll": "الكل",
   "catMorningEvening": "الصباح والمساء",
