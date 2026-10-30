@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -34,6 +35,7 @@ class ToggleRow extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: () {
           BmHaptics.selection();
+          BmSounds.toggle();
           onChanged(!value);
         },
         child: ConstrainedBox(
