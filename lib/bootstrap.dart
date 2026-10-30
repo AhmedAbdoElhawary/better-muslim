@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/audio/adhan_files.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
@@ -32,9 +33,6 @@ Future<void> _boot(FlavorConfig config) async {
   Monitoring.installErrorHandlers();
   Monitoring.activate(config: config);
 
-  /// the OFL needs each bundled font's license shipped with the app
-  LicenseRegistry.addLicense(_fontLicenses);
-
   /// GeoNames is CC BY 4.0, the credit line in More comes in milestone 9
   LicenseRegistry.addLicense(_placesLicense);
 
@@ -42,6 +40,7 @@ Future<void> _boot(FlavorConfig config) async {
   tz.initializeTimeZones();
   final db = config.isDesignScenario ? await designScenarioStore() : await AppDatabase.open();
   final phoneZone = await PhoneZone.read();
+  if (!config.isDesignScenario) await AdhanFiles.init();
 
   /// before the first frame, so a new install never flashes home and a set up one never the
   /// welcome (R2)
@@ -87,21 +86,6 @@ Future<void> _boot(FlavorConfig config) async {
       ),
     ),
   );
-}
-
-Stream<LicenseEntry> _fontLicenses() async* {
-  const fonts = [
-    'amiri',
-    'amiriquran',
-    'marcellus',
-    'notosansarabic',
-    'reemkufi',
-    'schibstedgrotesk',
-  ];
-  for (final font in fonts) {
-    final license = await rootBundle.loadString('assets/fonts/licenses/$font-OFL.txt');
-    yield LicenseEntryWithLineBreaks([font], license);
-  }
 }
 
 Stream<LicenseEntry> _placesLicense() async* {
