@@ -286,7 +286,6 @@ abstract final class SpaceManager {
   static const double cartoucheNameTop = 3;
   static const double mushafNumberTop = 2;
 
-  // TODO(ahmed): a regular 15 line page from the designer, this side gap inside the frame stands in until then.
   static const double mushafTextInset = 10;
   static const double foreEdgeStripe = 2.5;
 
@@ -552,7 +551,6 @@ abstract final class SizeManager {
   static const double beadFocusStroke = 1.5;
   static const double beadLine = 1;
 
-  // TODO(ahmed): tune the marker, head bead and tassel on a phone, the handoff draws none of them.
   static const double beadMarker = 32;
   static const double beadHead = 34;
   static const double tassel = 20;
