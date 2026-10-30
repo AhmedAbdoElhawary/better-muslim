@@ -9,8 +9,6 @@
 //
 // Builds the downloadable tafsirs into build/tafsir/ instead, from quran.com's api into the same
 // cache, see specs/008-enhancements/contracts/tafsir-files.md.
-//
-// TODO(ahmed): Clear Quran is only an empty sample in assets/quran/samples.json, supply it once licensed.
 
 import 'dart:convert';
 import 'dart:io';
@@ -20,12 +18,12 @@ import 'package:crypto/crypto.dart';
 const _cache = 'tool/quran/.cache';
 const _out = 'assets/quran';
 
-// TODO(ahmed): confirm Sahih International's and Al-Muyassar's terms for the store build.
+// tanzil's translations are for non-commercial use only, fine while the app is free with no ads.
 const _metadata = 'https://tanzil.net/res/text/metadata/quran-data.js';
 const _translation = 'https://tanzil.net/trans/?transID=en.sahih&type=txt-2';
 const _tafsir = 'https://tanzil.net/trans/?transID=ar.muyassar&type=txt-2';
 
-// TODO(ahmed): download madinah_v2_layout.sqlite and qpc_hafs_words.sqlite from qul.tarteel.ai into tool/quran/.cache/ and confirm QUL's license and credit line, the reader has only page 1 without them.
+// madinah_v2_layout.sqlite and qpc_hafs_words.sqlite from qul.tarteel.ai, saved under these names.
 const _layout = '$_cache/madinah_v2_layout.db';
 const _words = '$_cache/qpc_hafs_words.db';
 
