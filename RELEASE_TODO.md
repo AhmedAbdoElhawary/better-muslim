@@ -30,11 +30,13 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 ## Adhan
 
 - [ ] Send the two emails below, one to Mishary Alafasy and one to Nasser Al-Qatami.
-- [ ] If Alafasy says yes, his pair replaces Madinah and the Malmö Fajr inside the app.
-- [ ] If Al-Qatami says yes, his pair goes into a new adhan release and downloads like before.
+- [ ] Alafasy's pair is already in the app, taken from archive.org. If he says no, it has to come
+      out before release. (`lib/core/settings/adhan_recording.dart`)
+- [ ] If Al-Qatami says yes, his pair goes into the `adhan-v2` release and downloads like before.
+      No Fajr adhan of his is online, so his pair needs his Fajr from him.
 - [ ] Add each credit line to `lib/features/more/model/credits.dart` exactly as they give it.
 
-<!-- TODO(ahmed): send this from my address and fill in Alafasy's contact address, the app keeps the old pair until he says yes -->
+<!-- TODO(ahmed): send this from my address and fill in Alafasy's contact address, his pair is already in the app so his answer decides the release -->
 
 > **To:** 
 >

@@ -75,8 +75,7 @@
   "readDua": "Read dua",
   "markPrayed": "Mark prayed",
   "stopAdhan": "Stop adhan",
-  "adhanOfMadinah": "Adhan of Madinah",
-  "adhanOfFajr": "Fajr adhan · Malmö",
+  "alafasyFajr": "Fajr adhan · Alafasy",
   "prayerTimes": "Prayer times",
   "prayedToday": "{count} of 5 prayed today",
   "@prayedToday": {
@@ -579,7 +578,7 @@
       "prayer": {}
     }
   },
-  "recordingMadinah": "Madinah",
+  "recordingAlafasy": "Mishary Alafasy",
   "fullAdhanLength": "Full adhan · {length}",
   "@fullAdhanLength": {
     "placeholders": {

@@ -99,7 +99,7 @@ class RecordingRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recording = ref.watch(
       settingsProvider.select(
-        (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.madinah,
+        (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.alafasy,
       ),
     );
     return NavRow(

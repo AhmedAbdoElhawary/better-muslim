@@ -107,16 +107,6 @@ const credits = [
     useKey: StringsManager.useAzkarDuas,
     link: 'https://www.hisnmuslim.com',
   ),
-  Credit(
-    source: 'ejaz215 · Freesound · Madinah',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY 3.0',
-    link: 'https://freesound.org/people/ejaz215/sounds/33937/',
-  ),
-  Credit(
-    source: 'Besim Azemi · Islamic Center Malmö · Fajr',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY 3.0',
-    link: 'https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm',
-  ),
+  // TODO(ahmed): put the credit line alafasy gives, word for word, once he answers
+  Credit(source: 'Mishary Rashid Alafasy', useKey: StringsManager.useAdhanRecordings),
 ];

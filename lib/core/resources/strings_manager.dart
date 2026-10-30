@@ -30,8 +30,7 @@ abstract final class StringsManager {
   static const String readDua = 'readDua';
   static const String markPrayed = 'markPrayed';
   static const String stopAdhan = 'stopAdhan';
-  static const String adhanOfMadinah = 'adhanOfMadinah';
-  static const String adhanOfFajr = 'adhanOfFajr';
+  static const String alafasyFajr = 'alafasyFajr';
   static const String prayerTimes = 'prayerTimes';
   static const String prayedToday = 'prayedToday';
   static const String missedToMakeUp = 'missedToMakeUp';
@@ -260,7 +259,7 @@ abstract final class StringsManager {
   static const String noteNoFasting = 'noteNoFasting';
   static const String adhanSound = 'adhanSound';
   static const String forPrayer = 'forPrayer';
-  static const String recordingMadinah = 'recordingMadinah';
+  static const String recordingAlafasy = 'recordingAlafasy';
   static const String fullAdhanLength = 'fullAdhanLength';
   static const String recordingFull = 'recordingFull';
   static const String notificationsOff = 'notificationsOff';

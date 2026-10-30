@@ -10,6 +10,7 @@ import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v13.dart' as v13;
 import 'generated/schema_v14.dart' as v14;
+import 'generated/schema_v15.dart' as v15;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
@@ -761,6 +762,39 @@ void main() {
             row.ishaRecording,
           },
           {'madinah'},
+        );
+        expect(row.maghribSound, 'tone');
+      },
+    );
+  });
+
+  test('v14 to v15 moves madinah to alafasy and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 14,
+      newVersion: 15,
+      createOld: v14.DatabaseAtV14.new,
+      createNew: v15.DatabaseAtV15.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch.insert(
+          oldDb.settings,
+          const v14.SettingsCompanion(
+            maghribRecording: Value('madinah'),
+            maghribSound: Value('tone'),
+          ),
+        );
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(
+          {
+            row.fajrRecording,
+            row.dhuhrRecording,
+            row.asrRecording,
+            row.maghribRecording,
+            row.ishaRecording,
+          },
+          {'alafasy'},
         );
         expect(row.maghribSound, 'tone');
       },
