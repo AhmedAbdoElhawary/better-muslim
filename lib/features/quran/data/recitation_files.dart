@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:better_muslim/core/database/backup_exclusion.dart';
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:path_provider/path_provider.dart';
-
-/// a download's length from its header and its body
-typedef Fetched = ({int? length, Stream<List<int>> bytes});
 
 class RecitationException implements Exception {
   const RecitationException(this.failure);
@@ -25,7 +23,7 @@ class RecitationFiles {
     Future<Fetched> Function(Uri uri)? fetch,
     Future<void> Function(String path)? exclude,
   }) : _root = root ?? getApplicationSupportDirectory,
-       _fetch = fetch ?? download,
+       _fetch = fetch ?? fetchUri,
        _exclude = exclude ?? BackupExclusion.exclude;
 
   static final base = Uri.parse('https://everyayah.com/data/Alafasy_128kbps/');
@@ -142,18 +140,4 @@ class RecitationFiles {
   static bool isMp3(List<int> head) =>
       (head.length >= 3 && head[0] == 0x49 && head[1] == 0x44 && head[2] == 0x33) ||
       (head.length >= 2 && head[0] == 0xFF && (head[1] & 0xE0) == 0xE0);
-
-  /// https only and no headers beyond the defaults (FR-034)
-  static Future<Fetched> download(Uri uri) async {
-    final client = HttpClient()..userAgent = null;
-    try {
-      final response = await (await client.getUrl(uri)).close();
-      if (response.statusCode != HttpStatus.ok) throw HttpException('${response.statusCode}');
-      final length = response.contentLength;
-      return (length: length < 0 ? null : length, bytes: response);
-    } finally {
-      /// not forced, the open response still finishes
-      client.close();
-    }
-  }
 }
