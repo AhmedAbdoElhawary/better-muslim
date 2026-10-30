@@ -25,10 +25,6 @@ final surahTextProvider = FutureProvider.autoDispose.family<SurahText, int>(
   (ref, surah) async => (await ref.watch(quranAssetsProvider.future)).surahText(surah),
 );
 
-final quranSamplesProvider = FutureProvider.autoDispose<Map<String, Map<String, String>>>(
-  (ref) async => (await ref.watch(quranAssetsProvider.future)).samples(),
-);
-
 /// what the reader picked, follow sky is resolved with the app's mode where it's drawn
 final pageColorProvider = Provider<PageColor>(
   (ref) => ref.watch(
