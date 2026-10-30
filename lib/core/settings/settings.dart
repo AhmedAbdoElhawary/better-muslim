@@ -40,7 +40,7 @@ extension PrayerSoundOf on AppSettings {
     Prayer.isha => ishaSound,
   };
 
-  /// alafasy until the picked one is on the phone, a restored backup brings the choice only
+  /// madinah until the picked one is on the phone, a restored backup brings the choice only
   AdhanRecording recordingOf(Prayer prayer) {
     final recording = switch (prayer) {
       Prayer.fajr => fajrRecording,
@@ -49,7 +49,7 @@ extension PrayerSoundOf on AppSettings {
       Prayer.maghrib => maghribRecording,
       Prayer.isha => ishaRecording,
     };
-    return AdhanFiles.isReady(recording) ? recording : AdhanRecording.alafasy;
+    return AdhanFiles.isReady(recording) ? recording : AdhanRecording.madinah;
   }
 }
 

@@ -273,7 +273,7 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
   }
 
   AdhanRecording _recordingOf(Prayer prayer) =>
-      ref.read(settingsProvider).value?.recordingOf(prayer) ?? AdhanRecording.alafasy;
+      ref.read(settingsProvider).value?.recordingOf(prayer) ?? AdhanRecording.madinah;
 
   /// a recording previewed in the adhan sound sheet gives way to the real adhan
   void _stopPreview() {

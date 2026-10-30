@@ -40,7 +40,7 @@ class _RecordingSheet extends ConsumerStatefulWidget {
 
 class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   late AdhanRecording _picked =
-      ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.alafasy;
+      ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.madinah;
   late final ClipPlayer _player;
   late final StreamSubscription<void> _ended;
   AdhanRecording? _playing;
@@ -109,7 +109,12 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
               subtitle: StringsManager.forPrayer,
               subtitleArgs: {'prayer': context.tr(widget.prayer.nameKey)},
             ),
-            for (final recording in AdhanRecording.values)
+
+            /// every recording plays the same fajr, so fajr has one row
+            for (final recording
+                in widget.prayer == Prayer.fajr
+                    ? const [AdhanRecording.madinah]
+                    : AdhanRecording.values)
               _RecordingRow(
                 recording,
                 length: recording.lengthOf(widget.prayer),

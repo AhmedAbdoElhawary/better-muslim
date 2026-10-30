@@ -32,12 +32,12 @@
 		B55D3D1B67CD284373F3C53B /* CountdownActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C09B9A7459A41FF743AEEB7 /* CountdownActivity.swift */; };
 		B5A0ECA132D16D588AE1F5A8 /* ReemKufi-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0037BAE9848733D3511C594F /* ReemKufi-Variable.ttf */; };
 		B946F3A339671A48A0AF3E38 /* SurfaceIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E60C5E0BBBA12032C0245B7F /* SurfaceIcons.swift */; };
-		CF9FC525E985492713D23A1E /* adhan_alafasy_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5F45266AC54B882DEF248600 /* adhan_alafasy_clip.caf */; };
+		CF9FC525E985492713D23A1E /* adhan_madinah_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5F45266AC54B882DEF248600 /* adhan_madinah_clip.caf */; };
 		D9FE579ECDF0781B59F056B2 /* silence.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0BD67DACB14DF9B7FD3FBC96 /* silence.caf */; };
 		DB9B76081F8AD02E2E377E57 /* PrayerWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F92EAFE292C7BA865842C9E1 /* PrayerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DDCD013CF7C62693EB2C794C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B5BFDEB01BBC80F6FF090226 /* Localizable.strings */; };
 		E8FF188D4B9C733FC7519D74 /* SurfaceFonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF784FE3092E6757742FC06 /* SurfaceFonts.swift */; };
-		F702FD8337D3DBD10BEC10C1 /* adhan_alafasy_fajr_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2B24F090FB64DD309ED84CA7 /* adhan_alafasy_fajr_clip.caf */; };
+		F702FD8337D3DBD10BEC10C1 /* adhan_fajr_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2B24F090FB64DD309ED84CA7 /* adhan_fajr_clip.caf */; };
 		F879F260AC7A62538BD9AA49 /* SurfaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54CFDAE9CEA55BA10713CC9E /* SurfaceData.swift */; };
 		FACC4BD99E02D9B3F6AF27B2 /* SurfaceColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA7F813360CD304792CF628 /* SurfaceColors.swift */; };
 /* End PBXBuildFile section */
@@ -90,7 +90,7 @@
 		0D7B6D4DA5D829737559BC1C /* NotoSansArabic-Variable.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "NotoSansArabic-Variable.ttf"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		2B24F090FB64DD309ED84CA7 /* adhan_alafasy_fajr_clip.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = adhan_alafasy_fajr_clip.caf; sourceTree = "<group>"; };
+		2B24F090FB64DD309ED84CA7 /* adhan_fajr_clip.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = adhan_fajr_clip.caf; sourceTree = "<group>"; };
 		2C09B9A7459A41FF743AEEB7 /* CountdownActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CountdownActivity.swift; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -98,7 +98,7 @@
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		4B0081ABBE324E825C3F0A61 /* MediumWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediumWidget.swift; sourceTree = "<group>"; };
 		54CFDAE9CEA55BA10713CC9E /* SurfaceData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurfaceData.swift; sourceTree = "<group>"; };
-		5F45266AC54B882DEF248600 /* adhan_alafasy_clip.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = adhan_alafasy_clip.caf; sourceTree = "<group>"; };
+		5F45266AC54B882DEF248600 /* adhan_madinah_clip.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = adhan_madinah_clip.caf; sourceTree = "<group>"; };
 		63273EF50DA8AB06B9A9DD26 /* ar */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -188,8 +188,8 @@
 		933D3050E17D2C4729A62FFA /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
-				5F45266AC54B882DEF248600 /* adhan_alafasy_clip.caf */,
-				2B24F090FB64DD309ED84CA7 /* adhan_alafasy_fajr_clip.caf */,
+				5F45266AC54B882DEF248600 /* adhan_madinah_clip.caf */,
+				2B24F090FB64DD309ED84CA7 /* adhan_fajr_clip.caf */,
 				0BD67DACB14DF9B7FD3FBC96 /* silence.caf */,
 			);
 			name = Sounds;
@@ -396,8 +396,8 @@
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				B1A000012F00000000000001 /* InfoPlist.strings in Resources */,
-				CF9FC525E985492713D23A1E /* adhan_alafasy_clip.caf in Resources */,
-				F702FD8337D3DBD10BEC10C1 /* adhan_alafasy_fajr_clip.caf in Resources */,
+				CF9FC525E985492713D23A1E /* adhan_madinah_clip.caf in Resources */,
+				F702FD8337D3DBD10BEC10C1 /* adhan_fajr_clip.caf in Resources */,
 				D9FE579ECDF0781B59F056B2 /* silence.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

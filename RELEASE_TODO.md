@@ -30,17 +30,17 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 ## Adhan
 
 - [ ] Send the two emails below, one to Mishary Alafasy and one to Nasser Al-Qatami.
-- [ ] Alafasy's pair is already in the app, taken from archive.org. If he says no, it has to come
-      out before release. (`lib/core/settings/adhan_recording.dart`)
-- [ ] If Al-Qatami says yes, his pair goes into the `adhan-v2` release and downloads like before.
-      No Fajr adhan of his is online, so his pair needs his Fajr from him.
+- [ ] If Alafasy says yes, his pair replaces Madinah and the Malmö Fajr inside the app.
+- [ ] If Al-Qatami says yes, his pair goes into a new adhan release and downloads like before.
 - [ ] Add each credit line to `lib/features/more/model/credits.dart` exactly as they give it.
+- [ ] Nothing licenses the Quran recitation from EveryAyah, his yes covers it too. If he says no,
+      the recitation needs another source before release (`docs/research/recitation-and-adhan-licensing.md`).
 
-<!-- TODO(ahmed): send this from my address and fill in Alafasy's contact address, his pair is already in the app so his answer decides the release -->
+<!-- TODO(ahmed): send this from my address, the app keeps the old pair until he says yes -->
 
-> **To:** 
+> **To:** ai@alafasy.co
 >
-> **Subject:** Permission to use your adhan in a free app
+> **Subject:** Permission to use your adhan and recitation in a free app
 >
 > Assalamu alaikum,
 >
@@ -50,6 +50,10 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 > May I include your standard adhan and your Fajr adhan in the app? They would be the recording
 > inside the app, so everyone who installs it would hear your adhan at every prayer, with Fajr
 > always in your voice too. If you agree, could you send both as WAV files?
+>
+> The app also plays your Quran recitation, ayah by ayah, from the files on EveryAyah
+> (everyayah.com/data/Alafasy_128kbps). May I keep using it, so people can listen to and download
+> your recitation inside the app?
 >
 > Please also tell me the credit line you'd like shown in the app, and any terms you have. I'll
 > follow them exactly.

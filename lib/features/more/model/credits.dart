@@ -107,6 +107,16 @@ const credits = [
     useKey: StringsManager.useAzkarDuas,
     link: 'https://www.hisnmuslim.com',
   ),
-  // TODO(ahmed): put the credit line alafasy gives, word for word, once he answers
-  Credit(source: 'Mishary Rashid Alafasy', useKey: StringsManager.useAdhanRecordings),
+  Credit(
+    source: 'ejaz215 · Wikimedia Commons · Madinah',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC BY 3.0',
+    link: 'https://commons.wikimedia.org/wiki/File:33937_ejaz215_call-to-prayer-from-the-prophet-s-mo.ogg',
+  ),
+  Credit(
+    source: 'Besim Azemi · Islamic Center Malmö · Fajr',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC BY 3.0',
+    link: 'https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm',
+  ),
 ];

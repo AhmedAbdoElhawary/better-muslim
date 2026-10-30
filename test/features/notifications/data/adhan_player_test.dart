@@ -50,12 +50,12 @@ void main() {
       final channel = _FakeChannel();
       final player = NativeAdhanPlayer(channel);
 
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
 
       expect(channel.played, hasLength(1));
-      expect(channel.played.single['asset'], 'assets/audio/adhan_alafasy.m4a');
-      expect(channel.played.single['mediaSubtitle'], 'Mishary Alafasy');
+      expect(channel.played.single['asset'], 'assets/audio/adhan_madinah.m4a');
+      expect(channel.played.single['mediaSubtitle'], 'Adhan of Madinah');
     });
 
     test('state events become playback', () async {
@@ -82,7 +82,7 @@ void main() {
       final player = NativeAdhanPlayer(channel);
       addTearDown(player.dispose);
 
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
       channel.events.add({'id': maghrib.id, 'playing': true, 'ended': false});
       await pumpEventQueue();
       expect(BmSounds.busy, isTrue);
@@ -97,7 +97,7 @@ void main() {
       final audio = _FakeAudioPlayer();
       final player = JustAudioAdhanPlayer(player: audio, session: Future.value(_FakeSession()));
 
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
       audio.states.add(PlayerState(true, ProcessingState.ready));
       await pumpEventQueue();
       expect(BmSounds.busy, isTrue);
@@ -110,7 +110,7 @@ void main() {
       final audio = _FakeAudioPlayer();
       final player = JustAudioAdhanPlayer(player: audio, session: Future.value(_FakeSession()));
 
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
       await tester.pump(const Duration(milliseconds: 750));
       expect(audio.volumes.last, closeTo(.5, .05));
       await tester.pump(const Duration(milliseconds: 800));
@@ -127,7 +127,7 @@ void main() {
       final session = _FakeSession();
       final player = JustAudioAdhanPlayer(player: audio, session: Future.value(session));
 
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
       session.interruptions.add(AudioInterruptionEvent(true, AudioInterruptionType.unknown));
       await tester.pump();
 
@@ -138,11 +138,11 @@ void main() {
       final audio = _FakeAudioPlayer()..loadError = PlayerException(-11800, 'refused', 0);
       final player = JustAudioAdhanPlayer(player: audio, session: Future.value(_FakeSession()));
 
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
       expect(audio.volumes, isEmpty);
 
       audio.loadError = null;
-      await player.play(maghrib, texts, AdhanRecording.alafasy);
+      await player.play(maghrib, texts, AdhanRecording.madinah);
       expect(audio.volumes, [0]);
     });
   });
