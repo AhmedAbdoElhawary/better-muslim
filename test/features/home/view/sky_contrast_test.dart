@@ -45,9 +45,6 @@ Color _sky(BmSkyStops stops, double y, double height, double drift) {
   return stops.top;
 }
 
-// TODO(ahmed): these light base skies (the design scenario only) miss AA with the palette as designed, 3.8 to 4.3 (andalus "NOW", livingSky "Asr", iznik and noor the countdown). pick a fix or accept it, then remove the set.
-const _shortBase = {'andalus light', 'iznik light', 'livingSky light', 'noor light'};
-
 void main() {
   setUpAll(tz.initializeTimeZones);
   setUpAll(loadAppFonts);
@@ -146,44 +143,38 @@ void main() {
         });
       }
 
-      testWidgets(
-        '${theme.name}, theme base sky, ${brightness.name} mode',
-        skip: _shortBase.contains('${theme.name} ${brightness.name}'),
-        (tester) async {
-          await pumpHome(tester, await designOverrides(theme: theme), brightness: brightness);
-          await expectAA(
-            tester,
-            '${theme.name} theme base ${brightness.name}',
-            theme: theme,
-            brightness: brightness,
-          );
-          await unmount(tester);
-        },
-      );
+      testWidgets('${theme.name}, theme base sky, ${brightness.name} mode', (tester) async {
+        await pumpHome(tester, await designOverrides(theme: theme), brightness: brightness);
+        await expectAA(
+          tester,
+          '${theme.name} theme base ${brightness.name}',
+          theme: theme,
+          brightness: brightness,
+        );
+        await unmount(tester);
+      });
     }
   }
 
-  testWidgets(
-    'every sky stays AA across the ambient drift',
-    // TODO(ahmed): decide how the bright skies stay AA while the sky drifts (3.7 to 4.3 today, see the milestone 3 reply), then unskip.
-    skip: true,
-    (tester) async {
+  testWidgets('every sky stays AA across the ambient drift', (tester) async {
+    for (final theme in bmThemeOrder) {
       for (final brightness in Brightness.values) {
         for (final MapEntry(key: state, value: (hour, minute)) in states.entries) {
           await pumpHome(
             tester,
-            makkahAt(tester, DateTime.utc(2026, 10, 15, hour, minute)),
+            makkahAt(tester, DateTime.utc(2026, 10, 15, hour, minute), theme: theme),
             brightness: brightness,
           );
           await expectAA(
             tester,
-            '${state.name} ${brightness.name}',
+            '${theme.name} ${state.name} ${brightness.name}',
+            theme: theme,
             brightness: brightness,
             drift: true,
           );
           await unmount(tester);
         }
       }
-    },
-  );
+    }
+  });
 }
