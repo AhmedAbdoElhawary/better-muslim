@@ -31,10 +31,14 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 
 - [ ] Send the two emails below, one to Mishary Alafasy and one to Nasser Al-Qatami.
 - [ ] If Alafasy says yes, his pair replaces Madinah and the Malmö Fajr inside the app.
-- [ ] If Al-Qatami says yes, his pair goes into a new adhan release and downloads like before.
+- [ ] If Al-Qatami says yes, his pair goes into the `adhan-v2` release and downloads like before.
+      No Fajr adhan of his is online, so it only goes in once he sends his Fajr too.
 - [ ] Add each credit line to `lib/features/more/model/credits.dart` exactly as they give it.
-- [ ] Nothing licenses the Quran recitation from EveryAyah, his yes covers it too. If he says no,
-      the recitation needs another source before release (`docs/research/recitation-and-adhan-licensing.md`).
+- [ ] Then build ticket 03 (`specs/010-enhancements/tickets/03-ship-permitted-recordings.md`) with
+      the files they sent. Commit `572b14b` already did it for Alafasy, revert `6eab0fe` and swap in
+      his own files if he says yes.
+- [ ] A dev phone that ran the app at `572b14b` has the v15 database and won't open the v14 one,
+      reinstall the app on it.
 
 <!-- TODO(ahmed): send this from my address, the app keeps the old pair until he says yes -->
 
@@ -75,7 +79,9 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 >
 > May I offer your standard adhan and your Fajr adhan in the app? They would be an optional
 > download: anyone who picks your recording downloads it once, and then hears your adhan at every
-> prayer, with Fajr always in your voice too. If you agree, could you send both as WAV files?
+> prayer, with Fajr always in your voice too. If you agree, could you send both as WAV files? I
+> couldn't find your Fajr adhan anywhere, so if you haven't recorded one, I'd be grateful if you
+> could.
 >
 > Please also tell me the credit line you'd like shown in the app, and any terms you have. I'll
 > follow them exactly.
@@ -83,6 +89,15 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 > JazakAllahu khairan,
 > Ahmed Abdo Elhawary
 > elhawarydev@gmail.com
+
+## Quran recitation
+
+Nothing licenses the Alafasy recitation from EveryAyah (`docs/research/recitation-and-adhan-licensing.md`).
+
+- [ ] Alafasy's email above asks about it too. A yes covers it.
+- [ ] If he says no or never answers, pick another source before release: the Quran Foundation
+      API (client id, Content Sync every 7 days, a public privacy policy), or a reciter who gives
+      written permission. The five reciters of ticket 17 need the same check.
 
 ## Dua audio
 
