@@ -195,7 +195,7 @@ void main() {
       );
       final recordings = scheduler.appliedRecordings.single;
       expect(recordings[Prayer.maghrib], AdhanRecording.madinah);
-      expect(recordings[Prayer.fajr], AdhanRecording.makkah);
+      expect(recordings[Prayer.fajr], AdhanRecording.madinah);
     });
 
     test('on by default: 3 quiet nudges, tonight\'s first before asr + 20', () async {
