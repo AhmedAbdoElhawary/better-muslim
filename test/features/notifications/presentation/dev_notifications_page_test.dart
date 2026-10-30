@@ -46,6 +46,7 @@ void main() {
     expect(find.byType(DevNotificationsPage), findsOneWidget);
     expect(find.text('Open adhan screen'), findsOneWidget);
     expect(find.text('Test notification in 1 min'), findsOneWidget);
+    expect(find.text('Test adhan in 1 min'), findsOneWidget);
     await unmount(tester);
   });
 
@@ -110,6 +111,7 @@ void main() {
     containerOf(tester).read(routerProvider).push(Routes.devNotifications);
     await tester.pumpAndSettle();
     expect(find.text('Test notification in 1 min'), findsNothing);
+    expect(find.text('Test adhan in 1 min'), findsNothing);
     expect(find.text('Refresh widgets'), findsNothing);
     expect(find.text('Start countdown now'), findsNothing);
 
