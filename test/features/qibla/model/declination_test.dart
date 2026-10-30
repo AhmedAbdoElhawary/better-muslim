@@ -19,6 +19,11 @@ void main() {
     }
   });
 
+  /// the model is valid until 2030, this fails a month early so a release never ships it stale
+  test('WMM2025 is still valid, swap in WMM2030 from NOAA before 2030', () {
+    expect(DateTime.now().isBefore(DateTime(2029, 12)), isTrue);
+  });
+
   test('mid year', () {
     expect(decimalYear(DateTime(2027, 7, 2)), closeTo(2027.5, .01));
   });
