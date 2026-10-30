@@ -14,6 +14,7 @@ import 'package:better_muslim/core/widgets/motion/container_transform.dart';
 import 'package:better_muslim/core/widgets/motion/skeleton.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +39,10 @@ class ContinueCard extends ConsumerWidget {
           button: true,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: open,
+            onTap: () async {
+              await warmMushafPage(context, ref, page);
+              if (context.mounted) open();
+            },
             child: const _Card(),
           ),
         ),
