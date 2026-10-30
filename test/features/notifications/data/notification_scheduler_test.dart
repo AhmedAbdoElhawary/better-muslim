@@ -51,7 +51,7 @@ void main() {
     Prayer.isha: PrayerSound.silent,
   };
 
-  final recordings = {for (final prayer in Prayer.values) prayer: AdhanRecording.makkah};
+  final recordings = {for (final prayer in Prayer.values) prayer: AdhanRecording.madinah};
 
   Alert alertOf(Prayer prayer, int hour, int minute) => Alert(
     day: DateTime(2026, 10, 15),
@@ -111,10 +111,10 @@ void main() {
 
         final adhan = android.channels.where((channel) => channel.id.startsWith('adhan_')).toList();
         expect(adhan.map((channel) => channel.id), [
-          'adhan_fajr_adhan_makkah',
+          'adhan_fajr_adhan_madinah',
           'adhan_dhuhr_tone',
           'adhan_asr_tone',
-          'adhan_maghrib_adhan_makkah',
+          'adhan_maghrib_adhan_madinah',
           'adhan_isha_silent',
         ]);
 
@@ -125,22 +125,19 @@ void main() {
             'adhan_maghrib_tone',
             'adhan_maghrib_silent',
             'adhan_maghrib_adhan',
-            'adhan_maghrib_adhan_madinah',
+            'adhan_maghrib_adhan_aaqibAzeez',
           ]),
         );
-        expect(android.deleted, isNot(contains('adhan_maghrib_adhan_makkah')));
+        expect(android.deleted, isNot(contains('adhan_maghrib_adhan_madinah')));
         final isha = adhan.last;
         expect([isha.playSound, isha.enableVibration], [false, false]);
         final maghrib = adhan[3];
-        expect((maghrib.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_makkah_clip');
+        expect((maghrib.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_madinah_clip');
         final fajr = adhan.first;
-        expect(
-          (fajr.sound! as RawResourceAndroidNotificationSound).sound,
-          'adhan_makkah_fajr_clip',
-        );
+        expect((fajr.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_fajr_clip');
         expect(android.scheduled.map((call) => call.details!.channelId), [
           'adhan_asr_tone',
-          'adhan_maghrib_adhan_makkah',
+          'adhan_maghrib_adhan_madinah',
           'adhan_isha_silent',
         ]);
       },
@@ -171,10 +168,10 @@ void main() {
       expect(entry['id'], alerts[1].id);
       expect(entry['atMillis'], alerts[1].at.millisecondsSinceEpoch);
       expect(entry['payload'], payloadOf(alerts[1]));
-      expect(entry['asset'], 'assets/audio/adhan_makkah.m4a');
-      expect(entry['channel'], 'adhan_maghrib_adhan_makkah');
+      expect(entry['asset'], 'assets/audio/adhan_madinah.m4a');
+      expect(entry['channel'], 'adhan_maghrib_adhan_madinah');
       expect(entry['title'], 'Maghrib · 17:56');
-      expect(entry['mediaSubtitle'], 'Adhan of Makkah');
+      expect(entry['mediaSubtitle'], 'Adhan of Madinah');
       expect(entry['subText'], 'Adhan');
       expect(entry['actions'], {
         'markPrayed': 'Mark prayed',
@@ -191,19 +188,21 @@ void main() {
       await NotificationScheduler(channel).apply(
         alerts: alerts,
         sounds: sounds,
-        recordings: {...recordings, Prayer.maghrib: AdhanRecording.madinah},
+        recordings: {...recordings, Prayer.maghrib: AdhanRecording.aaqibAzeez},
         texts: texts,
       );
 
-      expect(
-        android.channels.map((channel) => channel.id),
-        contains('adhan_maghrib_adhan_madinah'),
+      final maghrib = android.channels.firstWhere(
+        (channel) => channel.id == 'adhan_maghrib_adhan_aaqibAzeez',
       );
-      expect(android.deleted, contains('adhan_maghrib_adhan_makkah'));
+
+      /// a downloaded recording's clip isn't in res/raw, the channel keeps madinah's
+      expect((maghrib.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_madinah_clip');
+      expect(android.deleted, contains('adhan_maghrib_adhan_madinah'));
       final [entry] = channel.entries;
-      expect(entry['channel'], 'adhan_maghrib_adhan_madinah');
-      expect(entry['asset'], AdhanRecording.madinah.fullAsset(Prayer.maghrib));
-      expect(entry['mediaSubtitle'], 'Madinah');
+      expect(entry['channel'], 'adhan_maghrib_adhan_aaqibAzeez');
+      expect(entry['asset'], AdhanRecording.aaqibAzeez.fullAsset(Prayer.maghrib));
+      expect(entry['mediaSubtitle'], 'Aaqib Azeez');
     });
 
     test('without exact alarms the adhan stays with the plugin and its clip', () async {
@@ -279,7 +278,7 @@ void main() {
 
       expect(ios.calls.first, 'cancelAllPending');
       final [asr, maghrib, isha, _] = ios.scheduled.map((call) => call.details!).toList();
-      expect(maghrib.sound, '${AdhanRecording.makkah.clipOf(Prayer.maghrib)}.caf');
+      expect(maghrib.sound, '${AdhanRecording.madinah.clipOf(Prayer.maghrib)}.caf');
       expect(
         [maghrib.presentSound, maghrib.presentBanner, maghrib.presentList],
         [false, false, true],
