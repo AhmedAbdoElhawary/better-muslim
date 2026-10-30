@@ -27,6 +27,57 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 - [ ] The Play link is already set to `com.elhawary.bettermuslim`. Check it opens once the app is
       listed.
 
+## Adhan
+
+- [ ] Send the two emails below, one to Mishary Alafasy and one to Nasser Al-Qatami.
+- [ ] If Alafasy says yes, his pair replaces Madinah and the Malmö Fajr inside the app.
+- [ ] If Al-Qatami says yes, his pair goes into a new adhan release and downloads like before.
+- [ ] Add each credit line to `lib/features/more/model/credits.dart` exactly as they give it.
+
+<!-- TODO(ahmed): send this from my address and fill in Alafasy's contact address, the app keeps the old pair until he says yes -->
+
+> **To:** 
+>
+> **Subject:** Permission to use your adhan in a free app
+>
+> Assalamu alaikum,
+>
+> I'm building Better Muslim, a free app for iOS and Android with no ads and no account, for prayer
+> times, Quran, azkar and duas. It plays the adhan at each prayer time.
+>
+> May I include your standard adhan and your Fajr adhan in the app? They would be the recording
+> inside the app, so everyone who installs it would hear your adhan at every prayer, with Fajr
+> always in your voice too. If you agree, could you send both as WAV files?
+>
+> Please also tell me the credit line you'd like shown in the app, and any terms you have. I'll
+> follow them exactly.
+>
+> JazakAllahu khairan,
+> Ahmed Abdo Elhawary
+> elhawarydev@gmail.com
+
+<!-- TODO(ahmed): send this from my address and fill in Al-Qatami's contact address, nothing ships for him until he says yes -->
+
+> **To:** 
+>
+> **Subject:** Permission to use your adhan in a free app
+>
+> Assalamu alaikum,
+>
+> I'm building Better Muslim, a free app for iOS and Android with no ads and no account, for prayer
+> times, Quran, azkar and duas. It plays the adhan at each prayer time.
+>
+> May I offer your standard adhan and your Fajr adhan in the app? They would be an optional
+> download: anyone who picks your recording downloads it once, and then hears your adhan at every
+> prayer, with Fajr always in your voice too. If you agree, could you send both as WAV files?
+>
+> Please also tell me the credit line you'd like shown in the app, and any terms you have. I'll
+> follow them exactly.
+>
+> JazakAllahu khairan,
+> Ahmed Abdo Elhawary
+> elhawarydev@gmail.com
+
 ## Dua audio
 
 - [ ] Send the email below to hisnmuslim.com.
