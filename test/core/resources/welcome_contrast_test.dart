@@ -35,33 +35,6 @@ Iterable<Color> _behindText(BmSkyStops stops) sync* {
 
 Color _over(Color top, Color under) => Color.alphaBlend(top, under);
 
-// TODO(ahmed): the welcome's text misses AA on these skies with the palette as designed (title 1.6 to 4.6, tagline 1.6 to 4.4, see the milestone 10 reply; the theme skies of milestone 12 add andalus and livingSky fajr and iznik isha, tagline 4.46 to 4.49). pick a fix (a stronger scrim, darker light skies, or accept it), then remove both lists so every case runs.
-const _shortStates = {'sunrise', 'dhuhr', 'asr', 'maghrib'};
-const _shortSkies = {
-  'andalus dark fajr',
-  'andalus light theme base',
-  'iznik dark isha',
-  'iznik dark theme base',
-  'iznik light isha',
-  'iznik light theme base',
-  'livingSky dark fajr',
-  'livingSky light theme base',
-  'moonlight dark fajr',
-  'moonlight light fajr',
-  'moonlight light theme base',
-  'noor dark fajr',
-  'noor light theme base',
-  'qiyam dark fajr',
-  'qiyam light fajr',
-  'qiyam light theme base',
-  'qiyamEmerald dark fajr',
-  'qiyamEmerald light fajr',
-  'qiyamEmerald light theme base',
-  'qiyamRose dark fajr',
-  'qiyamRose light fajr',
-  'qiyamRose light theme base',
-};
-
 void main() {
   for (final id in bmThemeOrder) {
     for (final (mode, palette) in [('dark', bmThemes[id]!.dark), ('light', bmThemes[id]!.light)]) {
@@ -72,12 +45,11 @@ void main() {
           state.name: (themeSky(id)[state]!, bmSkyIsBright(state)),
       };
       for (final MapEntry(key: name, value: (stops, bright)) in skies.entries) {
-        final short = _shortStates.contains(name) || _shortSkies.contains('${id.name} $mode $name');
-        test('${id.name} $mode, the welcome on the $name sky (FR-040)', skip: short, () {
+        test('${id.name} $mode, the welcome on the $name sky (FR-040)', () {
           final text = (bright ? ThemeEnum.onSkyBright : ThemeEnum.onSky).resolve(palette);
-          final scrim = ThemeEnum.skyScrim.resolve(palette);
+          final scrim = ThemeEnum.welcomeScrim.resolve(palette);
           for (final sky in _behindText(stops)) {
-            final under = bright ? _over(scrim, sky) : sky;
+            final under = _over(scrim, sky);
             final title = _over(text, under);
             final tagline = _over(text.withValues(alpha: text.a * .85), under);
             expect(_ratio(title, under), greaterThanOrEqualTo(3), reason: 'title on $under');
