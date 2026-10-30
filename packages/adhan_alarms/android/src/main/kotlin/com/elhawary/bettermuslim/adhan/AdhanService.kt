@@ -45,8 +45,9 @@ class AdhanService : Service() {
         }
     }
 
+    // alarm volume, media volume is often left at 0 after a video
     private val attributes = AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_MEDIA)
+        .setUsage(AudioAttributes.USAGE_ALARM)
         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
         .build()
 
@@ -105,9 +106,7 @@ class AdhanService : Service() {
 
         val media = MediaPlayer().apply {
             setAudioAttributes(attributes)
-            openAsset(this@AdhanService, next.getString("asset")).use {
-                setDataSource(it.fileDescriptor, it.startOffset, it.length)
-            }
+            setSource(this@AdhanService, next.getString("asset"))
             setWakeMode(this@AdhanService, PowerManager.PARTIAL_WAKE_LOCK)
             setOnCompletionListener { finished() }
             prepare()
@@ -325,11 +324,22 @@ class AdhanService : Service() {
         fun length(context: Context, asset: String): Int {
             val retriever = MediaMetadataRetriever()
             return try {
-                openAsset(context, asset).use { retriever.setDataSource(it.fileDescriptor, it.startOffset, it.length) }
+                val path = asset.takeIf { it.startsWith("/") }
+                if (path != null) {
+                    retriever.setDataSource(path)
+                } else {
+                    openAsset(context, asset).use { retriever.setDataSource(it.fileDescriptor, it.startOffset, it.length) }
+                }
                 retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toInt() ?: 0
             } finally {
                 retriever.release()
             }
+        }
+
+        // a downloaded recording is a path in the app's files, the rest are flutter assets
+        private fun MediaPlayer.setSource(context: Context, asset: String) {
+            if (asset.startsWith("/")) return setDataSource(asset)
+            openAsset(context, asset).use { setDataSource(it.fileDescriptor, it.startOffset, it.length) }
         }
 
         // the flutter asset itself, so the audio file is in the app once
