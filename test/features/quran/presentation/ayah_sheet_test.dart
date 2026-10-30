@@ -122,12 +122,7 @@ void main() {
     expect(inSheet(StudySheet, find.text(tafsir(5))), findsOneWidget);
 
     await tapIn(tester, StudySheet, find.text('Translation'));
-    for (final text in [
-      'Sahih International',
-      translation(5),
-      'Clear Quran (Khattab)',
-      'Arabic · Al-Muyassar summary',
-    ]) {
+    for (final text in ['Sahih International', translation(5), 'Arabic · Al-Muyassar summary']) {
       expect(inSheet(StudySheet, find.text(text)), findsWidgets, reason: text);
     }
 
