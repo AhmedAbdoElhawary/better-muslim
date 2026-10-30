@@ -290,7 +290,7 @@ void main() {
         const SettingsCompanion(ishaSound: Value(PrayerSound.silent)),
         const SettingsCompanion(reminderMinutes: Value(20)),
         const SettingsCompanion(reminderMinutes: Value(25)),
-        const SettingsCompanion(maghribRecording: Value(AdhanRecording.madinah)),
+        const SettingsCompanion(maghribRecording: Value(AdhanRecording.aaqibAzeez)),
         const SettingsCompanion(digits: Value(Digits.western)),
       ]) {
         final runs = scheduler.runs;
