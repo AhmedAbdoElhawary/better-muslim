@@ -5,6 +5,9 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/recitation_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -120,6 +123,31 @@ void main() {
       Brightness.dark,
       reason: 'follow sky takes the dark app on night',
     );
+    await unmount(tester);
+  });
+
+  /// the open builds the page alone, the hidden controls and 4.25 wait until it's open
+  testWidgets('the reader opens with its page, a tap brings the controls at once', (tester) async {
+    await pumpQuran(tester);
+
+    await tester.tap(find.text('CONTINUE READING'));
+    for (var i = 0; i < 10 && find.byType(ReaderPage).evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await tester.pump(BmMotion.containerOpen ~/ 2);
+    expect(find.byType(PageTurner), findsOneWidget);
+    expect(find.byType(PageChrome), findsNothing);
+    expect(find.byType(RecitationSheet), findsNothing);
+
+    await tester.pump(BmMotion.containerOpen);
+    await tester.tapAt(const Offset(385, 400));
+    await tester.pump();
+    expect(find.byType(PageChrome), findsOneWidget);
+    expect(find.byType(RecitationSheet), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(tester.widget<PageChrome>(find.byType(PageChrome)).shown, isTrue);
+    expect(find.byType(RecitationSheet), findsOneWidget);
     await unmount(tester);
   });
 }

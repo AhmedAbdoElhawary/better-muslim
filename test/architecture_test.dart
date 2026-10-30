@@ -85,10 +85,10 @@ final _rules = [
     allowedIn: [_theme, _adhanSky],
   ),
 
-  /// buildModalBarrier is the route's own override
+  /// buildModalBarrier and buildPage are the route's own overrides
   _Rule(
     'widgets are classes, not build functions',
-    RegExp(r'\bWidget\s+_?build(?!ModalBarrier\b)[A-Z]\w*\('),
+    RegExp(r'\bWidget\s+_?build(?!(ModalBarrier|Page)\b)[A-Z]\w*\('),
   ),
   _Rule(
     'no shared_preferences, use drift or flutter_secure_storage',
