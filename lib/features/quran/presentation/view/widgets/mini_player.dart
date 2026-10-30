@@ -68,13 +68,17 @@ class MiniPlayer extends ConsumerWidget {
     );
     final reduce = MediaQuery.disableAnimationsOf(context);
     final bottom = MediaQuery.paddingOf(context).bottom;
-    final player = IgnorePointer(
-      ignoring: !active,
-      child: OnlyPadding(
-        start: SpaceManager.miniPlayerSide,
-        end: SpaceManager.miniPlayerSide,
-        bottom: SpaceManager.miniPlayerBottom,
-        child: _Player(onOpen: onOpen),
+
+    /// its own layer, the card's spring and its rise only move it
+    final player = RepaintBoundary(
+      child: IgnorePointer(
+        ignoring: !active,
+        child: OnlyPadding(
+          start: SpaceManager.miniPlayerSide,
+          end: SpaceManager.miniPlayerSide,
+          bottom: SpaceManager.miniPlayerBottom,
+          child: _Player(onOpen: onOpen),
+        ),
       ),
     );
     return AnimatedBuilder(
