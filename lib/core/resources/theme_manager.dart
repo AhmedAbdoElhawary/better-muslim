@@ -37,6 +37,7 @@ enum ThemeEnum {
   onSkyMuted,
   onSkyBright,
   skyScrim,
+  welcomeScrim,
   glass,
   glassHighlight,
   scrim,
@@ -93,7 +94,12 @@ enum ThemeEnum {
 
     /// bm_sky's numbers, the same on every theme and mode since the sky keeps its own palette
     ThemeEnum.onSkyBright => const Color(0xEBFFFFFF),
-    ThemeEnum.skyScrim => const Color(0x47000000),
+
+    /// bm_sky's 28% missed AA on the brightest drift, 38% is the least that passes
+    ThemeEnum.skyScrim => const Color(0x60000000),
+
+    /// the welcome's text block stays AA on every sky, the lightest needs 52%
+    ThemeEnum.welcomeScrim => const Color(0x85000000),
     ThemeEnum.glass => const Color(0x6607100D),
     ThemeEnum.glassHighlight => const Color(0x1AFFFFFF),
 
