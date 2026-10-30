@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// listen, save and share under every dua card
+/// listen, save and share under every dua card, listen only once the dua has its clip
 class DuaActions extends ConsumerWidget {
   const DuaActions({required this.dua, super.key});
   final Dua dua;
@@ -57,12 +57,15 @@ class DuaActions extends ConsumerWidget {
     final saved = ref.watch(isSavedProvider(dua.id));
     return Row(
       children: [
-        _Action(
-          icon: playing ? BmIcon.ui(BmUiIcon.stop) : BmIcon(BmIconName.listen),
-          label: playing ? StringsManager.stop : StringsManager.listen,
-          onTap: () => _onTapPlay(context, ref),
-        ),
-        const RSizedBox.horizontal(SpaceManager.s1),
+        /// a listen with no clip behind it would only say it failed
+        if (dua.audio != null) ...[
+          _Action(
+            icon: playing ? BmIcon.ui(BmUiIcon.stop) : BmIcon(BmIconName.listen),
+            label: playing ? StringsManager.stop : StringsManager.listen,
+            onTap: () => _onTapPlay(context, ref),
+          ),
+          const RSizedBox.horizontal(SpaceManager.s1),
+        ],
         _Action(
           icon: BmIcon(BmIconName.bookmark, filled: saved),
           label: saved ? StringsManager.saved : StringsManager.save,
