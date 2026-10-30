@@ -22,6 +22,7 @@ import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
@@ -37,6 +38,7 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _title = 'Notifications (dev)';
   static const _openAdhan = 'Open adhan screen';
   static const _testIn1Minute = 'Test notification in 1 min';
+  static const _testAdhanIn1Minute = 'Test adhan in 1 min';
   static const _replayOnboarding = 'Replay onboarding';
   static const _refreshWidgets = 'Refresh widgets';
   static const _startCountdown = 'Start countdown now';
@@ -56,6 +58,24 @@ class DevNotificationsPage extends ConsumerWidget {
       at: at,
       sound: ref.read(settingsProvider).value?.soundOf(prayer) ?? PrayerSound.tone,
     );
+  }
+
+  static Future<void> _test(WidgetRef ref, Alert? alert) async {
+    final location = ref.read(locationProvider);
+    if (alert == null || location == null) return;
+    final texts = await AlertTexts.load(
+      locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
+      use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+      digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
+      location: location,
+    );
+    await ref
+        .read(notificationSchedulerProvider)
+        .testIn1Minute(
+          alert,
+          texts,
+          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.madinah,
+        );
   }
 
   @override
@@ -78,28 +98,28 @@ class DevNotificationsPage extends ConsumerWidget {
                 },
               ),
               if (!isScenario) ...[
+                _Row(_testIn1Minute, onTap: () => _test(ref, nextAlert(ref))),
+
+                /// the next prayer may be on tone, this one always plays the full adhan
                 _Row(
-                  _testIn1Minute,
-                  onTap: () async {
-                    final alert = nextAlert(ref);
-                    final location = ref.read(locationProvider);
-                    if (alert == null || location == null) return;
-                    final texts = await AlertTexts.load(
-                      locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
-                      use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
-                      digits: ref.read(settingsProvider).value?.digits ?? Digits.eastern,
-                      location: location,
+                  _testAdhanIn1Minute,
+                  onTap: () {
+                    final next = nextAlert(ref);
+                    _test(
+                      ref,
+                      next == null
+                          ? null
+                          : Alert(
+                              day: next.day,
+                              prayer: next.prayer,
+                              kind: next.kind,
+                              at: next.at,
+                              sound: PrayerSound.adhan,
+                            ),
                     );
-                    await ref
-                        .read(notificationSchedulerProvider)
-                        .testIn1Minute(
-                          alert,
-                          texts,
-                          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ??
-                              AdhanRecording.makkah,
-                        );
                   },
                 ),
+                const _AdhanCheck(),
 
                 /// past the plugin's equal check, so the widgets reload even with the same data
                 _Row(
@@ -183,6 +203,61 @@ class _FastDayRow extends ConsumerWidget {
           translateTitle: false,
           toggled: on,
           onTap: () => ref.read(fastDayProvider.notifier).set(!on),
+        ),
+      ],
+    );
+  }
+}
+
+/// why an adhan stays quiet on this phone, read again on each tap after changing a setting
+class _AdhanCheck extends ConsumerStatefulWidget {
+  const _AdhanCheck();
+
+  @override
+  ConsumerState<_AdhanCheck> createState() => _AdhanCheckState();
+}
+
+class _AdhanCheckState extends ConsumerState<_AdhanCheck> {
+  static const _label = 'Adhan check (tap to read again)';
+
+  late Future<List<(String, bool?)>> _checks = _read();
+
+  Future<List<(String, bool?)>> _read() async {
+    final scheduler = ref.read(notificationSchedulerProvider);
+    final checks = [
+      ('Notifications allowed', await scheduler.isAllowed()),
+      ('Alarms & reminders allowed', await scheduler.canExactAlarms()),
+      ('Ringer on, no do not disturb', await ref.read(adhanChannelProvider).canSound()),
+    ];
+    return [
+      for (final (label, ok) in checks) ('$label: ${ok == null ? '-' : (ok ? 'yes' : 'NO')}', ok),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Row(
+          _label,
+          onTap: () => setState(() {
+            _checks = _read();
+          }),
+        ),
+        FutureBuilder(
+          future: _checks,
+          builder: (context, snapshot) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final (line, ok) in snapshot.data ?? const <(String, bool?)>[])
+                RegularText(
+                  line,
+                  translate: false,
+                  color: ok == false ? ThemeEnum.error : ThemeEnum.text2,
+                ),
+            ],
+          ),
         ),
       ],
     );
