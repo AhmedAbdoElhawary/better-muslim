@@ -63,7 +63,6 @@ void main() {
         'Leaving the home',
         'Abu Dawud 4/325, at-Tirmidhi 5/490',
         'بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَاَ حَوْلَ وَلَا قُوَّةَ إِلاَّ بِاللَّهِ',
-        'Listen',
         'Save',
         'Share',
         'Waking up',
@@ -259,17 +258,10 @@ void main() {
   });
 
   group('listen and share (US5)', () {
-    testWidgets('without a clip listen changes nothing', (tester) async {
-      final clips = FakeClipPlayer();
-      await pumpDuas(tester, [
-        ...await designOverrides(),
-        clipPlayerProvider.overrideWithValue(clips),
-      ]);
-      await tester.tap(action('Listen'));
-      await tester.pumpAndSettle();
-
-      expect(action('Listen'), findsOneWidget);
-      expect(clips.played, isEmpty);
+    testWidgets('without a clip there is no listen', (tester) async {
+      await pumpDuas(tester, await designOverrides());
+      expect(action('Save'), findsWidgets);
+      expect(action('Listen'), findsNothing);
       await unmount(tester);
     });
 
