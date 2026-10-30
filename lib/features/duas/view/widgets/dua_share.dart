@@ -99,14 +99,15 @@ class DuaShare extends ShareContent {
         ),
         TextDirection.rtl,
       ),
-      if (english) ...[
+
+      /// an empty line would still take its height and gap
+      if (english && dua.transliteration.isNotEmpty)
         painter(
           dua.transliteration,
           small.copyWith(fontStyle: FontStyle.italic),
           TextDirection.ltr,
         ),
-        painter(dua.translation, small, TextDirection.ltr),
-      ],
+      if (english && dua.translation.isNotEmpty) painter(dua.translation, small, TextDirection.ltr),
     ];
   }
 }
