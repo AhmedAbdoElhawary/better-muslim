@@ -41,6 +41,12 @@ class AdhanChannel {
     return millis == null ? null : Duration(milliseconds: millis);
   }
 
+  /// the dev page's check, null off android
+  Future<bool?> canSound() async {
+    if (!_isAndroid) return null;
+    return _methods.invokeMethod<bool>('canSound');
+  }
+
   Future<void> dismiss(int id) => _call('dismiss', id);
 
   /// the payload of the notification that started the app, given once
