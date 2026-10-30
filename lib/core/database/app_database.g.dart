@@ -270,7 +270,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('makkah'),
+        defaultValue: const Constant('madinah'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterfajrRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> dhuhrRecording =
@@ -280,7 +280,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('makkah'),
+        defaultValue: const Constant('madinah'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterdhuhrRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> asrRecording =
@@ -290,7 +290,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('makkah'),
+        defaultValue: const Constant('madinah'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterasrRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> maghribRecording =
@@ -300,7 +300,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('makkah'),
+        defaultValue: const Constant('madinah'),
       ).withConverter<AdhanRecording>($SettingsTable.$convertermaghribRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> ishaRecording =
@@ -310,7 +310,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('makkah'),
+        defaultValue: const Constant('madinah'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterishaRecording);
   static const VerificationMeta _reminderMinutesMeta = const VerificationMeta('reminderMinutes');
   @override
