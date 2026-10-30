@@ -90,6 +90,10 @@ class _StudyTabsState extends ConsumerState<StudyTabs> {
   Widget build(BuildContext context) {
     final ayah = widget.ayah;
     return SingleChildScrollView(
+      primary: true,
+
+      /// a short pane still takes the drag that grows the sheet
+      physics: const AlwaysScrollableScrollPhysics(),
       child: SafeArea(
         top: false,
         child: BottomPadding(

@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -47,13 +50,13 @@ void springTo(
 /// K.sheet of _gen/kit.js over the page, moved by the reader's spring: 0 below the screen, 1 at its
 /// detent. a drag on its head follows the finger, a flick or a pull past the share closes it.
 /// with reduce motion it stays in place and fades
-class ReaderSheet extends StatelessWidget {
+class ReaderSheet extends StatefulWidget {
   const ReaderSheet({
     required this.open,
     required this.onClose,
     required this.head,
     required this.body,
-    this.height,
+    this.grows = false,
     super.key,
   });
 
@@ -62,27 +65,101 @@ class ReaderSheet extends StatelessWidget {
   final Widget head;
   final Widget body;
 
-  /// the large detent's, the medium one is as tall as its content
-  final double? height;
+  /// long tafsir needs 720 but the page should still show behind it at first
+  final bool grows;
 
-  void _drag(BuildContext context, DragUpdateDetails details) {
-    open.stop();
-    open.value = (open.value - details.delta.dy / context.size!.height).clamp(0.0, 1.0);
+  @override
+  State<ReaderSheet> createState() => _ReaderSheetState();
+}
+
+class _ReaderSheetState extends State<ReaderSheet> with SingleTickerProviderStateMixin {
+  late final _grow = AnimationController.unbounded(vsync: this);
+  late final _scroll = _SheetScroll(this);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.open.addListener(_reset);
   }
 
-  void _release(BuildContext context, DragEndDetails details) {
-    final velocity = details.primaryVelocity ?? 0;
-    if (velocity > BmMotion.completeVelocity || open.value < 1 - BmMotion.completeShare) {
-      onClose();
-    } else {
-      springTo(context, open, 1, velocity: -velocity / context.size!.height);
+  @override
+  void didUpdateWidget(ReaderSheet old) {
+    super.didUpdateWidget(old);
+    if (old.open == widget.open) return;
+    old.open.removeListener(_reset);
+    widget.open.addListener(_reset);
+  }
+
+  @override
+  void dispose() {
+    widget.open.removeListener(_reset);
+    _grow.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// closed, so the next ayah opens at 400 again with its text at the top
+  void _reset() {
+    if (widget.open.value > 0) return;
+    _grow.value = 0;
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
+
+  /// 720 never passes the status bar on a short phone
+  double get _full => math.min(
+    SizeManager.studySheetFull.r,
+    MediaQuery.sizeOf(context).height - MediaQuery.paddingOf(context).top,
+  );
+
+  double get _small => math.min(SizeManager.studySheet.r, _full);
+
+  /// between closed and 400, or between 400 and 720
+  bool get _between => widget.open.value < 1 || _grow.value > 0 && _grow.value < 1;
+
+  /// up takes the sheet to 720 first, down takes it to closed once the text is at its top
+  bool _takes(double dy, {required bool atTop}) =>
+      dy < 0 ? widget.open.value < 1 || _grow.value < 1 : atTop;
+
+  void _drag(double dy) {
+    final open = widget.open;
+    if (!widget.grows) {
+      open.stop();
+      open.value = (open.value - dy / context.size!.height).clamp(0.0, 1.0);
+      return;
     }
+    open.stop();
+    _grow.stop();
+    if (dy < 0 && open.value < 1 || dy > 0 && _grow.value <= 0) {
+      open.value = (open.value - dy / _small).clamp(0.0, 1.0);
+    } else {
+      _grow.value = (_grow.value - dy / (_full - _small)).clamp(0.0, 1.0);
+    }
+  }
+
+  void _release(double velocity) {
+    final open = widget.open;
+    if (open.value < 1) {
+      if (velocity > BmMotion.completeVelocity || open.value < 1 - BmMotion.completeShare) {
+        widget.onClose();
+      } else {
+        final height = widget.grows ? _small : context.size!.height;
+        springTo(context, open, 1, velocity: -velocity / height);
+      }
+      return;
+    }
+    if (!widget.grows) return;
+    final full = velocity.abs() > BmMotion.completeVelocity ? velocity < 0 : _grow.value > .5;
+    final target = full ? 1.0 : 0.0;
+    if (_grow.value != target) BmHaptics.selection();
+    springTo(context, _grow, target, velocity: -velocity / (_full - _small));
   }
 
   @override
   Widget build(BuildContext context) {
     final reduce = MediaQuery.disableAnimationsOf(context);
-    final height = this.height;
+    final grows = widget.grows;
+    final full = _full;
+    final small = _small;
     final sheet = DecoratedBox(
       decoration: BoxDecoration(
         color: context.getColor(ThemeEnum.raised),
@@ -98,47 +175,120 @@ class ReaderSheet extends StatelessWidget {
         ],
       ),
       child: ConstrainedBox(
-        constraints: height == null
-            ? BoxConstraints(minHeight: SizeManager.ayahSheet.r)
-            : BoxConstraints.tightFor(height: height),
+        constraints: grows
+            ? BoxConstraints.tightFor(height: full)
+            : BoxConstraints(minHeight: SizeManager.ayahSheet.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onVerticalDragUpdate: (details) => _drag(context, details),
-              onVerticalDragEnd: (details) => _release(context, details),
+              onVerticalDragUpdate: (details) => _drag(details.delta.dy),
+              onVerticalDragEnd: (details) => _release(details.primaryVelocity ?? 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const VerticalPadding(padding: SpaceManager.s2, child: Grabber()),
-                  head,
+                  widget.head,
                 ],
               ),
             ),
-            if (height == null) Flexible(child: body) else Expanded(child: body),
+            if (grows)
+              Expanded(
+                child: PrimaryScrollController(controller: _scroll, child: widget.body),
+              )
+            else
+              Flexible(child: widget.body),
           ],
         ),
       ),
     );
+    final open = widget.open;
     return AnimatedBuilder(
-      animation: open,
-      builder: (context, child) => IgnorePointer(
-        ignoring: open.value < .5,
-        child: reduce
-            ? CustomOpacity(opacity: open.value.clamp(0.0, 1.0), child: child)
-            /// below the screen it isn't painted, it would be with every frame of the page. not
-            /// Offstage, the reader measures the sheet before it moves
-            : Opacity(
-                opacity: open.value <= 0 ? 0 : 1,
-                child: FractionalTranslation(translation: Offset(0, 1 - open.value), child: child),
-              ),
-      ),
+      animation: grows ? Listenable.merge([open, _grow]) : open,
+      builder: (context, child) {
+        /// laid out at 720, the part above 400 waits under the screen until it grows. a close
+        /// from 720 slides all of it down
+        final grown = (full - small) * _grow.value;
+        return IgnorePointer(
+          ignoring: open.value < .5,
+          child: reduce
+              ? CustomOpacity(
+                  opacity: open.value.clamp(0.0, 1.0),
+                  child: grows
+                      ? Transform.translate(offset: Offset(0, full - small - grown), child: child)
+                      : child,
+                )
+              /// below the screen it isn't painted, it would be with every frame of the page. not
+              /// Offstage, the reader measures the sheet before it moves
+              : Opacity(
+                  opacity: open.value <= 0 ? 0 : 1,
+                  child: grows
+                      ? Transform.translate(
+                          offset: Offset(0, full - (small + grown) * open.value),
+                          child: child,
+                        )
+                      : FractionalTranslation(translation: Offset(0, 1 - open.value), child: child),
+                ),
+        );
+      },
 
       /// so a slide only moves its layer, nothing in the sheet paints again
       child: RepaintBoundary(child: sheet),
     );
+  }
+}
+
+/// the study text's drag moves the sheet first, like a sheet with detents in ios
+class _SheetScroll extends ScrollController {
+  _SheetScroll(this.sheet);
+
+  final _ReaderSheetState sheet;
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) => _SheetPosition(sheet, physics: physics, context: context, oldPosition: oldPosition);
+}
+
+class _SheetPosition extends ScrollPositionWithSingleContext {
+  _SheetPosition(this.sheet, {required super.physics, required super.context, super.oldPosition});
+
+  final _ReaderSheetState sheet;
+
+  /// the sheet moved in this drag, so its release snaps the sheet, not a fling of the text
+  var _moved = false;
+
+  @override
+  void applyUserOffset(double delta) {
+    /// down scrolls the text only to its top, the rest of the move goes to the sheet
+    if (delta > 0 && pixels > minScrollExtent) {
+      final text = math.min(delta, pixels - minScrollExtent);
+      super.applyUserOffset(text);
+      delta -= text;
+      if (delta == 0) return;
+    }
+    if (!sheet._takes(delta, atTop: pixels <= minScrollExtent)) {
+      super.applyUserOffset(delta);
+      return;
+    }
+    _moved = true;
+    sheet._drag(delta);
+  }
+
+  @override
+  void goBallistic(double velocity) {
+    final moved = _moved;
+    _moved = false;
+    if (!moved || !sheet._between) {
+      super.goBallistic(velocity);
+      return;
+    }
+    goIdle();
+    sheet._release(-velocity);
   }
 }
 
@@ -429,7 +579,7 @@ class AyahSheet extends ConsumerWidget {
   }
 }
 
-/// 4.23, the large detent: back and forward move the ayah and its wash without closing
+/// 4.23, opens at 400 and grows to 720: back and forward move the ayah and its wash without closing
 class StudySheet extends ConsumerWidget {
   const StudySheet({
     required this.ayah,
@@ -456,7 +606,7 @@ class StudySheet extends ConsumerWidget {
     return ReaderSheet(
       open: open,
       onClose: onClose,
-      height: MediaQuery.sizeOf(context).height - SizeManager.largeSheetTop.r,
+      grows: true,
       head: _SheetHead(
         title: _AyahTitle(ayah),
         subtitle: _AyahPlace(ayah),
