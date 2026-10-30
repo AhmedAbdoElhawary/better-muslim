@@ -8,6 +8,7 @@ import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v12.dart' as v12;
+import 'generated/schema_v13.dart' as v13;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
@@ -691,6 +692,41 @@ void main() {
           (row.quranLayout, row.quranFont, row.lastReadPage, row.mushafSize),
           ('translation', 'amiri', 255, 0),
         );
+      },
+    );
+  });
+
+  test('v12 to v13 puts every prayer on madinah and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 12,
+      newVersion: 13,
+      createOld: v12.DatabaseAtV12.new,
+      createNew: v13.DatabaseAtV13.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch.insert(
+          oldDb.settings,
+          const v12.SettingsCompanion(
+            fajrRecording: Value('makkah'),
+            asrRecording: Value('cairo'),
+            ishaRecording: Value('takbir'),
+            maghribSound: Value('tone'),
+          ),
+        );
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(
+          {
+            row.fajrRecording,
+            row.dhuhrRecording,
+            row.asrRecording,
+            row.maghribRecording,
+            row.ishaRecording,
+          },
+          {'madinah'},
+        );
+        expect(row.maghribSound, 'tone');
       },
     );
   });
