@@ -63,12 +63,17 @@ void main() {
     expect(jump('Ar-Rahman'), rahman);
     expect(jump('rahman'), rahman);
     expect(jump('surah ar rahman'), rahman);
-    expect(jump('baqara')?.surah, 2);
+    expect(jump('baqarah')?.surah, 2);
     expect(jump('البقرة')?.surah, 2);
     expect(jump('آل عمران')?.surah, 3);
     expect(jump('عمران')?.surah, 3);
     expect(jump('سورة الكهف')?.surah, 18);
     expect(jump('mercy'), isNull);
+
+    /// only a whole name, the start of an ayah's word is no surah
+    expect(jump('baqara'), isNull);
+    expect(jump('الم'), isNull);
+    expect(jump('رحم'), isNull);
   });
 
   test('arabic is found without diacritics, dagger alef either way', () {

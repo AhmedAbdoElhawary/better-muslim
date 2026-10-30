@@ -10,7 +10,6 @@ enum JumpKind { surah, page, ayah }
 /// where the jump card opens the reader, ayah only for an ayah
 typedef QuranJump = ({JumpKind kind, int surah, int page, AyahKey? ayah});
 
-/// words joined by one space and where each starts
 typedef _Form = ({String text, List<int> starts});
 
 /// one ayah as the search reads it, its words without the end marker
@@ -26,7 +25,7 @@ class SearchAyah {
   final AyahKey key;
   final List<String> words;
 
-  /// the english translation's words
+  /// split on spaces, a matched word is washed whole
   final List<String> translation;
 
   /// the dagger alef dropped and as an alef, so الرحمن and الكتاب both find their ayahs
@@ -72,8 +71,7 @@ class SearchHit {
   final Set<int> translation;
 }
 
-/// the jump card and the hits grouped by surah in mushaf order, no typo guessing. all lists an
-/// ayah found in both once
+/// no typo guessing, a guess would wash words that aren't what was typed
 ({QuranJump? jump, Map<int, List<SearchHit>> groups}) searchQuran(
   String query,
   List<SearchAyah> ayahs,
@@ -116,7 +114,6 @@ QuranJump? _jump(String query, QuranAssets assets) {
   }
   final name = _nameKey(text.replaceFirst(RegExp(r'^(surah|sura|سورة|سوره)\s+'), ''));
   if (name.isEmpty) return null;
-  QuranSurah? started;
   for (final surah in assets.surahs) {
     final names = [
       _nameKey(surah.en),
@@ -124,16 +121,12 @@ QuranJump? _jump(String query, QuranAssets assets) {
       _nameKey(surah.ar),
       _nameKey(surah.ar).replaceFirst(RegExp('^ال'), ''),
     ];
-    if (names.contains(name)) return _surah(surah);
-
-    /// "baqara" finds al-baqarah, two letters start too many names
-    if (name.length >= 3) started ??= names.any((key) => key.startsWith(name)) ? surah : null;
+    if (names.contains(name)) {
+      return (kind: JumpKind.surah, surah: surah.n, page: surah.page, ayah: null);
+    }
   }
-  return started == null ? null : _surah(started);
+  return null;
 }
-
-QuranJump _surah(QuranSurah surah) =>
-    (kind: JumpKind.surah, surah: surah.n, page: surah.page, ayah: null);
 
 /// letters only, so "Ar-Rahman", "ar rahman" and "arrahman" are one name
 String _nameKey(String name) =>
