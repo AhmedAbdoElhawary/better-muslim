@@ -475,7 +475,7 @@ class _HeaderText extends ConsumerWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        /// bm_sky: a 0 → 28% black scrim behind the header text on the bright skies. it fades out
+        /// a 0 → 38% black scrim behind the header text on the bright skies. it fades out
         /// below the text instead of ending on a hard line
         Positioned.fill(
           child: _Scrim(
