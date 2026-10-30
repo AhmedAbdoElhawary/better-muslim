@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/adhan_files.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
@@ -39,13 +40,17 @@ extension PrayerSoundOf on AppSettings {
     Prayer.isha => ishaSound,
   };
 
-  AdhanRecording recordingOf(Prayer prayer) => switch (prayer) {
-    Prayer.fajr => fajrRecording,
-    Prayer.dhuhr => dhuhrRecording,
-    Prayer.asr => asrRecording,
-    Prayer.maghrib => maghribRecording,
-    Prayer.isha => ishaRecording,
-  };
+  /// madinah until the picked one is on the phone, a restored backup brings the choice only
+  AdhanRecording recordingOf(Prayer prayer) {
+    final recording = switch (prayer) {
+      Prayer.fajr => fajrRecording,
+      Prayer.dhuhr => dhuhrRecording,
+      Prayer.asr => asrRecording,
+      Prayer.maghrib => maghribRecording,
+      Prayer.isha => ishaRecording,
+    };
+    return AdhanFiles.isReady(recording) ? recording : AdhanRecording.madinah;
+  }
 }
 
 SettingsCompanion soundChoice(Prayer prayer, PrayerSound sound) => switch (prayer) {
