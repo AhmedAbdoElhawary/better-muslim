@@ -106,7 +106,6 @@ class QuranAssets {
   /// the current page and its two neighbours
   final _pages = <int, Map<String, dynamic>?>{};
   final _texts = <int, SurahText>{};
-  Map<String, Map<String, String>>? _samples;
 
   QuranSurah surah(int n) => surahs[n - 1];
 
@@ -179,13 +178,6 @@ class QuranAssets {
     if (_texts.length > 3) _texts.remove(_texts.keys.first);
     return text;
   }
-
-  /// ibn kathir, as-sa'di and clear quran by source and "1:5", only samples until licensed
-  Future<Map<String, Map<String, String>>> samples() async => _samples ??= {
-    for (final MapEntry(:key, :value)
-        in (await _json('assets/quran/samples.json') as Map<String, dynamic>).entries)
-      key: (value as Map<String, dynamic>).cast<String, String>(),
-  };
 }
 
 /// loadString sends files over 50 kb to an isolate, slower for these than decoding them here
