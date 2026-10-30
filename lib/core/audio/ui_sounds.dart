@@ -15,14 +15,17 @@ abstract final class BmSounds {
   @visibleForTesting
   static SoundOutput output = JustAudioSoundOutput();
 
-  // TODO(ahmed): these are placeholder tones, put the brand board's Bead (40 ms), Complete (600 ms) and Aligned (300 ms) at -24 LUFS under the same names.
+  static const _toggle = 'assets/audio/ui_toggle.m4a';
   static const _bead = 'assets/audio/ui_bead.m4a';
   static const _complete = 'assets/audio/ui_complete.m4a';
   static const _aligned = 'assets/audio/ui_aligned.m4a';
+  static const _prayed = 'assets/audio/ui_prayed.m4a';
 
+  static Future<void> toggle() => _play(_toggle);
   static Future<void> bead() => _play(_bead);
   static Future<void> complete() => _play(_complete);
   static Future<void> aligned() => _play(_aligned);
+  static Future<void> prayed() => _play(_prayed);
 
   static Future<void> _play(String asset) async {
     if (!enabled || busy) return;
@@ -64,7 +67,14 @@ class JustAudioSoundOutput implements SoundOutput {
     if (player == null) {
       /// a tap sound never takes audio focus from the user's music
       player = _players[asset] = AudioPlayer(handleAudioSessionActivation: false);
-      await player.setAsset(asset);
+      try {
+        await player.setAsset(asset);
+      } on PlayerException {
+        /// a player that failed to load stays empty forever, so the next tap makes a new one
+        _players.remove(asset);
+        await player.dispose();
+        return;
+      }
     }
     await player.seek(Duration.zero);
     unawaited(player.play());
