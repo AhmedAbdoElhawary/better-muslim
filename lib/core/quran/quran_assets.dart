@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final quranAssetsProvider = FutureProvider<QuranAssets>((ref) => QuranAssets.load());
 
 const quranPageCount = 604;
+const quranSurahCount = 114;
 
 class QuranSurah {
   const QuranSurah({

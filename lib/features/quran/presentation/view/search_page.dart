@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
@@ -5,7 +7,6 @@ import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
-import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -13,6 +14,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/quran/data/search_text.dart';
 import 'package:better_muslim/features/quran/domain/quran_search.dart';
@@ -39,7 +41,12 @@ class SearchPage extends ConsumerStatefulWidget {
 }
 
 class _SearchPageState extends ConsumerState<SearchPage> {
+  /// one search after a pause, not one per letter on a slow phone
+  static const _typingPause = Duration(milliseconds: 150);
+
   final _controller = TextEditingController();
+  var _query = '';
+  Timer? _typing;
   var _scope = SearchScope.all;
 
   /// null is the first surah only, a new query or chip starts there again
@@ -51,8 +58,21 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   void dispose() {
+    _typing?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _type(String text) {
+    setState(() {});
+    _typing?.cancel();
+    _typing = Timer(
+      _typingPause,
+      () => setState(() {
+        _query = text;
+        _open = null;
+      }),
+    );
   }
 
   void _toggle(int surah, int first) => setState(() {
@@ -67,7 +87,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget build(BuildContext context) {
     final ayahs = ref.watch(searchAyahsProvider).value;
     final assets = ref.watch(quranAssetsProvider).value;
-    final query = _controller.text;
+    final query = _query;
     if (ayahs != null && assets != null) {
       final searched = (query: query, scope: _scope, ayahs: ayahs);
       if (searched != _searched) {
@@ -95,7 +115,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _SearchBar(_controller, onChanged: () => setState(() => _open = null)),
+            _SearchBar(_controller, onChanged: _type),
             const RSizedBox.vertical(SpaceManager.s3),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -153,22 +173,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 }
 
-/// the field, its clear button and Cancel
+/// the field and Cancel
 class _SearchBar extends StatelessWidget {
   const _SearchBar(this.controller, {required this.onChanged});
 
   final TextEditingController controller;
-  final VoidCallback onChanged;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final text = controller.text;
-    final style = GetRegularStyle(
-      fontSize: FontSizeManager.searchField.sp,
-      color: context.getColor(ThemeEnum.text),
-      fontFamily: FontEnum.dua.arabic,
-      fontFamilyFallback: [FontEnum.body.latin, FontEnum.body.arabic],
-    );
     return OnlyPadding(
       top: SpaceManager.searchBarTop,
       start: SpaceManager.s4,
@@ -176,79 +189,11 @@ class _SearchBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              constraints: BoxConstraints(minHeight: SizeManager.hit.r),
-              padding: REdgeInsetsDirectional.only(
-                start: SpaceManager.searchFieldStart,
-                end: SpaceManager.searchFieldEnd,
-              ),
-              decoration: BoxDecoration(
-                color: context.getColor(ThemeEnum.variant),
-                borderRadius: BorderRadius.circular(RadiusManager.searchField.r),
-              ),
-              child: Row(
-                children: [
-                  BmIcon.ui(
-                    BmUiIcon.search,
-                    size: SizeManager.iconList.r,
-                    color: context.getColor(ThemeEnum.text2),
-                  ),
-                  const RSizedBox.horizontal(SpaceManager.s2),
-                  Expanded(
-                    child: TextField(
-                      controller: controller,
-                      autofocus: true,
-                      onChanged: (_) => onChanged(),
-                      style: style,
-                      cursorColor: context.getColor(ThemeEnum.primary),
-                      textInputAction: TextInputAction.search,
-
-                      /// arabic sits on the right as 4.27 draws it, whatever the app's language
-                      textDirection: RegExp('[؀-ۿ]').hasMatch(text) ? TextDirection.rtl : null,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        isDense: true,
-                        hintText: context.tr(StringsManager.searchQuran),
-                        hintStyle: style.copyWith(color: context.getColor(ThemeEnum.text2)),
-                      ),
-                    ),
-                  ),
-                  if (text.isNotEmpty)
-                    Semantics(
-                      button: true,
-                      label: context.tr(StringsManager.close),
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          controller.clear();
-                          onChanged();
-                        },
-                        child: RSizedBox.square(
-                          dimension: SizeManager.hit,
-                          child: Center(
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: context.getColor(ThemeEnum.outlineStrong),
-                                shape: BoxShape.circle,
-                              ),
-                              child: RSizedBox.square(
-                                dimension: SizeManager.searchClear,
-                                child: Center(
-                                  child: BmIcon.ui(
-                                    BmUiIcon.close,
-                                    size: SizeManager.searchClearIcon.r,
-                                    color: context.getColor(ThemeEnum.bg),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+            child: SearchField(
+              hint: StringsManager.searchQuran,
+              controller: controller,
+              filled: true,
+              onChanged: onChanged,
             ),
           ),
           const RSizedBox.horizontal(SpaceManager.s3),
@@ -292,9 +237,9 @@ class _JumpCard extends ConsumerWidget {
       JumpKind.surah => (
         StringsManager.jumpToSurah,
         context.tr(StringsManager.numberName, {'n': number(surah.n), 'name': name}),
-        context.tr(StringsManager.jumpSurahMeta, {
+        context.tr(StringsManager.surahRow, {
           'place': context.tr(surah.medinan ? StringsManager.medinan : StringsManager.meccan),
-          'count': number(surah.ayahs),
+          'n': number(surah.ayahs),
           'page': number(surah.page),
         }),
       ),
@@ -526,7 +471,6 @@ class _Words extends StatelessWidget {
 
   final List<String> words;
 
-  /// indexes into words
   final Set<int> washed;
   final TextDirection direction;
   final FontEnum font;

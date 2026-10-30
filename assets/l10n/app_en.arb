@@ -1048,7 +1048,6 @@
   "jumpToPage": "JUMP TO PAGE",
   "jumpToAyah": "JUMP TO AYAH",
   "numberName": "{n} · {name}",
-  "jumpSurahMeta": "{place} · {count} ayahs · p. {page}",
   "noAyahsFound": "No ayahs found",
   "searchQuranHint": "Search ignores diacritics and hamza forms."
 }

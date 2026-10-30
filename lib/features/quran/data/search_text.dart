@@ -12,8 +12,7 @@ final searchAyahsProvider = FutureProvider.autoDispose<List<SearchAyah>>(
   (ref) => loadSearchAyahs(),
 );
 
-/// every ayah's words from the 604 shipped pages and its translation from the 114 surah files,
-/// decoded off the main isolate
+/// decoded off the main isolate, the files are several mb
 Future<List<SearchAyah>> loadSearchAyahs() async {
   /// one at a time, the test bundle's synchronous futures leave Future.wait empty
   Future<List<Uint8List>> load(String folder, int count) async => [
@@ -23,7 +22,7 @@ Future<List<SearchAyah>> loadSearchAyahs() async {
       ),
   ];
   final pages = await load('pages', quranPageCount);
-  final surahs = await load('surahs', 114);
+  final surahs = await load('surahs', quranSurahCount);
   return Isolate.run(() {
     final words = <AyahKey, List<String>>{};
     for (final page in pages) {

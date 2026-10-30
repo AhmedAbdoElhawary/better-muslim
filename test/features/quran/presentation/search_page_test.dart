@@ -13,6 +13,9 @@ import '../../../helpers/more.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
 
+/// the page searches after a pause in typing
+const typingPause = Duration(milliseconds: 200);
+
 void main() {
   late List<SearchAyah> ayahs;
   setUpAll(tz.initializeTimeZones);
@@ -41,6 +44,7 @@ void main() {
       expect(find.text('No ayahs found'), findsNothing);
 
       await tester.enterText(find.byType(TextField), 'الرحمن');
+      await tester.pump(typingPause);
       await tester.pumpAndSettle();
       expect(find.text('JUMP TO SURAH'), findsOneWidget);
       expect(find.text('55 · Ar-Rahman'), findsOneWidget);
@@ -57,10 +61,12 @@ void main() {
       expect(find.text('2:163'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'p 700');
+      await tester.pump(typingPause);
       await tester.pumpAndSettle();
       expect(find.text('No ayahs found'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'الحمد لله رب العالمين');
+      await tester.pump(typingPause);
       await tester.pumpAndSettle();
       await tester.tap(find.text('1:2'));
       await tester.pumpAndSettle();

@@ -542,7 +542,6 @@ abstract final class StringsManager {
   static const String jumpToPage = 'jumpToPage';
   static const String jumpToAyah = 'jumpToAyah';
   static const String numberName = 'numberName';
-  static const String jumpSurahMeta = 'jumpSurahMeta';
   static const String noAyahsFound = 'noAyahsFound';
   static const String searchQuranHint = 'searchQuranHint';
 }
