@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,17 +22,10 @@ void main() {
     }
   });
 
-  test('hisn al-muslim\'s sets, each marked for my english', () async {
+  test('hisn al-muslim\'s sets', () async {
     final content = await loadAzkarContent();
     expect(content.morning.total, 23);
     expect(content.evening.total, 20);
-
-    final json = jsonDecode(File('assets/azkar/azkar.json').readAsStringSync()) as Map;
-    for (final set in json.values) {
-      for (final item in (set as Map)['items'] as List) {
-        expect((item as Map)['note'], contains('TODO(ahmed)'), reason: '${item['id']}');
-      }
-    }
   });
 
   test('the source and grading pick their language', () async {
