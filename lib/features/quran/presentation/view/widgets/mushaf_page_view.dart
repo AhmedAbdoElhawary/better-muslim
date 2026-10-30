@@ -1052,7 +1052,6 @@ class _Laid {
       );
     }
 
-    // TODO(ahmed): QCF V2 per page fonts here once licensed, the lines and hit test stay.
     TextPainter quran(String text, double fontSize) => TextPainter(
       text: TextSpan(
         text: text,
@@ -1077,7 +1076,6 @@ class _Laid {
     ];
 
     var gap = quran(' ', fontSize).width;
-    // TODO(ahmed): a regular 15 line page from the designer, this rule stands in until then.
     if (!opening && !reflow) {
       /// a whole line in one painter is as wide as its words and spaces, so the words are measured
       /// once, at the size the page ends up with
