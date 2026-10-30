@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -33,7 +34,9 @@ class _MarkButtonState extends ConsumerState<MarkButton> with TickerProviderStat
   late final _check =
       AnimationController(vsync: this, duration: _checkDelay + BmMotion.checkStroke, value: 1)
         ..addStatusListener((status) {
-          if (status == AnimationStatus.completed) BmHaptics.markPrayed();
+          if (status != AnimationStatus.completed) return;
+          BmHaptics.markPrayed();
+          BmSounds.prayed();
         });
 
   late final _checkProgress = CurvedAnimation(
@@ -55,6 +58,7 @@ class _MarkButtonState extends ConsumerState<MarkButton> with TickerProviderStat
     if (_reduceMotion) {
       /// meaning stays: the check is there and the haptic still fires
       BmHaptics.markPrayed();
+      BmSounds.prayed();
       return;
     }
     _scale.animateWith(SpringSimulation(BmMotion.snappy, _from, 1, 0));
