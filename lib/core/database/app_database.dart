@@ -352,7 +352,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -501,6 +501,21 @@ class AppDatabase extends _$AppDatabase {
             },
           ),
         );
+      },
+      from13To14: (m, schema) async {
+        /// a removed name fails to read as the enum, madinah is the one left
+        for (final column in [
+          'fajr_recording',
+          'dhuhr_recording',
+          'asr_recording',
+          'maghrib_recording',
+          'isha_recording',
+        ]) {
+          await customStatement(
+            "update settings set $column = 'madinah' "
+            "where $column in ('aaqibAzeez', 'andrewler', 'synagda')",
+          );
+        }
       },
     ),
   );

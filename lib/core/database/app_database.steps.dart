@@ -3367,6 +3367,182 @@ i1.GeneratedColumn<String> _column_88(String aliasedName) =>
       $customConstraints: 'NOT NULL DEFAULT \'madinah\'',
       defaultValue: const i1.CustomExpression('\'madinah\''),
     );
+
+final class Schema14 extends i0.VersionedSchema {
+  Schema14({required super.database}) : super(version: 14);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    settings,
+    prayerLog,
+    qadaEntries,
+    azkarCounts,
+    savedDuas,
+    quranBookmarks,
+    quranNotes,
+    qadaDay,
+    quranBookmarkAyah,
+    quranBookmarkPage,
+  ];
+  late final Shape16 settings = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+        _column_84,
+        _column_85,
+        _column_86,
+        _column_87,
+        _column_88,
+        _column_49,
+        _column_32,
+        _column_33,
+        _column_52,
+        _column_53,
+        _column_54,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_51,
+        _column_55,
+        _column_56,
+        _column_57,
+        _column_50,
+        _column_58,
+        _column_59,
+        _column_60,
+        _column_61,
+        _column_62,
+        _column_63,
+        _column_64,
+        _column_65,
+        _column_82,
+        _column_83,
+        _column_66,
+        _column_67,
+        _column_68,
+        _column_69,
+        _column_70,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 prayerLog = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'prayer_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(date, prayer)'],
+      columns: [_column_21, _column_22],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 qadaEntries = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'qada_entries',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_23, _column_22, _column_24, _column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 azkarCounts = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'azkar_counts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(set_id, day, zikr)'],
+      columns: [_column_38, _column_39, _column_40, _column_41],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 savedDuas = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'saved_duas',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(dua)'],
+      columns: [_column_42, _column_43],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape13 quranBookmarks = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'quran_bookmarks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_23,
+        _column_71,
+        _column_72,
+        _column_73,
+        _column_74,
+        _column_75,
+        _column_76,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape14 quranNotes = Shape14(
+    source: i0.VersionedTable(
+      entityName: 'quran_notes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(surah, ayah)'],
+      columns: [_column_77, _column_78, _column_79, _column_80],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index qadaDay = i1.Index(
+    'qada_day',
+    'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
+  );
+  final i1.Index quranBookmarkAyah = i1.Index(
+    'quran_bookmark_ayah',
+    'CREATE UNIQUE INDEX quran_bookmark_ayah ON quran_bookmarks (surah, ayah)',
+  );
+  final i1.Index quranBookmarkPage = i1.Index(
+    'quran_bookmark_page',
+    'CREATE UNIQUE INDEX quran_bookmark_page ON quran_bookmarks (page) WHERE surah IS NULL',
+  );
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -3380,6 +3556,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
   required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
+  required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -3443,6 +3620,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from12To13(migrator, schema);
         return 13;
+      case 13:
+        final schema = Schema14(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from13To14(migrator, schema);
+        return 14;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -3462,6 +3644,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
   required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
+  required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -3476,5 +3659,6 @@ i1.OnUpgrade stepByStep({
     from10To11: from10To11,
     from11To12: from11To12,
     from12To13: from12To13,
+    from13To14: from13To14,
   ),
 );

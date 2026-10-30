@@ -248,7 +248,11 @@ class NotificationScheduler {
     for (final sound in PrayerSound.values)
       if (sound != PrayerSound.adhan) channelId(prayer, sound, AdhanRecording.madinah),
     for (final recording in AdhanRecording.values) channelId(prayer, PrayerSound.adhan, recording),
+    for (final name in _removedRecordings) 'adhan_${prayer.name}_adhan_$name',
   ];
+
+  /// taken out of the app, a phone that picked one still has its channel
+  static const _removedRecordings = ['aaqibAzeez', 'andrewler', 'synagda'];
 
   AndroidNotificationChannel _channelOf(
     Prayer prayer,

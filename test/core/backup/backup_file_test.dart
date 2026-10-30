@@ -44,7 +44,7 @@ void main() {
     expect(ascii.decode(bytes.sublist(0, 8)), 'BMBACKUP');
     final header = ByteData.sublistView(bytes, 0, 19);
     expect(header.getUint8(8), 1);
-    expect(header.getUint16(9), 13);
+    expect(header.getUint16(9), 14);
     expect(header.getUint64(11), bytes.length - 19);
   });
 

@@ -107,7 +107,6 @@ void main() {
     expect(find.text('Adhan sound'), findsWidgets);
     expect(find.text('For Fajr'), findsOneWidget);
     expect(find.text('Full adhan · 4:02'), findsOneWidget);
-    expect(find.text('Aaqib Azeez'), findsNothing);
 
     await tester.tap(find.text('Madinah'));
     await tester.pumpAndSettle();
@@ -121,41 +120,17 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the maghrib sheet: four recordings, a downloaded one plays and save keeps it', (
-    tester,
-  ) async {
+  testWidgets('the maghrib sheet: madinah only, it plays and save keeps it', (tester) async {
     await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
     await tester.tap(recordingOf(Prayer.maghrib));
     await tester.pumpAndSettle();
 
-    for (final line in [
-      'Full adhan · 3:06',
-      'Full adhan · 1:27',
-      'Full adhan · 2:38',
-      'Full adhan · 2:34',
-    ]) {
-      expect(find.text(line), findsOneWidget, reason: line);
-    }
+    expect(find.text('Full adhan · 3:06'), findsOneWidget);
+    expect(find.textContaining('Full adhan · '), findsOneWidget);
 
-    await tester.tap(find.text('Aaqib Azeez'));
+    await tester.tap(find.text('Madinah'));
     await tester.pumpAndSettle();
-    expect(clips.played, [AdhanRecording.aaqibAzeez.fullAsset(Prayer.maghrib)]);
-
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.aaqibAzeez);
-    await unmount(tester);
-  });
-
-  testWidgets('offline, a recording not on the phone says so and the pick stays', (tester) async {
-    await open(tester, downloads: (recording) => _FakeDownload(recording, ready: false));
-    await tester.tap(recordingOf(Prayer.maghrib));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Andrewler'));
-    await tester.pump();
-    expect(find.text('Needs internet once'), findsOneWidget);
-    expect(clips.played, isEmpty);
+    expect(clips.played, [AdhanRecording.madinah.fullAsset(Prayer.maghrib)]);
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
@@ -169,10 +144,10 @@ void main() {
     await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
     await tester.tap(recordingOf(Prayer.maghrib));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Adam Synagda'));
+    await tester.tap(find.text('Madinah'));
     await tester.pumpAndSettle();
     final stops = clips.stops;
-    Navigator.of(tester.element(find.text('Adam Synagda'))).pop();
+    Navigator.of(tester.element(find.text('Madinah'))).pop();
     await tester.pumpAndSettle();
     expect((await settingsOf(tester)).maghribRecording, AdhanRecording.madinah);
     expect(clips.stops, greaterThan(stops));

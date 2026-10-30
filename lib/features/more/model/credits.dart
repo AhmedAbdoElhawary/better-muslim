@@ -119,22 +119,4 @@ const credits = [
     license: 'CC BY 3.0',
     link: 'https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm',
   ),
-  Credit(
-    source: 'Aaqib Azeez',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY-SA 4.0',
-    link: 'https://commons.wikimedia.org/wiki/File:The_Adhan_-_Muslim_Call_to_Prayer_-_Aaqib_Azeez.mp3',
-  ),
-  Credit(
-    source: 'Andrewler',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY-SA 4.0',
-    link: 'https://commons.wikimedia.org/wiki/File:Azan.ogg',
-  ),
-  Credit(
-    source: 'Adam Synagda',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC0',
-    link: 'https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg',
-  ),
 ];

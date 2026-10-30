@@ -22,11 +22,27 @@ class AdhanFiles {
 
   static final _cancelled = <AdhanRecording>{};
 
+  /// taken out of the app, a phone that downloaded them still has the files
+  static const _removed = ['adhan_aaqib_azeez', 'adhan_andrewler', 'adhan_synagda'];
+
   /// once in the app and once in each background engine, the folders are made on a download
   static Future<void> init() async {
     if (_folder != null) return;
     if (Platform.isIOS) _sounds = '${(await getLibraryDirectory()).path}/Sounds';
     _folder = '${(await getApplicationSupportDirectory()).path}/adhan';
+  }
+
+  static Future<void> deleteRemoved() async {
+    await init();
+    for (final name in _removed) {
+      for (final path in [
+        '$_folder/$name.m4a',
+        if (_sounds case final sounds?) '$sounds/${name}_clip.caf',
+      ]) {
+        final file = File(path);
+        if (file.existsSync()) await file.delete();
+      }
+    }
   }
 
   static String pathOf(AdhanRecording recording) => '$_folder/${recording.file}.m4a';

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/audio/adhan_files.dart';
@@ -40,7 +42,10 @@ Future<void> _boot(FlavorConfig config) async {
   tz.initializeTimeZones();
   final db = config.isDesignScenario ? await designScenarioStore() : await AppDatabase.open();
   final phoneZone = await PhoneZone.read();
-  if (!config.isDesignScenario) await AdhanFiles.init();
+  if (!config.isDesignScenario) {
+    await AdhanFiles.init();
+    unawaited(AdhanFiles.deleteRemoved());
+  }
 
   /// before the first frame, so a new install never flashes home and a set up one never the
   /// welcome (R2)

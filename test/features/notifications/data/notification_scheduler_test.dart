@@ -118,7 +118,7 @@ void main() {
           'adhan_isha_silent',
         ]);
 
-        /// milestone 5's id and the other recordings go too, so the phone lists one per prayer
+        /// milestone 5's id and the removed recordings go too, so the phone lists one per prayer
         expect(
           android.deleted,
           containsAll([
@@ -180,29 +180,6 @@ void main() {
         'play': 'Play',
       });
       expect(android.scheduled.map((call) => call.id), [alerts[0].id, alerts[2].id]);
-    });
-
-    test('a recording change makes its own channel and the alarm plays it', () async {
-      final android = useAndroid();
-
-      await NotificationScheduler(channel).apply(
-        alerts: alerts,
-        sounds: sounds,
-        recordings: {...recordings, Prayer.maghrib: AdhanRecording.aaqibAzeez},
-        texts: texts,
-      );
-
-      final maghrib = android.channels.firstWhere(
-        (channel) => channel.id == 'adhan_maghrib_adhan_aaqibAzeez',
-      );
-
-      /// a downloaded recording's clip isn't in res/raw, the channel keeps madinah's
-      expect((maghrib.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_madinah_clip');
-      expect(android.deleted, contains('adhan_maghrib_adhan_madinah'));
-      final [entry] = channel.entries;
-      expect(entry['channel'], 'adhan_maghrib_adhan_aaqibAzeez');
-      expect(entry['asset'], AdhanRecording.aaqibAzeez.fullAsset(Prayer.maghrib));
-      expect(entry['mediaSubtitle'], 'Aaqib Azeez');
     });
 
     test('without exact alarms the adhan stays with the plugin and its clip', () async {

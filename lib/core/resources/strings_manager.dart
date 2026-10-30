@@ -261,9 +261,6 @@ abstract final class StringsManager {
   static const String adhanSound = 'adhanSound';
   static const String forPrayer = 'forPrayer';
   static const String recordingMadinah = 'recordingMadinah';
-  static const String recordingAaqibAzeez = 'recordingAaqibAzeez';
-  static const String recordingAndrewler = 'recordingAndrewler';
-  static const String recordingSynagda = 'recordingSynagda';
   static const String fullAdhanLength = 'fullAdhanLength';
   static const String recordingFull = 'recordingFull';
   static const String notificationsOff = 'notificationsOff';

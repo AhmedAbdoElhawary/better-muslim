@@ -580,9 +580,6 @@
     }
   },
   "recordingMadinah": "Madinah",
-  "recordingAaqibAzeez": "Aaqib Azeez",
-  "recordingAndrewler": "Andrewler",
-  "recordingSynagda": "Adam Synagda",
   "fullAdhanLength": "Full adhan · {length}",
   "@fullAdhanLength": {
     "placeholders": {
