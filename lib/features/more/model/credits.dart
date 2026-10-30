@@ -93,7 +93,8 @@ const credits = [
     link: 'https://tanzil.net',
   ),
   Credit(
-    source: "Quran.com · Tafsir Ibn Kathir · Tafsir as-Sa'di",
+    source:
+        "Quran.com · Tafsir Ibn Kathir · Tafsir as-Sa'di · Tafsir al-Tabari · Tafsir al-Qurtubi",
     useKey: StringsManager.useTafsir,
     link: 'https://quran.com',
   ),

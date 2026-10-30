@@ -115,6 +115,24 @@ void main() {
     await chunks.close();
   });
 
+  test('tabari and qurtubi download from tafsir-v2 with their own sha256', () {
+    expect(
+      TafsirSource.tabari.address.toString(),
+      'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/tafsir-v2/tabari.json.gz',
+    );
+    expect(
+      TafsirSource.qurtubi.address.toString(),
+      'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/tafsir-v2/qurtubi.json.gz',
+    );
+    expect(
+      TafsirSource.ibnKathir.address.pathSegments.reversed.take(2),
+      ['ibn_kathir.json.gz', 'tafsir-v1'],
+    );
+    final hashes = {for (final source in TafsirSource.values.skip(1)) source.sha256};
+    expect(hashes, hasLength(4));
+    expect(hashes.every(RegExp(r'^[0-9a-f]{64}$').hasMatch), isTrue);
+  });
+
   test('al-muyassar is always ready, from the shipped surah files', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
     final tafsir = TafsirFiles(assets: QuranAssets.load, root: () async => root);

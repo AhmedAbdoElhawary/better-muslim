@@ -447,6 +447,8 @@ abstract final class StringsManager {
   static const String alMuyassar = 'alMuyassar';
   static const String ibnKathir = 'ibnKathir';
   static const String asSadi = 'asSadi';
+  static const String atTabari = 'atTabari';
+  static const String alQurtubi = 'alQurtubi';
   static const String muyassarSummary = 'muyassarSummary';
   static const String muyassarCredit = 'muyassarCredit';
   static const String previousAyah = 'previousAyah';

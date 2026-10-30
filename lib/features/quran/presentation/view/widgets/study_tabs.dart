@@ -40,6 +40,8 @@ extension on TafsirSource {
     TafsirSource.muyassar => StringsManager.alMuyassar,
     TafsirSource.ibnKathir => StringsManager.ibnKathir,
     TafsirSource.saadi => StringsManager.asSadi,
+    TafsirSource.tabari => StringsManager.atTabari,
+    TafsirSource.qurtubi => StringsManager.alQurtubi,
   };
 }
 
