@@ -13,8 +13,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": true,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": true
       },
       {
         "id": "m02",
@@ -27,8 +26,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": true,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": true
       },
       {
         "id": "m03",
@@ -41,8 +39,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m04",
@@ -55,8 +52,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m05",
@@ -69,8 +65,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m06",
@@ -83,8 +78,7 @@
         },
         "grading": null,
         "count": 4,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m07",
@@ -97,8 +91,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m08",
@@ -111,8 +104,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m09",
@@ -125,8 +117,7 @@
         },
         "grading": null,
         "count": 7,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m10",
@@ -139,8 +130,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m11",
@@ -153,8 +143,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m12",
@@ -167,8 +156,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m13",
@@ -181,8 +169,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m14",
@@ -195,8 +182,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m15",
@@ -209,8 +195,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m16",
@@ -223,8 +208,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m17",
@@ -237,8 +221,7 @@
         },
         "grading": null,
         "count": 100,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m18",
@@ -251,8 +234,7 @@
         },
         "grading": null,
         "count": 10,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m19",
@@ -265,8 +247,7 @@
         },
         "grading": null,
         "count": 100,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m20",
@@ -279,8 +260,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m21",
@@ -293,8 +273,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m22",
@@ -307,8 +286,7 @@
         },
         "grading": null,
         "count": 100,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "m23",
@@ -321,8 +299,7 @@
         },
         "grading": null,
         "count": 10,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       }
     ]
   },
@@ -340,8 +317,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": true,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": true
       },
       {
         "id": "e02",
@@ -354,8 +330,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": true,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": true
       },
       {
         "id": "e03",
@@ -368,8 +343,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e04",
@@ -382,8 +356,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e05",
@@ -396,8 +369,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e06",
@@ -410,8 +382,7 @@
         },
         "grading": null,
         "count": 4,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e07",
@@ -424,8 +395,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e08",
@@ -438,8 +408,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e09",
@@ -452,8 +421,7 @@
         },
         "grading": null,
         "count": 7,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e10",
@@ -466,8 +434,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e11",
@@ -480,8 +447,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e12",
@@ -494,8 +460,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e13",
@@ -508,8 +473,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e14",
@@ -522,8 +486,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e15",
@@ -536,8 +499,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e16",
@@ -550,8 +512,7 @@
         },
         "grading": null,
         "count": 1,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e17",
@@ -564,8 +525,7 @@
         },
         "grading": null,
         "count": 100,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e18",
@@ -578,8 +538,7 @@
         },
         "grading": null,
         "count": 10,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e19",
@@ -592,8 +551,7 @@
         },
         "grading": null,
         "count": 3,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       },
       {
         "id": "e20",
@@ -606,8 +564,7 @@
         },
         "grading": null,
         "count": 10,
-        "quran": false,
-        "note": "TODO(ahmed): english transliteration and translation, from a translation I may use"
+        "quran": false
       }
     ]
   }
