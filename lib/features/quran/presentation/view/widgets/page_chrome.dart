@@ -49,19 +49,23 @@ class PageChrome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reduce = MediaQuery.disableAnimationsOf(context);
-    return IgnorePointer(
-      ignoring: !shown,
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: _Arrive(card: card, from: -1, reduce: reduce, child: _TopBar(page)),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _Arrive(card: card, from: 1, reduce: reduce, child: _Dock(page, onListen)),
-          ),
-        ],
+
+    /// the bar and the dock never overlap, so they share one blur of the page
+    return BackdropGroup(
+      child: IgnorePointer(
+        ignoring: !shown,
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: _Arrive(card: card, from: -1, reduce: reduce, child: _TopBar(page)),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _Arrive(card: card, from: 1, reduce: reduce, child: _Dock(page, onListen)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -89,9 +93,18 @@ class _Arrive extends StatelessWidget {
         final value = card.value.clamp(0.0, 1.0);
         return reduce
             ? CustomOpacity(opacity: value, child: child)
-            : FractionalTranslation(translation: Offset(0, from * (1 - card.value)), child: child);
+            /// off the screen it isn't painted, its blur would run on every frame of a turn
+            : Opacity(
+                opacity: value == 0 ? 0 : 1,
+                child: FractionalTranslation(
+                  translation: Offset(0, from * (1 - card.value)),
+                  child: child,
+                ),
+              );
       },
-      child: child,
+
+      /// so a slide only moves its layer, nothing in the bar paints again
+      child: RepaintBoundary(child: child),
     );
   }
 }
@@ -128,7 +141,7 @@ class ReaderGlass extends StatelessWidget {
     final rounded = radius == null ? null : BorderRadius.circular(radius.r);
     return ClipRRect(
       borderRadius: rounded ?? BorderRadius.zero,
-      child: BackdropFilter(
+      child: BackdropFilter.grouped(
         filter: ImageFilter.compose(
           outer: _saturate,
           inner: ImageFilter.blur(sigmaX: SizeManager.glassBlur, sigmaY: SizeManager.glassBlur),
