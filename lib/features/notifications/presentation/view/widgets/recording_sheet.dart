@@ -4,6 +4,7 @@ import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
@@ -16,8 +17,11 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
+import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
+import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,7 +40,7 @@ class _RecordingSheet extends ConsumerStatefulWidget {
 
 class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   late AdhanRecording _picked =
-      ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.makkah;
+      ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.madinah;
   late final ClipPlayer _player;
   late final StreamSubscription<void> _ended;
   AdhanRecording? _playing;
@@ -67,6 +71,26 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
     await _player.play(recording.fullAsset(widget.prayer));
   }
 
+  /// downloaded on the first tap, then it picks and plays like the others
+  Future<void> _pick(AdhanRecording recording) async {
+    if (ref.read(adhanDownloadProvider(recording)).ready) return _play(recording);
+    BmHaptics.selection();
+    try {
+      await ref.read(adhanDownloadProvider(recording).notifier).download();
+    } on DownloadException catch (error) {
+      if (!mounted || error.failure == DownloadFailure.cancelled) return;
+      showToast(
+        context,
+        error.failure == DownloadFailure.offline
+            ? StringsManager.needsInternetOnce
+            : StringsManager.downloadFailed,
+        icon: BmIconName.adhan,
+      );
+      return;
+    }
+    if (mounted) await _play(recording);
+  }
+
   Future<void> _stop() async {
     setState(() => _playing = null);
     await _player.stop();
@@ -85,13 +109,19 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
               subtitle: StringsManager.forPrayer,
               subtitleArgs: {'prayer': context.tr(widget.prayer.nameKey)},
             ),
-            for (final recording in AdhanRecording.values)
+
+            /// every recording plays the same fajr, so fajr has one row
+            for (final recording
+                in widget.prayer == Prayer.fajr
+                    ? const [AdhanRecording.madinah]
+                    : AdhanRecording.values)
               _RecordingRow(
                 recording,
+                length: recording.lengthOf(widget.prayer),
                 picked: recording == _picked,
                 playing: recording == _playing,
-                onTap: () => _play(recording),
-                onPlay: () => recording == _playing ? _stop() : _play(recording),
+                onTap: () => _pick(recording),
+                onPlay: () => recording == _playing ? _stop() : _pick(recording),
               ),
             OnlyPadding(
               start: SpaceManager.s5,
@@ -118,6 +148,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
 class _RecordingRow extends ConsumerWidget {
   const _RecordingRow(
     this.recording, {
+    required this.length,
     required this.picked,
     required this.playing,
     required this.onTap,
@@ -125,6 +156,7 @@ class _RecordingRow extends ConsumerWidget {
   });
 
   final AdhanRecording recording;
+  final String length;
   final bool picked;
   final bool playing;
   final VoidCallback onTap;
@@ -159,17 +191,15 @@ class _RecordingRow extends ConsumerWidget {
                       RegularText(recording.nameKey, fontSize: FontSizeManager.body),
                       const RSizedBox.vertical(SpaceManager.rowLineGap),
                       RegularText(
-                        recording.isShort
-                            ? StringsManager.shortLength
-                            : StringsManager.fullAdhanLength,
-                        args: {'length': context.formatDigits(recording.lengthLabel, digits)},
+                        StringsManager.fullAdhanLength,
+                        args: {'length': context.formatDigits(length, digits)},
                         fontSize: FontSizeManager.rowSubtitle,
                         color: ThemeEnum.text2,
                       ),
                     ],
                   ),
                 ),
-                _PlayButton(playing: playing, onTap: onPlay),
+                _PlayButton(recording, playing: playing, onTap: onPlay),
               ],
             ),
           ),
@@ -213,20 +243,32 @@ class _Radio extends StatelessWidget {
   }
 }
 
-class _PlayButton extends StatelessWidget {
-  const _PlayButton({required this.playing, required this.onTap});
+/// play, or download first with its progress, a tap while downloading stops it
+class _PlayButton extends ConsumerWidget {
+  const _PlayButton(this.recording, {required this.playing, required this.onTap});
+  final AdhanRecording recording;
   final bool playing;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(adhanDownloadProvider(recording));
+    final label = status.downloading
+        ? StringsManager.cancel
+        : !status.ready
+        ? StringsManager.download
+        : playing
+        ? StringsManager.stop
+        : StringsManager.play;
     return Semantics(
       button: true,
-      label: context.tr(playing ? StringsManager.stop : StringsManager.play),
+      label: context.tr(label),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+        onTap: status.downloading
+            ? ref.read(adhanDownloadProvider(recording).notifier).cancel
+            : onTap,
         child: RSizedBox.square(
           dimension: SizeManager.playButton,
           child: DecoratedBox(
@@ -235,11 +277,17 @@ class _PlayButton extends StatelessWidget {
               color: context.getColor(ThemeEnum.variant),
             ),
             child: Center(
-              child: BmIcon.ui(
-                playing ? BmUiIcon.stop : BmUiIcon.play,
-                size: SizeManager.iconList.r,
-                color: context.getColor(ThemeEnum.text),
-              ),
+              child: status.downloading
+                  ? BmOilDrop(size: SizeManager.oilDropInline, progress: status.progress)
+                  : BmIcon.ui(
+                      !status.ready
+                          ? BmUiIcon.download
+                          : playing
+                          ? BmUiIcon.stop
+                          : BmUiIcon.play,
+                      size: SizeManager.iconList.r,
+                      color: context.getColor(ThemeEnum.text),
+                    ),
             ),
           ),
         ),
