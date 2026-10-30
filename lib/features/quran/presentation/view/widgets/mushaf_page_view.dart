@@ -11,6 +11,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/mushaf_star.dart';
@@ -107,7 +108,6 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
     final page = ref.watch(mushafPageProvider(number));
     final assets = ref.watch(quranAssetsProvider).value;
     final info = assets?.pageInfo(number);
-    String eastern(int n) => formatDigitsIn('$n', language: 'ar', digits: Digits.eastern);
     final lines = page.value?.lines ?? const <MushafLine>[];
     final keys = {for (final line in lines) ...line.words.map((word) => word.key)};
     final texts = {
@@ -116,15 +116,12 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
     };
     return _MushafPaper(
       page: page.value,
-      number: eastern(number),
+      number: _eastern(number),
       placeholder: page.hasValue && page.value == null,
       surah: info == null ? '' : assets!.surah(info.start.surah).ar,
-      juz: info == null ? '' : '$mushafJuzWord ${eastern(info.juz)}',
-      names: {
-        for (final line in page.value?.lines ?? const <MushafLine>[])
-          if (line.surah case final surah? when assets != null) surah: assets.surah(surah).ar,
-      },
-      eastern: eastern,
+      juz: info == null ? '' : '$mushafJuzWord ${_eastern(info.juz)}',
+      names: _names(page.value, assets),
+      eastern: _eastern,
       unit: ScreenUtil().scaleWidth,
       selected: _washed,
       wash: _wash,
@@ -164,6 +161,48 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       ),
     );
   }
+}
+
+/// the page's digits as the mushaf prints them, in both languages
+String _eastern(int n) => formatDigitsIn('$n', language: 'ar', digits: Digits.eastern);
+
+/// the arabic names of the surahs starting on the page
+Map<int, String> _names(MushafPage? page, QuranAssets? assets) => {
+  for (final line in page?.lines ?? const <MushafLine>[])
+    if (line.surah case final surah? when assets != null) surah: assets.surah(surah).ar,
+};
+
+/// lays the page out the way the reader will before it opens, so the container transform never
+/// waits a frame on its words. a size, font or ink the reader doesn't end up with only misses
+Future<void> warmMushafPage(BuildContext context, WidgetRef ref, int number) async {
+  final assets = await ref.read(quranAssetsProvider.future);
+  final json = await assets.page(number);
+  if (json == null || !context.mounted) return;
+  final page = MushafPage.fromJson(number, json);
+
+  /// decoded now, the reader's labels then find them in the assets' cache
+  for (final surah in {
+    for (final line in page.lines) ...line.words.map((word) => word.key.surah),
+  }) {
+    await assets.surahText(surah);
+  }
+  if (!context.mounted) return;
+  final settings = ref.read(settingsProvider).value;
+  final color = ref.read(pageColorProvider).resolve(dark: context.isThemeDark);
+  _laidOf((
+    page: page,
+    number: _eastern(number),
+    names: _names(page, assets),
+    eastern: _eastern,
+    unit: ScreenUtil().scaleWidth,
+    family: (settings?.quranFont ?? QuranFont.kfgqpc).family,
+    step: settings?.mushafSize ?? 0,
+    ink: AppTheme.page(color, ref.read(themeIdProvider)).getColor(ThemeEnum.ink),
+
+    /// the reader fills the root navigator, in its transition too. a copy, in debug a size belongs
+    /// to its render object and the page may not adopt it
+    viewport: Size.copy(Navigator.of(context, rootNavigator: true).context.size!),
+  ));
 }
 
 class _MushafPaper extends LeafRenderObjectWidget {
@@ -442,7 +481,17 @@ class RenderMushafPage extends RenderBox {
       constraints.hasBoundedHeight ? constraints.maxHeight : constraints.minHeight,
     );
     if (_laid?.viewport != viewport) {
-      _laid = _Laid.of(this, viewport);
+      _laid = _laidOf((
+        page: _page,
+        number: _number,
+        names: _names,
+        eastern: eastern,
+        unit: _unit,
+        family: _family,
+        step: _step,
+        ink: _colors.ink,
+        viewport: viewport,
+      ));
       markNeedsSemanticsUpdate();
     }
     size = constraints.constrain(_laid!.size);
@@ -882,6 +931,34 @@ class RenderMushafPage extends RenderBox {
   }
 }
 
+/// what a page's layout is made from
+typedef _LaidInput = ({
+  MushafPage? page,
+  String number,
+  Map<int, String> names,
+  String Function(int n) eastern,
+  double unit,
+  String family,
+  int step,
+  Color ink,
+  Size viewport,
+});
+
+/// the last pages laid out, so turning back or opening a warmed page measures no word again
+final _laids = <Object, _Laid>{};
+
+_Laid _laidOf(_LaidInput input) {
+  final page = input.page;
+  if (page == null) return _Laid.of(input);
+
+  /// the names and digits follow from the page number
+  final key = (page.number, input.viewport, input.unit, input.family, input.step, input.ink);
+  final laid = _laids.remove(key) ?? _Laid.of(input);
+  _laids[key] = laid;
+  if (_laids.length > 5) _laids.remove(_laids.keys.first);
+  return laid;
+}
+
 /// a page's measured words and their places, made once per page and size
 class _Laid {
   _Laid({
@@ -904,10 +981,9 @@ class _Laid {
     required this.ink,
   });
 
-  factory _Laid.of(RenderMushafPage box, Size viewport) {
-    final unit = box._unit;
-    final page = box._page;
-    final reflow = box.reflow;
+  factory _Laid.of(_LaidInput input) {
+    final (:page, :number, :names, :eastern, :unit, :family, :step, :ink, :viewport) = input;
+    final reflow = step > 0;
     Rect frameOf(Size size) => Rect.fromLTRB(
       SpaceManager.mushafFrameLeft * unit,
       SpaceManager.mushafFrameTop * unit,
@@ -968,10 +1044,10 @@ class _Laid {
     }
 
     /// below 100% the lines narrow and keep their places
-    if (box._step < 0) {
+    if (step < 0) {
       area = Rect.fromCenter(
         center: area.center,
-        width: area.width * mushafScale(box._step),
+        width: area.width * mushafScale(step),
         height: area.height,
       );
     }
@@ -980,14 +1056,14 @@ class _Laid {
     TextPainter quran(String text, double fontSize) => TextPainter(
       text: TextSpan(
         text: text,
-        style: GetRegularStyle(fontSize: fontSize, fontFamily: box._family, color: box._colors.ink),
+        style: GetRegularStyle(fontSize: fontSize, fontFamily: family, color: ink),
       ),
       textDirection: TextDirection.rtl,
     )..layout();
 
     /// one size for the whole page
     var fontSize = reflow
-        ? FontSizeManager.mushafReflow * mushafScale(box._step) * unit
+        ? FontSizeManager.mushafReflow * mushafScale(step) * unit
         : FontSizeManager.quranPage * unit;
     var scale = fontSize / (FontSizeManager.quranPage * unit);
     List<List<TextPainter?>> measure() => [
@@ -1052,16 +1128,8 @@ class _Laid {
       text: TextSpan(
         text: text,
         style: bold
-            ? GetBoldStyle(
-                fontSize: fontSize,
-                fontFamily: FontFamilyManager.dua,
-                color: box._colors.ink,
-              )
-            : GetRegularStyle(
-                fontSize: fontSize,
-                fontFamily: FontFamilyManager.dua,
-                color: box._colors.ink,
-              ),
+            ? GetBoldStyle(fontSize: fontSize, fontFamily: FontFamilyManager.dua, color: ink)
+            : GetRegularStyle(fontSize: fontSize, fontFamily: FontFamilyManager.dua, color: ink),
       ),
       textDirection: TextDirection.rtl,
     )..layout();
@@ -1075,7 +1143,7 @@ class _Laid {
         if (!line.words[j].end) continue;
         markers.add((
           layout.words[i][j].center,
-          amiri(box.eastern(line.words[j].key.ayah), FontSizeManager.ayahMarker * scale * unit),
+          amiri(eastern(line.words[j].key.ayah), FontSizeManager.ayahMarker * scale * unit),
         ));
       }
       if (line.type == MushafLineType.surahName) {
@@ -1092,7 +1160,7 @@ class _Laid {
             height,
           ),
           amiri(
-            '$mushafSurahWord ${box._names[line.surah] ?? ''}',
+            '$mushafSurahWord ${names[line.surah] ?? ''}',
             FontSizeManager.cartouche * unit,
             bold: true,
           ),
@@ -1118,9 +1186,9 @@ class _Laid {
       markers: markers,
       cartouches: cartouches,
       basmallahs: basmallahs,
-      number: amiri(box._number, FontSizeManager.mushafHeader * unit),
+      number: amiri(number, FontSizeManager.mushafHeader * unit),
       textHeight: quran(' ', fontSize).height,
-      ink: box._colors.ink,
+      ink: ink,
     );
   }
 
