@@ -1,0 +1,71 @@
+import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/features/quran/data/search_text.dart';
+import 'package:better_muslim/features/quran/domain/quran_search.dart';
+import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/search_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+
+import '../../../helpers/fonts.dart';
+import '../../../helpers/home.dart';
+import '../../../helpers/more.dart';
+import '../../../helpers/prayer.dart';
+import '../../../helpers/providers.dart';
+
+void main() {
+  late List<SearchAyah> ayahs;
+  setUpAll(tz.initializeTimeZones);
+  setUpAll(loadAppFonts);
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    ayahs = await loadSearchAyahs();
+  });
+  setUp(mockSystemChannel);
+
+  testWidgets(
+    '4.27 from quran home: jump card, grouped hits, rows that open, a hit opens the reader',
+    (tester) async {
+      await pumpHome(tester, [
+        ...await designOverrides(),
+        searchAyahsProvider.overrideWith((ref) async => ayahs),
+      ], settle: false);
+      await tester.pump();
+      containerOf(tester).read(routerProvider).go(Routes.quran);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.bySemanticsLabel('Search the Quran'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SearchPage), findsOneWidget);
+      expect(find.text('Search ignores diacritics and hamza forms.'), findsOneWidget);
+      expect(find.text('No ayahs found'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'الرحمن');
+      await tester.pumpAndSettle();
+      expect(find.text('JUMP TO SURAH'), findsOneWidget);
+      expect(find.text('55 · Ar-Rahman'), findsOneWidget);
+      expect(find.text('Medinan · 78 ayahs · p. 531'), findsOneWidget);
+      expect(find.text('AL-FATIHA'), findsOneWidget);
+      expect(find.text('1:1'), findsOneWidget);
+      expect(find.text('1:3'), findsOneWidget);
+
+      /// the next surah is a closed row, a tap opens its hits under it
+      expect(find.text('2:163'), findsNothing);
+      await tester.tap(find.text('Al-Baqarah'));
+      await tester.pumpAndSettle();
+      expect(find.text('AL-BAQARAH'), findsOneWidget);
+      expect(find.text('2:163'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'p 700');
+      await tester.pumpAndSettle();
+      expect(find.text('No ayahs found'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'الحمد لله رب العالمين');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1:2'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ReaderPage>(find.byType(ReaderPage)).page, 1);
+      await unmount(tester);
+    },
+  );
+}

@@ -573,5 +573,14 @@
   "percent": "{n}٪",
   "prayedOfFive": "{count} من ٥ صلوات",
   "notifQuietTitle": "ليستمر الأذان",
-  "notifQuietBody": "افتح التطبيق لتُجدول صلوات الأيام القادمة."
+  "notifQuietBody": "افتح التطبيق لتُجدول صلوات الأيام القادمة.",
+  "searchQuran": "ابحث في القرآن",
+  "ayahText": "نص الآية",
+  "jumpToSurah": "الانتقال إلى السورة",
+  "jumpToPage": "الانتقال إلى الصفحة",
+  "jumpToAyah": "الانتقال إلى الآية",
+  "numberName": "{n} · {name}",
+  "jumpSurahMeta": "{place} · {count} آية · ص {page}",
+  "noAyahsFound": "لا توجد آيات",
+  "searchQuranHint": "البحث لا يتأثر بالتشكيل ولا بصور الهمزة."
 }

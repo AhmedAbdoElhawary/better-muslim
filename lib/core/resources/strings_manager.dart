@@ -536,4 +536,13 @@ abstract final class StringsManager {
   static const String prayedOfFive = 'prayedOfFive';
   static const String notifQuietTitle = 'notifQuietTitle';
   static const String notifQuietBody = 'notifQuietBody';
+  static const String searchQuran = 'searchQuran';
+  static const String ayahText = 'ayahText';
+  static const String jumpToSurah = 'jumpToSurah';
+  static const String jumpToPage = 'jumpToPage';
+  static const String jumpToAyah = 'jumpToAyah';
+  static const String numberName = 'numberName';
+  static const String jumpSurahMeta = 'jumpSurahMeta';
+  static const String noAyahsFound = 'noAyahsFound';
+  static const String searchQuranHint = 'searchQuranHint';
 }

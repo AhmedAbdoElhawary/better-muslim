@@ -35,6 +35,7 @@ import 'package:better_muslim/features/qibla/view/qibla_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/saved_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/search_page.dart';
 import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,6 +91,7 @@ abstract final class Routes {
   ).toString();
 
   static const String quranSaved = '$quran/saved';
+  static const String quranSearch = '$quran/search';
   static const String quranNotes = '$quranSaved?tab=notes';
 
   /// dev builds only
@@ -254,6 +256,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             _page(state, SavedPage(notes: state.uri.queryParameters['tab'] == 'notes')),
       ),
 
+      GoRoute(
+        path: Routes.quranSearch,
+        pageBuilder: (context, state) => _page(state, const SearchPage()),
+      ),
       GoRoute(path: Routes.theme, pageBuilder: (context, state) => _page(state, const ThemePage())),
       GoRoute(
         path: Routes.adhanSettings,

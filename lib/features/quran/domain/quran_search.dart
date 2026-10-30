@@ -1,0 +1,126 @@
+import 'package:better_muslim/core/location/place_list.dart';
+import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
+
+/// 4.27's chips, the root chip waits for a licensed root list
+enum SearchScope { all, arabic }
+
+enum JumpKind { surah, page, ayah }
+
+/// where the jump card opens the reader, ayah only for an ayah
+typedef QuranJump = ({JumpKind kind, int surah, int page, AyahKey? ayah});
+
+/// one ayah as the search reads it, its words without the end marker
+class SearchAyah {
+  SearchAyah(this.key, this.words, this.translation)
+    : _forms = [_form(words, ''), _form(words, 'ا')];
+
+  final AyahKey key;
+  final List<String> words;
+  final String translation;
+
+  /// the dagger alef dropped and as an alef, so الرحمن and الكتاب both find their ayahs
+  final List<({String text, List<int> starts})> _forms;
+
+  static ({String text, List<int> starts}) _form(List<String> words, String daggerAlef) {
+    final text = StringBuffer();
+    final starts = <int>[];
+    for (final word in words) {
+      if (text.isNotEmpty) text.write(' ');
+      starts.add(text.length);
+      text.write(_fold(word.replaceAll('\u0670', daggerAlef)));
+    }
+    return (text: '$text', starts: starts);
+  }
+
+  /// the words a match touches, a match inside a word washes the whole word
+  Set<int> _matched(String query) {
+    final words = <int>{};
+    for (final form in _forms) {
+      var word = 0;
+      for (var at = form.text.indexOf(query); at != -1; at = form.text.indexOf(query, at + 1)) {
+        while (word + 1 < form.starts.length && form.starts[word + 1] <= at) {
+          word++;
+        }
+        for (var i = word; i < form.starts.length && form.starts[i] < at + query.length; i++) {
+          words.add(i);
+        }
+      }
+    }
+    return words;
+  }
+}
+
+class SearchHit {
+  const SearchHit(this.ayah, {required this.arabic});
+
+  final SearchAyah ayah;
+
+  /// indexes into ayah.words
+  final Set<int> arabic;
+}
+
+/// the jump card and the hits grouped by surah in mushaf order, no typo guessing
+({QuranJump? jump, Map<int, List<SearchHit>> groups}) searchQuran(
+  String query,
+  List<SearchAyah> ayahs,
+  QuranAssets assets, {
+  SearchScope scope = SearchScope.all,
+}) {
+  final text = query.trim().replaceAll(RegExp(r'\s+'), ' ');
+  if (text.isEmpty) return (jump: null, groups: const {});
+  final arabic = _fold(text);
+  final groups = <int, List<SearchHit>>{};
+  for (final ayah in ayahs) {
+    final words = ayah._matched(arabic);
+    if (words.isEmpty) continue;
+    (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, arabic: words));
+  }
+  return (jump: _jump(text, assets), groups: groups);
+}
+
+/// "2:255", "p 50" or a surah's name in either language, out of range is no jump
+QuranJump? _jump(String query, QuranAssets assets) {
+  final text = query.toLowerCase().replaceAllMapped(
+    RegExp('[٠-٩]'),
+    (match) => '${match[0]!.codeUnitAt(0) - 0x0660}',
+  );
+  if (RegExp(r'^(\d+)\s*:\s*(\d+)$').firstMatch(text) case final match?) {
+    final (surah, ayah) = (int.parse(match[1]!), int.parse(match[2]!));
+    if (surah < 1 || surah > assets.surahs.length || ayah < 1) return null;
+    if (ayah > assets.surah(surah).ayahs) return null;
+    final key = AyahKey(surah, ayah);
+    return (kind: JumpKind.ayah, surah: surah, page: assets.pageOf(key), ayah: key);
+  }
+  if (RegExp(r'^p(?:age)?\.?\s*(\d+)$').firstMatch(text) case final match?) {
+    final page = int.parse(match[1]!);
+    if (page < 1 || page > quranPageCount) return null;
+    return (kind: JumpKind.page, surah: assets.pageInfo(page).start.surah, page: page, ayah: null);
+  }
+  final name = _nameKey(text.replaceFirst(RegExp(r'^(surah|sura|سورة|سوره)\s+'), ''));
+  if (name.isEmpty) return null;
+  QuranSurah? started;
+  for (final surah in assets.surahs) {
+    final names = [
+      _nameKey(surah.en),
+      _nameKey(surah.en.replaceFirst(RegExp(r'^a[a-z]{1,2}-', caseSensitive: false), '')),
+      _nameKey(surah.ar),
+      _nameKey(surah.ar).replaceFirst(RegExp('^ال'), ''),
+    ];
+    if (names.contains(name)) return _surah(surah);
+
+    /// "baqara" finds al-baqarah, two letters start too many names
+    if (name.length >= 3) started ??= names.any((key) => key.startsWith(name)) ? surah : null;
+  }
+  return started == null ? null : _surah(started);
+}
+
+QuranJump _surah(QuranSurah surah) =>
+    (kind: JumpKind.surah, surah: surah.n, page: surah.page, ayah: null);
+
+/// letters only, so "Ar-Rahman", "ar rahman" and "arrahman" are one name
+String _nameKey(String name) =>
+    _fold(name.toLowerCase()).replaceAll(RegExp('[^a-z\u0621-\u064A]'), '');
+
+/// the mushaf often writes a hamza with no seat (شَيۡـًٔا), so hamza goes on both sides
+String _fold(String text) => normalizeArabic(text.replaceAll(RegExp('[ءؤئ]'), ''));

@@ -1041,5 +1041,14 @@
   "percent": "{n}%",
   "prayedOfFive": "{count} of 5 prayed",
   "notifQuietTitle": "Keep the adhan coming",
-  "notifQuietBody": "Open the app so the next days' prayers are scheduled."
+  "notifQuietBody": "Open the app so the next days' prayers are scheduled.",
+  "searchQuran": "Search the Quran",
+  "ayahText": "Ayah text",
+  "jumpToSurah": "JUMP TO SURAH",
+  "jumpToPage": "JUMP TO PAGE",
+  "jumpToAyah": "JUMP TO AYAH",
+  "numberName": "{n} · {name}",
+  "jumpSurahMeta": "{place} · {count} ayahs · p. {page}",
+  "noAyahsFound": "No ayahs found",
+  "searchQuranHint": "Search ignores diacritics and hamza forms."
 }

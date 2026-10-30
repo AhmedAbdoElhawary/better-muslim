@@ -401,6 +401,16 @@ abstract final class SpaceManager {
   static const double verseCellSide = 18;
   static const double verseCellBottom = 14;
   static const double verseMarkerGap = 10;
+
+  /// search (4.27)
+  static const double searchBarTop = 6;
+  static const double searchFieldStart = 12;
+  static const double searchFieldEnd = 10;
+  static const double searchSection = 18;
+  static const double searchHitTop = 10;
+  static const double searchHitGap = 10;
+  static const double searchWashSide = 3;
+  static const double searchHintSide = 20;
 }
 
 abstract final class RadiusManager {
@@ -446,6 +456,9 @@ abstract final class RadiusManager {
   static const double sharePreview = 22;
   static const double displaySwatch = 12;
   static const double verseCell = 18;
+  static const double searchField = 12;
+  static const double searchJumpIcon = 12;
+  static const double searchWash = 6;
 }
 
 abstract final class SizeManager {
@@ -815,4 +828,12 @@ abstract final class SizeManager {
   static const double verseMarkerRing = 12;
   static const double verseMarkerStroke = 1.2;
   static const double verseMarkerStar = .9;
+
+  /// search (4.27)
+  static const double searchClear = 20;
+  static const double searchClearIcon = 12;
+  static const double searchJumpIcon = 40;
+  static const double searchRow = 46;
+  static const double searchRowNumber = 24;
+  static const double searchChevron = 18;
 }

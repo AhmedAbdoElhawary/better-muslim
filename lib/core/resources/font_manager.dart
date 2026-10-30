@@ -158,6 +158,13 @@ abstract final class FontSizeManager {
   static const double verseTranslation = 14;
   static const double arabicStep = 2;
   static const double translationStep = 1;
+
+  /// search (4.27)
+  static const double searchField = 19;
+  static const double searchJumpTitle = 15.5;
+  static const double searchJumpMeta = 12.5;
+  static const double searchJumpName = 21;
+  static const double searchAyah = 21;
 }
 
 abstract final class LineHeightManager {
@@ -190,6 +197,8 @@ abstract final class LineHeightManager {
   static const double duaAr = 1.9;
   static const double dhikrAr = 1.7;
   static const double quranAr = 2.2;
+  static const double searchAyah = 2.1;
+  static const double searchTranslation = 1.45;
 
   /// home values with no BmText role
   static const double cardTitleAr = 1.2;
