@@ -106,7 +106,6 @@ flutter:
     - assets/quran/
     - assets/quran/pages/
     - assets/quran/surahs/
-    # TODO(ahmed): replace the placeholder adhan files in assets/audio/ with the licensed recordings, same names.
     - assets/audio/
     - shorebird.yaml
 
