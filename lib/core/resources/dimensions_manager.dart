@@ -740,6 +740,9 @@ abstract final class SizeManager {
   /// the scrim over the receded page
   static const double pageDim = .28;
 
+  /// black54, the scrim behind a container transform
+  static const double containerScrim = .54;
+
   /// quran home (4.18)
   static const double pageThumbW = 60;
   static const double pageThumbH = 85;
