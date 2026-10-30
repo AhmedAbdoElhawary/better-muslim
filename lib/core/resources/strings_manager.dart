@@ -30,7 +30,8 @@ abstract final class StringsManager {
   static const String readDua = 'readDua';
   static const String markPrayed = 'markPrayed';
   static const String stopAdhan = 'stopAdhan';
-  static const String adhanOfMakkah = 'adhanOfMakkah';
+  static const String adhanOfMadinah = 'adhanOfMadinah';
+  static const String adhanOfFajr = 'adhanOfFajr';
   static const String prayerTimes = 'prayerTimes';
   static const String prayedToday = 'prayedToday';
   static const String missedToMakeUp = 'missedToMakeUp';
@@ -259,16 +260,12 @@ abstract final class StringsManager {
   static const String noteNoFasting = 'noteNoFasting';
   static const String adhanSound = 'adhanSound';
   static const String forPrayer = 'forPrayer';
-  static const String recordingMakkah = 'recordingMakkah';
   static const String recordingMadinah = 'recordingMadinah';
-  static const String recordingAlAqsa = 'recordingAlAqsa';
-  static const String recordingCairo = 'recordingCairo';
-  static const String recordingIstanbul = 'recordingIstanbul';
-  static const String recordingTakbir = 'recordingTakbir';
+  static const String recordingAaqibAzeez = 'recordingAaqibAzeez';
+  static const String recordingAndrewler = 'recordingAndrewler';
+  static const String recordingSynagda = 'recordingSynagda';
   static const String fullAdhanLength = 'fullAdhanLength';
-  static const String shortLength = 'shortLength';
   static const String recordingFull = 'recordingFull';
-  static const String recordingShort = 'recordingShort';
   static const String notificationsOff = 'notificationsOff';
   static const String openSettings = 'openSettings';
   static const String sectionYourData = 'sectionYourData';
@@ -278,6 +275,7 @@ abstract final class StringsManager {
   static const String cancel = 'cancel';
   static const String reset = 'reset';
   static const String sectionAbout = 'sectionAbout';
+  static const String acknowledgements = 'acknowledgements';
   static const String openSourceLicenses = 'openSourceLicenses';
   static const String usePlaceNames = 'usePlaceNames';
   static const String useFonts = 'useFonts';
@@ -394,7 +392,6 @@ abstract final class StringsManager {
   static const String noteDeleted = 'noteDeleted';
   static const String addNote = 'addNote';
   static const String private = 'private';
-  static const String comingSoon = 'comingSoon';
   static const String juzPagePlace = 'juzPagePlace';
   static const String murattalDownloaded = 'murattalDownloaded';
   static const String ayahOf = 'ayahOf';
@@ -451,7 +448,6 @@ abstract final class StringsManager {
   static const String alMuyassar = 'alMuyassar';
   static const String ibnKathir = 'ibnKathir';
   static const String asSadi = 'asSadi';
-  static const String clearQuran = 'clearQuran';
   static const String muyassarSummary = 'muyassarSummary';
   static const String muyassarCredit = 'muyassarCredit';
   static const String previousAyah = 'previousAyah';
