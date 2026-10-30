@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -64,13 +65,13 @@ class _StudyTabsState extends ConsumerState<StudyTabs> {
     setState(() => _tafsir = tafsir);
     try {
       await ref.read(tafsirStatusProvider(tafsir).notifier).download();
-    } on TafsirException catch (error) {
+    } on DownloadException catch (error) {
       if (!mounted) return;
       if (_tafsir == tafsir) setState(() => _tafsir = TafsirSource.muyassar);
-      if (error.failure == TafsirFailure.cancelled) return;
+      if (error.failure == DownloadFailure.cancelled) return;
       showToast(
         context,
-        error.failure == TafsirFailure.offline
+        error.failure == DownloadFailure.offline
             ? StringsManager.needsInternetOnce
             : StringsManager.downloadFailed,
         icon: BmIconName.quran,
@@ -306,7 +307,6 @@ class _TranslationPane extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = ref.watch(surahTextProvider(ayah.surah)).value;
-    final sample = ref.watch(quranSamplesProvider).value?['clearQuran']?['$ayah'];
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final cards = [
       (
@@ -314,7 +314,6 @@ class _TranslationPane extends ConsumerWidget {
         text?.translation[ayah.ayah - 1] ?? '',
         TextDirection.ltr,
       ),
-      (StringsManager.clearQuran, sample, TextDirection.ltr),
       (StringsManager.muyassarSummary, text?.tafsir[ayah.ayah - 1] ?? '', TextDirection.rtl),
     ];
     return OnlyPadding(
@@ -330,7 +329,7 @@ class _TranslationPane extends ConsumerWidget {
               name: name,
               text: text,
               direction: direction,
-              slot: i == (isArabic ? 2 : 0),
+              slot: i == (isArabic ? 1 : 0),
             ),
           ],
         ],
@@ -350,14 +349,12 @@ class _TranslationCard extends StatelessWidget {
   /// a StringsManager key
   final String name;
 
-  /// null shows coming soon
-  final String? text;
+  final String text;
   final TextDirection direction;
   final bool slot;
 
   @override
   Widget build(BuildContext context) {
-    final text = this.text;
     final color = slot ? ThemeEnum.text : ThemeEnum.text2;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -377,19 +374,16 @@ class _TranslationCard extends StatelessWidget {
               color: slot ? ThemeEnum.primary : ThemeEnum.text3,
             ),
             const RSizedBox.vertical(SpaceManager.studyCardLineGap),
-            if (text == null)
-              RegularText(StringsManager.comingSoon, fontSize: FontSizeManager.body, color: color)
-            else
-              Directionality(
-                textDirection: direction,
-                child: RegularText(
-                  text,
-                  translate: false,
-                  fontSize: FontSizeManager.body,
-                  height: LineHeightManager.verseTranslation,
-                  color: color,
-                ),
+            Directionality(
+              textDirection: direction,
+              child: RegularText(
+                text,
+                translate: false,
+                fontSize: FontSizeManager.body,
+                height: LineHeightManager.verseTranslation,
+                color: color,
               ),
+            ),
           ],
         ),
       ),
