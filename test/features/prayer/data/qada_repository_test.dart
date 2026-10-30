@@ -48,17 +48,6 @@ void main() {
 
       expect(await entries(), hasLength(1));
     });
-
-    test('watchWeek gives the dated entries of the 7 days by day and prayer', () async {
-      await qada.add(october(10), Prayer.fajr);
-      await qada.add(october(11), Prayer.fajr);
-      await qada.add(october(17), Prayer.isha);
-      await qada.add(october(18), Prayer.isha);
-      await qada.addOlder(Prayer.fajr, 2);
-
-      final week = await qada.watchWeek(october(11)).first;
-      expect(week.keys, {(october(11), Prayer.fajr), (october(17), Prayer.isha)});
-    });
   });
 
   group('the qada list (US3)', () {

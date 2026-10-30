@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/extensions/window_size.dart';
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
@@ -12,7 +13,6 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
-import 'package:better_muslim/features/prayer/presentation/providers/row_state.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/row_trailing.dart';

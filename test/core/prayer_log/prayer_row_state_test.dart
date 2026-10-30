@@ -1,7 +1,7 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/prayer_log/prayer_row_state.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
-import 'package:better_muslim/features/prayer/domain/prayer_row_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;

@@ -2,7 +2,19 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:timezone/timezone.dart';
 
-enum PrayerRowState { unavailable, prayed, next, later, mark, madeUp, inQada, addToQada }
+enum PrayerRowState {
+  unavailable,
+  prayed,
+  next,
+  later,
+  mark,
+  madeUp,
+  inQada,
+  addToQada;
+
+  /// a made up prayer counts as prayed for the day
+  bool get done => this == prayed || this == madeUp;
+}
 
 typedef RowState = ({PrayerRowState state, bool isOpen});
 

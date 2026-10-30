@@ -33,6 +33,7 @@ class DayDetails extends ConsumerWidget {
     final hasEvents = ref.watch(
       hijriDateProvider(day).select((hijri) => eventsOn(hijri).isNotEmpty),
     );
+    final done = ref.watch(dayDoneProvider(day));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -47,6 +48,7 @@ class DayDetails extends ConsumerWidget {
             DayTab.events => StringsManager.tabEvents,
           },
           empty: hasEvents ? const {} : const {DayTab.events},
+          checked: done ? const {DayTab.prayerTimes} : const {},
           onChanged: ref.read(dayTabProvider.notifier).open,
         ),
         const RSizedBox.vertical(SpaceManager.s4),

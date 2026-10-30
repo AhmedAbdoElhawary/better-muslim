@@ -26,6 +26,7 @@ class NavRow extends StatelessWidget {
     this.args = const {},
     this.translateValue = true,
     this.toggled,
+    this.mark,
     this.onTap,
     this.heroTag,
     this.startFlex = 2,
@@ -50,6 +51,9 @@ class NavRow extends StatelessWidget {
   /// set for a toggle row, the tap then flips it with the selection haptic
   final bool? toggled;
 
+  /// beside the value, like the calendar's prayer status
+  final Widget? mark;
+
   /// null draws the value with no chevron and no tap (Version)
   final VoidCallback? onTap;
 
@@ -65,7 +69,7 @@ class NavRow extends StatelessWidget {
     final stacked = MediaQuery.textScalerOf(context).scale(1) > _stackAt;
 
     /// a new value after a sheet closes crossfades in place, no slide
-    final valueText = value == null
+    final label = value == null
         ? null
         : AnimatedSwitcher(
             duration: BmMotion.micro,
@@ -84,6 +88,17 @@ class NavRow extends StatelessWidget {
               color: ThemeEnum.text2,
               textAlign: stacked ? null : TextAlign.end,
             ),
+          );
+    final mark = this.mark;
+    final valueText = mark == null || label == null
+        ? label
+        : Row(
+            mainAxisAlignment: stacked ? MainAxisAlignment.start : MainAxisAlignment.end,
+            children: [
+              mark,
+              const RSizedBox.horizontal(SpaceManager.s2),
+              Flexible(child: label),
+            ],
           );
     final text = RegularText(this.title, translate: translateTitle, fontSize: FontSizeManager.body);
     final title = heroTag == null

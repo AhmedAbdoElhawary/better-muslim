@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/prayer_log/prayer_row_state.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
@@ -11,7 +12,6 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/prayer/data/qada_repository.dart';
-import 'package:better_muslim/features/prayer/domain/prayer_row_state.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/prayer_actions.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_complete.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/mark_button.dart';

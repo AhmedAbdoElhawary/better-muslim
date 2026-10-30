@@ -22,6 +22,7 @@ class Segmented<T> extends StatelessWidget {
     this.small = false,
     this.muted = const {},
     this.empty = const {},
+    this.checked = const {},
     super.key,
   });
 
@@ -39,6 +40,9 @@ class Segmented<T> extends StatelessWidget {
   /// nothing behind it, drawn in text2 with a close icon even when picked, still tappable
   final Set<T> empty;
 
+  /// a success check after the label, the calendar's full day
+  final Set<T> checked;
+
   @override
   Widget build(BuildContext context) {
     final height = small ? SizeManager.segmentSmall : SizeManager.segment;
@@ -51,6 +55,7 @@ class Segmented<T> extends StatelessWidget {
       small: small,
       muted: small || muted.contains(value),
       empty: empty.contains(value),
+      checked: checked.contains(value),
       reach: reach,
       onTap: () {
         if (value == selected) return;
@@ -115,6 +120,7 @@ class _Segment extends StatelessWidget {
     required this.small,
     required this.muted,
     required this.empty,
+    required this.checked,
     required this.reach,
     required this.onTap,
   });
@@ -124,6 +130,7 @@ class _Segment extends StatelessWidget {
   final bool small;
   final bool muted;
   final bool empty;
+  final bool checked;
   final double reach;
   final VoidCallback onTap;
 
@@ -153,17 +160,17 @@ class _Segment extends StatelessWidget {
                 widthFactor: small ? 1 : null,
                 child: AnimatedSwitcher(
                   duration: BmMotion.micro,
-                  child: empty
+                  child: empty || checked
                       ? Row(
-                          key: const ValueKey(true),
+                          key: ValueKey((empty, checked)),
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Flexible(child: text),
                             const RSizedBox.horizontal(SpaceManager.segmentIconGap),
                             BmIcon.ui(
-                              BmUiIcon.close,
+                              empty ? BmUiIcon.close : BmUiIcon.check,
                               size: SizeManager.iconChip.r,
-                              color: context.getColor(ThemeEnum.text2),
+                              color: context.getColor(empty ? ThemeEnum.text2 : ThemeEnum.success),
                             ),
                           ],
                         )

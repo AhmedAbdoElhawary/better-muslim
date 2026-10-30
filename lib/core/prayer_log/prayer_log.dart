@@ -1,6 +1,9 @@
+import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
+import 'package:better_muslim/core/prayer_log/prayer_row_state.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,3 +34,35 @@ final prayedProvider = Provider.autoDispose.family<Set<Prayer>, DateTime>(
     weekLogProvider(weekStart(day)).select((log) => log.value?[day] ?? const <Prayer>{}),
   ),
 );
+
+/// the dated qada entries of the 7 days from a sunday, one query per visible week
+final qadaWeekProvider = StreamProvider.autoDispose
+    .family<Map<(DateTime, Prayer), QadaEntry>, DateTime>((ref, start) {
+      final db = ref.watch(databaseProvider);
+      const date = CivilDate();
+      final end = DateTime(start.year, start.month, start.day + 6);
+      final query = db.select(db.qadaEntries)
+        ..where((row) => row.missedOn.isBetweenValues(date.toSql(start), date.toSql(end)));
+      return query.watch().map(
+        (rows) => {for (final row in rows) (row.missedOn!, row.prayer): row},
+      );
+    });
+
+/// follows the ticker, but a row only rebuilds when its state changes
+final rowStateProvider = Provider.autoDispose.family<RowState, (DateTime, Prayer)>((ref, key) {
+  final (day, prayer) = key;
+  final times = ref.watch(dayTimesProvider(day));
+  final tomorrow = ref.watch(dayTimesProvider(DateTime(day.year, day.month, day.day + 1)));
+  final qada = ref.watch(
+    qadaWeekProvider(weekStart(day)).select((week) => week.value?[(day, prayer)]),
+  );
+  return rowState(
+    prayer: prayer,
+    time: times?.timeOf(prayer),
+    end: times?.endOf(prayer, tomorrow),
+    now: ref.watch(tickerProvider).value ?? ref.watch(clockProvider)(),
+    logged: ref.watch(prayedProvider(day).select((prayed) => prayed.contains(prayer))),
+    qada: qada,
+    next: ref.watch(nextPrayerProvider),
+  );
+});
