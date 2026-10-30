@@ -2,6 +2,7 @@ import 'dart:ui' show Tristate;
 
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
@@ -9,6 +10,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
+import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -43,12 +45,16 @@ void main() {
     FakeScheduler? scheduler,
     Locale locale = const Locale('en'),
     double textScale = 1,
+    AdhanDownloadNotifier Function(AdhanRecording recording)? downloads,
   }) async => pumpMore(
     tester,
     <Override>[
       ...await designOverrides(),
       notificationSchedulerProvider.overrideWithValue(scheduler ?? FakeScheduler(allowed: allowed)),
       clipPlayerProvider.overrideWithValue(clips),
+      if (downloads != null)
+        for (final recording in AdhanRecording.values)
+          adhanDownloadProvider(recording).overrideWith(() => downloads(recording)),
     ],
     push: Routes.adhanSettings,
     locale: locale,
@@ -73,7 +79,7 @@ void main() {
     expect(find.byType(RecordingRow), findsNWidgets(2));
     expect(recordingOf(Prayer.fajr), findsOneWidget);
     expect(recordingOf(Prayer.maghrib), findsOneWidget);
-    expect(find.text('Makkah · full adhan'), findsNWidgets(2));
+    expect(find.text('Madinah · full adhan'), findsNWidgets(2));
     expect(find.text('10 min'), findsOneWidget);
     expect(find.text('Notifications are off for this app.'), findsNothing);
     await unmount(tester);
@@ -91,7 +97,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the adhan sound sheet: six recordings, a tap plays, save keeps and stops', (
+  testWidgets('the fajr sheet has the one fajr adhan, a tap plays, save keeps and stops', (
     tester,
   ) async {
     await open(tester);
@@ -100,16 +106,8 @@ void main() {
 
     expect(find.text('Adhan sound'), findsWidgets);
     expect(find.text('For Fajr'), findsOneWidget);
-    for (final line in [
-      'Full adhan · 3:52',
-      'Full adhan · 4:10',
-      'Full adhan · 3:31',
-      'Full adhan · 3:44',
-      'Full adhan · 4:02',
-      'Short · 0:12',
-    ]) {
-      expect(find.text(line), findsOneWidget, reason: line);
-    }
+    expect(find.text('Full adhan · 4:02'), findsOneWidget);
+    expect(find.text('Aaqib Azeez'), findsNothing);
 
     await tester.tap(find.text('Madinah'));
     await tester.pumpAndSettle();
@@ -119,22 +117,64 @@ void main() {
     await tester.pumpAndSettle();
     expect((await settingsOf(tester)).fajrRecording, AdhanRecording.madinah);
     expect(clips.stops, greaterThanOrEqualTo(1));
-    expect(find.text('Madinah · full adhan'), findsOneWidget);
+    expect(find.text('Madinah · full adhan'), findsNWidgets(2));
+    await unmount(tester);
+  });
+
+  testWidgets('the maghrib sheet: four recordings, a downloaded one plays and save keeps it', (
+    tester,
+  ) async {
+    await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
+    await tester.tap(recordingOf(Prayer.maghrib));
+    await tester.pumpAndSettle();
+
+    for (final line in [
+      'Full adhan · 3:06',
+      'Full adhan · 1:27',
+      'Full adhan · 2:38',
+      'Full adhan · 2:34',
+    ]) {
+      expect(find.text(line), findsOneWidget, reason: line);
+    }
+
+    await tester.tap(find.text('Aaqib Azeez'));
+    await tester.pumpAndSettle();
+    expect(clips.played, [AdhanRecording.aaqibAzeez.fullAsset(Prayer.maghrib)]);
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.aaqibAzeez);
+    await unmount(tester);
+  });
+
+  testWidgets('offline, a recording not on the phone says so and the pick stays', (tester) async {
+    await open(tester, downloads: (recording) => _FakeDownload(recording, ready: false));
+    await tester.tap(recordingOf(Prayer.maghrib));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Andrewler'));
+    await tester.pump();
+    expect(find.text('Needs internet once'), findsOneWidget);
+    expect(clips.played, isEmpty);
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.madinah);
     await unmount(tester);
   });
 
   testWidgets('closing the sheet without save keeps the recording and stops the sound', (
     tester,
   ) async {
-    await open(tester);
+    await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
     await tester.tap(recordingOf(Prayer.maghrib));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cairo'));
+    await tester.tap(find.text('Adam Synagda'));
     await tester.pumpAndSettle();
     final stops = clips.stops;
-    Navigator.of(tester.element(find.text('Cairo'))).pop();
+    Navigator.of(tester.element(find.text('Adam Synagda'))).pop();
     await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.makkah);
+    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.madinah);
     expect(clips.stops, greaterThan(stops));
     await unmount(tester);
   });
@@ -239,4 +279,17 @@ void main() {
       await unmount(tester);
     });
   }
+}
+
+/// no files in a test, ready says whether the recording is already on the phone
+class _FakeDownload extends AdhanDownloadNotifier {
+  _FakeDownload(super.recording, {required this.ready});
+
+  final bool ready;
+
+  @override
+  AdhanDownload build() => (ready: ready, downloading: false, progress: null);
+
+  @override
+  Future<void> download() async => throw const DownloadException(DownloadFailure.offline);
 }
