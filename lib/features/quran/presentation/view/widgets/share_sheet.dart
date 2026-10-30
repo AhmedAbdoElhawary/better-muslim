@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
@@ -7,7 +8,6 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
-import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_share.dart';
@@ -38,11 +38,11 @@ class _AyahShareSheetState extends ConsumerState<_AyahShareSheet> {
     if (source.tafsir case final tafsir?) {
       try {
         await ref.read(tafsirStatusProvider(tafsir).notifier).download();
-      } on TafsirException catch (error) {
-        if (!mounted || error.failure == TafsirFailure.cancelled) return;
+      } on DownloadException catch (error) {
+        if (!mounted || error.failure == DownloadFailure.cancelled) return;
         showToast(
           context,
-          error.failure == TafsirFailure.offline
+          error.failure == DownloadFailure.offline
               ? StringsManager.needsInternetOnce
               : StringsManager.downloadFailed,
           icon: BmIconName.quran,
