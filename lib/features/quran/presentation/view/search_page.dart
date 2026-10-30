@@ -26,6 +26,7 @@ extension on SearchScope {
   String get label => switch (this) {
     SearchScope.all => StringsManager.catAll,
     SearchScope.arabic => StringsManager.ayahText,
+    SearchScope.translation => StringsManager.translation,
   };
 }
 
@@ -484,26 +485,22 @@ class _HitCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Wrap(
-                      spacing: SpaceManager.s1.r,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        for (final (i, word) in hit.ayah.words.indexed)
-                          _Word(word, font: font.font, washed: hit.arabic.contains(i)),
-                      ],
-                    ),
+                  _Words(
+                    hit.ayah.words,
+                    washed: hit.arabic,
+                    direction: TextDirection.rtl,
+                    font: font.font,
+                    fontSize: FontSizeManager.searchAyah,
+                    height: LineHeightManager.searchAyah,
+                    color: ThemeEnum.text,
                   ),
-                  Directionality(
-                    textDirection: TextDirection.ltr,
-                    child: RegularText(
-                      hit.ayah.translation,
-                      translate: false,
-                      fontSize: FontSizeManager.caption,
-                      height: LineHeightManager.searchTranslation,
-                      color: ThemeEnum.text2,
-                    ),
+                  _Words(
+                    hit.ayah.translation,
+                    washed: hit.translation,
+                    direction: TextDirection.ltr,
+                    fontSize: FontSizeManager.caption,
+                    height: LineHeightManager.searchTranslation,
+                    color: ThemeEnum.text2,
                   ),
                 ],
               ),
@@ -515,30 +512,69 @@ class _HitCard extends ConsumerWidget {
   }
 }
 
-class _Word extends StatelessWidget {
-  const _Word(this.word, {required this.font, required this.washed});
+/// word by word, so a matched word is washed behind its glyphs and never recolored
+class _Words extends StatelessWidget {
+  const _Words(
+    this.words, {
+    required this.washed,
+    required this.direction,
+    required this.fontSize,
+    required this.height,
+    required this.color,
+    this.font = FontEnum.body,
+  });
 
-  final String word;
+  final List<String> words;
+
+  /// indexes into words
+  final Set<int> washed;
+  final TextDirection direction;
   final FontEnum font;
-  final bool washed;
+  final double fontSize;
+  final double height;
+  final ThemeEnum color;
 
   @override
   Widget build(BuildContext context) {
-    final text = RegularText(
-      word,
-      translate: false,
-      font: font,
-      fontSize: FontSizeManager.searchAyah,
-      height: LineHeightManager.searchAyah,
-      color: ThemeEnum.text,
+    return Directionality(
+      textDirection: direction,
+      child: Wrap(
+        spacing: SpaceManager.s1.r,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          for (final (i, word) in words.indexed)
+            _Wash(
+              washed: washed.contains(i),
+              child: RegularText(
+                word,
+                translate: false,
+                font: font,
+                fontSize: fontSize,
+                height: height,
+                color: color,
+              ),
+            ),
+        ],
+      ),
     );
-    if (!washed) return text;
+  }
+}
+
+class _Wash extends StatelessWidget {
+  const _Wash({required this.washed, required this.child});
+
+  final bool washed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!washed) return child;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.getColor(ThemeEnum.primaryContainer),
         borderRadius: BorderRadius.circular(RadiusManager.searchWash.r),
       ),
-      child: HorizontalPadding(padding: SpaceManager.searchWashSide, child: text),
+      child: HorizontalPadding(padding: SpaceManager.searchWashSide, child: child),
     );
   }
 }

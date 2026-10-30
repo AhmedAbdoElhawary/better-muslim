@@ -15,8 +15,8 @@ void main() {
 
   QuranJump? jump(String query) => searchQuran(query, ayahs, assets).jump;
 
-  List<AyahKey> found(String query) => [
-    for (final hits in searchQuran(query, ayahs, assets).groups.values)
+  List<AyahKey> found(String query, {SearchScope scope = SearchScope.all}) => [
+    for (final hits in searchQuran(query, ayahs, assets, scope: scope).groups.values)
       for (final hit in hits) hit.ayah.key,
   ];
 
@@ -109,6 +109,42 @@ void main() {
     expect(groups.keys.first, 1);
     expect(groups[1]!.map((hit) => hit.ayah.key), [const AyahKey(1, 1), const AyahKey(1, 3)]);
     expect(groups.keys.toList(), [...groups.keys]..sort());
+  });
+
+  test('translation is searched case-insensitive, its matched words washed', () {
+    expect(found('MERCIFUL', scope: SearchScope.translation), contains(const AyahKey(1, 1)));
+    expect(found('the entirely merciful', scope: SearchScope.translation).take(2), [
+      const AyahKey(1, 1),
+      const AyahKey(1, 3),
+    ]);
+    final hit = searchQuran(
+      'merciful',
+      ayahs,
+      assets,
+      scope: SearchScope.translation,
+    ).groups[1]!.first;
+    expect(
+      [for (final i in hit.translation.toList()..sort()) hit.ayah.translation[i]],
+      ['Merciful,', 'Merciful.'],
+    );
+    expect(hit.arabic, isEmpty);
+  });
+
+  test('each chip searches only its own text', () {
+    expect(found('merciful', scope: SearchScope.arabic), isEmpty);
+    expect(found('الرحمن', scope: SearchScope.translation), isEmpty);
+    expect(found('الرحمن', scope: SearchScope.arabic), found('الرحمن'));
+  });
+
+  test('all searches both, an ayah found in both is listed once', () {
+    expect(found('merciful'), found('merciful', scope: SearchScope.translation));
+    for (final query in ['الله', 'allah', 'a']) {
+      final keys = found(query);
+      expect(keys.toSet(), hasLength(keys.length), reason: query);
+    }
+
+    expect(found('الله'), found('الله', scope: SearchScope.arabic));
+    expect(found('allah'), found('allah', scope: SearchScope.translation));
   });
 
   test('no typo guessing, and an empty query gives nothing', () {

@@ -3,64 +3,77 @@ import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 
 /// 4.27's chips, the root chip waits for a licensed root list
-enum SearchScope { all, arabic }
+enum SearchScope { all, arabic, translation }
 
 enum JumpKind { surah, page, ayah }
 
 /// where the jump card opens the reader, ayah only for an ayah
 typedef QuranJump = ({JumpKind kind, int surah, int page, AyahKey? ayah});
 
+/// words joined by one space and where each starts
+typedef _Form = ({String text, List<int> starts});
+
 /// one ayah as the search reads it, its words without the end marker
 class SearchAyah {
-  SearchAyah(this.key, this.words, this.translation)
-    : _forms = [_form(words, ''), _form(words, 'ا')];
+  SearchAyah(this.key, this.words, String translation)
+    : translation = translation.split(' '),
+      _arabic = [
+        _form([for (final word in words) _fold(word.replaceAll('\u0670', ''))]),
+        _form([for (final word in words) _fold(word.replaceAll('\u0670', 'ا'))]),
+      ],
+      _translation = _form(translation.toLowerCase().split(' '));
 
   final AyahKey key;
   final List<String> words;
-  final String translation;
+
+  /// the english translation's words
+  final List<String> translation;
 
   /// the dagger alef dropped and as an alef, so الرحمن and الكتاب both find their ayahs
-  final List<({String text, List<int> starts})> _forms;
+  final List<_Form> _arabic;
+  final _Form _translation;
 
-  static ({String text, List<int> starts}) _form(List<String> words, String daggerAlef) {
+  static _Form _form(List<String> words) {
     final text = StringBuffer();
     final starts = <int>[];
     for (final word in words) {
       if (text.isNotEmpty) text.write(' ');
       starts.add(text.length);
-      text.write(_fold(word.replaceAll('\u0670', daggerAlef)));
+      text.write(word);
     }
     return (text: '$text', starts: starts);
   }
+}
 
-  /// the words a match touches, a match inside a word washes the whole word
-  Set<int> _matched(String query) {
-    final words = <int>{};
-    for (final form in _forms) {
-      var word = 0;
-      for (var at = form.text.indexOf(query); at != -1; at = form.text.indexOf(query, at + 1)) {
-        while (word + 1 < form.starts.length && form.starts[word + 1] <= at) {
-          word++;
-        }
-        for (var i = word; i < form.starts.length && form.starts[i] < at + query.length; i++) {
-          words.add(i);
-        }
+/// the words a match touches, a match inside a word washes the whole word
+Set<int> _matched(List<_Form> forms, String query) {
+  final words = <int>{};
+  for (final form in forms) {
+    var word = 0;
+    for (var at = form.text.indexOf(query); at != -1; at = form.text.indexOf(query, at + 1)) {
+      while (word + 1 < form.starts.length && form.starts[word + 1] <= at) {
+        word++;
+      }
+      for (var i = word; i < form.starts.length && form.starts[i] < at + query.length; i++) {
+        words.add(i);
       }
     }
-    return words;
   }
+  return words;
 }
 
 class SearchHit {
-  const SearchHit(this.ayah, {required this.arabic});
+  const SearchHit(this.ayah, {this.arabic = const {}, this.translation = const {}});
 
   final SearchAyah ayah;
 
-  /// indexes into ayah.words
+  /// indexes into ayah.words and ayah.translation
   final Set<int> arabic;
+  final Set<int> translation;
 }
 
-/// the jump card and the hits grouped by surah in mushaf order, no typo guessing
+/// the jump card and the hits grouped by surah in mushaf order, no typo guessing. all lists an
+/// ayah found in both once
 ({QuranJump? jump, Map<int, List<SearchHit>> groups}) searchQuran(
   String query,
   List<SearchAyah> ayahs,
@@ -70,11 +83,15 @@ class SearchHit {
   final text = query.trim().replaceAll(RegExp(r'\s+'), ' ');
   if (text.isEmpty) return (jump: null, groups: const {});
   final arabic = _fold(text);
+  final english = text.toLowerCase();
   final groups = <int, List<SearchHit>>{};
   for (final ayah in ayahs) {
-    final words = ayah._matched(arabic);
-    if (words.isEmpty) continue;
-    (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, arabic: words));
+    final words = scope == SearchScope.translation ? const <int>{} : _matched(ayah._arabic, arabic);
+    final translation = scope == SearchScope.arabic
+        ? const <int>{}
+        : _matched([ayah._translation], english);
+    if (words.isEmpty && translation.isEmpty) continue;
+    (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, arabic: words, translation: translation));
   }
   return (jump: _jump(text, assets), groups: groups);
 }
