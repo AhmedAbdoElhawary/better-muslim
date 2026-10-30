@@ -73,14 +73,15 @@ class Settings extends Table {
 
   /// each prayer's own recording, android fixes a channel's sound so it can't be one for all
   TextColumn get fajrRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('makkah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
   TextColumn get dhuhrRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('makkah'))();
-  TextColumn get asrRecording => textEnum<AdhanRecording>().withDefault(const Constant('makkah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
+  TextColumn get asrRecording =>
+      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
   TextColumn get maghribRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('makkah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
   TextColumn get ishaRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('makkah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
 
   /// minutes before each prayer, 0 is off
   IntColumn get reminderMinutes => integer()
@@ -351,7 +352,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -478,6 +479,25 @@ class AppDatabase extends _$AppDatabase {
               schema.settings.quranLayout: const CustomExpression<String>(
                 "case when quran_layout = 'both' then 'translation' else quran_layout end",
               ),
+            },
+          ),
+        );
+      },
+      from12To13: (m, schema) async {
+        /// the placeholder recordings are gone, every prayer starts again on madinah. sqlite can't
+        /// change a default in place, the table is remade with every row kept
+        await m.alterTable(
+          TableMigration(
+            schema.settings,
+            columnTransformer: {
+              for (final column in [
+                schema.settings.fajrRecording,
+                schema.settings.dhuhrRecording,
+                schema.settings.asrRecording,
+                schema.settings.maghribRecording,
+                schema.settings.ishaRecording,
+              ])
+                column: const Constant('madinah'),
             },
           ),
         );
