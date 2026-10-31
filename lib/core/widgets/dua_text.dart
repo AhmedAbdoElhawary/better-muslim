@@ -2,6 +2,8 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/azkar.dart';
+import 'package:better_muslim/core/settings/quran.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +51,11 @@ class DuaText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final font = ref.watch(azkarFontProvider);
+
+    /// a verse looks the same here, in the reader and on its share card
+    final quranFont = ref.watch(
+      settingsProvider.select((settings) => (settings.value?.quranFont ?? QuranFont.kfgqpc).font),
+    );
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final title = this.title;
     final source = this.source;
@@ -88,7 +95,7 @@ class DuaText extends ConsumerWidget {
           child: RegularText(
             arabic,
             translate: false,
-            font: quran ? FontEnum.quran : font,
+            font: quran ? quranFont : font,
             fontSize: centered ? FontSizeManager.zikrAr : FontSizeManager.duaAr,
             height: quran ? LineHeightManager.quranAr : LineHeightManager.duaAr,
             textAlign: align,

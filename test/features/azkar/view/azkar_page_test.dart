@@ -136,7 +136,7 @@ void main() {
 
     await tester.tap(find.text('Morning azkar'));
     await tester.pumpAndSettle();
-    expect(fontsIn(DuaText), contains(FontEnum.quran));
+    expect(fontsIn(DuaText), contains(FontEnum.kfgqpc));
 
     /// the third is the first that isn't a verse
     for (var i = 0; i < 2; i++) {
