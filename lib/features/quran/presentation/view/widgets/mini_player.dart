@@ -157,6 +157,7 @@ class _Player extends ConsumerWidget {
                           textDirection: direction,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const PlayingTitle(),
                               if (MediaQuery.textScalerOf(context).scale(1) <=
