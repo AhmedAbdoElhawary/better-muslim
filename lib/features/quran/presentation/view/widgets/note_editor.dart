@@ -14,6 +14,7 @@ import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/text_field.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
+import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
@@ -38,9 +39,11 @@ class _NoteEditor extends ConsumerStatefulWidget {
 class _NoteEditorState extends ConsumerState<_NoteEditor> {
   late final Note? _note = ref.read(noteProvider(widget.ayah));
   late var _text = _note?.text ?? '';
+  late var _highlight = _note?.highlight ?? false;
 
   Future<void> _save() async {
-    await ref.read(quranStoreProvider).saveNote(widget.ayah, _text);
+    if (_note case final note? when _text.trim().isEmpty && !_highlight) return _delete(note);
+    await ref.read(quranStoreProvider).saveNote(widget.ayah, _text, highlight: _highlight);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -84,21 +87,36 @@ class _NoteEditorState extends ConsumerState<_NoteEditor> {
               ),
               HorizontalPadding(
                 padding: SpaceManager.s5,
+                child: BmTextField(
+                  label: StringsManager.note,
+                  hint: StringsManager.noteHint,
+                  initial: note?.text,
+                  maxLines: null,
+                  autofocus: true,
+                  onChanged: (text) => setState(() => _text = text),
+                ),
+              ),
+
+              /// the row pads 16 itself, 4 more lines it up with the field
+              HorizontalPadding(
+                padding: SpaceManager.s1,
+                child: ToggleRow(
+                  title: StringsManager.highlightInMushaf,
+                  value: _highlight,
+                  onChanged: (value) => setState(() => _highlight = value),
+                ),
+              ),
+              HorizontalPadding(
+                padding: SpaceManager.s5,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    BmTextField(
-                      label: StringsManager.note,
-                      hint: StringsManager.noteHint,
-                      initial: note?.text,
-                      maxLines: null,
-                      autofocus: true,
-                      onChanged: (text) => setState(() => _text = text),
-                    ),
-                    const RSizedBox.vertical(SpaceManager.s5),
+                    const RSizedBox.vertical(SpaceManager.s3),
+
+                    /// an existing note saved empty and unchecked is deleted, with its undo
                     BmButton.primary(
                       StringsManager.save,
-                      busy: _text.trim().isEmpty,
+                      busy: note == null && _text.trim().isEmpty && !_highlight,
                       onPressed: _save,
                     ),
                     if (note != null) ...[
@@ -188,13 +206,21 @@ class NoteCard extends ConsumerWidget {
                     color: ThemeEnum.text3,
                   ),
                 const RSizedBox.vertical(SpaceManager.noteLineGap),
-                RegularText(
-                  note.text,
-                  translate: false,
-                  fontSize: FontSizeManager.body,
-                  height: LineHeightManager.body,
-                  color: ThemeEnum.text,
-                ),
+                if (note.text.isEmpty)
+                  const RegularText(
+                    StringsManager.highlightedInMushaf,
+                    fontSize: FontSizeManager.body,
+                    height: LineHeightManager.body,
+                    color: ThemeEnum.text2,
+                  )
+                else
+                  RegularText(
+                    note.text,
+                    translate: false,
+                    fontSize: FontSizeManager.body,
+                    height: LineHeightManager.body,
+                    color: ThemeEnum.text,
+                  ),
               ],
             ),
           ),

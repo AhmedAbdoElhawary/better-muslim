@@ -96,17 +96,21 @@ class QuranStore {
     return query.watch().map((rows) => rows.map(_note).toList());
   }
 
-  /// trimmed, the store refuses an empty one
-  Future<void> saveNote(AyahKey ayah, String text) => _db
-      .into(_notes)
-      .insertOnConflictUpdate(
-        QuranNotesCompanion.insert(
-          surah: ayah.surah,
-          ayah: ayah.ayah,
-          note: text.trim(),
-          updatedAt: _clock(),
-        ),
-      );
+  /// trimmed, no text and no highlight leaves nothing to keep
+  Future<void> saveNote(AyahKey ayah, String text, {bool highlight = false}) {
+    if (text.trim().isEmpty && !highlight) return deleteNote(ayah);
+    return _db
+        .into(_notes)
+        .insertOnConflictUpdate(
+          QuranNotesCompanion.insert(
+            surah: ayah.surah,
+            ayah: ayah.ayah,
+            note: text.trim(),
+            highlight: Value(highlight),
+            updatedAt: _clock(),
+          ),
+        );
+  }
 
   Future<void> deleteNote(AyahKey ayah) => (_db.delete(
     _notes,
@@ -120,6 +124,7 @@ class QuranStore {
           surah: note.ayah.surah,
           ayah: note.ayah.ayah,
           note: note.text,
+          highlight: Value(note.highlight),
           updatedAt: note.updatedAt,
         ),
       );
@@ -133,6 +138,10 @@ class QuranStore {
     createdAt: row.createdAt,
   );
 
-  static Note _note(QuranNote row) =>
-      Note(ayah: AyahKey(row.surah, row.ayah), text: row.note, updatedAt: row.updatedAt);
+  static Note _note(QuranNote row) => Note(
+    ayah: AyahKey(row.surah, row.ayah),
+    text: row.note,
+    highlight: row.highlight,
+    updatedAt: row.updatedAt,
+  );
 }

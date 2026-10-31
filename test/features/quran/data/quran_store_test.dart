@@ -109,8 +109,20 @@ void main() {
       expect(note.updatedAt.isAtSameMomentAs(now), isTrue);
     });
 
-    test('an empty note is refused', () async {
-      expect(store.saveNote(ayah, '   '), throwsA(anything));
+    test('a highlight is kept with or without text, and goes when unchecked', () async {
+      await store.saveNote(ayah, '  ', highlight: true);
+      final [note] = await store.watchNotes().first;
+      expect((note.text, note.highlight), ('', true));
+
+      await store.saveNote(ayah, 'patience', highlight: true);
+      expect((await store.watchNotes().first).single.text, 'patience');
+      await store.saveNote(ayah, 'patience');
+      expect((await store.watchNotes().first).single.highlight, isFalse);
+    });
+
+    test('no text and no highlight deletes the note', () async {
+      await store.saveNote(ayah, 'remember', highlight: true);
+      await store.saveNote(ayah, '   ');
       expect(await store.watchNotes().first, isEmpty);
     });
 
@@ -124,7 +136,7 @@ void main() {
     });
 
     test('delete and undo put the same note back', () async {
-      await store.saveNote(ayah, 'remember');
+      await store.saveNote(ayah, 'remember', highlight: true);
       final [note] = await store.watchNotes().first;
 
       await store.deleteNote(ayah);
@@ -151,6 +163,9 @@ void main() {
       (const AyahKey(2, 255), 42, RibbonColor.accent),
     );
     final [note] = await store.watchNotes().first;
-    expect((note.ayah, note.text), (const AyahKey(1, 5), 'remember this one'));
+    expect(
+      (note.ayah, note.text, note.highlight),
+      (const AyahKey(1, 5), 'remember this one', true),
+    );
   });
 }

@@ -464,6 +464,8 @@ abstract final class StringsManager {
   static const String removeBookmark = 'removeBookmark';
   static const String deleteNote = 'deleteNote';
   static const String noteHint = 'noteHint';
+  static const String highlightInMushaf = 'highlightInMushaf';
+  static const String highlightedInMushaf = 'highlightedInMushaf';
   static const String bookmarkName = 'bookmarkName';
   static const String ribbonPrimary = 'ribbonPrimary';
   static const String ribbonAccent = 'ribbonAccent';

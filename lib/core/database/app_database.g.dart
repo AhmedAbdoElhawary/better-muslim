@@ -4326,9 +4326,19 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
     'note',
     aliasedName,
     false,
-    check: () => ComparableExpr(StringExpressionOperators(note).trim().length).isBiggerThanValue(0),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _highlightMeta = const VerificationMeta('highlight');
+  @override
+  late final GeneratedColumn<bool> highlight = GeneratedColumn<bool>(
+    'highlight',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("highlight" IN (0, 1))'),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
@@ -4340,7 +4350,7 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [surah, ayah, note, updatedAt];
+  List<GeneratedColumn> get $columns => [surah, ayah, note, highlight, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4368,6 +4378,12 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
     } else if (isInserting) {
       context.missing(_noteMeta);
     }
+    if (data.containsKey('highlight')) {
+      context.handle(
+        _highlightMeta,
+        highlight.isAcceptableOrUnknown(data['highlight']!, _highlightMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -4388,6 +4404,10 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
       surah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}surah'])!,
       ayah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}ayah'])!,
       note: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      highlight: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}highlight'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -4405,11 +4425,13 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
   final int surah;
   final int ayah;
   final String note;
+  final bool highlight;
   final DateTime updatedAt;
   const QuranNote({
     required this.surah,
     required this.ayah,
     required this.note,
+    required this.highlight,
     required this.updatedAt,
   });
   @override
@@ -4418,6 +4440,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
     map['surah'] = Variable<int>(surah);
     map['ayah'] = Variable<int>(ayah);
     map['note'] = Variable<String>(note);
+    map['highlight'] = Variable<bool>(highlight);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -4427,6 +4450,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
       surah: Value(surah),
       ayah: Value(ayah),
       note: Value(note),
+      highlight: Value(highlight),
       updatedAt: Value(updatedAt),
     );
   }
@@ -4437,6 +4461,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
       surah: serializer.fromJson<int>(json['surah']),
       ayah: serializer.fromJson<int>(json['ayah']),
       note: serializer.fromJson<String>(json['note']),
+      highlight: serializer.fromJson<bool>(json['highlight']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -4447,21 +4472,25 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
       'surah': serializer.toJson<int>(surah),
       'ayah': serializer.toJson<int>(ayah),
       'note': serializer.toJson<String>(note),
+      'highlight': serializer.toJson<bool>(highlight),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
-  QuranNote copyWith({int? surah, int? ayah, String? note, DateTime? updatedAt}) => QuranNote(
-    surah: surah ?? this.surah,
-    ayah: ayah ?? this.ayah,
-    note: note ?? this.note,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
+  QuranNote copyWith({int? surah, int? ayah, String? note, bool? highlight, DateTime? updatedAt}) =>
+      QuranNote(
+        surah: surah ?? this.surah,
+        ayah: ayah ?? this.ayah,
+        note: note ?? this.note,
+        highlight: highlight ?? this.highlight,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
   QuranNote copyWithCompanion(QuranNotesCompanion data) {
     return QuranNote(
       surah: data.surah.present ? data.surah.value : this.surah,
       ayah: data.ayah.present ? data.ayah.value : this.ayah,
       note: data.note.present ? data.note.value : this.note,
+      highlight: data.highlight.present ? data.highlight.value : this.highlight,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -4472,13 +4501,14 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
           ..write('surah: $surah, ')
           ..write('ayah: $ayah, ')
           ..write('note: $note, ')
+          ..write('highlight: $highlight, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(surah, ayah, note, updatedAt);
+  int get hashCode => Object.hash(surah, ayah, note, highlight, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4486,6 +4516,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
           other.surah == this.surah &&
           other.ayah == this.ayah &&
           other.note == this.note &&
+          other.highlight == this.highlight &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -4493,12 +4524,14 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
   final Value<int> surah;
   final Value<int> ayah;
   final Value<String> note;
+  final Value<bool> highlight;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const QuranNotesCompanion({
     this.surah = const Value.absent(),
     this.ayah = const Value.absent(),
     this.note = const Value.absent(),
+    this.highlight = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4506,6 +4539,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     required int surah,
     required int ayah,
     required String note,
+    this.highlight = const Value.absent(),
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   }) : surah = Value(surah),
@@ -4516,6 +4550,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     Expression<int>? surah,
     Expression<int>? ayah,
     Expression<String>? note,
+    Expression<bool>? highlight,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -4523,6 +4558,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
       if (surah != null) 'surah': surah,
       if (ayah != null) 'ayah': ayah,
       if (note != null) 'note': note,
+      if (highlight != null) 'highlight': highlight,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4532,6 +4568,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     Value<int>? surah,
     Value<int>? ayah,
     Value<String>? note,
+    Value<bool>? highlight,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -4539,6 +4576,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
       surah: surah ?? this.surah,
       ayah: ayah ?? this.ayah,
       note: note ?? this.note,
+      highlight: highlight ?? this.highlight,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -4556,6 +4594,9 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
+    if (highlight.present) {
+      map['highlight'] = Variable<bool>(highlight.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -4571,6 +4612,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
           ..write('surah: $surah, ')
           ..write('ayah: $ayah, ')
           ..write('note: $note, ')
+          ..write('highlight: $highlight, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -6482,6 +6524,7 @@ typedef $$QuranNotesTableCreateCompanionBuilder = QuranNotesCompanion Function({
   required int surah,
   required int ayah,
   required String note,
+  Value<bool> highlight,
   required DateTime updatedAt,
   Value<int> rowid,
 });
@@ -6489,6 +6532,7 @@ typedef $$QuranNotesTableUpdateCompanionBuilder = QuranNotesCompanion Function({
   Value<int> surah,
   Value<int> ayah,
   Value<String> note,
+  Value<bool> highlight,
   Value<DateTime> updatedAt,
   Value<int> rowid,
 });
@@ -6509,6 +6553,9 @@ class $$QuranNotesTableFilterComposer extends Composer<_$AppDatabase, $QuranNote
 
   ColumnFilters<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get highlight =>
+      $composableBuilder(column: $table.highlight, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
@@ -6531,6 +6578,9 @@ class $$QuranNotesTableOrderingComposer extends Composer<_$AppDatabase, $QuranNo
   ColumnOrderings<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get highlight =>
+      $composableBuilder(column: $table.highlight, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 }
@@ -6551,6 +6601,9 @@ class $$QuranNotesTableAnnotationComposer extends Composer<_$AppDatabase, $Quran
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<bool> get highlight =>
+      $composableBuilder(column: $table.highlight, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -6585,12 +6638,14 @@ class $$QuranNotesTableTableManager
                 Value<int> surah = const Value.absent(),
                 Value<int> ayah = const Value.absent(),
                 Value<String> note = const Value.absent(),
+                Value<bool> highlight = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => QuranNotesCompanion(
                 surah: surah,
                 ayah: ayah,
                 note: note,
+                highlight: highlight,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -6599,12 +6654,14 @@ class $$QuranNotesTableTableManager
                 required int surah,
                 required int ayah,
                 required String note,
+                Value<bool> highlight = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => QuranNotesCompanion.insert(
                 surah: surah,
                 ayah: ayah,
                 note: note,
+                highlight: highlight,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),

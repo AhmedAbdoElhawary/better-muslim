@@ -11,6 +11,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../drift/app_database/generated/schema_v10.dart' as v10;
+import '../../drift/app_database/generated/schema_v14.dart' as v14;
 import '../../drift/app_database/generated/schema_v7.dart' as v7;
 import '../../helpers/backup.dart';
 import '../../helpers/phone_storage.dart';
@@ -44,7 +45,7 @@ void main() {
     expect(ascii.decode(bytes.sublist(0, 8)), 'BMBACKUP');
     final header = ByteData.sublistView(bytes, 0, 19);
     expect(header.getUint8(8), 1);
-    expect(header.getUint16(9), 14);
+    expect(header.getUint16(9), 15);
     expect(header.getUint64(11), bytes.length - 19);
   });
 
@@ -66,6 +67,7 @@ void main() {
     expect(await store.select(store.qadaEntries).get(), hasLength(2));
     expect(await store.select(store.azkarCounts).get(), hasLength(1));
     expect(await store.select(store.savedDuas).get(), hasLength(1));
+    expect((await store.select(store.quranNotes).getSingle()).highlight, isTrue);
     await closeBackup(store);
   });
 
@@ -186,6 +188,25 @@ void main() {
     await restoreOlder(10, payload);
     final settings = await from.select(from.settings).getSingle();
     expect((settings.quranFont, settings.pageColor), (QuranFont.amiri, PageColor.night));
+  });
+
+  test('a v14 backup restores its notes with no highlight', () async {
+    final (payload, executor) = olderStore(14);
+    final old = v14.DatabaseAtV14(executor);
+    await old
+        .into(old.quranNotes)
+        .insert(
+          const v14.QuranNotesCompanion(
+            surah: Value(2),
+            ayah: Value(255),
+            note: Value('ayat al-kursi'),
+            updatedAt: Value(1792400000),
+          ),
+        );
+    await old.close();
+    await restoreOlder(14, payload);
+    final note = await from.select(from.quranNotes).getSingle();
+    expect((note.ayah, note.note, note.highlight), (255, 'ayat al-kursi', false));
   });
 
   test('the temp files are gone after every call', () async {

@@ -244,17 +244,19 @@ class QuranBookmarks extends Table {
   DateTimeColumn get createdAt => dateTime()();
 }
 
-/// one note per ayah
+/// one note per ayah, a highlighted one may have no text
 class QuranNotes extends Table {
   IntColumn get surah => integer()();
   IntColumn get ayah => integer()();
-
-  // ignore: recursive_getters, drift reads the column inside its own check
-  TextColumn get note => text().check(note.trim().length.isBiggerThanValue(0))();
+  TextColumn get note => text()();
+  BoolColumn get highlight => boolean().withDefault(const Constant(false))();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override
   Set<Column<Object>> get primaryKey => {surah, ayah};
+
+  @override
+  List<String> get customConstraints => ['CHECK (length(trim(note)) > 0 OR highlight)'];
 }
 
 @DriftDatabase(
@@ -352,7 +354,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -516,6 +518,12 @@ class AppDatabase extends _$AppDatabase {
             "where $column in ('aaqibAzeez', 'andrewler', 'synagda')",
           );
         }
+      },
+      from14To15: (m, schema) async {
+        /// sqlite can't change a check in place, the table is remade with every note kept
+        await m.alterTable(
+          TableMigration(schema.quranNotes, newColumns: [schema.quranNotes.highlight]),
+        );
       },
     ),
   );

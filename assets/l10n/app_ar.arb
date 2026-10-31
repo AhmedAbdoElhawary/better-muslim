@@ -501,6 +501,8 @@
   "removeBookmark": "أزل العلامة",
   "deleteNote": "احذف الملاحظة",
   "noteHint": "اكتب ملاحظة خاصة",
+  "highlightInMushaf": "ظلّل في المصحف",
+  "highlightedInMushaf": "مظلّلة في المصحف",
   "bookmarkName": "الاسم",
   "ribbonPrimary": "الأساسي",
   "ribbonAccent": "المميّز",

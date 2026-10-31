@@ -969,6 +969,8 @@
   "removeBookmark": "Remove bookmark",
   "deleteNote": "Delete note",
   "noteHint": "Write a private note",
+  "highlightInMushaf": "Highlight in mushaf",
+  "highlightedInMushaf": "Highlighted in mushaf",
   "bookmarkName": "Name",
   "ribbonPrimary": "Main",
   "ribbonAccent": "Accent",

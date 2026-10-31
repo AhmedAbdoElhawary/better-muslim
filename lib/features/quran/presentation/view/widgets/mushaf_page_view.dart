@@ -17,8 +17,10 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
+import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
+import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -37,6 +39,7 @@ typedef MushafColors = ({
   Color gutter,
   Color selection,
   Color follow,
+  Color highlight,
 });
 
 /// how a screen reader reads an ayah, on the page and in its cell (FR-052). in arabic the
@@ -126,6 +129,14 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       selected: _washed,
       wash: _wash,
       chosen: ref.watch(selectionProvider.select((selection) => selection.chosen)),
+      highlighted: ref.watch(
+        notesProvider.select(
+          (notes) => {
+            for (final note in notes.value ?? const <Note>[])
+              if (note.highlight && keys.contains(note.ayah)) note.ayah,
+          },
+        ),
+      ),
 
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
@@ -158,6 +169,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
         gutter: context.getColor(ThemeEnum.gutter),
         selection: context.getColor(ThemeEnum.selectionWash),
         follow: context.getColor(ThemeEnum.followWash),
+        highlight: context.getColor(ThemeEnum.highlightWash),
       ),
     );
   }
@@ -218,6 +230,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.selected,
     required this.wash,
     required this.chosen,
+    required this.highlighted,
     required this.following,
     required this.onAyah,
     required this.onLongAyah,
@@ -239,6 +252,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final AyahKey? selected;
   final Animation<double> wash;
   final Set<AyahKey> chosen;
+  final Set<AyahKey> highlighted;
   final AyahKey? following;
   final ValueChanged<AyahKey>? onAyah;
   final ValueChanged<AyahKey>? onLongAyah;
@@ -261,6 +275,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     selected: selected,
     wash: wash,
     chosen: chosen,
+    highlighted: highlighted,
     following: following,
     onAyah: onAyah,
     onLongAyah: onLongAyah,
@@ -285,6 +300,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..selected = selected
       ..wash = wash
       ..chosen = chosen
+      ..highlighted = highlighted
       ..following = following
       ..onAyah = onAyah
       ..onLongAyah = onLongAyah
@@ -311,6 +327,7 @@ class RenderMushafPage extends RenderBox {
     required this._selected,
     required this._wash,
     required this._chosen,
+    required this._highlighted,
     required this._following,
     required this.onAyah,
     required this.onLongAyah,
@@ -398,6 +415,14 @@ class RenderMushafPage extends RenderBox {
   set chosen(Set<AyahKey> value) {
     if (setEquals(value, _chosen)) return;
     _chosen = value;
+    markNeedsPaint();
+  }
+
+  Set<AyahKey> _highlighted;
+  Set<AyahKey> get highlighted => _highlighted;
+  set highlighted(Set<AyahKey> value) {
+    if (setEquals(value, _highlighted)) return;
+    _highlighted = value;
     markNeedsPaint();
   }
 
@@ -856,13 +881,20 @@ class RenderMushafPage extends RenderBox {
   void _paintWash(Canvas canvas, _Laid laid) {
     if (_page == null) return;
     final radius = Radius.circular(RadiusManager.ayahWash * _unit);
-    void wash(AyahKey key, Color color) {
+    void wash(AyahKey key, Color color, {bool lower = false}) {
       final paint = Paint()..color = color;
       for (final rect in _washRects(laid, key)) {
-        canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
+        final shape = lower
+            ? Rect.fromLTRB(rect.left, rect.center.dy, rect.right, rect.bottom)
+            : rect;
+        canvas.drawRRect(RRect.fromRectAndRadius(shape, radius), paint);
       }
     }
 
+    /// only the lower half, so it never reads as the selection or the follow wash
+    for (final key in _highlighted) {
+      wash(key, _colors.highlight, lower: true);
+    }
     if (_following case final key?) wash(key, _colors.follow);
     for (final key in _chosen) {
       wash(key, _colors.selection);

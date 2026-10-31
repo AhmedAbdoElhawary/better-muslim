@@ -69,6 +69,30 @@ void main() {
     });
   }
 
+  for (final id in BmThemeId.values) {
+    test('${id.name} keeps the ayah ink AA on the highlight wash in every page palette', () {
+      for (final (name, base) in [
+        ('paper', BmPagePalette.paper),
+        ('cream', BmPagePalette.cream),
+        ('sepia', BmPagePalette.sepia),
+        ('green', BmPagePalette.green),
+        ('night', BmPagePalette.night),
+        ('navy', BmPagePalette.navy),
+      ]) {
+        final dark = base.bg.computeLuminance() < .5;
+        final tinted = BmPagePalette.tint(base, dark ? bmThemes[id]!.dark : bmThemes[id]!.light);
+        final page = ThemeEnum.page.resolve(tinted);
+        final wash = Color.alphaBlend(ThemeEnum.highlightWash.resolve(tinted), page);
+        expect(wash, isNot(page), reason: name);
+        expect(
+          _ratio(ThemeEnum.ink.resolve(tinted), wash),
+          greaterThanOrEqualTo(4.5),
+          reason: name,
+        );
+      }
+    });
+  }
+
   /// a theme that isn't == the last restarts the reader's 1.8 s AnimatedTheme on every rebuild
   test('the same palette gives the same theme', () {
     expect(

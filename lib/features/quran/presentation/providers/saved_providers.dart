@@ -14,6 +14,11 @@ final notesProvider = StreamProvider<List<Note>>(
   (ref) => ref.watch(quranStoreProvider).watchNotes(),
 );
 
+/// a highlight with no text isn't a note to list
+final writtenNotesProvider = Provider<List<Note>>(
+  (ref) => [...?ref.watch(notesProvider).value?.where((note) => note.text.isNotEmpty)],
+);
+
 /// the bookmark menu's, it changes while the menu is open
 final bookmarkProvider = Provider.family<Bookmark?, int>(
   (ref, id) => ref.watch(

@@ -62,6 +62,7 @@ Future<AppDatabase> seededStore() async {
           surah: 1,
           ayah: 5,
           note: 'remember this one',
+          highlight: const Value(true),
           updatedAt: DateTime.utc(2026, 10, 19, 21),
         ),
       );

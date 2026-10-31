@@ -102,7 +102,7 @@ class _Bookmarks extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
-    final note = ref.watch(notesProvider.select((notes) => notes.value?.firstOrNull));
+    final note = ref.watch(writtenNotesProvider.select((notes) => notes.firstOrNull));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -280,7 +280,7 @@ class _Notes extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notes = ref.watch(notesProvider).value ?? const [];
+    final notes = ref.watch(writtenNotesProvider);
     if (notes.isEmpty) {
       return const EmptyState(title: StringsManager.noNotes, body: StringsManager.noNotesBody);
     }

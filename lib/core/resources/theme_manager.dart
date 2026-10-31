@@ -50,6 +50,7 @@ enum ThemeEnum {
   ornamentSoft,
   selectionWash,
   followWash,
+  highlightWash,
   pageHidden,
   gutter,
   pageGlass,
@@ -116,6 +117,9 @@ enum ThemeEnum {
     ThemeEnum.ornamentSoft => palette.pageColors.ornamentSoft,
     ThemeEnum.selectionWash => palette.pageColors.selectionWash,
     ThemeEnum.followWash => palette.pageColors.followWash,
+
+    /// a note's highlight, the accent soft enough that the ink on it stays AA
+    ThemeEnum.highlightWash => palette.accent.withValues(alpha: .2),
     ThemeEnum.pageHidden => palette.pageColors.hidden,
     ThemeEnum.gutter => palette.pageColors.gutter,
 

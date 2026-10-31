@@ -10,6 +10,7 @@ import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v13.dart' as v13;
 import 'generated/schema_v14.dart' as v14;
+import 'generated/schema_v15.dart' as v15;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
@@ -766,4 +767,52 @@ void main() {
       },
     );
   });
+
+  test(
+    'v14 to v15 keeps every note, none highlighted, and an empty one only highlighted',
+    () async {
+      const old = v14.QuranNotesData(
+        surah: 1,
+        ayah: 5,
+        note: 'remember this one',
+        updatedAt: 1792400000,
+      );
+      await verifier.testWithDataIntegrity(
+        oldVersion: 14,
+        newVersion: 15,
+        createOld: v14.DatabaseAtV14.new,
+        createNew: v15.DatabaseAtV15.new,
+        openTestedDatabase: AppDatabase.forTesting,
+        createItems: (batch, oldDb) => batch.insert(oldDb.quranNotes, old),
+        validateItems: (newDb) async {
+          final row = await newDb.select(newDb.quranNotes).getSingle();
+          expect(row.toJson(), {...old.toJson(), 'highlight': 0});
+          await newDb
+              .into(newDb.quranNotes)
+              .insert(
+                const v15.QuranNotesCompanion(
+                  surah: Value(2),
+                  ayah: Value(255),
+                  note: Value(''),
+                  highlight: Value(1),
+                  updatedAt: Value(1792400000),
+                ),
+              );
+          await expectLater(
+            newDb
+                .into(newDb.quranNotes)
+                .insert(
+                  const v15.QuranNotesCompanion(
+                    surah: Value(2),
+                    ayah: Value(256),
+                    note: Value(' '),
+                    updatedAt: Value(1792400000),
+                  ),
+                ),
+            throwsA(anything),
+          );
+        },
+      );
+    },
+  );
 }
