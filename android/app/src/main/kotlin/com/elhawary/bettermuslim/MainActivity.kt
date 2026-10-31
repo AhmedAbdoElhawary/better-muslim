@@ -1,7 +1,11 @@
 package com.elhawary.bettermuslim
 
+import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -14,6 +18,8 @@ import io.flutter.plugin.common.MethodChannel
 
 // audio_service's activity, so the recitation's engine is this one (research R10)
 class MainActivity : AudioServiceActivity() {
+    private var tone: Ringtone? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -81,6 +87,20 @@ class MainActivity : AudioServiceActivity() {
                             "${Build.MANUFACTURER} ${Build.MODEL}"
                         }
                         result.success(mapOf("model" to model, "os" to "Android ${Build.VERSION.RELEASE}"))
+                    }
+                    "playTone" -> {
+                        // the channel's own sound, I may have changed it in the phone's settings
+                        val channel = call.argument<String>("channel")
+                            ?.let { getSystemService(NotificationManager::class.java).getNotificationChannel(it) }
+                        val uri = channel?.sound ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                        tone?.stop()
+                        tone = RingtoneManager.getRingtone(this, uri)?.apply {
+                            audioAttributes = AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                .build()
+                            play()
+                        }
+                        result.success(null)
                     }
                     "keepScreenOn" -> {
                         if (call.argument<Boolean>("on") == true) {
