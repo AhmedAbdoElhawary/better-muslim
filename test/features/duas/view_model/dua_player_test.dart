@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
@@ -84,6 +85,24 @@ void main() {
     clips.end();
     await pumpEventQueue();
     expect(container.read(duaPlayerProvider), isNull);
+  });
+
+  test('holds the audio while it plays, the quran taking it stops the dua', () async {
+    await player().toggle(first);
+    expect(container.read(audioUseProvider), AudioUse.clip);
+
+    container.read(audioUseProvider.notifier).claim(AudioUse.recitation);
+    await pumpEventQueue();
+    expect(container.read(duaPlayerProvider), isNull);
+    expect(clips.stops, 1);
+    expect(container.read(audioUseProvider), AudioUse.recitation);
+  });
+
+  test('lets the audio go when the dua ends', () async {
+    await player().toggle(first);
+    clips.end();
+    await pumpEventQueue();
+    expect(container.read(audioUseProvider), AudioUse.none);
   });
 
   test('offline with its clip not on the phone it fails and plays nothing', () async {
