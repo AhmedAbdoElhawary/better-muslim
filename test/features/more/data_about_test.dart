@@ -103,9 +103,9 @@ void main() {
         'url': 'https://www.geonames.org',
       });
 
-      await scrollTo(tester, 'Besim Azemi · Islamic Center Malmö · Fajr');
+      await scrollTo(tester, 'Mishary Rashid Alafasy · Adhan and Fajr');
       expect(find.text('Adam Synagda'), findsNothing);
-      expect(find.text('Adhan recordings · CC BY 3.0'), findsWidgets);
+      expect(find.text('Adhan recordings'), findsOneWidget);
       await tapText(tester, 'Open source licenses');
       expect(find.byType(LicensePage), findsOneWidget);
       await unmount(tester);
