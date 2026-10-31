@@ -18,7 +18,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// 4.30, the ayahs as a still image on a brand background (FR-041, FR-015)
 Future<void> showAyahShare(BuildContext context, List<AyahKey> keys) =>
-    showBmSheet(context, maxSheetHeight: true, builder: (_) => _AyahShareSheet(keys));
+    showBmSheet(context, builder: (_) => _AyahShareSheet(keys));
 
 class _AyahShareSheet extends ConsumerStatefulWidget {
   const _AyahShareSheet(this.keys);
