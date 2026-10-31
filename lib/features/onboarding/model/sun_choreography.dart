@@ -153,7 +153,6 @@ class SunChoreography {
   /// faint to full, the tagline develops
   double taglineInk(double b) => _iv(b, .50, .75, Curves.easeInOut);
   double getStartedIn(double b) => _iv(b, .60, .85, Curves.easeOutCubic);
-  double restoreIn(double b) => _iv(b, .70, 1, Curves.easeOutCubic);
 
   /// 4.11 covering the welcome over its first 300 ms (c 0 to 1): buttons, tagline, title, stars,
   /// then mark and horizon (FR-015)

@@ -7,14 +7,11 @@ import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
-import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/core/widgets/backup/pick_and_restore.dart';
 import 'package:better_muslim/core/widgets/step/step_scope.dart';
 import 'package:better_muslim/features/onboarding/model/lens_spec.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/glass/liquid_glass.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/intro_layer.dart';
-import 'package:better_muslim/features/onboarding/view/widgets/reset_notice.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_layer.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_sky.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_stars.dart';
@@ -64,7 +61,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
   var _backward = false;
   var _reduce = false;
   var _entered = false;
-  var _told = false;
 
   Offset? _ball;
   var _velocity = Offset.zero;
@@ -351,9 +347,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
   void _rebuild() {
     final duration = _reduce ? BmMotion.standard : SunChoreography.rebuild * (1 - _build.value);
     if (duration > Duration.zero) {
-      _build
-          .animateTo(1, duration: duration, curve: Curves.easeOutCubic)
-          .whenCompleteOrCancel(_onBuilt);
+      _build.animateTo(1, duration: duration, curve: Curves.easeOutCubic);
     }
   }
 
@@ -380,21 +374,12 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
             _forward = false;
             _stage = SunStage.main;
           });
-          _onBuilt();
         });
   }
 
   /// a tap anywhere while it builds ends the build at once (FR-013)
   void _finishBuild(PointerDownEvent _) {
     if (_forward) _build.value = 1;
-  }
-
-  /// once the welcome has built, a store reset is told over it (FR-036)
-  void _onBuilt() {
-    if (!mounted || _build.value < 1 || _told) return;
-    if (ref.read(settingsProvider).value?.storeResetPending != true) return;
-    _told = true;
-    showResetNotice(context);
   }
 
   double _reverseFraction(SunChoreography ch, Offset ball) =>
@@ -435,13 +420,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
         _pastLine = false;
       });
     });
-  }
-
-  /// nothing to lose yet, so no dialog. the steps follow with the backup's choices (FR-033)
-  Future<void> _restore() async {
-    if (await pickAndRestore(context, confirm: false) && mounted) {
-      context.push(Routes.onboardingLocation);
-    }
   }
 
   @override
@@ -542,7 +520,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
                           covered: covered,
                           interactive: _home == SunStage.main && !_backward,
                           onGetStarted: () => context.push(Routes.onboardingLocation),
-                          onRestore: _restore,
                         ),
                         if (glass)
                           IgnorePointer(
