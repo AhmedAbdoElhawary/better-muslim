@@ -13,6 +13,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/rolling_digits.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
@@ -140,6 +141,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(flying, findsNothing);
       expect(tester.widget<Visibility>(cardRow).visible, isTrue);
+      await unmount(tester);
+    });
+
+    testWidgets('the sky glows under the bar once it shows, the top glow switch takes it off', (
+      tester,
+    ) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+      double glow() => tester
+          .widget<AnimatedOpacity>(
+            find
+                .descendant(
+                  of: find.ancestor(
+                    of: find.byType(CompactAppBar),
+                    matching: find.byType(TitleGlow),
+                  ),
+                  matching: find.byType(AnimatedOpacity),
+                )
+                .first,
+          )
+          .opacity;
+      expect(glow(), 0);
+
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(glow(), 1);
+
+      await containerOf(tester)
+          .read(databaseProvider)
+          .updateSettings(const SettingsCompanion(topGlow: Value(false)));
+      await tester.pumpAndSettle();
+      expect(glow(), 0);
       await unmount(tester);
     });
 

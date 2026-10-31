@@ -1,7 +1,9 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/core/settings/quran.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -82,6 +84,19 @@ void main() {
             greaterThanOrEqualTo(4.5),
             reason: 'text on the glass over $name',
           );
+        }
+      });
+
+      /// home's bar glows with the sky of the moment, asr's lit bottom included
+      test('${id.name} $mode: home\'s bar title over each sky\'s glow meets AA', () {
+        final (bg, surface, text) = (palette.bg, palette.surface, palette.text);
+        for (final MapEntry(key: state, value: stops) in themeSky(id).entries) {
+          final glow = TitleGlow.legible(stops.bottom, bg: bg, surface: surface, text: text);
+          final under = Color.alphaBlend(
+            surface.withValues(alpha: BmGlass.surfaceOpacity),
+            Color.alphaBlend(glow.withValues(alpha: TitleGlow.alpha), bg),
+          );
+          expect(_ratio(text, under), greaterThanOrEqualTo(4.5), reason: state.name);
         }
       });
 
