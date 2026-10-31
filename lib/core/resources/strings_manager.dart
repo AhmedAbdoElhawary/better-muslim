@@ -93,7 +93,6 @@ abstract final class StringsManager {
   static const String uiSounds = 'uiSounds';
   static const String welcomeTagline = 'welcomeTagline';
   static const String getStarted = 'getStarted';
-  static const String restoreBackup = 'restoreBackup';
   static const String locTitle = 'locTitle';
   static const String locBody = 'locBody';
   static const String locB1 = 'locB1';
@@ -266,6 +265,7 @@ abstract final class StringsManager {
   static const String noteQadr = 'noteQadr';
   static const String noteNoFasting = 'noteNoFasting';
   static const String adhanSound = 'adhanSound';
+  static const String toneSound = 'toneSound';
   static const String forPrayer = 'forPrayer';
   static const String recordingAlafasy = 'recordingAlafasy';
   static const String fullAdhanLength = 'fullAdhanLength';
@@ -310,25 +310,6 @@ abstract final class StringsManager {
   static const String sunHint = 'sunHint';
   static const String sunBackHint = 'sunBackHint';
   static const String stepOf = 'stepOf';
-  static const String backUp = 'backUp';
-  static const String password = 'password';
-  static const String confirmPassword = 'confirmPassword';
-  static const String passwordNote = 'passwordNote';
-  static const String passwordTooShort = 'passwordTooShort';
-  static const String passwordsDontMatch = 'passwordsDontMatch';
-  static const String saveBackup = 'saveBackup';
-  static const String restorePasswordNote = 'restorePasswordNote';
-  static const String restore = 'restore';
-  static const String wrongPassword = 'wrongPassword';
-  static const String notABackup = 'notABackup';
-  static const String damagedBackup = 'damagedBackup';
-  static const String newerBackup = 'newerBackup';
-  static const String restoreTitle = 'restoreTitle';
-  static const String restoreBody = 'restoreBody';
-  static const String backupRestored = 'backupRestored';
-  static const String resetNoticeTitle = 'resetNoticeTitle';
-  static const String resetNoticeBody = 'resetNoticeBody';
-  static const String startFresh = 'startFresh';
   static const String surfaceNext = 'surfaceNext';
   static const String surfaceNextCity = 'surfaceNextCity';
   static const String surfaceNextShort = 'surfaceNextShort';
@@ -608,4 +589,11 @@ abstract final class StringsManager {
   static const String forward10 = 'forward10';
   static const String ayahNumber = 'ayahNumber';
   static const String recitationBar = 'recitationBar';
+  static const String searchCount = 'searchCount';
+  static const String expandAll = 'expandAll';
+  static const String foldAll = 'foldAll';
+  static const String recentSearches = 'recentSearches';
+  static const String clearAll = 'clearAll';
+  static const String removeSearch = 'removeSearch';
+  static const String prayerSound = 'prayerSound';
 }
