@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/backup/restore_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
+import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +24,10 @@ Future<bool> pickAndRestore(BuildContext context, {required bool confirm}) async
   if (file == null || !context.mounted) return false;
   final restored = await showBmSheet<bool>(
     context,
+    title: const SheetTitle(
+      StringsManager.restoreBackup,
+      subtitle: StringsManager.restorePasswordNote,
+    ),
     builder: (_) => RestoreSheet(file: file, confirm: confirm),
   );
   return restored ?? false;
