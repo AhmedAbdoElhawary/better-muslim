@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -17,6 +18,7 @@ import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
+import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
 import 'package:flutter/material.dart';
@@ -143,14 +145,20 @@ class NoteCard extends ConsumerWidget {
   const NoteCard(
     this.note, {
     required this.onTap,
+    this.onLongPress,
     this.showAyah = true,
+    this.showArabic = false,
     this.radius = RadiusManager.lg,
     super.key,
   });
 
   final Note note;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final bool showAyah;
+
+  /// Highlights shows the ayah itself, its note under it only when there is one
+  final bool showArabic;
   final double radius;
 
   @override
@@ -164,6 +172,7 @@ class NoteCard extends ConsumerWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
+        onLongPress: onLongPress,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: context.getColor(ThemeEnum.surface),
@@ -205,15 +214,12 @@ class NoteCard extends ConsumerWidget {
                     fontSize: FontSizeManager.label,
                     color: ThemeEnum.text3,
                   ),
-                const RSizedBox.vertical(SpaceManager.noteLineGap),
-                if (note.text.isEmpty)
-                  const RegularText(
-                    StringsManager.highlightedInMushaf,
-                    fontSize: FontSizeManager.body,
-                    height: LineHeightManager.body,
-                    color: ThemeEnum.text2,
-                  )
-                else
+                if (showArabic) ...[
+                  const RSizedBox.vertical(SpaceManager.noteLineGap),
+                  _Arabic(note.ayah),
+                ],
+                if (note.text.isNotEmpty) ...[
+                  const RSizedBox.vertical(SpaceManager.noteLineGap),
                   RegularText(
                     note.text,
                     translate: false,
@@ -221,10 +227,45 @@ class NoteCard extends ConsumerWidget {
                     height: LineHeightManager.body,
                     color: ThemeEnum.text,
                   ),
+                ] else if (!showArabic) ...[
+                  const RSizedBox.vertical(SpaceManager.noteLineGap),
+                  const RegularText(
+                    StringsManager.highlightedInMushaf,
+                    fontSize: FontSizeManager.body,
+                    height: LineHeightManager.body,
+                    color: ThemeEnum.text2,
+                  ),
+                ],
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// in the reader's font, like a search hit
+class _Arabic extends ConsumerWidget {
+  const _Arabic(this.ayah);
+
+  final AyahKey ayah;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = ref.watch(ayahTextProvider(ayah)).value ?? '';
+    final font = ref.watch(
+      settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.kfgqpc),
+    );
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: RegularText(
+        text,
+        translate: false,
+        font: font.font,
+        fontSize: FontSizeManager.searchAyah,
+        height: LineHeightManager.searchAyah,
+        color: ThemeEnum.text,
       ),
     );
   }

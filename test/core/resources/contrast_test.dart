@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -58,6 +59,35 @@ void main() {
 
   for (final id in bmThemeOrder) {
     for (final (mode, palette) in [('dark', bmThemes[id]!.dark), ('light', bmThemes[id]!.light)]) {
+      /// aa for graphics, the ribbons sit on the theme's page and Saved's cards, and on each
+      /// reader page of the same mode
+      test('${id.name} $mode: every category color meets 3:1 on its pages', () {
+        final dark = palette.bg.computeLuminance() < .5;
+        final pages = [
+          palette,
+          for (final base in [
+            BmPagePalette.paper,
+            BmPagePalette.cream,
+            BmPagePalette.sepia,
+            BmPagePalette.green,
+            BmPagePalette.night,
+            BmPagePalette.navy,
+          ])
+            if ((base.bg.computeLuminance() < .5) == dark) BmPagePalette.tint(base, palette),
+        ];
+        for (final page in pages) {
+          for (final color in CategoryColor.values) {
+            for (final under in [ThemeEnum.page, ThemeEnum.surface]) {
+              expect(
+                _ratio(color.theme.resolve(page), under.resolve(page)),
+                greaterThanOrEqualTo(3),
+                reason: '${color.name} on ${under.name}',
+              );
+            }
+          }
+        }
+      });
+
       test('${id.name} $mode meets AA for body text (SC-007)', () {
         for (final (text, under) in pairs) {
           expect(

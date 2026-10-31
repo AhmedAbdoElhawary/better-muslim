@@ -60,7 +60,14 @@ enum ThemeEnum {
   shareEmerald,
   shareSky1,
   shareSky2,
-  shareSky3;
+  shareSky3,
+  categoryGreen,
+  categoryTeal,
+  categoryBlue,
+  categoryViolet,
+  categoryRose,
+  categoryAmber,
+  categorySlate;
 
   Color resolve(BmPalette palette) => switch (this) {
     ThemeEnum.bg => palette.bg,
@@ -132,7 +139,17 @@ enum ThemeEnum {
     ThemeEnum.shareSky1 => bmShareSky1,
     ThemeEnum.shareSky2 => bmShareSky2,
     ThemeEnum.shareSky3 => bmShareSky3,
+    ThemeEnum.categoryGreen => _byMode(palette, bmCategoryGreen),
+    ThemeEnum.categoryTeal => _byMode(palette, bmCategoryTeal),
+    ThemeEnum.categoryBlue => _byMode(palette, bmCategoryBlue),
+    ThemeEnum.categoryViolet => _byMode(palette, bmCategoryViolet),
+    ThemeEnum.categoryRose => _byMode(palette, bmCategoryRose),
+    ThemeEnum.categoryAmber => _byMode(palette, bmCategoryAmber),
+    ThemeEnum.categorySlate => _byMode(palette, bmCategorySlate),
   };
+
+  static Color _byMode(BmPalette palette, ({Color light, Color dark}) color) =>
+      Color.lerp(color.light, color.dark, palette.pageColors.night)!;
 }
 
 /// a theme that isn't the context's yet, like the reader's before it opens
@@ -158,6 +175,19 @@ extension BmThemeName on BmThemeId {
     BmThemeId.andalus => StringsManager.themeAndalus,
     BmThemeId.moonlight => StringsManager.themeMoonlight,
     BmThemeId.qiyamRose => StringsManager.themeQiyamRose,
+  };
+}
+
+extension CategoryTheme on CategoryColor {
+  ThemeEnum get theme => switch (this) {
+    CategoryColor.primary => ThemeEnum.primary,
+    CategoryColor.green => ThemeEnum.categoryGreen,
+    CategoryColor.teal => ThemeEnum.categoryTeal,
+    CategoryColor.blue => ThemeEnum.categoryBlue,
+    CategoryColor.violet => ThemeEnum.categoryViolet,
+    CategoryColor.rose => ThemeEnum.categoryRose,
+    CategoryColor.amber => ThemeEnum.categoryAmber,
+    CategoryColor.slate => ThemeEnum.categorySlate,
   };
 }
 

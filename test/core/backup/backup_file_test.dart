@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../drift/app_database/generated/schema_v10.dart' as v10;
 import '../../drift/app_database/generated/schema_v14.dart' as v14;
+import '../../drift/app_database/generated/schema_v15.dart' as v15;
 import '../../drift/app_database/generated/schema_v7.dart' as v7;
 import '../../helpers/backup.dart';
 import '../../helpers/phone_storage.dart';
@@ -45,7 +46,7 @@ void main() {
     expect(ascii.decode(bytes.sublist(0, 8)), 'BMBACKUP');
     final header = ByteData.sublistView(bytes, 0, 19);
     expect(header.getUint8(8), 1);
-    expect(header.getUint16(9), 15);
+    expect(header.getUint16(9), 16);
     expect(header.getUint64(11), bytes.length - 19);
   });
 
@@ -68,6 +69,12 @@ void main() {
     expect(await store.select(store.azkarCounts).get(), hasLength(1));
     expect(await store.select(store.savedDuas).get(), hasLength(1));
     expect((await store.select(store.quranNotes).getSingle()).highlight, isTrue);
+    final categories = await store.select(store.quranCategories).get();
+    expect(categories.map((category) => (category.name, category.color)), [
+      (null, CategoryColor.primary),
+      ('Reflect', CategoryColor.rose),
+    ]);
+    expect((await store.select(store.quranBookmarks).getSingle()).category, categories.last.id);
     await closeBackup(store);
   });
 
@@ -207,6 +214,26 @@ void main() {
     await restoreOlder(14, payload);
     final note = await from.select(from.quranNotes).getSingle();
     expect((note.ayah, note.note, note.highlight), (255, 'ayat al-kursi', false));
+  });
+
+  test('a v15 backup restores its bookmarks into "Bookmarks"', () async {
+    final (payload, executor) = olderStore(15);
+    final old = v15.DatabaseAtV15(executor);
+    await old
+        .into(old.quranBookmarks)
+        .insert(
+          const v15.QuranBookmarksCompanion(
+            page: Value(582),
+            color: Value('accent'),
+            createdAt: Value(1792400000),
+          ),
+        );
+    await old.close();
+    await restoreOlder(15, payload);
+    final [category] = await from.select(from.quranCategories).get();
+    final bookmark = await from.select(from.quranBookmarks).getSingle();
+    expect((bookmark.page, bookmark.category), (582, category.id));
+    expect((category.id, category.name), (AppDatabase.defaultCategory, null));
   });
 
   test('the temp files are gone after every call', () async {

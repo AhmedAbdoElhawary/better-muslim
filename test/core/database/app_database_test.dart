@@ -3,6 +3,7 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter_test/flutter_test.dart';
@@ -105,5 +106,15 @@ void main() {
     await db.updateSettings(const SettingsCompanion(method: Value(null)));
 
     expect((await db.watchSettings().first).method, isNull);
+  });
+
+  test('a new store has "Bookmarks" in the primary color', () async {
+    final db = await open();
+    final [category] = await db.select(db.quranCategories).get();
+
+    expect(
+      (category.id, category.name, category.color, category.position),
+      (AppDatabase.defaultCategory, null, CategoryColor.primary, 0),
+    );
   });
 }

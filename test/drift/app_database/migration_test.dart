@@ -11,6 +11,7 @@ import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v13.dart' as v13;
 import 'generated/schema_v14.dart' as v14;
 import 'generated/schema_v15.dart' as v15;
+import 'generated/schema_v16.dart' as v16;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
@@ -815,4 +816,34 @@ void main() {
       );
     },
   );
+
+  test('v15 to v16 makes "Bookmarks" and moves every bookmark into it', () async {
+    const ayah = v15.QuranBookmarksData(
+      id: 1,
+      surah: 2,
+      ayah: 255,
+      page: 42,
+      name: 'Reflect',
+      color: 'accent',
+      createdAt: 1792400000,
+    );
+    const page = v15.QuranBookmarksData(id: 2, page: 582, color: 'neutral', createdAt: 1792400001);
+    await verifier.testWithDataIntegrity(
+      oldVersion: 15,
+      newVersion: 16,
+      createOld: v15.DatabaseAtV15.new,
+      createNew: v16.DatabaseAtV16.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insertAll(oldDb.quranBookmarks, [ayah, page]),
+      validateItems: (newDb) async {
+        final [category] = await newDb.select(newDb.quranCategories).get();
+        expect(category.toJson(), {'id': 1, 'name': null, 'color': 'primary', 'position': 0});
+        final rows = await newDb.select(newDb.quranBookmarks).get();
+        expect(rows.map((row) => row.toJson()), [
+          {...ayah.toJson()..remove('color'), 'category': 1},
+          {...page.toJson()..remove('color'), 'category': 1},
+        ]);
+      },
+    );
+  });
 }

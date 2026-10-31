@@ -1,19 +1,10 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-extension RibbonTheme on RibbonColor {
-  ThemeEnum get theme => switch (this) {
-    RibbonColor.primary => ThemeEnum.primary,
-    RibbonColor.accent => ThemeEnum.accent,
-    RibbonColor.neutral => ThemeEnum.text2,
-  };
-}
 
 /// data-ribbon of _gen/quran.js, hung from the page's top edge in the newest bookmark's color.
 /// on the page itself, so it turns with the leaf

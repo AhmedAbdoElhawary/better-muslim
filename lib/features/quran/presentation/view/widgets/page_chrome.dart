@@ -19,7 +19,7 @@ import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
-import 'package:better_muslim/features/quran/presentation/view/bookmark_actions.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/display_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/scrubber.dart';
 import 'package:drift/drift.dart' show Value;
@@ -248,7 +248,7 @@ class _PageBookmark extends ConsumerWidget {
       label: context.tr(StringsManager.bookmark),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => togglePageBookmark(context, ref, page),
+        onTap: () => showBookmarkPicker(context, page: page),
         child: RSizedBox.square(
           dimension: SizeManager.hit,
           child: Center(

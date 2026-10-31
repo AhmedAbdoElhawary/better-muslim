@@ -169,6 +169,9 @@ class BmPageColors {
   final Color followWash;
   final Color hidden;
   final Color gutter;
+
+  /// 0 on paper, 1 on night, so a color with a light and a dark shade crossfades with the theme
+  final double night;
   const BmPageColors({
     required this.page,
     required this.ink,
@@ -179,6 +182,7 @@ class BmPageColors {
     required this.followWash,
     required this.hidden,
     required this.gutter,
+    this.night = 0,
   });
 
   static BmPageColors lerp(BmPageColors a, BmPageColors b, double t) => BmPageColors(
@@ -191,6 +195,7 @@ class BmPageColors {
     followWash: Color.lerp(a.followWash, b.followWash, t)!,
     hidden: Color.lerp(a.hidden, b.hidden, t)!,
     gutter: Color.lerp(a.gutter, b.gutter, t)!,
+    night: lerpDouble(a.night, b.night, t)!,
   );
 }
 
@@ -204,6 +209,16 @@ const bmShareEmerald = Color(0xFF10382E);
 const bmShareSky1 = Color(0xFF14121C);
 const bmShareSky2 = Color(0xFF6A4436);
 const bmShareSky3 = Color(0xFFC98E5E);
+
+/// the bookmark categories' fixed colors, deep on a light page and soft on a dark one so each
+/// keeps 3:1 on every page
+const bmCategoryGreen = (light: Color(0xFF2F7A4A), dark: Color(0xFF5FBF85));
+const bmCategoryTeal = (light: Color(0xFF1F7380), dark: Color(0xFF4FBFC4));
+const bmCategoryBlue = (light: Color(0xFF2F64B8), dark: Color(0xFF7FA8F0));
+const bmCategoryViolet = (light: Color(0xFF7350B0), dark: Color(0xFFB39AF0));
+const bmCategoryRose = (light: Color(0xFFB8436E), dark: Color(0xFFF08AAE));
+const bmCategoryAmber = (light: Color(0xFF94600F), dark: Color(0xFFE0A84A));
+const bmCategorySlate = (light: Color(0xFF5E6B78), dark: Color(0xFFA3AEBA));
 
 /// the reader's palettes, K.PAGE in _gen/kit.js. roles K.PAGE leaves out come from Qiyam Emerald
 abstract final class BmPagePalette {
@@ -341,6 +356,7 @@ abstract final class BmPagePalette {
         followWash: was.followWash,
         hidden: hidden,
         gutter: gutter,
+        night: was.night,
       ),
     );
   }
@@ -396,6 +412,7 @@ abstract final class BmPagePalette {
         followWash: (dark ? theme.accent : theme.primary).withValues(alpha: page.followWash.a),
         hidden: page.hidden,
         gutter: page.gutter,
+        night: page.night,
       ),
     );
   }
@@ -453,6 +470,7 @@ abstract final class BmPagePalette {
       followWash: Color(0x294E9C80),
       hidden: Color(0xFF17211C),
       gutter: Color(0x99000000),
+      night: 1,
     ),
   );
 }

@@ -20,7 +20,7 @@ import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
-import 'package:better_muslim/features/quran/presentation/view/bookmark_actions.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/quran_tile.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
@@ -481,7 +481,7 @@ class AyahSheet extends ConsumerWidget {
       (
         BmIcon(BmIconName.bookmark, filled: saved),
         StringsManager.bookmark,
-        () => toggleAyahBookmark(context, ref, ayah),
+        () => showBookmarkPicker(context, ayah: ayah),
       ),
       (BmIcon.ui(BmUiIcon.note), StringsManager.note, () => onStudy(StudyTab.notes)),
       (BmIcon.ui(BmUiIcon.share), StringsManager.share, () => showAyahShare(context, [ayah])),

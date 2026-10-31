@@ -44,6 +44,15 @@ Future<AppDatabase> seededStore() async {
   await db.into(db.qadaEntries).insert(QadaEntriesCompanion.insert(prayer: Prayer.fajr));
   await db.setZikrCount(AzkarSet.morning, DateTime(2026, 10, 15), 'ayat-kursi', 1);
   await db.saveDua('travel-1', at: DateTime.utc(2026, 10, 12, 9));
+  final category = await db
+      .into(db.quranCategories)
+      .insert(
+        QuranCategoriesCompanion.insert(
+          name: const Value('Reflect'),
+          color: CategoryColor.rose,
+          position: 1,
+        ),
+      );
   await db
       .into(db.quranBookmarks)
       .insert(
@@ -51,7 +60,7 @@ Future<AppDatabase> seededStore() async {
           surah: const Value(2),
           ayah: const Value(255),
           page: 42,
-          color: RibbonColor.accent,
+          category: category,
           createdAt: DateTime.utc(2026, 10, 18, 7),
         ),
       );

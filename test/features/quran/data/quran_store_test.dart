@@ -37,7 +37,10 @@ void main() {
 
       final bookmarks = await store.watchBookmarks().first;
       expect(bookmarks.map((bookmark) => (bookmark.ayah, bookmark.page)), [(null, 1), (ayah, 1)]);
-      expect(bookmarks.map((bookmark) => bookmark.color), everyElement(RibbonColor.primary));
+      expect(
+        bookmarks.map((bookmark) => (bookmark.category, bookmark.color)),
+        everyElement((AppDatabase.defaultCategory, CategoryColor.primary)),
+      );
     });
 
     test('newest first', () async {
@@ -49,18 +52,19 @@ void main() {
       expect(bookmarks.map((bookmark) => bookmark.page), [42, 1]);
     });
 
-    test('rename, recolor and move keep the id', () async {
+    test('rename, move and a new category keep the id', () async {
       await store.addAyah(ayah, 1);
       final [before] = await store.watchBookmarks().first;
+      final rose = await store.addCategory(' Reflect ', CategoryColor.rose);
 
-      await store.rename(before.id, '  Reflect ');
-      await store.recolor(before.id, RibbonColor.accent);
+      await store.rename(before.id, '  Kursi ');
+      await store.setCategory(before.id, rose);
       await store.move(before.id, const AyahKey(2, 255), 42);
 
       final [after] = await store.watchBookmarks().first;
       expect(
-        (after.id, after.name, after.color, after.ayah, after.page),
-        (before.id, 'Reflect', RibbonColor.accent, const AyahKey(2, 255), 42),
+        (after.id, after.name, after.category, after.color, after.ayah, after.page),
+        (before.id, 'Kursi', rose, CategoryColor.rose, const AyahKey(2, 255), 42),
       );
     });
 
@@ -95,6 +99,52 @@ void main() {
       await store.restore(named);
 
       expect(await store.watchBookmarks().first, [named]);
+    });
+  });
+
+  group('categories', () {
+    test('"Bookmarks" first, a new one after it, trimmed', () async {
+      final id = await store.addCategory(' Reflect ', CategoryColor.teal);
+      await store.addCategory('Wird', CategoryColor.amber);
+
+      final categories = await store.watchCategories().first;
+      expect(categories.map((category) => (category.name, category.color)), [
+        (null, CategoryColor.primary),
+        ('Reflect', CategoryColor.teal),
+        ('Wird', CategoryColor.amber),
+      ]);
+      expect(categories[1].id, id);
+    });
+
+    test('a new category can hold a bookmark straight away', () async {
+      final id = await store.addCategory('Reflect', CategoryColor.teal);
+      await store.addAyah(ayah, 1, category: id);
+      await store.addPage(5, category: id);
+
+      final bookmarks = await store.watchBookmarks().first;
+      expect(bookmarks.map((bookmark) => bookmark.category), [id, id]);
+    });
+
+    test('rename and recolor, "Bookmarks" too', () async {
+      await store.addAyah(ayah, 1);
+      await store.updateCategory(AppDatabase.defaultCategory, ' Mine ', CategoryColor.violet);
+
+      final [category] = await store.watchCategories().first;
+      expect((category.name, category.color), ('Mine', CategoryColor.violet));
+      expect((await store.watchBookmarks().first).single.color, CategoryColor.violet);
+    });
+
+    test('deleting a category takes its bookmarks with it', () async {
+      final id = await store.addCategory('Reflect', CategoryColor.teal);
+      await store.addAyah(ayah, 1, category: id);
+      await store.addPage(5);
+
+      await store.deleteCategory(id);
+
+      expect((await store.watchCategories().first).map((category) => category.id), [
+        AppDatabase.defaultCategory,
+      ]);
+      expect((await store.watchBookmarks().first).single.page, 5);
     });
   });
 
@@ -160,7 +210,7 @@ void main() {
     final [bookmark] = await store.watchBookmarks().first;
     expect(
       (bookmark.ayah, bookmark.page, bookmark.color),
-      (const AyahKey(2, 255), 42, RibbonColor.accent),
+      (const AyahKey(2, 255), 42, CategoryColor.rose),
     );
     final [note] = await store.watchNotes().first;
     expect(

@@ -1,12 +1,18 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/domain/bookmark.dart';
+import 'package:better_muslim/features/quran/domain/category.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// newest first
 final bookmarksProvider = StreamProvider<List<Bookmark>>(
   (ref) => ref.watch(quranStoreProvider).watchBookmarks(),
+);
+
+/// "Bookmarks" first, then in the order I made them
+final categoriesProvider = StreamProvider<List<Category>>(
+  (ref) => ref.watch(quranStoreProvider).watchCategories(),
 );
 
 /// newest first
@@ -17,6 +23,11 @@ final notesProvider = StreamProvider<List<Note>>(
 /// a highlight with no text isn't a note to list
 final writtenNotesProvider = Provider<List<Note>>(
   (ref) => [...?ref.watch(notesProvider).value?.where((note) => note.text.isNotEmpty)],
+);
+
+/// newest first, like the notes
+final highlightsProvider = Provider<List<Note>>(
+  (ref) => [...?ref.watch(notesProvider).value?.where((note) => note.highlight)],
 );
 
 /// the bookmark menu's, it changes while the menu is open

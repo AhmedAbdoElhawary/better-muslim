@@ -368,6 +368,7 @@ abstract final class SpaceManager {
   static const double savedRibbonGap = 14;
   static const double savedLineGap = 2;
   static const double recentNoteTop = 22;
+  static const double categoryHeaderTop = 22;
   static const double noteCardV = 14;
   static const double noteCardSide = 16;
   static const double noteLineGap = 6;
@@ -789,6 +790,9 @@ abstract final class SizeManager {
   static const double savedRibbonW = 16;
   static const double savedRibbonH = 30;
   static const double savedRibbonNotch = .8;
+
+  /// the dot before a category's header in Saved
+  static const double categoryDot = 8;
 
   /// 4.30's card in design points, captured at shareSquare pixels wide
   static const double shareAyahCard = 300;

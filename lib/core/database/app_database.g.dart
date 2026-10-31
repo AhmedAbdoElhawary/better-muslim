@@ -3902,6 +3902,280 @@ class SavedDuasCompanion extends UpdateCompanion<SavedDua> {
   }
 }
 
+class $QuranCategoriesTable extends QuranCategories
+    with TableInfo<$QuranCategoriesTable, QuranCategory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuranCategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<CategoryColor, String> color =
+      GeneratedColumn<String>(
+        'color',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<CategoryColor>($QuranCategoriesTable.$convertercolor);
+  static const VerificationMeta _positionMeta = const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quran_categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuranCategory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuranCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuranCategory(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name']),
+      color: $QuranCategoriesTable.$convertercolor.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}color'])!,
+      ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $QuranCategoriesTable createAlias(String alias) {
+    return $QuranCategoriesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<CategoryColor, String, String> $convertercolor =
+      const EnumNameConverter<CategoryColor>(CategoryColor.values);
+}
+
+class QuranCategory extends DataClass implements Insertable<QuranCategory> {
+  final int id;
+
+  /// null on the default shows "Bookmarks" in the app's language
+  final String? name;
+  final CategoryColor color;
+  final int position;
+  const QuranCategory({required this.id, this.name, required this.color, required this.position});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    {
+      map['color'] = Variable<String>($QuranCategoriesTable.$convertercolor.toSql(color));
+    }
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  QuranCategoriesCompanion toCompanion(bool nullToAbsent) {
+    return QuranCategoriesCompanion(
+      id: Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      color: Value(color),
+      position: Value(position),
+    );
+  }
+
+  factory QuranCategory.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuranCategory(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      color: $QuranCategoriesTable.$convertercolor.fromJson(
+        serializer.fromJson<String>(json['color']),
+      ),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String?>(name),
+      'color': serializer.toJson<String>($QuranCategoriesTable.$convertercolor.toJson(color)),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  QuranCategory copyWith({
+    int? id,
+    Value<String?> name = const Value.absent(),
+    CategoryColor? color,
+    int? position,
+  }) => QuranCategory(
+    id: id ?? this.id,
+    name: name.present ? name.value : this.name,
+    color: color ?? this.color,
+    position: position ?? this.position,
+  );
+  QuranCategory copyWithCompanion(QuranCategoriesCompanion data) {
+    return QuranCategory(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranCategory(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, color, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuranCategory &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.position == this.position);
+}
+
+class QuranCategoriesCompanion extends UpdateCompanion<QuranCategory> {
+  final Value<int> id;
+  final Value<String?> name;
+  final Value<CategoryColor> color;
+  final Value<int> position;
+  const QuranCategoriesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  QuranCategoriesCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    required CategoryColor color,
+    required int position,
+  }) : color = Value(color),
+       position = Value(position);
+  static Insertable<QuranCategory> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? color,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (position != null) 'position': position,
+    });
+  }
+
+  QuranCategoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? name,
+    Value<CategoryColor>? color,
+    Value<int>? position,
+  }) {
+    return QuranCategoriesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>($QuranCategoriesTable.$convertercolor.toSql(color.value));
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranCategoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $QuranBookmarksTable extends QuranBookmarks
     with TableInfo<$QuranBookmarksTable, QuranBookmark> {
   @override
@@ -3956,14 +4230,15 @@ class $QuranBookmarksTable extends QuranBookmarks
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta('category');
   @override
-  late final GeneratedColumnWithTypeConverter<RibbonColor, String> color = GeneratedColumn<String>(
-    'color',
+  late final GeneratedColumn<int> category = GeneratedColumn<int>(
+    'category',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
-  ).withConverter<RibbonColor>($QuranBookmarksTable.$convertercolor);
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
@@ -3974,7 +4249,7 @@ class $QuranBookmarksTable extends QuranBookmarks
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, surah, ayah, page, name, color, createdAt];
+  List<GeneratedColumn> get $columns => [id, surah, ayah, page, name, category, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4004,6 +4279,14 @@ class $QuranBookmarksTable extends QuranBookmarks
     if (data.containsKey('name')) {
       context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4026,9 +4309,10 @@ class $QuranBookmarksTable extends QuranBookmarks
       ayah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}ayah']),
       page: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}page'])!,
       name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name']),
-      color: $QuranBookmarksTable.$convertercolor.fromSql(
-        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}color'])!,
-      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4040,9 +4324,6 @@ class $QuranBookmarksTable extends QuranBookmarks
   $QuranBookmarksTable createAlias(String alias) {
     return $QuranBookmarksTable(attachedDatabase, alias);
   }
-
-  static JsonTypeConverter2<RibbonColor, String, String> $convertercolor =
-      const EnumNameConverter<RibbonColor>(RibbonColor.values);
 }
 
 class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
@@ -4057,7 +4338,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
 
   /// null shows the reference
   final String? name;
-  final RibbonColor color;
+  final int category;
   final DateTime createdAt;
   const QuranBookmark({
     required this.id,
@@ -4065,7 +4346,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     this.ayah,
     required this.page,
     this.name,
-    required this.color,
+    required this.category,
     required this.createdAt,
   });
   @override
@@ -4082,9 +4363,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
-    {
-      map['color'] = Variable<String>($QuranBookmarksTable.$convertercolor.toSql(color));
-    }
+    map['category'] = Variable<int>(category);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -4096,7 +4375,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       ayah: ayah == null && nullToAbsent ? const Value.absent() : Value(ayah),
       page: Value(page),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      color: Value(color),
+      category: Value(category),
       createdAt: Value(createdAt),
     );
   }
@@ -4109,9 +4388,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       ayah: serializer.fromJson<int?>(json['ayah']),
       page: serializer.fromJson<int>(json['page']),
       name: serializer.fromJson<String?>(json['name']),
-      color: $QuranBookmarksTable.$convertercolor.fromJson(
-        serializer.fromJson<String>(json['color']),
-      ),
+      category: serializer.fromJson<int>(json['category']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -4124,7 +4401,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       'ayah': serializer.toJson<int?>(ayah),
       'page': serializer.toJson<int>(page),
       'name': serializer.toJson<String?>(name),
-      'color': serializer.toJson<String>($QuranBookmarksTable.$convertercolor.toJson(color)),
+      'category': serializer.toJson<int>(category),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -4135,7 +4412,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     Value<int?> ayah = const Value.absent(),
     int? page,
     Value<String?> name = const Value.absent(),
-    RibbonColor? color,
+    int? category,
     DateTime? createdAt,
   }) => QuranBookmark(
     id: id ?? this.id,
@@ -4143,7 +4420,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     ayah: ayah.present ? ayah.value : this.ayah,
     page: page ?? this.page,
     name: name.present ? name.value : this.name,
-    color: color ?? this.color,
+    category: category ?? this.category,
     createdAt: createdAt ?? this.createdAt,
   );
   QuranBookmark copyWithCompanion(QuranBookmarksCompanion data) {
@@ -4153,7 +4430,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       ayah: data.ayah.present ? data.ayah.value : this.ayah,
       page: data.page.present ? data.page.value : this.page,
       name: data.name.present ? data.name.value : this.name,
-      color: data.color.present ? data.color.value : this.color,
+      category: data.category.present ? data.category.value : this.category,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -4166,14 +4443,14 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
           ..write('ayah: $ayah, ')
           ..write('page: $page, ')
           ..write('name: $name, ')
-          ..write('color: $color, ')
+          ..write('category: $category, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, surah, ayah, page, name, color, createdAt);
+  int get hashCode => Object.hash(id, surah, ayah, page, name, category, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4183,7 +4460,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
           other.ayah == this.ayah &&
           other.page == this.page &&
           other.name == this.name &&
-          other.color == this.color &&
+          other.category == this.category &&
           other.createdAt == this.createdAt);
 }
 
@@ -4193,7 +4470,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
   final Value<int?> ayah;
   final Value<int> page;
   final Value<String?> name;
-  final Value<RibbonColor> color;
+  final Value<int> category;
   final Value<DateTime> createdAt;
   const QuranBookmarksCompanion({
     this.id = const Value.absent(),
@@ -4201,7 +4478,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     this.ayah = const Value.absent(),
     this.page = const Value.absent(),
     this.name = const Value.absent(),
-    this.color = const Value.absent(),
+    this.category = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   QuranBookmarksCompanion.insert({
@@ -4210,10 +4487,10 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     this.ayah = const Value.absent(),
     required int page,
     this.name = const Value.absent(),
-    required RibbonColor color,
+    required int category,
     required DateTime createdAt,
   }) : page = Value(page),
-       color = Value(color),
+       category = Value(category),
        createdAt = Value(createdAt);
   static Insertable<QuranBookmark> custom({
     Expression<int>? id,
@@ -4221,7 +4498,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     Expression<int>? ayah,
     Expression<int>? page,
     Expression<String>? name,
-    Expression<String>? color,
+    Expression<int>? category,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -4230,7 +4507,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
       if (ayah != null) 'ayah': ayah,
       if (page != null) 'page': page,
       if (name != null) 'name': name,
-      if (color != null) 'color': color,
+      if (category != null) 'category': category,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -4241,7 +4518,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     Value<int?>? ayah,
     Value<int>? page,
     Value<String?>? name,
-    Value<RibbonColor>? color,
+    Value<int>? category,
     Value<DateTime>? createdAt,
   }) {
     return QuranBookmarksCompanion(
@@ -4250,7 +4527,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
       ayah: ayah ?? this.ayah,
       page: page ?? this.page,
       name: name ?? this.name,
-      color: color ?? this.color,
+      category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -4273,8 +4550,8 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (color.present) {
-      map['color'] = Variable<String>($QuranBookmarksTable.$convertercolor.toSql(color.value));
+    if (category.present) {
+      map['category'] = Variable<int>(category.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -4290,7 +4567,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
           ..write('ayah: $ayah, ')
           ..write('page: $page, ')
           ..write('name: $name, ')
-          ..write('color: $color, ')
+          ..write('category: $category, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -4628,6 +4905,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $QadaEntriesTable qadaEntries = $QadaEntriesTable(this);
   late final $AzkarCountsTable azkarCounts = $AzkarCountsTable(this);
   late final $SavedDuasTable savedDuas = $SavedDuasTable(this);
+  late final $QuranCategoriesTable quranCategories = $QuranCategoriesTable(this);
   late final $QuranBookmarksTable quranBookmarks = $QuranBookmarksTable(this);
   late final $QuranNotesTable quranNotes = $QuranNotesTable(this);
   late final Index qadaDay = Index(
@@ -4652,6 +4930,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     qadaEntries,
     azkarCounts,
     savedDuas,
+    quranCategories,
     quranBookmarks,
     quranNotes,
     qadaDay,
@@ -6320,13 +6599,164 @@ typedef $$SavedDuasTableProcessedTableManager =
       SavedDua,
       PrefetchHooks Function()
     >;
+typedef $$QuranCategoriesTableCreateCompanionBuilder = QuranCategoriesCompanion Function({
+  Value<int> id,
+  Value<String?> name,
+  required CategoryColor color,
+  required int position,
+});
+typedef $$QuranCategoriesTableUpdateCompanionBuilder = QuranCategoriesCompanion Function({
+  Value<int> id,
+  Value<String?> name,
+  Value<CategoryColor> color,
+  Value<int> position,
+});
+
+class $$QuranCategoriesTableFilterComposer extends Composer<_$AppDatabase, $QuranCategoriesTable> {
+  $$QuranCategoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<CategoryColor, CategoryColor, String> get color =>
+      $composableBuilder(
+        column: $table.color,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuranCategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuranCategoriesTable> {
+  $$QuranCategoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuranCategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuranCategoriesTable> {
+  $$QuranCategoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<CategoryColor, String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+}
+
+class $$QuranCategoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuranCategoriesTable,
+          QuranCategory,
+          $$QuranCategoriesTableFilterComposer,
+          $$QuranCategoriesTableOrderingComposer,
+          $$QuranCategoriesTableAnnotationComposer,
+          $$QuranCategoriesTableCreateCompanionBuilder,
+          $$QuranCategoriesTableUpdateCompanionBuilder,
+          (QuranCategory, BaseReferences<_$AppDatabase, $QuranCategoriesTable, QuranCategory>),
+          QuranCategory,
+          PrefetchHooks Function()
+        > {
+  $$QuranCategoriesTableTableManager(_$AppDatabase db, $QuranCategoriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuranCategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuranCategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuranCategoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<CategoryColor> color = const Value.absent(),
+            Value<int> position = const Value.absent(),
+          }) => QuranCategoriesCompanion(id: id, name: name, color: color, position: position),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                required CategoryColor color,
+                required int position,
+              }) => QuranCategoriesCompanion.insert(
+                id: id,
+                name: name,
+                color: color,
+                position: position,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QuranCategoriesTable, QuranCategory>(table),
+                  BaseReferences<_$AppDatabase, $QuranCategoriesTable, QuranCategory>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuranCategoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuranCategoriesTable,
+      QuranCategory,
+      $$QuranCategoriesTableFilterComposer,
+      $$QuranCategoriesTableOrderingComposer,
+      $$QuranCategoriesTableAnnotationComposer,
+      $$QuranCategoriesTableCreateCompanionBuilder,
+      $$QuranCategoriesTableUpdateCompanionBuilder,
+      (QuranCategory, BaseReferences<_$AppDatabase, $QuranCategoriesTable, QuranCategory>),
+      QuranCategory,
+      PrefetchHooks Function()
+    >;
 typedef $$QuranBookmarksTableCreateCompanionBuilder = QuranBookmarksCompanion Function({
   Value<int> id,
   Value<int?> surah,
   Value<int?> ayah,
   required int page,
   Value<String?> name,
-  required RibbonColor color,
+  required int category,
   required DateTime createdAt,
 });
 typedef $$QuranBookmarksTableUpdateCompanionBuilder = QuranBookmarksCompanion Function({
@@ -6335,7 +6765,7 @@ typedef $$QuranBookmarksTableUpdateCompanionBuilder = QuranBookmarksCompanion Fu
   Value<int?> ayah,
   Value<int> page,
   Value<String?> name,
-  Value<RibbonColor> color,
+  Value<int> category,
   Value<DateTime> createdAt,
 });
 
@@ -6362,10 +6792,8 @@ class $$QuranBookmarksTableFilterComposer extends Composer<_$AppDatabase, $Quran
   ColumnFilters<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<RibbonColor, RibbonColor, String> get color => $composableBuilder(
-    column: $table.color,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnFilters<int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6394,8 +6822,8 @@ class $$QuranBookmarksTableOrderingComposer extends Composer<_$AppDatabase, $Qur
   ColumnOrderings<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
@@ -6424,8 +6852,8 @@ class $$QuranBookmarksTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<RibbonColor, String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => column);
+  GeneratedColumn<int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -6464,7 +6892,7 @@ class $$QuranBookmarksTableTableManager
                 Value<int?> ayah = const Value.absent(),
                 Value<int> page = const Value.absent(),
                 Value<String?> name = const Value.absent(),
-                Value<RibbonColor> color = const Value.absent(),
+                Value<int> category = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => QuranBookmarksCompanion(
                 id: id,
@@ -6472,7 +6900,7 @@ class $$QuranBookmarksTableTableManager
                 ayah: ayah,
                 page: page,
                 name: name,
-                color: color,
+                category: category,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -6482,7 +6910,7 @@ class $$QuranBookmarksTableTableManager
                 Value<int?> ayah = const Value.absent(),
                 required int page,
                 Value<String?> name = const Value.absent(),
-                required RibbonColor color,
+                required int category,
                 required DateTime createdAt,
               }) => QuranBookmarksCompanion.insert(
                 id: id,
@@ -6490,7 +6918,7 @@ class $$QuranBookmarksTableTableManager
                 ayah: ayah,
                 page: page,
                 name: name,
-                color: color,
+                category: category,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -6703,6 +7131,8 @@ class $AppDatabaseManager {
   $$AzkarCountsTableTableManager get azkarCounts =>
       $$AzkarCountsTableTableManager(_db, _db.azkarCounts);
   $$SavedDuasTableTableManager get savedDuas => $$SavedDuasTableTableManager(_db, _db.savedDuas);
+  $$QuranCategoriesTableTableManager get quranCategories =>
+      $$QuranCategoriesTableTableManager(_db, _db.quranCategories);
   $$QuranBookmarksTableTableManager get quranBookmarks =>
       $$QuranBookmarksTableTableManager(_db, _db.quranBookmarks);
   $$QuranNotesTableTableManager get quranNotes =>

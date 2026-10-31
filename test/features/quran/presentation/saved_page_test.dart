@@ -6,6 +6,7 @@ import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -45,10 +46,11 @@ void main() {
             QuranBookmarksCompanion.insert(
               page: 582,
               name: const Value('Morning wird'),
-              color: RibbonColor.primary,
+              category: AppDatabase.defaultCategory,
               createdAt: DateTime.utc(2026, 10, 1, 8),
             ),
           );
+      final study = await storeOf(tester).addCategory('Study', CategoryColor.rose);
       await db
           .into(db.quranBookmarks)
           .insert(
@@ -57,11 +59,12 @@ void main() {
               ayah: const Value(255),
               page: 42,
               name: const Value('Reflect'),
-              color: RibbonColor.accent,
+              category: study,
               createdAt: DateTime.utc(2026, 10, 13, 8),
             ),
           );
       await storeOf(tester).saveNote(const AyahKey(1, 5), 'Ask for help in everything, then act.');
+      await storeOf(tester).addCategory('Empty', CategoryColor.teal);
     });
     await tester.pumpAndSettle();
   }
@@ -76,7 +79,9 @@ void main() {
 
   double topOf(WidgetTester tester, String text) => tester.getTopLeft(find.text(text).first).dy;
 
-  testWidgets('bookmarks: last read first marked auto, then mine newest first', (tester) async {
+  testWidgets('bookmarks: last read first marked auto, then mine under their categories', (
+    tester,
+  ) async {
     await pumpApp(tester);
     await seed(tester);
     await open(tester, Routes.quranSaved);
@@ -98,9 +103,22 @@ void main() {
     ]) {
       expect(find.text(text), findsOneWidget, reason: text);
     }
-    expect(topOf(tester, 'Last read'), lessThan(topOf(tester, 'Reflect')));
-    expect(topOf(tester, 'Reflect'), lessThan(topOf(tester, 'Morning wird')));
-    expect(find.text('Highlights'), findsNothing);
+    expect(find.text('Highlights'), findsOneWidget, reason: 'the third tab');
+    expect(find.text('Study'), findsOneWidget);
+    expect(find.text('Empty'), findsNothing, reason: 'no bookmarks, no header');
+
+    /// "Bookmarks" is the tab and the default's header
+    final header = tester.getTopLeft(find.text('Bookmarks').last).dy;
+    expect(topOf(tester, 'Last read'), lessThan(header));
+    expect(header, lessThan(topOf(tester, 'Morning wird')));
+    expect(topOf(tester, 'Morning wird'), lessThan(topOf(tester, 'Study')));
+    expect(topOf(tester, 'Study'), lessThan(topOf(tester, 'Reflect')));
+    final ribbons = tester.widgetList<RibbonShape>(find.byType(RibbonShape));
+    expect(ribbons.map((ribbon) => ribbon.color), [
+      ThemeEnum.text2,
+      ThemeEnum.primary,
+      ThemeEnum.categoryRose,
+    ]);
     await unmount(tester);
   });
 
@@ -131,27 +149,25 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('long press renames, recolors and moves a bookmark here', (tester) async {
+  testWidgets('long press renames and moves a bookmark here', (tester) async {
     await pumpApp(tester);
     await seed(tester);
     await open(tester, Routes.quranSaved);
 
     await tester.longPress(find.text('Reflect'));
     await tester.pumpAndSettle();
-    for (final text in ['Rename', 'Color', 'Main', 'Accent', 'Neutral', 'Move here']) {
+    for (final text in ['Rename', 'Move here']) {
       expect(find.text(text), findsOneWidget, reason: text);
     }
+    expect(find.text('Color'), findsNothing, reason: 'the color is the category\'s');
 
     await tester.enterText(find.byType(TextField), 'Kursi');
-    await tapAndStore(tester, find.text('Neutral'));
     await tapAndStore(tester, find.text('Move here'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pumpAndSettle();
 
     expect(find.text('Kursi'), findsOneWidget);
     expect(find.text('Al-Fatiha 1:3 · Page 1'), findsNWidgets(2), reason: 'moved to last read');
-    final ribbons = tester.widgetList<RibbonShape>(find.byType(RibbonShape));
-    expect(ribbons.map((ribbon) => ribbon.color), contains(ThemeEnum.text2));
     await unmount(tester);
   });
 
@@ -165,23 +181,58 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('bookmark hangs the ribbon, again removes it with undo for 4 s', (tester) async {
+  Future<void> selectAyah(WidgetTester tester, AyahKey ayah) async {
+    final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
+      (page) => page.washBounds(ayah) != null,
+    );
+    await tester.tapAt(page.localToGlobal(page.washBounds(ayah)!.center));
+    await tester.pumpAndSettle();
+  }
+
+  /// a tap past the spine shows the bars
+  Future<void> showChrome(WidgetTester tester) async {
+    await tester.tapAt(const Offset(385, 400));
+    await tester.pumpAndSettle();
+  }
+
+  /// the top bar's, the page itself
+  final topBookmark = find.descendant(
+    of: find.byType(PageChrome),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is Semantics && widget.properties.label == 'Bookmark',
+    ),
+  );
+
+  Finder inPicker(Finder finder) => find.descendant(of: find.byType(BottomSheet), matching: finder);
+
+  testWidgets('bookmark picks a category and hangs the ribbon, remove has undo for 4 s', (
+    tester,
+  ) async {
     await pumpApp(tester);
     await open(tester, Routes.quranPage(1));
     Finder ribbon() =>
         find.descendant(of: find.byType(PageRibbon), matching: find.byType(RibbonShape));
     expect(ribbon(), findsNothing);
 
-    final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
-      (page) => page.washBounds(const AyahKey(1, 3)) != null,
-    );
-    await tester.tapAt(page.localToGlobal(page.washBounds(const AyahKey(1, 3))!.center));
-    await tester.pumpAndSettle();
+    await selectAyah(tester, const AyahKey(1, 3));
     await tapAndStore(tester, find.text('Bookmark'));
+    expect(inPicker(find.text('Al-Fatiha 1:3 · Page 1')), findsOneWidget);
+    expect(inPicker(find.text('New category')), findsOneWidget);
+    expect(inPicker(find.text('Remove bookmark')), findsNothing);
+    await tapAndStore(tester, inPicker(find.text('Bookmarks')));
+    expect(find.byType(BottomSheet), findsNothing, reason: 'picking saves and closes');
     expect(ribbon(), findsWidgets);
     expect(tester.widget<RibbonShape>(ribbon().first).color, ThemeEnum.primary);
 
     await tapAndStore(tester, find.text('Bookmark'));
+    final ticked = find.ancestor(
+      of: inPicker(find.text('Bookmarks')),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.selected == true,
+      ),
+    );
+    expect(ticked, findsOneWidget, reason: 'its category is ticked');
+    await tapAndStore(tester, inPicker(find.text('Remove bookmark')));
     expect(find.text('Bookmark removed'), findsOneWidget);
     expect(ribbon(), findsNothing);
     await tester.pump(const Duration(milliseconds: 3800));
@@ -189,6 +240,151 @@ void main() {
 
     await tapAndStore(tester, find.text('Undo'));
     expect(ribbon(), findsWidgets);
+    await unmount(tester);
+  });
+
+  testWidgets('a new category from the picker takes the bookmark in its color', (tester) async {
+    await pumpApp(tester);
+    await open(tester, Routes.quranPage(1));
+    await selectAyah(tester, const AyahKey(1, 3));
+    await tapAndStore(tester, find.text('Bookmark'));
+
+    await tapAndStore(tester, inPicker(find.text('New category')));
+    expect(inPicker(find.text('Green')), findsOneWidget);
+    expect(inPicker(find.text('Slate')), findsOneWidget);
+    await tester.enterText(inPicker(find.byType(TextField)), 'Study');
+    await tapAndStore(tester, inPicker(find.text('Teal')));
+    await tapAndStore(tester, inPicker(find.text('Save')));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BottomSheet), findsNothing);
+    final ribbon = find.descendant(of: find.byType(PageRibbon), matching: find.byType(RibbonShape));
+    expect(tester.widget<RibbonShape>(ribbon.first).color, ThemeEnum.categoryTeal);
+    await unmount(tester);
+  });
+
+  testWidgets('the top bar bookmarks the page through the same picker', (tester) async {
+    await pumpApp(tester);
+    await open(tester, Routes.quranPage(5));
+    await showChrome(tester);
+    await tester.tap(topBookmark);
+    await tester.pumpAndSettle();
+
+    expect(inPicker(find.text('Al-Baqarah · Page 5')), findsOneWidget);
+    await tapAndStore(tester, inPicker(find.text('Bookmarks')));
+    final bookmarks = await tester.runAsync(() => storeOf(tester).watchBookmarks().first);
+    expect(bookmarks!.map((bookmark) => (bookmark.ayah, bookmark.page)), [(null, 5)]);
+    await unmount(tester);
+  });
+
+  testWidgets('a long press in the picker renames, recolors and deletes a category', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await seed(tester);
+    await open(tester, Routes.quranPage(42));
+    await showChrome(tester);
+    await tester.tap(topBookmark);
+    await tester.pumpAndSettle();
+
+    /// "Bookmarks" is filled in and can't be deleted
+    await tester.longPress(inPicker(find.text('Bookmarks')));
+    await tester.pumpAndSettle();
+    expect(inPicker(find.text('Edit category')), findsOneWidget);
+    expect(inPicker(find.text('Delete category')), findsNothing);
+    await tester.enterText(inPicker(find.byType(TextField)), 'Wird');
+    await tapAndStore(tester, inPicker(find.text('Blue')));
+    await tapAndStore(tester, inPicker(find.text('Save')));
+    expect(inPicker(find.text('Wird')), findsOneWidget, reason: 'back on the list');
+
+    await tester.longPress(inPicker(find.text('Study')));
+    await tester.pumpAndSettle();
+    await tapAndStore(tester, inPicker(find.text('Delete category')));
+    expect(find.text('Delete this category?'), findsOneWidget);
+    await tapAndStore(tester, find.text('Delete'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+    expect(inPicker(find.text('Study')), findsNothing);
+
+    final (categories, bookmarks) = (await tester.runAsync(
+      () async => (
+        await storeOf(tester).watchCategories().first,
+        await storeOf(tester).watchBookmarks().first,
+      ),
+    ))!;
+    expect(categories.map((category) => (category.name, category.color)), [
+      ('Wird', CategoryColor.blue),
+      ('Empty', CategoryColor.teal),
+    ]);
+    expect(bookmarks.map((bookmark) => bookmark.name), ['Morning wird'], reason: 'Reflect went');
+    await unmount(tester);
+  });
+
+  testWidgets('highlights lists each highlighted ayah, long press takes the highlight off', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    final db = dbOf(tester);
+    await tester.runAsync(
+      () => db.batch(
+        (batch) => batch.insertAll(db.quranNotes, [
+          for (final (ayah, note, highlight, hour) in [
+            (5, 'patience', true, 8),
+            (2, '', true, 9),
+            (7, 'not highlighted', false, 10),
+          ])
+            QuranNotesCompanion.insert(
+              surah: 1,
+              ayah: ayah,
+              note: note,
+              highlight: Value(highlight),
+              updatedAt: DateTime.utc(2026, 10, 14, hour),
+            ),
+        ]),
+      ),
+    );
+    await open(tester, Routes.quranSaved);
+    await tester.tap(find.text('Highlights'));
+    await tester.pumpAndSettle();
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1:2'), findsOneWidget);
+    expect(find.text('1:5'), findsOneWidget);
+    expect(find.text('1:7'), findsNothing);
+    expect(find.text('patience'), findsOneWidget);
+    expect(find.text('Highlighted in mushaf'), findsNothing, reason: 'the ayah shows instead');
+    expect(find.textContaining('ٱلۡحَمۡدُ'), findsOneWidget, reason: 'the ayah itself');
+    expect(topOf(tester, '1:2'), lessThan(topOf(tester, '1:5')), reason: 'newest first');
+
+    await tester.longPress(find.text('patience'));
+    await tester.pump();
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+    expect(find.text('Highlight removed'), findsOneWidget);
+    expect(find.text('1:5'), findsNothing);
+    final note = await tester.runAsync(() => storeOf(tester).watchNotes().first);
+    expect(
+      note!.map((note) => (note.ayah, note.text, note.highlight, note.updatedAt.toUtc().hour)),
+      contains((const AyahKey(1, 5), 'patience', false, 8)),
+      reason: 'the note text stays, at its place in Notes',
+    );
+
+    await tester.tap(find.text('1:2'));
+    await tester.pumpAndSettle();
+    final reader = tester.widget<ReaderPage>(find.byType(ReaderPage));
+    expect((reader.page, reader.ayah), (1, const AyahKey(1, 2)));
+    await unmount(tester);
+  });
+
+  testWidgets('no highlights shows the empty state', (tester) async {
+    await pumpApp(tester);
+    await open(tester, Routes.quranSaved);
+    await tester.tap(find.text('Highlights'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No highlights yet'), findsOneWidget);
     await unmount(tester);
   });
 }

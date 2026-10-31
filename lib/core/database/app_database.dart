@@ -240,8 +240,18 @@ class QuranBookmarks extends Table {
 
   /// null shows the reference
   TextColumn get name => text().nullable()();
-  TextColumn get color => textEnum<RibbonColor>()();
+  IntColumn get category => integer()();
   DateTimeColumn get createdAt => dateTime()();
+}
+
+/// a named and colored group of bookmarks, id 1 is the "Bookmarks" that is never deleted
+class QuranCategories extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// null on the default shows "Bookmarks" in the app's language
+  TextColumn get name => text().nullable()();
+  TextColumn get color => textEnum<CategoryColor>()();
+  IntColumn get position => integer()();
 }
 
 /// one note per ayah, a highlighted one may have no text
@@ -260,7 +270,16 @@ class QuranNotes extends Table {
 }
 
 @DriftDatabase(
-  tables: [Settings, PrayerLog, QadaEntries, AzkarCounts, SavedDuas, QuranBookmarks, QuranNotes],
+  tables: [
+    Settings,
+    PrayerLog,
+    QadaEntries,
+    AzkarCounts,
+    SavedDuas,
+    QuranCategories,
+    QuranBookmarks,
+    QuranNotes,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.executor);
@@ -354,10 +373,17 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
+
+  /// the category every bookmark lands in until I pick another
+  static const defaultCategory = 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+      await _addDefaultCategory();
+    },
     onUpgrade: stepByStep(
       from1To2: (m, schema) async {
         await m.createTable(schema.prayerLog);
@@ -525,7 +551,26 @@ class AppDatabase extends _$AppDatabase {
           TableMigration(schema.quranNotes, newColumns: [schema.quranNotes.highlight]),
         );
       },
+      from15To16: (m, schema) async {
+        await m.createTable(schema.quranCategories);
+        await _addDefaultCategory();
+
+        /// every bookmark moves into the default, the old ribbon colors go
+        await m.alterTable(
+          TableMigration(
+            schema.quranBookmarks,
+            newColumns: [schema.quranBookmarks.category],
+            columnTransformer: {schema.quranBookmarks.category: const Constant(defaultCategory)},
+          ),
+        );
+      },
     ),
+  );
+
+  /// raw sql, the step's schema and this one's tables are not the same classes
+  Future<void> _addDefaultCategory() => customStatement(
+    'insert into quran_categories (id, color, position) '
+    "values ($defaultCategory, '${CategoryColor.primary.name}', 0)",
   );
 
   /// an existing row keeps its first use, now is passed so tests and the scenario control it

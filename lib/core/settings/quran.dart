@@ -40,7 +40,8 @@ double mushafScale(int step) => 1 + step / 10;
 
 enum PageTurn { book, slide }
 
-enum RibbonColor { primary, accent, neutral }
+/// a bookmark category's, primary is the theme's own and the rest are fixed
+enum CategoryColor { primary, green, teal, blue, violet, rose, amber, slate }
 
 /// the mushaf and share font, picked in Display (FR-011, FR-026)
 enum QuranFont {

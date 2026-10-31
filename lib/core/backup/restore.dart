@@ -9,6 +9,7 @@ const backupTables = [
   'qada_entries',
   'azkar_counts',
   'saved_duas',
+  'quran_categories',
   'quran_bookmarks',
   'quran_notes',
 ];
@@ -39,6 +40,7 @@ Future<void> copyTables(AppDatabase from, AppDatabase into) async {
   final qada = await from.select(from.qadaEntries).get();
   final azkar = await from.select(from.azkarCounts).get();
   final duas = await from.select(from.savedDuas).get();
+  final categories = await from.select(from.quranCategories).get();
   final bookmarks = await from.select(from.quranBookmarks).get();
   final notes = await from.select(from.quranNotes).get();
   await into.batch((batch) {
@@ -48,12 +50,14 @@ Future<void> copyTables(AppDatabase from, AppDatabase into) async {
       ..deleteAll(into.qadaEntries)
       ..deleteAll(into.azkarCounts)
       ..deleteAll(into.savedDuas)
+      ..deleteAll(into.quranCategories)
       ..deleteAll(into.quranBookmarks)
       ..deleteAll(into.quranNotes)
       ..insertAll(into.prayerLog, log)
       ..insertAll(into.qadaEntries, qada)
       ..insertAll(into.azkarCounts, azkar)
       ..insertAll(into.savedDuas, duas)
+      ..insertAll(into.quranCategories, categories)
       ..insertAll(into.quranBookmarks, bookmarks)
       ..insertAll(into.quranNotes, notes);
   });
