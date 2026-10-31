@@ -14,6 +14,7 @@ class SearchField extends StatelessWidget {
   const SearchField({
     required this.hint,
     required this.onChanged,
+    this.onSubmitted,
     this.controller,
     this.filled = false,
     super.key,
@@ -22,6 +23,7 @@ class SearchField extends StatelessWidget {
   /// a StringsManager key
   final String hint;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
 
   /// given, a clear button shows while there is text
   final TextEditingController? controller;
@@ -74,6 +76,7 @@ class SearchField extends StatelessWidget {
                   controller: controller,
                   autofocus: filled,
                   onChanged: onChanged,
+                  onSubmitted: onSubmitted,
                   style: style(ThemeEnum.text),
                   cursorColor: context.getColor(ThemeEnum.primary),
                   textInputAction: TextInputAction.search,
