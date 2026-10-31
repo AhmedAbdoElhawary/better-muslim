@@ -12,6 +12,7 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
+import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,6 +27,7 @@ Future<bool> showLocationSheet(
 }) async =>
     await showBmSheet<bool>(
       context,
+      title: const SheetTitle(StringsManager.location),
       builder: (_) => LocationSheet(useMyLocation: useMyLocation, failed: failed),
     ) ??
     false;
@@ -80,11 +82,6 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SymmetricPadding(
-            horizontal: SpaceManager.screen,
-            child: SemiBoldText(StringsManager.location),
-          ),
-          const RSizedBox.vertical(SpaceManager.s2),
           _UseMyLocationRow(busy: _busy, onTap: _useMyLocation),
           BmSwitcher(
             child: _failed
