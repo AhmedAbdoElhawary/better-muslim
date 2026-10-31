@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
@@ -21,10 +22,21 @@ class DuaPlayer extends Notifier<String?> {
 
   @override
   String? build() {
+    final use = ref.read(audioUseProvider.notifier);
+
+    /// held for the whole dua, so the quran never comes back between its ayahs
+    listenSelf((_, id) => id == null ? use.release(AudioUse.clip) : use.claim(AudioUse.clip));
+    ref.listen(audioUseProvider, (_, now) {
+      if (now == AudioUse.recitation || now == AudioUse.adhan) stop();
+    });
+
     /// leaving the duas pages stops the clip with them
     ref.onDispose(() {
       _ended?.cancel();
       _player?.stop();
+
+      /// riverpod lets no provider change another while it is disposed
+      Future(() => use.release(AudioUse.clip));
     });
     return null;
   }
