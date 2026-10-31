@@ -40,9 +40,10 @@ void main() {
       ),
     );
 
-    /// the neighbours come one frame each
-    await tester.pump();
-    await tester.pump();
+    /// the pages around come one frame each
+    for (var i = 0; i < 4; i++) {
+      await tester.pump();
+    }
     return page;
   }
 
@@ -111,15 +112,38 @@ void main() {
     expect(reduced.value, 6);
   });
 
-  testWidgets('only the page and its two neighbours are built, once each', (tester) async {
+  testWidgets('only the page and two each side are built, once each', (tester) async {
     final page = await pumpTurner(tester, start: 5);
     await tester.pumpAndSettle();
-    expect(built.toSet(), {4, 5, 6});
+    expect(built.toSet(), {3, 4, 5, 6, 7});
     built.clear();
 
     await drag(tester, 393 * .6);
     expect(page.value, 6);
-    expect(built, [7], reason: 'the pages already there keep their elements');
+    expect(built, [8], reason: 'the pages already there keep their elements');
+  });
+
+  testWidgets('a turn still settling never blocks the next one', (tester) async {
+    for (final book in [true, false]) {
+      final page = await pumpTurner(tester, start: 5, book: book);
+      for (var i = 0; i < 3; i++) {
+        await tester.tapAt(const Offset(20, 400));
+        await tester.pump(const Duration(milliseconds: 60));
+      }
+      expect(page.value, 7, reason: 'each tap lands the turn before it');
+      await tester.pumpAndSettle();
+      expect(page.value, 8);
+
+      await tester.tapAt(const Offset(20, 400));
+      await tester.pump(const Duration(milliseconds: 60));
+      await tester.timedDrag(
+        find.byType(PageTurner),
+        const Offset(393 * .6, 0),
+        const Duration(milliseconds: 300),
+      );
+      await tester.pumpAndSettle();
+      expect(page.value, 10, reason: 'a grab mid turn turns one more');
+    }
   });
 
   /// the layers between the turner and the page, the ones that soften it on android (R11)
@@ -161,7 +185,10 @@ void main() {
     await tester.pump();
     expect(built, [5, 6, 4]);
     await tester.pump();
-    expect(built, [5, 6, 4], reason: 'nothing more once both are there');
+    await tester.pump();
+    expect(built, [5, 6, 4, 7, 3]);
+    await tester.pump();
+    expect(built, [5, 6, 4, 7, 3], reason: 'nothing more once all are there');
   });
 
   testWidgets('a settled page has no transform or opacity above it', (tester) async {
@@ -176,7 +203,7 @@ void main() {
     await drag(tester, 393 * .6);
     expect(slide.value, 6);
     expect(layersAbove(tester, 6), isEmpty);
-    expect(built, [7], reason: 'the wrappers come and go, the pages stay');
+    expect(built, [8], reason: 'the wrappers come and go, the pages stay');
   });
 
   testWidgets('book curls a picture of the leaf and lets it go when the page settles', (
