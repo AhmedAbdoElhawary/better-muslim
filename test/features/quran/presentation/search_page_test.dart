@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/quran/data/search_text.dart';
 import 'package:better_muslim/features/quran/domain/quran_search.dart';
@@ -18,11 +19,13 @@ const typingPause = Duration(milliseconds: 200);
 
 void main() {
   late List<SearchAyah> ayahs;
+  late QuranAssets assets;
   setUpAll(tz.initializeTimeZones);
   setUpAll(loadAppFonts);
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     ayahs = await loadSearchAyahs();
+    assets = await QuranAssets.load();
   });
   setUp(mockSystemChannel);
 
@@ -49,16 +52,51 @@ void main() {
       expect(find.text('JUMP TO SURAH'), findsOneWidget);
       expect(find.text('55 · Ar-Rahman'), findsOneWidget);
       expect(find.text('Medinan · 78 ayahs · p. 531'), findsOneWidget);
+      final count = searchQuran('الرحمن', ayahs, assets).groups;
+      expect(
+        find.text(
+          '${count.values.expand((hits) => hits).fold(0, (sum, hit) => sum + hit.count)} times in '
+          '${count.values.fold(0, (sum, hits) => sum + hits.length)} ayahs in ${count.length} surahs',
+        ),
+        findsOneWidget,
+      );
+
+      /// every surah starts folded, a tap opens its hits and a second folds them
+      expect(find.text('1:1'), findsNothing);
+      await tester.tap(find.text('Al-Fatiha'));
+      await tester.pumpAndSettle();
       expect(find.text('AL-FATIHA'), findsOneWidget);
       expect(find.text('1:1'), findsOneWidget);
       expect(find.text('1:3'), findsOneWidget);
-
-      /// the next surah is a closed row, a tap opens its hits under it
-      expect(find.text('2:163'), findsNothing);
-      await tester.tap(find.text('Al-Baqarah'));
+      await tester.tap(find.text('AL-FATIHA'));
       await tester.pumpAndSettle();
+      expect(find.text('1:1'), findsNothing);
+
+      await tester.tap(find.text('Expand all'));
+      await tester.pumpAndSettle();
+      expect(find.text('1:1'), findsOneWidget);
       expect(find.text('AL-BAQARAH'), findsOneWidget);
-      expect(find.text('2:163'), findsOneWidget);
+      await tester.tap(find.text('Fold all'));
+      await tester.pumpAndSettle();
+      expect(find.text('AL-BAQARAH'), findsNothing);
+      expect(find.text('Expand all'), findsOneWidget);
+
+      /// a search I submit is kept, the empty field lists it
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pump(typingPause);
+      await tester.pumpAndSettle();
+      expect(find.text('Recent searches'), findsOneWidget);
+      await tester.tap(find.text('الرحمن'));
+      await tester.pumpAndSettle();
+      expect(find.text('Expand all'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pump(typingPause);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clear'));
+      await tester.pumpAndSettle();
+      expect(find.text('Recent searches'), findsNothing);
 
       await tester.enterText(find.byType(TextField), 'p 700');
       await tester.pump(typingPause);
@@ -67,6 +105,8 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'الحمد لله رب العالمين');
       await tester.pump(typingPause);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Al-Fatiha'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('1:2'));
       await tester.pumpAndSettle();
