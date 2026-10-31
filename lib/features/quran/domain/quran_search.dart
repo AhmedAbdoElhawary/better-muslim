@@ -2,8 +2,8 @@ import 'package:better_muslim/core/location/place_list.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 
-/// 4.27's chips, the root chip waits for a licensed root list
-enum SearchScope { all, arabic, translation }
+/// 4.27's chips
+enum SearchScope { all, arabic, translation, root }
 
 enum JumpKind { surah, page, ayah }
 
@@ -14,8 +14,9 @@ typedef _Form = ({String text, List<int> starts});
 
 /// one ayah as the search reads it, its words without the end marker
 class SearchAyah {
-  SearchAyah(this.key, this.words, String translation)
+  SearchAyah(this.key, this.words, String translation, {List<String> roots = const []})
     : translation = translation.split(' '),
+      _roots = [for (final root in roots) _fold(root)],
       _arabic = [
         _form([for (final word in words) _fold(word.replaceAll('\u0670', ''))]),
         _form([for (final word in words) _fold(word.replaceAll('\u0670', 'ا'))]),
@@ -31,6 +32,9 @@ class SearchAyah {
   /// the dagger alef dropped and as an alef, so الرحمن and الكتاب both find their ayahs
   final List<_Form> _arabic;
   final _Form _translation;
+
+  /// each word's root from the quranic arabic corpus, '' for a word without one
+  final List<String> _roots;
 
   static _Form _form(List<String> words) {
     final text = StringBuffer();
@@ -83,6 +87,19 @@ class SearchHit {
   final arabic = _fold(text);
   final english = text.toLowerCase();
   final groups = <int, List<SearchHit>>{};
+  if (scope == SearchScope.root) {
+    /// "ر ح م" and "رحم" are the same root
+    final root = arabic.replaceAll(' ', '');
+    for (final ayah in ayahs) {
+      final words = {
+        for (final (i, word) in ayah._roots.indexed)
+          if (word == root && i < ayah.words.length) i,
+      };
+      if (words.isEmpty) continue;
+      (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, arabic: words));
+    }
+    return (jump: null, groups: groups);
+  }
   for (final ayah in ayahs) {
     final words = scope == SearchScope.translation ? const <int>{} : _matched(ayah._arabic, arabic);
     final translation = scope == SearchScope.arabic
