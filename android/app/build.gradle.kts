@@ -90,7 +90,6 @@ android {
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("release")
             } else {
-                // TODO(ahmed): the one path that makes a debug-signed "release". CI catches it, a local build only warns.
                 logger.warn("key.properties not found — signing the RELEASE build with the DEBUG key. This artifact cannot be uploaded to Play.")
                 signingConfigs.getByName("debug")
             }
