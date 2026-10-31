@@ -20,6 +20,11 @@ final notesProvider = StreamProvider<List<Note>>(
   (ref) => ref.watch(quranStoreProvider).watchNotes(),
 );
 
+/// newest first, the search page's recent list
+final searchesProvider = StreamProvider<List<String>>(
+  (ref) => ref.watch(quranStoreProvider).watchSearches(),
+);
+
 /// a highlight with no text isn't a note to list
 final writtenNotesProvider = Provider<List<Note>>(
   (ref) => [...?ref.watch(notesProvider).value?.where((note) => note.text.isNotEmpty)],
