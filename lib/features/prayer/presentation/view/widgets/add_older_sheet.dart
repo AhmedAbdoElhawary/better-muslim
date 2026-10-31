@@ -22,6 +22,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// toast goes on the list's context, the sheet's is gone by then
 Future<void> showAddOlderSheet(BuildContext context, Prayer prayer) => showBmSheet(
   context,
+  title: SheetTitle(StringsManager.addMissedTitle, args: {'prayer': context.tr(prayer.nameKey)}),
   builder: (_) => _AddOlderSheet(listContext: context, prayer: prayer),
 );
 
@@ -69,10 +70,6 @@ class _AddOlderSheetState extends ConsumerState<_AddOlderSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SheetTitle(
-              StringsManager.addMissedTitle,
-              args: {'prayer': context.tr(widget.prayer.nameKey)},
-            ),
             VerticalPadding(
               padding: SpaceManager.s4,
               child: Row(
