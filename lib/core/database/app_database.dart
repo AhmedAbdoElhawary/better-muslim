@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/azkar/azkar_window.dart';
@@ -16,7 +15,6 @@ import 'package:better_muslim/core/settings/azkar.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -59,9 +57,6 @@ class Settings extends Table {
   BoolColumn get reduceMotion => boolean().withDefault(const Constant(false))();
   BoolColumn get haptics => boolean().withDefault(const Constant(true))();
   BoolColumn get uiSounds => boolean().withDefault(const Constant(false))();
-
-  /// set by a store reset, cleared once the user has been told (milestone 10)
-  BoolColumn get storeResetPending => boolean().withDefault(const Constant(false))();
 
   /// the strip's earliest week. the v2 migration fills it with the upgrade date
   TextColumn get firstUse => text().map(const CivilDate()).nullable()();
@@ -123,7 +118,6 @@ class Settings extends Table {
   BoolColumn get topGlow => boolean().withDefault(const Constant(true))();
   TextColumn get language => textEnum<Language>().withDefault(const Constant('phone'))();
 
-  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
   BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
 
   IntColumn get lastReadSurah => integer().withDefault(const Constant(1))();
@@ -273,6 +267,15 @@ class QuranNotes extends Table {
   List<String> get customConstraints => ['CHECK (length(trim(note)) > 0 OR highlight)'];
 }
 
+/// the last searches on the quran search page
+class QuranSearches extends Table {
+  TextColumn get query => text()();
+  DateTimeColumn get searchedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {query};
+}
+
 @DriftDatabase(
   tables: [
     Settings,
@@ -283,6 +286,7 @@ class QuranNotes extends Table {
     QuranCategories,
     QuranBookmarks,
     QuranNotes,
+    QuranSearches,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -292,7 +296,7 @@ class AppDatabase extends _$AppDatabase {
 
   static const _name = 'better_muslim';
 
-  /// a store that can't be opened starts fresh instead of crashing, and remembers it (FR-024)
+  /// a store that can't be opened starts fresh instead of crashing (FR-024)
   static Future<AppDatabase> open() async {
     /// Documents is backed up and shown in the Files app, Application Support is not
     final directory = await getApplicationSupportDirectory();
@@ -342,24 +346,8 @@ class AppDatabase extends _$AppDatabase {
       if (leftover.existsSync()) leftover.deleteSync();
     }
     final db = _connect(file, await DatabaseKey.create());
-    await db.updateSettings(const SettingsCompanion(storeResetPending: Value(true)));
     await BackupExclusion.exclude(file.path);
     return db;
-  }
-
-  /// a backup's store, locked with the password (contracts/backup-file.md). hex, so any password
-  /// works with no quoting
-  static AppDatabase backup(File file, String password) {
-    final key = utf8.encode(password).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
-    return AppDatabase._(
-      NativeDatabase.createInBackground(
-        file,
-        setup: (db) => db
-          ..execute("pragma cipher = 'chacha20'")
-          ..execute('pragma kdf_iter = 600000')
-          ..execute("pragma hexkey = '$key'"),
-      ),
-    );
   }
 
   /// its own function, so the setup closure sent to drift's isolate captures only sendable values
@@ -377,7 +365,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 22;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -595,6 +583,13 @@ class AppDatabase extends _$AppDatabase {
             },
           ),
         );
+      },
+      from20To21: (m, schema) async {
+        await m.createTable(schema.quranSearches);
+      },
+      from21To22: (m, schema) async {
+        /// the reset notice left with backup and restore
+        await m.alterTable(TableMigration(schema.settings));
       },
     ),
   );

@@ -189,21 +189,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("ui_sounds" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _storeResetPendingMeta = const VerificationMeta(
-    'storeResetPending',
-  );
-  @override
-  late final GeneratedColumn<bool> storeResetPending = GeneratedColumn<bool>(
-    'store_reset_pending',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("store_reset_pending" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
   @override
   late final GeneratedColumnWithTypeConverter<DateTime?, String> firstUse = GeneratedColumn<String>(
     'first_use',
@@ -663,7 +648,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     reduceMotion,
     haptics,
     uiSounds,
-    storeResetPending,
     firstUse,
     fajrSound,
     dhuhrSound,
@@ -789,15 +773,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _uiSoundsMeta,
         uiSounds.isAcceptableOrUnknown(data['ui_sounds']!, _uiSoundsMeta),
-      );
-    }
-    if (data.containsKey('store_reset_pending')) {
-      context.handle(
-        _storeResetPendingMeta,
-        storeResetPending.isAcceptableOrUnknown(
-          data['store_reset_pending']!,
-          _storeResetPendingMeta,
-        ),
       );
     }
     if (data.containsKey('reminder_minutes')) {
@@ -1016,10 +991,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       uiSounds: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}ui_sounds'],
-      )!,
-      storeResetPending: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}store_reset_pending'],
       )!,
       firstUse: $SettingsTable.$converterfirstUsen.fromSql(
         attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}first_use']),
@@ -1327,9 +1298,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final bool haptics;
   final bool uiSounds;
 
-  /// set by a store reset, cleared once the user has been told (milestone 10)
-  final bool storeResetPending;
-
   /// the strip's earliest week. the v2 migration fills it with the upgrade date
   final DateTime? firstUse;
   final PrayerSound fajrSound;
@@ -1367,8 +1335,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final CalendarMode calendarMode;
   final bool topGlow;
   final Language language;
-
-  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
   final bool onboarded;
   final int lastReadSurah;
   final int lastReadAyah;
@@ -1417,7 +1383,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.reduceMotion,
     required this.haptics,
     required this.uiSounds,
-    required this.storeResetPending,
     this.firstUse,
     required this.fajrSound,
     required this.dhuhrSound,
@@ -1513,7 +1478,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['reduce_motion'] = Variable<bool>(reduceMotion);
     map['haptics'] = Variable<bool>(haptics);
     map['ui_sounds'] = Variable<bool>(uiSounds);
-    map['store_reset_pending'] = Variable<bool>(storeResetPending);
     if (!nullToAbsent || firstUse != null) {
       map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse));
     }
@@ -1648,7 +1612,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reduceMotion: Value(reduceMotion),
       haptics: Value(haptics),
       uiSounds: Value(uiSounds),
-      storeResetPending: Value(storeResetPending),
       firstUse: firstUse == null && nullToAbsent ? const Value.absent() : Value(firstUse),
       fajrSound: Value(fajrSound),
       dhuhrSound: Value(dhuhrSound),
@@ -1728,7 +1691,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reduceMotion: serializer.fromJson<bool>(json['reduceMotion']),
       haptics: serializer.fromJson<bool>(json['haptics']),
       uiSounds: serializer.fromJson<bool>(json['uiSounds']),
-      storeResetPending: serializer.fromJson<bool>(json['storeResetPending']),
       firstUse: serializer.fromJson<DateTime?>(json['firstUse']),
       fajrSound: $SettingsTable.$converterfajrSound.fromJson(
         serializer.fromJson<String>(json['fajrSound']),
@@ -1836,7 +1798,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'reduceMotion': serializer.toJson<bool>(reduceMotion),
       'haptics': serializer.toJson<bool>(haptics),
       'uiSounds': serializer.toJson<bool>(uiSounds),
-      'storeResetPending': serializer.toJson<bool>(storeResetPending),
       'firstUse': serializer.toJson<DateTime?>(firstUse),
       'fajrSound': serializer.toJson<String>($SettingsTable.$converterfajrSound.toJson(fajrSound)),
       'dhuhrSound': serializer.toJson<String>(
@@ -1920,7 +1881,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     bool? reduceMotion,
     bool? haptics,
     bool? uiSounds,
-    bool? storeResetPending,
     Value<DateTime?> firstUse = const Value.absent(),
     PrayerSound? fajrSound,
     PrayerSound? dhuhrSound,
@@ -1983,7 +1943,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reduceMotion: reduceMotion ?? this.reduceMotion,
     haptics: haptics ?? this.haptics,
     uiSounds: uiSounds ?? this.uiSounds,
-    storeResetPending: storeResetPending ?? this.storeResetPending,
     firstUse: firstUse.present ? firstUse.value : this.firstUse,
     fajrSound: fajrSound ?? this.fajrSound,
     dhuhrSound: dhuhrSound ?? this.dhuhrSound,
@@ -2048,9 +2007,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reduceMotion: data.reduceMotion.present ? data.reduceMotion.value : this.reduceMotion,
       haptics: data.haptics.present ? data.haptics.value : this.haptics,
       uiSounds: data.uiSounds.present ? data.uiSounds.value : this.uiSounds,
-      storeResetPending: data.storeResetPending.present
-          ? data.storeResetPending.value
-          : this.storeResetPending,
       firstUse: data.firstUse.present ? data.firstUse.value : this.firstUse,
       fajrSound: data.fajrSound.present ? data.fajrSound.value : this.fajrSound,
       dhuhrSound: data.dhuhrSound.present ? data.dhuhrSound.value : this.dhuhrSound,
@@ -2140,7 +2096,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('reduceMotion: $reduceMotion, ')
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
-          ..write('storeResetPending: $storeResetPending, ')
           ..write('firstUse: $firstUse, ')
           ..write('fajrSound: $fajrSound, ')
           ..write('dhuhrSound: $dhuhrSound, ')
@@ -2208,7 +2163,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reduceMotion,
     haptics,
     uiSounds,
-    storeResetPending,
     firstUse,
     fajrSound,
     dhuhrSound,
@@ -2275,7 +2229,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.reduceMotion == this.reduceMotion &&
           other.haptics == this.haptics &&
           other.uiSounds == this.uiSounds &&
-          other.storeResetPending == this.storeResetPending &&
           other.firstUse == this.firstUse &&
           other.fajrSound == this.fajrSound &&
           other.dhuhrSound == this.dhuhrSound &&
@@ -2340,7 +2293,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<bool> reduceMotion;
   final Value<bool> haptics;
   final Value<bool> uiSounds;
-  final Value<bool> storeResetPending;
   final Value<DateTime?> firstUse;
   final Value<PrayerSound> fajrSound;
   final Value<PrayerSound> dhuhrSound;
@@ -2403,7 +2355,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reduceMotion = const Value.absent(),
     this.haptics = const Value.absent(),
     this.uiSounds = const Value.absent(),
-    this.storeResetPending = const Value.absent(),
     this.firstUse = const Value.absent(),
     this.fajrSound = const Value.absent(),
     this.dhuhrSound = const Value.absent(),
@@ -2467,7 +2418,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reduceMotion = const Value.absent(),
     this.haptics = const Value.absent(),
     this.uiSounds = const Value.absent(),
-    this.storeResetPending = const Value.absent(),
     this.firstUse = const Value.absent(),
     this.fajrSound = const Value.absent(),
     this.dhuhrSound = const Value.absent(),
@@ -2531,7 +2481,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<bool>? reduceMotion,
     Expression<bool>? haptics,
     Expression<bool>? uiSounds,
-    Expression<bool>? storeResetPending,
     Expression<String>? firstUse,
     Expression<String>? fajrSound,
     Expression<String>? dhuhrSound,
@@ -2595,7 +2544,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (reduceMotion != null) 'reduce_motion': reduceMotion,
       if (haptics != null) 'haptics': haptics,
       if (uiSounds != null) 'ui_sounds': uiSounds,
-      if (storeResetPending != null) 'store_reset_pending': storeResetPending,
       if (firstUse != null) 'first_use': firstUse,
       if (fajrSound != null) 'fajr_sound': fajrSound,
       if (dhuhrSound != null) 'dhuhr_sound': dhuhrSound,
@@ -2661,7 +2609,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<bool>? reduceMotion,
     Value<bool>? haptics,
     Value<bool>? uiSounds,
-    Value<bool>? storeResetPending,
     Value<DateTime?>? firstUse,
     Value<PrayerSound>? fajrSound,
     Value<PrayerSound>? dhuhrSound,
@@ -2725,7 +2672,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       reduceMotion: reduceMotion ?? this.reduceMotion,
       haptics: haptics ?? this.haptics,
       uiSounds: uiSounds ?? this.uiSounds,
-      storeResetPending: storeResetPending ?? this.storeResetPending,
       firstUse: firstUse ?? this.firstUse,
       fajrSound: fajrSound ?? this.fajrSound,
       dhuhrSound: dhuhrSound ?? this.dhuhrSound,
@@ -2836,9 +2782,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     }
     if (uiSounds.present) {
       map['ui_sounds'] = Variable<bool>(uiSounds.value);
-    }
-    if (storeResetPending.present) {
-      map['store_reset_pending'] = Variable<bool>(storeResetPending.value);
     }
     if (firstUse.present) {
       map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse.value));
@@ -3023,7 +2966,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('reduceMotion: $reduceMotion, ')
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
-          ..write('storeResetPending: $storeResetPending, ')
           ..write('firstUse: $firstUse, ')
           ..write('fajrSound: $fajrSound, ')
           ..write('dhuhrSound: $dhuhrSound, ')
@@ -4987,6 +4929,205 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
   }
 }
 
+class $QuranSearchesTable extends QuranSearches with TableInfo<$QuranSearchesTable, QuranSearche> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuranSearchesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _queryMeta = const VerificationMeta('query');
+  @override
+  late final GeneratedColumn<String> query = GeneratedColumn<String>(
+    'query',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _searchedAtMeta = const VerificationMeta('searchedAt');
+  @override
+  late final GeneratedColumn<DateTime> searchedAt = GeneratedColumn<DateTime>(
+    'searched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [query, searchedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quran_searches';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuranSearche> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('query')) {
+      context.handle(_queryMeta, query.isAcceptableOrUnknown(data['query']!, _queryMeta));
+    } else if (isInserting) {
+      context.missing(_queryMeta);
+    }
+    if (data.containsKey('searched_at')) {
+      context.handle(
+        _searchedAtMeta,
+        searchedAt.isAcceptableOrUnknown(data['searched_at']!, _searchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_searchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {query};
+  @override
+  QuranSearche map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuranSearche(
+      query: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}query'],
+      )!,
+      searchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}searched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QuranSearchesTable createAlias(String alias) {
+    return $QuranSearchesTable(attachedDatabase, alias);
+  }
+}
+
+class QuranSearche extends DataClass implements Insertable<QuranSearche> {
+  final String query;
+  final DateTime searchedAt;
+  const QuranSearche({required this.query, required this.searchedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['query'] = Variable<String>(query);
+    map['searched_at'] = Variable<DateTime>(searchedAt);
+    return map;
+  }
+
+  QuranSearchesCompanion toCompanion(bool nullToAbsent) {
+    return QuranSearchesCompanion(query: Value(query), searchedAt: Value(searchedAt));
+  }
+
+  factory QuranSearche.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuranSearche(
+      query: serializer.fromJson<String>(json['query']),
+      searchedAt: serializer.fromJson<DateTime>(json['searchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'query': serializer.toJson<String>(query),
+      'searchedAt': serializer.toJson<DateTime>(searchedAt),
+    };
+  }
+
+  QuranSearche copyWith({String? query, DateTime? searchedAt}) =>
+      QuranSearche(query: query ?? this.query, searchedAt: searchedAt ?? this.searchedAt);
+  QuranSearche copyWithCompanion(QuranSearchesCompanion data) {
+    return QuranSearche(
+      query: data.query.present ? data.query.value : this.query,
+      searchedAt: data.searchedAt.present ? data.searchedAt.value : this.searchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranSearche(')
+          ..write('query: $query, ')
+          ..write('searchedAt: $searchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(query, searchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuranSearche && other.query == this.query && other.searchedAt == this.searchedAt);
+}
+
+class QuranSearchesCompanion extends UpdateCompanion<QuranSearche> {
+  final Value<String> query;
+  final Value<DateTime> searchedAt;
+  final Value<int> rowid;
+  const QuranSearchesCompanion({
+    this.query = const Value.absent(),
+    this.searchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  QuranSearchesCompanion.insert({
+    required String query,
+    required DateTime searchedAt,
+    this.rowid = const Value.absent(),
+  }) : query = Value(query),
+       searchedAt = Value(searchedAt);
+  static Insertable<QuranSearche> custom({
+    Expression<String>? query,
+    Expression<DateTime>? searchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (query != null) 'query': query,
+      if (searchedAt != null) 'searched_at': searchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QuranSearchesCompanion copyWith({
+    Value<String>? query,
+    Value<DateTime>? searchedAt,
+    Value<int>? rowid,
+  }) {
+    return QuranSearchesCompanion(
+      query: query ?? this.query,
+      searchedAt: searchedAt ?? this.searchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (query.present) {
+      map['query'] = Variable<String>(query.value);
+    }
+    if (searchedAt.present) {
+      map['searched_at'] = Variable<DateTime>(searchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranSearchesCompanion(')
+          ..write('query: $query, ')
+          ..write('searchedAt: $searchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4998,6 +5139,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $QuranCategoriesTable quranCategories = $QuranCategoriesTable(this);
   late final $QuranBookmarksTable quranBookmarks = $QuranBookmarksTable(this);
   late final $QuranNotesTable quranNotes = $QuranNotesTable(this);
+  late final $QuranSearchesTable quranSearches = $QuranSearchesTable(this);
   late final Index qadaDay = Index(
     'qada_day',
     'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
@@ -5023,6 +5165,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     quranCategories,
     quranBookmarks,
     quranNotes,
+    quranSearches,
     qadaDay,
     quranBookmarkAyah,
     quranBookmarkPage,
@@ -5049,7 +5192,6 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<bool> reduceMotion,
   Value<bool> haptics,
   Value<bool> uiSounds,
-  Value<bool> storeResetPending,
   Value<DateTime?> firstUse,
   Value<PrayerSound> fajrSound,
   Value<PrayerSound> dhuhrSound,
@@ -5113,7 +5255,6 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<bool> reduceMotion,
   Value<bool> haptics,
   Value<bool> uiSounds,
-  Value<bool> storeResetPending,
   Value<DateTime?> firstUse,
   Value<PrayerSound> fajrSound,
   Value<PrayerSound> dhuhrSound,
@@ -5237,11 +5378,6 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
 
   ColumnFilters<bool> get uiSounds =>
       $composableBuilder(column: $table.uiSounds, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get storeResetPending => $composableBuilder(
-    column: $table.storeResetPending,
-    builder: (column) => ColumnFilters(column),
-  );
 
   ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get firstUse => $composableBuilder(
     column: $table.firstUse,
@@ -5507,11 +5643,6 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<bool> get uiSounds =>
       $composableBuilder(column: $table.uiSounds, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get storeResetPending => $composableBuilder(
-    column: $table.storeResetPending,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get firstUse =>
       $composableBuilder(column: $table.firstUse, builder: (column) => ColumnOrderings(column));
 
@@ -5733,9 +5864,6 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<bool> get uiSounds =>
       $composableBuilder(column: $table.uiSounds, builder: (column) => column);
 
-  GeneratedColumn<bool> get storeResetPending =>
-      $composableBuilder(column: $table.storeResetPending, builder: (column) => column);
-
   GeneratedColumnWithTypeConverter<DateTime?, String> get firstUse =>
       $composableBuilder(column: $table.firstUse, builder: (column) => column);
 
@@ -5908,7 +6036,6 @@ class $$SettingsTableTableManager
                 Value<bool> reduceMotion = const Value.absent(),
                 Value<bool> haptics = const Value.absent(),
                 Value<bool> uiSounds = const Value.absent(),
-                Value<bool> storeResetPending = const Value.absent(),
                 Value<DateTime?> firstUse = const Value.absent(),
                 Value<PrayerSound> fajrSound = const Value.absent(),
                 Value<PrayerSound> dhuhrSound = const Value.absent(),
@@ -5971,7 +6098,6 @@ class $$SettingsTableTableManager
                 reduceMotion: reduceMotion,
                 haptics: haptics,
                 uiSounds: uiSounds,
-                storeResetPending: storeResetPending,
                 firstUse: firstUse,
                 fajrSound: fajrSound,
                 dhuhrSound: dhuhrSound,
@@ -6036,7 +6162,6 @@ class $$SettingsTableTableManager
                 Value<bool> reduceMotion = const Value.absent(),
                 Value<bool> haptics = const Value.absent(),
                 Value<bool> uiSounds = const Value.absent(),
-                Value<bool> storeResetPending = const Value.absent(),
                 Value<DateTime?> firstUse = const Value.absent(),
                 Value<PrayerSound> fajrSound = const Value.absent(),
                 Value<PrayerSound> dhuhrSound = const Value.absent(),
@@ -6099,7 +6224,6 @@ class $$SettingsTableTableManager
                 reduceMotion: reduceMotion,
                 haptics: haptics,
                 uiSounds: uiSounds,
-                storeResetPending: storeResetPending,
                 firstUse: firstUse,
                 fajrSound: fajrSound,
                 dhuhrSound: dhuhrSound,
@@ -7244,6 +7368,124 @@ typedef $$QuranNotesTableProcessedTableManager =
       QuranNote,
       PrefetchHooks Function()
     >;
+typedef $$QuranSearchesTableCreateCompanionBuilder = QuranSearchesCompanion Function({
+  required String query,
+  required DateTime searchedAt,
+  Value<int> rowid,
+});
+typedef $$QuranSearchesTableUpdateCompanionBuilder = QuranSearchesCompanion Function({
+  Value<String> query,
+  Value<DateTime> searchedAt,
+  Value<int> rowid,
+});
+
+class $$QuranSearchesTableFilterComposer extends Composer<_$AppDatabase, $QuranSearchesTable> {
+  $$QuranSearchesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get query =>
+      $composableBuilder(column: $table.query, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get searchedAt =>
+      $composableBuilder(column: $table.searchedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuranSearchesTableOrderingComposer extends Composer<_$AppDatabase, $QuranSearchesTable> {
+  $$QuranSearchesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get query =>
+      $composableBuilder(column: $table.query, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get searchedAt =>
+      $composableBuilder(column: $table.searchedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuranSearchesTableAnnotationComposer extends Composer<_$AppDatabase, $QuranSearchesTable> {
+  $$QuranSearchesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get query =>
+      $composableBuilder(column: $table.query, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get searchedAt =>
+      $composableBuilder(column: $table.searchedAt, builder: (column) => column);
+}
+
+class $$QuranSearchesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuranSearchesTable,
+          QuranSearche,
+          $$QuranSearchesTableFilterComposer,
+          $$QuranSearchesTableOrderingComposer,
+          $$QuranSearchesTableAnnotationComposer,
+          $$QuranSearchesTableCreateCompanionBuilder,
+          $$QuranSearchesTableUpdateCompanionBuilder,
+          (QuranSearche, BaseReferences<_$AppDatabase, $QuranSearchesTable, QuranSearche>),
+          QuranSearche,
+          PrefetchHooks Function()
+        > {
+  $$QuranSearchesTableTableManager(_$AppDatabase db, $QuranSearchesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$QuranSearchesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuranSearchesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuranSearchesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> query = const Value.absent(),
+            Value<DateTime> searchedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => QuranSearchesCompanion(query: query, searchedAt: searchedAt, rowid: rowid),
+          createCompanionCallback: ({
+            required String query,
+            required DateTime searchedAt,
+            Value<int> rowid = const Value.absent(),
+          }) => QuranSearchesCompanion.insert(query: query, searchedAt: searchedAt, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QuranSearchesTable, QuranSearche>(table),
+                  BaseReferences<_$AppDatabase, $QuranSearchesTable, QuranSearche>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuranSearchesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuranSearchesTable,
+      QuranSearche,
+      $$QuranSearchesTableFilterComposer,
+      $$QuranSearchesTableOrderingComposer,
+      $$QuranSearchesTableAnnotationComposer,
+      $$QuranSearchesTableCreateCompanionBuilder,
+      $$QuranSearchesTableUpdateCompanionBuilder,
+      (QuranSearche, BaseReferences<_$AppDatabase, $QuranSearchesTable, QuranSearche>),
+      QuranSearche,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7261,4 +7503,6 @@ class $AppDatabaseManager {
       $$QuranBookmarksTableTableManager(_db, _db.quranBookmarks);
   $$QuranNotesTableTableManager get quranNotes =>
       $$QuranNotesTableTableManager(_db, _db.quranNotes);
+  $$QuranSearchesTableTableManager get quranSearches =>
+      $$QuranSearchesTableTableManager(_db, _db.quranSearches);
 }
