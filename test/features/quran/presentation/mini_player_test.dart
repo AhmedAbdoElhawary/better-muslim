@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';

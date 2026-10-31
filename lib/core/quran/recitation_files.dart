@@ -5,12 +5,13 @@ import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/settings/quran.dart';
-import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// one for the player and the downloads, so they share the one download at a time
 final recitationFilesProvider = Provider<RecitationFiles>((ref) => RecitationFiles());
+
+enum RecitationFailure { offline, failed }
 
 class RecitationException implements Exception {
   const RecitationException(this.failure);

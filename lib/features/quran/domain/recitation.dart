@@ -1,10 +1,9 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/foundation.dart';
 
 enum RecitationStatus { idle, loading, playing, paused }
-
-enum RecitationFailure { offline, failed }
 
 /// off, after some minutes, or after the surah's last ayah. lives only for the session
 @immutable

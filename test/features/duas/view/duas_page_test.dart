@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:better_muslim/core/audio/clip_player.dart';
@@ -5,8 +6,11 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/system/share.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
@@ -15,7 +19,7 @@ import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
-import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:share_plus/share_plus.dart';
@@ -129,6 +133,48 @@ void main() {
 
       expect(find.text('No duas found'), findsOneWidget);
       expect(find.text('Try another word in English or Arabic.'), findsNothing);
+      await unmount(tester);
+    });
+
+    testWidgets('quran shows the rabbana duas, sahih english, listen in my reciter', (
+      tester,
+    ) async {
+      final clips = FakeClipPlayer();
+      final root = Directory.systemTemp.createTempSync('recitations');
+      File('${root.path}/recitations/husary/002127.mp3')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync([0x49, 0x44, 0x33]);
+      final overrides = await designOverrides(
+        recitationFiles: recitationFilesProvider.overrideWith(
+          (ref) => RecitationFiles(
+            root: () async => root,
+            fetch: (_) async => throw const SocketException('offline'),
+            exclude: (_) async {},
+          ),
+        ),
+      );
+      await pumpDuas(tester, [...overrides, clipPlayerProvider.overrideWithValue(clips)]);
+      await containerOf(tester)
+          .read(databaseProvider)
+          .updateSettings(const SettingsCompanion(reciter: Value(Reciter.husary)));
+      await chip(tester, 'Quran');
+
+      final card = tester.widget<DuaCard>(find.byType(DuaCard));
+      expect(card.dua.id, 'q2-127');
+      expect(find.text('Al-Baqarah 2:127'), findsOneWidget);
+      expect(find.textContaining('Our Lord, accept [this] from us.'), findsOneWidget);
+      expect(find.text('Rabbana duas from the Quran'), findsWidgets);
+      expect(find.text('38 duas'), findsOneWidget);
+      expect(find.text('Leaving the home'), findsNothing);
+
+      await tester.tap(action('Listen'));
+      await tester.pumpAndSettle();
+      expect(clips.played, ['${root.path}/recitations/husary/002127.mp3']);
+      expect(action('Stop'), findsOneWidget);
+
+      await tester.tap(action('Save'));
+      await tester.pumpAndSettle();
+      expect(action('Saved'), findsOneWidget);
       await unmount(tester);
     });
 
@@ -268,7 +314,9 @@ void main() {
     testWidgets('a clip plays and reads stop, a page on top or leaving stops it', (tester) async {
       final clips = FakeClipPlayer();
       final withClip = [
-        for (final category in await tester.runAsync(loadDuas) ?? <DuaCategory>[])
+        for (final category
+            in await tester.runAsync(() async => loadDuas(await QuranAssets.load())) ??
+                <DuaCategory>[])
           DuaCategory(
             id: category.id,
             name: category.name,

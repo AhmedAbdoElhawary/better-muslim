@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/settings/quran.dart';
-import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/router/app_router.dart';
-import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;

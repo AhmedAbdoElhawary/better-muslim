@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/model/duas_view.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<DuaCategory> categories;
-  setUpAll(() async => categories = await loadDuas());
+  setUpAll(() async => categories = await loadDuas(await QuranAssets.load()));
 
   /// the card's category first, then the rows
   List<String?> view(DuaChip chip) {
@@ -21,6 +22,7 @@ void main() {
       'Before sleeping',
       'Entering and leaving the mosque',
       'Before and after eating',
+      'Rabbana duas from the Quran',
     ]);
   });
 

@@ -125,6 +125,7 @@ abstract final class StringsManager {
   static const String catHome = 'catHome';
   static const String catTravel = 'catTravel';
   static const String catSleep = 'catSleep';
+  static const String catQuranic = 'catQuranic';
   static const String listen = 'listen';
   static const String save = 'save';
   static const String share = 'share';

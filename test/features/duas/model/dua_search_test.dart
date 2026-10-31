@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/model/dua_search.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<DuaCategory> categories;
-  setUpAll(() async => categories = await loadDuas());
+  setUpAll(() async => categories = await loadDuas(await QuranAssets.load()));
 
   Set<String> found(String query) => {
     for (final (_, category) in searchDuas(query, categories)) category.name.en,

@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:better_muslim/core/audio/clip_player.dart';
+import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view_model/dua_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,9 +24,22 @@ void main() {
 
   late FakeClipPlayer clips;
   late ProviderContainer container;
+  late Directory root;
   setUp(() {
     clips = FakeClipPlayer();
-    container = ProviderContainer(overrides: [clipPlayerProvider.overrideWithValue(clips)]);
+    root = Directory.systemTemp.createTempSync('recitations');
+    container = ProviderContainer(
+      overrides: [
+        clipPlayerProvider.overrideWithValue(clips),
+        recitationFilesProvider.overrideWithValue(
+          RecitationFiles(
+            root: () async => root,
+            fetch: (_) async => throw const SocketException('offline'),
+            exclude: (_) async {},
+          ),
+        ),
+      ],
+    );
     container.listen(duaPlayerProvider, (_, _) {});
     addTearDown(container.dispose);
   });
@@ -62,5 +79,40 @@ void main() {
 
     expect(container.read(duaPlayerProvider), isNull);
     expect(clips.played, isEmpty);
+  });
+
+  group('a quranic dua', () {
+    const verses = Dua(
+      id: 'q10-85-86',
+      arabic: '',
+      transliteration: '',
+      translation: '',
+      source: (en: '', ar: ''),
+      quran: true,
+      ayahs: [AyahKey(10, 85), AyahKey(10, 86)],
+    );
+
+    test('recites its ayahs one after the other from the phone', () async {
+      for (final name in ['010085.mp3', '010086.mp3']) {
+        File('${root.path}/recitations/alafasy/$name').createSync(recursive: true);
+      }
+      expect(await player().toggle(verses), isTrue);
+      expect(clips.played, ['${root.path}/recitations/alafasy/010085.mp3']);
+
+      clips.end();
+      await pumpEventQueue();
+      expect(clips.played.last, '${root.path}/recitations/alafasy/010086.mp3');
+      expect(container.read(duaPlayerProvider), 'q10-85-86');
+
+      clips.end();
+      await pumpEventQueue();
+      expect(container.read(duaPlayerProvider), isNull);
+    });
+
+    test('offline with an ayah not on the phone it fails and plays nothing', () async {
+      expect(await player().toggle(verses), isFalse);
+      expect(container.read(duaPlayerProvider), isNull);
+      expect(clips.played, isEmpty);
+    });
   });
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
