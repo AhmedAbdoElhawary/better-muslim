@@ -584,4 +584,8 @@ abstract final class StringsManager {
   static const String deleteDownloadTitle = 'deleteDownloadTitle';
   static const String deleteDownloadBody = 'deleteDownloadBody';
   static const String sizeMb = 'sizeMb';
+  static const String back10 = 'back10';
+  static const String forward10 = 'forward10';
+  static const String ayahNumber = 'ayahNumber';
+  static const String recitationBar = 'recitationBar';
 }

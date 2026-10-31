@@ -35,6 +35,10 @@ class AudioServiceRecitation implements Recitation {
 
   final RecitationFiles _files;
   final _player = AudioPlayer();
+
+  /// reads an ayah's length for ±10 s when it hasn't played yet, it never plays
+  final _probe = AudioPlayer();
+  final _lengths = <(Reciter, AyahKey), Duration>{};
   late final _Handler _handler;
   final _states = StreamController<RecitationState>.broadcast();
   RecitationState _state = const RecitationState();
@@ -77,6 +81,10 @@ class AudioServiceRecitation implements Recitation {
     _player.playerStateStream.listen(_changed);
     _player.positionStream.listen((position) {
       if (_state.active) {
+        if ((_index, _player.duration) case (final index?, final duration?)
+            when index < _queue.length) {
+          _lengths[(_state.reciter, recitationFile(_queue[index]))] = duration;
+        }
         _emit(_state.copyWith(position: position, duration: _player.duration ?? Duration.zero));
       }
     });
@@ -251,6 +259,35 @@ class AudioServiceRecitation implements Recitation {
     _jump(previousAyahIndex(_queue, index) ?? _queue.indexOf(_queue[index]));
   }
 
+  @override
+  Future<void> seekBy(Duration by) async {
+    final index = _index;
+    if (index == null || !_state.active) return;
+    final landed = await seekAcross(_queue, index, _player.position, by, _length);
+    if (landed == null) return stop();
+    if (landed.index >= _added) return play(_queue[landed.index], to: _state.to!);
+    _gap?.cancel();
+    if (landed.index != index) _jumped = true;
+    await _player.seek(landed.position, index: landed.index);
+  }
+
+  /// past what's in the playlist it stops the walk there, that file may not be on the phone yet
+  Future<Duration> _length(int index) async {
+    if (index >= _added) return const Duration(days: 1);
+    final key = (_state.reciter, recitationFile(_queue[index]));
+    if (_lengths[key] case final length?) return length;
+    final file = await _files.file(key.$1, key.$2);
+    return _lengths[key] = await _probe.setFilePath(file.path) ?? Duration.zero;
+  }
+
+  @override
+  Future<void> seekToAyah(AyahKey ayah) async {
+    final index = _queue.indexOf(ayah);
+    if (index < 0) return;
+    if (index < _added) return _jump(index);
+    await _replay(ayah);
+  }
+
   void _jump(int index) {
     _gap?.cancel();
     _jumped = true;
@@ -281,9 +318,9 @@ class AudioServiceRecitation implements Recitation {
     if (paused) await pause();
   }
 
-  /// the queue again from the playing ayah, the range keeps its start
-  Future<void> _replay() async {
-    final (ayah, from, to) = (_state.ayah, _state.from, _state.to);
+  /// the queue again from the playing ayah or the one given, the range keeps its start
+  Future<void> _replay([AyahKey? start]) async {
+    final (ayah, from, to) = (start ?? _state.ayah, _state.from, _state.to);
     if (ayah == null || to == null) return;
     await play(ayah, to: to);
     _emit(_state.copyWith(from: from));

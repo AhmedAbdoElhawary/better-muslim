@@ -210,19 +210,52 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-/// "Al-Fatiha · Ayah 3 of 7", the ayah's time and how far into the range it is
-class _Progress extends ConsumerWidget {
+/// "Al-Fatiha · Ayah 3 of 7", the ayah's time and how far into the range it is. a drag along it
+/// shows the ayah under the finger and goes there on release (ADR 0001)
+class _Progress extends ConsumerStatefulWidget {
   const _Progress();
+
+  @override
+  ConsumerState<_Progress> createState() => _ProgressState();
+}
+
+class _ProgressState extends ConsumerState<_Progress> {
+  /// the ayah under the finger while dragging
+  int? _drag;
+  double _width = 1;
 
   static String _time(Duration time) =>
       '${time.inMinutes}:${'${time.inSeconds % 60}'.padLeft(2, '0')}';
 
+  void _dragTo(double dx, AyahKey? from, AyahKey? to) {
+    if (from == null || to == null) return;
+    final x = (dx - SpaceManager.s5.r) / _width;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final ayah = dragAyah(rtl ? 1 - x : x, from: from, to: to);
+    if (ayah == _drag) return;
+    BmHaptics.selection();
+    setState(() => _drag = ayah);
+  }
+
+  void _release(AyahKey? from) {
+    final ayah = _drag;
+    setState(() => _drag = null);
+    if (ayah == null || from == null) return;
+    ref.read(followingProvider.notifier).set(true);
+    ref.read(recitationProvider).seekToAyah(AyahKey(from.surah, ayah));
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ayah = ref.watch(playingAyahProvider);
-    final (position, duration) = ref.watch(
+    final (position, duration, from, to) = ref.watch(
       recitationStateProvider.select(
-        (state) => (state.value?.position ?? Duration.zero, state.value?.duration ?? Duration.zero),
+        (state) => (
+          state.value?.position ?? Duration.zero,
+          state.value?.duration ?? Duration.zero,
+          state.value?.from,
+          state.value?.to,
+        ),
       ),
     );
     final surah = ayah == null ? null : ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
@@ -235,60 +268,128 @@ class _Progress extends ConsumerWidget {
     final where = surah == null
         ? ''
         : '${isArabic ? surah.ar : surah.en} · ${context.tr(StringsManager.ayahOf, {'n': '$n', 'total': '$total'})}';
-    return OnlyPadding(
-      top: SpaceManager.recitationProgressTop,
-      start: SpaceManager.s5,
-      end: SpaceManager.s5,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+    final drag = _drag;
+    final shown = drag == null || from == null ? ayah : AyahKey(from.surah, drag);
+    final fraction = shown == null || from == null || to == null
+        ? 0.0
+        : rangeProgress(shown, from: from, to: to);
+
+    /// the whole block takes the drag, the bar alone is under the 44 pt a target needs
+    return Semantics(
+      label: context.tr(StringsManager.recitationBar),
+      value: context.formatDigits(where, digits),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: (details) => _dragTo(details.localPosition.dx, from, to),
+        onHorizontalDragUpdate: (details) => _dragTo(details.localPosition.dx, from, to),
+        onHorizontalDragEnd: (_) => _release(from),
+        onHorizontalDragCancel: () => setState(() => _drag = null),
+        child: OnlyPadding(
+          top: SpaceManager.recitationProgressTop,
+          start: SpaceManager.s5,
+          end: SpaceManager.s5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: RegularText(
-                  context.formatDigits(where, digits),
-                  translate: false,
-                  fontSize: FontSizeManager.rowSubtitle,
-                  color: ThemeEnum.text2,
-                  maxLines: 1,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: RegularText(
+                      context.formatDigits(where, digits),
+                      translate: false,
+                      fontSize: FontSizeManager.rowSubtitle,
+                      color: ThemeEnum.text2,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const RSizedBox.horizontal(SpaceManager.s2),
+                  RegularText(
+                    context.formatDigits('${_time(position)} / ${_time(duration)}', digits),
+                    translate: false,
+                    fontSize: FontSizeManager.rowSubtitle,
+                    color: ThemeEnum.text2,
+                    tabularFigures: true,
+                  ),
+                ],
               ),
-              const RSizedBox.horizontal(SpaceManager.s2),
-              RegularText(
-                context.formatDigits('${_time(position)} / ${_time(duration)}', digits),
-                translate: false,
-                fontSize: FontSizeManager.rowSubtitle,
-                color: ThemeEnum.text2,
-                tabularFigures: true,
+              const RSizedBox.vertical(SpaceManager.s2),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  _width = constraints.maxWidth;
+                  final rtl = Directionality.of(context) == TextDirection.rtl;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(RadiusManager.recitationBar.r),
+                        child: RSizedBox(
+                          height: SizeManager.recitationBar,
+                          child: ColoredBox(
+                            color: context.getColor(ThemeEnum.variant),
+                            child: AnimatedFractionallySizedBox(
+                              duration: MediaQuery.disableAnimationsOf(context) || drag != null
+                                  ? Duration.zero
+                                  : BmMotion.standard,
+                              curve: BmMotion.standardCurve,
+                              alignment: AlignmentDirectional.centerStart,
+                              widthFactor: fraction,
+                              child: ColoredBox(color: context.getColor(ThemeEnum.primary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (drag != null)
+                        Positioned(
+                          left: (rtl ? 1 - fraction : fraction) * _width,
+                          bottom: SizeManager.recitationBar.r + SpaceManager.s2.r,
+                          child: FractionalTranslation(
+                            translation: const Offset(-.5, 0),
+                            child: _AyahBubble(drag, digits: digits),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
-          const RSizedBox.vertical(SpaceManager.s2),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusManager.recitationBar.r),
-            child: RSizedBox(
-              height: SizeManager.recitationBar,
-              child: ColoredBox(
-                color: context.getColor(ThemeEnum.variant),
-                child: AnimatedFractionallySizedBox(
-                  duration: MediaQuery.disableAnimationsOf(context)
-                      ? Duration.zero
-                      : BmMotion.standard,
-                  curve: BmMotion.standardCurve,
-                  alignment: AlignmentDirectional.centerStart,
-                  widthFactor: (n / total).clamp(0.0, 1.0),
-                  child: ColoredBox(color: context.getColor(ThemeEnum.primary)),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// repeat, previous, play or pause, next and the speed, left to right in arabic too (FR-029)
+/// "Ayah 45" over the finger while the bar is dragged
+class _AyahBubble extends StatelessWidget {
+  const _AyahBubble(this.ayah, {required this.digits});
+
+  final int ayah;
+  final Digits digits;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.getColor(ThemeEnum.primary),
+        borderRadius: BorderRadius.circular(RadiusManager.pill.r),
+      ),
+      child: SymmetricPadding(
+        horizontal: SpaceManager.s2,
+        vertical: SpaceManager.s1,
+        child: SemiBoldText(
+          StringsManager.ayahNumber,
+          args: {'n': context.formatDigits('$ayah', digits)},
+          fontSize: FontSizeManager.rowSubtitle,
+          color: ThemeEnum.onPrimary,
+          maxLines: 1,
+        ),
+      ),
+    );
+  }
+}
+
+/// repeat, previous, -10, play or pause, +10, next and the speed, left to right in arabic too
+/// (FR-029)
 class _Controls extends ConsumerWidget {
   const _Controls();
 
@@ -335,7 +436,25 @@ class _Controls extends ConsumerWidget {
                 color: context.getColor(ThemeEnum.text),
               ),
             ),
+            _Control(
+              label: StringsManager.back10,
+              onTap: () => move(() => recitation.seekBy(const Duration(seconds: -10))),
+              child: BmIcon.ui(
+                BmUiIcon.back_10,
+                size: SizeManager.recitationIcon.r,
+                color: context.getColor(ThemeEnum.text),
+              ),
+            ),
             const PlayButton(size: SizeManager.recitationPlay, icon: SizeManager.recitationIcon),
+            _Control(
+              label: StringsManager.forward10,
+              onTap: () => move(() => recitation.seekBy(const Duration(seconds: 10))),
+              child: BmIcon.ui(
+                BmUiIcon.forward_10,
+                size: SizeManager.recitationIcon.r,
+                color: context.getColor(ThemeEnum.text),
+              ),
+            ),
             _Control(
               label: StringsManager.nextAyah,
               onTap: () => move(recitation.next),
@@ -350,11 +469,14 @@ class _Controls extends ConsumerWidget {
               onTap: () => db.updateSettings(
                 SettingsCompanion(reciteSpeed: Value(after(reciteSpeeds, speed))),
               ),
-              child: SemiBoldText(
-                StringsManager.rate,
-                args: {'rate': speedLabel(context, speed, digits)},
-                fontSize: FontSizeManager.secondary,
-                tabularFigures: true,
+              child: MediaQuery.withClampedTextScaling(
+                maxScaleFactor: SizeManager.recitationRateMaxTextScale,
+                child: SemiBoldText(
+                  StringsManager.rate,
+                  args: {'rate': speedLabel(context, speed, digits)},
+                  fontSize: FontSizeManager.secondary,
+                  tabularFigures: true,
+                ),
               ),
             ),
           ],

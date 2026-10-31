@@ -621,5 +621,9 @@
   "noDownloadsBody": "نزّل سورة من شاشة التلاوة لتستمع إليها دون إنترنت.",
   "deleteDownloadTitle": "حذف هذا التنزيل؟",
   "deleteDownloadBody": "ستُشغَّل السورة من الإنترنت مرة أخرى.",
-  "sizeMb": "{n} م.ب"
+  "sizeMb": "{n} م.ب",
+  "back10": "رجوع ١٠ ثوانٍ",
+  "forward10": "تقديم ١٠ ثوانٍ",
+  "ayahNumber": "الآية {n}",
+  "recitationBar": "الآية في النطاق"
 }

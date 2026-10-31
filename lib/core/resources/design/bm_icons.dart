@@ -68,6 +68,8 @@ enum BmUiIcon {
   timer,
   chevron_down,
   download,
+  back_10,
+  forward_10,
 }
 
 class BmIcon extends StatelessWidget {

@@ -741,6 +741,9 @@ abstract final class SizeManager {
   static const double recitationBar = 4;
   static const double recitationPlay = 64;
   static const double recitationIcon = 26;
+
+  /// seven controls fill the row, a bigger rate would push it past the sheet
+  static const double recitationRateMaxTextScale = 1.4;
   static const double recitationRepeatIcon = 24;
   static const double recitationRow = 46;
   static const double miniPlayerShadowBlur = 40;

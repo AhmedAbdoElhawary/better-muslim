@@ -67,6 +67,15 @@ class FakeRecitation implements Recitation {
   }
 
   @override
+  Future<void> seekBy(Duration by) async => calls.add('seek ${by.inSeconds}');
+
+  @override
+  Future<void> seekToAyah(AyahKey ayah) async {
+    calls.add('seek to $ayah');
+    emit(_state.copyWith(ayah: ayah));
+  }
+
+  @override
   Future<void> setSpeed(double speed) async {
     calls.add('speed $speed');
     emit(_state.copyWith(speed: speed));

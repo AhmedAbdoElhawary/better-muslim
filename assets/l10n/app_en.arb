@@ -1095,5 +1095,14 @@
     "placeholders": {
       "n": {}
     }
-  }
+  },
+  "back10": "Back 10 seconds",
+  "forward10": "Forward 10 seconds",
+  "ayahNumber": "Ayah {n}",
+  "@ayahNumber": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "recitationBar": "Ayah in the range"
 }

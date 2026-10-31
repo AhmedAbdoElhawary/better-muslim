@@ -165,6 +165,78 @@ void main() {
     await unmount(tester);
   });
 
+  for (final locale in const [Locale('en'), Locale('ar')]) {
+    testWidgets('the controls read repeat to speed left to right, ${locale.languageCode}', (
+      tester,
+    ) async {
+      final recitation = FakeRecitation();
+      await pumpReciting(tester, recitation, locale: locale);
+      await recitation.play(const AyahKey(1, 3), to: const AyahKey(1, 7));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: find.byType(MiniPlayer), matching: find.byType(PlayingTitle)),
+      );
+      await tester.pumpAndSettle();
+
+      final labels = locale.languageCode == 'en'
+          ? [
+              'Repeat each ayah',
+              'Previous ayah',
+              'Back 10 seconds',
+              'Pause',
+              'Forward 10 seconds',
+              'Next ayah',
+              'Speed',
+            ]
+          : [
+              'كرّر كل آية',
+              'الآية السابقة',
+              'رجوع ١٠ ثوانٍ',
+              'إيقاف مؤقت',
+              'تقديم ١٠ ثوانٍ',
+              'الآية التالية',
+              'السرعة',
+            ];
+      final xs = [for (final label in labels) tester.getCenter(labelled(label)).dx];
+      expect(xs, [...xs]..sort(), reason: 'never mirrored');
+      for (final label in labels) {
+        final size = tester.getSize(labelled(label));
+        expect(size.width >= 44 && size.height >= 44, isTrue, reason: label);
+      }
+      await unmount(tester);
+    });
+  }
+
+  testWidgets('±10 seeks through the audio', (tester) async {
+    final recitation = await opened(tester);
+
+    await tester.tap(labelled('Back 10 seconds'));
+    await tester.tap(labelled('Forward 10 seconds'));
+    await tester.pumpAndSettle();
+    expect(recitation.calls.sublist(recitation.calls.length - 2), ['seek -10', 'seek 10']);
+    await unmount(tester);
+  });
+
+  testWidgets('dragging the bar shows the ayah under the finger and seeks there on release', (
+    tester,
+  ) async {
+    final recitation = await opened(tester);
+    expect(inSheet(find.text('Ayah 5')), findsNothing);
+
+    final bar = tester.getRect(labelled('Ayah in the range'));
+    final gesture = await tester.startGesture(bar.centerLeft + const Offset(30, 0));
+    await gesture.moveTo(bar.center);
+    await tester.pump();
+    expect(inSheet(find.text('Ayah 5')), findsOneWidget, reason: 'the middle of 3 to 7');
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(recitation.calls.last, 'seek to 1:5');
+    expect(inSheet(find.text('Ayah 5')), findsNothing);
+    expect(inSheet(find.text('Al-Fatiha · Ayah 5 of 7')), findsOneWidget);
+    await unmount(tester);
+  });
+
   testWidgets('holds at text scale 2.0', (tester) async {
     await opened(tester, textScale: 2);
     expect(tester.takeException(), isNull);

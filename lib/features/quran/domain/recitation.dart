@@ -130,6 +130,12 @@ abstract class Recitation {
   Future<void> resume();
   Future<void> next();
   Future<void> previous();
+
+  /// ±10 s through the audio, into the next or previous ayah past either end
+  Future<void> seekBy(Duration by);
+
+  /// the ayah's first play in the range, from the bar
+  Future<void> seekToAyah(AyahKey ayah);
   Future<void> setSpeed(double speed);
   Future<void> setRepeat(int times);
   Future<void> setPause(Duration gap);
@@ -179,6 +185,36 @@ int? previousAyahIndex(List<AyahKey> queue, int index) {
   return queue.indexOf(queue[start - 1]);
 }
 
+/// where a jump of by lands from position in the item at index, crossing into the next or
+/// previous items by what is left over. the first item stops at its start, null runs past the end
+Future<({int index, Duration position})?> seekAcross(
+  List<AyahKey> queue,
+  int index,
+  Duration position,
+  Duration by,
+  Future<Duration> Function(int index) length,
+) async {
+  var at = index;
+  var target = position + by;
+  while (target >= await length(at)) {
+    target -= await length(at);
+    if (++at >= queue.length) return null;
+  }
+  while (target < Duration.zero) {
+    if (at == 0) return (index: 0, position: Duration.zero);
+    target += await length(--at);
+  }
+  return (index: at, position: target);
+}
+
+/// the ayah under a drag along the bar, fraction 0 at the range's start and 1 at its end
+int dragAyah(double fraction, {required AyahKey from, required AyahKey to}) =>
+    from.ayah + (fraction.clamp(0.0, 1.0) * (to.ayah - from.ayah)).round();
+
+/// how much of the range is played with this ayah, the bismillah reads as the first
+double rangeProgress(AyahKey playing, {required AyahKey from, required AyahKey to}) =>
+    ((readAyah(playing).ayah - from.ayah + 1) / (to.ayah - from.ayah + 1)).clamp(0.0, 1.0);
+
 /// following stays on while the page shown holds the playing ayah
 bool following({required int shownPage, required int playingPage}) => shownPage == playingPage;
 
@@ -209,6 +245,12 @@ class IdleRecitation implements Recitation {
 
   @override
   Future<void> previous() async {}
+
+  @override
+  Future<void> seekBy(Duration by) async {}
+
+  @override
+  Future<void> seekToAyah(AyahKey ayah) async {}
 
   @override
   Future<void> setSpeed(double speed) async {}
