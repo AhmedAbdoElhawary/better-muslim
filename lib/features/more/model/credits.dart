@@ -105,6 +105,12 @@ const credits = [
     link: 'https://quran.com',
   ),
   Credit(
+    source: 'Quranic Arabic Corpus · Kais Dukes',
+    useKey: StringsManager.useWordRoots,
+    license: 'GNU GPL',
+    link: 'https://corpus.quran.com',
+  ),
+  Credit(
     source: 'EveryAyah · Mishary Rashid Alafasy',
     useKey: StringsManager.useRecitation,
     link: 'https://everyayah.com',
@@ -135,15 +141,12 @@ const credits = [
     link: 'https://www.hisnmuslim.com',
   ),
   Credit(
-    source: 'ejaz215 · Wikimedia Commons · Madinah',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY 3.0',
-    link: 'https://commons.wikimedia.org/wiki/File:33937_ejaz215_call-to-prayer-from-the-prophet-s-mo.ogg',
+    source: 'Sunnah.com · Hisn al-Muslim references',
+    useKey: StringsManager.useAzkarDuas,
+    link: 'https://sunnah.com/hisn',
   ),
   Credit(
-    source: 'Besim Azemi · Islamic Center Malmö · Fajr',
+    source: 'Mishary Rashid Alafasy · Adhan and Fajr',
     useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY 3.0',
-    link: 'https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm',
   ),
 ];
