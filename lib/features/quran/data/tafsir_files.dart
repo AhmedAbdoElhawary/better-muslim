@@ -27,7 +27,6 @@ enum TafsirSource {
     sha256: '168779be2ff2c428af34445bf76294518c0fb433f7c5648ed6b355ab8d7fd7ee',
     release: 'tafsir-v1',
   ),
-  // TODO(ahmed): upload build/tafsir/tabari.json.gz and qurtubi.json.gz to release tafsir-v2, their download fails until then.
   tabari(
     file: 'tabari.json.gz',
     sha256: '3849d44e535886ae8b085b911c0d7b4fbc0a5a85a1394a13eaf6fdaa6da55132',
