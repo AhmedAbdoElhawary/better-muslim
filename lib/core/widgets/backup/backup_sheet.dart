@@ -22,8 +22,11 @@ import 'package:share_plus/share_plus.dart';
 /// the shortest password a backup takes (FR-029)
 const minPasswordLength = 6;
 
-Future<void> showBackupSheet(BuildContext context) =>
-    showBmSheet(context, builder: (_) => const _BackupSheet());
+Future<void> showBackupSheet(BuildContext context) => showBmSheet(
+  context,
+  title: const SheetTitle(StringsManager.backUp),
+  builder: (_) => const _BackupSheet(),
+);
 
 /// a password twice, then the file to the phone's share sheet (FR-029)
 class _BackupSheet extends ConsumerStatefulWidget {
@@ -75,7 +78,6 @@ class _BackupSheetState extends ConsumerState<_BackupSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetTitle(StringsManager.backUp),
               HorizontalPadding(
                 padding: SpaceManager.s5,
                 child: Column(
