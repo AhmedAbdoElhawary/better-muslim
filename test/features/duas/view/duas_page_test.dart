@@ -6,7 +6,6 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
-import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
@@ -15,10 +14,9 @@ import 'package:better_muslim/core/system/share.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
-import 'package:better_muslim/features/duas/model/dua.dart';
+import 'package:better_muslim/features/duas/model/dua_clips.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
-import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
 import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,13 +71,13 @@ void main() {
         'Before sleeping',
         'Entering and leaving the mosque',
         'Before and after eating',
-        '3 duas',
-        '9 duas',
         '4 duas',
+        '13 duas',
+        '3 duas',
+        '2 duas',
       ]) {
         expect(find.text(text), findsWidgets, reason: text);
       }
-      expect(find.text('2 duas'), findsNWidgets(2));
       expect(
         tester.getTopLeft(find.text('Waking up')).dy,
         lessThan(tester.getTopLeft(find.text('Before and after eating')).dy),
@@ -127,12 +125,20 @@ void main() {
       await unmount(tester);
     });
 
-    testWidgets('travel has nothing yet, only the title', (tester) async {
+    testWidgets('the hisn al-muslim chips each show their chapters', (tester) async {
       await pumpDuas(tester, await designOverrides());
-      await chip(tester, 'Travel');
-
-      expect(find.text('No duas found'), findsOneWidget);
-      expect(find.text('Try another word in English or Arabic.'), findsNothing);
+      for (final (label, category) in [
+        ('Prayer', 'Before ablution'),
+        ('Travel', 'When mounting an animal or any means of transport'),
+        ('Food', 'Before and after eating'),
+        ('Distress', 'For anxiety and sorrow'),
+        ('Illness', 'When visiting the sick'),
+        ('Weather', 'During a wind storm'),
+      ]) {
+        await chip(tester, label);
+        expect(find.text(category), findsWidgets, reason: label);
+        expect(find.text('No duas found'), findsNothing, reason: label);
+      }
       await unmount(tester);
     });
 
@@ -198,7 +204,7 @@ void main() {
             )
             .dua
             .id,
-        'd006',
+        'd022',
       );
       await unmount(tester);
     });
@@ -208,9 +214,10 @@ void main() {
 
       expect(find.text('أبو داود ٤/٣٢٥، الترمذي ٥/٤٩٠'), findsOneWidget);
       expect(find.text('مغادرة المنزل'), findsNWidgets(2));
-      expect(find.text('٩ أدعية'), findsOneWidget);
-      expect(find.text('٣ أدعية'), findsOneWidget);
-      expect(find.text('دعاءان'), findsNWidgets(2));
+      expect(find.text('١٣ دعاءً'), findsOneWidget);
+      expect(find.text('٣ أدعية'), findsWidgets);
+      expect(find.text('٤ أدعية'), findsWidgets);
+      expect(find.text('دعاءان'), findsWidgets);
       await unmount(tester);
     });
   });
@@ -304,45 +311,25 @@ void main() {
   });
 
   group('listen and share (US5)', () {
-    testWidgets('without a clip there is no listen', (tester) async {
-      await pumpDuas(tester, await designOverrides());
-      expect(action('Save'), findsWidgets);
-      expect(action('Listen'), findsNothing);
-      await unmount(tester);
-    });
-
     testWidgets('a clip plays and reads stop, a page on top or leaving stops it', (tester) async {
       final clips = FakeClipPlayer();
-      final withClip = [
-        for (final category
-            in await tester.runAsync(() async => loadDuas(await QuranAssets.load())) ??
-                <DuaCategory>[])
-          DuaCategory(
-            id: category.id,
-            name: category.name,
-            chip: category.chip,
-            duas: [
-              for (final dua in category.duas)
-                Dua(
-                  id: dua.id,
-                  arabic: dua.arabic,
-                  transliteration: dua.transliteration,
-                  translation: dua.translation,
-                  source: dua.source,
-                  audio: 'assets/duas/audio/${dua.id}.m4a',
-                ),
-            ],
-          ),
-      ];
+      final root = Directory.systemTemp.createTempSync('duas');
+      File('${root.path}/duas/16.mp3').createSync(recursive: true);
       await pumpDuas(tester, [
         ...await designOverrides(),
         clipPlayerProvider.overrideWithValue(clips),
-        duasContentProvider.overrideWith((ref) async => withClip),
+        duaClipsProvider.overrideWithValue(
+          DuaClips(
+            root: () async => root,
+            fetch: (_) async => throw const SocketException('offline'),
+            exclude: (_) async {},
+          ),
+        ),
       ]);
       await tester.tap(action('Listen'));
       await tester.pumpAndSettle();
       expect(action('Stop'), findsOneWidget);
-      expect(clips.played, ['assets/duas/audio/d001.m4a']);
+      expect(clips.played, ['${root.path}/duas/16.mp3']);
 
       containerOf(tester).read(routerProvider).push(Routes.duaCategory('mosque'));
       await tester.pumpAndSettle();
