@@ -13,11 +13,15 @@ import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
+import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/data/search_text.dart';
 import 'package:better_muslim/features/quran/domain/quran_search.dart';
+import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +37,7 @@ extension on SearchScope {
   };
 }
 
-/// 4.27. the first surah's hits are open, the rest are rows that open in place
+/// 4.27. every surah starts as a row with its count, a tap opens its hits in place
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
 
@@ -50,8 +54,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Timer? _typing;
   var _scope = SearchScope.all;
 
-  /// null is the first surah only, a new query or chip starts there again
-  Set<int>? _open;
+  /// a new query or chip folds every surah again
+  var _open = <int>{};
 
   /// the last search, a row opening doesn't search again
   ({String query, SearchScope scope, List<SearchAyah> ayahs})? _searched;
@@ -71,15 +75,33 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       _typingPause,
       () => setState(() {
         _query = text;
-        _open = null;
+        _open = {};
       }),
     );
   }
 
-  void _toggle(int surah, int first) => setState(() {
-    final open = {
-      ...(_open ?? {first}),
-    };
+  /// only a search I meant is kept, a half typed one is not
+  void _save() {
+    final query = _controller.text.trim();
+    if (query.isNotEmpty) ref.read(quranStoreProvider).saveSearch(query);
+  }
+
+  void _submit(String text) {
+    _typing?.cancel();
+    setState(() {
+      _query = text;
+      _open = {};
+    });
+    _save();
+  }
+
+  void _pick(String query) {
+    _controller.text = query;
+    _submit(query);
+  }
+
+  void _toggle(int surah) => setState(() {
+    final open = {..._open};
     if (!open.remove(surah)) open.add(surah);
     _open = open;
   });
@@ -97,26 +119,27 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       }
     }
     final (:jump, :groups) = _result;
-    final first = groups.keys.firstOrNull;
-    final open = _open ?? {?first};
+    final open = _open;
     final entries = <Widget>[
-      if (jump != null) _JumpCard(jump),
+      if (jump != null) _JumpCard(jump, onOpen: _save),
       for (final (i, surah) in groups.keys.indexed)
         if (open.contains(surah)) ...[
-          _GroupHeader(surah, count: groups[surah]!.length, onTap: () => _toggle(surah, first!)),
-          for (final hit in groups[surah]!) _HitCard(hit),
+          _GroupHeader(surah, count: groups[surah]!.length, onTap: () => _toggle(surah)),
+          for (final hit in groups[surah]!) _HitCard(hit, onOpen: _save),
         ] else if (i == 0 || open.contains(groups.keys.elementAt(i - 1)))
           _SurahRows([
-            for (final next in groups.keys.skip(i).takeWhile((n) => !open.contains(n))) next,
-          ], onTap: (surah) => _toggle(surah, first!)),
+            for (final next in groups.keys.skip(i).takeWhile((n) => !open.contains(n)))
+              (surah: next, count: groups[next]!.length),
+          ], onTap: _toggle),
     ];
+    final allOpen = open.length == groups.length;
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _SearchBar(_controller, onChanged: _type),
+            _SearchBar(_controller, onChanged: _type, onSubmitted: _submit),
             const RSizedBox.vertical(SpaceManager.s3),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -130,20 +153,32 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       selected: scope == _scope,
                       onTap: () => setState(() {
                         _scope = scope;
-                        _open = null;
+                        _open = {};
                       }),
                     ),
                   ],
                 ],
               ),
             ),
+            if (groups.isNotEmpty)
+              _ResultCount(
+                matches: groups.values
+                    .expand((hits) => hits)
+                    .fold(0, (sum, hit) => sum + hit.count),
+                ayahs: groups.values.fold(0, (sum, hits) => sum + hits.length),
+                surahs: groups.length,
+                allOpen: allOpen,
+                onToggle: () => setState(() => _open = allOpen ? {} : {...groups.keys}),
+              ),
             Expanded(
               child: entries.isEmpty
                   ? Column(
                       children: [
                         Expanded(
-                          child: query.trim().isEmpty || ayahs == null
-                              ? const SizedBox.shrink()
+                          child: query.trim().isEmpty
+                              ? _Recent(onPick: _pick)
+                              : ayahs == null || assets == null
+                              ? const Center(child: BmStarLoader())
                               : const Center(
                                   child: RegularText(
                                     StringsManager.noAyahsFound,
@@ -159,7 +194,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       padding: REdgeInsetsDirectional.only(
                         start: SpaceManager.s4,
                         end: SpaceManager.s4,
-                        top: SpaceManager.searchSection,
+                        top: groups.isEmpty ? SpaceManager.searchSection : SpaceManager.s1,
                       ),
                       itemCount: entries.length + 1,
                       itemBuilder: (context, i) => i < entries.length
@@ -174,42 +209,30 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 }
 
-/// the field and Cancel
+/// the back chevron and the field
 class _SearchBar extends StatelessWidget {
-  const _SearchBar(this.controller, {required this.onChanged});
+  const _SearchBar(this.controller, {required this.onChanged, required this.onSubmitted});
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
 
   @override
   Widget build(BuildContext context) {
     return OnlyPadding(
       top: SpaceManager.searchBarTop,
-      start: SpaceManager.s4,
+      start: SpaceManager.s2,
       end: SpaceManager.s4,
       child: Row(
         children: [
+          const BarBackButton(),
           Expanded(
             child: SearchField(
               hint: StringsManager.searchQuran,
               controller: controller,
               filled: true,
               onChanged: onChanged,
-            ),
-          ),
-          const RSizedBox.horizontal(SpaceManager.s3),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: context.pop,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: SizeManager.hit.r),
-              child: const Center(
-                child: RegularText(
-                  StringsManager.cancel,
-                  fontSize: FontSizeManager.body,
-                  color: ThemeEnum.primary,
-                ),
-              ),
+              onSubmitted: onSubmitted,
             ),
           ),
         ],
@@ -219,9 +242,10 @@ class _SearchBar extends StatelessWidget {
 }
 
 class _JumpCard extends ConsumerWidget {
-  const _JumpCard(this.jump);
+  const _JumpCard(this.jump, {required this.onOpen});
 
   final QuranJump jump;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -265,7 +289,10 @@ class _JumpCard extends ConsumerWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.push(Routes.quranPage(jump.page, ayah: ayah)),
+        onTap: () {
+          onOpen();
+          context.push(Routes.quranPage(jump.page, ayah: ayah));
+        },
         child: SurfaceCard(
           child: OnlyPadding(
             top: SpaceManager.s3,
@@ -381,9 +408,10 @@ class _GroupHeader extends ConsumerWidget {
 
 /// the ayah with the matched words washed behind their glyphs, the glyphs keep their ink
 class _HitCard extends ConsumerWidget {
-  const _HitCard(this.hit);
+  const _HitCard(this.hit, {required this.onOpen});
 
   final SearchHit hit;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -403,7 +431,10 @@ class _HitCard extends ConsumerWidget {
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => context.push(Routes.quranPage(page, ayah: key)),
+          onTap: () {
+            onOpen();
+            context.push(Routes.quranPage(page, ayah: key));
+          },
           child: SurfaceCard(
             child: OnlyPadding(
               top: SpaceManager.searchHitTop,
@@ -528,7 +559,7 @@ class _Wash extends StatelessWidget {
 class _SurahRows extends ConsumerWidget {
   const _SurahRows(this.surahs, {required this.onTap});
 
-  final List<int> surahs;
+  final List<({int surah, int count})> surahs;
   final ValueChanged<int> onTap;
 
   @override
@@ -543,7 +574,7 @@ class _SurahRows extends ConsumerWidget {
       padding: SpaceManager.searchSection - SpaceManager.searchHitGap,
       child: GroupedSection(
         children: [
-          for (final surah in surahs)
+          for (final (:surah, :count) in surahs)
             Semantics(
               button: true,
               expanded: false,
@@ -575,6 +606,14 @@ class _SurahRows extends ConsumerWidget {
                             fontSize: FontSizeManager.body,
                           ),
                         ),
+                        RegularText(
+                          context.formatDigits('$count', digits),
+                          translate: false,
+                          fontSize: FontSizeManager.label,
+                          color: ThemeEnum.text3,
+                          tabularFigures: true,
+                        ),
+                        const RSizedBox.horizontal(SpaceManager.s2),
                         Transform.flip(
                           flipX: Directionality.of(context) == TextDirection.rtl,
                           child: BmIcon.ui(
@@ -590,6 +629,184 @@ class _SurahRows extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// 15 times in 12 ayahs in 5 surahs, and one switch that opens or folds every surah
+class _ResultCount extends ConsumerWidget {
+  const _ResultCount({
+    required this.matches,
+    required this.ayahs,
+    required this.surahs,
+    required this.allOpen,
+    required this.onToggle,
+  });
+
+  final int matches;
+  final int ayahs;
+  final int surahs;
+  final bool allOpen;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final digits = ref.watch(
+      settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
+    );
+    return OnlyPadding(
+      top: SpaceManager.s1,
+      start: SpaceManager.s4 + SpaceManager.s1,
+      end: SpaceManager.s4,
+      child: Row(
+        children: [
+          Expanded(
+            child: RegularText(
+              StringsManager.searchCount,
+              args: {
+                'matches': context.formatDigits('$matches', digits),
+                'ayahs': context.formatDigits('$ayahs', digits),
+                'surahs': context.formatDigits('$surahs', digits),
+              },
+              fontSize: FontSizeManager.label,
+              color: ThemeEnum.text2,
+            ),
+          ),
+          _TextButton(allOpen ? StringsManager.foldAll : StringsManager.expandAll, onTap: onToggle),
+        ],
+      ),
+    );
+  }
+}
+
+/// the last searches while the field is empty, a tap searches again
+class _Recent extends ConsumerWidget {
+  const _Recent({required this.onPick});
+
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searches = ref.watch(searchesProvider).value ?? const [];
+    if (searches.isEmpty) return const SizedBox.shrink();
+    return ListView(
+      padding: REdgeInsetsDirectional.only(
+        start: SpaceManager.s4,
+        end: SpaceManager.s4,
+        top: SpaceManager.s3,
+      ),
+      children: [
+        OnlyPadding(
+          start: SpaceManager.s1,
+          child: Row(
+            children: [
+              const Expanded(
+                child: RegularText(
+                  StringsManager.recentSearches,
+                  fontSize: FontSizeManager.sectionLabel,
+                  letterSpacing: LetterSpacingManager.sectionLabel,
+                  color: ThemeEnum.text3,
+                ),
+              ),
+              _TextButton(
+                StringsManager.clearAll,
+                onTap: () => ref.read(quranStoreProvider).clearSearches(),
+              ),
+            ],
+          ),
+        ),
+        GroupedSection(
+          children: [
+            for (final query in searches)
+              Semantics(
+                button: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onPick(query),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: SizeManager.searchRow.r),
+                    child: OnlyPadding(
+                      start: SpaceManager.listRowStart,
+                      child: Row(
+                        children: [
+                          BmIcon.ui(
+                            BmUiIcon.search,
+                            size: SizeManager.searchChevron.r,
+                            color: context.getColor(ThemeEnum.text3),
+                          ),
+                          const RSizedBox.horizontal(SpaceManager.listRowGap),
+                          Expanded(
+                            child: RegularText(
+                              query,
+                              translate: false,
+                              fontSize: FontSizeManager.body,
+                              maxLines: 1,
+                            ),
+                          ),
+                          _RemoveSearch(query),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _RemoveSearch extends ConsumerWidget {
+  const _RemoveSearch(this.query);
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Semantics(
+      button: true,
+      label: context.tr(StringsManager.removeSearch, {'query': query}),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => ref.read(quranStoreProvider).removeSearch(query),
+        child: RSizedBox.square(
+          dimension: SizeManager.hit,
+          child: Center(
+            child: BmIcon.ui(
+              BmUiIcon.close,
+              size: SizeManager.searchChevron.r,
+              color: context.getColor(ThemeEnum.text3),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// a primary word with the whole 44 high hit
+class _TextButton extends StatelessWidget {
+  const _TextButton(this.label, {required this.onTap});
+
+  /// a StringsManager key
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: SizeManager.hit.r),
+          child: Center(
+            child: RegularText(label, fontSize: FontSizeManager.label, color: ThemeEnum.primary),
+          ),
+        ),
       ),
     );
   }
