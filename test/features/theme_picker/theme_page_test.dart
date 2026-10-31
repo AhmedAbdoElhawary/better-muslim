@@ -58,13 +58,23 @@ void main() {
       'Andalus',
       'Moonlight',
       'Qiyam Rose',
+      'Sahara Sand',
+      'Zaytun',
+      'Attar',
+      'Noor Midnight',
+      'Qiyam Dusk',
+      'Qiyam Copper',
+      'Qiyam Lapis',
+      'Qiyam Sand',
     ];
     final tops = [for (final name in names) tester.getCenter(find.text(name))];
-    for (var i = 1; i < 4; i++) {
-      expect(tops[i].dx, greaterThan(tops[i - 1].dx));
-      expect(tops[i + 4].dx, greaterThan(tops[i + 3].dx));
+    for (var row = 0; row < 4; row++) {
+      for (var i = row * 4 + 1; i < row * 4 + 4; i++) {
+        expect(tops[i].dx, greaterThan(tops[i - 1].dx), reason: names[i]);
+        expect(tops[i].dy, tops[row * 4].dy, reason: names[i]);
+      }
+      if (row > 0) expect(tops[row * 4].dy, greaterThan(tops[row * 4 - 4].dy));
     }
-    expect(tops[4].dy, greaterThan(tops[0].dy));
     expect(
       find.text('Follow sky switches to light after sunrise and back to dark at Maghrib.'),
       findsOneWidget,

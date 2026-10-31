@@ -175,6 +175,14 @@ extension BmThemeName on BmThemeId {
     BmThemeId.andalus => StringsManager.themeAndalus,
     BmThemeId.moonlight => StringsManager.themeMoonlight,
     BmThemeId.qiyamRose => StringsManager.themeQiyamRose,
+    BmThemeId.saharaSand => StringsManager.themeSaharaSand,
+    BmThemeId.zaytun => StringsManager.themeZaytun,
+    BmThemeId.attar => StringsManager.themeAttar,
+    BmThemeId.noorMidnight => StringsManager.themeNoorMidnight,
+    BmThemeId.qiyamDusk => StringsManager.themeQiyamDusk,
+    BmThemeId.qiyamCopper => StringsManager.themeQiyamCopper,
+    BmThemeId.qiyamLapis => StringsManager.themeQiyamLapis,
+    BmThemeId.qiyamSand => StringsManager.themeQiyamSand,
   };
 }
 

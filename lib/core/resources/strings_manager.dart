@@ -291,6 +291,14 @@ abstract final class StringsManager {
   static const String themeAndalus = 'themeAndalus';
   static const String themeMoonlight = 'themeMoonlight';
   static const String themeQiyamRose = 'themeQiyamRose';
+  static const String themeSaharaSand = 'themeSaharaSand';
+  static const String themeZaytun = 'themeZaytun';
+  static const String themeAttar = 'themeAttar';
+  static const String themeNoorMidnight = 'themeNoorMidnight';
+  static const String themeQiyamDusk = 'themeQiyamDusk';
+  static const String themeQiyamCopper = 'themeQiyamCopper';
+  static const String themeQiyamLapis = 'themeQiyamLapis';
+  static const String themeQiyamSand = 'themeQiyamSand';
   static const String firstHeadline = 'firstHeadline';
   static const String swipeToBegin = 'swipeToBegin';
   static const String letGoToBegin = 'letGoToBegin';

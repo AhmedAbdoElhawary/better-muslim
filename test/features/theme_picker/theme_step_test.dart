@@ -38,7 +38,7 @@ void main() {
       Routes.onboardingTheme,
       overrides: await designOverrides(onboarded: false),
     );
-    await tester.tap(find.text('Iznik'));
+    await tester.tap(find.text('Qiyam Sand'));
     await tester.tap(find.text('Dark'));
     await frames(tester, const Duration(milliseconds: 400));
     await tester.tap(find.text('Apply theme'));
@@ -51,7 +51,7 @@ void main() {
     await frames(tester, const Duration(milliseconds: 400));
 
     final settings = await settingsOf(tester);
-    expect((settings.theme, settings.themeMode), (BmThemeId.iznik, BmThemeMode.dark));
+    expect((settings.theme, settings.themeMode), (BmThemeId.qiyamSand, BmThemeMode.dark));
     expect(settings.onboarded, isTrue);
     expect(containerOf(tester).read(onboardingProvider), (done: true, replay: false));
     expect(find.byType(ThemePage), findsNothing);
