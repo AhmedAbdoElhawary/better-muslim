@@ -38,6 +38,36 @@ Future<void> showBookmarkPicker(BuildContext context, {AyahKey? ayah, int? page}
   builder: (_) => _BookmarkPicker(ayah: ayah, page: page),
 );
 
+/// Saved's New category and a tap on its header: the same form in a sheet of its own
+Future<void> showCategorySheet(BuildContext context, {Category? category}) =>
+    showBmSheet(context, builder: (_) => _CategorySheet(category));
+
+/// the default keeps following the app's language until I give it my own name
+Future<void> _update(
+  BuildContext context,
+  WidgetRef ref,
+  Category category,
+  String name,
+  CategoryColor color,
+) {
+  final isDefault = category.id == AppDatabase.defaultCategory;
+  final kept = isDefault && (name.trim().isEmpty || name == context.tr(StringsManager.bookmarks));
+  return ref.read(quranStoreProvider).updateCategory(category.id, kept ? null : name, color);
+}
+
+/// true once it is gone
+Future<bool> _delete(BuildContext context, WidgetRef ref, Category category) async {
+  final confirmed = await showBmDialog(
+    context,
+    title: StringsManager.deleteCategoryTitle,
+    body: StringsManager.deleteCategoryBody,
+    action: StringsManager.delete,
+  );
+  if (!confirmed) return false;
+  await ref.read(quranStoreProvider).deleteCategory(category.id);
+  return true;
+}
+
 extension on CategoryColor {
   String get label => switch (this) {
     CategoryColor.primary => StringsManager.colorPrimary,
@@ -101,30 +131,12 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
 
   /// a new category takes the bookmark at once, an edited one goes back to the list
   Future<void> _save(String name, CategoryColor color) async {
-    final store = ref.read(quranStoreProvider);
     if (_editing case final category?) {
-      final isDefault = category.id == AppDatabase.defaultCategory;
-
-      /// the default keeps following the app's language until I give it my own name
-      final kept =
-          isDefault && (name.trim().isEmpty || name == context.tr(StringsManager.bookmarks));
-      await store.updateCategory(category.id, kept ? null : name, color);
+      await _update(context, ref, category, name, color);
       _back();
       return;
     }
-    await _pick(await store.addCategory(name, color));
-  }
-
-  Future<void> _delete(Category category) async {
-    final confirmed = await showBmDialog(
-      context,
-      title: StringsManager.deleteCategoryTitle,
-      body: StringsManager.deleteCategoryBody,
-      action: StringsManager.delete,
-    );
-    if (!confirmed) return;
-    await ref.read(quranStoreProvider).deleteCategory(category.id);
-    _back();
+    await _pick(await ref.read(quranStoreProvider).addCategory(name, color));
   }
 
   @override
@@ -147,7 +159,9 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
                     onSave: _save,
                     onDelete: editing == null || editing.id == AppDatabase.defaultCategory
                         ? null
-                        : () => _delete(editing),
+                        : () async {
+                            if (await _delete(context, ref, editing)) _back();
+                          },
                   )
                 : Column(
                     key: const ValueKey('list'),
@@ -310,6 +324,46 @@ class _Row extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategorySheet extends ConsumerWidget {
+  const _CategorySheet(this.category);
+
+  /// null is a new category
+  final Category? category;
+
+  Future<void> _save(BuildContext context, WidgetRef ref, String name, CategoryColor color) async {
+    if (category case final category?) {
+      await _update(context, ref, category, name, color);
+    } else {
+      await ref.read(quranStoreProvider).addCategory(name, color);
+    }
+    if (context.mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _remove(BuildContext context, WidgetRef ref, Category category) async {
+    if (await _delete(context, ref, category) && context.mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final category = this.category;
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        child: BottomPadding(
+          padding: SpaceManager.s6,
+          child: _CategoryForm(
+            category: category,
+            onSave: (name, color) => _save(context, ref, name, color),
+            onDelete: category == null || category.id == AppDatabase.defaultCategory
+                ? null
+                : () => _remove(context, ref, category),
           ),
         ),
       ),
