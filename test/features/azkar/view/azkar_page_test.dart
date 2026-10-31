@@ -1,18 +1,26 @@
 import 'dart:ui';
 
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/resources/font_manager.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/azkar.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/dua_text.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
+import 'package:better_muslim/features/azkar/view/widgets/dhikr_text.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/azkar.dart';
 import '../../../helpers/fonts.dart';
 import '../../../helpers/home.dart';
+import '../../../helpers/more.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
 
@@ -96,6 +104,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(containerOf(tester).read(settingsProvider).value!.azkarNudges, isFalse);
     expect(phone.haptics, [selection]);
+    await unmount(tester);
+  });
+
+  testWidgets('Aa picks the azkar font, azkar and tasbih take it, verses keep the quran font', (
+    tester,
+  ) async {
+    await pumpAzkar(tester, await designOverrides());
+    Finder named(String text) =>
+        find.byWidgetPredicate((widget) => widget is RegularText && widget.text == text);
+    Set<FontEnum> fontsIn(Type owner) => {
+      for (final text in tester.widgetList<RegularText>(
+        find.descendant(of: find.byType(owner), matching: find.byType(RegularText)),
+      ))
+        text.font,
+    };
+
+    await tester.tap(find.bySemanticsLabel('Azkar font'));
+    await tester.pumpAndSettle();
+    for (final (name, font) in [
+      (StringsManager.azkarFontAmiri, FontEnum.dua),
+      (StringsManager.fontScheherazade, FontEnum.scheherazade),
+      (StringsManager.azkarFontNaskh, FontEnum.naskh),
+    ]) {
+      expect(tester.widget<RegularText>(named(name)).font, font, reason: name);
+    }
+
+    await tester.tap(named(StringsManager.azkarFontNaskh));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).azkarFont, AzkarFont.naskh);
+
+    await tester.tap(find.text('Morning azkar'));
+    await tester.pumpAndSettle();
+    expect(fontsIn(DuaText), contains(FontEnum.quran));
+
+    /// the third is the first that isn't a verse
+    for (var i = 0; i < 2; i++) {
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+    }
+    expect(fontsIn(DuaText), contains(FontEnum.naskh));
+    expect(fontsIn(DuaText), isNot(contains(FontEnum.dua)));
+
+    containerOf(tester).read(routerProvider).go(Routes.tasbih);
+    await tester.pumpAndSettle();
+    expect(fontsIn(DhikrText), contains(FontEnum.naskh));
     await unmount(tester);
   });
 

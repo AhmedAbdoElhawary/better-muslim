@@ -554,6 +554,9 @@ abstract final class StringsManager {
   static const String fontAmiri = 'fontAmiri';
   static const String fontKfgqpc = 'fontKfgqpc';
   static const String fontScheherazade = 'fontScheherazade';
+  static const String azkarFont = 'azkarFont';
+  static const String azkarFontAmiri = 'azkarFontAmiri';
+  static const String azkarFontNaskh = 'azkarFontNaskh';
   static const String ornament = 'ornament';
   static const String solidColor = 'solidColor';
   static const String patternKhatam = 'patternKhatam';

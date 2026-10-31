@@ -621,6 +621,16 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant('alafasy'),
   ).withConverter<Reciter>($SettingsTable.$converterreciter);
+  @override
+  late final GeneratedColumnWithTypeConverter<AzkarFont, String> azkarFont =
+      GeneratedColumn<String>(
+        'azkar_font',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('amiri'),
+      ).withConverter<AzkarFont>($SettingsTable.$converterazkarFont);
   static const VerificationMeta _recitePauseMeta = const VerificationMeta('recitePause');
   @override
   late final GeneratedColumn<int> recitePause = GeneratedColumn<int>(
@@ -694,6 +704,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     reciteSpeed,
     reciteRepeat,
     reciter,
+    azkarFont,
     recitePause,
   ];
   @override
@@ -1201,6 +1212,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       reciter: $SettingsTable.$converterreciter.fromSql(
         attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}reciter'])!,
       ),
+      azkarFont: $SettingsTable.$converterazkarFont.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}azkar_font'],
+        )!,
+      ),
       recitePause: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}recite_pause'],
@@ -1277,6 +1294,8 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<QuranFont>(QuranFont.values);
   static JsonTypeConverter2<Reciter, String, String> $converterreciter =
       const EnumNameConverter<Reciter>(Reciter.values);
+  static JsonTypeConverter2<AzkarFont, String, String> $converterazkarFont =
+      const EnumNameConverter<AzkarFont>(AzkarFont.values);
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -1374,6 +1393,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   /// 1 is off, 0 is surah loop
   final int reciteRepeat;
   final Reciter reciter;
+  final AzkarFont azkarFont;
 
   /// seconds between ayahs
   final int recitePause;
@@ -1438,6 +1458,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.reciteSpeed,
     required this.reciteRepeat,
     required this.reciter,
+    required this.azkarFont,
     required this.recitePause,
   });
   @override
@@ -1595,6 +1616,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     {
       map['reciter'] = Variable<String>($SettingsTable.$converterreciter.toSql(reciter));
     }
+    {
+      map['azkar_font'] = Variable<String>($SettingsTable.$converterazkarFont.toSql(azkarFont));
+    }
     map['recite_pause'] = Variable<int>(recitePause);
     return map;
   }
@@ -1669,6 +1693,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reciteSpeed: Value(reciteSpeed),
       reciteRepeat: Value(reciteRepeat),
       reciter: Value(reciter),
+      azkarFont: Value(azkarFont),
       recitePause: Value(recitePause),
     );
   }
@@ -1778,6 +1803,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reciter: $SettingsTable.$converterreciter.fromJson(
         serializer.fromJson<String>(json['reciter']),
       ),
+      azkarFont: $SettingsTable.$converterazkarFont.fromJson(
+        serializer.fromJson<String>(json['azkarFont']),
+      ),
       recitePause: serializer.fromJson<int>(json['recitePause']),
     );
   }
@@ -1867,6 +1895,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'reciteSpeed': serializer.toJson<double>(reciteSpeed),
       'reciteRepeat': serializer.toJson<int>(reciteRepeat),
       'reciter': serializer.toJson<String>($SettingsTable.$converterreciter.toJson(reciter)),
+      'azkarFont': serializer.toJson<String>($SettingsTable.$converterazkarFont.toJson(azkarFont)),
       'recitePause': serializer.toJson<int>(recitePause),
     };
   }
@@ -1932,6 +1961,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     double? reciteSpeed,
     int? reciteRepeat,
     Reciter? reciter,
+    AzkarFont? azkarFont,
     int? recitePause,
   }) => AppSettings(
     id: id ?? this.id,
@@ -1994,6 +2024,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reciteSpeed: reciteSpeed ?? this.reciteSpeed,
     reciteRepeat: reciteRepeat ?? this.reciteRepeat,
     reciter: reciter ?? this.reciter,
+    azkarFont: azkarFont ?? this.azkarFont,
     recitePause: recitePause ?? this.recitePause,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
@@ -2082,6 +2113,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reciteSpeed: data.reciteSpeed.present ? data.reciteSpeed.value : this.reciteSpeed,
       reciteRepeat: data.reciteRepeat.present ? data.reciteRepeat.value : this.reciteRepeat,
       reciter: data.reciter.present ? data.reciter.value : this.reciter,
+      azkarFont: data.azkarFont.present ? data.azkarFont.value : this.azkarFont,
       recitePause: data.recitePause.present ? data.recitePause.value : this.recitePause,
     );
   }
@@ -2149,6 +2181,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('reciteSpeed: $reciteSpeed, ')
           ..write('reciteRepeat: $reciteRepeat, ')
           ..write('reciter: $reciter, ')
+          ..write('azkarFont: $azkarFont, ')
           ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
@@ -2216,6 +2249,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reciteSpeed,
     reciteRepeat,
     reciter,
+    azkarFont,
     recitePause,
   ]);
   @override
@@ -2282,6 +2316,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.reciteSpeed == this.reciteSpeed &&
           other.reciteRepeat == this.reciteRepeat &&
           other.reciter == this.reciter &&
+          other.azkarFont == this.azkarFont &&
           other.recitePause == this.recitePause);
 }
 
@@ -2346,6 +2381,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<double> reciteSpeed;
   final Value<int> reciteRepeat;
   final Value<Reciter> reciter;
+  final Value<AzkarFont> azkarFont;
   final Value<int> recitePause;
   const SettingsCompanion({
     this.id = const Value.absent(),
@@ -2408,6 +2444,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reciteSpeed = const Value.absent(),
     this.reciteRepeat = const Value.absent(),
     this.reciter = const Value.absent(),
+    this.azkarFont = const Value.absent(),
     this.recitePause = const Value.absent(),
   });
   SettingsCompanion.insert({
@@ -2471,6 +2508,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reciteSpeed = const Value.absent(),
     this.reciteRepeat = const Value.absent(),
     this.reciter = const Value.absent(),
+    this.azkarFont = const Value.absent(),
     this.recitePause = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
@@ -2534,6 +2572,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<double>? reciteSpeed,
     Expression<int>? reciteRepeat,
     Expression<String>? reciter,
+    Expression<String>? azkarFont,
     Expression<int>? recitePause,
   }) {
     return RawValuesInsertable({
@@ -2597,6 +2636,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (reciteSpeed != null) 'recite_speed': reciteSpeed,
       if (reciteRepeat != null) 'recite_repeat': reciteRepeat,
       if (reciter != null) 'reciter': reciter,
+      if (azkarFont != null) 'azkar_font': azkarFont,
       if (recitePause != null) 'recite_pause': recitePause,
     });
   }
@@ -2662,6 +2702,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<double>? reciteSpeed,
     Value<int>? reciteRepeat,
     Value<Reciter>? reciter,
+    Value<AzkarFont>? azkarFont,
     Value<int>? recitePause,
   }) {
     return SettingsCompanion(
@@ -2725,6 +2766,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       reciteSpeed: reciteSpeed ?? this.reciteSpeed,
       reciteRepeat: reciteRepeat ?? this.reciteRepeat,
       reciter: reciter ?? this.reciter,
+      azkarFont: azkarFont ?? this.azkarFont,
       recitePause: recitePause ?? this.recitePause,
     );
   }
@@ -2948,6 +2990,11 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (reciter.present) {
       map['reciter'] = Variable<String>($SettingsTable.$converterreciter.toSql(reciter.value));
     }
+    if (azkarFont.present) {
+      map['azkar_font'] = Variable<String>(
+        $SettingsTable.$converterazkarFont.toSql(azkarFont.value),
+      );
+    }
     if (recitePause.present) {
       map['recite_pause'] = Variable<int>(recitePause.value);
     }
@@ -3017,6 +3064,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('reciteSpeed: $reciteSpeed, ')
           ..write('reciteRepeat: $reciteRepeat, ')
           ..write('reciter: $reciter, ')
+          ..write('azkarFont: $azkarFont, ')
           ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
@@ -5042,6 +5090,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<double> reciteSpeed,
   Value<int> reciteRepeat,
   Value<Reciter> reciter,
+  Value<AzkarFont> azkarFont,
   Value<int> recitePause,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
@@ -5105,6 +5154,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<double> reciteSpeed,
   Value<int> reciteRepeat,
   Value<Reciter> reciter,
+  Value<AzkarFont> azkarFont,
   Value<int> recitePause,
 });
 
@@ -5383,6 +5433,11 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<AzkarFont, AzkarFont, String> get azkarFont => $composableBuilder(
+    column: $table.azkarFont,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => ColumnFilters(column));
 }
@@ -5607,6 +5662,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<String> get reciter =>
       $composableBuilder(column: $table.reciter, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get azkarFont =>
+      $composableBuilder(column: $table.azkarFont, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => ColumnOrderings(column));
 }
@@ -5798,6 +5856,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumnWithTypeConverter<Reciter, String> get reciter =>
       $composableBuilder(column: $table.reciter, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<AzkarFont, String> get azkarFont =>
+      $composableBuilder(column: $table.azkarFont, builder: (column) => column);
+
   GeneratedColumn<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => column);
 }
@@ -5888,6 +5949,7 @@ class $$SettingsTableTableManager
                 Value<double> reciteSpeed = const Value.absent(),
                 Value<int> reciteRepeat = const Value.absent(),
                 Value<Reciter> reciter = const Value.absent(),
+                Value<AzkarFont> azkarFont = const Value.absent(),
                 Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
@@ -5950,6 +6012,7 @@ class $$SettingsTableTableManager
                 reciteSpeed: reciteSpeed,
                 reciteRepeat: reciteRepeat,
                 reciter: reciter,
+                azkarFont: azkarFont,
                 recitePause: recitePause,
               ),
           createCompanionCallback:
@@ -6014,6 +6077,7 @@ class $$SettingsTableTableManager
                 Value<double> reciteSpeed = const Value.absent(),
                 Value<int> reciteRepeat = const Value.absent(),
                 Value<Reciter> reciter = const Value.absent(),
+                Value<AzkarFont> azkarFont = const Value.absent(),
                 Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
@@ -6076,6 +6140,7 @@ class $$SettingsTableTableManager
                 reciteSpeed: reciteSpeed,
                 reciteRepeat: reciteRepeat,
                 reciter: reciter,
+                azkarFont: azkarFont,
                 recitePause: recitePause,
               ),
           withReferenceMapper: (p0) => p0

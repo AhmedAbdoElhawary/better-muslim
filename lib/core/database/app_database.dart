@@ -12,6 +12,7 @@ import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/azkar.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
@@ -167,6 +168,7 @@ class Settings extends Table {
       .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10, 0]))();
 
   TextColumn get reciter => textEnum<Reciter>().withDefault(const Constant('alafasy'))();
+  TextColumn get azkarFont => textEnum<AzkarFont>().withDefault(const Constant('amiri'))();
 
   /// seconds between ayahs
   IntColumn get recitePause => integer()
@@ -375,7 +377,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -572,6 +574,9 @@ class AppDatabase extends _$AppDatabase {
       from17To18: (m, schema) async {
         /// the repeat check takes surah loop, sqlite remakes the table for it
         await m.alterTable(TableMigration(schema.settings));
+      },
+      from18To19: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.azkarFont);
       },
     ),
   );

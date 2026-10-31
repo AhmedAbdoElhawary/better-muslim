@@ -66,6 +66,12 @@ const credits = [
     license: _ofl,
     link: 'https://software.sil.org/scheherazade',
   ),
+  Credit(
+    source: 'Noto Naskh Arabic',
+    useKey: StringsManager.useFonts,
+    license: _ofl,
+    link: 'https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic',
+  ),
 
   /// its license lets it be used and shipped for free, never sold or modified
   Credit(

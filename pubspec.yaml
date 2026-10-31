@@ -136,6 +136,9 @@ flutter:
     - family: KfgqpcHafs
       fonts:
         - asset: assets/fonts/KfgqpcHafs.ttf
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Variable.ttf
 
 flutter_launcher_icons:
   ios: true

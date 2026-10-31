@@ -10,6 +10,7 @@ abstract final class FontFamilyManager {
   static const String quran = BmFont.quran;
   static const String kfgqpc = 'KfgqpcHafs';
   static const String scheherazade = 'ScheherazadeNew';
+  static const String naskh = 'NotoNaskhArabic';
 }
 
 /// the text widgets pick the latin or arabic family by the app language
@@ -25,7 +26,8 @@ enum FontEnum {
   quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran),
 
   kfgqpc(latin: FontFamilyManager.kfgqpc, arabic: FontFamilyManager.kfgqpc),
-  scheherazade(latin: FontFamilyManager.scheherazade, arabic: FontFamilyManager.scheherazade);
+  scheherazade(latin: FontFamilyManager.scheherazade, arabic: FontFamilyManager.scheherazade),
+  naskh(latin: FontFamilyManager.naskh, arabic: FontFamilyManager.naskh);
 
   const FontEnum({required this.latin, required this.arabic});
   final String latin;
