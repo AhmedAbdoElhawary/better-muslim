@@ -466,7 +466,11 @@ class AyahSheet extends ConsumerWidget {
     final translation = isArabic ? text?.tafsir[ayah.ayah - 1] : text?.translation[ayah.ayah - 1];
     final arabic = ref.watch(ayahTextProvider(ayah)).value;
     final surah = ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
-    final saved = ref.watch(ayahBookmarkProvider(ayah).select((bookmark) => bookmark != null));
+    final saved = ref.watch(ayahBookmarkProvider(ayah).select((bookmark) => bookmark?.color));
+    final (written, highlighted) = ref.watch(
+      noteProvider(ayah)
+          .select((note) => (note?.text.isNotEmpty ?? false, note?.highlight ?? false)),
+    );
 
     void copy() {
       if (arabic == null || translation == null || surah == null) return;
@@ -479,11 +483,19 @@ class AyahSheet extends ConsumerWidget {
       (BmIcon.ui(BmUiIcon.play), StringsManager.playFromHere, onPlay),
       (BmIcon.ui(BmUiIcon.tafsir), StringsManager.tafsir, () => onStudy(StudyTab.tafsir)),
       (
-        BmIcon(BmIconName.bookmark, filled: saved),
+        BmIcon(
+          BmIconName.bookmark,
+          filled: saved != null,
+          color: saved == null ? null : context.getColor(saved.theme),
+        ),
         StringsManager.bookmark,
         () => showBookmarkPicker(context, ayah: ayah),
       ),
-      (BmIcon.ui(BmUiIcon.note), StringsManager.note, () => onStudy(StudyTab.notes)),
+      (
+        BmIcon.ui(written ? BmUiIcon.note_filled : BmUiIcon.note),
+        StringsManager.note,
+        () => onStudy(StudyTab.notes),
+      ),
       (BmIcon.ui(BmUiIcon.share), StringsManager.share, () => showAyahShare(context, [ayah])),
       (BmIcon.ui(BmUiIcon.copy), StringsManager.copy, copy),
     ];
@@ -560,6 +572,7 @@ class AyahSheet extends ConsumerWidget {
                                 icon: icon,
                                 label: label,
                                 onTap: onTap,
+                                highlight: highlighted && label == StringsManager.note,
                                 height: SizeManager.ayahAction,
                                 radius: RadiusManager.row,
                               ),
