@@ -17,10 +17,8 @@ class SearchAyah {
   SearchAyah(this.key, this.words, String translation, {List<String> roots = const []})
     : translation = translation.split(' '),
       _roots = [for (final root in roots) _fold(root)],
-      _arabic = [
-        _form([for (final word in words) _fold(word.replaceAll('\u0670', ''))]),
-        _form([for (final word in words) _fold(word.replaceAll('\u0670', 'ا'))]),
-      ],
+      _arabic = _forms(words, _fold),
+      _hamza = _forms(words, _foldHamza),
       _translation = _form(translation.toLowerCase().split(' '));
 
   final AyahKey key;
@@ -31,10 +29,18 @@ class SearchAyah {
 
   /// the dagger alef dropped and as an alef, so الرحمن and الكتاب both find their ayahs
   final List<_Form> _arabic;
+
+  /// the same with every hamza kept as ء, for a query that has one
+  final List<_Form> _hamza;
   final _Form _translation;
 
   /// each word's root from the quranic arabic corpus, '' for a word without one
   final List<String> _roots;
+
+  static List<_Form> _forms(List<String> words, String Function(String) fold) => [
+    _form([for (final word in words) fold(word.replaceAll('\u0670', ''))]),
+    _form([for (final word in words) fold(word.replaceAll('\u0670', 'ا'))]),
+  ];
 
   static _Form _form(List<String> words) {
     final text = StringBuffer();
@@ -48,32 +54,45 @@ class SearchAyah {
   }
 }
 
-/// the words a match touches, a match inside a word washes the whole word
-Set<int> _matched(List<_Form> forms, String query) {
+/// the words a match touches, a match inside a word washes the whole word. a word counts one
+/// match however many it holds, so العالمين is one ال
+({Set<int> words, int count}) _matched(List<_Form> forms, String query) {
   final words = <int>{};
+  final starts = <int>{};
   for (final form in forms) {
     var word = 0;
     for (var at = form.text.indexOf(query); at != -1; at = form.text.indexOf(query, at + 1)) {
       while (word + 1 < form.starts.length && form.starts[word + 1] <= at) {
         word++;
       }
+      starts.add(word);
       for (var i = word; i < form.starts.length && form.starts[i] < at + query.length; i++) {
         words.add(i);
       }
     }
   }
-  return words;
+  return (words: words, count: starts.length);
 }
 
 class SearchHit {
-  const SearchHit(this.ayah, {this.arabic = const {}, this.translation = const {}});
+  const SearchHit(
+    this.ayah, {
+    required this.count,
+    this.arabic = const {},
+    this.translation = const {},
+  });
 
   final SearchAyah ayah;
+
+  /// how many times the query is in this ayah
+  final int count;
 
   /// indexes into ayah.words and ayah.translation
   final Set<int> arabic;
   final Set<int> translation;
 }
+
+const _none = (words: <int>{}, count: 0);
 
 /// no typo guessing, a guess would wash words that aren't what was typed
 ({QuranJump? jump, Map<int, List<SearchHit>> groups}) searchQuran(
@@ -84,7 +103,8 @@ class SearchHit {
 }) {
   final text = query.trim().replaceAll(RegExp(r'\s+'), ' ');
   if (text.isEmpty) return (jump: null, groups: const {});
-  final arabic = _fold(text);
+  final hamza = _foldHamza(text).contains('ء');
+  final arabic = hamza ? _foldHamza(text) : _fold(text);
   final english = text.toLowerCase();
   final groups = <int, List<SearchHit>>{};
   if (scope == SearchScope.root) {
@@ -96,17 +116,26 @@ class SearchHit {
           if (word == root && i < ayah.words.length) i,
       };
       if (words.isEmpty) continue;
-      (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, arabic: words));
+      (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, count: words.length, arabic: words));
     }
     return (jump: null, groups: groups);
   }
   for (final ayah in ayahs) {
-    final words = scope == SearchScope.translation ? const <int>{} : _matched(ayah._arabic, arabic);
+    final words = scope == SearchScope.translation
+        ? _none
+        : _matched(hamza ? ayah._hamza : ayah._arabic, arabic);
     final translation = scope == SearchScope.arabic
-        ? const <int>{}
+        ? _none
         : _matched([ayah._translation], english);
-    if (words.isEmpty && translation.isEmpty) continue;
-    (groups[ayah.key.surah] ??= []).add(SearchHit(ayah, arabic: words, translation: translation));
+    if (words.words.isEmpty && translation.words.isEmpty) continue;
+    (groups[ayah.key.surah] ??= []).add(
+      SearchHit(
+        ayah,
+        count: words.count + translation.count,
+        arabic: words.words,
+        translation: translation.words,
+      ),
+    );
   }
   return (jump: _jump(text, assets), groups: groups);
 }
@@ -149,5 +178,9 @@ QuranJump? _jump(String query, QuranAssets assets) {
 String _nameKey(String name) =>
     _fold(name.toLowerCase()).replaceAll(RegExp('[^a-z\u0621-\u064A]'), '');
 
-/// the mushaf often writes a hamza with no seat (شَيۡـًٔا), so hamza goes on both sides
-String _fold(String text) => normalizeArabic(text.replaceAll(RegExp('[ءؤئ]'), ''));
+/// the mushaf often writes a hamza with no seat (شَيۡـًٔا), so hamza goes on both sides. a seat
+/// stays its letter, so مومن finds مؤمن
+String _fold(String text) => normalizeArabic(text.replaceAll('ء', ''));
+
+/// a typed hamza has to be there, so الرجاء never finds الرجال
+String _foldHamza(String text) => normalizeArabic(text.replaceAll(RegExp('[ؤئ\u0654\u0655]'), 'ء'));
