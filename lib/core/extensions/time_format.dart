@@ -7,11 +7,12 @@ import 'package:timezone/timezone.dart';
 
 extension TimeFormatExtension on BuildContext {
   /// the phone's 12 or 24 hour setting, the app stores none (FR-017a)
-  String formatTime(TZDateTime time, Digits digits) => formatTimeIn(
+  String formatTime(TZDateTime time, Digits digits, {bool period = true}) => formatTimeIn(
     time,
     language: Localizations.localeOf(this).languageCode,
     use24h: MediaQuery.alwaysUse24HourFormatOf(this),
     digits: digits,
+    period: period,
   );
 
   String formatDigits(String text, Digits digits) =>
@@ -22,14 +23,20 @@ extension TimeFormatExtension on BuildContext {
       formatDigits('${date.day} ${tr(date.monthKey)} ${date.year}', digits);
 }
 
-/// the same as the context extension, for notifications built with no context
+/// the same as the context extension, for notifications built with no context.
+/// period false drops am/pm on 12 hour phones
 String formatTimeIn(
   TZDateTime time, {
   required String language,
   required bool use24h,
   required Digits digits,
+  bool period = true,
 }) {
-  final format = use24h ? DateFormat.Hm(language) : DateFormat.jm(language);
+  final format = use24h
+      ? DateFormat.Hm(language)
+      : period
+      ? DateFormat.jm(language)
+      : DateFormat('h:mm', language);
   return formatDigitsIn(
     (format..useNativeDigits = false).format(time),
     language: language,

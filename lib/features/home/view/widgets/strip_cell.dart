@@ -90,13 +90,19 @@ class StripTime extends ConsumerWidget {
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
     final time = cell.time;
-    return MediumText(
-      time == null ? _dash : context.formatTime(time, digits),
-      translate: false,
-      fontSize: FontSizeManager.timeSmall,
-      color: !cell.current && (cell.logged || cell.past) ? ThemeEnum.text2 : ThemeEnum.text,
-      tabularFigures: true,
-      maxLines: 1,
+
+    /// "12:05 PM" needs about 73 pt and a cell is 69, so the strip alone drops am/pm (R15)
+    return Semantics(
+      label: time == null ? _dash : context.formatTime(time, digits),
+      excludeSemantics: true,
+      child: MediumText(
+        time == null ? _dash : context.formatTime(time, digits, period: false),
+        translate: false,
+        fontSize: FontSizeManager.timeSmall,
+        color: !cell.current && (cell.logged || cell.past) ? ThemeEnum.text2 : ThemeEnum.text,
+        tabularFigures: true,
+        maxLines: 1,
+      ),
     );
   }
 }
