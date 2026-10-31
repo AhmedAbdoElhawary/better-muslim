@@ -12,6 +12,7 @@ import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/tone_button.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -94,6 +95,22 @@ void main() {
     expect(settings.soundOf(Prayer.dhuhr), PrayerSound.silent);
     expect(settings.soundOf(Prayer.asr), PrayerSound.adhan);
     expect(find.byType(RecordingRow), findsNWidgets(3));
+    await unmount(tester);
+  });
+
+  testWidgets('a tone row under each tone prayer plays its channel\'s sound', (tester) async {
+    await open(tester);
+    expect(find.byType(ToneRow), findsNWidgets(3));
+
+    await tester.tap(inRow(Prayer.dhuhr, 'Silent'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ToneRow), findsNWidgets(2));
+
+    await tester.tap(
+      find.descendant(of: find.byType(ToneRow), matching: find.byType(ToneButton)).first,
+    );
+    expect(system.last.method, 'playTone');
+    expect(system.last.arguments, {'channel': 'adhan_asr_tone'});
     await unmount(tester);
   });
 
