@@ -524,7 +524,7 @@
   "bookmarkRef": "{surah} {s}:{a} · صفحة {p}",
   "pageRef": "{surah} · صفحة {p}",
   "noteRef": "{s}:{a}",
-  "whenPrivate": "{when} · خاصة",
+  "whenPrivate": "{when}",
   "noNotes": "لا ملاحظات بعد",
   "noNotesBody": "اضغط ملاحظة على أي آية لتكتب ما لا يراه غيرك.",
   "removeBookmark": "أزل العلامة",

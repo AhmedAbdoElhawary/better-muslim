@@ -998,7 +998,7 @@
   "bookmarkRef": "{surah} {s}:{a} · Page {p}",
   "pageRef": "{surah} · Page {p}",
   "noteRef": "{s}:{a}",
-  "whenPrivate": "{when} · Private",
+  "whenPrivate": "{when}",
   "noNotes": "No notes yet",
   "noNotesBody": "Tap Note on any ayah to write one only you can see.",
   "removeBookmark": "Remove bookmark",
