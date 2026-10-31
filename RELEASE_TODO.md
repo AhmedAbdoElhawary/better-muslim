@@ -16,9 +16,18 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 
 ## Android
 
-- [ ] Make the release keystore and `android/key.properties` (keyAlias, keyPassword, storeFile,
-      storePassword), both stay out of git. Without them a local release build is debug signed.
-      (`android/app/build.gradle.kts`)
+- [x] The upload keystore is `~/.android-keys/better-muslim-upload.jks`, its passwords are in
+      `android/key.properties`. Both stay out of git.
+- [ ] Back up both somewhere safe. Play App Signing can reset a lost upload key, but only after a
+      support request.
+- [ ] Put the keystore in the repo secrets so CI signs with it (`ANDROID_KEYSTORE_BASE64`,
+      `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`).
+
+## Content
+
+- [ ] Upload `build/tafsir/tabari.json.gz` and `qurtubi.json.gz` to the `tafsir-v2` release of
+      `better-muslim-content`. Their download fails until then.
+      (`lib/features/quran/data/tafsir_files.dart`)
 
 ## Store listings
 
@@ -27,118 +36,13 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
 - [ ] The Play link is already set to `com.elhawary.bettermuslim`. Check it opens once the app is
       listed.
 
-## Adhan
-
-- [ ] Send the two emails below, one to Mishary Alafasy and one to Nasser Al-Qatami.
-- [ ] If Alafasy says yes, his pair replaces Madinah and the Malmö Fajr inside the app.
-- [ ] If Al-Qatami says yes, his pair goes into the `adhan-v2` release and downloads like before.
-      No Fajr adhan of his is online, so it only goes in once he sends his Fajr too.
-- [ ] Add each credit line to `lib/features/more/model/credits.dart` exactly as they give it.
-- [ ] Then build ticket 03 (`specs/010-enhancements/tickets/03-ship-permitted-recordings.md`) with
-      the files they sent. Commit `572b14b` already did it for Alafasy, revert `6eab0fe` and swap in
-      his own files if he says yes.
-- [ ] A dev phone that ran the app at `572b14b` has the v15 database and won't open the v14 one,
-      reinstall the app on it.
-
-<!-- TODO(ahmed): send this from my address, the app keeps the old pair until he says yes -->
-
-> **To:** ai@alafasy.co
->
-> **Subject:** Permission to use your adhan and recitation in a free app
->
-> Assalamu alaikum,
->
-> I'm building Better Muslim, a free app for iOS and Android with no ads and no account, for prayer
-> times, Quran, azkar and duas. It plays the adhan at each prayer time.
->
-> May I include your standard adhan and your Fajr adhan in the app? They would be the recording
-> inside the app, so everyone who installs it would hear your adhan at every prayer, with Fajr
-> always in your voice too. If you agree, could you send both as WAV files?
->
-> The app also plays your Quran recitation, ayah by ayah, from the files on EveryAyah
-> (everyayah.com/data/Alafasy_128kbps). May I keep using it, so people can listen to and download
-> your recitation inside the app?
->
-> Please also tell me the credit line you'd like shown in the app, and any terms you have. I'll
-> follow them exactly.
->
-> JazakAllahu khairan,
-> Ahmed Abdo Elhawary
-> elhawarydev@gmail.com
-
-<!-- TODO(ahmed): send this from my address and fill in Al-Qatami's contact address, nothing ships for him until he says yes -->
-
-> **To:** 
->
-> **Subject:** Permission to use your adhan in a free app
->
-> Assalamu alaikum,
->
-> I'm building Better Muslim, a free app for iOS and Android with no ads and no account, for prayer
-> times, Quran, azkar and duas. It plays the adhan at each prayer time.
->
-> May I offer your standard adhan and your Fajr adhan in the app? They would be an optional
-> download: anyone who picks your recording downloads it once, and then hears your adhan at every
-> prayer, with Fajr always in your voice too. If you agree, could you send both as WAV files? I
-> couldn't find your Fajr adhan anywhere, so if you haven't recorded one, I'd be grateful if you
-> could.
->
-> Please also tell me the credit line you'd like shown in the app, and any terms you have. I'll
-> follow them exactly.
->
-> JazakAllahu khairan,
-> Ahmed Abdo Elhawary
-> elhawarydev@gmail.com
-
-## Quran recitation
-
-Nothing licenses the Alafasy recitation from EveryAyah (`docs/research/recitation-and-adhan-licensing.md`).
-
-- [ ] Alafasy's email above asks about it too. A yes covers it.
-- [ ] If he says no or never answers, pick another source before release: the Quran Foundation
-      API (client id, Content Sync every 7 days, a public privacy policy), or a reciter who gives
-      written permission. The five reciters of ticket 17 need the same check.
-
-## Dua audio
-
-- [ ] Send the email below to hisnmuslim.com.
-- [ ] If they say yes, put the clips in `assets/duas/audio/` and their paths in
-      `assets/duas/duas.json`. Listen shows on a dua by itself once it has a clip.
-      (`lib/features/duas/model/dua.dart`)
-- [ ] Add their credit line to `lib/features/more/model/credits.dart` if they give one.
-
-> **Subject:** Permission to use Hisn al-Muslim audio in a free app
->
-> Assalamu alaikum,
->
-> I'm building Better Muslim, a free app for iOS and Android with no ads and no account, for prayer
-> times, Quran, azkar and duas. The azkar and duas text comes from Hisn al-Muslim, and the app
-> credits the book and links to hisnmuslim.com.
->
-> May I include your audio recordings of the duas in the app? Each one would play from its dua
-> card, with your site credited on the Acknowledgements page. If you have terms or a credit line
-> you'd like me to use, I'll follow them exactly.
->
-> JazakAllahu khairan,
-> Ahmed Abdo Elhawary
-> elhawarydev@gmail.com
-
 ## Check on my phones
 
 - [ ] Android, Dev: More › dev page › Adhan check, all three lines should say yes. Then
-      "Test adhan in 1 min" and listen to the full adhan with the screen off.
-- [ ] Android: pick Aaqib Azeez in the adhan sound sheet, it downloads and plays.
-- [ ] iOS, after the Apple account items: a downloaded recording plays its clip in the
-      notification (the clip is saved to `Library/Sounds`).
+      "Test adhan in 1 min" and listen to Alafasy's full adhan with the screen off.
+- [ ] A phone that ran the app at `572b14b` has a v15 database that never had the highlight,
+      categories or reciter steps, reinstall the app on it.
 - [ ] Turn on UI sounds in More and listen to the toggle, tasbih bead, tasbih complete, qibla
       aligned and Mark prayed. Swap any I don't like in `assets/audio/ui_*.m4a`, same names.
-
-## Decide
-
-- [ ] The Home sky scrim is 38% instead of the handoff's 28%, the least that keeps the bright
-      skies AA while they drift. Keep it or go back. (`ThemeEnum.skyScrim` in
-      `lib/core/resources/theme_manager.dart`)
-- [ ] The welcome has a 52% scrim behind its text on every sky. Keep it or go back.
-      (`ThemeEnum.welcomeScrim`)
-- [ ] Listen is hidden on duas with no clip, the handoff shows it on every dua. Keep it hidden
-      until the clips are in or show it.
+- [ ] Listen on a few Hisn al-Muslim duas, each downloads from hisnmuslim.com once and then plays
+      offline.
