@@ -143,7 +143,7 @@ class NotificationScheduler {
       for (final alert in alerts) {
         /// the full adhan needs code at prayer time with the app closed, the plugin can't run it.
         /// without exact alarms it stays with the plugin and its clip (FR-023)
-        final recording = recordings[alert.prayer] ?? AdhanRecording.madinah;
+        final recording = recordings[alert.prayer] ?? AdhanRecording.alafasy;
         if (exact && alert.kind == AlertKind.adhan && alert.sound == PrayerSound.adhan) {
           native.add(entryOf(alert, texts, recording));
           continue;
@@ -227,7 +227,7 @@ class NotificationScheduler {
       AndroidNotificationChannelGroup(_group, texts.tr(StringsManager.soundAdhan)),
     );
     for (final MapEntry(key: prayer, value: sound) in sounds.entries) {
-      final recording = recordings[prayer] ?? AdhanRecording.madinah;
+      final recording = recordings[prayer] ?? AdhanRecording.alafasy;
       final kept = channelId(prayer, sound, recording);
       await android.createNotificationChannel(_channelOf(prayer, sound, recording, texts));
       for (final other in channelIdsOf(prayer).where((id) => id != kept)) {
@@ -246,13 +246,13 @@ class NotificationScheduler {
   static List<String> channelIdsOf(Prayer prayer) => [
     'adhan_${prayer.name}_adhan',
     for (final sound in PrayerSound.values)
-      if (sound != PrayerSound.adhan) channelId(prayer, sound, AdhanRecording.madinah),
+      if (sound != PrayerSound.adhan) channelId(prayer, sound, AdhanRecording.alafasy),
     for (final recording in AdhanRecording.values) channelId(prayer, PrayerSound.adhan, recording),
     for (final name in _removedRecordings) 'adhan_${prayer.name}_adhan_$name',
   ];
 
   /// taken out of the app, a phone that picked one still has its channel
-  static const _removedRecordings = ['aaqibAzeez', 'andrewler', 'synagda'];
+  static const _removedRecordings = ['aaqibAzeez', 'andrewler', 'synagda', 'madinah'];
 
   AndroidNotificationChannel _channelOf(
     Prayer prayer,
