@@ -22,6 +22,9 @@ class QuranStore {
   $QuranBookmarksTable get _bookmarks => _db.quranBookmarks;
   $QuranCategoriesTable get _categories => _db.quranCategories;
   $QuranNotesTable get _notes => _db.quranNotes;
+  $QuranSearchesTable get _searches => _db.quranSearches;
+
+  static const _searchesKept = 10;
 
   /// newest first, each with its category's color
   Stream<List<Bookmark>> watchBookmarks() {
@@ -172,6 +175,31 @@ class QuranStore {
           updatedAt: note.updatedAt,
         ),
       );
+
+  /// newest first
+  Stream<List<String>> watchSearches() {
+    final query = _db.select(_searches)
+      ..orderBy([(row) => OrderingTerm.desc(row.searchedAt)])
+      ..limit(_searchesKept);
+    return query.watch().map((rows) => [for (final row in rows) row.query]);
+  }
+
+  /// a search made again moves to the top, the oldest past ten goes
+  Future<void> saveSearch(String query) => _db.transaction(() async {
+    await _db
+        .into(_searches)
+        .insertOnConflictUpdate(QuranSearchesCompanion.insert(query: query, searchedAt: _clock()));
+    final kept = _db.selectOnly(_searches)
+      ..addColumns([_searches.query])
+      ..orderBy([OrderingTerm.desc(_searches.searchedAt)])
+      ..limit(_searchesKept);
+    await (_db.delete(_searches)..where((row) => row.query.isNotInQuery(kept))).go();
+  });
+
+  Future<void> removeSearch(String query) =>
+      (_db.delete(_searches)..where((row) => row.query.equals(query))).go();
+
+  Future<void> clearSearches() => _db.delete(_searches).go();
 
   static Bookmark _bookmark(QuranBookmark row, CategoryColor color) => Bookmark(
     id: row.id,
