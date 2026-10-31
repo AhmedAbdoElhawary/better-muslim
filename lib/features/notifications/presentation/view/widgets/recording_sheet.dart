@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
@@ -49,6 +50,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   late AdhanRecording _picked =
       ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.alafasy;
   late final ClipPlayer _player;
+  late final AudioUseNotifier _use;
   late final StreamSubscription<void> _ended;
   AdhanRecording? _playing;
 
@@ -56,22 +58,33 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   void initState() {
     super.initState();
     _player = ref.read(clipPlayerProvider);
-    _ended = _player.ended.listen((_) => setState(() => _playing = null));
+    _use = ref.read(audioUseProvider.notifier);
+    _ended = _player.ended.listen((_) => _setPlaying(null));
+    ref.listenManual(audioUseProvider, (_, use) {
+      if (_playing != null && (use == AudioUse.recitation || use == AudioUse.adhan)) _stop();
+    });
   }
 
   @override
   void dispose() {
     _ended.cancel();
     _player.stop();
+
+    /// riverpod lets no widget change a provider while the tree builds
+    if (_playing != null) Future(() => _use.release(AudioUse.clip));
     super.dispose();
+  }
+
+  /// the quran pauses while a preview plays and comes back after
+  void _setPlaying(AdhanRecording? recording) {
+    setState(() => _playing = recording);
+    recording == null ? _use.release(AudioUse.clip) : _use.claim(AudioUse.clip);
   }
 
   Future<void> _play(AdhanRecording recording) async {
     BmHaptics.selection();
-    setState(() {
-      _picked = recording;
-      _playing = recording;
-    });
+    setState(() => _picked = recording);
+    _setPlaying(recording);
     await _player.stop();
 
     /// fajr always previews and plays the recording's fajr variant
@@ -99,7 +112,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   }
 
   Future<void> _stop() async {
-    setState(() => _playing = null);
+    _setPlaying(null);
     await _player.stop();
   }
 
