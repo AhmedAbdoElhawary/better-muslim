@@ -1,13 +1,11 @@
 import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.dart';
-import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
-import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
@@ -16,7 +14,6 @@ import 'package:better_muslim/core/widgets/shortcut_row.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
-import 'package:better_muslim/features/azkar/view/widgets/azkar_font_sheet.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,8 +59,7 @@ class AzkarPage extends StatelessWidget {
   }
 }
 
-/// the large title under the font button, in the same button row as prayer's so the tabs' titles
-/// line up
+/// the large title under the same empty button row as prayer's, so the tabs' titles line up
 class _Header extends StatelessWidget {
   const _Header();
 
@@ -72,53 +68,16 @@ class _Header extends StatelessWidget {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return SafeArea(
       bottom: false,
-      child: TopPadding(
-        padding: SpaceManager.s1,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const EndPadding(
-              padding: SpaceManager.s2,
-              child: Align(alignment: AlignmentDirectional.centerEnd, child: _FontButton()),
-            ),
-            SymmetricPadding(
-              horizontal: SpaceManager.s5,
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: LargeTitle(
-                  StringsManager.tabAzkar,
-                  fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.largeTitle,
-                  height: isArabic ? LineHeightManager.titleAr : LineHeightManager.largeTitle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// "Aa", the azkar font sheet
-class _FontButton extends StatelessWidget {
-  const _FontButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: context.tr(StringsManager.azkarFont),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => showAzkarFontSheet(context),
-        child: RSizedBox.square(
-          dimension: SizeManager.hit,
-          child: Center(
-            child: BmIcon.ui(
-              BmUiIcon.text_size,
-              size: SizeManager.icon.r,
-              color: context.getColor(ThemeEnum.text),
-            ),
+      child: OnlyPadding(
+        top: SpaceManager.s1 + SizeManager.hit,
+        start: SpaceManager.s5,
+        end: SpaceManager.s5,
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: LargeTitle(
+            StringsManager.tabAzkar,
+            fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.largeTitle,
+            height: isArabic ? LineHeightManager.titleAr : LineHeightManager.largeTitle,
           ),
         ),
       ),
