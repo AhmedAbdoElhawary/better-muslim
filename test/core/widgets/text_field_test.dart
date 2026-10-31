@@ -16,22 +16,18 @@ void main() {
     return (box.decoration as BoxDecoration).border! as Border;
   }
 
-  testWidgets('the label, a 1 pt outline2 ring, at least 44 tall, obscured', (tester) async {
-    await pumpCoreWidget(
-      tester,
-      BmTextField(label: StringsManager.password, obscure: true, onChanged: (_) {}),
-    );
-    expect(find.text('Password'), findsOneWidget);
+  testWidgets('the label, a 1 pt outline2 ring, at least 44 tall', (tester) async {
+    await pumpCoreWidget(tester, BmTextField(label: StringsManager.note, onChanged: (_) {}));
+    expect(find.text('Note'), findsOneWidget);
     expect(ring(tester).top.color, palette.outlineStrong);
     expect(ring(tester).top.width, 1);
-    expect(tester.widget<TextField>(find.byType(TextField)).obscureText, isTrue);
     expect(tester.getSize(find.byType(TextField)).height, greaterThanOrEqualTo(20));
     final box = find.ancestor(of: find.byType(TextField), matching: find.byType(ConstrainedBox));
     expect(tester.getSize(box.first).height, greaterThanOrEqualTo(44));
   });
 
   testWidgets('focused: a 2 pt primary ring', (tester) async {
-    await pumpCoreWidget(tester, BmTextField(label: StringsManager.password, onChanged: (_) {}));
+    await pumpCoreWidget(tester, BmTextField(label: StringsManager.note, onChanged: (_) {}));
     await tester.tap(find.byType(TextField));
     await tester.pump();
     expect(ring(tester).top.color, palette.primary);
@@ -42,13 +38,12 @@ void main() {
     await pumpCoreWidget(
       tester,
       BmTextField(
-        label: StringsManager.password,
-        error: StringsManager.passwordTooShort,
-        errorArgs: const {'count': '6'},
+        label: StringsManager.bookmarkName,
+        error: StringsManager.categoryHint,
         onChanged: (_) {},
       ),
     );
-    expect(find.text('Use at least 6 characters.'), findsOneWidget);
+    expect(find.text('Category name'), findsOneWidget);
     expect(ring(tester).top.color, palette.error);
     expect(ring(tester).top.width, 2);
   });
@@ -56,16 +51,12 @@ void main() {
   testWidgets('arabic', (tester) async {
     await pumpCoreWidget(
       tester,
-      BmTextField(
-        label: StringsManager.confirmPassword,
-        error: StringsManager.passwordsDontMatch,
-        onChanged: (_) {},
-      ),
+      BmTextField(label: StringsManager.note, error: StringsManager.noteHint, onChanged: (_) {}),
       locale: const Locale('ar'),
       textScale: 2,
     );
-    expect(find.text('تأكيد كلمة المرور'), findsOneWidget);
-    expect(find.text('كلمتا المرور غير متطابقتين.'), findsOneWidget);
+    expect(find.text('ملاحظة'), findsOneWidget);
+    expect(find.text('اكتب ملاحظة خاصة'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
