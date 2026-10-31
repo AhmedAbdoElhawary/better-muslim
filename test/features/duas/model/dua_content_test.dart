@@ -2,6 +2,7 @@ import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/model/dua_search.dart';
+import 'package:better_muslim/features/duas/model/duas_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,13 +15,14 @@ void main() {
       expect(categoryIds.add(category.id), isTrue, reason: category.id);
       expect(category.name.en, isNotEmpty);
       expect(category.name.ar, isNotEmpty);
-      expect(category.chip, isNot(anyOf(DuaChip.all, DuaChip.saved)), reason: category.id);
+      expect(category.chip, isNot(DuaChip.saved), reason: category.id);
       expect(category.duas, isNotEmpty, reason: category.id);
       for (final dua in category.duas) {
         expect(dua.source.en, isNotEmpty, reason: dua.id);
         expect(dua.source.ar, isNotEmpty, reason: dua.id);
-        final audio = dua.audio;
-        if (audio != null) expect(audio, startsWith('assets/duas/audio/'), reason: dua.id);
+        if (dua.quran && dua.ayahs.isNotEmpty) continue;
+        expect(dua.audio, endsWith('.mp3'), reason: dua.id);
+        expect(dua.sha256, hasLength(64), reason: dua.id);
       }
     }
   });
@@ -34,19 +36,33 @@ void main() {
     }
   });
 
-  test('the five categories in the 4.14 order from hisn al-muslim', () async {
+  test('the 4.14 five first with their ids, then every other hisn al-muslim chapter', () async {
     final categories = await loadDuas(await QuranAssets.load());
     expect(
-      [for (final category in categories) (category.name.en, category.duas.length)],
+      [for (final category in categories.take(5)) (category.name.en, category.duas.length)],
       [
         ('Leaving the home', 2),
-        ('Waking up', 3),
-        ('Before sleeping', 9),
-        ('Entering and leaving the mosque', 2),
+        ('Waking up', 4),
+        ('Before sleeping', 13),
+        ('Entering and leaving the mosque', 3),
         ('Before and after eating', 4),
-        ('Rabbana duas from the Quran', 38),
       ],
     );
+    expect(categories.last.chip, DuaChip.quranic);
+    expect(categories.where((category) => category.id.startsWith('hisn-')), hasLength(123));
+    final ids = {for (final category in categories) ...category.duas.map((dua) => dua.id)};
+    for (var n = 1; n <= 20; n++) {
+      expect(ids, contains('d${'$n'.padLeft(3, '0')}'), reason: 'a saved dua keeps its id');
+    }
+    final eating = categories.singleWhere((category) => category.id == 'eating');
+    expect(eating.chip, DuaChip.food);
+  });
+
+  test('every chip has duas', () async {
+    final categories = await loadDuas(await QuranAssets.load());
+    for (final chip in DuaChip.values.where((chip) => chip != DuaChip.saved)) {
+      expect(duasViewFor(chip, categories).card, isNotNull, reason: chip.name);
+    }
   });
 
   test('every quranic dua is whole ayahs that say rabbana, with sahih international', () async {
