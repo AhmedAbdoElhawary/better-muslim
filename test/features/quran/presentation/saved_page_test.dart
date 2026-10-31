@@ -243,6 +243,49 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('a bookmarked ayah has its margin ribbon in its color, others have none', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await tester.runAsync(() => storeOf(tester).addCategory('Study', CategoryColor.rose));
+    await open(tester, Routes.quranPage(1));
+    RenderMushafPage page() => tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
+      (page) => page.washBounds(const AyahKey(1, 3)) != null,
+    );
+    Future<void> bookmark(AyahKey ayah, String category) async {
+      await selectAyah(tester, ayah);
+      await tapAndStore(tester, find.text('Bookmark'));
+      await tapAndStore(tester, inPicker(find.text(category)));
+      await tester.tapAt(const Offset(200, 60));
+      await tester.pumpAndSettle();
+    }
+
+    expect(page().ribbonRect(const AyahKey(1, 3)), isNull);
+    await bookmark(const AyahKey(1, 3), 'Bookmarks');
+    await bookmark(const AyahKey(1, 4), 'Study');
+
+    final three = page().ribbonRect(const AyahKey(1, 3))!;
+    final four = page().ribbonRect(const AyahKey(1, 4))!;
+    expect(page().ribbonRect(const AyahKey(1, 5)), isNull);
+    expect(three.overlaps(four), isFalse, reason: 'never on top of each other');
+    for (final rect in [three, four]) {
+      expect(rect.right, lessThan(page().washBounds(const AyahKey(1, 5))!.left));
+      expect(rect.left, greaterThan(0));
+    }
+    final context = tester.element(find.byType(MushafPageView).first);
+    expect(page().ribbons, {
+      const AyahKey(1, 3): context.getColor(ThemeEnum.primary),
+      const AyahKey(1, 4): context.getColor(ThemeEnum.categoryRose),
+    });
+
+    await selectAyah(tester, const AyahKey(1, 4));
+    await tapAndStore(tester, find.text('Bookmark'));
+    await tapAndStore(tester, inPicker(find.text('Remove bookmark')));
+    expect(page().ribbonRect(const AyahKey(1, 4)), isNull);
+    expect(page().ribbonRect(const AyahKey(1, 3)), isNotNull);
+    await unmount(tester);
+  });
+
   testWidgets('a new category from the picker takes the bookmark in its color', (tester) async {
     await pumpApp(tester);
     await open(tester, Routes.quranPage(1));

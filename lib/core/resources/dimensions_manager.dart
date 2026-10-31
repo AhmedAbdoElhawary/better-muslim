@@ -293,6 +293,9 @@ abstract final class SpaceManager {
   static const double ayahLift = 24;
   static const double ribbonLeft = 44;
 
+  /// between the margin ribbons, the fore-edge and the frame
+  static const double marginRibbonGap = 2;
+
   /// the page as a card under the controls (4.21), the next page peeks this far from it
   static const double pageCardLift = 24;
   static const double pagePeekGap = 14;
@@ -682,6 +685,10 @@ abstract final class SizeManager {
   static const double ribbonNotch = .84;
   static const double ribbonShadowY = 2;
   static const double ribbonShadowBlur = 6;
+
+  /// a bookmarked ayah's ribbon in the page margin, beside its last line
+  static const double marginRibbonW = 6;
+  static const double marginRibbonH = 18;
 
   /// K.STAR's stroke on the page number and the surah rows, the arch's two lines, the marker's
   static const double starStroke = .9;

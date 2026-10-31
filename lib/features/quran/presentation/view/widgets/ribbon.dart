@@ -103,14 +103,7 @@ class _Ribbon extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..addPolygon([
-        Offset.zero,
-        Offset(size.width, 0),
-        Offset(size.width, size.height),
-        Offset(size.width / 2, size.height * notch),
-        Offset(0, size.height),
-      ], true);
+    final path = ribbonPath(Offset.zero & size, notch);
     if (shadow case final shadow?) {
       canvas.drawPath(
         path.shift(Offset(0, shadowY)),
@@ -126,3 +119,13 @@ class _Ribbon extends CustomPainter {
   bool shouldRepaint(_Ribbon old) =>
       old.color != color || old.notch != notch || old.shadow != shadow;
 }
+
+/// the ribbon's outline in rect, also the mushaf's margin ribbons
+Path ribbonPath(Rect rect, double notch) => Path()
+  ..addPolygon([
+    rect.topLeft,
+    rect.topRight,
+    rect.bottomRight,
+    Offset(rect.center.dx, rect.top + rect.height * notch),
+    rect.bottomLeft,
+  ], true);

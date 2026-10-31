@@ -15,6 +15,7 @@ import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/mushaf_star.dart';
+import 'package:better_muslim/features/quran/domain/bookmark.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
@@ -22,6 +23,7 @@ import 'package:better_muslim/features/quran/presentation/providers/page_provide
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -137,6 +139,13 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
           },
         ),
       ),
+      ribbons: {
+        for (final bookmark
+            in ref.watch(bookmarksProvider.select((bookmarks) => bookmarks.value)) ??
+                const <Bookmark>[])
+          if (bookmark.ayah case final ayah? when keys.contains(ayah))
+            ayah: context.getColor(bookmark.color.theme),
+      },
 
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
@@ -231,6 +240,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.wash,
     required this.chosen,
     required this.highlighted,
+    required this.ribbons,
     required this.following,
     required this.onAyah,
     required this.onLongAyah,
@@ -253,6 +263,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final Animation<double> wash;
   final Set<AyahKey> chosen;
   final Set<AyahKey> highlighted;
+  final Map<AyahKey, Color> ribbons;
   final AyahKey? following;
   final ValueChanged<AyahKey>? onAyah;
   final ValueChanged<AyahKey>? onLongAyah;
@@ -276,6 +287,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     wash: wash,
     chosen: chosen,
     highlighted: highlighted,
+    ribbons: ribbons,
     following: following,
     onAyah: onAyah,
     onLongAyah: onLongAyah,
@@ -301,6 +313,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..wash = wash
       ..chosen = chosen
       ..highlighted = highlighted
+      ..ribbons = ribbons
       ..following = following
       ..onAyah = onAyah
       ..onLongAyah = onLongAyah
@@ -328,6 +341,7 @@ class RenderMushafPage extends RenderBox {
     required this._wash,
     required this._chosen,
     required this._highlighted,
+    required this._ribbons,
     required this._following,
     required this.onAyah,
     required this.onLongAyah,
@@ -423,6 +437,15 @@ class RenderMushafPage extends RenderBox {
   set highlighted(Set<AyahKey> value) {
     if (setEquals(value, _highlighted)) return;
     _highlighted = value;
+    markNeedsPaint();
+  }
+
+  /// each bookmarked ayah on the page in its category's color
+  Map<AyahKey, Color> _ribbons;
+  Map<AyahKey, Color> get ribbons => _ribbons;
+  set ribbons(Map<AyahKey, Color> value) {
+    if (mapEquals(value, _ribbons)) return;
+    _ribbons = value;
     markNeedsPaint();
   }
 
@@ -661,6 +684,36 @@ class RenderMushafPage extends RenderBox {
     _nodes.clear();
   }
 
+  /// beside the line the ayah ends on, between the fore-edge and the frame, never over the text
+  Rect? ribbonRect(AyahKey key) {
+    final laid = _laid;
+    if (laid == null || _page == null || !_ribbons.containsKey(key)) return null;
+    for (var i = 0; i < laid.page.lines.length; i++) {
+      final ends = [
+        for (final word in laid.page.lines[i].words)
+          if (word.end && _ribbons.containsKey(word.key)) word.key,
+      ];
+      final index = ends.indexOf(key);
+      if (index < 0) continue;
+      final gap = SpaceManager.marginRibbonGap * _unit;
+      final start = laid.frame.left - gap;
+      final room = start - SizeManager.foreEdge * _unit - gap;
+      final width = math.min(
+        SizeManager.marginRibbonW * _unit,
+        (room - (ends.length - 1) * gap) / ends.length,
+      );
+
+      /// the line reads right to left, so its first ayah is the one nearest the text
+      final right = start - index * (width + gap);
+      return Rect.fromCenter(
+        center: Offset(right - width / 2, laid.layout.lines[i].center.dy),
+        width: width,
+        height: SizeManager.marginRibbonH * _unit,
+      );
+    }
+    return null;
+  }
+
   Rect? washBounds(AyahKey key) {
     final laid = _laid;
     if (laid == null || _page == null) return null;
@@ -682,6 +735,7 @@ class RenderMushafPage extends RenderBox {
       _paintCartouche(canvas, rect);
     }
     if (_placeholder) _paintPlaceholder(canvas, laid);
+    _paintRibbons(canvas);
     _paintWash(canvas, laid);
     _paintMarkers(canvas, laid);
 
@@ -874,6 +928,14 @@ class RenderMushafPage extends RenderBox {
         RRect.fromRectAndRadius(bar, Radius.circular(RadiusManager.mushafPlaceholder * _unit)),
         Paint()..color = _colors.ink.withValues(alpha: i % 3 == 0 ? .1 : .08),
       );
+    }
+  }
+
+  void _paintRibbons(Canvas canvas) {
+    for (final MapEntry(:key, :value) in _ribbons.entries) {
+      if (ribbonRect(key) case final rect?) {
+        canvas.drawPath(ribbonPath(rect, SizeManager.ribbonNotch), Paint()..color = value);
+      }
     }
   }
 
