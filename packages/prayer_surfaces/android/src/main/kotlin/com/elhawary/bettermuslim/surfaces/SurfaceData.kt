@@ -21,9 +21,6 @@ class SurfaceData(private val json: JSONObject) {
     val entries: List<JSONObject> = json.optJSONArray("entries").let { array ->
         List(array?.length() ?: 0) { array!!.getJSONObject(it) }
     }
-    val countdowns: List<JSONObject> = json.optJSONArray("countdowns").let { array ->
-        List(array?.length() ?: 0) { array!!.getJSONObject(it) }
-    }
 
     fun text(key: String): String = texts.optString(key)
 
@@ -80,9 +77,6 @@ class SurfaceData(private val json: JSONObject) {
         entries.firstOrNull { it.getLong("from") > now }?.let { moments += it.getLong("from") }
         return moments.filter { it > now }.minOrNull() ?: until
     }
-
-    // the countdown window covering now, at most one
-    fun windowAt(now: Long): JSONObject? = countdowns.firstOrNull { it.getLong("start") <= now && now < it.getLong("end") }
 
     fun digits(text: String): String {
         if (!eastern) return text

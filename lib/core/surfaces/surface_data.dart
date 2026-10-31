@@ -15,13 +15,10 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter/painting.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
 
-/// the notifications' 6 days, ios 26 schedules no countdown further than they go
-const _windowDays = 6;
-const _windowLength = Duration(hours: 2);
-
 /// the file the widgets, the live activity and the android countdown read
 /// (contracts/surface-data.md). the prayer rules stay in dart, the native side only picks the
-/// entry in force and counts
+/// entry in force and counts. the countdown shows while the app is off screen, the native side
+/// knows when
 Map<String, Object?> buildSurfaceData({
   required DateTime now,
   required Location? location,
@@ -65,7 +62,6 @@ Map<String, Object?> buildSurfaceData({
       'channel': tr(StringsManager.countdownChannel),
     },
     'entries': const <Map<String, Object?>>[],
-    'countdowns': const <Map<String, Object?>>[],
   };
   if (location == null) return data;
 
@@ -165,6 +161,7 @@ Map<String, Object?> buildSurfaceData({
       'atTime': tr(StringsManager.atTime, {'time': time}),
       'timeCity': tr(StringsManager.notifReminderBody, {'time': time, 'city': city}),
       'nameTime': tr(StringsManager.nameTime, {'prayer': name, 'time': time}),
+      'nameNow': tr(StringsManager.prayerNow, {'prayer': name}),
       'barFrom': barFrom?.millisecondsSinceEpoch,
       'barFromLabel': barFromLabel,
       'sunrise': times.sunrise?.millisecondsSinceEpoch,
@@ -196,36 +193,10 @@ Map<String, Object?> buildSurfaceData({
     };
   }
 
-  int entryIndexAt(int ms) => froms.lastIndexWhere((from) => from <= ms);
-
-  /// a prayer with no time (polar) has no window and isn't the previous one of the next
-  final prayerTimes = [
-    for (var i = -1; i < _windowDays; i++)
-      for (final prayer in Prayer.values)
-        if (timesOn(plus(first, i)).timeOf(prayer) case final time?) (day: i, time: time),
-  ]..sort((a, b) => a.time.compareTo(b.time));
-  final countdowns = <Map<String, Object?>>[];
-  if (settings.prayerCountdown) {
-    for (var i = 1; i < prayerTimes.length; i++) {
-      final (:day, :time) = prayerTimes[i];
-      final previous = prayerTimes[i - 1].time;
-      final twoHours = time.subtract(_windowLength);
-      final windowStart = previous.isAfter(twoHours) ? previous : twoHours;
-      if (day < 0 || !time.isAfter(now) || !windowStart.isBefore(time)) continue;
-      final shown = windowStart.isAfter(now) ? windowStart : now;
-      countdowns.add({
-        'start': windowStart.millisecondsSinceEpoch,
-        'end': time.millisecondsSinceEpoch,
-        'entry': entryIndexAt(shown.millisecondsSinceEpoch),
-      });
-    }
-  }
-
   return {
     ...data,
     'until': until.millisecondsSinceEpoch,
     'entries': [for (final from in froms) entryAt(from)],
-    'countdowns': countdowns,
   };
 }
 

@@ -321,6 +321,7 @@ abstract final class StringsManager {
   static const String surfaceNextShort = 'surfaceNextShort';
   static const String nameTime = 'nameTime';
   static const String nameTimePrayed = 'nameTimePrayed';
+  static const String prayerNow = 'prayerNow';
   static const String reminderChip = 'reminderChip';
   static const String prayerCountdown = 'prayerCountdown';
   static const String prayerCountdownLine = 'prayerCountdownLine';

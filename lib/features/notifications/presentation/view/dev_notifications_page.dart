@@ -41,7 +41,6 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _testAdhanIn1Minute = 'Test adhan in 1 min';
   static const _replayOnboarding = 'Replay onboarding';
   static const _refreshWidgets = 'Refresh widgets';
-  static const _startCountdown = 'Start countdown now';
 
   /// the next prayer as an alert, on its own prayer day
   static Alert? nextAlert(WidgetRef ref) {
@@ -133,9 +132,6 @@ class DevNotificationsPage extends ConsumerWidget {
                     force: true,
                   ),
                 ),
-
-                /// the next prayer's countdown whatever the 2 hours, so it shows without waiting
-                _Row(_startCountdown, onTap: () => ref.read(surfacesChannelProvider).startNow()),
                 const _FastDayRow(),
               ],
 

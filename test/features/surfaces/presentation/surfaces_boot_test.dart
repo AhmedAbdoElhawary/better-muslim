@@ -214,21 +214,6 @@ void main() {
     await unmount(tester);
   });
 
-  /// maghrib 17:56, its window opens 2 hours before at 15:56
-  testWidgets('one write when a window opens and one when it ends, the app open', (tester) async {
-    final channel = await pumpBoot(tester, hour: 15, minute: 46);
-    expect(channel.updates, hasLength(1));
-
-    await tester.pump(const Duration(minutes: 10));
-    await settle(tester);
-    expect(channel.updates, hasLength(2));
-
-    await tester.pump(const Duration(hours: 2));
-    await settle(tester);
-    expect(channel.updates, hasLength(3));
-    await unmount(tester);
-  });
-
   testWidgets('the design scenario writes nothing', (tester) async {
     await pumpHome(
       tester,

@@ -222,7 +222,7 @@ void main() {
     await open(tester);
     final phone = recordPhone();
     await tester.scrollUntilVisible(find.text('Countdown before each prayer'), 100);
-    expect(find.text('Starts 2 hours before, ends at the adhan'), findsOneWidget);
+    expect(find.text('On the lock screen while the app is closed'), findsOneWidget);
     expect(
       find.ancestor(
         of: find.text('Countdown before each prayer'),

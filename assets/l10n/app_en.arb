@@ -699,6 +699,12 @@
       "time": {}
     }
   },
+  "prayerNow": "{prayer} · now",
+  "@prayerNow": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
   "reminderChip": "Reminder {time}",
   "@reminderChip": {
     "placeholders": {
@@ -706,7 +712,7 @@
     }
   },
   "prayerCountdown": "Countdown before each prayer",
-  "prayerCountdownLine": "Starts 2 hours before, ends at the adhan",
+  "prayerCountdownLine": "On the lock screen while the app is closed",
   "countdownChannel": "Prayer countdown",
   "openToSetPlace": "Open Better Muslim to set your place",
   "openToUpdateTimes": "Open Better Muslim to update the times",

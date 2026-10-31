@@ -48,6 +48,7 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
       "atTime": "at 17:56",
       "timeCity": "17:56 · Makkah",
       "nameTime": "Maghrib 17:56",
+      "nameNow": "Maghrib · now",
       "barFrom": 1792066020000,
       "barFromLabel": "Asr 15:27 · prayed",
       "sunrise": 1792043700000,
@@ -67,9 +68,6 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
         { "prayer": "isha", "name": "Isha", "time": "19:26", "logged": false, "past": false }
       ]
     }
-  ],
-  "countdowns": [
-    { "start": 1792068960000, "end": 1792076160000, "entry": 0 }
   ]
 }
 ```
@@ -78,11 +76,11 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 
 | Field | Rule |
 | --- | --- |
-| version | 2 (1 had no mode, colors or light). A reader that finds a higher one shows "out of date" (an app update the extension hasn't caught up with) |
-| place | false: no entries, no countdowns, the no place state |
+| version | 2 (1 had no mode, colors, light or nameNow, and had the 2 hour `countdowns`). A reader that finds a higher one shows "out of date" (an app update the extension hasn't caught up with) |
+| place | false: no entries, no countdown, the no place state |
 | language | `en` or `ar`. `ar` lays out right to left, uses Reem Kufi for names and Noto Sans Arabic for the rest |
 | eastern | true only in Arabic with Eastern digits. The native countdowns map 0-9 to ٠-٩ |
-| countdown | the switch. false: `countdowns` is empty and every running one ends |
+| countdown | the switch. false: no live countdown and every running one ends |
 | mode | `dark`, `light` or `followSky`, the app's mode. A message (no place, out of date) uses it, and follows the phone with `followSky` |
 | colors | the theme's roles for `light` and `dark`, ARGB ints: `top`, `middle`, `bottom` (the small and medium sky), `deep` (the large sky's end), `text`, `label`, `dim`, `gold`, `live` (the live countdown's digits), `primary`, `container`, `success`, `ring`, `sun`, `outline`. Dark is the theme's sky, light the theme's surfaces. The live countdown always takes `dark` |
 | until | end of the last entry. Past it: the out of date state. 0 with no place |
@@ -93,7 +91,6 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 | entries[].barFrom, sunrise, maghrib | null when the day has no such time |
 | entries[].reminder | null when the reminder is off |
 | entries[].light | which of `colors` the widgets use for this entry. Follow sky is light from sunrise until maghrib, and entries change at both |
-| countdowns | ascending `start`, at most 30 (6 days x 5) |
 
 Nothing else goes in: the test compares the key set of the built JSON with this list (SC-006).
 
@@ -111,6 +108,7 @@ What a running countdown shows, taken from `entries[entry]` and `texts`:
 | the bar | `barFrom` to `at` |
 | start label | `barFromLabel` |
 | end label | `nameTime` |
+| the prayer past its time (iOS 18 to 25) | `nameNow`, the countdown hidden |
 | "{city} · {method}" | `texts.methodLine` (expanded island) |
 | "Reminder {time}" | `reminder`, the chip only when not null |
 | Android title | `nameTime` |

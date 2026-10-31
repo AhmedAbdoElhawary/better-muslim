@@ -95,7 +95,6 @@ void main() {
   ) as Json;
 
   List<Json> entriesOf(Json data) => (data['entries']! as List).cast<Json>();
-  List<Json> windowsOf(Json data) => (data['countdowns']! as List).cast<Json>();
   List<Json> stripOf(Json entry) => (entry['strip']! as List).cast<Json>();
 
   /// the rule of contracts/native-surfaces.md
@@ -213,90 +212,52 @@ void main() {
     }
   });
 
-  group('the countdown windows', () {
+  group('the live countdown', () {
     final now = at(makkah, 10, 15, 16, 32);
     late Json data;
     setUp(() => data = build(makkah, now, prayed: {Prayer.asr}));
 
     DateTime timeOf(int day, Prayer prayer) =>
         timesOn(makkah, DateTime(2026, 10, 15 + day)).timeOf(prayer)!;
-    Json windowEnding(DateTime end) =>
-        windowsOf(data).singleWhere((window) => window['end'] == end.millisecondsSinceEpoch);
+    Json entryAt(DateTime time) => inForce(data, time.millisecondsSinceEpoch);
     int ms(DateTime time) => time.millisecondsSinceEpoch;
 
-    test('2 hours before, or from the previous prayer when that is later', () {
-      final maghrib = windowEnding(timeOf(0, Prayer.maghrib));
-      expect(maghrib['start'], ms(timeOf(0, Prayer.maghrib).subtract(const Duration(hours: 2))));
-      expect(maghrib['entry'], 0);
-
-      /// umm al-qura's isha is 90 minutes after maghrib
-      final isha = windowEnding(timeOf(0, Prayer.isha));
-      expect(isha['start'], ms(timeOf(0, Prayer.maghrib)));
+    test('no windows, it follows the app leaving and coming back', () {
+      expect(data.containsKey('countdowns'), isFalse);
+      expect(data['countdown'], true);
     });
 
-    test("fajr's starts in the night, its bar from last night's isha", () {
-      final fajr = windowEnding(timeOf(1, Prayer.fajr));
-      expect(fajr['start'], ms(timeOf(1, Prayer.fajr).subtract(const Duration(hours: 2))));
-      final entry = entriesOf(data)[fajr['entry']! as int];
-      expect(entry['prayer'], 'fajr');
+    test('rolls to the next prayer at each prayer time', () {
+      final maghrib = timeOf(0, Prayer.maghrib);
+      expect(entryAt(now)['at'], ms(maghrib));
+      expect(entryAt(maghrib)['prayer'], 'isha');
+      expect(entryAt(maghrib)['at'], ms(timeOf(0, Prayer.isha)));
+      expect(entryAt(timeOf(0, Prayer.isha))['prayer'], 'fajr');
+    });
+
+    test("fajr's bar from last night's isha", () {
+      final entry = entryAt(timeOf(0, Prayer.isha));
       expect(entry['barFrom'], ms(timeOf(0, Prayer.isha)));
       expect(entry['barFromLabel'], 'Isha ${clock(timeOf(0, Prayer.isha), makkah)}');
     });
 
     test("dhuhr's bar starts at sunrise, never prayed", () {
-      final dhuhr = windowEnding(timeOf(1, Prayer.dhuhr));
-      final entry = entriesOf(data)[dhuhr['entry']! as int];
       final sunrise = timesOn(makkah, DateTime(2026, 10, 16)).sunrise!;
+      final entry = entryAt(sunrise);
+      expect(entry['prayer'], 'dhuhr');
       expect(entry['barFrom'], ms(sunrise));
       expect(entry['barFromLabel'], 'Sunrise ${clock(sunrise, makkah)}');
     });
 
     test('a logged start prayer ends its label in prayed', () {
-      final entry = entriesOf(data)[windowEnding(timeOf(0, Prayer.maghrib))['entry']! as int];
-      expect(entry['barFromLabel'], 'Asr ${clock(timeOf(0, Prayer.asr), makkah)} · prayed');
+      expect(entryAt(now)['barFromLabel'], 'Asr ${clock(timeOf(0, Prayer.asr), makkah)} · prayed');
     });
 
-    test('only the first 6 prayer days, each entry the one in force at its start', () {
-      final windows = windowsOf(data);
-      expect(windows, hasLength(6 * 5 - 3));
-      expect(windows.last['end'], ms(timeOf(5, Prayer.isha)));
-      for (final window in windows) {
-        final start = window['start']! as int;
-        final entry = entriesOf(data).indexOf(inForce(data, start < ms(now) ? ms(now) : start));
-        expect(window['entry'], entry);
-      }
-    });
-
-    test('never overlapping, in order', () {
-      final windows = windowsOf(data);
-      for (var i = 1; i < windows.length; i++) {
-        expect(windows[i]['start']! as int, greaterThanOrEqualTo(windows[i - 1]['end']! as int));
-      }
-      expect(windows.first['start'], lessThan(ms(now)));
-    });
-
-    test('a prayer with no time has no window and is no one\'s previous', () {
-      final polar = build(tromso, at(tromso, 6, 20, 9, 0));
-      final days = [for (var i = -1; i < 6; i++) timesOn(tromso, DateTime(2026, 6, 19 + i))];
-      final ends = {
-        for (final day in days) ...[ms(day.dhuhr!), ms(day.asr!)],
-      };
-      for (final window in windowsOf(polar)) {
-        expect(ends, contains(window['end']));
-        final end = window['end']! as int;
-        final previous = ends.where((time) => time < end).lastOrNull;
-        final twoHours = end - const Duration(hours: 2).inMilliseconds;
-        expect(window['start'], previous != null && previous > twoHours ? previous : twoHours);
-      }
-      expect(windowsOf(polar), hasLength(lessThanOrEqualTo(6 * 2)));
-    });
-
-    test('none with the switch off, none without a place', () {
+    test('the switch off and no place are sent as they are', () {
       final off = build(makkah, now, settings: defaults.copyWith(prayerCountdown: false));
       expect(off['countdown'], false);
-      expect(windowsOf(off), isEmpty);
       expect(entriesOf(off), isNotEmpty);
-      expect(windowsOf(build(null, now)), isEmpty);
+      expect(build(null, now)['place'], false);
     });
   });
 
@@ -349,6 +310,7 @@ void main() {
       expect(entry['atTime'], 'at 17:56');
       expect(entry['timeCity'], '17:56 · Makkah');
       expect(entry['nameTime'], 'Maghrib 17:56');
+      expect(entry['nameNow'], 'Maghrib · now');
       expect(entry['reminder'], 'Reminder 17:46');
       expect(entry['prayedLine'], '3 of 5 prayed today');
       expect(entry['hijriCity'], '${entry['hijri']} · Makkah');
@@ -378,6 +340,7 @@ void main() {
       expect(entry['name'], 'المغرب');
       expect(entry['time'], '١٧:٥٦');
       expect(entry['nameTime'], 'المغرب ١٧:٥٦');
+      expect(entry['nameNow'], 'المغرب · الآن');
       expect(entry['barFromLabel'], endsWith(' · صلّيت'));
       expect(entry['prayedLine'], contains('٣'));
       expect(entry['hijri'], isNot(matches(RegExp('[0-9]'))));
@@ -487,7 +450,6 @@ void main() {
       'until',
       'texts',
       'entries',
-      'countdowns',
     ];
     const texts = [
       'noPlace',
@@ -514,6 +476,7 @@ void main() {
       'atTime',
       'timeCity',
       'nameTime',
+      'nameNow',
       'barFrom',
       'barFromLabel',
       'sunrise',
@@ -528,7 +491,6 @@ void main() {
       'strip',
     ];
     const cell = ['prayer', 'name', 'time', 'logged', 'past'];
-    const window = ['start', 'end', 'entry'];
 
     test('the key sets', () {
       final data = build(makkah, at(makkah, 10, 15, 16, 32));
@@ -542,9 +504,6 @@ void main() {
           expect(strip.keys.toSet(), cell.toSet());
         }
       }
-      for (final item in windowsOf(data)) {
-        expect(item.keys.toSet(), window.toSet());
-      }
     });
 
     test('no place', () {
@@ -553,7 +512,6 @@ void main() {
       expect(data['place'], false);
       expect(data['until'], 0);
       expect(entriesOf(data), isEmpty);
-      expect(windowsOf(data), isEmpty);
       expect((data['texts']! as Json).keys.toSet(), texts.toSet());
     });
   });

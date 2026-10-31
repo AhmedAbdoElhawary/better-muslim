@@ -6,7 +6,6 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
-import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/settings.dart';
@@ -20,7 +19,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import '../../helpers/home.dart';
 import '../../helpers/surfaces.dart';
 
 void main() {
@@ -60,7 +58,7 @@ void main() {
 
   DateTime at(int day, int hour, int minute) => tz.TZDateTime(riyadh, 2026, 10, day, hour, minute);
 
-  Future<DateTime?> write(DateTime now, {bool force = false}) => writeSurfaces(
+  Future<void> write(DateTime now, {bool force = false}) => writeSurfaces(
     db,
     channel: channel,
     locale: const Locale('en'),
@@ -128,12 +126,11 @@ void main() {
     expect(channel.updates.single.force, true);
   });
 
-  test('no place hands the no place json and nothing to wait for', () async {
-    final next = await write(at(15, 16, 32));
+  test('no place hands the no place json', () async {
+    await write(at(15, 16, 32));
     final data = jsonDecode(channel.updates.single.json) as Map<String, Object?>;
     expect(data['place'], false);
     expect(data['entries'], isEmpty);
-    expect(next, isNull);
   });
 
   test('a channel error is reported once and nothing throws', () async {
@@ -147,28 +144,6 @@ void main() {
     expect(reporter.contexts, [
       {'reason': 'write surfaces'},
     ]);
-  });
-
-  test('returns the next countdown start or end after now', () async {
-    await placeInMakkah();
-    final maghrib = tz.TZDateTime(riyadh, 2026, 10, 15, 17, 56);
-
-    /// maghrib's runs, it ends where isha's starts
-    expect((await write(at(15, 16, 32)))?.millisecondsSinceEpoch, maghrib.millisecondsSinceEpoch);
-    final asr = dayTimesAt(
-      makkah(),
-      DateTime(2026, 10, 15),
-      method: null,
-      asrMethod: null,
-      hijriAdjust: 0,
-    ).asr!;
-    expect(
-      (await write(asr.add(const Duration(minutes: 1))))?.millisecondsSinceEpoch,
-      maghrib.subtract(const Duration(hours: 2)).millisecondsSinceEpoch,
-    );
-
-    await db.updateSettings(const SettingsCompanion(prayerCountdown: Value(false)));
-    expect(await write(at(15, 16, 32)), isNull);
   });
 }
 
