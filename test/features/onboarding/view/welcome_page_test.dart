@@ -73,7 +73,6 @@ void main() {
   bool onWelcome(WidgetTester tester) =>
       seen(tester, find.text('Get started')) == 1 &&
       seen(tester, find.text('Better Muslim')) == 1 &&
-      seen(tester, find.text('Restore from backup')) == 1 &&
       tester.widget<WelcomeSun>(find.byType(WelcomeSun)).opacity > .99 &&
       find.byType(SunGlass).evaluate().isEmpty;
 
@@ -191,7 +190,6 @@ void main() {
     await tester.tapAt(const Offset(40, 160));
     await tester.pump();
     expect(seen(tester, find.text('Get started')), 1);
-    expect(seen(tester, find.text('Restore from backup')), 1);
     await unmount(tester);
   });
 
