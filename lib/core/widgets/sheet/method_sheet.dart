@@ -2,6 +2,8 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -19,7 +21,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 Future<void> showMethodSheet(BuildContext context) => showBmSheet(
   context,
-  title: const SheetTitle(StringsManager.calculationMethod),
+  title: const Row(
+    children: [
+      Expanded(child: SheetTitle(StringsManager.calculationMethod)),
+      _Reset(),
+    ],
+  ),
   builder: (_) => const _MethodSheet(),
 );
 
@@ -72,6 +79,52 @@ class _MethodSheet extends ConsumerWidget {
               onTap: () => pick(SettingsCompanion(asrMethod: Value(asr))),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// back to "By country" for both, only once one of them was picked
+class _Reset extends ConsumerWidget {
+  const _Reset();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final picked = ref.watch(
+      settingsProvider.select(
+        (settings) => settings.value?.method != null || settings.value?.asrMethod != null,
+      ),
+    );
+    return Semantics(
+      button: true,
+      enabled: picked,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: picked
+            ? () => ref
+                  .read(databaseProvider)
+                  .updateSettings(
+                    const SettingsCompanion(method: Value(null), asrMethod: Value(null)),
+                  )
+            : null,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: SizeManager.hit.r, minWidth: SizeManager.hit.r),
+          child: SymmetricPadding(
+            horizontal: SpaceManager.s5,
+            child: Center(
+              widthFactor: 1,
+              child: AnimatedOpacity(
+                opacity: picked ? 1 : BmOpacity.disabled,
+                duration: BmMotion.micro,
+                child: const RegularText(
+                  StringsManager.reset,
+                  fontSize: FontSizeManager.secondary,
+                  color: ThemeEnum.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
