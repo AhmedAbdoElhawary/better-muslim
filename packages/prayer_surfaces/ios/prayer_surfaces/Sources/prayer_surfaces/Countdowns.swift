@@ -29,8 +29,13 @@ struct CountdownFile: Decodable {
     let entry: Int
   }
 
+  struct Colors: Decodable {
+    let dark: [String: UInt32]
+  }
+
   let place: Bool
   let countdown: Bool
+  let colors: Colors
   let language: String
   let eastern: Bool
   let texts: Texts
@@ -147,7 +152,8 @@ enum Countdowns {
       language: file.language,
       eastern: file.eastern,
       barFrom: entry.barFrom.map(Date.init(millis:)),
-      at: Date(millis: entry.at))
+      at: Date(millis: entry.at),
+      colors: file.colors.dark)
   }
 
   private static func key(_ entry: CountdownFile.Entry) -> String { "\(entry.prayer)|\(entry.day)" }

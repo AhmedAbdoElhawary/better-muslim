@@ -10,7 +10,8 @@ struct SmallWidget: View {
     case .ready(let data, let item):
       SmallContent(data: data, entry: item, date: entry.date)
         .widgetURL(SurfaceLinks.home)
-        .widgetBackground(SurfaceColors.widgetSky)
+        .widgetBackground(data.palette(item).widgetSky)
+        .environment(\.palette, data.palette(item))
     default:
       MessageView(entry: entry)
     }
@@ -18,6 +19,7 @@ struct SmallWidget: View {
 }
 
 private struct SmallContent: View {
+  @Environment(\.palette) private var palette
   let data: SurfaceData
   let entry: SurfaceData.Entry
   let date: Date
@@ -30,20 +32,20 @@ private struct SmallContent: View {
         Text(data.texts.next)
           .font(fonts.body(11))
           .tracking(11 * 0.12)
-          .foregroundColor(SurfaceColors.label)
+          .foregroundColor(palette.label)
         Text(entry.name)
           .font(fonts.display(24))
-          .foregroundColor(SurfaceColors.text)
+          .foregroundColor(palette.text)
           .lineLimit(1)
         Text(data.inDuration(entry, at: date))
           .font(fonts.numbers(15, weight: 600))
-          .foregroundColor(SurfaceColors.gold)
+          .foregroundColor(palette.gold)
           .accentable()
         Spacer(minLength: 0)
         /// a long city is cut, never the time, which comes first
         Text(entry.timeCity)
           .font(fonts.numbers(12))
-          .foregroundColor(SurfaceColors.label)
+          .foregroundColor(palette.label)
           .lineLimit(1)
           .truncationMode(.tail)
       }
@@ -60,6 +62,7 @@ private struct SmallContent: View {
 /// the 170 x 170 drawing of the tree, scaled to the widget. by night only the dotted arc, as
 /// home's. never mirrored
 private struct SunArc: View {
+  @Environment(\.palette) private var palette
   let share: Double?
 
   var body: some View {
@@ -67,13 +70,13 @@ private struct SunArc: View {
       ZStack(alignment: .topLeading) {
         ArcShape(share: 1)
           .stroke(
-            SurfaceColors.text.opacity(0.35),
+            palette.text.opacity(0.35),
             style: StrokeStyle(lineWidth: 1, lineCap: .round, dash: [1, 4]))
-        Horizon().stroke(SurfaceColors.text.opacity(0.2), lineWidth: 1)
+        Horizon().stroke(palette.text.opacity(0.2), lineWidth: 1)
         if let share {
           ArcShape(share: share)
             .stroke(
-              SurfaceColors.text.opacity(0.75),
+              palette.text.opacity(0.75),
               style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
           Sun()
             .position(ArcGeometry(size: geometry.size).point(share))
@@ -122,14 +125,15 @@ private struct Horizon: Shape {
 
 /// 14 pt with its glow, 0 0 14px 5px at 45%
 struct Sun: View {
+  @Environment(\.palette) private var palette
   var body: some View {
     ZStack {
       Circle()
-        .fill(SurfaceColors.sun.opacity(0.45))
+        .fill(palette.sun.opacity(0.45))
         .frame(width: 24, height: 24)
         .blur(radius: 7)
       Circle()
-        .fill(SurfaceColors.sun)
+        .fill(palette.sun)
         .frame(width: 14, height: 14)
     }
   }

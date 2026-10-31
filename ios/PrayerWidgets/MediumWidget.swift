@@ -10,7 +10,8 @@ struct MediumWidget: View {
     case .ready(let data, let item):
       MediumContent(data: data, entry: item, date: entry.date)
         .widgetURL(SurfaceLinks.home)
-        .widgetBackground(SurfaceColors.widgetSky)
+        .widgetBackground(data.palette(item).widgetSky)
+        .environment(\.palette, data.palette(item))
     default:
       MessageView(entry: entry)
     }
@@ -18,6 +19,7 @@ struct MediumWidget: View {
 }
 
 private struct MediumContent: View {
+  @Environment(\.palette) private var palette
   let data: SurfaceData
   let entry: SurfaceData.Entry
   let date: Date
@@ -29,18 +31,18 @@ private struct MediumContent: View {
         VStack(alignment: .leading, spacing: 0) {
           Text(entry.name)
             .font(fonts.display(24))
-            .foregroundColor(SurfaceColors.text)
+            .foregroundColor(palette.text)
             .lineLimit(1)
           Text(entry.hijriCity)
             .font(fonts.body(12))
-            .foregroundColor(SurfaceColors.label)
+            .foregroundColor(palette.label)
             .lineLimit(1)
             .truncationMode(.tail)
         }
         Spacer(minLength: 8)
         Text(data.hm(entry, at: date))
           .font(fonts.numbers(22, weight: 600))
-          .foregroundColor(SurfaceColors.gold)
+          .foregroundColor(palette.gold)
           .environment(\.layoutDirection, .leftToRight)
           .accentable()
       }
@@ -62,6 +64,7 @@ private struct MediumContent: View {
 }
 
 private struct StripCell: View {
+  @Environment(\.palette) private var palette
   let cell: SurfaceData.Cell
   let current: Bool
   let fonts: SurfaceFonts
@@ -70,12 +73,12 @@ private struct StripCell: View {
     VStack(spacing: 3) {
       Text(cell.name)
         .font(fonts.body(11, weight: current ? 600 : 400))
-        .foregroundColor(current ? SurfaceColors.gold : SurfaceColors.label)
+        .foregroundColor(current ? palette.gold : palette.label)
         .lineLimit(1)
         .minimumScaleFactor(0.8)
       Text(cell.time)
         .font(fonts.numbers(14, weight: 500))
-        .foregroundColor(SurfaceColors.text)
+        .foregroundColor(palette.text)
         .lineLimit(1)
         .minimumScaleFactor(0.7)
       ZStack {
@@ -88,11 +91,11 @@ private struct StripCell: View {
     .padding(.bottom, 7)
     .background(
       RoundedRectangle(cornerRadius: 12, style: .continuous)
-        .fill(current ? SurfaceColors.primary.opacity(0.2) : Color.white.opacity(0.05))
+        .fill(current ? palette.primary.opacity(0.2) : palette.text.opacity(0.05))
     )
     .overlay(
       RoundedRectangle(cornerRadius: 12, style: .continuous)
-        .strokeBorder(current ? SurfaceColors.primary.opacity(0.45) : .clear, lineWidth: 1)
+        .strokeBorder(current ? palette.primary.opacity(0.45) : .clear, lineWidth: 1)
     )
     .accentable(current)
   }

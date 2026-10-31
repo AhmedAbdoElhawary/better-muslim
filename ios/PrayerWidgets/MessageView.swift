@@ -40,22 +40,32 @@ extension View {
 }
 
 private struct WidgetBackground<Background: View>: ViewModifier {
+  @Environment(\.palette) private var palette
   let background: Background
 
   func body(content: Content) -> some View {
+    /// the trees' inset 0.5 pt hairline at 10%
+    let framed = ZStack {
+      background
+      ContainerRelativeShape()
+        .inset(by: 0.25)
+        .stroke(palette.text.opacity(0.1), lineWidth: 0.5)
+    }
     if #available(iOSApplicationExtension 17.0, *) {
-      content.containerBackground(for: .widget) { background }
+      content.containerBackground(for: .widget) { framed }
     } else {
-      content.frame(maxWidth: .infinity, maxHeight: .infinity).background(background)
+      content.frame(maxWidth: .infinity, maxHeight: .infinity).background(framed)
     }
   }
 }
 
 /// no place and out of date: the frame, the mark and what to do instead of wrong times (FR-024)
 struct MessageView: View {
+  @Environment(\.colorScheme) private var scheme
   let entry: SurfaceEntry
 
   var body: some View {
+    let palette = entry.file.palette(scheme)
     let arabic =
       entry.file.data?.isArabic ?? (Locale.preferredLanguages.first?.hasPrefix("ar") ?? false)
     let fonts = SurfaceFonts(arabic: arabic)
@@ -63,7 +73,7 @@ struct MessageView: View {
       Star(size: 23, stroke: 1.1)
       Text(entry.state.message ?? "")
         .font(fonts.body(13, weight: 500))
-        .foregroundColor(SurfaceColors.text)
+        .foregroundColor(palette.text)
         .multilineTextAlignment(.center)
         .lineLimit(3)
         .minimumScaleFactor(0.8)
@@ -71,7 +81,8 @@ struct MessageView: View {
     .padding(16)
     .environment(\.layoutDirection, arabic ? .rightToLeft : .leftToRight)
     .widgetURL(SurfaceLinks.home)
-    .widgetBackground(SurfaceColors.widgetSky)
+    .widgetBackground(palette.widgetSky)
+    .environment(\.palette, palette)
   }
 }
 

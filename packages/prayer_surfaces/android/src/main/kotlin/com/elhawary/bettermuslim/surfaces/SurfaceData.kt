@@ -1,6 +1,7 @@
 package com.elhawary.bettermuslim.surfaces
 
 import android.content.Context
+import android.content.res.Configuration
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
@@ -14,6 +15,7 @@ class SurfaceData(private val json: JSONObject) {
     val isArabic get() = json.optString("language") == "ar"
     val eastern get() = json.optBoolean("eastern")
     val countdown get() = json.optBoolean("countdown")
+    val mode get() = json.optString("mode")
     val until get() = json.optLong("until")
     val texts: JSONObject get() = json.getJSONObject("texts")
     val entries: List<JSONObject> = json.optJSONArray("entries").let { array ->
@@ -24,6 +26,11 @@ class SurfaceData(private val json: JSONObject) {
     }
 
     fun text(key: String): String = texts.optString(key)
+
+    // the entry's light or dark, follow sky already worked out per entry by the app
+    fun palette(entry: JSONObject): Palette = palette(entry.optBoolean("light"))
+
+    fun palette(light: Boolean) = Palette(json.optJSONObject("colors")?.optJSONObject(if (light) "light" else "dark"))
 
     fun entryAt(now: Long): JSONObject? = entries.lastOrNull { it.getLong("from") <= now }
 
@@ -120,11 +127,37 @@ sealed interface SurfaceState {
         fun of(data: SurfaceData?, now: Long): SurfaceState {
             if (data == null) return NoPlace(null)
             // an app newer than this code may write a shape it can't read
-            if (data.version > 1) return Outdated(null)
+            if (data.version > 2) return Outdated(null)
             if (!data.place) return NoPlace(data.text("noPlace"))
             val entry = data.entryAt(now)
             if (now >= data.until || entry == null) return Outdated(data.text("outdated"))
             return Ready(data, entry)
+        }
+    }
+}
+
+// the theme's colors as the app wrote them. no file yet, the phone's own until the app writes
+class Palette(private val roles: JSONObject?) {
+    fun color(context: Context, role: String): Int {
+        if (roles != null && roles.has(role)) return roles.getLong(role).toInt()
+        val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val surface = if (night) android.R.color.black else android.R.color.white
+        val ink = if (night) android.R.color.white else android.R.color.black
+        return context.getColor(if (role in SURFACES) surface else ink)
+    }
+
+    companion object {
+        private val SURFACES = setOf("top", "middle", "bottom", "deep", "container", "outline")
+
+        // a message has no entry: the app's mode, or the phone's when following a sky it hasn't got
+        fun of(context: Context, data: SurfaceData?): Palette {
+            if (data == null) return Palette(null)
+            val light = when (data.mode) {
+                "light" -> true
+                "dark" -> false
+                else -> context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK != Configuration.UI_MODE_NIGHT_YES
+            }
+            return data.palette(light)
         }
     }
 }

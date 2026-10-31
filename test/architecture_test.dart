@@ -18,6 +18,9 @@ const _shareColors = 'lib/core/widgets/share/share_options.dart';
 /// the adhan screen keeps emerald's sky in every theme (TOKENS.md)
 const _adhanSky = 'lib/features/notifications/presentation/view/widgets/adhan_sky.dart';
 
+/// the widgets and the live countdown, their colors come in surfaces.json
+const _surfaceFolders = ['ios/PrayerWidgets', 'packages/prayer_surfaces/ios'];
+
 /// the app root copies the data once, nothing below it rebuilds for it
 const _appRoot = 'lib/core/app/app.dart';
 
@@ -149,6 +152,27 @@ void main() {
         .map((file) => file.path)
         .toList();
     _expectNone('no golden tests, comparing against the PNGs is too expensive', goldens);
+  });
+
+  test('the widgets and the live countdown take their colors from the theme', () {
+    final native = [
+      for (final folder in _surfaceFolders)
+        ...Directory(folder).listSync(recursive: true).whereType<File>(),
+    ].where((file) => RegExp(r'\.(swift|kt|xml)$').hasMatch(file.path));
+    final literals = RegExp(
+      r'Color\(hex:|0x[0-9A-Fa-f]{6,8}\b|#[0-9A-Fa-f]{6,8}\b|<color |(?<!android\.)R\.color\.',
+    );
+    final violations = <String>[];
+    for (final file in native) {
+      final content = file
+          .readAsStringSync()
+          .replaceAll(RegExp(r'//.*'), '')
+          .replaceAll(RegExp('<!--.*?-->', dotAll: true), '');
+      for (final match in literals.allMatches(content)) {
+        violations.add(_where(file.path, content, match.start));
+      }
+    }
+    _expectNone('the widgets and the live countdown take their colors from the theme', violations);
   });
 
   /// a literal here ships prod without Sentry or sends debug runs to prod Sentry

@@ -32,6 +32,8 @@ Why: every feature can change or be deleted without touching the others.
   `context.bm` in features. The one exception is an always dark surface the handoff gives its own
   colors (the adhan screen): its literals live in one file on the allow list of
   `test/architecture_test.dart`.
+- The home widgets and the live countdown are not always dark. Their colors are the theme's, sent
+  in the surface data for light and dark, and the Swift and Kotlin code holds none.
 - Text MUST go through `LightText`, `RegularText`, `MediumText`, `SemiBoldText`, `BoldText`.
   Never `Text` or `TextStyle` outside core. The font defaults to `FontEnum.body` (Schibsted
   Grotesk / Noto Sans Arabic), Marcellus / Reem Kufi is `font: FontEnum.display`. Each weight
@@ -188,4 +190,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.7.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-21
+**Version**: 3.8.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-31

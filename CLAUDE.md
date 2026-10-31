@@ -35,8 +35,9 @@ From the spec to the code:
 | `ICON outline/x`, `ICON ui/x` | `BmIcon(BmIconName.x)`, `BmIcon.ui(BmUiIcon.x)` |
 | animation, haptic | `BmMotion` + `MOTION.md`, `BmHaptics` |
 
-- Always-dark surfaces (adhan screen, system surfaces) may use literal colors: add that one file
-  to the allow list at the top of `test/architecture_test.dart`.
+- The always-dark adhan screen may use literal colors: add that one file to the allow list at the
+  top of `test/architecture_test.dart`. The widgets and the live countdown take the theme's colors
+  from the surface data.
 - Text scale is clamped at 2.0 in `App`. Above 1.4 the countdown and prayer rows stack.
 - Living Sky follows `BmSkyState`. The design scenario shows the theme's base sky.
 - Quran mockups use Amiri Quran. Production needs KFGQPC Hafs + QCF V2 (licensed separately).

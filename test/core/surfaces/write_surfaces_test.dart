@@ -7,6 +7,8 @@ import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surface_data.dart';
 import 'package:better_muslim/core/surfaces/write_surfaces.dart';
@@ -102,6 +104,22 @@ void main() {
     final data = jsonDecode(channel.updates.single.json) as Map<String, Object?>;
     final entry = (data['entries']! as List).first as Map<String, Object?>;
     expect(entry['prayedLine'], '1 of 5 prayed today');
+  });
+
+  test('the theme and mode in the store', () async {
+    await placeInMakkah();
+    await db.updateSettings(
+      const SettingsCompanion(theme: Value(BmThemeId.iznik), themeMode: Value(BmThemeMode.light)),
+    );
+
+    await write(at(15, 16, 32));
+
+    final data = jsonDecode(channel.updates.single.json) as Map<String, Object?>;
+    expect(data['mode'], 'light');
+    expect(
+      ((data['colors']! as Map)['light'] as Map)['text'],
+      bmThemes[BmThemeId.iznik]!.light.text.toARGB32(),
+    );
   });
 
   test('force is passed through', () async {

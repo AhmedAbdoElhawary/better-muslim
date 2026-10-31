@@ -19,6 +19,8 @@ struct PrayerCountdownAttributes: ActivityAttributes {
     var eastern: Bool
     var barFrom: Date?
     var at: Date
+    /// the theme's dark palette, the lock screen's own colors
+    var colors: [String: UInt32]
   }
 
   var prayer: String

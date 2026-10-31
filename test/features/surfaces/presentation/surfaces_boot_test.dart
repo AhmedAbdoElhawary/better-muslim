@@ -8,6 +8,8 @@ import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
@@ -142,6 +144,25 @@ void main() {
     final data = jsonDecode(channel.updates.last.json) as Map<String, Object?>;
     expect(data['countdown'], false);
     expect((data['texts']! as Map)['liveNext'], 'Next prayer · Istanbul');
+    await unmount(tester);
+  });
+
+  testWidgets('one write after a theme change and one after a mode change', (tester) async {
+    final channel = await pumpBoot(tester);
+
+    await dbOf(tester).updateSettings(const SettingsCompanion(theme: Value(BmThemeId.andalus)));
+    await settle(tester, const Duration(milliseconds: 700));
+    expect(channel.updates, hasLength(2));
+    final data = jsonDecode(channel.updates.last.json) as Map<String, Object?>;
+    expect(
+      ((data['colors']! as Map)['dark'] as Map)['text'],
+      bmThemes[BmThemeId.andalus]!.dark.text.toARGB32(),
+    );
+
+    await dbOf(tester).updateSettings(const SettingsCompanion(themeMode: Value(BmThemeMode.dark)));
+    await settle(tester, const Duration(milliseconds: 700));
+    expect(channel.updates, hasLength(3));
+    expect(jsonDecode(channel.updates.last.json)['mode'], 'dark');
     await unmount(tester);
   });
 

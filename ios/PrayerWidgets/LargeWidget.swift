@@ -10,7 +10,8 @@ struct LargeWidget: View {
     case .ready(let data, let item):
       LargeContent(data: data, entry: item, date: entry.date)
         .widgetURL(SurfaceLinks.home)
-        .widgetBackground(SurfaceColors.largeSky)
+        .widgetBackground(data.palette(item).largeSky)
+        .environment(\.palette, data.palette(item))
     default:
       MessageView(entry: entry)
     }
@@ -18,6 +19,7 @@ struct LargeWidget: View {
 }
 
 private struct LargeContent: View {
+  @Environment(\.palette) private var palette
   let data: SurfaceData
   let entry: SurfaceData.Entry
   let date: Date
@@ -30,24 +32,24 @@ private struct LargeContent: View {
           Text(data.texts.nextCity)
             .font(fonts.body(11))
             .tracking(11 * 0.12)
-            .foregroundColor(SurfaceColors.label)
+            .foregroundColor(palette.label)
             .lineLimit(1)
             .truncationMode(.tail)
           Text(entry.name)
             .font(fonts.display(28))
-            .foregroundColor(SurfaceColors.text)
+            .foregroundColor(palette.text)
             .lineLimit(1)
         }
         Spacer(minLength: 8)
         VStack(alignment: .trailing, spacing: 0) {
           Text(data.hm(entry, at: date))
             .font(fonts.numbers(24, weight: 600))
-            .foregroundColor(SurfaceColors.gold)
+            .foregroundColor(palette.gold)
             .environment(\.layoutDirection, .leftToRight)
             .accentable()
           Text(entry.atTime)
             .font(fonts.body(12))
-            .foregroundColor(SurfaceColors.label)
+            .foregroundColor(palette.label)
         }
       }
       .padding(.horizontal, 2)
@@ -71,10 +73,10 @@ private struct LargeContent: View {
         Text(entry.dateLine).lineLimit(1)
       }
       .font(fonts.body(12.5))
-      .foregroundColor(SurfaceColors.label)
+      .foregroundColor(palette.label)
       .padding(EdgeInsets(top: 10, leading: 4, bottom: 0, trailing: 4))
       .overlay(alignment: .top) {
-        Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1)
+        Rectangle().fill(palette.text.opacity(0.08)).frame(height: 1)
       }
     }
     .padding(EdgeInsets(top: 16, leading: 16, bottom: 14, trailing: 16))
@@ -85,6 +87,7 @@ private struct LargeContent: View {
 }
 
 private struct PrayerRow: View {
+  @Environment(\.palette) private var palette
   let cell: SurfaceData.Cell
   let current: Bool
   let fonts: SurfaceFonts
@@ -93,17 +96,17 @@ private struct PrayerRow: View {
     HStack(spacing: 12) {
       Text(cell.name)
         .font(fonts.display(17))
-        .foregroundColor(current ? SurfaceColors.gold : SurfaceColors.text)
+        .foregroundColor(current ? palette.gold : palette.text)
         .frame(maxWidth: .infinity, alignment: .leading)
       Text(cell.time)
         .font(fonts.numbers(15, weight: 500))
-        .foregroundColor(SurfaceColors.text)
+        .foregroundColor(palette.text)
       ZStack {
         if cell.logged {
           Check(size: 16)
         } else {
           Circle()
-            .strokeBorder(SurfaceColors.ring, lineWidth: 1.2)
+            .strokeBorder(palette.ring, lineWidth: 1.2)
             .frame(width: 12, height: 12)
         }
       }
@@ -113,11 +116,11 @@ private struct PrayerRow: View {
     .frame(height: 40)
     .background(
       RoundedRectangle(cornerRadius: 12, style: .continuous)
-        .fill(current ? SurfaceColors.primary.opacity(0.2) : .clear)
+        .fill(current ? palette.primary.opacity(0.2) : .clear)
     )
     .overlay(
       RoundedRectangle(cornerRadius: 12, style: .continuous)
-        .strokeBorder(current ? SurfaceColors.primary.opacity(0.45) : .clear, lineWidth: 1)
+        .strokeBorder(current ? palette.primary.opacity(0.45) : .clear, lineWidth: 1)
     )
     .accentable(current)
   }

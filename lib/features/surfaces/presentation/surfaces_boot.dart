@@ -40,6 +40,8 @@ final _surfaceInputsProvider = Provider((ref) {
         row?.reminderMinutes,
         row?.prayerCountdown,
         row?.language,
+        row?.theme,
+        row?.themeMode,
       );
     }),
   );

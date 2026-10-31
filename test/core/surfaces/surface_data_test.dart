@@ -12,6 +12,8 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surface_data.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
@@ -406,6 +408,73 @@ void main() {
     });
   });
 
+  group('the theme', () {
+    final now = at(makkah, 10, 15, 16, 32);
+    Json colorsOf(Json data, String mode) => (data['colors']! as Json)[mode]! as Json;
+
+    test("emerald's dark is the 5.6 tree's", () {
+      expect(colorsOf(build(makkah, now), 'dark'), {
+        'top': 0xFF000000,
+        'middle': 0xFF04100C,
+        'bottom': 0xFF173328,
+
+        /// the large widget's #0B1E17, one step off from the lerp
+        'deep': 0xFF0C1E17,
+        'text': 0xFFD9D3C2,
+        'label': 0xD9D9D3C2,
+        'dim': 0xFF878C82,
+        'gold': 0xFFD9C08A,
+        'live': colorsOf(build(makkah, now), 'dark')['live'],
+        'primary': 0xFFA88A52,
+        'container': 0xFF221C10,
+        'success': 0xFF5FB389,
+        'ring': 0xFF4C5E57,
+        'sun': 0xFFCDB27A,
+        'outline': 0xFF1C2C26,
+      });
+    });
+
+    test('the chosen theme, light from its surfaces', () {
+      final theme = bmThemes[BmThemeId.andalus]!;
+      final data = build(makkah, now, settings: defaults.copyWith(theme: BmThemeId.andalus));
+      expect(colorsOf(data, 'dark')['text'], theme.dark.text.toARGB32());
+      expect(colorsOf(data, 'dark')['top'], theme.dark.sky1.toARGB32());
+      expect(colorsOf(data, 'light')['text'], theme.light.text.toARGB32());
+      expect(colorsOf(data, 'light')['top'], theme.light.surface.toARGB32());
+      expect(colorsOf(data, 'light')['gold'], theme.light.onPrimaryContainer.toARGB32());
+    });
+
+    test('follow sky is light from sunrise until maghrib, each entry on its own', () {
+      final data = build(makkah, now);
+      expect(data['mode'], 'followSky');
+      final today = timesOn(makkah, DateTime(2026, 10, 15));
+      final tomorrow = timesOn(makkah, DateTime(2026, 10, 16));
+      bool lightAt(DateTime time) => inForce(data, time.millisecondsSinceEpoch)['light']! as bool;
+      expect(lightAt(now), true);
+      expect(lightAt(today.maghrib!), false);
+      expect(lightAt(tomorrow.fajr!), false);
+      expect(lightAt(tomorrow.sunrise!), true);
+      expect(lightAt(tomorrow.maghrib!.subtract(const Duration(minutes: 1))), true);
+    });
+
+    test('dark and light hold all day', () {
+      for (final mode in [BmThemeMode.dark, BmThemeMode.light]) {
+        final data = build(makkah, now, settings: defaults.copyWith(themeMode: mode));
+        expect(data['mode'], mode.name);
+        expect(entriesOf(data).map((entry) => entry['light']).toSet(), {mode == BmThemeMode.light});
+      }
+    });
+
+    test('no place still sends the mode and the colors', () {
+      final data = build(null, now, settings: defaults.copyWith(themeMode: BmThemeMode.light));
+      expect(data['mode'], 'light');
+      expect(
+        colorsOf(data, 'light')['text'],
+        bmThemes[BmThemeId.qiyamEmerald]!.light.text.toARGB32(),
+      );
+    });
+  });
+
   group('SC-006, only the listed fields', () {
     const top = [
       'version',
@@ -413,6 +482,8 @@ void main() {
       'language',
       'eastern',
       'countdown',
+      'mode',
+      'colors',
       'until',
       'texts',
       'entries',
@@ -453,6 +524,7 @@ void main() {
       'prayedLine',
       'reminder',
       'next',
+      'light',
       'strip',
     ];
     const cell = ['prayer', 'name', 'time', 'logged', 'past'];
@@ -461,7 +533,7 @@ void main() {
     test('the key sets', () {
       final data = build(makkah, at(makkah, 10, 15, 16, 32));
       expect(data.keys.toSet(), top.toSet());
-      expect(data['version'], 1);
+      expect(data['version'], 2);
       expect((data['texts']! as Json).keys.toSet(), texts.toSet());
       for (final item in entriesOf(data)) {
         expect(item.keys.toSet(), entry.toSet());
