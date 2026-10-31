@@ -162,21 +162,26 @@ class _AyahCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(RadiusManager.row.r),
         boxShadow: [BoxShadow(color: context.getColor(ThemeEnum.outline), spreadRadius: 1)],
       ),
-      child: OnlyPadding(
-        top: SpaceManager.studyCardPadTop,
-        bottom: SpaceManager.studyCardPadBottom,
-        start: SpaceManager.studyCardSide,
-        end: SpaceManager.studyCardSide,
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: RegularText(
-            line,
-            translate: false,
-            font: FontEnum.quran,
-            fontSize: FontSizeManager.quranStudy,
-            height: LineHeightManager.quranStudy,
-            color: ThemeEnum.ink,
-            textAlign: TextAlign.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: SizeManager.tasbihRingArc.r),
+        child: SingleChildScrollView(
+          child: OnlyPadding(
+            top: SpaceManager.studyCardPadTop,
+            bottom: SpaceManager.studyCardPadBottom,
+            start: SpaceManager.studyCardSide,
+            end: SpaceManager.studyCardSide,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: RegularText(
+                line,
+                translate: false,
+                font: FontEnum.quran,
+                fontSize: FontSizeManager.quranStudy,
+                height: LineHeightManager.quranStudy,
+                color: ThemeEnum.ink,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ),
       ),
