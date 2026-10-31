@@ -223,7 +223,6 @@
   "uiSounds": "UI sounds",
   "welcomeTagline": "Prayer, Quran and remembrance, moving with the sky above you.",
   "getStarted": "Get started",
-  "restoreBackup": "Restore from backup",
   "locTitle": "Prayer times for where you are",
   "locBody": "Your location sets the prayer times, the Qibla and the calculation method for your region.",
   "locB1": "Accurate prayer times",
@@ -590,6 +589,7 @@
   "noteQadr": "Seek Laylat al-Qadr",
   "noteNoFasting": "No fasting",
   "adhanSound": "Adhan sound",
+  "toneSound": "Tone sound",
   "forPrayer": "For {prayer}",
   "@forPrayer": {
     "placeholders": {
@@ -661,30 +661,6 @@
       "total": {}
     }
   },
-  "backUp": "Back up",
-  "password": "Password",
-  "confirmPassword": "Confirm password",
-  "passwordNote": "Keep this password safe. Without it the backup can't be opened.",
-  "passwordTooShort": "Use at least {count} characters.",
-  "@passwordTooShort": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "passwordsDontMatch": "The passwords don't match.",
-  "saveBackup": "Save backup",
-  "restorePasswordNote": "Enter the password you chose for this backup.",
-  "restore": "Restore",
-  "wrongPassword": "Wrong password. Check it and try again.",
-  "notABackup": "This file isn't a Better Muslim backup.",
-  "damagedBackup": "This backup is damaged and can't be opened.",
-  "newerBackup": "This backup is from a newer version. Update the app, then restore.",
-  "restoreTitle": "Restore this backup?",
-  "restoreBody": "It replaces everything on this phone. It can't be undone.",
-  "backupRestored": "Backup restored",
-  "resetNoticeTitle": "Your saved data couldn't be opened",
-  "resetNoticeBody": "The app started fresh on this phone. If you have a backup, you can restore it now.",
-  "startFresh": "Start fresh",
   "surfaceNext": "NEXT",
   "surfaceNextCity": "NEXT · {city}",
   "@surfaceNextCity": {
@@ -1129,5 +1105,12 @@
       "n": {}
     }
   },
-  "recitationBar": "Ayah in the range"
+  "recitationBar": "Ayah in the range",
+  "searchCount": "{matches, plural, one{{matches} time} other{{matches} times}} in {ayahs, plural, one{{ayahs} ayah} other{{ayahs} ayahs}} in {surahs, plural, one{{surahs} surah} other{{surahs} surahs}}",
+  "expandAll": "Expand all",
+  "foldAll": "Fold all",
+  "recentSearches": "Recent searches",
+  "clearAll": "Clear",
+  "removeSearch": "Remove {query}",
+  "prayerSound": "{prayer}: {sound}"
 }
