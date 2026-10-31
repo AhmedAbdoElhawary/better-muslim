@@ -118,8 +118,7 @@ Why: rules that only live in a document get broken, a failing test doesn't.
 - Location and prayer history stay on the device. Nothing leaves it without my decision.
 - The whole drift database is encrypted. Its key is made on the phone on first launch and lives
   only in flutter_secure_storage.
-- The database stays out of iCloud and Android auto backup. A new phone gets the data only from
-  the app's own backup file.
+- The database stays out of iCloud and Android auto backup. Nothing moves to a new phone.
 - Secrets never go in the repo or the app bundle.
 - Https only, and anything downloaded (Quran text, audio) is validated before use.
 - Ask me before writing the privacy policy and terms.
@@ -151,7 +150,7 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
   hijri, geolocator, flutter_local_notifications, timezone, flutter_timezone, just_audio,
   audio_session, audio_service (the recitation in the background and on the lock screen),
   workmanager (the background top-up), share_plus (the share sheet for the dua card), animations
-  (the container transform), file_picker (picking a backup file to restore).
+  (the container transform).
 - The compass is the app's own `better_muslim/compass` channel, true north from the World Magnetic
   Model in Dart.
 - Native code that has to run in every Flutter engine (the app's, a background task's, a headless
@@ -190,4 +189,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 3.8.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-31
+**Version**: 4.0.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-31
