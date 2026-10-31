@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
@@ -203,22 +205,31 @@ Map<String, Object?> buildSurfaceData({
 /// the 5.6 trees' colors as roles: the dark sky behind dark widgets, and light ones on the theme's
 /// own surfaces, since its light sky stays dark
 Map<String, int> _colorsOf(BmPalette palette, {bool dark = true}) {
-  final (top, middle, bottom) = dark
+  final (top, middle, sky) = dark
       ? (palette.sky1, palette.sky2, palette.sky3)
       : (palette.surface, palette.raised, palette.variant);
   final gold = HSLColor.fromColor(palette.onPrimaryContainer);
+
+  /// the live countdown's digits a step brighter than gold, lighter on dark and darker on light
+  final live = gold.withLightness((gold.lightness + (dark ? .1 : -.1)).clamp(0, 1)).toColor();
+  final label = palette.text.withValues(alpha: .85);
+  final texts = [palette.text, label, palette.onPrimaryContainer, live];
+
+  /// some themes' last sky is too light under the text, it goes toward the middle until aa
+  var bottom = sky;
+  for (var t = .05; texts.any((text) => _ratio(text, bottom) < 4.5) && t <= 1; t += .05) {
+    bottom = Color.lerp(sky, middle, t)!;
+  }
   return {
     'top': top.toARGB32(),
     'middle': middle.toARGB32(),
     'bottom': bottom.toARGB32(),
     'deep': Color.lerp(middle, bottom, .4)!.toARGB32(),
     'text': palette.text.toARGB32(),
-    'label': palette.text.withValues(alpha: .85).toARGB32(),
+    'label': label.toARGB32(),
     'dim': palette.text2.toARGB32(),
     'gold': palette.onPrimaryContainer.toARGB32(),
-
-    /// the live countdown's digits, a step lighter than gold on the lock screen
-    'live': gold.withLightness((gold.lightness + .1).clamp(0, 1)).toColor().toARGB32(),
+    'live': live.toARGB32(),
     'primary': palette.primary.toARGB32(),
     'container': palette.primaryContainer.toARGB32(),
     'success': palette.success.toARGB32(),
@@ -228,4 +239,11 @@ Map<String, int> _colorsOf(BmPalette palette, {bool dark = true}) {
     'sun': (dark ? palette.sun : palette.glow).toARGB32(),
     'outline': palette.outline.toARGB32(),
   };
+}
+
+/// wcag's ratio, a see through text laid over what it sits on first
+double _ratio(Color text, Color under) {
+  final front = Color.alphaBlend(text, under).computeLuminance();
+  final back = under.computeLuminance();
+  return (math.max(front, back) + .05) / (math.min(front, back) + .05);
 }

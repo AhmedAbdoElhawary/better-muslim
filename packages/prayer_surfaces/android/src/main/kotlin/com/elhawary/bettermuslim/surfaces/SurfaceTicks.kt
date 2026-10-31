@@ -18,7 +18,7 @@ object SurfaceTicks {
         val alarms = context.getSystemService(AlarmManager::class.java)
         val exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms()
 
-        val shown = data?.let { CountdownNotification.shown(context, it, now) }
+        val shown = data?.let { CountdownNotification.shown(it, now) }
         if (data == null || now >= data.until || (PrayerWidget.ids(context).isEmpty() && shown == null)) {
             alarms.cancel(intent(context, ACTION_TICK))
         } else if (exact) {

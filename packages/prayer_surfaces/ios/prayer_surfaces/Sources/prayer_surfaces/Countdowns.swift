@@ -53,6 +53,9 @@ enum Countdowns {
   /// ios keeps only a few at once, these cover about a day
   private static let ahead = 4
 
+  /// ending takes a moment, a quick leave again must not count these as running
+  private static var ending = Set<String>()
+
   /// the app is still in front while it resigns, the last moment ios lets it start one. ios 26
   /// schedules the next prayers too, each from the one before's time
   static func start(_ file: CountdownFile) {
@@ -61,7 +64,7 @@ enum Countdowns {
       let entry = file.entries.last(where: { Date(millis: $0.from) <= now }),
       Date(millis: entry.at) > now
     else { return }
-    let running = Set(live.map { key($0.attributes) })
+    let running = Set(live.filter { !ending.contains($0.id) }.map { key($0.attributes) })
     if !running.contains(key(entry)) { _ = try? request(file, entry) }
     guard #available(iOS 26.0, *) else { return }
     var at = entry.at
@@ -80,8 +83,13 @@ enum Countdowns {
   }
 
   /// the app is on screen again
-  static func endAll() async {
-    for activity in live { await activity.end(nil, dismissalPolicy: .immediate) }
+  static func endAll() {
+    let activities = live
+    ending.formUnion(activities.map(\.id))
+    Task { @MainActor in
+      for activity in activities { await activity.end(nil, dismissalPolicy: .immediate) }
+      ending.subtract(activities.map(\.id))
+    }
   }
 
   /// on every write: a mark, a new theme or text reaches the running ones, the switch or no place

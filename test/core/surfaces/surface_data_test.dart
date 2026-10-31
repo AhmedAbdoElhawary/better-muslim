@@ -397,6 +397,32 @@ void main() {
       });
     });
 
+    /// wcag's ratio, a see through color first laid over what it sits on
+    double ratio(int text, int under) {
+      final back = Color(under);
+      final front = Color.alphaBlend(Color(text), back);
+      final (a, b) = (front.computeLuminance(), back.computeLuminance());
+      return a > b ? (a + .05) / (b + .05) : (b + .05) / (a + .05);
+    }
+
+    for (final id in bmThemeOrder) {
+      test('${id.name}: the widgets and the live countdown meet AA in both modes', () {
+        final data = build(makkah, now, settings: defaults.copyWith(theme: id));
+        for (final mode in ['dark', 'light']) {
+          final colors = colorsOf(data, mode);
+          for (final under in ['top', 'middle', 'bottom', 'deep']) {
+            for (final text in ['text', 'label', 'gold', 'live']) {
+              expect(
+                ratio(colors[text]! as int, colors[under]! as int),
+                greaterThanOrEqualTo(4.5),
+                reason: '$mode $text on $under',
+              );
+            }
+          }
+        }
+      });
+    }
+
     test('the chosen theme, light from its surfaces', () {
       final theme = bmThemes[BmThemeId.andalus]!;
       final data = build(makkah, now, settings: defaults.copyWith(theme: BmThemeId.andalus));

@@ -12,7 +12,7 @@ struct CountdownActivity: Widget {
       let palette = SurfacePalette(context.state.colors)
       CountdownCard(state: context.state, stale: context.isStale)
         .environment(\.palette, palette)
-        .activityBackgroundTint(Color.black.opacity(0.62))
+        .activityBackgroundTint(palette.top.opacity(0.62))
         .activitySystemActionForegroundColor(palette.text)
         .widgetURL(SurfaceLinks.home)
     } dynamicIsland: { context in
@@ -66,7 +66,7 @@ private struct CountdownCard: View {
           /// past its time before ios 26 it waits for the app, honest about it
           Text(stale ? state.nameNow : state.name)
             .font(fonts.display(24))
-            .foregroundColor(.white)
+            .foregroundColor(palette.text)
             .lineLimit(1)
             .accessibilitySortPriority(4)
         }
@@ -98,7 +98,7 @@ private struct ExpandedHeader: View {
           .lineLimit(1)
         Text(stale ? state.nameNow : state.name)
           .font(fonts.display(24))
-          .foregroundColor(.white)
+          .foregroundColor(palette.text)
           .lineLimit(1)
           .accessibilitySortPriority(4)
       }
@@ -227,7 +227,7 @@ private struct BarWithLabels: View {
         }
         .progressViewStyle(.linear)
         .tint(palette.gold)
-        .background(Capsule().fill(Color.white.opacity(0.2)).frame(height: 4))
+        .background(Capsule().fill(palette.text.opacity(0.2)).frame(height: 4))
         .frame(height: 16)
         .environment(\.layoutDirection, .leftToRight)
         .accessibilityHidden(true)
@@ -251,7 +251,7 @@ private struct StarTile: View {
     RoundedRectangle(cornerRadius: 11)
       .fill(palette.tile)
       .overlay(
-        RoundedRectangle(cornerRadius: 11).strokeBorder(Color.white.opacity(0.18), lineWidth: 0.5))
+        RoundedRectangle(cornerRadius: 11).strokeBorder(palette.text.opacity(0.18), lineWidth: 0.5))
       .overlay(Star(size: 23, stroke: 1.1))
       .frame(width: 40, height: 40)
       .accessibilityHidden(true)

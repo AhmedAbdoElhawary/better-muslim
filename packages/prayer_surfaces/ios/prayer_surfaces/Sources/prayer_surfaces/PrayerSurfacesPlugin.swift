@@ -22,7 +22,7 @@ public class PrayerSurfacesPlugin: NSObject, FlutterPlugin {
     center.addObserver(
       forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main
     ) { _ in
-      Task { await Countdowns.endAll() }
+      Countdowns.endAll()
     }
   }
 

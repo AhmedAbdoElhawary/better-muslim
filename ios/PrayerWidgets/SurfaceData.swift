@@ -8,8 +8,9 @@ struct SurfaceData: Decodable {
   let language: String
   let eastern: Bool
   let countdown: Bool
-  let mode: String
-  let colors: SurfaceColors
+  /// optional, a version 1 file from before an update still shows its times
+  let mode: String?
+  let colors: SurfaceColors?
   let until: Double
   let texts: Texts
   let entries: [Entry]
@@ -50,7 +51,7 @@ struct SurfaceData: Decodable {
     let prayedLine: String
     let reminder: String?
     let next: Int?
-    let light: Bool
+    let light: Bool?
     let strip: [Cell]
   }
 
@@ -74,7 +75,10 @@ struct SurfaceData: Decodable {
   var isArabic: Bool { language == "ar" }
 
   /// the entry's light or dark, follow sky already worked out per entry by the app
-  func palette(_ entry: Entry) -> SurfacePalette { entry.light ? colors.light : colors.dark }
+  func palette(_ entry: Entry) -> SurfacePalette {
+    guard let colors, let light = entry.light else { return .system }
+    return light ? colors.light : colors.dark
+  }
 
   func entry(at date: Date) -> Entry? {
     let ms = date.millis
@@ -194,11 +198,11 @@ enum SurfaceState {
 extension SurfaceFile {
   /// a message has no entry: the app's mode, or the phone's when following a sky it hasn't got
   func palette(_ scheme: ColorScheme) -> SurfacePalette {
-    guard let data else { return .system }
-    switch data.mode {
-    case "light": return data.colors.light
-    case "dark": return data.colors.dark
-    default: return scheme == .light ? data.colors.light : data.colors.dark
+    guard let colors = data?.colors else { return .system }
+    switch data?.mode {
+    case "light": return colors.light
+    case "dark": return colors.dark
+    default: return scheme == .light ? colors.light : colors.dark
     }
   }
 }

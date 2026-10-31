@@ -11,12 +11,6 @@ class SurfacesReceiver : BroadcastReceiver() {
         when (intent.action) {
             SurfaceTicks.ACTION_TICK -> PrayerWidget.tick(context)
             SurfaceTicks.ACTION_ROLL -> {}
-            Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED -> {
-                // the app isn't on screen after either, so the countdown comes back like the adhan alarms
-                PrayerWidget.refresh(context)
-                CountdownNotification.onScreen(context, false)
-                return
-            }
             else -> PrayerWidget.refresh(context)
         }
         CountdownNotification.sync(context)

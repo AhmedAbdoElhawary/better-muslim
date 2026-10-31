@@ -14,12 +14,13 @@ import org.json.JSONObject
 object CountdownNotification {
     private const val CHANNEL = "prayer_countdown"
     private const val ID = 7300
-    private const val PREFS = "prayer_surfaces"
-    private const val ON_SCREEN = "on_screen"
 
-    // the app's activity started or stopped. a reboot or an update leaves it off screen
+    // in memory, not saved: a crash, a kill or a reboot starts a new process with the app off screen
+    private var onScreen = false
+
+    // the app's activity started or stopped
     fun onScreen(context: Context, on: Boolean) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(ON_SCREEN, on).apply()
+        onScreen = on
         sync(context)
         SurfaceTicks.arm(context)
     }
@@ -29,7 +30,7 @@ object CountdownNotification {
         val manager = context.getSystemService(NotificationManager::class.java)
         val data = SurfaceData.load(context)
         val now = System.currentTimeMillis()
-        val entry = data?.let { shown(context, it, now) }
+        val entry = data?.let { shown(it, now) }
         if (data == null || entry == null || !allowed(context, data)) {
             manager.cancel(ID)
             return
@@ -38,9 +39,9 @@ object CountdownNotification {
     }
 
     // the entry in force names the next prayer, none while the app is on screen
-    fun shown(context: Context, data: SurfaceData, now: Long): JSONObject? {
+    fun shown(data: SurfaceData, now: Long): JSONObject? {
         if (!data.place || !data.countdown) return null
-        if (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(ON_SCREEN, false)) return null
+        if (onScreen) return null
         if (now >= data.until) return null
         return data.entryAt(now)
     }

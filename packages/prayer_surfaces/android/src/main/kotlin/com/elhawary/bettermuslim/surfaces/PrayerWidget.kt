@@ -72,7 +72,7 @@ open class PrayerWidget : AppWidgetProvider() {
             }
             val manager = AppWidgetManager.getInstance(context)
             for ((id, provider) in placed(context)) {
-                val painter = painter(context, manager, id, provider.kind, data)
+                val painter = painter(context, manager, id, provider.kind, data, state)
                 if (provider.kind == Kind.SMALL) {
                     manager.updateAppWidget(id, views(context, painter, state, now))
                     continue
@@ -91,7 +91,7 @@ open class PrayerWidget : AppWidgetProvider() {
             val kinds = placed(context).toMap()
             for (id in ids) {
                 val kind = kinds[id]?.kind ?: continue
-                manager.updateAppWidget(id, views(context, painter(context, manager, id, kind, data), state, now))
+                manager.updateAppWidget(id, views(context, painter(context, manager, id, kind, data, state), state, now))
             }
             if (drawn(state) != prefs(context).getLong(DRAWN, -1)) preview(context, manager, data, state, now)
             prefs(context).edit().putLong(DRAWN, drawn(state)).apply()
@@ -153,12 +153,11 @@ open class PrayerWidget : AppWidgetProvider() {
         private fun layout(kind: Kind) = if (kind == Kind.LARGE) R.layout.prayer_widget_large else R.layout.prayer_widget
 
         // the portrait size: the launcher reports the narrowest width and the tallest height
-        private fun painter(context: Context, manager: AppWidgetManager, id: Int, kind: Kind, data: SurfaceData?): WidgetPainter {
+        private fun painter(context: Context, manager: AppWidgetManager, id: Int, kind: Kind, data: SurfaceData?, state: SurfaceState): WidgetPainter {
             val options = manager.getAppWidgetOptions(id)
             val provider = PROVIDERS.first { it.kind == kind }
             val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 }?.toFloat() ?: provider.width
             val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 }?.toFloat() ?: provider.height
-            val state = SurfaceState.of(data, System.currentTimeMillis())
             return WidgetPainter(context, kind, width, height, palette(context, data, state))
         }
 

@@ -82,7 +82,7 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 | eastern | true only in Arabic with Eastern digits. The native countdowns map 0-9 to ٠-٩ |
 | countdown | the switch. false: no live countdown and every running one ends |
 | mode | `dark`, `light` or `followSky`, the app's mode. A message (no place, out of date) uses it, and follows the phone with `followSky` |
-| colors | the theme's roles for `light` and `dark`, ARGB ints: `top`, `middle`, `bottom` (the small and medium sky), `deep` (the large sky's end), `text`, `label`, `dim`, `gold`, `live` (the live countdown's digits), `primary`, `container`, `success`, `ring`, `sun`, `outline`. Dark is the theme's sky, light the theme's surfaces. The live countdown always takes `dark` |
+| colors | the theme's roles for `light` and `dark`, ARGB ints: `top`, `middle`, `bottom` (the small and medium sky), `deep` (the large sky's end), `text`, `label`, `dim`, `gold`, `live` (the live countdown's digits), `primary`, `container`, `success`, `ring`, `sun`, `outline`. Dark is the theme's sky, light the theme's surfaces. `bottom` goes toward `middle` where the text would be under AA on it. The live countdown always takes `dark`. A version 1 file has no `mode`, `colors` or entry `light`, and shows in the system's colors until the app writes again |
 | until | end of the last entry. Past it: the out of date state. 0 with no place |
 | texts | the strings that don't change with the moment. `{duration}`, `{hours}`, `{minutes}`, `{prayer}` are filled natively |
 | entries | ascending `from`, the first at the start of the stretch the write falls in (the last boundary at or before it), so two writes in the same stretch give the same file and the equal check skips the second |
