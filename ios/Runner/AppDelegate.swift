@@ -1,3 +1,4 @@
+import AudioToolbox
 import CoreLocation
 import Flutter
 import UIKit
@@ -127,6 +128,10 @@ import workmanager_apple
           String(decoding: bytes.prefix(while: { $0 != 0 }), as: UTF8.self)
         }
         result(["model": model, "os": "iOS \(UIDevice.current.systemVersion)"])
+      case "playTone":
+        // tri-tone, what ios plays for a notification without its own sound
+        AudioServicesPlaySystemSound(1007)
+        result(nil)
       case "keepScreenOn":
         UIApplication.shared.isIdleTimerDisabled =
           (call.arguments as? [String: Any])?["on"] as? Bool ?? false
