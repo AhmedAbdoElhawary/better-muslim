@@ -97,6 +97,27 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('a dua pauses it and gives it back when done, the adhan never does', (tester) async {
+    final recitation = await playing(tester);
+    final use = containerOf(tester).read(audioUseProvider.notifier);
+
+    use.claim(AudioUse.clip);
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'pause');
+
+    use.release(AudioUse.clip);
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'resume');
+    expect(recitation.current.status, RecitationStatus.playing);
+
+    use.claim(AudioUse.adhan);
+    await tester.pumpAndSettle();
+    use.release(AudioUse.adhan);
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'pause');
+    await unmount(tester);
+  });
+
   testWidgets('an offline download says so', (tester) async {
     final recitation = await playing(tester);
 
