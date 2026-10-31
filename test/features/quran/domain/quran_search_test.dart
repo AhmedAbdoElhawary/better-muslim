@@ -30,6 +30,17 @@ void main() {
     return hit.arabic.toList()..sort();
   }
 
+  test('root finds every word of that root, spaced or not, and washes only them', () {
+    final hits = searchQuran('رحم', ayahs, assets, scope: SearchScope.root).groups;
+    final first = hits[1]!.first;
+    expect(first.ayah.key, const AyahKey(1, 1));
+    expect(first.arabic.toList()..sort(), [2, 3]);
+    expect(found('ر ح م', scope: SearchScope.root), found('رحم', scope: SearchScope.root));
+    expect(found('رحم', scope: SearchScope.root), hasLength(greaterThan(300)));
+    expect(found('أله', scope: SearchScope.root), contains(const AyahKey(112, 1)));
+    expect(found('zzz', scope: SearchScope.root), isEmpty);
+  });
+
   test('every ayah is read, without its number', () {
     expect(ayahs, hasLength(6236));
     expect(ayahs.first.words, hasLength(4));
