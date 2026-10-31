@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -16,6 +17,7 @@ class DayCell extends StatelessWidget {
     required this.look,
     required this.semantics,
     required this.onTap,
+    this.prayed = 0,
     super.key,
   });
 
@@ -28,10 +30,19 @@ class DayCell extends StatelessWidget {
   final String semantics;
   final VoidCallback onTap;
 
+  /// how many of the day's five were logged, today keeps its own fill
+  final int prayed;
+
   @override
   Widget build(BuildContext context) {
     final today = look == DayLook.today;
-    final ink = today ? ThemeEnum.onPrimary : ThemeEnum.text;
+    final full = !today && prayed == Prayer.values.length;
+    final some = !today && !full && prayed > 0;
+    final ink = today
+        ? ThemeEnum.onPrimary
+        : full
+        ? ThemeEnum.onPrimaryContainer
+        : ThemeEnum.text;
     return Semantics(
       button: true,
       selected: look == DayLook.selected,
@@ -44,8 +55,18 @@ class DayCell extends StatelessWidget {
           constraints: BoxConstraints(minHeight: SizeManager.dayCell.r),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: today ? context.getColor(ThemeEnum.primary) : null,
+              color: today
+                  ? context.getColor(ThemeEnum.primary)
+                  : full
+                  ? context.getColor(ThemeEnum.primaryContainer)
+                  : null,
               borderRadius: BorderRadius.circular(RadiusManager.dayCell.r),
+              border: some
+                  ? Border.all(
+                      color: context.getColor(ThemeEnum.primary),
+                      width: SizeManager.divider.r,
+                    )
+                  : null,
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -67,7 +88,7 @@ class DayCell extends StatelessWidget {
                       other,
                       translate: false,
                       fontSize: FontSizeManager.calendarGregorian,
-                      color: today ? ink : ThemeEnum.text2,
+                      color: today || full ? ink : ThemeEnum.text2,
                       tabularFigures: true,
                       maxLines: 1,
                     ),

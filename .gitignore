@@ -68,3 +68,4 @@ app.*.map.json
 
 # tanzil and qul downloads for tool/quran/build_quran.dart
 /tool/quran/.cache/
+/promots/enhance 3

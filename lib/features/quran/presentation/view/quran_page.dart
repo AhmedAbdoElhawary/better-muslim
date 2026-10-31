@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/quran/last_read.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -9,10 +10,12 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/continue_card.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/quran_tile.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/surah_index.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -130,16 +133,23 @@ class _HeaderButton extends StatelessWidget {
   }
 }
 
-class _Tools extends StatelessWidget {
+class _Tools extends ConsumerWidget {
   const _Tools();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        // TODO: Listen plays from the last read ayah (US3).
         Expanded(
-          child: QuranTile(icon: BmIcon(BmIconName.listen), label: StringsManager.listen),
+          child: QuranTile(
+            icon: BmIcon(BmIconName.listen),
+            label: StringsManager.listen,
+            onTap: () {
+              final lastRead = ref.read(lastReadProvider);
+              playFrom(context, ref, lastRead.ayah);
+              context.push(Routes.quranPage(lastRead.page));
+            },
+          ),
         ),
         const RSizedBox.horizontal(SpaceManager.quranToolGap),
         Expanded(

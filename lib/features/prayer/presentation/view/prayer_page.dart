@@ -3,6 +3,7 @@ import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
@@ -16,6 +17,7 @@ import 'package:better_muslim/features/prayer/presentation/view/widgets/week_str
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 /// 4.04 and 4.17. a link with a day and a prayer opens that day scrolled to the row
 class PrayerPage extends ConsumerStatefulWidget {
@@ -71,6 +73,7 @@ class _PrayerPageState extends ConsumerState<PrayerPage> {
           slivers: [
             SliverToBoxAdapter(
               child: PrayerHeader(
+                onCalendar: () => context.push(Routes.hijriCalendar),
                 onPin: () => showLocationSheet(context),
                 onSliders: () => showMethodSheet(context),
               ),

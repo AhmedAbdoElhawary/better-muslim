@@ -12,9 +12,6 @@ abstract final class FontFamilyManager {
   static const String scheherazade = 'ScheherazadeNew';
 }
 
-// TODO(ahmed): flip to true once assets/fonts/KfgqpcHafs.ttf is in and its family is in pubspec.yaml.
-const bool kfgqpcShipped = false;
-
 /// the text widgets pick the latin or arabic family by the app language
 enum FontEnum {
   body(latin: FontFamilyManager.body, arabic: FontFamilyManager.bodyAr),
@@ -25,14 +22,9 @@ enum FontEnum {
   /// amiri for duas and azkar, in both languages
   dua(latin: FontFamilyManager.dua, arabic: FontFamilyManager.dua),
 
-  // TODO(ahmed): switch to KFGQPC Hafs once licensed, the mushaf text must render in the licensed font.
   quran(latin: FontFamilyManager.quran, arabic: FontFamilyManager.quran),
 
-  /// amiri quran stands in until the file is shipped
-  kfgqpc(
-    latin: kfgqpcShipped ? FontFamilyManager.kfgqpc : FontFamilyManager.quran,
-    arabic: kfgqpcShipped ? FontFamilyManager.kfgqpc : FontFamilyManager.quran,
-  ),
+  kfgqpc(latin: FontFamilyManager.kfgqpc, arabic: FontFamilyManager.kfgqpc),
   scheherazade(latin: FontFamilyManager.scheherazade, arabic: FontFamilyManager.scheherazade);
 
   const FontEnum({required this.latin, required this.arabic});
@@ -137,6 +129,9 @@ abstract final class FontSizeManager {
 
   /// quran (09 Quran). pages 3 to 604 step down from quranPage until the widest line fits
   static const double quranPage = 22.5;
+
+  /// a mushaf above 100% at 100%, about where the printed pages end up
+  static const double mushafReflow = 17;
   static const double mushafHeader = 15;
   static const double ayahMarker = 13;
   static const double quranTag = 11;

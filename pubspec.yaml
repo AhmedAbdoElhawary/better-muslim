@@ -106,11 +106,9 @@ flutter:
     - assets/quran/
     - assets/quran/pages/
     - assets/quran/surahs/
-    # TODO(ahmed): replace the placeholder adhan files in assets/audio/ with the licensed recordings, same names.
     - assets/audio/
     - shorebird.yaml
 
-  # TODO(ahmed): put KFGQPC Uthmanic Script Hafs (QUL's file) at assets/fonts/KfgqpcHafs.ttf and confirm its license, the kfgqpc font falls back to Amiri Quran until then.
   fonts:
     - family: Marcellus
       fonts:
@@ -135,6 +133,9 @@ flutter:
     - family: ScheherazadeNew
       fonts:
         - asset: assets/fonts/ScheherazadeNew-Regular.ttf
+    - family: KfgqpcHafs
+      fonts:
+        - asset: assets/fonts/KfgqpcHafs.ttf
 
 flutter_launcher_icons:
   ios: true

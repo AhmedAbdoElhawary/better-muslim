@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
@@ -145,9 +146,7 @@ void main() {
         ..add(_mp3)
         ..close();
     });
-    final fetched = await RecitationFiles.download(
-      Uri.parse('http://127.0.0.1:${server.port}/001005.mp3'),
-    );
+    final fetched = await fetchUri(Uri.parse('http://127.0.0.1:${server.port}/001005.mp3'));
     expect(await fetched.bytes.expand((chunk) => chunk).toList(), _mp3);
     final sent = <String>[];
     (await headers.future).forEach((name, _) => sent.add(name));

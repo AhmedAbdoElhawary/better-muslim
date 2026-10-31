@@ -1,4 +1,3 @@
-// TODO(ahmed): swap in the WMM2030 coefficients from NOAA before 2030, the model is valid until then.
 /// NOAA's WMM2025 (WMM.COF, public domain): n, m, g, h, gDot, hDot in nT and nT a year
 const wmm2025 = <(int, int, double, double, double, double)>[
   (1, 0, -29351.8, 0.0, 12.0, 0.0),

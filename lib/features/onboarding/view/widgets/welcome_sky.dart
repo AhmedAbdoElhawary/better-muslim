@@ -53,10 +53,9 @@ class WelcomeSky extends ConsumerWidget {
         shown: shown,
         horizon: horizon,
         mark: mark,
-        bright: state != null && bmSkyIsBright(state),
         onSky: context.getColor(ThemeEnum.onSky),
         primary: context.getColor(ThemeEnum.primary),
-        scrim: context.getColor(ThemeEnum.skyScrim),
+        scrim: context.getColor(ThemeEnum.welcomeScrim),
         ambient: ambient,
       ),
     );
@@ -70,7 +69,6 @@ class WelcomeSkyPainter extends CustomPainter {
     required this.shown,
     required this.horizon,
     required this.mark,
-    required this.bright,
     required this.onSky,
     required this.primary,
     required this.scrim,
@@ -82,7 +80,6 @@ class WelcomeSkyPainter extends CustomPainter {
   final double shown;
   final double horizon;
   final double mark;
-  final bool bright;
   final Color onSky;
   final Color primary;
   final Color scrim;
@@ -118,20 +115,18 @@ class WelcomeSkyPainter extends CustomPainter {
     canvas.saveLayer(full, Paint()..color = scrim.withValues(alpha: shown));
     canvas.drawRect(full, Paint()..shader = bmSkyGradient(stops, drift).createShader(full));
 
-    /// bm_sky: a 0 to 28% scrim behind the text block on the bright skies
-    if (bright) {
-      final fade = SizeManager.skyScrimFade * ch.unit;
-      canvas.drawRect(
-        Rect.fromLTRB(0, ch.horizonY, size.width, size.height),
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [scrim.withValues(alpha: 0), scrim, scrim],
-            stops: [0, fade / (size.height - ch.horizonY), 1],
-          ).createShader(Rect.fromLTRB(0, ch.horizonY, size.width, size.height)),
-      );
-    }
+    /// fades in under the horizon, full from where the title starts
+    final fade = SizeManager.skyScrimFade * ch.unit;
+    canvas.drawRect(
+      Rect.fromLTRB(0, ch.horizonY, size.width, size.height),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [scrim.withValues(alpha: 0), scrim, scrim],
+          stops: [0, fade / (size.height - ch.horizonY), 1],
+        ).createShader(Rect.fromLTRB(0, ch.horizonY, size.width, size.height)),
+    );
     canvas.restore();
 
     final u = ch.unit;
@@ -198,7 +193,6 @@ class WelcomeSkyPainter extends CustomPainter {
       old.shown != shown ||
       old.horizon != horizon ||
       old.mark != mark ||
-      old.bright != bright ||
       old.onSky != onSky ||
       old.primary != primary ||
       old.scrim != scrim ||

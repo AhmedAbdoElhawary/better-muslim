@@ -73,7 +73,7 @@ class DuaCategory {
   final List<Dua> duas;
 }
 
-// TODO(ahmed): dua clips go in assets/duas/audio/ and their paths in duas.json.
+// TODO(ahmed): once hisnmuslim.com allows their audio, the clips go in assets/duas/audio/ and their paths in duas.json, listen shows by itself then.
 Future<List<DuaCategory>> loadDuas() async {
   final json = jsonDecode(
     await rootBundle.loadString(

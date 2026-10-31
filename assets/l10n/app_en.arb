@@ -75,7 +75,8 @@
   "readDua": "Read dua",
   "markPrayed": "Mark prayed",
   "stopAdhan": "Stop adhan",
-  "adhanOfMakkah": "Adhan of Makkah",
+  "adhanOfMadinah": "Adhan of Madinah",
+  "adhanOfFajr": "Fajr adhan · Malmö",
   "prayerTimes": "Prayer times",
   "prayedToday": "{count} of 5 prayed today",
   "@prayedToday": {
@@ -578,32 +579,18 @@
       "prayer": {}
     }
   },
-  "recordingMakkah": "Makkah",
   "recordingMadinah": "Madinah",
-  "recordingAlAqsa": "Al-Aqsa",
-  "recordingCairo": "Cairo",
-  "recordingIstanbul": "Istanbul",
-  "recordingTakbir": "Takbir only",
+  "recordingAaqibAzeez": "Aaqib Azeez",
+  "recordingAndrewler": "Andrewler",
+  "recordingSynagda": "Adam Synagda",
   "fullAdhanLength": "Full adhan · {length}",
   "@fullAdhanLength": {
     "placeholders": {
       "length": {}
     }
   },
-  "shortLength": "Short · {length}",
-  "@shortLength": {
-    "placeholders": {
-      "length": {}
-    }
-  },
   "recordingFull": "{recording} · full adhan",
   "@recordingFull": {
-    "placeholders": {
-      "recording": {}
-    }
-  },
-  "recordingShort": "{recording} · short",
-  "@recordingShort": {
     "placeholders": {
       "recording": {}
     }
@@ -617,7 +604,8 @@
   "cancel": "Cancel",
   "reset": "Reset",
   "sectionAbout": "ABOUT",
-  "openSourceLicenses": "OPEN SOURCE LICENSES",
+  "acknowledgements": "Acknowledgements",
+  "openSourceLicenses": "Open source licenses",
   "usePlaceNames": "Place names",
   "useFonts": "Fonts",
   "useAzkarDuas": "Azkar and duas",
@@ -856,7 +844,6 @@
   "noteDeleted": "Note deleted",
   "addNote": "Add note",
   "private": "Private",
-  "comingSoon": "Coming soon",
   "juzPagePlace": "Juz {j} · Page {p} · {place}",
   "@juzPagePlace": {
     "placeholders": {
@@ -934,7 +921,6 @@
   "pageSection": "PAGE",
   "layout": "Layout",
   "mushaf": "Mushaf",
-  "both": "Both",
   "pageTurn": "Page turn",
   "book": "Book",
   "slide": "Slide",
@@ -952,7 +938,6 @@
   "alMuyassar": "Al-Muyassar",
   "ibnKathir": "Ibn Kathir",
   "asSadi": "As-Sa'di",
-  "clearQuran": "Clear Quran (Khattab)",
   "muyassarSummary": "Arabic · Al-Muyassar summary",
   "muyassarCredit": "At-Tafsir al-Muyassar · King Fahd Complex",
   "previousAyah": "Previous ayah",
@@ -1040,5 +1025,10 @@
   "sepia": "Sepia",
   "green": "Green",
   "navy": "Navy",
-  "fontSection": "FONT"
+  "fontSection": "FONT",
+  "mushafSize": "Mushaf size",
+  "percent": "{n}%",
+  "prayedOfFive": "{count} of 5 prayed",
+  "notifQuietTitle": "Keep the adhan coming",
+  "notifQuietBody": "Open the app so the next days' prayers are scheduled."
 }

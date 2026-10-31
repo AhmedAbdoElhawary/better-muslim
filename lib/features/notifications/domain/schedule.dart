@@ -2,9 +2,16 @@ import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:timezone/timezone.dart';
 
-// TODO(ahmed): when the 6 days run out on iOS the phone goes quiet, a last "open the app" message could go here if I design one.
 const scheduleDays = 6;
+
+/// ios may never run the top-up, so a while after the last alert one asks to open the app
+TZDateTime? quietNoticeAt(List<Alert> alerts) => alerts.isEmpty
+    ? null
+    : alerts.map((alert) => alert.at).reduce((a, b) => a.isAfter(b) ? a : b).add(quietNoticeDelay);
+
+const quietNoticeDelay = Duration(minutes: 30);
 
 /// calendar prayer days, not 144 hours: fajr gets earlier each day, so 144 hours can hold 7 fajrs.
 /// days are the prayer day of now and the ones after it, null where there is no location.
@@ -41,7 +48,8 @@ List<Alert> buildSchedule({
   ];
 }
 
-/// ios holds 64 pending, the prayers take 60 and the dev test one, so only the next 3 nudges
+/// ios holds 64 pending, the prayers take 60 and the quiet one, so only the next 3 nudges.
+/// the dev test one makes 65, ios then drops the latest, the quiet one
 const nudgeCount = 3;
 
 /// the next nudges after now, 20 minutes after fajr and asr, none for a window already done.

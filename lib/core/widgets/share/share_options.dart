@@ -167,7 +167,7 @@ class ShareOptions {
     this.sizeLocked = false,
     this.solid = false,
     this.ornament,
-    this.font = QuranFont.amiri,
+    this.font = QuranFont.kfgqpc,
     this.appName = true,
   });
 

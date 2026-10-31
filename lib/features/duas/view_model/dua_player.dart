@@ -40,7 +40,8 @@ class DuaPlayer extends Notifier<String?> {
   }
 
   Future<void> stop() async {
-    if (state == null) return;
+    /// the guard's microtask can land after the duas pages closed, dispose already stopped it
+    if (!ref.mounted || state == null) return;
     state = null;
     await _player?.stop();
   }

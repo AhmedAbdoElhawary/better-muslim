@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/hijri/hijri_date.dart';
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
@@ -183,6 +184,7 @@ class _Day extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final prayed = ref.watch(prayedProvider(day).select((prayed) => prayed.length));
     final look = lookOf(hijri, today: isToday, selected: selected);
     final (big, small) = gregorian
         ? (
@@ -201,7 +203,8 @@ class _Day extends ConsumerWidget {
       day: big,
       other: small,
       look: look,
-      semantics: _semantics(context, hijri, isToday, digits),
+      prayed: prayed,
+      semantics: _semantics(context, hijri, isToday, digits, prayed),
       onTap: () {
         if (selected) return;
         BmHaptics.selection();
@@ -210,12 +213,20 @@ class _Day extends ConsumerWidget {
     );
   }
 
-  String _semantics(BuildContext context, HijriDate hijri, bool isToday, Digits digits) {
+  String _semantics(
+    BuildContext context,
+    HijriDate hijri,
+    bool isToday,
+    Digits digits,
+    int prayed,
+  ) {
     final locale = Localizations.localeOf(context).languageCode;
     return [
       context.hijriFull(hijri, digits),
       context.formatDigits(DateFormat.yMMMMEEEEd(locale).format(day), digits),
       if (isToday) context.tr(StringsManager.today),
+      if (prayed > 0)
+        context.tr(StringsManager.prayedOfFive, {'count': context.formatDigits('$prayed', digits)}),
       for (final event in eventsOn(hijri)) context.tr(event.nameKey),
     ].join(', ');
   }

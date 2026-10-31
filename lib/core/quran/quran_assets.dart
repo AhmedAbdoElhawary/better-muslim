@@ -106,7 +106,6 @@ class QuranAssets {
   /// the current page and its two neighbours
   final _pages = <int, Map<String, dynamic>?>{};
   final _texts = <int, SurahText>{};
-  Map<String, Map<String, String>>? _samples;
 
   QuranSurah surah(int n) => surahs[n - 1];
 
@@ -167,24 +166,18 @@ class QuranAssets {
   }
 
   Future<SurahText> surahText(int n) async {
-    if (_texts[n] case final text?) return text;
+    if (_texts.remove(n) case final text?) return _texts[n] = text;
     final json = await _json('assets/quran/surahs/${_three(n)}.json') as Map<String, dynamic>;
     final text = SurahText(
       translation: (json['tr'] as List).cast<String>(),
       tafsir: (json['tafsir'] as List).cast<String>(),
     );
-    _texts
-      ..clear()
-      ..[n] = text;
+    _texts[n] = text;
+
+    /// a page or its neighbour can hold two surahs, turning back and forth never decodes again
+    if (_texts.length > 3) _texts.remove(_texts.keys.first);
     return text;
   }
-
-  /// ibn kathir, as-sa'di and clear quran by source and "1:5", only samples until licensed
-  Future<Map<String, Map<String, String>>> samples() async => _samples ??= {
-    for (final MapEntry(:key, :value)
-        in (await _json('assets/quran/samples.json') as Map<String, dynamic>).entries)
-      key: (value as Map<String, dynamic>).cast<String, String>(),
-  };
 }
 
 /// loadString sends files over 50 kb to an isolate, slower for these than decoding them here

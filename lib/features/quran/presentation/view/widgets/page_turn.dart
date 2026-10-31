@@ -61,6 +61,10 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
   /// one key per page on its boundary, so a page keeps its element when its wrappers change
   final _keys = <int, GlobalKey>{};
 
+  /// the pages built so far. a page measures every word, so a frame takes at most one new one
+  final _ready = <int>{};
+  bool _warming = false;
+
   /// the leaf's picture while it curls, and which page it is
   final _leaf = ValueNotifier<(int, ui.Image)?>(null);
 
@@ -101,6 +105,31 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
       if (boundary is! RenderRepaintBoundary || !boundary.hasSize) return;
       _leaf.value?.$2.dispose();
       _leaf.value = (leaf, boundary.toImageSync(pixelRatio: _ratio));
+    });
+  }
+
+  /// the neighbours come one per frame after the shown page, once the reader is open
+  void _warm() {
+    if (_warming) return;
+    _warming = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _warming = false;
+      if (!mounted) return;
+
+      /// not while the reader opens or the page moves, a page's layout would drop one of their frames
+      final moving = [widget.card, widget.recede, widget.lift, _turn].any((a) => a.isAnimating);
+      if (ModalRoute.of(context)?.animation?.isCompleted == false || moving) {
+        _warm();
+        SchedulerBinding.instance.scheduleFrame();
+        return;
+      }
+      final page = widget.page.value;
+      for (final n in [page + 1, page - 1]) {
+        if (n >= 1 && n <= quranPageCount && !_ready.contains(n)) {
+          setState(() => _ready.add(n));
+          return;
+        }
+      }
     });
   }
 
@@ -198,6 +227,10 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
             valueListenable: widget.page,
             builder: (context, page, _) {
               _keys.removeWhere((n, _) => (n - page).abs() > 1);
+              _ready
+                ..removeWhere((n) => (n - page).abs() > 1)
+                ..add(page);
+              _warm();
               return _Pages(
                 turn: _turn,
                 card: widget.card,
@@ -211,7 +244,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
                 width: _width,
                 pages: {
                   for (final n in [page - 1, page, page + 1])
-                    if (n >= 1 && n <= quranPageCount)
+                    if (_ready.contains(n))
                       n: RepaintBoundary(
                         key: _keys.putIfAbsent(n, GlobalKey.new),
                         child: widget.pageBuilder(n),
@@ -266,6 +299,7 @@ class _Pages extends StatelessWidget {
       offset: Offset(0, SizeManager.pageCardShadowY.r),
       spreadRadius: SizeManager.pageCardShadowSpread.r,
     );
+    final bg = context.getColor(ThemeEnum.bg);
     return AnimatedBuilder(
       animation: Listenable.merge([turn, card, recede, lift, leaf, parked]),
       builder: (context, _) {
@@ -314,7 +348,8 @@ class _Pages extends StatelessWidget {
                     final shown => _Placed(
                       hidden: !shown,
                       transform: _transform(n, t, c, cardTransform),
-                      opacity: _opacity(n, t, c),
+                      opacity: _opacity(n, t),
+                      veil: n == current + 1 && t == 0 ? bg.withValues(alpha: 1 - .9 * c) : null,
                       radius: radius,
                       shadow: n == current && radius > 0 ? shadow : null,
                       child: child,
@@ -361,8 +396,7 @@ class _Pages extends StatelessWidget {
       ..multiply(card);
   }
 
-  double _opacity(int n, double t, double c) {
-    if (n == current + 1 && t == 0) return .9 * c;
+  double _opacity(int n, double t) {
     if (!fade) return 1;
     if (t > 0 && n == current) return 1 - t;
     if (t < 0 && n == current - 1) return -t;
@@ -377,6 +411,7 @@ class _Placed extends StatelessWidget {
     required this.child,
     this.hidden = false,
     this.opacity = 1,
+    this.veil,
     this.radius = 0,
     this.shadow,
   });
@@ -384,6 +419,10 @@ class _Placed extends StatelessWidget {
   final bool hidden;
   final Matrix4 transform;
   final double opacity;
+
+  /// the next page peeks at 90% of the card's value through the bg laid over it. the same as an
+  /// Opacity, it only has the bg behind, without an offscreen layer on every frame of the card
+  final Color? veil;
   final double radius;
   final BoxShadow? shadow;
   final Widget child;
@@ -391,6 +430,17 @@ class _Placed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var page = child;
+    if (veil case final veil?) {
+      page = Stack(
+        fit: StackFit.passthrough,
+        children: [
+          page,
+          Positioned.fill(
+            child: IgnorePointer(child: ColoredBox(color: veil)),
+          ),
+        ],
+      );
+    }
     if (radius > 0 || shadow != null) {
       page = DecoratedBox(
         decoration: BoxDecoration(

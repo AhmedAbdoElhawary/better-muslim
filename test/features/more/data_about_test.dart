@@ -2,6 +2,7 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -82,6 +83,30 @@ void main() {
       expect(settings.subhanallahCount, 16);
       expect(settings.firstUse, DateTime(2026, 10, 1));
       expect(find.text('Undo'), findsNothing);
+      await unmount(tester);
+    });
+  });
+
+  group('about', () {
+    testWidgets('acknowledgements lists every credit, a tap opens its link, then the licenses', (
+      tester,
+    ) async {
+      final system = mockSystemChannel();
+      await pumpMore(tester, await designOverrides());
+      await tapText(tester, 'Acknowledgements');
+      expect(find.text('GeoNames'), findsOneWidget);
+      expect(find.text('Place names · CC BY 4.0'), findsOneWidget);
+
+      await tester.tap(find.text('GeoNames'));
+      await tester.pumpAndSettle();
+      expect(system.where((call) => call.method == 'openUrl').single.arguments, {
+        'url': 'https://www.geonames.org',
+      });
+
+      await scrollTo(tester, 'Adam Synagda');
+      expect(find.text('Adhan recordings · CC0'), findsOneWidget);
+      await tapText(tester, 'Open source licenses');
+      expect(find.byType(LicensePage), findsOneWidget);
       await unmount(tester);
     });
   });

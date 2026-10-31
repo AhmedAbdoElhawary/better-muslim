@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
@@ -100,7 +101,10 @@ class NavRow extends StatelessWidget {
           onTap: onTap == null
               ? null
               : () {
-                  if (toggled != null) BmHaptics.selection();
+                  if (toggled != null) {
+                    BmHaptics.selection();
+                    BmSounds.toggle();
+                  }
                   onTap();
                 },
           child: ConstrainedBox(

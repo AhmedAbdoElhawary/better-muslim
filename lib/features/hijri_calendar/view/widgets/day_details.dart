@@ -1,5 +1,7 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/hijri/hijri_date.dart';
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -8,6 +10,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
+import 'package:better_muslim/core/widgets/day_dots.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/coming_up_list.dart';
@@ -81,9 +84,22 @@ class _DateLine extends ConsumerWidget {
             translate: false,
             color: ThemeEnum.text2,
           ),
+          _Prayed(day),
         ],
       ),
     );
+  }
+}
+
+class _Prayed extends ConsumerWidget {
+  const _Prayed(this.day);
+  final DateTime day;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final past = ref.watch(todayProvider.select((today) => !day.isAfter(today)));
+    if (!past) return const SizedBox.shrink();
+    return TopPadding(padding: SpaceManager.s2, child: DayDots(ref.watch(prayedProvider(day))));
   }
 }
 

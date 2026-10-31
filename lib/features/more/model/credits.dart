@@ -66,15 +66,19 @@ const credits = [
     license: _ofl,
     link: 'https://software.sil.org/scheherazade',
   ),
-  // TODO(ahmed): KFGQPC Hafs's exact credit and license once its file is in, a wrong credit breaks its terms.
+
+  /// its license lets it be used and shipped for free, never sold or modified
   Credit(
-    source: 'KFGQPC Uthmanic Script Hafs',
+    source: 'KFGQPC HAFS Uthmanic Script, King Fahd Glorious Quran Printing Complex',
     useKey: StringsManager.useFonts,
-    link: 'https://qul.tarteel.ai',
+    license: 'KFGQPC EULA',
+    link: 'https://fonts.qurancomplex.gov.sa',
   ),
-  // TODO(ahmed): QUL's exact credit line and license for the Madinah V2 layout and QPC Hafs words, a wrong credit breaks their terms.
+
+  /// qul's own faq: licenses differ by resource, these two come from the complex's print
   Credit(
-    source: 'Quranic Universal Library (QUL)',
+    source:
+        'Quranic Universal Library (QUL) · Tarteel, from King Fahd Glorious Quran Printing Complex',
     useKey: StringsManager.useMushafText,
     link: 'https://qul.tarteel.ai',
   ),
@@ -98,8 +102,39 @@ const credits = [
     useKey: StringsManager.useRecitation,
     link: 'https://everyayah.com',
   ),
-  // TODO(ahmed): confirm the source of the azkar and duas text and translation, add its license and https link, a wrong credit breaks the license.
-  Credit(source: 'Hisn al-Muslim', useKey: StringsManager.useAzkarDuas),
-  // TODO(ahmed): the adhan recordings' source, license and https link once the licensed files are in.
-  Credit(source: 'Adhan of Makkah', useKey: StringsManager.useAdhanRecordings),
+  Credit(
+    source: "Hisn al-Muslim · Sa'id al-Qahtani",
+    useKey: StringsManager.useAzkarDuas,
+    link: 'https://www.hisnmuslim.com',
+  ),
+  Credit(
+    source: 'ejaz215 · Freesound · Madinah',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC BY 3.0',
+    link: 'https://freesound.org/people/ejaz215/sounds/33937/',
+  ),
+  Credit(
+    source: 'Besim Azemi · Islamic Center Malmö · Fajr',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC BY 3.0',
+    link: 'https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm',
+  ),
+  Credit(
+    source: 'Aaqib Azeez',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC BY-SA 4.0',
+    link: 'https://commons.wikimedia.org/wiki/File:The_Adhan_-_Muslim_Call_to_Prayer_-_Aaqib_Azeez.mp3',
+  ),
+  Credit(
+    source: 'Andrewler',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC BY-SA 4.0',
+    link: 'https://commons.wikimedia.org/wiki/File:Azan.ogg',
+  ),
+  Credit(
+    source: 'Adam Synagda',
+    useKey: StringsManager.useAdhanRecordings,
+    license: 'CC0',
+    link: 'https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg',
+  ),
 ];

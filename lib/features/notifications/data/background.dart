@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/audio/adhan_files.dart';
 import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.dart';
@@ -191,6 +192,7 @@ void callbackDispatcher() {
     final db = await AppDatabase.openExisting();
     if (db == null) return true;
     try {
+      await AdhanFiles.init();
       final locale = AppLocalizations.localeOf((await db.watchSettings().first).language);
       final l10n = await AppLocalizations.load(locale);
       final scheduler = NotificationScheduler(AdhanChannel());

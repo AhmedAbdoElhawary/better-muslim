@@ -1,7 +1,6 @@
 import 'package:better_muslim/core/resources/strings_manager.dart';
 
 /// the dua after the adhan. content, not ui text, so it is not in the arb files
-// TODO(ahmed): check the dua text, transliteration and translation against Bukhari 614.
 abstract final class DuaAfterAdhan {
   static const titleKey = StringsManager.afterTheAdhan;
   static const sourceEn = 'Sahih al-Bukhari 614';

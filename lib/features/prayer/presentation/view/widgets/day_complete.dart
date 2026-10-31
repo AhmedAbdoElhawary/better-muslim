@@ -99,89 +99,100 @@ class _DayCompleteState extends ConsumerState<DayComplete> with TickerProviderSt
     final caption = _between(reduce ? 800 : 1200, reduce ? 300 : 520, curve: BmMotion.decelerate);
     final out = _between(_hold.inMilliseconds, BmMotion.standard.inMilliseconds);
     final primary = context.getColor(ThemeEnum.primary);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _done,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_timeline, _star]),
-        builder: (context, _) => CustomOpacity(
-          opacity: 1 - out.value,
-          child: ColoredBox(
-            color: context.getColor(ThemeEnum.bg).withValues(alpha: _backdrop),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RSizedBox.square(
-                    dimension: SizeManager.dayCompleteRing,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        for (final (index, _) in Prayer.values.indexed)
-                          Transform.translate(
-                            offset: Offset(
-                              (index - 2) *
-                                  SpaceManager.dayCompleteDots.r *
-                                  (reduce ? 1 : 1 - dots.value),
-                              0,
-                            ),
-                            child: Transform.scale(
-                              scale: reduce ? 1 : lerpDouble(1, .4, dots.value),
-                              child: CustomOpacity(
-                                opacity: 1 - dots.value,
-                                child: _Circle(
-                                  size: SizeManager.dayCompleteDot,
-                                  color: primary,
-                                  filled: true,
+    return Material(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _done,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_timeline, _star]),
+          builder: (context, _) => CustomOpacity(
+            opacity: 1 - out.value,
+            child: ColoredBox(
+              color: context.getColor(ThemeEnum.bg).withValues(alpha: _backdrop),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RSizedBox.square(
+                      dimension: SizeManager.dayCompleteRing,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          for (final (index, _) in Prayer.values.indexed)
+                            Transform.translate(
+                              offset: Offset(
+                                (index - 2) *
+                                    SpaceManager.dayCompleteDots.r *
+                                    (reduce ? 1 : 1 - dots.value),
+                                0,
+                              ),
+                              child: Transform.scale(
+                                scale: reduce ? 1 : lerpDouble(1, .4, dots.value),
+                                child: CustomOpacity(
+                                  opacity: 1 - dots.value,
+                                  child: _Circle(
+                                    size: SizeManager.dayCompleteDot,
+                                    color: primary,
+                                    filled: true,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        if (!reduce)
+                          if (!reduce)
+                            CustomOpacity(
+                              opacity: ring.value == 0 ? 0 : .7 * (1 - ring.value),
+                              child: Transform.scale(
+                                scale: 1 + ring.value,
+                                child: _Circle(
+                                  size: SizeManager.dayCompleteRing,
+                                  color: primary,
+                                  filled: false,
+                                ),
+                              ),
+                            ),
                           CustomOpacity(
-                            opacity: ring.value == 0 ? 0 : .7 * (1 - ring.value),
+                            opacity: starIn.value,
                             child: Transform.scale(
-                              scale: 1 + ring.value,
-                              child: _Circle(
-                                size: SizeManager.dayCompleteRing,
-                                color: primary,
-                                filled: false,
+                              scale: reduce || _star.value == 0 ? 1 : _star.value,
+                              child: CustomPaint(
+                                size: Size.square(SizeManager.dayCompleteStar.r),
+                                painter: _StarPainter(primary),
                               ),
                             ),
                           ),
-                        CustomOpacity(
-                          opacity: starIn.value,
-                          child: Transform.scale(
-                            scale: reduce || _star.value == 0 ? 1 : _star.value,
-                            child: CustomPaint(
-                              size: Size.square(SizeManager.dayCompleteStar.r),
-                              painter: _StarPainter(primary),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const RSizedBox.vertical(SpaceManager.s4),
-                  CustomOpacity(
-                    opacity: caption.value,
-                    child: Transform.translate(
-                      offset: Offset(
-                        0,
-                        reduce ? 0 : SpaceManager.dayCompleteRise.r * (1 - caption.value),
-                      ),
-                      child: const RegularText(
-                        StringsManager.allFivePrayed,
-                        font: FontEnum.display,
-                        fontSize: FontSizeManager.dayComplete,
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const RSizedBox.vertical(SpaceManager.s4),
+                    _AllFivePrayers(caption: caption, reduce: reduce),
+                  ],
+                ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AllFivePrayers extends StatelessWidget {
+  const new({required this.caption, required this.reduce});
+
+  final Animation<double> caption;
+  final bool reduce;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomOpacity(
+      opacity: caption.value,
+      child: Transform.translate(
+        offset: Offset(0, reduce ? 0 : SpaceManager.dayCompleteRise.r * (1 - caption.value)),
+        child: const RegularText(
+          StringsManager.allFivePrayed,
+          font: FontEnum.display,
+          fontSize: FontSizeManager.dayComplete,
         ),
       ),
     );

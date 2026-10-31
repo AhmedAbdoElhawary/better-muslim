@@ -31,7 +31,7 @@ class TafsirStatusNotifier extends Notifier<TafsirStatus> {
     return _idle;
   }
 
-  /// throws a TafsirException, cancelled included
+  /// throws a DownloadException, cancelled included
   Future<void> download() async {
     if (state.ready || state.downloading) return;
     state = (ready: false, downloading: true, progress: null);

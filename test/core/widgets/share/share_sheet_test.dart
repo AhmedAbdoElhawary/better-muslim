@@ -117,7 +117,7 @@ void main() {
   testWidgets('a font pick lays the card out again with it', (tester) async {
     final content = _Content();
     await pumpSheet(tester, content);
-    expect(content.asked.last.font, QuranFont.amiri);
+    expect(content.asked.last.font, QuranFont.kfgqpc);
     await tap(tester, 'Scheherazade');
     expect(content.asked.last.font, QuranFont.scheherazade);
     await unmount(tester);

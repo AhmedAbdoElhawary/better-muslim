@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:audio_session/audio_session.dart';
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
@@ -146,7 +147,7 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
           BmSounds.busy = state.playing && state.processingState != ProcessingState.completed,
     );
     try {
-      await _player.setAsset(recording.fullAsset(alert.prayer));
+      await _player.setAudioSource(sourceOf(recording.fullAsset(alert.prayer)));
     } on PlayerException catch (error, stack) {
       /// the adhan screen is already open, it stays open silent instead of crashing
       _id = null;
@@ -186,12 +187,12 @@ class JustAudioAdhanPlayer extends AdhanPlayer {
     if (known != null) return known;
     final reader = AudioPlayer();
     try {
-      return _lengths[asset] = await reader.setAsset(asset) ?? Duration.zero;
+      return _lengths[asset] = await reader.setAudioSource(sourceOf(asset)) ?? Duration.zero;
     } on PlayerException catch (error, stack) {
       await _report(error, stack, 'adhan length');
 
       /// zero would send a fresh adhan tap to the prayer tab, the label is close enough
-      final [minutes, seconds] = recording.lengthLabel.split(':').map(int.parse).toList();
+      final [minutes, seconds] = recording.lengthOf(prayer).split(':').map(int.parse).toList();
       return Duration(minutes: minutes, seconds: seconds);
     } finally {
       await reader.dispose();

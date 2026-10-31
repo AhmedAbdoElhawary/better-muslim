@@ -99,12 +99,12 @@ class RecordingRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recording = ref.watch(
       settingsProvider.select(
-        (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.makkah,
+        (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.madinah,
       ),
     );
     return NavRow(
       title: StringsManager.adhanSound,
-      value: recording.isShort ? StringsManager.recordingShort : StringsManager.recordingFull,
+      value: StringsManager.recordingFull,
       args: {'recording': context.tr(recording.nameKey)},
       onTap: () => showRecordingSheet(context, prayer),
     );

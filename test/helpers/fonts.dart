@@ -9,6 +9,7 @@ Future<void> loadAppFonts() async {
     'NotoSansArabic': ['assets/fonts/NotoSansArabic-Variable.ttf'],
     'Amiri': ['assets/fonts/Amiri-Regular.ttf', 'assets/fonts/Amiri-Bold.ttf'],
     'AmiriQuran': ['assets/fonts/AmiriQuran-Regular.ttf'],
+    'KfgqpcHafs': ['assets/fonts/KfgqpcHafs.ttf'],
   };
   for (final MapEntry(key: family, value: files) in fonts.entries) {
     final loader = FontLoader(family);

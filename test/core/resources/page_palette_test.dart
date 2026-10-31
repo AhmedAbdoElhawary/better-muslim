@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -67,4 +68,15 @@ void main() {
       }
     });
   }
+
+  /// a theme that isn't == the last restarts the reader's 1.8 s AnimatedTheme on every rebuild
+  test('the same palette gives the same theme', () {
+    expect(
+      AppTheme.page(PageColor.sepia, BmThemeId.iznik),
+      same(AppTheme.page(PageColor.sepia, BmThemeId.iznik)),
+    );
+    expect(AppTheme.light(BmThemeId.noor), same(AppTheme.light(BmThemeId.noor)));
+    expect(AppTheme.dark(BmThemeId.noor), same(AppTheme.dark(BmThemeId.noor)));
+    expect(AppTheme.page(PageColor.night), isNot(same(AppTheme.page(PageColor.navy))));
+  });
 }

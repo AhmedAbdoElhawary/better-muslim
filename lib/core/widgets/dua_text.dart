@@ -67,11 +67,14 @@ class DuaText extends StatelessWidget {
                 ),
               ),
               if (source != null)
-                MediumText(
-                  source,
-                  translate: false,
-                  fontSize: FontSizeManager.label,
-                  color: ThemeEnum.accent,
+                Flexible(
+                  child: MediumText(
+                    source,
+                    translate: false,
+                    fontSize: FontSizeManager.label,
+                    color: ThemeEnum.accent,
+                    textAlign: TextAlign.end,
+                  ),
                 ),
             ],
           ),
@@ -88,7 +91,9 @@ class DuaText extends StatelessWidget {
             textAlign: align,
           ),
         ),
-        if (!isArabic) ...[
+
+        /// empty until the english comes, the arabic stands alone then
+        if (!isArabic && transliteration.isNotEmpty) ...[
           RSizedBox.vertical(gap),
           RegularText(
             transliteration,
@@ -99,6 +104,8 @@ class DuaText extends StatelessWidget {
             color: ThemeEnum.text2,
             textAlign: align,
           ),
+        ],
+        if (!isArabic && translation.isNotEmpty) ...[
           RSizedBox.vertical(gap),
           RegularText(
             translation,

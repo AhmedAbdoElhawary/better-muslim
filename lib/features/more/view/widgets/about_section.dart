@@ -1,11 +1,13 @@
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/system/system_channel.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 /// acknowledgements, and the version that does nothing on tap (FR-033, FR-034)
 class AboutSection extends StatelessWidget {
@@ -13,7 +15,18 @@ class AboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const GroupedSection(label: StringsManager.sectionAbout, children: [_VersionRow()]);
+    return GroupedSection(
+      label: StringsManager.sectionAbout,
+      children: [
+        NavRow(
+          icon: BmIcon.ui(BmUiIcon.note, size: SizeManager.iconList.r),
+          title: StringsManager.acknowledgements,
+          heroTag: Routes.acknowledgements,
+          onTap: () => context.push(Routes.acknowledgements),
+        ),
+        const _VersionRow(),
+      ],
+    );
   }
 }
 

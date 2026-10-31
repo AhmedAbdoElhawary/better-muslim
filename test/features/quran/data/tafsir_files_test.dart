@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
-import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -52,10 +52,10 @@ void main() {
           .map((file) => file.uri.pathSegments.last)
           .toList();
 
-  Future<TafsirFailure> failure(Future<Object?> future) async {
+  Future<DownloadFailure> failure(Future<Object?> future) async {
     try {
       await future;
-    } on TafsirException catch (error) {
+    } on DownloadException catch (error) {
       return error.failure;
     }
     fail('no error');
@@ -76,7 +76,7 @@ void main() {
 
   test('a wrong hash leaves no file and no .part', () async {
     final tafsir = files((_) => serve(_body), hash: 'not it');
-    expect(await failure(download(tafsir)), TafsirFailure.failed);
+    expect(await failure(download(tafsir)), DownloadFailure.failed);
     expect(left(), isEmpty);
   });
 
@@ -88,7 +88,7 @@ void main() {
 
   test('offline throws offline', () async {
     final tafsir = files((_) => throw const SocketException('offline'));
-    expect(await failure(download(tafsir)), TafsirFailure.offline);
+    expect(await failure(download(tafsir)), DownloadFailure.offline);
   });
 
   test('a plain http address is refused before anything is fetched', () async {
@@ -97,7 +97,7 @@ void main() {
       asked++;
       return serve(_body);
     }, address: 'http://example.com/ibn_kathir.json.gz');
-    expect(await failure(download(tafsir)), TafsirFailure.failed);
+    expect(await failure(download(tafsir)), DownloadFailure.failed);
     expect(asked, 0);
   });
 
@@ -110,7 +110,7 @@ void main() {
     expect(left(), ['ibn_kathir.json.gz.part']);
     tafsir.cancel(TafsirSource.ibnKathir);
     chunks.add(_body.sublist(10));
-    expect(await running, TafsirFailure.cancelled);
+    expect(await running, DownloadFailure.cancelled);
     expect(left(), isEmpty);
     await chunks.close();
   });

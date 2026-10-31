@@ -21,23 +21,21 @@ void main() {
     expect(normalize('ARABIC'), 'arabic');
   });
 
-  test('finds by arabic without marks, transliteration, translation, source and category', () {
+  test('finds by arabic without marks, source and category', () {
     expect(found('توكلت'), contains('Leaving the home'));
-    expect(found('tawakkaltu'), contains('Leaving the home'));
-    expect(found('trust'), contains('Leaving the home'));
-    expect(found('5095'), contains('Leaving the home'));
-    expect(found('٥٠٩٥'), contains('Leaving the home'));
+    expect(found('4/325'), contains('Leaving the home'));
+    expect(found('٤/٣٢٥'), contains('Leaving the home'));
     expect(found('sleeping'), {'Before sleeping'});
     expect(found('النوم'), {'Before sleeping'});
   });
 
   test('every word counts, in any order', () {
-    expect(found('allah trust'), found('trust allah'));
-    expect(found('trust zzz'), isEmpty);
+    expect(found('الله توكلت'), found('توكلت الله'));
+    expect(found('توكلت zzz'), isEmpty);
   });
 
   test('a dua shows once, under its first category', () {
-    final ids = [for (final (dua, _) in searchDuas('allah', categories)) dua.id];
+    final ids = [for (final (dua, _) in searchDuas('الله', categories)) dua.id];
     expect(ids.toSet(), hasLength(ids.length));
   });
 

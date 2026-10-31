@@ -5,6 +5,10 @@ import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
+/// a downloaded adhan is a path on the phone, everything else a flutter asset
+AudioSource sourceOf(String asset) =>
+    asset.startsWith('/') ? AudioSource.file(asset) : AudioSource.asset(asset);
+
 /// the one thing the tests replace, so no test reaches the phone's audio
 abstract class ClipPlayer {
   Future<void> play(String asset);
@@ -28,7 +32,7 @@ class JustAudioClipPlayer implements ClipPlayer {
       (state) =>
           BmSounds.busy = state.playing && state.processingState != ProcessingState.completed,
     );
-    await _player.setAsset(asset);
+    await _player.setAudioSource(sourceOf(asset));
     unawaited(_player.play());
   }
 

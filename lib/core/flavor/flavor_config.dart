@@ -25,7 +25,6 @@ class FlavorConfig {
         orElse: () => fallbackFlavor,
       ),
       appName: const String.fromEnvironment('APP_NAME', defaultValue: 'Better Muslim'),
-      // TODO(ahmed): put the server link in API_BASE_URL of each dart_define/<flavor>.json once the backend exists, empty means no backend yet.
       apiBaseUrl: const String.fromEnvironment('API_BASE_URL'),
       sentryDsn: const String.fromEnvironment('SENTRY_DSN'),
       scenario: const String.fromEnvironment('SCENARIO'),

@@ -14,6 +14,7 @@ import 'package:better_muslim/core/widgets/motion/stagger.dart';
 import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -163,7 +164,7 @@ final _digitsProvider = Provider.autoDispose(
 );
 
 /// suraRow() of _gen/quran.js: the number in the star, the name over its line, the arabic name
-class _Row extends StatelessWidget {
+class _Row extends ConsumerWidget {
   const _Row({
     required this.number,
     required this.page,
@@ -191,7 +192,7 @@ class _Row extends StatelessWidget {
   final String? arabic;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final titleArgs = this.titleArgs;
     final arabic = this.arabic;
     return BmContainerTransform(
@@ -201,7 +202,10 @@ class _Row extends StatelessWidget {
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: open,
+          onTap: () async {
+            await warmMushafPage(context, ref, page);
+            if (context.mounted) open();
+          },
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: context.getColor(ThemeEnum.outline))),

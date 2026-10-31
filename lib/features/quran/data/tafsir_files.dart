@@ -3,10 +3,9 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:better_muslim/core/database/backup_exclusion.dart';
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
-import 'package:better_muslim/features/quran/data/recitation_files.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -33,23 +32,11 @@ enum TafsirSource {
   final String sha256;
 
   /// a public repo of its own, this one is private and its releases need a token
-  // TODO(ahmed): run `gh repo create AhmedAbdoElhawary/better-muslim-content --public --add-readme` then `gh release create tafsir-v1 build/tafsir/*.json.gz --repo AhmedAbdoElhawary/better-muslim-content`, upload exactly these built files or the hashes above won't match and every download is thrown away.
   static final base = Uri.parse(
     'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/tafsir-v1/',
   );
 
   Uri get address => base.resolve(file);
-}
-
-enum TafsirFailure { offline, failed, cancelled }
-
-class TafsirException implements Exception {
-  const TafsirException(this.failure);
-
-  final TafsirFailure failure;
-
-  @override
-  String toString() => 'TafsirException($failure)';
 }
 
 /// each tafsir is one file for the whole quran, kept only when its sha256 matches (research R15)
@@ -62,7 +49,7 @@ class TafsirFiles {
     Uri Function(TafsirSource source)? address,
     String Function(TafsirSource source)? sha256,
   }) : _root = root ?? getApplicationSupportDirectory,
-       _fetch = fetch ?? RecitationFiles.download,
+       _fetch = fetch ?? fetchUri,
        _exclude = exclude ?? BackupExclusion.exclude,
        _address = address ?? ((source) => source.address),
        _sha256 = sha256 ?? ((source) => source.sha256);
@@ -96,47 +83,15 @@ class TafsirFiles {
 
   /// progress is 0 to 1, or null when the server sends no size
   Future<void> download(TafsirSource source, {void Function(double? progress)? onProgress}) async {
-    final uri = _address(source);
-    if (uri.scheme != 'https') throw const TafsirException(TafsirFailure.failed);
     _cancelled.remove(source);
-    final file = await _file(source);
-    final part = File('${file.path}.part');
-    final Fetched fetched;
-    try {
-      fetched = await _fetch(uri);
-    } on SocketException {
-      throw const TafsirException(TafsirFailure.offline);
-    } on IOException {
-      throw const TafsirException(TafsirFailure.failed);
-    }
-    final digest = _Digest();
-    final hash = sha256.startChunkedConversion(digest);
-    final sink = part.openWrite();
-    var written = 0;
-    try {
-      await for (final chunk in fetched.bytes) {
-        if (_cancelled.contains(source)) throw const TafsirException(TafsirFailure.cancelled);
-        hash.add(chunk);
-        sink.add(chunk);
-        written += chunk.length;
-        final length = fetched.length;
-        onProgress?.call(length == null ? null : written / length);
-      }
-      hash.close();
-      await sink.close();
-    } on Object catch (error) {
-      await sink.close().catchError((_) {});
-      if (part.existsSync()) part.deleteSync();
-      if (error is TafsirException) rethrow;
-      throw TafsirException(
-        error is SocketException ? TafsirFailure.offline : TafsirFailure.failed,
-      );
-    }
-    if ('${digest.value}' != _sha256(source)) {
-      part.deleteSync();
-      throw const TafsirException(TafsirFailure.failed);
-    }
-    part.renameSync(file.path);
+    await saveVerified(
+      _address(source),
+      await _file(source),
+      sha256Hex: _sha256(source),
+      fetch: _fetch,
+      cancelled: () => _cancelled.contains(source),
+      onProgress: onProgress,
+    );
   }
 
   /// the running download stops at its next chunk and deletes its .part
@@ -159,15 +114,4 @@ class TafsirFiles {
               as Map<String, dynamic>,
     );
   }
-}
-
-/// sha256's chunked conversion hands its one digest to a sink
-class _Digest implements Sink<Digest> {
-  Digest? value;
-
-  @override
-  void add(Digest data) => value = data;
-
-  @override
-  void close() {}
 }

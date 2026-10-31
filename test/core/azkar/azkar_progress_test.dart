@@ -40,20 +40,20 @@ void main() {
     return container;
   }
 
-  test('0 of 24 at 16:32, 1 of 24 once an item reaches its count', () async {
+  test('0 of 20 at 16:32, 1 of 20 once an item reaches its count', () async {
     final container = await containerAt(at(15, 16, 32));
     final db = container.read(databaseProvider);
     expect(container.read(currentAzkarSetProvider), AzkarSet.evening);
-    expect(container.read(azkarProgressProvider(AzkarSet.evening)), (done: 0, total: 24));
+    expect(container.read(azkarProgressProvider(AzkarSet.evening)), (done: 0, total: 20));
 
-    await db.setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e01', 99);
+    await db.setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e17', 99);
     await pumpEventQueue();
     expect(container.read(azkarProgressProvider(AzkarSet.evening)).done, 0);
 
-    await db.setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e01', 100);
+    await db.setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e17', 100);
     await pumpEventQueue();
-    expect(container.read(azkarProgressProvider(AzkarSet.evening)), (done: 1, total: 24));
-    expect(container.read(azkarProgressProvider(AzkarSet.morning)), (done: 0, total: 12));
+    expect(container.read(azkarProgressProvider(AzkarSet.evening)), (done: 1, total: 20));
+    expect(container.read(azkarProgressProvider(AzkarSet.morning)), (done: 0, total: 23));
   });
 
   test('an id no longer in the content is ignored', () async {
@@ -63,14 +63,14 @@ void main() {
         .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'gone', 5);
     await pumpEventQueue();
 
-    expect(container.read(azkarProgressProvider(AzkarSet.evening)), (done: 0, total: 24));
+    expect(container.read(azkarProgressProvider(AzkarSet.evening)), (done: 0, total: 20));
   });
 
   test('at 10:00 the evening shows last night\'s counts', () async {
     final container = await containerAt(at(15, 10, 0));
     await container
         .read(databaseProvider)
-        .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 14), 'e02', 1);
+        .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 14), 'e01', 1);
     await pumpEventQueue();
 
     expect(container.read(currentAzkarSetProvider), AzkarSet.morning);

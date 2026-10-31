@@ -92,8 +92,9 @@ void main() {
     final handle = tester.ensureSemantics();
     await pumpReader(tester, layout: QuranLayout.translation);
 
-    expect(ayahNode('Al-Fatiha · Ayah 1', translation(1)), findsOne);
-    tester.semantics.tap(ayahNode('Al-Fatiha · Ayah 2', translation(2)));
+    /// the page above the cells reads its ayahs too
+    expect(ayahNode('Al-Fatiha · Ayah 1', translation(1)), findsExactly(2));
+    tester.semantics.tap(ayahNode('Al-Fatiha · Ayah 2', translation(2)).first);
     await tester.pumpAndSettle();
     expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 2));
     await unmount(tester);

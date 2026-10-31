@@ -128,9 +128,16 @@ class ReaderSheet extends StatelessWidget {
         ignoring: open.value < .5,
         child: reduce
             ? CustomOpacity(opacity: open.value.clamp(0.0, 1.0), child: child)
-            : FractionalTranslation(translation: Offset(0, 1 - open.value), child: child),
+            /// below the screen it isn't painted, it would be with every frame of the page. not
+            /// Offstage, the reader measures the sheet before it moves
+            : Opacity(
+                opacity: open.value <= 0 ? 0 : 1,
+                child: FractionalTranslation(translation: Offset(0, 1 - open.value), child: child),
+              ),
       ),
-      child: sheet,
+
+      /// so a slide only moves its layer, nothing in the sheet paints again
+      child: RepaintBoundary(child: sheet),
     );
   }
 }

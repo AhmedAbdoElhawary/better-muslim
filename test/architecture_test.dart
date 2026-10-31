@@ -21,8 +21,8 @@ const _adhanSky = 'lib/features/notifications/presentation/view/widgets/adhan_sk
 /// the app root copies the data once, nothing below it rebuilds for it
 const _appRoot = 'lib/core/app/app.dart';
 
-/// recitation audio is the one download the constitution allows (VIII)
-const _recitationFiles = 'lib/features/quran/data/recitation_files.dart';
+/// the one place that downloads content (VIII): recitation, tafsir, adhan and dua audio
+const _download = 'lib/core/network/download.dart';
 
 /// a layer may not import the layers listed for it
 const _forbiddenLayers = {
@@ -85,10 +85,10 @@ final _rules = [
     allowedIn: [_theme, _adhanSky],
   ),
 
-  /// buildModalBarrier is the route's own override
+  /// buildModalBarrier and buildPage are the route's own overrides
   _Rule(
     'widgets are classes, not build functions',
-    RegExp(r'\bWidget\s+_?build(?!ModalBarrier\b)[A-Z]\w*\('),
+    RegExp(r'\bWidget\s+_?build(?!(ModalBarrier|Page)\b)[A-Z]\w*\('),
   ),
   _Rule(
     'no shared_preferences, use drift or flutter_secure_storage',
@@ -101,7 +101,7 @@ final _rules = [
   _Rule(
     'no network in the app, it is offline-first (FR-025)',
     RegExp(r'package:(http|dio)/|\bHttpClient\('),
-    allowedIn: [_recitationFiles],
+    allowedIn: [_download],
   ),
   _Rule(
     'icons come from BmIcon, never Material or Cupertino icons',
@@ -149,6 +149,13 @@ void main() {
         .map((file) => file.path)
         .toList();
     _expectNone('no golden tests, comparing against the PNGs is too expensive', goldens);
+  });
+
+  /// a literal here ships prod without Sentry or sends debug runs to prod Sentry
+  test('the release and debug switches stay on kReleaseMode and kDebugMode', () {
+    final constants = File('lib/core/resources/constants.dart').readAsStringSync();
+    expect(constants, contains('const bool kCustomReleaseMode = kReleaseMode;'));
+    expect(constants, contains('const bool kCustomDebugMode = kDebugMode;'));
   });
 
   test('lib has only main, bootstrap, core and features', () {

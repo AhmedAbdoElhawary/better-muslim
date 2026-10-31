@@ -37,6 +37,7 @@ enum ThemeEnum {
   onSkyMuted,
   onSkyBright,
   skyScrim,
+  welcomeScrim,
   glass,
   glassHighlight,
   scrim,
@@ -93,7 +94,12 @@ enum ThemeEnum {
 
     /// bm_sky's numbers, the same on every theme and mode since the sky keeps its own palette
     ThemeEnum.onSkyBright => const Color(0xEBFFFFFF),
-    ThemeEnum.skyScrim => const Color(0x47000000),
+
+    /// bm_sky's 28% missed AA on the brightest drift, 38% is the least that passes
+    ThemeEnum.skyScrim => const Color(0x60000000),
+
+    /// the welcome's text block stays AA on every sky, the lightest needs 52%
+    ThemeEnum.welcomeScrim => const Color(0x85000000),
     ThemeEnum.glass => const Color(0x6607100D),
     ThemeEnum.glassHighlight => const Color(0x1AFFFFFF),
 
@@ -123,6 +129,11 @@ enum ThemeEnum {
     ThemeEnum.shareSky2 => bmShareSky2,
     ThemeEnum.shareSky3 => bmShareSky3,
   };
+}
+
+/// a theme that isn't the context's yet, like the reader's before it opens
+extension ThemeDataColor on ThemeData {
+  Color getColor(ThemeEnum color) => color.resolve(extension<BmColors>()!.p);
 }
 
 extension ThemeExtension on BuildContext {
@@ -155,8 +166,13 @@ extension BmThemeModeName on BmThemeMode {
 }
 
 abstract final class AppTheme {
-  static ThemeData light(BmThemeId id) => _build(bmThemes[id]!.light, Brightness.light);
-  static ThemeData dark(BmThemeId id) => _build(bmThemes[id]!.dark, Brightness.dark);
+  /// one per palette, a new ThemeData is never == so AnimatedTheme fades again on each rebuild
+  static final _themes = <Object, ThemeData>{};
+
+  static ThemeData light(BmThemeId id) =>
+      _themes[(id, Brightness.light)] ??= _build(bmThemes[id]!.light, Brightness.light);
+  static ThemeData dark(BmThemeId id) =>
+      _themes[(id, Brightness.dark)] ??= _build(bmThemes[id]!.dark, Brightness.dark);
 
   /// the reader's chrome takes the page's palette tinted by the app's theme (research R5).
   /// follow sky is resolved before, see PageColor.resolve
@@ -170,7 +186,7 @@ abstract final class AppTheme {
       PageColor.night => BmPagePalette.night,
       PageColor.navy => BmPagePalette.navy,
     };
-    return color.dark
+    return _themes[(color, id)] ??= color.dark
         ? _build(BmPagePalette.tint(base, theme.dark), Brightness.dark)
         : _build(BmPagePalette.tint(base, theme.light), Brightness.light);
   }

@@ -85,6 +85,47 @@ List<Rect> washRects(
   return rects;
 }
 
+/// a mushaf larger than print: the page's words flow into lines as wide as width, in order. a surah
+/// name and the basmallah keep their own lines, the last line of a run is centered like print
+MushafPage reflowMushaf(
+  MushafPage page, {
+  required List<List<double>> widths,
+  required double width,
+  required double gap,
+}) {
+  final lines = <MushafLine>[];
+  var words = <MushafWord>[];
+  var used = 0.0;
+  void flush({required bool last}) {
+    if (words.isNotEmpty) {
+      lines.add(MushafLine(type: MushafLineType.ayah, centered: last, words: words));
+    }
+    words = [];
+    used = 0;
+  }
+
+  for (var i = 0; i < page.lines.length; i++) {
+    final line = page.lines[i];
+    if (line.type != MushafLineType.ayah) {
+      flush(last: true);
+      lines.add(line);
+      continue;
+    }
+    for (var j = 0; j < line.words.length; j++) {
+      final next = words.isEmpty ? widths[i][j] : used + gap + widths[i][j];
+      if (words.isNotEmpty && next > width) {
+        flush(last: false);
+        used = widths[i][j];
+      } else {
+        used = next;
+      }
+      words.add(line.words[j]);
+    }
+  }
+  flush(last: true);
+  return MushafPage(number: page.number, lines: lines);
+}
+
 /// how far the page goes up so the ayah stays gap above the sheet, never down
 double ayahLift({required double bottom, required double sheetTop, required double gap}) =>
     math.max(0, bottom + gap - sheetTop);

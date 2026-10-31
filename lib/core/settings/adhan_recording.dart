@@ -1,56 +1,82 @@
+import 'package:better_muslim/core/audio/adhan_files.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 
-const _full = 'assets/audio/adhan_makkah.m4a';
-const _fajrFull = 'assets/audio/adhan_makkah_fajr.m4a';
-const _clip = 'adhan_makkah_clip';
-const _fajrClip = 'adhan_makkah_fajr_clip';
+const _fajrFull = 'assets/audio/adhan_fajr.m4a';
+const _fajrClip = 'adhan_fajr_clip';
 
-// TODO(ahmed): each recording needs its own licensed files, adhan_{name}.m4a and adhan_{name}_fajr.m4a in assets/audio/, adhan_{name}_clip and adhan_{name}_fajr_clip (.caf in ios/Runner/Sounds/, .m4a in android res/raw/, 30 s or less). until then all six play the makkah placeholders.
+/// madinah ships in the app, the others are downloaded once. fajr always plays the one fajr
+/// recording, an adhan without "as-salatu khayrun min an-nawm" is wrong at fajr
 enum AdhanRecording {
-  makkah(
-    nameKey: StringsManager.recordingMakkah,
-    subtitleKey: StringsManager.adhanOfMakkah,
-    lengthLabel: '3:52',
-    full: _full,
-    fajrFull: _fajrFull,
-    clip: _clip,
-    fajrClip: _fajrClip,
+  madinah(
+    file: 'adhan_madinah',
+    nameKey: StringsManager.recordingMadinah,
+    subtitleKey: StringsManager.adhanOfMadinah,
+    lengthLabel: '3:06',
   ),
-  madinah(nameKey: StringsManager.recordingMadinah, lengthLabel: '4:10'),
-  alAqsa(nameKey: StringsManager.recordingAlAqsa, lengthLabel: '3:31'),
-  cairo(nameKey: StringsManager.recordingCairo, lengthLabel: '3:44'),
-  istanbul(nameKey: StringsManager.recordingIstanbul, lengthLabel: '4:02'),
-  takbir(nameKey: StringsManager.recordingTakbir, lengthLabel: '0:12');
+  aaqibAzeez(
+    file: 'adhan_aaqib_azeez',
+    nameKey: StringsManager.recordingAaqibAzeez,
+    lengthLabel: '1:27',
+    sha256: 'c0f5a75479a48c76b861218de649e36fe73a6a8dc0914f270a5ea07dfe1114b9',
+    clipSha256: '5b99fa9bbe489e1cec5508fd8017a44330e7c8c03a24a332d388b356ecdbe442',
+  ),
+  andrewler(
+    file: 'adhan_andrewler',
+    nameKey: StringsManager.recordingAndrewler,
+    lengthLabel: '2:38',
+    sha256: '7479c5548f5c434c46055082479f8e656a8af21167de90d169fdc70ba75bc853',
+    clipSha256: '67c8153a5b2e88bf1e1628cf1a00e06d532ed75adc58dd7726a3f1ebb0a88f42',
+  ),
+  synagda(
+    file: 'adhan_synagda',
+    nameKey: StringsManager.recordingSynagda,
+    lengthLabel: '2:34',
+    sha256: 'b394a49124d737472785f1d6e7ae24ea91673d1b34a223520af07a35de1ea0ce',
+    clipSha256: '593ca85247b96bbfc23137ac9662bf28a6287da7a17d88ddb6401a0706805bb0',
+  );
 
   const AdhanRecording({
+    required this.file,
     required this.nameKey,
     required this.lengthLabel,
     String? subtitleKey,
-    this.full = _full,
-    this.fajrFull = _fajrFull,
-    this.clip = _clip,
-    this.fajrClip = _fajrClip,
+    this.sha256,
+    this.clipSha256,
   }) : subtitleKey = subtitleKey ?? nameKey;
 
+  /// the file name without its extension, the same in the app, the release and the phone
+  final String file;
   final String nameKey;
 
   /// the adhan screen's line under the prayer
   final String subtitleKey;
 
-  /// the brand board's length for the sheet, the adhan screen reads the file's own
+  /// the sheet's length, the adhan screen reads the file's own
   final String lengthLabel;
-  final String full;
-  final String fajrFull;
 
-  /// 30 s or less, ios plays it as the notification sound. a .caf in ios/Runner/Sounds/ and a
-  /// res/raw file on android, both without the extension here
-  final String clip;
-  final String fajrClip;
+  /// null for madinah, it ships in the app
+  final String? sha256;
 
-  bool get isShort => this == takbir;
+  /// the ios notification sound, android has no folder a downloaded channel sound plays from
+  final String? clipSha256;
 
-  String fullAsset(Prayer prayer) => prayer == Prayer.fajr ? fajrFull : full;
+  bool get isBundled => sha256 == null;
 
-  String clipOf(Prayer prayer) => prayer == Prayer.fajr ? fajrClip : clip;
+  String subtitleOf(Prayer prayer) =>
+      prayer == Prayer.fajr ? StringsManager.adhanOfFajr : subtitleKey;
+
+  String lengthOf(Prayer prayer) => prayer == Prayer.fajr ? '4:02' : lengthLabel;
+
+  /// a flutter asset, or the downloaded file's path
+  String fullAsset(Prayer prayer) {
+    if (prayer == Prayer.fajr) return _fajrFull;
+    return isBundled ? 'assets/audio/$file.m4a' : AdhanFiles.pathOf(this);
+  }
+
+  /// 30 s or less, without the extension. a .caf in ios/Runner/Sounds/ or Library/Sounds/
+  String clipOf(Prayer prayer) => prayer == Prayer.fajr ? _fajrClip : '${file}_clip';
+
+  /// the res/raw clip, a downloaded recording's isn't there
+  String androidClipOf(Prayer prayer) => isBundled ? clipOf(prayer) : madinah.clipOf(prayer);
 }

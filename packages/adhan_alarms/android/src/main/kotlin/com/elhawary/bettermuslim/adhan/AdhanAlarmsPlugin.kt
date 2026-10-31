@@ -95,6 +95,7 @@ class AdhanAlarmsPlugin :
                 result.success(null)
             }
             "length" -> result.success(AdhanService.length(context, call.arguments as String))
+            "canSound" -> result.success(AdhanAlarms.canSound(context))
             "dismiss" -> {
                 NotificationManagerCompat.from(context).cancel(call.arguments as Int)
                 result.success(null)
