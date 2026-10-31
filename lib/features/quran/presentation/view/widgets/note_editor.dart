@@ -41,7 +41,7 @@ class _NoteEditor extends ConsumerStatefulWidget {
 class _NoteEditorState extends ConsumerState<_NoteEditor> {
   late final Note? _note = ref.read(noteProvider(widget.ayah));
   late var _text = _note?.text ?? '';
-  late var _highlight = _note?.highlight ?? false;
+  late var _highlight = _note?.highlight ?? true;
 
   Future<void> _save() async {
     if (_note case final note? when _text.trim().isEmpty && !_highlight) return _delete(note);
@@ -167,6 +167,10 @@ class NoteCard extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final (written, highlighted) = ref.watch(
+      noteProvider(note.ayah)
+          .select((note) => (note?.text.isNotEmpty ?? false, note?.highlight ?? false)),
+    );
     return Semantics(
       button: true,
       child: GestureDetector(
@@ -177,7 +181,12 @@ class NoteCard extends ConsumerWidget {
           decoration: BoxDecoration(
             color: context.getColor(ThemeEnum.surface),
             borderRadius: BorderRadius.circular(radius.r),
-            boxShadow: [BoxShadow(color: context.getColor(ThemeEnum.outline), spreadRadius: 1)],
+            boxShadow: [
+              BoxShadow(
+                color: context.getColor(highlighted ? ThemeEnum.glow : ThemeEnum.outline),
+                spreadRadius: 1,
+              ),
+            ],
           ),
           child: SymmetricPadding(
             horizontal: SpaceManager.noteCardSide,

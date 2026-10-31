@@ -8,7 +8,7 @@ class Note {
     required this.ayah,
     required this.text,
     required this.updatedAt,
-    this.highlight = false,
+    this.highlight = true,
   });
 
   final AyahKey ayah;
