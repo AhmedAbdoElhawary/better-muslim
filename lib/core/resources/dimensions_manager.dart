@@ -216,7 +216,6 @@ abstract final class SpaceManager {
   static const double welcomeTextSide = 24;
   static const double welcomeButtonsSide = 20;
   static const double welcomeButtonsBottom = 46;
-  static const double welcomeButtonGap = 8;
 
   /// around the sun's rest spot, so a thumb that lands a little off still grabs it
   static const double welcomeGrabMargin = 22;
@@ -283,6 +282,7 @@ abstract final class SpaceManager {
   static const double ayahWashV = 5;
   static const double ayahWashH = 2;
   static const double ayahMarkerGap = 2;
+  static const double ayahRibbonGap = 6;
   static const double cartoucheNameTop = 3;
   static const double mushafNumberTop = 2;
 
@@ -292,9 +292,6 @@ abstract final class SpaceManager {
   /// the selected ayah stays this far above the sheet
   static const double ayahLift = 24;
   static const double ribbonLeft = 44;
-
-  /// between the margin ribbons, the fore-edge and the frame
-  static const double marginRibbonGap = 2;
 
   /// the page as a card under the controls (4.21), the next page peeks this far from it
   static const double pageCardLift = 24;
@@ -686,9 +683,9 @@ abstract final class SizeManager {
   static const double ribbonShadowY = 2;
   static const double ribbonShadowBlur = 6;
 
-  /// a bookmarked ayah's ribbon in the page margin, beside its last line
-  static const double marginRibbonW = 6;
-  static const double marginRibbonH = 18;
+  /// a bookmarked ayah's ribbon in the line, between its last word and its marker
+  static const double ayahRibbonW = 7;
+  static const double ayahRibbonH = 14;
 
   /// K.STAR's stroke on the page number and the surah rows, the arch's two lines, the marker's
   static const double starStroke = .9;
