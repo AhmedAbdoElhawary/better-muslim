@@ -24,6 +24,7 @@ import 'package:better_muslim/features/quran/domain/category.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_menu.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
@@ -116,20 +117,22 @@ class _Bookmarks extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _LastReadRow(),
-        for (final category in categories)
-          if (bookmarks.where((bookmark) => bookmark.category == category.id).toList()
-              case final mine when mine.isNotEmpty) ...[
-            const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
-            _CategoryHeader(category, key: ObjectKey(category)),
-            for (final bookmark in mine) ...[
-              const RSizedBox.vertical(SpaceManager.savedGap),
-              _BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
-            ],
+        for (final category in categories) ...[
+          const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
+          _CategoryHeader(category, key: ObjectKey(category)),
+          for (final bookmark in bookmarks.where(
+            (bookmark) => bookmark.category == category.id,
+          )) ...[
+            const RSizedBox.vertical(SpaceManager.savedGap),
+            _BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
           ],
+        ],
         if (bookmarks.isEmpty) ...[
           const RSizedBox.vertical(SpaceManager.savedGap),
           const EmptyState(title: StringsManager.noBookmarks, body: StringsManager.noBookmarksBody),
         ],
+        const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
+        const _NewCategory(),
         if (note != null) ...[
           const RSizedBox.vertical(SpaceManager.recentNoteTop),
           const StartPadding(
@@ -149,7 +152,7 @@ class _Bookmarks extends ConsumerWidget {
   }
 }
 
-/// the category's dot and name, like the recent note's label
+/// the category's dot and name, like the recent note's label. a tap renames or recolors it
 class _CategoryHeader extends StatelessWidget {
   const _CategoryHeader(this.category, {super.key});
 
@@ -157,8 +160,8 @@ class _CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StartPadding(
-      padding: SpaceManager.s1,
+    return _HeaderButton(
+      onTap: () => showCategorySheet(context, category: category),
       child: Row(
         children: [
           DecoratedBox(
@@ -177,7 +180,61 @@ class _CategoryHeader extends StatelessWidget {
               color: ThemeEnum.text2,
             ),
           ),
+          BmIcon.ui(BmUiIcon.note, size: 16),
         ],
+      ),
+    );
+  }
+}
+
+/// the picker's New category, here so a category can be made before its first bookmark
+class _NewCategory extends StatelessWidget {
+  const _NewCategory();
+
+  @override
+  Widget build(BuildContext context) {
+    return _HeaderButton(
+      onTap: () => showCategorySheet(context),
+      child: Row(
+        children: [
+          BmIcon.ui(
+            BmUiIcon.plus,
+            size: SizeManager.iconInline.r,
+            color: context.getColor(ThemeEnum.primary),
+          ),
+          const RSizedBox.horizontal(SpaceManager.s2),
+          const Expanded(
+            child: MediumText(
+              StringsManager.newCategory,
+              fontSize: FontSizeManager.sectionLabel,
+              color: ThemeEnum.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// a header line with the 44 pt hit target
+class _HeaderButton extends StatelessWidget {
+  const _HeaderButton({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          constraints: BoxConstraints(minHeight: SizeManager.hit.r),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(RadiusManager.sm.r)),
+          child: StartPadding(padding: SpaceManager.s1, child: child),
+        ),
       ),
     );
   }
