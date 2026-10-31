@@ -13,7 +13,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/motion/loader_gate.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
@@ -202,7 +202,7 @@ class _Player extends ConsumerWidget {
   }
 }
 
-/// the primary circle, play or pause, the 16 pt oil drop in it while a file loads
+/// the primary circle, play or pause, the 16 pt star in it while a file loads
 class PlayButton extends ConsumerWidget {
   const PlayButton({
     this.size = SizeManager.hit,
@@ -231,7 +231,7 @@ class PlayButton extends ConsumerWidget {
           dimension: size,
           child: BmLoaderGate(
             loading: status == RecitationStatus.loading,
-            loader: const Center(child: BmOilDrop(size: SizeManager.oilDropSmall)),
+            loader: const Center(child: BmStarLoader(size: SizeManager.loaderSmall)),
             child: Center(
               child: BmIcon.ui(
                 playing ? BmUiIcon.pause : BmUiIcon.play,

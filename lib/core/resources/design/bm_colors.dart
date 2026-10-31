@@ -199,11 +199,6 @@ class BmPageColors {
   );
 }
 
-/// the oil drop loader's gradient, the same in every theme (11 Motion v2)
-const bmOilLight = Color(0xFFD9BE86);
-const bmOilDark = Color(0xFF8C7444);
-const bmOilRipple = Color(0xFFF1E3C4);
-
 /// 4.30's emerald and sky backgrounds for a shared ayah, the same in every theme
 const bmShareEmerald = Color(0xFF10382E);
 const bmShareSky1 = Color(0xFF14121C);
@@ -860,6 +855,7 @@ final Map<BmThemeId, BmThemeDef> bmThemes = {
       accent: const Color(0xFF9C4F36),
       text: const Color(0xFF2B2116),
       text2: const Color(0xFF6F6050),
+
       /// the design's sunlit sky and dark #2B2116 on it fail AA under the light text and the dark
       /// scrims every other sky has, so light mode keeps the dark mode's sky like the other themes
       sky1: const Color(0xFF120D08),

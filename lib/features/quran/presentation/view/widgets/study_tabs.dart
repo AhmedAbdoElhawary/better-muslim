@@ -11,7 +11,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
@@ -267,7 +267,7 @@ class _Downloading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        BmOilDrop(size: SizeManager.oilDropInline, progress: progress),
+        BmStarLoader(size: SizeManager.loaderInline, progress: progress),
         const RSizedBox.horizontal(SpaceManager.s2),
         const Expanded(child: RegularText(StringsManager.downloading, color: ThemeEnum.text2)),
         BmButton.text(StringsManager.cancel, onPressed: onCancel),

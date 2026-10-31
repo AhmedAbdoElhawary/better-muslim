@@ -54,9 +54,6 @@ enum ThemeEnum {
   pageHidden,
   gutter,
   pageGlass,
-  oilLight,
-  oilDark,
-  oilRipple,
   shareEmerald,
   shareSky1,
   shareSky2,
@@ -132,9 +129,6 @@ enum ThemeEnum {
 
     /// GLASS in _gen/quran.js, the reader's bars over the page
     ThemeEnum.pageGlass => palette.surface.withValues(alpha: .78),
-    ThemeEnum.oilLight => bmOilLight,
-    ThemeEnum.oilDark => bmOilDark,
-    ThemeEnum.oilRipple => bmOilRipple,
     ThemeEnum.shareEmerald => bmShareEmerald,
     ThemeEnum.shareSky1 => bmShareSky1,
     ThemeEnum.shareSky2 => bmShareSky2,

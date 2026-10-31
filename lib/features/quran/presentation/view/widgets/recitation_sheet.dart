@@ -15,7 +15,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/picker_row.dart';
@@ -150,7 +150,7 @@ class _Download extends ConsumerWidget {
         child: RSizedBox.square(
           dimension: SizeManager.hit,
           child: Center(
-            child: BmOilDrop(size: SizeManager.oilDropSmall, progress: download.progress),
+            child: BmStarLoader(size: SizeManager.loaderSmall, progress: download.progress),
           ),
         ),
       );
