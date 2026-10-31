@@ -33,30 +33,32 @@ class DownloadsPage extends ConsumerWidget {
         child: Column(
           children: [
             const CompactAppBar(StringsManager.downloads, heroTag: Routes.downloads),
-            Expanded(
-              child: downloads == null
-                  ? const SizedBox.shrink()
-                  : downloads.isEmpty
-                  ? const EmptyState(
-                      title: StringsManager.noDownloads,
-                      body: StringsManager.noDownloadsBody,
-                    )
-                  : ListView(
-                      padding: REdgeInsets.all(SpaceManager.screen),
-                      children: [
-                        for (final MapEntry(key: reciter, value: surahs) in downloads.entries) ...[
-                          GroupedSection(
-                            label: reciter.short,
-                            children: [
-                              for (final (:surah, :bytes) in surahs)
-                                _DownloadRow(reciter: reciter, surah: surah, bytes: bytes),
-                            ],
-                          ),
-                          const RSizedBox.vertical(SpaceManager.sectionGap),
+            if (downloads == null || downloads.isEmpty) ...[
+              const Spacer(),
+              const EmptyState(
+                title: StringsManager.noDownloads,
+                body: StringsManager.noDownloadsBody,
+              ),
+              const Spacer(),
+            ] else ...[
+              Expanded(
+                child: ListView(
+                  padding: REdgeInsets.all(SpaceManager.screen),
+                  children: [
+                    for (final MapEntry(key: reciter, value: surahs) in downloads.entries) ...[
+                      GroupedSection(
+                        label: reciter.short,
+                        children: [
+                          for (final (:surah, :bytes) in surahs)
+                            _DownloadRow(reciter: reciter, surah: surah, bytes: bytes),
                         ],
-                      ],
-                    ),
-            ),
+                      ),
+                      const RSizedBox.vertical(SpaceManager.sectionGap),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
