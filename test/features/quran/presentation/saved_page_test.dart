@@ -105,7 +105,7 @@ void main() {
     }
     expect(find.text('Highlights'), findsOneWidget, reason: 'the third tab');
     expect(find.text('Study'), findsOneWidget);
-    expect(find.text('Empty'), findsNothing, reason: 'no bookmarks, no header');
+    expect(find.text('Empty'), findsOneWidget, reason: 'its header shows with no bookmarks');
 
     /// "Bookmarks" is the tab and the default's header
     final header = tester.getTopLeft(find.text('Bookmarks').last).dy;
@@ -113,6 +113,8 @@ void main() {
     expect(header, lessThan(topOf(tester, 'Morning wird')));
     expect(topOf(tester, 'Morning wird'), lessThan(topOf(tester, 'Study')));
     expect(topOf(tester, 'Study'), lessThan(topOf(tester, 'Reflect')));
+    expect(topOf(tester, 'Reflect'), lessThan(topOf(tester, 'Empty')));
+    expect(topOf(tester, 'Empty'), lessThan(topOf(tester, 'New category')));
     final ribbons = tester.widgetList<RibbonShape>(find.byType(RibbonShape));
     expect(ribbons.map((ribbon) => ribbon.color), [
       ThemeEnum.text2,
@@ -168,6 +170,49 @@ void main() {
 
     expect(find.text('Kursi'), findsOneWidget);
     expect(find.text('Al-Fatiha 1:3 · Page 1'), findsNWidgets(2), reason: 'moved to last read');
+    await unmount(tester);
+  });
+
+  testWidgets('saved makes a category and its header renames, recolors and deletes it', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await seed(tester);
+    await open(tester, Routes.quranSaved);
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(BottomSheet), matching: finder);
+
+    await tester.ensureVisible(find.text('New category'));
+    await tapAndStore(tester, find.text('New category'));
+    expect(inSheet(find.text('Delete category')), findsNothing);
+    await tester.enterText(inSheet(find.byType(TextField)), 'Night');
+    await tapAndStore(tester, inSheet(find.text('Violet')));
+    await tapAndStore(tester, inSheet(find.text('Save')));
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Night'), findsOneWidget, reason: 'shows before its first bookmark');
+
+    /// "Bookmarks" is filled in and can't be deleted
+    await tapAndStore(tester, find.text('Bookmarks').last);
+    expect(inSheet(find.text('Edit category')), findsOneWidget);
+    expect(inSheet(find.text('Delete category')), findsNothing);
+    await tester.enterText(inSheet(find.byType(TextField)), 'Wird');
+    await tapAndStore(tester, inSheet(find.text('Blue')));
+    await tapAndStore(tester, inSheet(find.text('Save')));
+    expect(find.text('Wird'), findsOneWidget);
+
+    await tapAndStore(tester, find.text('Study'));
+    await tapAndStore(tester, inSheet(find.text('Delete category')));
+    await tapAndStore(tester, find.text('Delete'));
+    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.text('Study'), findsNothing);
+    expect(find.text('Reflect'), findsNothing, reason: 'its bookmarks went with it');
+
+    final categories = await tester.runAsync(() => storeOf(tester).watchCategories().first);
+    expect(categories!.map((category) => (category.name, category.color)), [
+      ('Wird', CategoryColor.blue),
+      ('Empty', CategoryColor.teal),
+      ('Night', CategoryColor.violet),
+    ]);
     await unmount(tester);
   });
 
@@ -243,7 +288,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a bookmarked ayah has its margin ribbon in its color, others have none', (
+  testWidgets('a bookmarked ayah has its ribbon before its marker in its color, others have none', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -268,9 +313,14 @@ void main() {
     final four = page().ribbonRect(const AyahKey(1, 4))!;
     expect(page().ribbonRect(const AyahKey(1, 5)), isNull);
     expect(three.overlaps(four), isFalse, reason: 'never on top of each other');
-    for (final rect in [three, four]) {
-      expect(rect.right, lessThan(page().washBounds(const AyahKey(1, 5))!.left));
-      expect(rect.left, greaterThan(0));
+    for (final (key, rect) in [(const AyahKey(1, 3), three), (const AyahKey(1, 4), four)]) {
+      final wash = page().washBounds(key)!;
+      expect(wash.contains(rect.center), isTrue, reason: 'inside its own ayah, in the line');
+      expect(
+        page().washBounds(AyahKey(1, key.ayah + 1))!.contains(rect.center),
+        isFalse,
+        reason: 'before its marker, not past it into the next ayah',
+      );
     }
     final context = tester.element(find.byType(MushafPageView).first);
     expect(page().ribbons, {
