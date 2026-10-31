@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:better_muslim/core/audio/clip_player.dart';
+import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
+import 'package:better_muslim/features/duas/model/dua_clips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final duaPlayerProvider = NotifierProvider.autoDispose<DuaPlayer, String?>(DuaPlayer.new);
@@ -27,7 +29,6 @@ class DuaPlayer extends Notifier<String?> {
     return null;
   }
 
-  /// a dua without a clip or ayahs does nothing until the clips are in the app
   Future<bool> toggle(Dua dua) async {
     if (!dua.listenable) return false;
 
@@ -50,7 +51,8 @@ class DuaPlayer extends Notifier<String?> {
     final List<String> clips;
     try {
       clips = await _clips(dua);
-    } on RecitationException {
+    } on Exception catch (error) {
+      if (error is! RecitationException && error is! DownloadException) rethrow;
       if (ref.mounted && state == dua.id) state = null;
       return false;
     }
@@ -62,9 +64,9 @@ class DuaPlayer extends Notifier<String?> {
     return true;
   }
 
-  /// the ayahs in the reciter picked for the quran, from the phone when already there
+  /// the dua's clip or the ayahs in the reciter picked for the quran, from the phone when already there
   Future<List<String>> _clips(Dua dua) async {
-    if (dua.audio case final audio?) return [audio];
+    if (dua.audio != null) return [await ref.read(duaClipsProvider).path(dua)];
     final files = ref.read(recitationFilesProvider);
     final reciter = ref.read(settingsProvider).value?.reciter ?? Reciter.alafasy;
     return [for (final key in dua.ayahs) (await files.file(reciter, key)).path];
