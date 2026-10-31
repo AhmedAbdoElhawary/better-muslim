@@ -12,6 +12,8 @@ struct PrayerCountdownAttributes: ActivityAttributes {
     var atTime: String
     var barFromLabel: String?
     var nameTime: String
+    /// "Maghrib · now", once the prayer time is past and ios before 26 can't start the next
+    var nameNow: String
     var methodLine: String
     var reminder: String?
     var now: String

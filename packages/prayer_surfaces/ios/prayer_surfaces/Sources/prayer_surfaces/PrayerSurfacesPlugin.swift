@@ -4,10 +4,26 @@ import WidgetKit
 
 /// contracts/surfaces-channel.md. a plugin, so the background engines reach the surfaces too
 public class PrayerSurfacesPlugin: NSObject, FlutterPlugin {
+  /// every engine registers the plugin, the app's leaving and coming back is watched once
+  private static var watching = false
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
       name: "better_muslim/surfaces", binaryMessenger: registrar.messenger())
     registrar.addMethodCallDelegate(PrayerSurfacesPlugin(), channel: channel)
+    guard #available(iOS 16.2, *), !watching else { return }
+    watching = true
+    let center = NotificationCenter.default
+    center.addObserver(
+      forName: UIApplication.willResignActiveNotification, object: nil, queue: .main
+    ) { _ in
+      if let file = CountdownFile.read() { Countdowns.start(file) }
+    }
+    center.addObserver(
+      forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main
+    ) { _ in
+      Task { await Countdowns.endAll() }
+    }
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -29,25 +45,15 @@ public class PrayerSurfacesPlugin: NSObject, FlutterPlugin {
         failure = FlutterError(
           code: "surfaces_failed", message: "\((error as NSError).code)", details: nil)
       }
-      /// whether or not the file changed, an activity may have passed its prayer time since
+      /// whether or not the file changed, a running one may need the new marks or colors
       guard #available(iOS 16.2, *), let file = CountdownFile.of(json) else {
         result(failure)
         return
       }
-      let active = UIApplication.shared.applicationState == .active
       Task { @MainActor in
-        await Countdowns.sync(file, appActive: active)
+        await Countdowns.sync(file)
         result(failure)
       }
-    case "startNow":
-      guard #available(iOS 16.2, *),
-        let json = try? String(contentsOf: SurfaceFile.url(), encoding: .utf8),
-        let file = CountdownFile.of(json)
-      else {
-        result(false)
-        return
-      }
-      result(Countdowns.startNow(file))
     default:
       result(FlutterMethodNotImplemented)
     }

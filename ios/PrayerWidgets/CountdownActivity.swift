@@ -2,8 +2,9 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// 5.3 on the lock screen and 5.4 in the dynamic island, counted by the system with no server
-/// (research R7)
+/// 5.3 on the lock screen and 5.4 in the dynamic island while the app is off screen, counted by
+/// the system with no server (research R7). the bar has no sun on it, ios draws a timer's progress
+/// itself and nothing can ride on it
 @available(iOS 16.2, *)
 struct CountdownActivity: Widget {
   var body: some WidgetConfiguration {
@@ -20,10 +21,12 @@ struct CountdownActivity: Widget {
       let palette = SurfacePalette(state.colors)
       return DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
-          ExpandedHeader(state: state).environment(\.palette, palette)
+          ExpandedHeader(state: state, stale: stale).environment(\.palette, palette)
         }
         DynamicIslandExpandedRegion(.trailing) {
-          CountdownColumn(state: state, stale: stale, size: 26).environment(\.palette, palette)
+          if !stale {
+            CountdownColumn(state: state, stale: stale, size: 26).environment(\.palette, palette)
+          }
         }
         DynamicIslandExpandedRegion(.bottom) {
           ExpandedFooter(state: state, stale: stale).environment(\.palette, palette)
@@ -60,14 +63,15 @@ private struct CountdownCard: View {
             .foregroundColor(palette.label)
             .lineLimit(1)
             .accessibilitySortPriority(1)
-          Text(state.name)
+          /// past its time before ios 26 it waits for the app, honest about it
+          Text(stale ? state.nameNow : state.name)
             .font(fonts.display(24))
             .foregroundColor(.white)
             .lineLimit(1)
             .accessibilitySortPriority(4)
         }
         Spacer(minLength: 8)
-        CountdownColumn(state: state, stale: stale, size: 28)
+        if !stale { CountdownColumn(state: state, stale: stale, size: 28) }
       }
       BarWithLabels(state: state, stale: stale)
     }
@@ -81,6 +85,7 @@ private struct CountdownCard: View {
 private struct ExpandedHeader: View {
   @Environment(\.palette) private var palette
   let state: PrayerCountdownAttributes.ContentState
+  let stale: Bool
 
   var body: some View {
     let fonts = SurfaceFonts(arabic: state.language == "ar")
@@ -91,7 +96,7 @@ private struct ExpandedHeader: View {
           .font(fonts.body(12.5))
           .foregroundColor(palette.label)
           .lineLimit(1)
-        Text(state.name)
+        Text(stale ? state.nameNow : state.name)
           .font(fonts.display(24))
           .foregroundColor(.white)
           .lineLimit(1)

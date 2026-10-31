@@ -13,7 +13,6 @@ struct SurfaceData: Decodable {
   let until: Double
   let texts: Texts
   let entries: [Entry]
-  let countdowns: [Window]
 
   struct Texts: Decodable {
     let noPlace: String
@@ -61,12 +60,6 @@ struct SurfaceData: Decodable {
     let time: String
     let logged: Bool
     let past: Bool
-  }
-
-  struct Window: Decodable {
-    let start: Double
-    let end: Double
-    let entry: Int
   }
 
   /// the app group container the app writes into

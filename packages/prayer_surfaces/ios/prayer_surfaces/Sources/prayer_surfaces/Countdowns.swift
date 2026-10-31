@@ -18,15 +18,10 @@ struct CountdownFile: Decodable {
     let name: String
     let atTime: String
     let nameTime: String
+    let nameNow: String
     let barFrom: Double?
     let barFromLabel: String?
     let reminder: String?
-  }
-
-  struct Window: Decodable {
-    let start: Double
-    let end: Double
-    let entry: Int
   }
 
   struct Colors: Decodable {
@@ -40,32 +35,75 @@ struct CountdownFile: Decodable {
   let eastern: Bool
   let texts: Texts
   let entries: [Entry]
-  let countdowns: [Window]
 
   static func of(_ json: String) -> CountdownFile? {
     try? JSONDecoder().decode(CountdownFile.self, from: Data(json.utf8))
   }
+
+  static func read() -> CountdownFile? {
+    guard let json = try? String(contentsOf: SurfaceFile.url(), encoding: .utf8) else { return nil }
+    return of(json)
+  }
 }
 
-/// the live activities kept in step with the file on every update (contracts/surfaces-channel.md
-/// "Sync", research R7)
+/// the live countdown while the app is off screen (contracts/surfaces-channel.md "Sync"). it starts
+/// as the app leaves and ends as it comes back
 @available(iOS 16.2, *)
 enum Countdowns {
-  /// "Start countdown now"'s prayer, kept until its time whatever the 2 hours
-  private static let startedKey = "prayer_surfaces.started"
+  /// ios keeps only a few at once, these cover about a day
+  private static let ahead = 4
 
-  static func sync(_ file: CountdownFile, appActive: Bool) async {
+  /// the app is still in front while it resigns, the last moment ios lets it start one. ios 26
+  /// schedules the next prayers too, each from the one before's time
+  static func start(_ file: CountdownFile) {
+    let now = Date()
+    guard file.place, file.countdown, ActivityAuthorizationInfo().areActivitiesEnabled,
+      let entry = file.entries.last(where: { Date(millis: $0.from) <= now }),
+      Date(millis: entry.at) > now
+    else { return }
+    let running = Set(live.map { key($0.attributes) })
+    if !running.contains(key(entry)) { _ = try? request(file, entry) }
+    guard #available(iOS 26.0, *) else { return }
+    var at = entry.at
+    for score in 1...ahead {
+      /// a prayer time is always an entry's start, the next prayer's entry
+      guard let next = file.entries.first(where: { $0.from >= at }), next.at > at else { break }
+      if !running.contains(key(next)) {
+        do {
+          _ = try schedule(file, next, at: Date(millis: at), relevance: Double(score))
+        } catch {
+          break
+        }
+      }
+      at = next.at
+    }
+  }
+
+  /// the app is on screen again
+  static func endAll() async {
+    for activity in live { await activity.end(nil, dismissalPolicy: .immediate) }
+  }
+
+  /// on every write: a mark, a new theme or text reaches the running ones, the switch or no place
+  /// ends them. one past its time stays as "Maghrib · now" until the app opens, or until ios 26's
+  /// next one is showing
+  static func sync(_ file: CountdownFile) async {
     let now = Date()
     let on = file.place && file.countdown
-    let started = UserDefaults.standard.string(forKey: startedKey)
-    let windows = file.countdowns.filter { Date(millis: $0.end) > now }
-    let wanted = Set(windows.map { key(file.entries[$0.entry]) } + [started].compactMap { $0 })
-
-    for activity in Activity<PrayerCountdownAttributes>.activities where activity.isLive {
-      let id = key(activity.attributes)
-      guard on, wanted.contains(id), let entry = file.entries.first(where: { key($0) == id }),
-        Date(millis: entry.at) > now
-      else {
+    let activities = live
+    let nextShowing = activities.contains {
+      $0.activityState == .active && $0.content.state.at > now
+    }
+    for activity in activities {
+      guard on else {
+        await activity.end(nil, dismissalPolicy: .immediate)
+        continue
+      }
+      if activity.content.state.at <= now {
+        if nextShowing { await activity.end(nil, dismissalPolicy: .immediate) }
+        continue
+      }
+      guard let entry = file.entries.first(where: { key($0) == key(activity.attributes) }) else {
         await activity.end(nil, dismissalPolicy: .immediate)
         continue
       }
@@ -75,41 +113,10 @@ enum Countdowns {
         await activity.update(ActivityContent(state: state, staleDate: Date(millis: entry.at)))
       }
     }
-    guard on else { return }
-
-    let running = Set(
-      Activity<PrayerCountdownAttributes>.activities.filter(\.isLive).map { key($0.attributes) })
-    for window in windows {
-      let entry = file.entries[window.entry]
-      if running.contains(key(entry)) { continue }
-      let start = Date(millis: window.start)
-      if start <= now {
-        /// before ios 26 a live activity starts only from the app in front
-        guard appActive, ActivityAuthorizationInfo().areActivitiesEnabled else { continue }
-        _ = try? request(file, entry)
-      } else if #available(iOS 26.0, *) {
-        do {
-          _ = try schedule(file, entry, at: start)
-        } catch {
-          /// the queue is full or ios said no, the next launch, top-up or mark tries again
-          break
-        }
-      } else {
-        break
-      }
-    }
   }
 
-  /// the next prayer's countdown from now, for the dev page. false when they're off or ios says no
-  static func startNow(_ file: CountdownFile) -> Bool {
-    let now = Date()
-    guard file.place, file.countdown, ActivityAuthorizationInfo().areActivitiesEnabled,
-      let entry = file.entries.last(where: { Date(millis: $0.from) <= now })
-    else { return false }
-    UserDefaults.standard.set(key(entry), forKey: startedKey)
-    let running = Activity<PrayerCountdownAttributes>.activities.filter(\.isLive)
-    if running.contains(where: { key($0.attributes) == key(entry) }) { return true }
-    return (try? request(file, entry)) != nil
+  private static var live: [Activity<PrayerCountdownAttributes>] {
+    Activity<PrayerCountdownAttributes>.activities.filter(\.isLive)
   }
 
   private static func request(_ file: CountdownFile, _ entry: CountdownFile.Entry) throws
@@ -121,14 +128,16 @@ enum Countdowns {
       pushType: nil)
   }
 
-  /// ios asks for an alert when a scheduled one starts, the silent file keeps fajr's quiet
+  /// ios asks for an alert when a scheduled one starts, the silent file keeps fajr's quiet. the
+  /// later one has the higher relevance, so the island shows it over the one now past
   @available(iOS 26.0, *)
-  private static func schedule(_ file: CountdownFile, _ entry: CountdownFile.Entry, at start: Date)
-    throws -> Activity<PrayerCountdownAttributes>
-  {
+  private static func schedule(
+    _ file: CountdownFile, _ entry: CountdownFile.Entry, at start: Date, relevance: Double
+  ) throws -> Activity<PrayerCountdownAttributes> {
     try Activity.request(
       attributes: PrayerCountdownAttributes(prayer: entry.prayer, day: entry.day),
-      content: ActivityContent(state: content(file, entry), staleDate: Date(millis: entry.at)),
+      content: ActivityContent(
+        state: content(file, entry), staleDate: Date(millis: entry.at), relevanceScore: relevance),
       pushType: nil,
       style: .standard,
       alertConfiguration: AlertConfiguration(
@@ -146,6 +155,7 @@ enum Countdowns {
       atTime: entry.atTime,
       barFromLabel: entry.barFromLabel,
       nameTime: entry.nameTime,
+      nameNow: entry.nameNow,
       methodLine: file.texts.methodLine,
       reminder: entry.reminder,
       now: file.texts.now,
