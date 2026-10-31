@@ -13,15 +13,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// the calendar, pin and sliders, the large title and "place · method", over the sky3 glow
+/// the adhan, pin and sliders, the large title and "place · method", over the sky3 glow
 class PrayerHeader extends StatelessWidget {
   const PrayerHeader({
-    required this.onCalendar,
+    required this.onAdhan,
     required this.onPin,
     required this.onSliders,
     super.key,
   });
-  final VoidCallback onCalendar;
+  final VoidCallback onAdhan;
   final VoidCallback onPin;
   final VoidCallback onSliders;
 
@@ -41,9 +41,9 @@ class PrayerHeader extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   _HeaderButton(
-                    icon: BmIconName.hijri,
-                    label: StringsManager.hijriCalendar,
-                    onTap: onCalendar,
+                    icon: BmIconName.adhan,
+                    label: StringsManager.adhanAndReminders,
+                    onTap: onAdhan,
                   ),
                   _HeaderButton(
                     icon: BmIconName.location,

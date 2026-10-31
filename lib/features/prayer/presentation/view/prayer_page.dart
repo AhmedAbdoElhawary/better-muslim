@@ -73,7 +73,7 @@ class _PrayerPageState extends ConsumerState<PrayerPage> {
           slivers: [
             SliverToBoxAdapter(
               child: PrayerHeader(
-                onCalendar: () => context.push(Routes.hijriCalendar),
+                onAdhan: () => context.push(Routes.adhanSettings),
                 onPin: () => showLocationSheet(context),
                 onSliders: () => showMethodSheet(context),
               ),
