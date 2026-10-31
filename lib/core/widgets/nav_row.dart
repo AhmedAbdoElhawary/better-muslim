@@ -27,6 +27,7 @@ class NavRow extends StatelessWidget {
     this.translateValue = true,
     this.toggled,
     this.mark,
+    this.trailing,
     this.onTap,
     this.heroTag,
     this.startFlex = 2,
@@ -53,6 +54,9 @@ class NavRow extends StatelessWidget {
 
   /// beside the value, like the calendar's prayer status
   final Widget? mark;
+
+  /// its own tap before the chevron, like a play button
+  final Widget? trailing;
 
   /// null draws the value with no chevron and no tap (Version)
   final VoidCallback? onTap;
@@ -90,6 +94,7 @@ class NavRow extends StatelessWidget {
             ),
           );
     final mark = this.mark;
+    final trailing = this.trailing;
     final valueText = mark == null || label == null
         ? label
         : Row(
@@ -154,6 +159,10 @@ class NavRow extends StatelessWidget {
                   if (!stacked && valueText != null) ...[
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
                     Expanded(flex: endFlex, child: valueText),
+                  ],
+                  if (trailing != null) ...[
+                    const RSizedBox.horizontal(SpaceManager.listRowGap),
+                    trailing,
                   ],
                   if (toggled != null) ...[
                     const RSizedBox.horizontal(SpaceManager.listRowGap),
