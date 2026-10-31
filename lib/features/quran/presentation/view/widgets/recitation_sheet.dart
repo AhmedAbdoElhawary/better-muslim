@@ -7,6 +7,7 @@ import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -438,7 +439,8 @@ class _Controls extends ConsumerWidget {
             ),
             _Control(
               label: StringsManager.back10,
-              onTap: () => move(() => recitation.seekBy(const Duration(seconds: -10))),
+              onTap: () =>
+                  move(() => recitation.seekBy(Duration(seconds: context.isRtl ? 10 : -10))),
               child: BmIcon.ui(
                 BmUiIcon.back_10,
                 size: SizeManager.recitationIcon.r,
@@ -448,7 +450,8 @@ class _Controls extends ConsumerWidget {
             const PlayButton(size: SizeManager.recitationPlay, icon: SizeManager.recitationIcon),
             _Control(
               label: StringsManager.forward10,
-              onTap: () => move(() => recitation.seekBy(const Duration(seconds: 10))),
+              onTap: () =>
+                  move(() => recitation.seekBy(Duration(seconds: context.isRtl ? -10 : 10))),
               child: BmIcon.ui(
                 BmUiIcon.forward_10,
                 size: SizeManager.recitationIcon.r,
