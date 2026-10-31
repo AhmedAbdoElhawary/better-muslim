@@ -63,8 +63,8 @@ From the spec to the code:
 9. More, Theme and Hijri calendar: every setting, the 8 themes with Follow sky, the calendar with its
    events and adjustment, the Adhan and reminders page, Reset prayer journey and Credits. **Done,
    waiting for my review.**
-10. Onboarding and backup: the sunrise first screen in liquid glass, the welcome, location,
-    notifications and theme steps, the backup file with Back up and Restore, the store reset notice.
+10. Onboarding: the sunrise first screen in liquid glass, the welcome, location, notifications and
+    theme steps. Backup and restore with the store reset notice was built here, then removed.
     **Done, waiting for my review.**
 11. Widgets and Live Activity: the iOS home widgets and lock screen accessories, the Android widget,
     the countdown before each prayer as a Live Activity with the Dynamic Island and as an Android
