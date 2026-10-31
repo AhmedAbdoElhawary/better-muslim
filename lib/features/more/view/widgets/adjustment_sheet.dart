@@ -32,8 +32,14 @@ extension AdjustmentFormat on BuildContext {
   });
 }
 
-Future<void> showAdjustmentSheet(BuildContext context) =>
-    showBmSheet(context, builder: (_) => const _AdjustmentSheet());
+Future<void> showAdjustmentSheet(BuildContext context) => showBmSheet(
+  context,
+  title: const SheetTitle(
+    StringsManager.hijriDateAdjustment,
+    subtitle: StringsManager.adjustmentBody,
+  ),
+  builder: (_) => const _AdjustmentSheet(),
+);
 
 /// a step from −2 to +2 shows today's hijri date at once, only save keeps it (FR-024)
 class _AdjustmentSheet extends ConsumerStatefulWidget {
@@ -63,11 +69,6 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SheetTitle(StringsManager.hijriDateAdjustment),
-            const HorizontalPadding(
-              padding: SpaceManager.s5,
-              child: RegularText(StringsManager.adjustmentBody, color: ThemeEnum.text2),
-            ),
             const RSizedBox.vertical(SpaceManager.s6),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
