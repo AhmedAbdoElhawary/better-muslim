@@ -219,6 +219,10 @@ Future<void> warmMushafPage(BuildContext context, WidgetRef ref, int number) asy
     family: (settings?.quranFont ?? QuranFont.kfgqpc).family,
     step: settings?.mushafSize ?? 0,
     ink: AppTheme.page(color, ref.read(themeIdProvider)).getColor(ThemeEnum.ink),
+    marked: {
+      for (final bookmark in ref.read(bookmarksProvider).value ?? const <Bookmark>[])
+        if (bookmark.ayah case final ayah? when bookmark.page == number) ayah,
+    },
 
     /// the reader fills the root navigator, in its transition too. a copy, in debug a size belongs
     /// to its render object and the page may not adopt it
@@ -445,8 +449,11 @@ class RenderMushafPage extends RenderBox {
   Map<AyahKey, Color> get ribbons => _ribbons;
   set ribbons(Map<AyahKey, Color> value) {
     if (mapEquals(value, _ribbons)) return;
+    final moved = !setEquals(value.keys.toSet(), _ribbons.keys.toSet());
     _ribbons = value;
-    markNeedsPaint();
+
+    /// the ribbon takes room in the line, a new color only repaints
+    moved ? _relayout() : markNeedsPaint();
   }
 
   AyahKey? _following;
@@ -538,6 +545,7 @@ class RenderMushafPage extends RenderBox {
         family: _family,
         step: _step,
         ink: _colors.ink,
+        marked: _ribbons.keys.toSet(),
         viewport: viewport,
       ));
       markNeedsSemanticsUpdate();
@@ -684,34 +692,10 @@ class RenderMushafPage extends RenderBox {
     _nodes.clear();
   }
 
-  /// beside the line the ayah ends on, between the fore-edge and the frame, never over the text
+  /// between the ayah's last word and its marker, in room the line keeps for it
   Rect? ribbonRect(AyahKey key) {
-    final laid = _laid;
-    if (laid == null || _page == null || !_ribbons.containsKey(key)) return null;
-    for (var i = 0; i < laid.page.lines.length; i++) {
-      final ends = [
-        for (final word in laid.page.lines[i].words)
-          if (word.end && _ribbons.containsKey(word.key)) word.key,
-      ];
-      final index = ends.indexOf(key);
-      if (index < 0) continue;
-      final gap = SpaceManager.marginRibbonGap * _unit;
-      final start = laid.frame.left - gap;
-      final room = start - SizeManager.foreEdge * _unit - gap;
-      final width = math.min(
-        SizeManager.marginRibbonW * _unit,
-        (room - (ends.length - 1) * gap) / ends.length,
-      );
-
-      /// the line reads right to left, so its first ayah is the one nearest the text
-      final right = start - index * (width + gap);
-      return Rect.fromCenter(
-        center: Offset(right - width / 2, laid.layout.lines[i].center.dy),
-        width: width,
-        height: SizeManager.marginRibbonH * _unit,
-      );
-    }
-    return null;
+    if (_page == null || !_ribbons.containsKey(key)) return null;
+    return _laid?.ribbons[key];
   }
 
   Rect? washBounds(AyahKey key) {
@@ -1035,6 +1019,9 @@ typedef _LaidInput = ({
   String family,
   int step,
   Color ink,
+
+  /// the bookmarked ayahs, each keeps room for its ribbon
+  Set<AyahKey> marked,
   Size viewport,
 });
 
@@ -1047,7 +1034,8 @@ _Laid _laidOf(_LaidInput input) {
 
   /// the names and digits follow from the page number
   final key = (page.number, input.viewport, input.unit, input.family, input.step, input.ink);
-  final laid = _laids.remove(key) ?? _Laid.of(input);
+  final kept = _laids.remove(key);
+  final laid = kept != null && setEquals(kept.marked, input.marked) ? kept : _Laid.of(input);
   _laids[key] = laid;
   if (_laids.length > 5) _laids.remove(_laids.keys.first);
   return laid;
@@ -1068,6 +1056,8 @@ class _Laid {
     required this.marker,
     required this.markerScale,
     required this.markers,
+    required this.marked,
+    required this.ribbons,
     required this.cartouches,
     required this.basmallahs,
     required this.number,
@@ -1076,7 +1066,8 @@ class _Laid {
   });
 
   factory _Laid.of(_LaidInput input) {
-    final (:page, :number, :names, :eastern, :unit, :family, :step, :ink, :viewport) = input;
+    final (:page, :number, :names, :eastern, :unit, :family, :step, :ink, :marked, :viewport) =
+        input;
     final reflow = step > 0;
     Rect frameOf(Size size) => Rect.fromLTRB(
       SpaceManager.mushafFrameLeft * unit,
@@ -1165,8 +1156,19 @@ class _Laid {
     ];
     double markerWidth() =>
         (SizeManager.ayahMarker * scale + 2 * SpaceManager.ayahMarkerGap) * unit;
-    List<List<double>> widths(List<List<TextPainter?>> words) => [
-      for (final line in words) [for (final word in line) word?.width ?? markerWidth()],
+    double ribbonWidth() =>
+        (SizeManager.ayahRibbonW * scale +
+            SpaceManager.ayahMarkerGap +
+            SpaceManager.ayahRibbonGap) *
+        unit;
+    double endWidth(MushafWord word) =>
+        markerWidth() + (marked.contains(word.key) ? ribbonWidth() : 0);
+    List<List<double>> widths(List<MushafLine> lines, List<List<TextPainter?>> words) => [
+      for (var i = 0; i < lines.length; i++)
+        [
+          for (var j = 0; j < words[i].length; j++)
+            words[i][j]?.width ?? endWidth(lines[i].words[j]),
+        ],
     ];
 
     var gap = quran(' ', fontSize).width;
@@ -1178,12 +1180,12 @@ class _Laid {
           for (final word in line.words)
             if (!word.end) word.text,
         ];
-        final markers = line.words.length - text.length;
+        final ends = line.words
+            .where((word) => word.end)
+            .fold(0.0, (sum, word) => sum + endWidth(word));
         final spaces = math.max(0, line.words.length - 1) - math.max(0, text.length - 1);
         final width =
-            (text.isEmpty ? 0.0 : quran(text.join(' '), fontSize).width) +
-            markers * markerWidth() +
-            spaces * gap;
+            (text.isEmpty ? 0.0 : quran(text.join(' '), fontSize).width) + ends + spaces * gap;
         return math.max(widest, width);
       });
       if (widest > area.width) {
@@ -1195,7 +1197,7 @@ class _Laid {
     var words = measure();
     if (reflow) {
       /// the same words in the new lines, measured once, and the page as tall as they need
-      mushaf = reflowMushaf(mushaf, widths: widths(words), width: area.width, gap: gap);
+      mushaf = reflowMushaf(mushaf, widths: widths(lines, words), width: area.width, gap: gap);
       lines = mushaf.lines;
       final measured = words.expand((line) => line).iterator;
       words = [
@@ -1209,7 +1211,7 @@ class _Laid {
     }
     final layout = layoutMushaf(
       page: mushaf,
-      widths: widths(words),
+      widths: widths(lines, words),
       bands: bands,
       area: area,
       gap: gap,
@@ -1226,16 +1228,34 @@ class _Laid {
       textDirection: TextDirection.rtl,
     )..layout();
     final markers = <(Offset, TextPainter)>[];
+    final ribbons = <AyahKey, Rect>{};
     final cartouches = <(Rect, TextPainter)>[];
     final basmallahs = <(Rect, TextPainter)>[];
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i];
       final band = layout.lines[i];
       for (var j = 0; j < line.words.length; j++) {
-        if (!line.words[j].end) continue;
+        final word = line.words[j];
+        if (!word.end) continue;
+        final rect = layout.words[i][j];
+        var center = rect.center;
+
+        /// the line reads right to left, the ribbon sits on the word's side and the marker past it
+        if (marked.contains(word.key)) {
+          center = Offset(rect.left + markerWidth() / 2, center.dy);
+          ribbons[word.key] = Rect.fromCenter(
+            center: Offset(
+              rect.right -
+                  (SpaceManager.ayahMarkerGap + SizeManager.ayahRibbonW * scale / 2) * unit,
+              center.dy,
+            ),
+            width: SizeManager.ayahRibbonW * scale * unit,
+            height: SizeManager.ayahRibbonH * scale * unit,
+          );
+        }
         markers.add((
-          layout.words[i][j].center,
-          amiri(eastern(line.words[j].key.ayah), FontSizeManager.ayahMarker * scale * unit),
+          center,
+          amiri(eastern(word.key.ayah), FontSizeManager.ayahMarker * scale * unit),
         ));
       }
       if (line.type == MushafLineType.surahName) {
@@ -1276,6 +1296,8 @@ class _Laid {
       marker: marker,
       markerScale: scale,
       markers: markers,
+      marked: marked,
+      ribbons: ribbons,
       cartouches: cartouches,
       basmallahs: basmallahs,
       number: amiri(number, FontSizeManager.mushafHeader * unit),
@@ -1300,6 +1322,8 @@ class _Laid {
   final double marker;
   final double markerScale;
   final List<(Offset, TextPainter)> markers;
+  final Set<AyahKey> marked;
+  final Map<AyahKey, Rect> ribbons;
   final List<(Rect, TextPainter)> cartouches;
   final List<(Rect, TextPainter)> basmallahs;
   final TextPainter number;
