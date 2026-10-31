@@ -8,7 +8,6 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
-import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,10 +89,6 @@ class _RestoreSheetState extends ConsumerState<RestoreSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetTitle(
-                StringsManager.restoreBackup,
-                subtitle: StringsManager.restorePasswordNote,
-              ),
               HorizontalPadding(
                 padding: SpaceManager.s5,
                 child: Column(
