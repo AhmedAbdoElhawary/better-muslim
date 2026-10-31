@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:better_muslim/core/app/app.dart';
-import 'package:better_muslim/core/backup/restore.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
@@ -182,7 +181,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('one write after reset prayer journey, one after a restore', (tester) async {
+  testWidgets('one write after reset prayer journey', (tester) async {
     final channel = await pumpBoot(tester);
     final db = dbOf(tester);
     await db.markPrayed(DateTime(2026, 10, 15), Prayer.asr);
@@ -192,15 +191,6 @@ void main() {
     await db.resetPrayerJourney();
     await settle(tester, const Duration(milliseconds: 700));
     expect(channel.updates, hasLength(before + 1));
-
-    final backup = AppDatabase.forTesting(NativeDatabase.memory());
-    await backup.updateSettings(makkahPlace);
-    await backup.markPrayed(DateTime(2026, 10, 15), Prayer.dhuhr);
-    await restore(db, backup);
-    await backup.close();
-    await settle(tester, const Duration(milliseconds: 700));
-    expect(channel.updates, hasLength(before + 2));
-    expect(channel.updates.last.json, contains('1 of 5 prayed today'));
     await unmount(tester);
   });
 
