@@ -75,8 +75,7 @@
   "readDua": "Read dua",
   "markPrayed": "Mark prayed",
   "stopAdhan": "Stop adhan",
-  "adhanOfMadinah": "Adhan of Madinah",
-  "adhanOfFajr": "Fajr adhan · Malmö",
+  "alafasyFajr": "Fajr adhan · Alafasy",
   "prayerTimes": "Prayer times",
   "prayedToday": "{count} of 5 prayed today",
   "@prayedToday": {
@@ -274,8 +273,13 @@
   "catAll": "All",
   "catMorningEvening": "Morning and evening",
   "catHome": "Home",
+  "catPrayer": "Prayer",
   "catTravel": "Travel",
   "catSleep": "Sleep",
+  "catFood": "Food",
+  "catDistress": "Distress",
+  "catIllness": "Illness",
+  "catWeather": "Weather",
   "catQuranic": "Quran",
   "listen": "Listen",
   "save": "Save",
@@ -592,7 +596,7 @@
       "prayer": {}
     }
   },
-  "recordingMadinah": "Madinah",
+  "recordingAlafasy": "Mishary Alafasy",
   "fullAdhanLength": "Full adhan · {length}",
   "@fullAdhanLength": {
     "placeholders": {
@@ -1032,6 +1036,7 @@
   "useTranslation": "Translation",
   "useTafsir": "Tafsir",
   "useRecitation": "Recitation",
+  "useWordRoots": "Word roots",
   "showSurahName": "Show surah name",
   "recitationPlaying": "Playing",
   "recitationPaused": "Paused",
@@ -1096,6 +1101,7 @@
   "notifQuietBody": "Open the app so the next days' prayers are scheduled.",
   "searchQuran": "Search the Quran",
   "ayahText": "Ayah text",
+  "root": "Root",
   "jumpToSurah": "JUMP TO SURAH",
   "jumpToPage": "JUMP TO PAGE",
   "jumpToAyah": "JUMP TO AYAH",

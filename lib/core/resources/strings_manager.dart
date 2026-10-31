@@ -30,8 +30,7 @@ abstract final class StringsManager {
   static const String readDua = 'readDua';
   static const String markPrayed = 'markPrayed';
   static const String stopAdhan = 'stopAdhan';
-  static const String adhanOfMadinah = 'adhanOfMadinah';
-  static const String adhanOfFajr = 'adhanOfFajr';
+  static const String alafasyFajr = 'alafasyFajr';
   static const String prayerTimes = 'prayerTimes';
   static const String prayedToday = 'prayedToday';
   static const String missedToMakeUp = 'missedToMakeUp';
@@ -123,8 +122,13 @@ abstract final class StringsManager {
   static const String catAll = 'catAll';
   static const String catMorningEvening = 'catMorningEvening';
   static const String catHome = 'catHome';
+  static const String catPrayer = 'catPrayer';
   static const String catTravel = 'catTravel';
   static const String catSleep = 'catSleep';
+  static const String catFood = 'catFood';
+  static const String catDistress = 'catDistress';
+  static const String catIllness = 'catIllness';
+  static const String catWeather = 'catWeather';
   static const String catQuranic = 'catQuranic';
   static const String listen = 'listen';
   static const String save = 'save';
@@ -263,7 +267,7 @@ abstract final class StringsManager {
   static const String noteNoFasting = 'noteNoFasting';
   static const String adhanSound = 'adhanSound';
   static const String forPrayer = 'forPrayer';
-  static const String recordingMadinah = 'recordingMadinah';
+  static const String recordingAlafasy = 'recordingAlafasy';
   static const String fullAdhanLength = 'fullAdhanLength';
   static const String recordingFull = 'recordingFull';
   static const String notificationsOff = 'notificationsOff';
@@ -521,6 +525,7 @@ abstract final class StringsManager {
   static const String useTranslation = 'useTranslation';
   static const String useTafsir = 'useTafsir';
   static const String useRecitation = 'useRecitation';
+  static const String useWordRoots = 'useWordRoots';
   static const String recitationPlaying = 'recitationPlaying';
   static const String recitationPaused = 'recitationPaused'; // Share backgrounds
   static const String midnight = 'midnight';
@@ -584,6 +589,7 @@ abstract final class StringsManager {
   static const String notifQuietBody = 'notifQuietBody';
   static const String searchQuran = 'searchQuran';
   static const String ayahText = 'ayahText';
+  static const String root = 'root';
   static const String jumpToSurah = 'jumpToSurah';
   static const String jumpToPage = 'jumpToPage';
   static const String jumpToAyah = 'jumpToAyah';
