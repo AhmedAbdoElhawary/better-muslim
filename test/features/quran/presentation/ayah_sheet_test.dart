@@ -164,13 +164,13 @@ void main() {
       await pumpReader(tester);
       await select(tester, 5);
       await tapIn(tester, AyahSheet, find.text('Tafsir'));
-      expect(shown(tester), closeTo(400, 1));
+      expect(shown(tester), closeTo(500, 1));
 
       await drag(tester, head(), -200);
       expect(shown(tester), closeTo(720, 1));
 
       await drag(tester, head(), 200);
-      expect(shown(tester), closeTo(400, 1));
+      expect(shown(tester), closeTo(500, 1));
       expect(selected(tester), isNotNull);
 
       await drag(tester, head(), 200);
@@ -203,7 +203,7 @@ void main() {
       /// the text goes back to its top first, then the sheet follows the rest of the drag
       await pull(100 + 250);
       expect(studyScroll(tester).pixels, 0);
-      expect(shown(tester), closeTo(400, 1));
+      expect(shown(tester), closeTo(500, 1));
 
       await pull(-320);
       await pull(-100);
@@ -218,7 +218,7 @@ void main() {
 
       await select(tester, 5);
       await tapIn(tester, AyahSheet, find.text('Tafsir'));
-      expect(shown(tester), closeTo(400, 1));
+      expect(shown(tester), closeTo(500, 1));
       expect(studyScroll(tester).pixels, 0);
       await unmount(tester);
     });
@@ -237,7 +237,7 @@ void main() {
       await pumpReader(tester, reduceMotion: true);
       await select(tester, 5);
       await tapIn(tester, AyahSheet, find.text('Tafsir'));
-      expect(shown(tester), closeTo(400, 1));
+      expect(shown(tester), closeTo(500, 1));
 
       await drag(tester, head(), -200);
       expect(shown(tester), closeTo(720, 1));
