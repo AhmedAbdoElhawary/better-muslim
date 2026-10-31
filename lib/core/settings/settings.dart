@@ -29,7 +29,14 @@ enum Language {
 }
 
 /// how each prayer reaches the phone. silent still shows the notification, with no sound
-enum PrayerSound { adhan, tone, silent }
+enum PrayerSound {
+  adhan(StringsManager.soundAdhan),
+  tone(StringsManager.soundTone),
+  silent(StringsManager.soundSilent);
+
+  const PrayerSound(this.nameKey);
+  final String nameKey;
+}
 
 extension PrayerSoundOf on AppSettings {
   PrayerSound soundOf(Prayer prayer) => switch (prayer) {
@@ -40,7 +47,7 @@ extension PrayerSoundOf on AppSettings {
     Prayer.isha => ishaSound,
   };
 
-  /// alafasy until the picked one is on the phone, a restored backup brings the choice only
+  /// alafasy until the picked one is on the phone
   AdhanRecording recordingOf(Prayer prayer) {
     final recording = switch (prayer) {
       Prayer.fajr => fajrRecording,
