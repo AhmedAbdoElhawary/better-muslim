@@ -10,8 +10,11 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> showLanguageSheet(BuildContext context) =>
-    showBmSheet(context, builder: (_) => const _LanguageSheet());
+Future<void> showLanguageSheet(BuildContext context) => showBmSheet(
+  context,
+  title: const SheetTitle(StringsManager.language),
+  builder: (_) => const _LanguageSheet(),
+);
 
 /// the app, its notifications and the widgets switch the moment it's picked
 class _LanguageSheet extends ConsumerWidget {
@@ -30,7 +33,6 @@ class _LanguageSheet extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetTitle(StringsManager.language),
               for (final language in Language.values)
                 PickerRow(
                   title: language.nameKey,
