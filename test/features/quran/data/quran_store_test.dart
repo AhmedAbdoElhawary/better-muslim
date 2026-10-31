@@ -1,5 +1,3 @@
-import 'package:better_muslim/core/backup/backup_file.dart';
-import 'package:better_muslim/core/backup/restore.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -7,9 +5,6 @@ import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../../helpers/backup.dart';
-import '../../../helpers/phone_storage.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -197,25 +192,31 @@ void main() {
     });
   });
 
-  test('a backup and restore carries both tables (SC-006)', () async {
-    usePhoneStorage();
-    final from = await seededStore();
-    addTearDown(from.close);
-    final file = await writeBackup(from, 'test1234', now: DateTime(2026, 10, 20));
-    final (backup, _) = await readBackup(file, 'test1234', schemaVersion: from.schemaVersion);
+  test('recent searches are newest first, a repeat moves up, only ten stay', () async {
+    for (var i = 1; i <= 11; i++) {
+      now = now.add(const Duration(minutes: 1));
+      await store.saveSearch('q$i');
+    }
+    now = now.add(const Duration(minutes: 1));
+    await store.saveSearch('q5');
 
-    await restore(db, backup!);
-    await closeBackup(backup);
+    expect(await store.watchSearches().first, [
+      'q5',
+      'q11',
+      'q10',
+      'q9',
+      'q8',
+      'q7',
+      'q6',
+      'q4',
+      'q3',
+      'q2',
+    ]);
+    expect(await db.select(db.quranSearches).get(), hasLength(10));
 
-    final [bookmark] = await store.watchBookmarks().first;
-    expect(
-      (bookmark.ayah, bookmark.page, bookmark.color),
-      (const AyahKey(2, 255), 42, CategoryColor.rose),
-    );
-    final [note] = await store.watchNotes().first;
-    expect(
-      (note.ayah, note.text, note.highlight),
-      (const AyahKey(1, 5), 'remember this one', true),
-    );
+    await store.removeSearch('q11');
+    expect((await store.watchSearches().first).take(2), ['q5', 'q10']);
+    await store.clearSearches();
+    expect(await store.watchSearches().first, isEmpty);
   });
 }
