@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/foundation.dart';
 
 enum RecitationStatus { idle, loading, playing, paused }
@@ -43,6 +44,7 @@ const recitePauses = [0, 1, 2, 3, 5];
 class RecitationState {
   const RecitationState({
     this.status = RecitationStatus.idle,
+    this.reciter = Reciter.alafasy,
     this.ayah,
     this.from,
     this.to,
@@ -57,6 +59,7 @@ class RecitationState {
   });
 
   final RecitationStatus status;
+  final Reciter reciter;
 
   /// the playing item, ayah 0 is the surah's bismillah
   final AyahKey? ayah;
@@ -79,6 +82,7 @@ class RecitationState {
 
   RecitationState copyWith({
     RecitationStatus? status,
+    Reciter? reciter,
     AyahKey? ayah,
     AyahKey? from,
     AyahKey? to,
@@ -92,6 +96,7 @@ class RecitationState {
     RecitationFailure? failure,
   }) => RecitationState(
     status: status ?? this.status,
+    reciter: reciter ?? this.reciter,
     ayah: ayah ?? this.ayah,
     from: from ?? this.from,
     to: to ?? this.to,

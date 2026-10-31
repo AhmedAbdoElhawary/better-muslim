@@ -56,3 +56,12 @@ enum QuranFont {
 
   String get family => font.arabic;
 }
+
+/// a voice for the recitation, one everyayah folder each
+enum Reciter {
+  alafasy('Alafasy_128kbps');
+
+  const Reciter(this.folder);
+
+  final String folder;
+}

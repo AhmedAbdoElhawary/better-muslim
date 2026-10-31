@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,37 +54,50 @@ void main() {
   }
 
   test('the address is everyayah over https with the padded name and nothing else', () {
-    final address = RecitationFiles.address(const AyahKey(1, 5));
+    final address = RecitationFiles.address(Reciter.alafasy, const AyahKey(1, 5));
     expect(address.toString(), 'https://everyayah.com/data/Alafasy_128kbps/001005.mp3');
     expect(address.hasQuery, isFalse);
   });
 
+  test("a reciter's files live in its own folder, alafasy's where they always were", () async {
+    final recitations = files((_) => serve(_mp3));
+    final file = await recitations.file(Reciter.alafasy, const AyahKey(2, 255));
+    expect(file.path, '${root.path}/recitations/alafasy/002255.mp3');
+    expect(asked.single.toString(), 'https://everyayah.com/data/Alafasy_128kbps/002255.mp3');
+  });
+
   test('a complete file with ID3 or a frame sync is kept and not fetched again', () async {
     final recitations = files((_) => serve(_mp3));
-    final file = await recitations.file(const AyahKey(1, 5));
+    final file = await recitations.file(Reciter.alafasy, const AyahKey(1, 5));
     expect(file.path, stored('001005.mp3').path);
     expect(file.readAsBytesSync(), _mp3);
-    await recitations.file(const AyahKey(1, 5));
+    await recitations.file(Reciter.alafasy, const AyahKey(1, 5));
     expect(asked, hasLength(1));
 
     final synced = files((_) => serve([0xFF, 0xFB, 0x90, 0x00]));
-    expect((await synced.file(const AyahKey(1, 6))).existsSync(), isTrue);
+    expect((await synced.file(Reciter.alafasy, const AyahKey(1, 6))).existsSync(), isTrue);
   });
 
   test('a short body leaves no file and reports the failure', () async {
     final recitations = files((_) => serve(_mp3, length: _mp3.length + 10));
-    expect(await failure(recitations.file(const AyahKey(1, 5))), RecitationFailure.failed);
+    expect(
+      await failure(recitations.file(Reciter.alafasy, const AyahKey(1, 5))),
+      RecitationFailure.failed,
+    );
     expect(left(), isEmpty);
   });
 
   test('no size header with an mp3 start is kept', () async {
     final recitations = files((_) async => (length: null, bytes: Stream.value(_mp3)));
-    expect((await recitations.file(const AyahKey(1, 5))).readAsBytesSync(), _mp3);
+    expect((await recitations.file(Reciter.alafasy, const AyahKey(1, 5))).readAsBytesSync(), _mp3);
   });
 
   test('wrong first bytes leave no file', () async {
     final recitations = files((_) => serve('<html>not found</html>'.codeUnits));
-    expect(await failure(recitations.file(const AyahKey(1, 5))), RecitationFailure.failed);
+    expect(
+      await failure(recitations.file(Reciter.alafasy, const AyahKey(1, 5))),
+      RecitationFailure.failed,
+    );
     expect(left(), isEmpty);
   });
 
@@ -97,13 +111,19 @@ void main() {
         ]),
       ),
     );
-    expect(await failure(recitations.file(const AyahKey(1, 5))), RecitationFailure.failed);
+    expect(
+      await failure(recitations.file(Reciter.alafasy, const AyahKey(1, 5))),
+      RecitationFailure.failed,
+    );
     expect(left(), isEmpty);
   });
 
   test('offline with no file reports offline', () async {
     final recitations = files((_) => throw const SocketException('offline'));
-    expect(await failure(recitations.file(const AyahKey(1, 5))), RecitationFailure.offline);
+    expect(
+      await failure(recitations.file(Reciter.alafasy, const AyahKey(1, 5))),
+      RecitationFailure.offline,
+    );
     expect(stored('001005.mp3').existsSync(), isFalse);
   });
 
@@ -118,9 +138,9 @@ void main() {
       return serve(_mp3);
     });
     final keys = [for (var ayah = 2; ayah <= 7; ayah++) AyahKey(1, ayah)];
-    await recitations.file(const AyahKey(1, 1));
-    recitations.ahead(keys);
-    while (!await recitations.isSurahReady([const AyahKey(1, 1), ...keys])) {
+    await recitations.file(Reciter.alafasy, const AyahKey(1, 1));
+    recitations.ahead(Reciter.alafasy, keys);
+    while (!await recitations.isSurahReady(Reciter.alafasy, [const AyahKey(1, 1), ...keys])) {
       await Future<void>.delayed(const Duration(milliseconds: 5));
     }
     expect(most, 1);
@@ -131,8 +151,8 @@ void main() {
 
   test('the folder is excluded from backup when it is made', () async {
     final recitations = files((_) => serve(_mp3));
-    await recitations.file(const AyahKey(1, 1));
-    await recitations.file(const AyahKey(1, 2));
+    await recitations.file(Reciter.alafasy, const AyahKey(1, 1));
+    await recitations.file(Reciter.alafasy, const AyahKey(1, 2));
     expect(excluded, ['${root.path}/recitations/alafasy']);
   });
 

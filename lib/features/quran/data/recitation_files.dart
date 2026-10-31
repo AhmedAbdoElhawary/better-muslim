@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -26,26 +27,29 @@ class RecitationFiles {
        _fetch = fetch ?? fetchUri,
        _exclude = exclude ?? BackupExclusion.exclude;
 
-  static final base = Uri.parse('https://everyayah.com/data/Alafasy_128kbps/');
+  static final base = Uri.parse('https://everyayah.com/data/');
 
   final Future<Directory> Function() _root;
   final Future<Fetched> Function(Uri uri) _fetch;
   final Future<void> Function(String path) _exclude;
 
-  Future<Directory>? _folder;
+  final _folders = <Reciter, Future<Directory>>{};
 
   /// one download at a time, the playing ayah goes before the next file ahead
   Future<void> _lock = Future.value();
   final _ahead = <AyahKey>[];
+  Reciter _aheadReciter = Reciter.alafasy;
   bool _running = false;
 
   static String name(AyahKey key) =>
       '${'${key.surah}'.padLeft(3, '0')}${'${key.ayah}'.padLeft(3, '0')}.mp3';
 
-  static Uri address(AyahKey key) => base.resolve(name(key));
+  static Uri address(Reciter reciter, AyahKey key) =>
+      base.resolve('${reciter.folder}/${name(key)}');
 
-  Future<Directory> get folder => _folder ??= () async {
-    final folder = Directory('${(await _root()).path}/recitations/alafasy');
+  /// named after the reciter, so alafasy's files from before stay where they are
+  Future<Directory> folder(Reciter reciter) => _folders[reciter] ??= () async {
+    final folder = Directory('${(await _root()).path}/recitations/${reciter.name}');
     if (!folder.existsSync()) {
       await folder.create(recursive: true);
       await _exclude(folder.path);
@@ -53,20 +57,22 @@ class RecitationFiles {
     return folder;
   }();
 
-  Future<File> _file(AyahKey key) async => File('${(await folder).path}/${name(key)}');
+  Future<File> _file(Reciter reciter, AyahKey key) async =>
+      File('${(await folder(reciter)).path}/${name(key)}');
 
   /// the checked file, downloaded now when it isn't on the phone yet
-  Future<File> file(AyahKey key) async {
-    final file = await _file(key);
+  Future<File> file(Reciter reciter, AyahKey key) async {
+    final file = await _file(reciter, key);
     if (file.existsSync()) return file;
     return _one(() async {
-      if (!file.existsSync()) await _download(key, file);
+      if (!file.existsSync()) await _download(address(reciter, key), file);
       return file;
     });
   }
 
   /// the rest of the surah, in order, after whatever plays now
-  void ahead(Iterable<AyahKey> keys) {
+  void ahead(Reciter reciter, Iterable<AyahKey> keys) {
+    _aheadReciter = reciter;
     _ahead
       ..clear()
       ..addAll(keys);
@@ -78,7 +84,7 @@ class RecitationFiles {
   Future<void> _runAhead() async {
     while (_ahead.isNotEmpty) {
       try {
-        await file(_ahead.removeAt(0));
+        await file(_aheadReciter, _ahead.removeAt(0));
       } on RecitationException {
         /// offline or a bad file, the next play asks again
         _ahead.clear();
@@ -87,9 +93,9 @@ class RecitationFiles {
     _running = false;
   }
 
-  Future<bool> isSurahReady(List<AyahKey> keys) async {
+  Future<bool> isSurahReady(Reciter reciter, List<AyahKey> keys) async {
     for (final key in keys) {
-      if (!(await _file(key)).existsSync()) return false;
+      if (!(await _file(reciter, key)).existsSync()) return false;
     }
     return true;
   }
@@ -101,11 +107,11 @@ class RecitationFiles {
   }
 
   /// to .part first, renamed only when complete and an mp3, anything else deleted
-  Future<void> _download(AyahKey key, File file) async {
+  Future<void> _download(Uri address, File file) async {
     final part = File('${file.path}.part');
     final Fetched fetched;
     try {
-      fetched = await _fetch(address(key));
+      fetched = await _fetch(address);
     } on SocketException {
       throw const RecitationException(RecitationFailure.offline);
     } on IOException {

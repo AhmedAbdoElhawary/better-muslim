@@ -140,7 +140,7 @@ class AudioServiceRecitation implements Recitation {
 
     final File first;
     try {
-      first = await _files.file(recitationFile(_queue.first));
+      first = await _files.file(_state.reciter, recitationFile(_queue.first));
     } on RecitationException catch (error) {
       if (session == _session) {
         _emit(_state.copyWith(status: RecitationStatus.idle, failure: error.failure));
@@ -159,7 +159,7 @@ class AudioServiceRecitation implements Recitation {
       return;
     }
     _added = 1;
-    _files.ahead({for (final item in _queue.skip(1)) recitationFile(item)});
+    _files.ahead(_state.reciter, {for (final item in _queue.skip(1)) recitationFile(item)});
     unawaited(_feed(session));
     await _player.setSpeed(_state.speed);
     await _player.setVolume(1);
@@ -172,7 +172,7 @@ class AudioServiceRecitation implements Recitation {
     while (_added < _queue.length) {
       final File file;
       try {
-        file = await _files.file(recitationFile(_queue[_added]));
+        file = await _files.file(_state.reciter, recitationFile(_queue[_added]));
       } on RecitationException catch (error) {
         /// what is in the playlist still plays, it stops where the files end
         if (session == _session && _waiting) {
@@ -195,7 +195,7 @@ class AudioServiceRecitation implements Recitation {
         unawaited(_player.play());
       }
     }
-    final ready = await _files.isSurahReady([
+    final ready = await _files.isSurahReady(_state.reciter, [
       for (var ayah = 1; ayah <= _queue.last.ayah; ayah++) AyahKey(_queue.last.surah, ayah),
       if (_queue.first.ayah == 0) const AyahKey(1, 1),
     ]);
