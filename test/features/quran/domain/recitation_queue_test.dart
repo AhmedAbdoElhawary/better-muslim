@@ -125,6 +125,16 @@ void main() {
       expect(dragAyah(1.4, from: from, to: to), 20);
     });
 
+    test('the fill under the finger never passes the picked ayah', () {
+      const from = AyahKey(2, 1);
+      const to = AyahKey(2, 2);
+      for (final fraction in [.1, .4, .5, .6, .9]) {
+        final ayah = AyahKey(2, dragAyah(fraction, from: from, to: to));
+        final fill = rangeProgress(ayah, from: from, to: to);
+        expect(fill >= fraction && fill - fraction <= .5, isTrue, reason: '$fraction');
+      }
+    });
+
     test('it fills by the playing ayah in the range, the bismillah as the first', () {
       const from = AyahKey(112, 1);
       const to = AyahKey(112, 4);

@@ -231,5 +231,21 @@ void main() {
       expect(left()..sort(), ['001001.mp3', '113001.mp3']);
       expect(await recitations.isSurahReady(Reciter.alafasy, ikhlas), isFalse);
     });
+
+    test(
+      'deleting al-fatiha keeps its first ayah while another surah reads it as bismillah',
+      () async {
+        final recitations = files((_) => serve(_mp3));
+        await recitations.downloadSurah(Reciter.alafasy, ikhlas);
+        await recitations.downloadSurah(Reciter.alafasy, [
+          for (var ayah = 1; ayah <= 7; ayah++) AyahKey(1, ayah),
+        ]);
+        await recitations.deleteSurah(Reciter.alafasy, 1);
+
+        expect(await recitations.downloaded(Reciter.alafasy, (_) => 4), [
+          (surah: 112, bytes: 4 * _mp3.length),
+        ]);
+      },
+    );
   });
 }

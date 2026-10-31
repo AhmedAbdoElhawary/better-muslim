@@ -125,7 +125,16 @@ class AudioServiceRecitation implements Recitation {
   }
 
   @override
-  Future<void> play(AyahKey from, {required AyahKey to, MediaText? media}) async {
+  Future<void> play(AyahKey from, {required AyahKey to, MediaText? media}) =>
+      _play(from, to: to, media: media);
+
+  /// paused loads the first file and waits there, for a new reciter picked while paused
+  Future<void> _play(
+    AyahKey from, {
+    required AyahKey to,
+    MediaText? media,
+    bool paused = false,
+  }) async {
     final session = ++_session;
     _cancelTimers();
     _waiting = false;
@@ -172,6 +181,10 @@ class AudioServiceRecitation implements Recitation {
     unawaited(_feed(session));
     await _player.setSpeed(_state.speed);
     await _player.setVolume(1);
+    if (paused) {
+      _emit(_state.copyWith(status: RecitationStatus.paused));
+      return;
+    }
     await (await AudioSession.instance).setActive(true);
     unawaited(_player.play());
   }
@@ -248,7 +261,7 @@ class AudioServiceRecitation implements Recitation {
     if (index == null) return;
     final next = nextAyahIndex(_queue, index);
     if (next == null) return _ended();
-    if (next >= _added) return play(_queue[next], to: _state.to!);
+    if (next >= _added) return _replay(_queue[next]);
     _jump(next);
   }
 
@@ -263,12 +276,20 @@ class AudioServiceRecitation implements Recitation {
   Future<void> seekBy(Duration by) async {
     final index = _index;
     if (index == null || !_state.active) return;
-    final landed = await seekAcross(_queue, index, _player.position, by, _length);
+    final ({int index, Duration position})? landed;
+    try {
+      landed = await seekAcross(_queue, index, _player.position, by, _length);
+    } on Exception {
+      /// an ayah ahead that can't be read or downloaded now, the tap does nothing
+      return;
+    }
     if (landed == null) return _ended();
-    if (landed.index >= _added) return play(_queue[landed.index], to: _state.to!);
+    if (landed.index >= _added) return _replay(_queue[landed.index]);
+    final waiting = _gap?.isActive ?? false;
     _gap?.cancel();
     if (landed.index != index) _jumped = true;
     await _player.seek(landed.position, index: landed.index);
+    if (waiting) unawaited(_player.play());
   }
 
   /// surah loop starts the range again from its start, bismillah included
@@ -288,8 +309,9 @@ class AudioServiceRecitation implements Recitation {
   @override
   Future<void> seekToAyah(AyahKey ayah) async {
     final index = _queue.indexOf(ayah);
-    if (index < 0) return;
-    if (index < _added) return _jump(index);
+
+    /// after a replay the queue starts at the ayah that played then, the range still starts before
+    if (index >= 0 && index < _added) return _jump(index);
     await _replay(ayah);
   }
 
@@ -319,15 +341,14 @@ class AudioServiceRecitation implements Recitation {
     final paused = _state.status == RecitationStatus.paused;
     _emit(_state.copyWith(reciter: reciter));
     if (!_state.active) return;
-    await _replay();
-    if (paused) await pause();
+    await _replay(null, paused);
   }
 
   /// the queue again from the playing ayah or the one given, the range keeps its start
-  Future<void> _replay([AyahKey? start]) async {
+  Future<void> _replay([AyahKey? start, bool paused = false]) async {
     final (ayah, from, to) = (start ?? _state.ayah, _state.from, _state.to);
     if (ayah == null || to == null) return;
-    await play(ayah, to: to);
+    await _play(ayah, to: to, paused: paused);
     _emit(_state.copyWith(from: from));
   }
 

@@ -71,11 +71,9 @@ typedef SurahDownload = ({bool ready, bool downloading, double? progress});
 const SurahDownload _idle = (ready: false, downloading: false, progress: null);
 const SurahDownload _ready = (ready: true, downloading: false, progress: null);
 
-/// one surah in one voice
-final surahDownloadProvider =
-    NotifierProvider.family<SurahDownloadNotifier, SurahDownload, (Reciter, int)>(
-      SurahDownloadNotifier.new,
-    );
+/// one surah in one voice, checked again on each open since playing a surah keeps its files too
+final surahDownloadProvider = NotifierProvider.autoDispose
+    .family<SurahDownloadNotifier, SurahDownload, (Reciter, int)>(SurahDownloadNotifier.new);
 
 class SurahDownloadNotifier extends Notifier<SurahDownload> {
   SurahDownloadNotifier(this.surah);
@@ -91,7 +89,7 @@ class SurahDownloadNotifier extends Notifier<SurahDownload> {
   SurahDownload build() {
     unawaited(() async {
       final ready = await ref.read(recitationFilesProvider).isSurahReady(surah.$1, await _files);
-      if (ready) state = _ready;
+      if (ready && ref.mounted) state = _ready;
     }());
     return _idle;
   }
@@ -100,6 +98,9 @@ class SurahDownloadNotifier extends Notifier<SurahDownload> {
   Future<void> download() async {
     if (state.ready || state.downloading) return;
     state = (ready: false, downloading: true, progress: null);
+
+    /// the sheet may close, the download and its progress go on
+    final link = ref.keepAlive();
     try {
       await ref
           .read(recitationFilesProvider)
@@ -113,19 +114,26 @@ class SurahDownloadNotifier extends Notifier<SurahDownload> {
       state = _idle;
       rethrow;
     } finally {
+      link.close();
       ref.invalidate(downloadsProvider);
     }
   }
 
+  /// the downloads page only reads it for this call, so it lives until the files are gone
   Future<void> delete() async {
+    final link = ref.keepAlive();
     await ref.read(recitationFilesProvider).deleteSurah(surah.$1, surah.$2);
     state = _idle;
     ref.invalidate(downloadsProvider);
+    link.close();
   }
 }
 
-/// More's Downloads page, the reciters with nothing downloaded left out
-final downloadsProvider = FutureProvider<Map<Reciter, List<({int surah, int bytes})>>>((ref) async {
+/// More's Downloads page, the reciters with nothing downloaded left out.
+/// read again on each open, playing a surah fills the folder too
+final downloadsProvider = FutureProvider.autoDispose<Map<Reciter, List<({int surah, int bytes})>>>((
+  ref,
+) async {
   final assets = await ref.watch(quranAssetsProvider.future);
   final files = ref.watch(recitationFilesProvider);
   return {

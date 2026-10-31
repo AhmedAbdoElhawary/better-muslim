@@ -168,11 +168,11 @@ class _Download extends ConsumerWidget {
       onTap: () async {
         try {
           await ref.read(surahDownloadProvider((reciter, surah)).notifier).download();
-        } on RecitationException catch (error) {
+        } on Object catch (error) {
           if (!context.mounted) return;
           showToast(
             context,
-            error.failure == RecitationFailure.offline
+            error is RecitationException && error.failure == RecitationFailure.offline
                 ? StringsManager.recitationOffline
                 : StringsManager.downloadFailed,
             icon: BmIconName.listen,

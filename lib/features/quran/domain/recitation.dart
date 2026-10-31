@@ -214,8 +214,11 @@ Future<({int index, Duration position})?> seekAcross(
 }
 
 /// the ayah under a drag along the bar, fraction 0 at the range's start and 1 at its end
-int dragAyah(double fraction, {required AyahKey from, required AyahKey to}) =>
-    from.ayah + (fraction.clamp(0.0, 1.0) * (to.ayah - from.ayah)).round();
+/// the ayah whose stretch of the bar holds the finger, the same stretches the fill uses
+int dragAyah(double fraction, {required AyahKey from, required AyahKey to}) {
+  final count = to.ayah - from.ayah + 1;
+  return from.ayah + ((fraction * count).ceil() - 1).clamp(0, count - 1);
+}
 
 /// how much of the range is played with this ayah, the bismillah reads as the first
 double rangeProgress(AyahKey playing, {required AyahKey from, required AyahKey to}) =>

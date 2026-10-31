@@ -141,10 +141,17 @@ class RecitationFiles {
     ];
   }
 
+  /// al-fatiha's first ayah stays while another surah needs it as its bismillah
   Future<void> deleteSurah(Reciter reciter, int surah) async {
     final prefix = '$surah'.padLeft(3, '0');
-    for (final entry in (await folder(reciter)).listSync().whereType<File>()) {
-      if (entry.uri.pathSegments.last.startsWith(prefix)) entry.deleteSync();
+    final entries = (await folder(reciter)).listSync().whereType<File>().toList();
+    final others = entries.any((entry) => !entry.uri.pathSegments.last.startsWith('001'));
+    for (final entry in entries) {
+      final name = entry.uri.pathSegments.last;
+      if (name.startsWith(prefix) &&
+          !(others && name == RecitationFiles.name(const AyahKey(1, 1)))) {
+        entry.deleteSync();
+      }
     }
   }
 
