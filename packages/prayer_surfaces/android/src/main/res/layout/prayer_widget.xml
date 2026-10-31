@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- the drawn picture, the countdown on top so a minute redraws only that, and five clear cells
-     over the times row. left to right in every language, the painter maps the cells -->
+<!-- the small and the medium: the drawn picture, the countdown on top so a minute redraws only
+     that, and five clear cells over the medium's grid. left to right in every language, the painter
+     maps the cells -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/surfaces_root"
     android:layout_width="match_parent"

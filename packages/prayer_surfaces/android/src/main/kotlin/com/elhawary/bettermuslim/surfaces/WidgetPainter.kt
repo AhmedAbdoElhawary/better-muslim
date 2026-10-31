@@ -2,7 +2,10 @@ package com.elhawary.bettermuslim.surfaces
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
@@ -14,64 +17,67 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import org.json.JSONObject
+import kotlin.math.PI
 import kotlin.math.ceil
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.sin
 
-// the 5.8 tree drawn in the app's own fonts, which widget layouts can't load (research R8, Q1).
+// the ios 5.6 trees drawn in the app's own fonts, which widget layouts can't load (research R8, Q1).
 // sizes are the tree's in dp, never scaled by the phone's font size (FR-029)
-class WidgetPainter(private val context: Context, widthDp: Float, heightDp: Float) {
-    enum class Size { FULL, BAND, ROW }
-
-    // 2 x 2 under 3 cells wide, 4 x 1 under 2 cells high, else 4 x 2 (FR-011)
-    val size = when {
-        widthDp < NARROW_DP -> Size.BAND
-        heightDp < SHORT_DP -> Size.ROW
-        else -> Size.FULL
-    }
+class WidgetPainter(
+    private val context: Context,
+    val kind: Kind,
+    widthDp: Float,
+    heightDp: Float,
+    private val palette: Palette,
+) {
+    enum class Kind { SMALL, MEDIUM, LARGE }
 
     private val density = context.resources.displayMetrics.density
     private val width = max(1, (widthDp * density).toInt())
     private val height = max(1, (heightDp * density).toInt())
 
-    // where the five click cells start, the band above them opens home
-    val rowTop: Int = when (size) {
-        Size.FULL -> dp(BAND_DP).toInt()
-        Size.ROW -> 0
-        Size.BAND -> height
-    }
-    val rowSide: Int = dp(10f).toInt()
-
     class Countdown(val bitmap: Bitmap, val left: Int, val top: Int)
 
-    // everything but the countdown, so it stays the same for a whole entry
-    fun picture(state: SurfaceState): Bitmap {
+    // the click cells over the five, as padding on their row or column
+    val cellsLeft: Int get() = dp(if (kind == Kind.LARGE) 16f else 14f).toInt()
+    val cellsTop: Int get() = when (kind) {
+        Kind.MEDIUM -> height - dp(12f + CELL).toInt()
+        else -> dp(LARGE_ROWS_TOP).toInt()
+    }
+    val cellsBottom: Int get() = when (kind) {
+        Kind.MEDIUM -> dp(12f).toInt()
+        else -> height - dp(LARGE_ROWS_TOP + 5 * ROW).toInt()
+    }
+
+    // everything but the countdown, so it stays the same for a whole entry. the small widget's sun
+    // moves, so it is drawn whole on every tick with its countdown inside
+    fun picture(state: SurfaceState, now: Long): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val frame = RectF(0f, 0f, width.toFloat(), height.toFloat())
-        val radius = dp(28f)
+        val radius = dp(24f)
         canvas.save()
         canvas.clipPath(Path().apply { addRoundRect(frame, radius, radius, Path.Direction.CW) })
-        canvas.drawColor(color(R.color.surfaces_surface))
+        drawSky(canvas, frame, deep = kind == Kind.LARGE && state is SurfaceState.Ready)
         when (state) {
-            is SurfaceState.Ready -> {
-                val band = when (size) {
-                    Size.FULL -> RectF(0f, 0f, width.toFloat(), dp(BAND_DP))
-                    Size.BAND -> frame
-                    Size.ROW -> null
-                }
-                band?.let { drawBand(canvas, it, state.data, state.entry) }
-                if (size != Size.BAND) drawRow(canvas, RectF(0f, band?.bottom ?: 0f, width.toFloat(), height.toFloat()), state.data, state.entry)
+            is SurfaceState.Ready -> when (kind) {
+                Kind.SMALL -> drawSmall(canvas, state.data, state.entry, now)
+                Kind.MEDIUM -> drawMedium(canvas, state.data, state.entry)
+                Kind.LARGE -> drawLarge(canvas, state.data, state.entry)
             }
             else -> drawMessage(canvas, frame, message(state)!!)
         }
         canvas.restore()
-        val outline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        // the trees' inset 0.5 hairline at 10%
+        val hairline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
-            strokeWidth = dp(1f)
-            color = color(R.color.surfaces_outline)
+            strokeWidth = dp(0.5f)
+            color = alpha(color("text"), 0.1f)
         }
-        val inset = dp(0.5f)
-        canvas.drawRoundRect(RectF(inset, inset, width - inset, height - inset), radius - inset, radius - inset, outline)
+        val inset = dp(0.25f)
+        canvas.drawRoundRect(RectF(inset, inset, width - inset, height - inset), radius - inset, radius - inset, hairline)
         return bitmap
     }
 
@@ -82,120 +88,263 @@ class WidgetPainter(private val context: Context, widthDp: Float, heightDp: Floa
         is SurfaceState.Ready -> null
     }
 
-    // the h:mm alone, at the spot the band leaves for it. null when this size shows none
+    // the h:mm alone, at the end of the header. null for the small widget, its picture has it
     fun countdown(data: SurfaceData, entry: JSONObject, now: Long): Countdown? {
-        if (size == Size.ROW) return null
-        val paint = text(24f, body(data, 600), color(R.color.surfaces_gold), tabular = true)
+        if (kind == Kind.SMALL) return null
+        val size = if (kind == Kind.MEDIUM) 22f else 24f
+        val paint = text(size, body(data, 600), color("gold"), tabular = true)
         val text = data.hm(entry, now)
-        val lineHeight = dp(24f * NORMAL)
+        val lineHeight = dp(size * NORMAL)
         val textWidth = ceil(paint.measureText(text)).toInt() + 1
         val bitmap = Bitmap.createBitmap(textWidth, ceil(lineHeight).toInt(), Bitmap.Config.ARGB_8888)
         drawLine(Canvas(bitmap), text, paint, 0f, 0f, lineHeight, Paint.Align.LEFT)
-        val (left, top) = countdownSpot(data, entry, textWidth)
-        return Countdown(bitmap, left, top)
-    }
-
-    private fun countdownSpot(data: SurfaceData, entry: JSONObject, textWidth: Int): Pair<Int, Int> {
-        val side = dp(18f)
-        val top = dp(14f)
-        if (stacked(data, entry)) {
-            // the band's left column is under the countdown when the two don't fit side by side
-            val below = top + dp(12f * NORMAL) + dp(26f * MARCELLUS)
-            val left = if (data.isArabic) width - side - textWidth else side
-            return left.toInt() to below.toInt()
-        }
+        val side = dp(if (kind == Kind.MEDIUM) 16f else 18f)
+        val top = dp(if (kind == Kind.MEDIUM) 14f else 16f)
         val left = if (data.isArabic) side else width - side - textWidth
-        return left.toInt() to top.toInt()
+        return Countdown(bitmap, left.toInt(), top.toInt())
     }
 
-    private fun drawBand(canvas: Canvas, band: RectF, data: SurfaceData, entry: JSONObject) {
-        val sky = Paint().apply {
-            shader = LinearGradient(
-                0f, band.top, 0f, band.bottom,
-                intArrayOf(color(R.color.surfaces_sky_top), color(R.color.surfaces_sky_middle), color(R.color.surfaces_sky_bottom)),
-                floatArrayOf(0f, 0.45f, 1f),
-                Shader.TileMode.CLAMP,
-            )
-        }
-        canvas.drawRect(band, sky)
+    private fun drawSky(canvas: Canvas, frame: RectF, deep: Boolean) {
+        val colors = if (deep) intArrayOf(color("top"), color("middle"), color("deep")) else intArrayOf(color("top"), color("middle"), color("bottom"))
+        val stops = if (deep) floatArrayOf(0f, 0.3f, 1f) else floatArrayOf(0f, 0.45f, 1f)
+        canvas.drawPaint(Paint().apply { shader = LinearGradient(0f, 0f, 0f, frame.bottom, colors, stops, Shader.TileMode.CLAMP) })
+    }
 
-        val side = dp(18f)
+    // widget3: the next prayer with the sun on its arc, padding 14 16
+    private fun drawSmall(canvas: Canvas, data: SurfaceData, entry: JSONObject, now: Long) {
+        drawArc(canvas, data.sunShare(entry, now))
+        val side = dp(16f)
         val arabic = data.isArabic
-        val start = if (arabic) band.right - side else band.left + side
-        val end = if (arabic) band.left + side else band.right - side
-        val startAlign = if (arabic) Paint.Align.RIGHT else Paint.Align.LEFT
-        val endAlign = if (arabic) Paint.Align.LEFT else Paint.Align.RIGHT
+        val x = if (arabic) width - side else side
+        val align = if (arabic) Paint.Align.RIGHT else Paint.Align.LEFT
+        val inner = width - 2 * side
 
-        val countdown = text(24f, body(data, 600), color(R.color.surfaces_gold), tabular = true)
-        val at = text(12f, body(data, 400), color(R.color.surfaces_label), tabular = true)
-        // the widest h:mm, so the city's cut doesn't move with the minutes
-        val countdownWidth = countdown.measureText(data.digits("00:00"))
-        val stacked = stacked(data, entry)
-        val endColumn = max(countdownWidth, at.measureText(entry.getString("atTime")))
-        val startWidth = (band.width() - 2 * side - if (stacked) 0f else endColumn + dp(8f)).coerceAtLeast(0f)
+        var top = dp(14f)
+        val next = text(11f, body(data, 400), color("label")).apply { letterSpacing = 0.12f }
+        drawLine(canvas, data.text("next"), next, x, top, dp(11f * NORMAL), align)
+        top += dp(11f * NORMAL)
+        val name = text(24f, display(data), color("text"))
+        drawLine(canvas, ellipsize(entry.getString("name"), name, inner), name, x, top, dp(24f * MARCELLUS), align)
+        top += dp(24f * MARCELLUS)
+        val duration = text(15f, body(data, 600), color("gold"), tabular = true)
+        drawLine(canvas, data.inDuration(entry, now), duration, x, top, dp(15f * NORMAL), align)
 
-        var top = band.top + dp(14f)
-        val label = text(12f, body(data, 400), color(R.color.surfaces_label))
-        // a long city is cut with an ellipsis, never the time
-        drawLine(canvas, ellipsize(data.text("nextCityShort"), label, startWidth), label, start, top, dp(12f * NORMAL), startAlign)
-        top += dp(12f * NORMAL)
-        val name = text(26f, display(data), color(R.color.surfaces_text))
-        drawLine(canvas, entry.getString("name"), name, start, top, dp(26f * MARCELLUS), startAlign)
-        top += dp(26f * MARCELLUS)
-
-        if (stacked) {
-            // the countdown's own bitmap goes here, then the time under it
-            drawLine(canvas, entry.getString("atTime"), at, start, top + dp(24f * NORMAL), dp(12f * NORMAL), startAlign)
-        } else {
-            drawLine(canvas, entry.getString("atTime"), at, end, band.top + dp(14f) + dp(24f * NORMAL), dp(12f * NORMAL), endAlign)
-        }
+        // a long city is cut, never the time, which comes first
+        val city = text(12f, body(data, 400), color("label"), tabular = true)
+        val bottom = height - dp(14f) - dp(12f * NORMAL)
+        drawLine(canvas, ellipsize(entry.getString("timeCity"), city, inner), city, x, bottom, dp(12f * NORMAL), align)
     }
 
-    // grid of 5, gap 4, padding 8 10 10. past cells dimmed, the next one on its gold tint
-    private fun drawRow(canvas: Canvas, area: RectF, data: SurfaceData, entry: JSONObject) {
-        val row = RectF(area.left + dp(10f), area.top + if (size == Size.FULL) dp(8f) else dp(6f), area.right - dp(10f), area.bottom - if (size == Size.FULL) dp(10f) else dp(6f))
+    // the 170 box's arc, centre 85 128 and radius 65, scaled to the widget. never mirrored
+    private fun drawArc(canvas: Canvas, share: Float?) {
+        val scaleX = width / 170f
+        val scaleY = height / 170f
+        fun point(at: Float): Pair<Float, Float> {
+            val angle = PI * (1 - at)
+            return (85 + 65 * cos(angle)).toFloat() * scaleX to (128 - 65 * sin(angle)).toFloat() * scaleY
+        }
+        fun arc(to: Float) = Path().apply {
+            val (startX, startY) = point(0f)
+            moveTo(startX, startY)
+            for (step in 1..60) {
+                val (px, py) = point(to * step / 60)
+                lineTo(px, py)
+            }
+        }
+        val text = color("text")
+        canvas.drawPath(
+            arc(1f),
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = dp(1f)
+                strokeCap = Paint.Cap.ROUND
+                pathEffect = DashPathEffect(floatArrayOf(dp(1f), dp(4f)), 0f)
+                color = alpha(text, 0.35f)
+            },
+        )
+        val horizon = 128 * scaleY
+        canvas.drawLine(0f, horizon, width.toFloat(), horizon, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            strokeWidth = dp(1f)
+            color = alpha(text, 0.2f)
+        })
+        if (share == null) return
+        canvas.drawPath(
+            arc(share),
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = dp(1.2f)
+                strokeCap = Paint.Cap.ROUND
+                color = alpha(text, 0.75f)
+            },
+        )
+        // 14 with its glow, 0 0 14px 5px at 45%
+        val (sunX, sunY) = point(share)
+        val sun = color("sun")
+        canvas.drawCircle(sunX, sunY, dp(12f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = alpha(sun, 0.45f)
+            maskFilter = BlurMaskFilter(dp(7f), BlurMaskFilter.Blur.NORMAL)
+        })
+        canvas.drawCircle(sunX, sunY, dp(7f), Paint(Paint.ANTI_ALIAS_FLAG).apply { color = sun })
+    }
+
+    // widget1: the prayer and the hijri line over all five, padding 14 14 12
+    private fun drawMedium(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
+        val side = dp(16f)
+        val arabic = data.isArabic
+        val x = if (arabic) width - side else side
+        val align = if (arabic) Paint.Align.RIGHT else Paint.Align.LEFT
+        val countdown = text(22f, body(data, 600), 0, tabular = true)
+        // the widest h:mm, so the line's cut doesn't move with the minutes
+        val inner = width - 2 * side - countdown.measureText(data.digits("00:00")) - dp(8f)
+
+        var top = dp(14f)
+        val name = text(24f, display(data), color("text"))
+        drawLine(canvas, ellipsize(entry.getString("name"), name, inner), name, x, top, dp(24f * MARCELLUS), align)
+        top += dp(24f * MARCELLUS)
+        val hijri = text(12f, body(data, 400), color("label"))
+        drawLine(canvas, ellipsize(entry.getString("hijriCity"), hijri, inner), hijri, x, top, dp(12f * NORMAL), align)
+
+        // grid of 5, gap 4, each 8 0 7 with a gap of 3
+        val row = RectF(dp(14f), height - dp(12f + CELL), width - dp(14f), height - dp(12f))
         val gap = dp(4f)
         val cellWidth = (row.width() - 4 * gap) / 5
         val strip = entry.getJSONArray("strip")
         val next = if (entry.isNull("next")) -1 else entry.getInt("next")
-        val highlight = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = color(R.color.surfaces_highlight) }
         for (index in 0 until 5) {
             val cell = strip.getJSONObject(index)
             // the five run as home's strip does, from the right in arabic
-            val column = if (data.isArabic) 4 - index else index
+            val column = if (arabic) 4 - index else index
             val left = row.left + column * (cellWidth + gap)
             val box = RectF(left, row.top, left + cellWidth, row.bottom)
             val current = index == next
-            if (current) canvas.drawRoundRect(box, dp(16f), dp(16f), highlight)
-            val past = cell.getBoolean("past")
-            val name = text(11f, body(data, if (current) 600 else 400), color(if (current) R.color.surfaces_gold else R.color.surfaces_dim))
-            val time = text(14f, body(data, 500), color(if (past && !current) R.color.surfaces_dim else R.color.surfaces_text), tabular = true)
-            val contentHeight = dp(11f * NORMAL) + dp(2f) + dp(14f * NORMAL)
-            val top = box.centerY() - contentHeight / 2
-            drawLine(canvas, ellipsize(cell.getString("name"), name, cellWidth), name, box.centerX(), top, dp(11f * NORMAL), Paint.Align.CENTER)
-            drawLine(canvas, cell.getString("time"), time, box.centerX(), top + dp(11f * NORMAL) + dp(2f), dp(14f * NORMAL), Paint.Align.CENTER)
+            drawHighlight(canvas, box, current, plain = alpha(color("text"), 0.05f))
+            val label = text(11f, body(data, if (current) 600 else 400), color(if (current) "gold" else "label"))
+            val time = text(14f, body(data, 500), color("text"), tabular = true)
+            var y = box.top + dp(8f)
+            drawLine(canvas, ellipsize(cell.getString("name"), label, cellWidth), label, box.centerX(), y, dp(11f * NORMAL), Paint.Align.CENTER)
+            y += dp(11f * NORMAL) + dp(3f)
+            drawLine(canvas, cell.getString("time"), time, box.centerX(), y, dp(14f * NORMAL), Paint.Align.CENTER)
+            y += dp(14f * NORMAL) + dp(3f)
+            if (cell.getBoolean("logged")) drawCheck(canvas, box.centerX(), y + dp(5f), dp(10f))
         }
     }
 
-    // no place and out of date: the frame, the band, the mark and what to do (FR-024)
+    // widget2: the day at a glance with what was prayed, padding 16 16 14, gap 10
+    private fun drawLarge(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
+        val side = dp(18f)
+        val arabic = data.isArabic
+        val start = if (arabic) width - side else side
+        val end = if (arabic) side else width - side
+        val startAlign = if (arabic) Paint.Align.RIGHT else Paint.Align.LEFT
+        val endAlign = if (arabic) Paint.Align.LEFT else Paint.Align.RIGHT
+        val countdown = text(24f, body(data, 600), 0, tabular = true)
+        val at = text(12f, body(data, 400), color("label"), tabular = true)
+        val endColumn = max(countdown.measureText(data.digits("00:00")), at.measureText(entry.getString("atTime")))
+        val inner = width - 2 * side - endColumn - dp(8f)
+
+        var top = dp(16f)
+        val label = text(11f, body(data, 400), color("label")).apply { letterSpacing = 0.12f }
+        drawLine(canvas, ellipsize(data.text("nextCity"), label, inner), label, start, top, dp(11f * NORMAL), startAlign)
+        top += dp(11f * NORMAL)
+        val name = text(28f, display(data), color("text"))
+        drawLine(canvas, ellipsize(entry.getString("name"), name, inner), name, start, top, dp(28f * MARCELLUS), startAlign)
+        drawLine(canvas, entry.getString("atTime"), at, end, dp(16f) + dp(24f * NORMAL), dp(12f * NORMAL), endAlign)
+
+        // rows of 40 with a gap of 2, each 0 12
+        val strip = entry.getJSONArray("strip")
+        val next = if (entry.isNull("next")) -1 else entry.getInt("next")
+        val left = dp(16f)
+        val right = width - dp(16f)
+        for (index in 0 until 5) {
+            val cell = strip.getJSONObject(index)
+            val rowTop = dp(LARGE_ROWS_TOP) + index * dp(ROW) + dp(1f)
+            val box = RectF(left, rowTop, right, rowTop + dp(40f))
+            val current = index == next
+            drawHighlight(canvas, box, current, plain = null)
+            val rowStart = if (arabic) box.right - dp(12f) else box.left + dp(12f)
+            val rowEnd = if (arabic) box.left + dp(12f) else box.right - dp(12f)
+            val mark = dp(22f)
+            val cellName = text(17f, display(data), color(if (current) "gold" else "text"))
+            val time = text(15f, body(data, 500), color("text"), tabular = true)
+            val timeEnd = if (arabic) rowEnd + mark + dp(12f) else rowEnd - mark - dp(12f)
+            val nameWidth = box.width() - dp(24f) - mark - dp(12f) - time.measureText(cell.getString("time")) - dp(12f)
+            drawLine(canvas, ellipsize(cell.getString("name"), cellName, nameWidth), cellName, rowStart, box.top, dp(40f), startAlign)
+            drawLine(canvas, cell.getString("time"), time, timeEnd, box.top, dp(40f), endAlign)
+            // the mark sits at the slot's end, the 16 check or the 12 ring
+            val half = dp(if (cell.getBoolean("logged")) 8f else 6f)
+            val markX = if (arabic) rowEnd + half else rowEnd - half
+            if (cell.getBoolean("logged")) {
+                drawCheck(canvas, markX, box.centerY(), dp(16f))
+            } else {
+                canvas.drawCircle(markX, box.centerY(), dp(5.4f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.STROKE
+                    strokeWidth = dp(1.2f)
+                    color = color("ring")
+                })
+            }
+        }
+
+        // the footer at the bottom, a hairline over it, padding 10 4 0
+        val footer = text(12.5f, body(data, 400), color("label"))
+        val footerTop = height - dp(14f) - dp(12.5f * NORMAL)
+        val lineY = footerTop - dp(10f)
+        canvas.drawLine(left, lineY, right, lineY, Paint().apply {
+            strokeWidth = dp(1f)
+            color = alpha(color("text"), 0.08f)
+        })
+        val footerStart = if (arabic) right - dp(4f) else left + dp(4f)
+        val footerEnd = if (arabic) left + dp(4f) else right - dp(4f)
+        val prayed = entry.getString("prayedLine")
+        drawLine(canvas, prayed, footer, footerStart, footerTop, dp(12.5f * NORMAL), startAlign)
+        val dateWidth = right - left - dp(8f) - footer.measureText(prayed) - dp(8f)
+        drawLine(canvas, ellipsize(entry.getString("dateLine"), footer, dateWidth), footer, footerEnd, footerTop, dp(12.5f * NORMAL), endAlign)
+    }
+
+    // the current one on primary at 20% with a 1 inset ring at 45%
+    private fun drawHighlight(canvas: Canvas, box: RectF, current: Boolean, plain: Int?) {
+        val radius = dp(12f)
+        val fill = if (current) alpha(color("primary"), 0.2f) else plain ?: return
+        canvas.drawRoundRect(box, radius, radius, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = fill })
+        if (!current) return
+        val inset = dp(0.5f)
+        canvas.drawRoundRect(
+            RectF(box.left + inset, box.top + inset, box.right - inset, box.bottom - inset),
+            radius - inset,
+            radius - inset,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = dp(1f)
+                color = alpha(color("primary"), 0.45f)
+            },
+        )
+    }
+
+    // assets/icons/ui/check.svg in its 24 box, centred
+    private fun drawCheck(canvas: Canvas, centerX: Float, centerY: Float, size: Float) {
+        val scale = size / 24f
+        val left = centerX - size / 2
+        val top = centerY - size / 2
+        val path = Path().apply {
+            moveTo(left + 5 * scale, top + 12.5f * scale)
+            lineTo(left + 9.5f * scale, top + 17 * scale)
+            lineTo(left + 19 * scale, top + 7.5f * scale)
+        }
+        canvas.drawPath(path, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = 1.25f * scale
+            strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
+            color = color("success")
+        })
+    }
+
+    // no place and out of date: the sky, the mark and what to do (FR-024)
     private fun drawMessage(canvas: Canvas, frame: RectF, message: String) {
         val arabic = message.any { Character.UnicodeBlock.of(it) == Character.UnicodeBlock.ARABIC }
-        if (size != Size.ROW) {
-            canvas.drawPaint(
-                Paint().apply {
-                    shader = LinearGradient(
-                        0f, 0f, 0f, frame.bottom,
-                        intArrayOf(color(R.color.surfaces_sky_top), color(R.color.surfaces_sky_middle), color(R.color.surfaces_sky_bottom)),
-                        floatArrayOf(0f, 0.45f, 1f),
-                        Shader.TileMode.CLAMP,
-                    )
-                },
-            )
-        }
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             typeface = Fonts.body(context, arabic, 500)
             textSize = dp(13f)
-            color = color(R.color.surfaces_text)
+            color = color("text")
         }
         val textWidth = (frame.width() - dp(32f)).toInt().coerceAtLeast(1)
         val layout = StaticLayout.Builder.obtain(message, 0, message.length, paint, textWidth)
@@ -203,10 +352,10 @@ class WidgetPainter(private val context: Context, widthDp: Float, heightDp: Floa
             .setMaxLines(3)
             .setEllipsize(TextUtils.TruncateAt.END)
             .build()
-        val star = if (size == Size.ROW) 0f else dp(23f)
-        val gap = if (size == Size.ROW) 0f else dp(10f)
+        val star = dp(23f)
+        val gap = dp(10f)
         val top = frame.centerY() - (star + gap + layout.height) / 2
-        if (size != Size.ROW) drawStar(canvas, frame.centerX(), top + star / 2, star)
+        drawStar(canvas, frame.centerX(), top + star / 2, star)
         canvas.save()
         canvas.translate(frame.centerX() - textWidth / 2f, top + star + gap)
         layout.draw(canvas)
@@ -229,17 +378,9 @@ class WidgetPainter(private val context: Context, widthDp: Float, heightDp: Floa
                 style = Paint.Style.STROKE
                 strokeWidth = 1.1f * scale
                 strokeJoin = Paint.Join.ROUND
-                color = color(R.color.surfaces_primary)
+                color = color("primary")
             },
         )
-    }
-
-    // the 2 x 2 band is too narrow for the name and the countdown side by side
-    private fun stacked(data: SurfaceData, entry: JSONObject): Boolean {
-        val name = text(26f, display(data), 0)
-        val countdown = text(24f, body(data, 600), 0, tabular = true)
-        val needed = name.measureText(entry.getString("name")) + dp(8f) + countdown.measureText(data.digits("00:00"))
-        return needed > width - 2 * dp(18f)
     }
 
     // css's line box: the text centred in it, as the trees lay their spans out
@@ -251,7 +392,7 @@ class WidgetPainter(private val context: Context, widthDp: Float, heightDp: Floa
     }
 
     private fun ellipsize(text: String, paint: TextPaint, width: Float): String =
-        TextUtils.ellipsize(text, paint, width, TextUtils.TruncateAt.END).toString()
+        TextUtils.ellipsize(text, paint, width.coerceAtLeast(0f), TextUtils.TruncateAt.END).toString()
 
     private fun text(sizeDp: Float, face: Typeface, color: Int, tabular: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = face
@@ -264,18 +405,24 @@ class WidgetPainter(private val context: Context, widthDp: Float, heightDp: Floa
 
     private fun display(data: SurfaceData) = Fonts.display(context, data.isArabic)
 
-    private fun color(id: Int) = context.getColor(id)
+    private fun color(role: String) = palette.color(context, role)
+
+    private fun alpha(color: Int, share: Float) =
+        Color.argb((Color.alpha(color) * share).toInt(), Color.red(color), Color.green(color), Color.blue(color))
 
     private fun dp(value: Float) = value * density
 
     companion object {
-        private const val BAND_DP = 84f
-        private const val NARROW_DP = 180f
-        private const val SHORT_DP = 100f
-
         // css's normal line height, and the trees' 1.15 for marcellus
         private const val NORMAL = 1.2f
         private const val MARCELLUS = 1.15f
+
+        // a medium cell: 8, the name, 3, the time, 3, the 10 mark, 7
+        private const val CELL = 8f + 11f * NORMAL + 3f + 14f * NORMAL + 3f + 10f + 7f
+
+        // a large row with its 2 gap, under the header and the 10 gap
+        private const val ROW = 42f
+        private const val LARGE_ROWS_TOP = 16f + 11f * NORMAL + 28f * MARCELLUS + 10f - 1f
 
         private val STAR = listOf(
             0f to -10f, 2.93f to -7.07f, 7.07f to -7.07f, 7.07f to -2.93f, 10f to 0f, 7.07f to 2.93f,

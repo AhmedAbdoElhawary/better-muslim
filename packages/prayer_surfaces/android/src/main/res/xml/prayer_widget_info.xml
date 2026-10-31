@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 4 x 2 by default, down to 2 x 2 (the sky band) and 4 x 1 (the times row). moved by the app's
-     own alarms, never by the launcher's update period -->
+<!-- 5.6 medium, all five with the next highlighted. moved by the app's own alarms, never by the
+     launcher's update period -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/surfaces_widget_description"
     android:initialLayout="@layout/prayer_widget"
     android:minWidth="250dp"
     android:minHeight="110dp"
-    android:minResizeWidth="110dp"
-    android:minResizeHeight="40dp"
+    android:minResizeWidth="250dp"
+    android:minResizeHeight="110dp"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="4"
     android:targetCellHeight="2"

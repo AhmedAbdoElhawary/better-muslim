@@ -66,6 +66,8 @@ object CountdownNotification {
         val at = entry.getLong("at")
         val builder = Notification.Builder(context, CHANNEL)
             .setSmallIcon(smallIcon(context))
+            // the theme's dark palette, as the ios lock screen
+            .setColor(data.palette(false).color(context, "gold"))
             .setContentTitle(entry.getString("nameTime"))
             .setContentText(data.text("liveNext"))
             .setWhen(at)
@@ -85,7 +87,7 @@ object CountdownNotification {
                     Notification.ProgressStyle()
                         .setProgressSegments(listOf(Notification.ProgressStyle.Segment(BAR)))
                         .setProgress(share)
-                        .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.surfaces_sun)),
+                        .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.surfaces_sun).setTint(data.palette(false).color(context, "live"))),
                 )
             }
         } else if (share != null) {

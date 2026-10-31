@@ -19,7 +19,11 @@ const _shareColors = 'lib/core/widgets/share/share_options.dart';
 const _adhanSky = 'lib/features/notifications/presentation/view/widgets/adhan_sky.dart';
 
 /// the widgets and the live countdown, their colors come in surfaces.json
-const _surfaceFolders = ['ios/PrayerWidgets', 'packages/prayer_surfaces/ios'];
+const _surfaceFolders = [
+  'ios/PrayerWidgets',
+  'packages/prayer_surfaces/ios',
+  'packages/prayer_surfaces/android/src',
+];
 
 /// the app root copies the data once, nothing below it rebuilds for it
 const _appRoot = 'lib/core/app/app.dart';

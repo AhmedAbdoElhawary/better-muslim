@@ -5,7 +5,7 @@
     <string name="surfaces_next_label">الصلاة القادمة</string>
     <string name="surfaces_next_description">الصلاة القادمة والشمس على قوسها.</string>
     <string name="surfaces_times_label">صلوات اليوم</string>
-    <string name="surfaces_times_description">مواقيت اليوم الخمسة في سطر واحد.</string>
+    <string name="surfaces_times_description">اليوم في لمحة، مع ما صلّيته.</string>
     <string name="surfaces_no_place">افتح مسلم أفضل لتحديد مكانك</string>
     <string name="surfaces_outdated">افتح مسلم أفضل لتحديث المواقيت</string>
 </resources>
