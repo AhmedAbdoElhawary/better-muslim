@@ -160,11 +160,11 @@ class Settings extends Table {
       // ignore: recursive_getters, drift reads the column inside its own check
       .check(reciteSpeed.isIn(const [0.75, 1.0, 1.25, 1.5]))();
 
-  /// 1 is off
+  /// 1 is off, 0 is surah loop
   IntColumn get reciteRepeat => integer()
       .withDefault(const Constant(1))
       // ignore: recursive_getters, drift reads the column inside its own check
-      .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10]))();
+      .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10, 0]))();
 
   TextColumn get reciter => textEnum<Reciter>().withDefault(const Constant('alafasy'))();
 
@@ -375,7 +375,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -568,6 +568,10 @@ class AppDatabase extends _$AppDatabase {
       },
       from16To17: (m, schema) async {
         await m.addColumn(schema.settings, schema.settings.reciter);
+      },
+      from17To18: (m, schema) async {
+        /// the repeat check takes surah loop, sqlite remakes the table for it
+        await m.alterTable(TableMigration(schema.settings));
       },
     ),
   );

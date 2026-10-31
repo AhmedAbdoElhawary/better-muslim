@@ -434,6 +434,7 @@
   "ayahOf": "الآية {n} من {total}",
   "repeatEachAyah": "كرّر كل آية",
   "nTimes": "{n} مرات",
+  "surahLoop": "تكرار السورة",
   "range": "النطاق",
   "ayahRange": "الآية {from} – {to}",
   "pauseBetweenAyahs": "توقف بين الآيات",

@@ -111,7 +111,7 @@ class AudioServiceRecitation implements Recitation {
         _waiting = true;
         _emit(_state.copyWith(status: RecitationStatus.loading));
       } else {
-        stop();
+        _ended();
       }
       return;
     }
@@ -247,7 +247,7 @@ class AudioServiceRecitation implements Recitation {
     final index = _index;
     if (index == null) return;
     final next = nextAyahIndex(_queue, index);
-    if (next == null) return stop();
+    if (next == null) return _ended();
     if (next >= _added) return play(_queue[next], to: _state.to!);
     _jump(next);
   }
@@ -264,12 +264,17 @@ class AudioServiceRecitation implements Recitation {
     final index = _index;
     if (index == null || !_state.active) return;
     final landed = await seekAcross(_queue, index, _player.position, by, _length);
-    if (landed == null) return stop();
+    if (landed == null) return _ended();
     if (landed.index >= _added) return play(_queue[landed.index], to: _state.to!);
     _gap?.cancel();
     if (landed.index != index) _jumped = true;
     await _player.seek(landed.position, index: landed.index);
   }
+
+  /// surah loop starts the range again from its start, bismillah included
+  Future<void> _ended() => startsAgain(_state.repeat, _state.sleep) && _state.from != null
+      ? play(_state.from!, to: _state.to!)
+      : stop();
 
   /// past what's in the playlist it stops the walk there, that file may not be on the phone yet
   Future<Duration> _length(int index) async {

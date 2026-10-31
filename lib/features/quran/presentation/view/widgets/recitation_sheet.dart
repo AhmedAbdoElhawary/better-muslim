@@ -515,7 +515,7 @@ class _Control extends StatelessWidget {
   }
 }
 
-/// the repeat icon in primary with its "3×" badge, no badge when off
+/// the repeat icon in primary with its "3×" badge, "∞" for surah loop, no badge when off
 class _RepeatIcon extends StatelessWidget {
   const _RepeatIcon({required this.repeat, required this.digits});
 
@@ -530,9 +530,9 @@ class _RepeatIcon extends StatelessWidget {
         BmIcon.ui(
           BmUiIcon.repeat,
           size: SizeManager.recitationRepeatIcon.r,
-          color: context.getColor(repeat > 1 ? ThemeEnum.primary : ThemeEnum.text2),
+          color: context.getColor(repeat != 1 ? ThemeEnum.primary : ThemeEnum.text2),
         ),
-        if (repeat > 1)
+        if (repeat != 1)
           PositionedDirectional(
             end: SpaceManager.repeatBadgeEnd.r,
             top: SpaceManager.repeatBadgeTop.r,
@@ -545,7 +545,7 @@ class _RepeatIcon extends StatelessWidget {
                 horizontal: SpaceManager.repeatBadgeH,
                 vertical: SpaceManager.repeatBadgeV,
                 child: SemiBoldText(
-                  context.formatDigits('$repeat×', digits),
+                  repeat == surahLoop ? '∞' : context.formatDigits('$repeat×', digits),
                   translate: false,
                   fontSize: FontSizeManager.repeatBadge,
                   color: ThemeEnum.onPrimary,
@@ -561,8 +561,11 @@ class _RepeatIcon extends StatelessWidget {
 class _Choices extends ConsumerWidget {
   const _Choices();
 
-  static _Label _repeat(int times) =>
-      times == 1 ? (StringsManager.off, const {}) : (StringsManager.nTimes, {'n': '$times'});
+  static _Label _repeat(int times) => switch (times) {
+    1 => (StringsManager.off, const {}),
+    surahLoop => (StringsManager.surahLoop, const {}),
+    _ => (StringsManager.nTimes, {'n': '$times'}),
+  };
 
   static _Label _pause(int seconds) =>
       seconds == 0 ? (StringsManager.off, const {}) : (StringsManager.nSeconds, {'n': '$seconds'});

@@ -86,6 +86,7 @@ void main() {
       '3 times',
       '5 times',
       '10 times',
+      'Surah loop',
     ]);
     await expectChoices(tester, 'Pause between ayahs', ['Off', '1 s', '2 s', '3 s', '5 s']);
     await expectChoices(tester, 'Sleep timer', [
@@ -151,6 +152,23 @@ void main() {
 
     expect(containerOf(tester).read(settingsProvider).value?.reciteRepeat, 3);
     expect(recitation.calls.last, 'repeat 3');
+    await unmount(tester);
+  });
+
+  testWidgets('the repeat button cycles 2, 3, 5, 10, surah loop and back to off', (tester) async {
+    final recitation = await opened(tester);
+
+    for (final (repeat, badge) in [(2, '2×'), (3, '3×'), (5, '5×'), (10, '10×'), (0, '∞')]) {
+      await tester.tap(labelled('Repeat each ayah'));
+      await tester.pumpAndSettle();
+      expect(containerOf(tester).read(settingsProvider).value?.reciteRepeat, repeat);
+      expect(recitation.calls.last, 'repeat $repeat');
+      expect(inSheet(find.text(badge)), findsOneWidget, reason: badge);
+    }
+    await tester.tap(labelled('Repeat each ayah'));
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'repeat 1');
+    expect(inSheet(find.text('∞')), findsNothing);
     await unmount(tester);
   });
 

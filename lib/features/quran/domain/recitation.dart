@@ -37,7 +37,10 @@ class SleepTimer {
 }
 
 const reciteSpeeds = [.75, 1.0, 1.25, 1.5];
-const reciteRepeats = [1, 2, 3, 5, 10];
+
+/// in the repeat cycle after 10, each ayah once and the range again from its start
+const surahLoop = 0;
+const reciteRepeats = [1, 2, 3, 5, 10, surahLoop];
 const recitePauses = [0, 1, 2, 3, 5];
 
 @immutable
@@ -151,8 +154,11 @@ abstract class Recitation {
 List<AyahKey> recitationQueue(AyahKey from, AyahKey to, {int repeat = 1}) => [
   if (from.ayah == 1 && from.surah != 1 && from.surah != 9) AyahKey(from.surah, 0),
   for (var ayah = from.ayah; ayah <= to.ayah; ayah++)
-    for (var i = 0; i < repeat; i++) AyahKey(from.surah, ayah),
+    for (var i = 0; i < (repeat == surahLoop ? 1 : repeat); i++) AyahKey(from.surah, ayah),
 ];
+
+/// surah loop plays the range again when it ends, end of surah still stops it there
+bool startsAgain(int repeat, SleepTimer sleep) => repeat == surahLoop && !sleep.endOfSurah;
 
 /// the bismillah is al-fatiha's first ayah
 AyahKey recitationFile(AyahKey item) => item.ayah == 0 ? const AyahKey(1, 1) : item;

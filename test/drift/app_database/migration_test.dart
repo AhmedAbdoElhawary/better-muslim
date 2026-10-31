@@ -13,6 +13,7 @@ import 'generated/schema_v14.dart' as v14;
 import 'generated/schema_v15.dart' as v15;
 import 'generated/schema_v16.dart' as v16;
 import 'generated/schema_v17.dart' as v17;
+import 'generated/schema_v18.dart' as v18;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
@@ -862,6 +863,28 @@ void main() {
       validateItems: (newDb) async {
         final row = await newDb.select(newDb.settings).getSingle();
         expect((row.reciteSpeed, row.reciteRepeat, row.reciter), (1.25, 3, 'alafasy'));
+      },
+    );
+  });
+
+  test('v17 to v18 keeps every row and takes surah loop as a repeat', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 17,
+      newVersion: 18,
+      createOld: v17.DatabaseAtV17.new,
+      createNew: v18.DatabaseAtV18.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v17.SettingsCompanion(reciteRepeat: Value(5), reciter: Value('husary')),
+      ),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect((row.reciteRepeat, row.reciter), (5, 'husary'));
+        await newDb
+            .update(newDb.settings)
+            .write(const v18.SettingsCompanion(reciteRepeat: Value(0)));
+        expect((await newDb.select(newDb.settings).getSingle()).reciteRepeat, 0);
       },
     );
   });

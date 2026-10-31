@@ -876,6 +876,7 @@
       "n": {}
     }
   },
+  "surahLoop": "Surah loop",
   "range": "Range",
   "ayahRange": "Ayah {from} – {to}",
   "@ayahRange": {

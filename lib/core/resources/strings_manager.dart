@@ -396,6 +396,7 @@ abstract final class StringsManager {
   static const String ayahOf = 'ayahOf';
   static const String repeatEachAyah = 'repeatEachAyah';
   static const String nTimes = 'nTimes';
+  static const String surahLoop = 'surahLoop';
   static const String range = 'range';
   static const String ayahRange = 'ayahRange';
   static const String pauseBetweenAyahs = 'pauseBetweenAyahs';

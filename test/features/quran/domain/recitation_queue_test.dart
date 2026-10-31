@@ -139,4 +139,24 @@ void main() {
       expect(queue.indexOf(const AyahKey(112, 3)), 5);
     });
   });
+
+  group('surah loop', () {
+    test('the repeat button cycles off, 2, 3, 5, 10, surah loop', () {
+      expect(reciteRepeats, [1, 2, 3, 5, 10, surahLoop]);
+    });
+
+    test('each ayah plays once, the bismillah first as on the first play', () {
+      expect(
+        recitationQueue(const AyahKey(112, 1), const AyahKey(112, 2), repeat: surahLoop),
+        const [AyahKey(112, 0), AyahKey(112, 1), AyahKey(112, 2)],
+      );
+    });
+
+    test('the range starts again when it ends, unless the sleep timer ends it there', () {
+      expect(startsAgain(surahLoop, const SleepTimer.off()), isTrue);
+      expect(startsAgain(surahLoop, const SleepTimer.after(Duration(minutes: 5))), isTrue);
+      expect(startsAgain(surahLoop, const SleepTimer.endOfSurah()), isFalse);
+      expect(startsAgain(3, const SleepTimer.off()), isFalse);
+    });
+  });
 }

@@ -607,7 +607,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     'recite_repeat',
     aliasedName,
     false,
-    check: () => reciteRepeat.isIn(const [1, 2, 3, 5, 10]),
+    check: () => reciteRepeat.isIn(const [1, 2, 3, 5, 10, 0]),
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
@@ -1371,7 +1371,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final int quranTranslationSize;
   final double reciteSpeed;
 
-  /// 1 is off
+  /// 1 is off, 0 is surah loop
   final int reciteRepeat;
   final Reciter reciter;
 
