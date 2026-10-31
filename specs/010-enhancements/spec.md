@@ -337,8 +337,8 @@ One pass over the whole app, in the order of my list:
 - "Bookmarks" can be renamed and recolored but never deleted. Deleting another category asks
   first, then removes its bookmarks.
 - Saved's Bookmarks are grouped under category headers.
-- The mushaf draws a small ribbon in the side margin beside the line where a bookmarked ayah
-  ends, in its category's color. Nothing is drawn inside the text line.
+- The mushaf draws a small ribbon at a bookmarked ayah's end, between its last word and its
+  marker, in its category's color. The line keeps room for it, nothing is drawn over the glyphs.
 - The backup file carries categories and highlights. An older backup restores its bookmarks
   into "Bookmarks".
 
