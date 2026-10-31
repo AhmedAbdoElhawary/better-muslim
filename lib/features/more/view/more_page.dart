@@ -22,7 +22,6 @@ import 'package:better_muslim/core/widgets/sheet/method_sheet.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/more/view/widgets/about_section.dart';
 import 'package:better_muslim/features/more/view/widgets/adjustment_sheet.dart';
-import 'package:better_muslim/features/more/view/widgets/backup_rows.dart';
 import 'package:better_muslim/features/more/view/widgets/contact_section.dart';
 import 'package:better_muslim/features/more/view/widgets/language_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/mode_sheet.dart';
@@ -73,8 +72,6 @@ class MorePage extends ConsumerWidget {
                           heroTag: Routes.downloads,
                           onTap: () => context.push(Routes.downloads),
                         ),
-                        const BackupRow(),
-                        const RestoreRow(),
                         const ResetRow(),
                       ],
                     ),
