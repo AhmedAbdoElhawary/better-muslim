@@ -4,11 +4,9 @@ import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/prayer_log/prayer_row_state.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
-import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
-import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/prayer/data/qada_repository.dart';
@@ -67,11 +65,6 @@ class RowTrailing extends ConsumerWidget {
         onTap: () => state == PrayerRowState.prayed ? _unmark(context, ref) : _mark(context, ref),
       ),
       PrayerRowState.next => const _NextChip(),
-      PrayerRowState.later => BmIcon(
-        BmIconName.adhan,
-        size: SizeManager.iconList.r,
-        color: context.getColor(ThemeEnum.text2),
-      ),
       PrayerRowState.addToQada => _ChipButton(
         onTap: () => showPassedSheet(context, day, prayer),
         child: const StateChip(StringsManager.addToQada, look: ChipLook.outline),
@@ -83,7 +76,7 @@ class RowTrailing extends ConsumerWidget {
 
       /// a label, made up stays made up from here (FR-021)
       PrayerRowState.madeUp => const StateChip(StringsManager.madeUp, check: true),
-      PrayerRowState.unavailable => const SizedBox.shrink(),
+      PrayerRowState.later || PrayerRowState.unavailable => const SizedBox.shrink(),
     };
     return AnimatedSwitcher(
       duration: BmMotion.micro,
