@@ -99,6 +99,7 @@ class _TextPicker extends ConsumerWidget {
       child: Row(
         children: [
           for (final (i, source) in ShareTextSource.values.indexed) ...[
+            if (i == 0) const RSizedBox.horizontal(SpaceManager.s4),
             if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
             TafsirChip(
               source.label,
@@ -109,6 +110,7 @@ class _TextPicker extends ConsumerWidget {
               },
               onTap: () => onPick(source),
             ),
+            if (i == ShareTextSource.values.length - 1) const RSizedBox.horizontal(SpaceManager.s4),
           ],
         ],
       ),

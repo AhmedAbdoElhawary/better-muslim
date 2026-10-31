@@ -15,7 +15,7 @@ class BmSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     final reduce = MediaQuery.disableAnimationsOf(context);
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final shift = BmMotion.shift.r;
+    final shift = (BmMotion.shift * 2).r;
     final offset = switch (from) {
       AxisDirection.up => Offset(0, -shift),
       AxisDirection.down => Offset(0, shift),
