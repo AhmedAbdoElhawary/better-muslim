@@ -11,8 +11,11 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> showAzkarFontSheet(BuildContext context) =>
-    showBmSheet(context, builder: (_) => const _AzkarFontSheet());
+Future<void> showAzkarFontSheet(BuildContext context) => showBmSheet(
+  context,
+  title: const SheetTitle(StringsManager.azkarFont),
+  builder: (_) => const _AzkarFontSheet(),
+);
 
 /// the three azkar fonts, each name written in itself, applied the moment it's picked
 class _AzkarFontSheet extends ConsumerWidget {
@@ -31,7 +34,6 @@ class _AzkarFontSheet extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetTitle(StringsManager.azkarFont),
               for (final font in AzkarFont.values)
                 PickerRow(
                   title: font.label,
