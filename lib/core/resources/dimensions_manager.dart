@@ -731,8 +731,8 @@ abstract final class SizeManager {
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
   static const double sheetMax = 740;
-  static const double ayahSheet = 400;
-  static const double studySheet = 400;
+  static const double ayahSheet = 500;
+  static const double studySheet = 500;
   static const double studySheetFull = 720;
   static const double recitationSheet = 452;
   static const double miniPlayer = 64;
