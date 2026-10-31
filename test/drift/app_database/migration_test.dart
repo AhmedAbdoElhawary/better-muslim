@@ -17,6 +17,8 @@ import 'generated/schema_v18.dart' as v18;
 import 'generated/schema_v19.dart' as v19;
 import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v20.dart' as v20;
+import 'generated/schema_v21.dart' as v21;
+import 'generated/schema_v22.dart' as v22;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
@@ -936,6 +938,39 @@ void main() {
           {'alafasy'},
         );
         expect(row.maghribSound, 'tone');
+      },
+    );
+  });
+
+  test('v20 to v21 adds the recent searches and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 20,
+      newVersion: 21,
+      createOld: v20.DatabaseAtV20.new,
+      createNew: v21.DatabaseAtV21.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) =>
+          batch.insert(oldDb.settings, const v20.SettingsCompanion(reciter: Value('husary'))),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).reciter, 'husary');
+        expect(await newDb.select(newDb.quranSearches).get(), isEmpty);
+      },
+    );
+  });
+
+  test('v21 to v22 drops the reset notice flag and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 21,
+      newVersion: 22,
+      createOld: v21.DatabaseAtV21.new,
+      createNew: v22.DatabaseAtV22.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v21.SettingsCompanion(storeResetPending: Value(1), reciter: Value('husary')),
+      ),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).reciter, 'husary');
       },
     );
   });
