@@ -25,6 +25,9 @@ class RecitationBoot extends ConsumerStatefulWidget {
 class _RecitationBootState extends ConsumerState<RecitationBoot> {
   StreamSubscription<bool>? _clicks;
 
+  /// paused by a clip, not by me
+  var _resume = false;
+
   Recitation get _recitation => ref.read(recitationProvider);
 
   @override
@@ -57,9 +60,23 @@ class _RecitationBootState extends ConsumerState<RecitationBoot> {
       },
     );
 
-    /// the adhan's claim pauses it, it never comes back on its own (FR-028)
-    ref.listenManual(audioUseProvider, (_, use) {
-      if (use == AudioUse.adhan) _recitation.pause();
+    /// the adhan's claim pauses it, it never comes back on its own (FR-028). a dua or a preview
+    /// gives it back when it's done
+    ref.listenManual(audioUseProvider, (previous, use) {
+      switch (use) {
+        case AudioUse.adhan:
+          _resume = false;
+          _recitation.pause();
+        case AudioUse.clip when previous == AudioUse.recitation:
+          _resume = true;
+          _recitation.pause();
+        case AudioUse.none when _resume:
+          _resume = false;
+          _recitation.resume();
+        case AudioUse.recitation:
+          _resume = false;
+        case AudioUse.none || AudioUse.clip:
+      }
     });
     ref.listenManual(playingAyahProvider, (_, ayah) async {
       if (ayah == null) return;
