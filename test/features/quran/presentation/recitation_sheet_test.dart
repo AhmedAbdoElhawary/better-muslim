@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/recitation_sheet.dart';
@@ -96,6 +97,30 @@ void main() {
       '60 min',
       'End of surah',
     ]);
+    await unmount(tester);
+  });
+
+  testWidgets('the reciter opens a list of five, the pick is saved and plays on', (tester) async {
+    final recitation = await opened(tester);
+
+    await tester.tap(inSheet(find.text('Mishary Rashid Alafasy')));
+    await tester.pumpAndSettle();
+    for (final name in [
+      'Mishary Rashid Alafasy',
+      'Mahmoud Khalil Al-Husary',
+      'Abdul Basit Abdul Samad (Murattal)',
+      'Mohamed Siddiq Al-Minshawi (Murattal)',
+      'Maher Al-Muaiqly',
+    ]) {
+      expect(find.text(name), findsWidgets, reason: name);
+    }
+    await tester.tap(find.text('Mahmoud Khalil Al-Husary'));
+    await tester.pumpAndSettle();
+
+    expect(containerOf(tester).read(settingsProvider).value?.reciter, Reciter.husary);
+    expect(recitation.calls.last, 'reciter husary');
+    expect(inSheet(find.text('Mahmoud Khalil Al-Husary')), findsOneWidget);
+    expect(inSheet(find.text('MH')), findsOneWidget);
     await unmount(tester);
   });
 

@@ -8,6 +8,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -111,6 +112,9 @@ class _Player extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final speed = ref.watch(recitationStateProvider.select((state) => state.value?.speed ?? 1));
+    final reciter = ref.watch(
+      recitationStateProvider.select((state) => state.value?.reciter ?? Reciter.alafasy),
+    );
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
@@ -163,7 +167,10 @@ class _Player extends ConsumerWidget {
                                   fontSize: FontSizeManager.label,
                                   color: ThemeEnum.text2,
                                   maxLines: 1,
-                                  args: {'rate': speedLabel(context, speed, digits)},
+                                  args: {
+                                    'reciter': context.tr(reciter.short),
+                                    'rate': speedLabel(context, speed, digits),
+                                  },
                                 ),
                               ],
                             ],

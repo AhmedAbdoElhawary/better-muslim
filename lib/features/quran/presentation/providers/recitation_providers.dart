@@ -56,7 +56,7 @@ Future<void> playFrom(BuildContext context, WidgetRef ref, AyahKey from, {AyahKe
             'surah': language == 'ar' ? surah.ar : surah.en,
             'n': formatDigitsIn('${ayah.ayah}', language: language, digits: digits),
           }),
-          artist: l10n.tr(StringsManager.reciterName, const {}),
+          artist: (reciter) => l10n.tr(reciter.label, const {}),
         ),
       );
 }

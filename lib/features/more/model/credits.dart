@@ -104,6 +104,26 @@ const credits = [
     link: 'https://everyayah.com',
   ),
   Credit(
+    source: 'EveryAyah · Mahmoud Khalil Al-Husary',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Abdul Basit Abdul Samad',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Mohamed Siddiq Al-Minshawi',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Maher Al-Muaiqly',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
     source: "Hisn al-Muslim · Sa'id al-Qahtani",
     useKey: StringsManager.useAzkarDuas,
     link: 'https://www.hisnmuslim.com',

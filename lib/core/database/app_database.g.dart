@@ -612,6 +612,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<Reciter, String> reciter = GeneratedColumn<String>(
+    'reciter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('alafasy'),
+  ).withConverter<Reciter>($SettingsTable.$converterreciter);
   static const VerificationMeta _recitePauseMeta = const VerificationMeta('recitePause');
   @override
   late final GeneratedColumn<int> recitePause = GeneratedColumn<int>(
@@ -684,6 +693,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     quranTranslationSize,
     reciteSpeed,
     reciteRepeat,
+    reciter,
     recitePause,
   ];
   @override
@@ -1188,6 +1198,9 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.int,
         data['${effectivePrefix}recite_repeat'],
       )!,
+      reciter: $SettingsTable.$converterreciter.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}reciter'])!,
+      ),
       recitePause: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}recite_pause'],
@@ -1262,6 +1275,8 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<PageTurn>(PageTurn.values);
   static JsonTypeConverter2<QuranFont, String, String> $converterquranFont =
       const EnumNameConverter<QuranFont>(QuranFont.values);
+  static JsonTypeConverter2<Reciter, String, String> $converterreciter =
+      const EnumNameConverter<Reciter>(Reciter.values);
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -1358,6 +1373,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
 
   /// 1 is off
   final int reciteRepeat;
+  final Reciter reciter;
 
   /// seconds between ayahs
   final int recitePause;
@@ -1421,6 +1437,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.quranTranslationSize,
     required this.reciteSpeed,
     required this.reciteRepeat,
+    required this.reciter,
     required this.recitePause,
   });
   @override
@@ -1575,6 +1592,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['quran_translation_size'] = Variable<int>(quranTranslationSize);
     map['recite_speed'] = Variable<double>(reciteSpeed);
     map['recite_repeat'] = Variable<int>(reciteRepeat);
+    {
+      map['reciter'] = Variable<String>($SettingsTable.$converterreciter.toSql(reciter));
+    }
     map['recite_pause'] = Variable<int>(recitePause);
     return map;
   }
@@ -1648,6 +1668,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranTranslationSize: Value(quranTranslationSize),
       reciteSpeed: Value(reciteSpeed),
       reciteRepeat: Value(reciteRepeat),
+      reciter: Value(reciter),
       recitePause: Value(recitePause),
     );
   }
@@ -1754,6 +1775,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranTranslationSize: serializer.fromJson<int>(json['quranTranslationSize']),
       reciteSpeed: serializer.fromJson<double>(json['reciteSpeed']),
       reciteRepeat: serializer.fromJson<int>(json['reciteRepeat']),
+      reciter: $SettingsTable.$converterreciter.fromJson(
+        serializer.fromJson<String>(json['reciter']),
+      ),
       recitePause: serializer.fromJson<int>(json['recitePause']),
     );
   }
@@ -1842,6 +1866,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'quranTranslationSize': serializer.toJson<int>(quranTranslationSize),
       'reciteSpeed': serializer.toJson<double>(reciteSpeed),
       'reciteRepeat': serializer.toJson<int>(reciteRepeat),
+      'reciter': serializer.toJson<String>($SettingsTable.$converterreciter.toJson(reciter)),
       'recitePause': serializer.toJson<int>(recitePause),
     };
   }
@@ -1906,6 +1931,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     int? quranTranslationSize,
     double? reciteSpeed,
     int? reciteRepeat,
+    Reciter? reciter,
     int? recitePause,
   }) => AppSettings(
     id: id ?? this.id,
@@ -1967,6 +1993,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
     reciteSpeed: reciteSpeed ?? this.reciteSpeed,
     reciteRepeat: reciteRepeat ?? this.reciteRepeat,
+    reciter: reciter ?? this.reciter,
     recitePause: recitePause ?? this.recitePause,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
@@ -2054,6 +2081,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           : this.quranTranslationSize,
       reciteSpeed: data.reciteSpeed.present ? data.reciteSpeed.value : this.reciteSpeed,
       reciteRepeat: data.reciteRepeat.present ? data.reciteRepeat.value : this.reciteRepeat,
+      reciter: data.reciter.present ? data.reciter.value : this.reciter,
       recitePause: data.recitePause.present ? data.recitePause.value : this.recitePause,
     );
   }
@@ -2120,6 +2148,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('quranTranslationSize: $quranTranslationSize, ')
           ..write('reciteSpeed: $reciteSpeed, ')
           ..write('reciteRepeat: $reciteRepeat, ')
+          ..write('reciter: $reciter, ')
           ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
@@ -2186,6 +2215,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranTranslationSize,
     reciteSpeed,
     reciteRepeat,
+    reciter,
     recitePause,
   ]);
   @override
@@ -2251,6 +2281,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.quranTranslationSize == this.quranTranslationSize &&
           other.reciteSpeed == this.reciteSpeed &&
           other.reciteRepeat == this.reciteRepeat &&
+          other.reciter == this.reciter &&
           other.recitePause == this.recitePause);
 }
 
@@ -2314,6 +2345,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<int> quranTranslationSize;
   final Value<double> reciteSpeed;
   final Value<int> reciteRepeat;
+  final Value<Reciter> reciter;
   final Value<int> recitePause;
   const SettingsCompanion({
     this.id = const Value.absent(),
@@ -2375,6 +2407,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranTranslationSize = const Value.absent(),
     this.reciteSpeed = const Value.absent(),
     this.reciteRepeat = const Value.absent(),
+    this.reciter = const Value.absent(),
     this.recitePause = const Value.absent(),
   });
   SettingsCompanion.insert({
@@ -2437,6 +2470,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranTranslationSize = const Value.absent(),
     this.reciteSpeed = const Value.absent(),
     this.reciteRepeat = const Value.absent(),
+    this.reciter = const Value.absent(),
     this.recitePause = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
@@ -2499,6 +2533,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<int>? quranTranslationSize,
     Expression<double>? reciteSpeed,
     Expression<int>? reciteRepeat,
+    Expression<String>? reciter,
     Expression<int>? recitePause,
   }) {
     return RawValuesInsertable({
@@ -2561,6 +2596,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (quranTranslationSize != null) 'quran_translation_size': quranTranslationSize,
       if (reciteSpeed != null) 'recite_speed': reciteSpeed,
       if (reciteRepeat != null) 'recite_repeat': reciteRepeat,
+      if (reciter != null) 'reciter': reciter,
       if (recitePause != null) 'recite_pause': recitePause,
     });
   }
@@ -2625,6 +2661,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<int>? quranTranslationSize,
     Value<double>? reciteSpeed,
     Value<int>? reciteRepeat,
+    Value<Reciter>? reciter,
     Value<int>? recitePause,
   }) {
     return SettingsCompanion(
@@ -2687,6 +2724,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
       reciteSpeed: reciteSpeed ?? this.reciteSpeed,
       reciteRepeat: reciteRepeat ?? this.reciteRepeat,
+      reciter: reciter ?? this.reciter,
       recitePause: recitePause ?? this.recitePause,
     );
   }
@@ -2907,6 +2945,9 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (reciteRepeat.present) {
       map['recite_repeat'] = Variable<int>(reciteRepeat.value);
     }
+    if (reciter.present) {
+      map['reciter'] = Variable<String>($SettingsTable.$converterreciter.toSql(reciter.value));
+    }
     if (recitePause.present) {
       map['recite_pause'] = Variable<int>(recitePause.value);
     }
@@ -2975,6 +3016,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('quranTranslationSize: $quranTranslationSize, ')
           ..write('reciteSpeed: $reciteSpeed, ')
           ..write('reciteRepeat: $reciteRepeat, ')
+          ..write('reciter: $reciter, ')
           ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
@@ -4999,6 +5041,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<int> quranTranslationSize,
   Value<double> reciteSpeed,
   Value<int> reciteRepeat,
+  Value<Reciter> reciter,
   Value<int> recitePause,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
@@ -5061,6 +5104,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> quranTranslationSize,
   Value<double> reciteSpeed,
   Value<int> reciteRepeat,
+  Value<Reciter> reciter,
   Value<int> recitePause,
 });
 
@@ -5334,6 +5378,11 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
   ColumnFilters<int> get reciteRepeat =>
       $composableBuilder(column: $table.reciteRepeat, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<Reciter, Reciter, String> get reciter => $composableBuilder(
+    column: $table.reciter,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => ColumnFilters(column));
 }
@@ -5555,6 +5604,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<int> get reciteRepeat =>
       $composableBuilder(column: $table.reciteRepeat, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get reciter =>
+      $composableBuilder(column: $table.reciter, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => ColumnOrderings(column));
 }
@@ -5743,6 +5795,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<int> get reciteRepeat =>
       $composableBuilder(column: $table.reciteRepeat, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<Reciter, String> get reciter =>
+      $composableBuilder(column: $table.reciter, builder: (column) => column);
+
   GeneratedColumn<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => column);
 }
@@ -5832,6 +5887,7 @@ class $$SettingsTableTableManager
                 Value<int> quranTranslationSize = const Value.absent(),
                 Value<double> reciteSpeed = const Value.absent(),
                 Value<int> reciteRepeat = const Value.absent(),
+                Value<Reciter> reciter = const Value.absent(),
                 Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
@@ -5893,6 +5949,7 @@ class $$SettingsTableTableManager
                 quranTranslationSize: quranTranslationSize,
                 reciteSpeed: reciteSpeed,
                 reciteRepeat: reciteRepeat,
+                reciter: reciter,
                 recitePause: recitePause,
               ),
           createCompanionCallback:
@@ -5956,6 +6013,7 @@ class $$SettingsTableTableManager
                 Value<int> quranTranslationSize = const Value.absent(),
                 Value<double> reciteSpeed = const Value.absent(),
                 Value<int> reciteRepeat = const Value.absent(),
+                Value<Reciter> reciter = const Value.absent(),
                 Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
@@ -6017,6 +6075,7 @@ class $$SettingsTableTableManager
                 quranTranslationSize: quranTranslationSize,
                 reciteSpeed: reciteSpeed,
                 reciteRepeat: reciteRepeat,
+                reciter: reciter,
                 recitePause: recitePause,
               ),
           withReferenceMapper: (p0) => p0

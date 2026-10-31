@@ -166,6 +166,8 @@ class Settings extends Table {
       // ignore: recursive_getters, drift reads the column inside its own check
       .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10]))();
 
+  TextColumn get reciter => textEnum<Reciter>().withDefault(const Constant('alafasy'))();
+
   /// seconds between ayahs
   IntColumn get recitePause => integer()
       .withDefault(const Constant(0))
@@ -373,7 +375,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -563,6 +565,9 @@ class AppDatabase extends _$AppDatabase {
             columnTransformer: {schema.quranBookmarks.category: const Constant(defaultCategory)},
           ),
         );
+      },
+      from16To17: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.reciter);
       },
     ),
   );

@@ -10,6 +10,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -43,6 +44,9 @@ class RecitationSheet extends ConsumerWidget {
     final ready = ref.watch(
       recitationStateProvider.select((state) => state.value?.surahReady ?? false),
     );
+    final reciter = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reciter ?? Reciter.alafasy),
+    );
     return ReaderSheet(
       open: open,
       onClose: onClose,
@@ -52,24 +56,50 @@ class RecitationSheet extends ConsumerWidget {
         end: SpaceManager.sheetHeadEnd,
         child: Row(
           children: [
-            const _Avatar(),
-            const RSizedBox.horizontal(SpaceManager.s3),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SemiBoldText(
-                    StringsManager.reciterName,
-                    fontSize: FontSizeManager.bodyLarge,
-                    maxLines: 2,
+              child: Semantics(
+                button: true,
+                hint: context.tr(StringsManager.reciter),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _Choices._pick(
+                    context,
+                    title: StringsManager.reciter,
+                    choices: Reciter.values,
+                    selected: reciter,
+                    label: (reciter) => (reciter.label, const {}),
+                    digits: (args) => args,
+                    onPick: (reciter) => ref
+                        .read(databaseProvider)
+                        .updateSettings(SettingsCompanion(reciter: Value(reciter))),
                   ),
-                  const RSizedBox.vertical(SpaceManager.quranHeaderGap),
-                  RegularText(
-                    ready ? StringsManager.murattalDownloaded : StringsManager.murattalHafs,
-                    fontSize: FontSizeManager.rowSubtitle,
-                    color: ThemeEnum.text2,
+                  child: Row(
+                    children: [
+                      _Avatar(reciter),
+                      const RSizedBox.horizontal(SpaceManager.s3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SemiBoldText(
+                              reciter.label,
+                              fontSize: FontSizeManager.bodyLarge,
+                              maxLines: 2,
+                            ),
+                            const RSizedBox.vertical(SpaceManager.quranHeaderGap),
+                            RegularText(
+                              ready
+                                  ? StringsManager.murattalDownloaded
+                                  : StringsManager.murattalHafs,
+                              fontSize: FontSizeManager.rowSubtitle,
+                              color: ThemeEnum.text2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
             RoundButton(icon: BmUiIcon.chevron_down, label: StringsManager.close, onTap: onClose),
@@ -95,7 +125,9 @@ class RecitationSheet extends ConsumerWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar();
+  const _Avatar(this.reciter);
+
+  final Reciter reciter;
 
   @override
   Widget build(BuildContext context) {
@@ -106,9 +138,9 @@ class _Avatar extends StatelessWidget {
           color: context.getColor(ThemeEnum.primaryContainer),
           shape: BoxShape.circle,
         ),
-        child: const Center(
+        child: Center(
           child: RegularText(
-            StringsManager.reciterInitials,
+            reciter.initials,
             font: FontEnum.display,
             fontSize: FontSizeManager.reciterInitials,
             color: ThemeEnum.onPrimaryContainer,

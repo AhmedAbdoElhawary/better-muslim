@@ -3990,6 +3990,333 @@ i1.GeneratedColumn<int> _column_92(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
+
+final class Schema17 extends i0.VersionedSchema {
+  Schema17({required super.database}) : super(version: 17);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    settings,
+    prayerLog,
+    qadaEntries,
+    azkarCounts,
+    savedDuas,
+    quranCategories,
+    quranBookmarks,
+    quranNotes,
+    qadaDay,
+    quranBookmarkAyah,
+    quranBookmarkPage,
+  ];
+  late final Shape20 settings = Shape20(
+    source: i0.VersionedTable(
+      entityName: 'settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+        _column_84,
+        _column_85,
+        _column_86,
+        _column_87,
+        _column_88,
+        _column_49,
+        _column_32,
+        _column_33,
+        _column_52,
+        _column_53,
+        _column_54,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_51,
+        _column_55,
+        _column_56,
+        _column_57,
+        _column_50,
+        _column_58,
+        _column_59,
+        _column_60,
+        _column_61,
+        _column_62,
+        _column_63,
+        _column_64,
+        _column_65,
+        _column_82,
+        _column_83,
+        _column_66,
+        _column_67,
+        _column_68,
+        _column_69,
+        _column_93,
+        _column_70,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 prayerLog = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'prayer_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(date, prayer)'],
+      columns: [_column_21, _column_22],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 qadaEntries = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'qada_entries',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_23, _column_22, _column_24, _column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 azkarCounts = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'azkar_counts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(set_id, day, zikr)'],
+      columns: [_column_38, _column_39, _column_40, _column_41],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 savedDuas = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'saved_duas',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(dua)'],
+      columns: [_column_42, _column_43],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape18 quranCategories = Shape18(
+    source: i0.VersionedTable(
+      entityName: 'quran_categories',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_23, _column_74, _column_75, _column_91],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape19 quranBookmarks = Shape19(
+    source: i0.VersionedTable(
+      entityName: 'quran_bookmarks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_23,
+        _column_71,
+        _column_72,
+        _column_73,
+        _column_74,
+        _column_92,
+        _column_76,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape17 quranNotes = Shape17(
+    source: i0.VersionedTable(
+      entityName: 'quran_notes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(surah, ayah)',
+        'CHECK(length(trim(note)) > 0 OR highlight)',
+      ],
+      columns: [_column_77, _column_78, _column_89, _column_90, _column_80],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index qadaDay = i1.Index(
+    'qada_day',
+    'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
+  );
+  final i1.Index quranBookmarkAyah = i1.Index(
+    'quran_bookmark_ayah',
+    'CREATE UNIQUE INDEX quran_bookmark_ayah ON quran_bookmarks (surah, ayah)',
+  );
+  final i1.Index quranBookmarkPage = i1.Index(
+    'quran_bookmark_page',
+    'CREATE UNIQUE INDEX quran_bookmark_page ON quran_bookmarks (page) WHERE surah IS NULL',
+  );
+}
+
+class Shape20 extends i0.VersionedTable {
+  Shape20({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get latitude =>
+      columnsByName['latitude']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get longitude =>
+      columnsByName['longitude']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get placeName =>
+      columnsByName['place_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get placeNameAr =>
+      columnsByName['place_name_ar']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get regionName =>
+      columnsByName['region_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get regionNameAr =>
+      columnsByName['region_name_ar']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get countryCode =>
+      columnsByName['country_code']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get timeZone =>
+      columnsByName['time_zone']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get locationMode =>
+      columnsByName['location_mode']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get method =>
+      columnsByName['method']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get asrMethod =>
+      columnsByName['asr_method']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get hijriAdjust =>
+      columnsByName['hijri_adjust']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get digits =>
+      columnsByName['digits']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get theme =>
+      columnsByName['theme']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get themeMode =>
+      columnsByName['theme_mode']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get reduceMotion =>
+      columnsByName['reduce_motion']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get haptics =>
+      columnsByName['haptics']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get uiSounds =>
+      columnsByName['ui_sounds']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get storeResetPending =>
+      columnsByName['store_reset_pending']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get firstUse =>
+      columnsByName['first_use']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fajrSound =>
+      columnsByName['fajr_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get dhuhrSound =>
+      columnsByName['dhuhr_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get asrSound =>
+      columnsByName['asr_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get maghribSound =>
+      columnsByName['maghrib_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get ishaSound =>
+      columnsByName['isha_sound']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fajrRecording =>
+      columnsByName['fajr_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get dhuhrRecording =>
+      columnsByName['dhuhr_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get asrRecording =>
+      columnsByName['asr_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get maghribRecording =>
+      columnsByName['maghrib_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get ishaRecording =>
+      columnsByName['isha_recording']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get reminderMinutes =>
+      columnsByName['reminder_minutes']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get notificationsAsked =>
+      columnsByName['notifications_asked']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get tasbihDhikr =>
+      columnsByName['tasbih_dhikr']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get subhanallahCount =>
+      columnsByName['subhanallah_count']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get alhamdulillahCount =>
+      columnsByName['alhamdulillah_count']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get allahuAkbarCount =>
+      columnsByName['allahu_akbar_count']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get morningOpenedOn =>
+      columnsByName['morning_opened_on']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get eveningOpenedOn =>
+      columnsByName['evening_opened_on']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get azkarNudges =>
+      columnsByName['azkar_nudges']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get prayerCountdown =>
+      columnsByName['prayer_countdown']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get calendarMode =>
+      columnsByName['calendar_mode']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get topGlow =>
+      columnsByName['top_glow']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get language =>
+      columnsByName['language']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get onboarded =>
+      columnsByName['onboarded']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastReadSurah =>
+      columnsByName['last_read_surah']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastReadAyah =>
+      columnsByName['last_read_ayah']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastReadPage =>
+      columnsByName['last_read_page']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastReadAt =>
+      columnsByName['last_read_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get pageColor =>
+      columnsByName['page_color']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get quranLayout =>
+      columnsByName['quran_layout']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get pageTurn =>
+      columnsByName['page_turn']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get keepScreenOn =>
+      columnsByName['keep_screen_on']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get quranFont =>
+      columnsByName['quran_font']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get mushafSize =>
+      columnsByName['mushaf_size']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get quranArabicSize =>
+      columnsByName['quran_arabic_size']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get quranTranslationSize =>
+      columnsByName['quran_translation_size']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get reciteSpeed =>
+      columnsByName['recite_speed']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get reciteRepeat =>
+      columnsByName['recite_repeat']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get reciter =>
+      columnsByName['reciter']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get recitePause =>
+      columnsByName['recite_pause']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_93(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'reciter',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL DEFAULT \'alafasy\'',
+      defaultValue: const i1.CustomExpression('\'alafasy\''),
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -4006,6 +4333,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
   required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
   required Future<void> Function(i1.Migrator m, Schema16 schema) from15To16,
+  required Future<void> Function(i1.Migrator m, Schema17 schema) from16To17,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -4084,6 +4412,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from15To16(migrator, schema);
         return 16;
+      case 16:
+        final schema = Schema17(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from16To17(migrator, schema);
+        return 17;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -4106,6 +4439,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
   required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
   required Future<void> Function(i1.Migrator m, Schema16 schema) from15To16,
+  required Future<void> Function(i1.Migrator m, Schema17 schema) from16To17,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -4123,5 +4457,6 @@ i1.OnUpgrade stepByStep({
     from13To14: from13To14,
     from14To15: from14To15,
     from15To16: from15To16,
+    from16To17: from16To17,
   ),
 );

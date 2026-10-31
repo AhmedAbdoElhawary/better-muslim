@@ -114,7 +114,10 @@ class RecitationState {
 }
 
 /// the media notification's texts, in the app's language and digits
-typedef MediaText = ({String Function(AyahKey ayah) title, String artist});
+typedef MediaText = ({
+  String Function(AyahKey ayah) title,
+  String Function(Reciter reciter) artist,
+});
 
 /// contracts/recitation.md. the tests use a fake, only AudioServiceRecitation touches the phone
 abstract class Recitation {
@@ -130,6 +133,9 @@ abstract class Recitation {
   Future<void> setSpeed(double speed);
   Future<void> setRepeat(int times);
   Future<void> setPause(Duration gap);
+
+  /// while playing it goes on from the same ayah in the new voice
+  Future<void> setReciter(Reciter reciter);
   Future<void> setSleep(SleepTimer timer);
   Future<void> stop();
 }
@@ -206,6 +212,9 @@ class IdleRecitation implements Recitation {
 
   @override
   Future<void> setPause(Duration gap) async {}
+
+  @override
+  Future<void> setReciter(Reciter reciter) async {}
 
   @override
   Future<void> setSleep(SleepTimer timer) async {}

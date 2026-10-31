@@ -35,11 +35,14 @@ class _RecitationBootState extends ConsumerState<RecitationBoot> {
     ref.listenManual(
       settingsProvider.select((settings) {
         final row = settings.value;
-        return row == null ? null : (row.reciteSpeed, row.reciteRepeat, row.recitePause);
+        return row == null
+            ? null
+            : (row.reciteSpeed, row.reciteRepeat, row.recitePause, row.reciter);
       }),
       (previous, next) {
         if (next == null) return;
-        final (speed, repeat, pause) = next;
+        final (speed, repeat, pause, reciter) = next;
+        if (reciter != previous?.$4) _recitation.setReciter(reciter);
         if (speed != previous?.$1) _recitation.setSpeed(speed);
         if (repeat != previous?.$2) _recitation.setRepeat(repeat);
         if (pause != previous?.$3) _recitation.setPause(Duration(seconds: pause));

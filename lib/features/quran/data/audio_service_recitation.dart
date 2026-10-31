@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:just_audio/just_audio.dart';
@@ -267,10 +268,25 @@ class AudioServiceRecitation implements Recitation {
   @override
   Future<void> setRepeat(int times) async {
     _emit(_state.copyWith(repeat: times));
-    final ayah = _state.ayah;
-    if (_state.status == RecitationStatus.playing && ayah != null) {
-      await play(ayah, to: _state.to!);
-    }
+    if (_state.status == RecitationStatus.playing) await _replay();
+  }
+
+  @override
+  Future<void> setReciter(Reciter reciter) async {
+    if (reciter == _state.reciter) return;
+    final paused = _state.status == RecitationStatus.paused;
+    _emit(_state.copyWith(reciter: reciter));
+    if (!_state.active) return;
+    await _replay();
+    if (paused) await pause();
+  }
+
+  /// the queue again from the playing ayah, the range keeps its start
+  Future<void> _replay() async {
+    final (ayah, from, to) = (_state.ayah, _state.from, _state.to);
+    if (ayah == null || to == null) return;
+    await play(ayah, to: to);
+    _emit(_state.copyWith(from: from));
   }
 
   @override
@@ -320,9 +336,10 @@ class _Handler extends BaseAudioHandler {
 
   void publish(RecitationState state, MediaText? media) {
     final ayah = state.ayah;
-    if (media != null && ayah != null && mediaItem.value?.id != '$ayah') {
+    final id = '${state.reciter.name}/$ayah';
+    if (media != null && ayah != null && mediaItem.value?.id != id) {
       mediaItem.add(
-        MediaItem(id: '$ayah', title: media.title(readAyah(ayah)), artist: media.artist),
+        MediaItem(id: id, title: media.title(readAyah(ayah)), artist: media.artist(state.reciter)),
       );
     }
     final playing = state.status == RecitationStatus.playing;
