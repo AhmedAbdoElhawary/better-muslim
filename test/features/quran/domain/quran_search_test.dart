@@ -41,6 +41,20 @@ void main() {
     expect(found('zzz', scope: SearchScope.root), isEmpty);
   });
 
+  test('count is every match in the ayah, one per word', () {
+    SearchHit hit(String query, AyahKey key, {SearchScope scope = SearchScope.all}) => searchQuran(
+      query,
+      ayahs,
+      assets,
+      scope: scope,
+    ).groups[key.surah]!.firstWhere((hit) => hit.ayah.key == key);
+
+    /// العالمين holds ال twice and is still one
+    expect(hit('ال', const AyahKey(1, 2)).count, 2);
+    expect(hit('الحمد لله', const AyahKey(1, 2)).count, 1);
+    expect(hit('رحم', const AyahKey(1, 1), scope: SearchScope.root).count, 2);
+  });
+
   test('every ayah is read, without its number', () {
     expect(ayahs, hasLength(6236));
     expect(ayahs.first.words, hasLength(4));
@@ -112,6 +126,13 @@ void main() {
     expect(found('المؤمنون'), contains(const AyahKey(23, 1)));
     expect(found('شيئا'), contains(const AyahKey(2, 48)));
     expect(found('السماء'), contains(const AyahKey(2, 19)));
+    expect(found('الملائكة'), contains(const AyahKey(2, 31)));
+  });
+
+  test('a typed hamza has to be in the word, without one it stays loose', () {
+    expect(found('الرجال'), contains(const AyahKey(4, 34)));
+    expect(found('الرجاء'), isNot(contains(const AyahKey(4, 34))));
+    expect(found('المومنون'), contains(const AyahKey(23, 1)));
   });
 
   test('the matched word is washed whole, every time it is in the ayah', () {
