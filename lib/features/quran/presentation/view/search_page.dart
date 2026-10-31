@@ -29,6 +29,7 @@ extension on SearchScope {
     SearchScope.all => StringsManager.catAll,
     SearchScope.arabic => StringsManager.ayahText,
     SearchScope.translation => StringsManager.translation,
+    SearchScope.root => StringsManager.root,
   };
 }
 
