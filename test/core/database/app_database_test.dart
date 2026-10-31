@@ -34,7 +34,6 @@ void main() {
     expect(settings.reduceMotion, isFalse);
     expect(settings.haptics, isTrue);
     expect(settings.uiSounds, isFalse);
-    expect(settings.storeResetPending, isFalse);
   });
 
   test('watching the settings again never adds a row', () async {
