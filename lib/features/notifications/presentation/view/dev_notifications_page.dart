@@ -73,7 +73,7 @@ class DevNotificationsPage extends ConsumerWidget {
         .testIn1Minute(
           alert,
           texts,
-          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.madinah,
+          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.alafasy,
         );
   }
 
