@@ -23,6 +23,7 @@ Future<List<SearchAyah>> loadSearchAyahs() async {
   ];
   final pages = await load('pages', quranPageCount);
   final surahs = await load('surahs', quranSurahCount);
+  final roots = Uint8List.sublistView(await rootBundle.load('assets/quran/roots.json'));
   return Isolate.run(() {
     final words = <AyahKey, List<String>>{};
     for (final page in pages) {
@@ -38,9 +39,17 @@ Future<List<SearchAyah>> loadSearchAyahs() async {
       for (final surah in surahs)
         ((jsonDecode(utf8.decode(surah)) as Map<String, dynamic>)['tr'] as List).cast<String>(),
     ];
+
+    /// surah, ayah, word, as many words as index.json counts
+    final rootsOf = jsonDecode(utf8.decode(roots)) as List;
     return [
       for (final MapEntry(:key, :value) in words.entries)
-        SearchAyah(key, value, translations[key.surah - 1][key.ayah - 1]),
+        SearchAyah(
+          key,
+          value,
+          translations[key.surah - 1][key.ayah - 1],
+          roots: ((rootsOf[key.surah - 1] as List)[key.ayah - 1] as List).cast<String>(),
+        ),
     ];
   });
 }
