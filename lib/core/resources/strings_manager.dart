@@ -576,4 +576,12 @@ abstract final class StringsManager {
   static const String numberName = 'numberName';
   static const String noAyahsFound = 'noAyahsFound';
   static const String searchQuranHint = 'searchQuranHint';
+  static const String downloadSurah = 'downloadSurah';
+  static const String surahDownloaded = 'surahDownloaded';
+  static const String downloads = 'downloads';
+  static const String noDownloads = 'noDownloads';
+  static const String noDownloadsBody = 'noDownloadsBody';
+  static const String deleteDownloadTitle = 'deleteDownloadTitle';
+  static const String deleteDownloadBody = 'deleteDownloadBody';
+  static const String sizeMb = 'sizeMb';
 }

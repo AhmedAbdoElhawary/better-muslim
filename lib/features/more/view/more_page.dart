@@ -64,9 +64,19 @@ class MorePage extends ConsumerWidget {
                     const RSizedBox.vertical(SpaceManager.sectionGap),
                     const _SoundSection(),
                     const RSizedBox.vertical(SpaceManager.sectionGap),
-                    const GroupedSection(
+                    GroupedSection(
                       label: StringsManager.sectionYourData,
-                      children: [BackupRow(), RestoreRow(), ResetRow()],
+                      children: [
+                        NavRow(
+                          icon: BmIcon.ui(BmUiIcon.download, size: SizeManager.iconList.r),
+                          title: StringsManager.downloads,
+                          heroTag: Routes.downloads,
+                          onTap: () => context.push(Routes.downloads),
+                        ),
+                        const BackupRow(),
+                        const RestoreRow(),
+                        const ResetRow(),
+                      ],
                     ),
                     const RSizedBox.vertical(SpaceManager.sectionGap),
                     const ContactSection(),

@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,3 +64,74 @@ Future<void> playFrom(BuildContext context, WidgetRef ref, AyahKey from, {AyahKe
         ),
       );
 }
+
+/// progress is null until the first file is in
+typedef SurahDownload = ({bool ready, bool downloading, double? progress});
+
+const SurahDownload _idle = (ready: false, downloading: false, progress: null);
+const SurahDownload _ready = (ready: true, downloading: false, progress: null);
+
+/// one surah in one voice
+final surahDownloadProvider =
+    NotifierProvider.family<SurahDownloadNotifier, SurahDownload, (Reciter, int)>(
+      SurahDownloadNotifier.new,
+    );
+
+class SurahDownloadNotifier extends Notifier<SurahDownload> {
+  SurahDownloadNotifier(this.surah);
+
+  final (Reciter, int) surah;
+
+  Future<List<AyahKey>> get _files async {
+    final assets = await ref.read(quranAssetsProvider.future);
+    return surahFiles(surah.$2, assets.surah(surah.$2).ayahs);
+  }
+
+  @override
+  SurahDownload build() {
+    unawaited(() async {
+      final ready = await ref.read(recitationFilesProvider).isSurahReady(surah.$1, await _files);
+      if (ready) state = _ready;
+    }());
+    return _idle;
+  }
+
+  /// throws a RecitationException, offline included, what came in stays for the next tap
+  Future<void> download() async {
+    if (state.ready || state.downloading) return;
+    state = (ready: false, downloading: true, progress: null);
+    try {
+      await ref
+          .read(recitationFilesProvider)
+          .downloadSurah(
+            surah.$1,
+            await _files,
+            onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
+          );
+      state = _ready;
+    } on Object {
+      state = _idle;
+      rethrow;
+    } finally {
+      ref.invalidate(downloadsProvider);
+    }
+  }
+
+  Future<void> delete() async {
+    await ref.read(recitationFilesProvider).deleteSurah(surah.$1, surah.$2);
+    state = _idle;
+    ref.invalidate(downloadsProvider);
+  }
+}
+
+/// More's Downloads page, the reciters with nothing downloaded left out
+final downloadsProvider = FutureProvider<Map<Reciter, List<({int surah, int bytes})>>>((ref) async {
+  final assets = await ref.watch(quranAssetsProvider.future);
+  final files = ref.watch(recitationFilesProvider);
+  return {
+    for (final reciter in Reciter.values)
+      if (await files.downloaded(reciter, (surah) => assets.surah(surah).ayahs) case final surahs
+          when surahs.isNotEmpty)
+        reciter: surahs,
+  };
+});

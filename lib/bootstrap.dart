@@ -63,10 +63,11 @@ Future<void> _boot(FlavorConfig config) async {
   }
 
   /// here and not in a provider, audio_service starts once and only in the app's own engine
+  final recitationFiles = RecitationFiles();
   final recitation = config.isDesignScenario
       ? null
       : await AudioServiceRecitation.init(
-          RecitationFiles(),
+          recitationFiles,
           channel: (await AppLocalizations.load(AppLocalizations.localeOf(settings.language)))
               .tr(StringsManager.tabQuran, const {}),
         );
@@ -85,6 +86,7 @@ Future<void> _boot(FlavorConfig config) async {
         onboardingProvider.overrideWith(() => OnboardingNotifier(done: settings.onboarded)),
         if (config.isDesignScenario) ...designScenarioOverrides(),
         if (recitation != null) recitationProvider.overrideWithValue(recitation),
+        recitationFilesProvider.overrideWithValue(recitationFiles),
       ],
       child: const NotificationsBoot(
         child: SurfacesBoot(child: RecitationBoot(child: App())),

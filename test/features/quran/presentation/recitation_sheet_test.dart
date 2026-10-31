@@ -124,6 +124,23 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('download offline shows the offline message and can be tapped again', (tester) async {
+    await opened(tester);
+
+    await tester.tap(labelled('Download surah'));
+
+    /// the folder is made on a real clock, the oil drop never settles while it waits
+    for (var i = 0; i < 5; i++) {
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    }
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Connect to the internet to download this recitation.'), findsOneWidget);
+    expect(labelled('Download surah'), findsOneWidget);
+    await unmount(tester);
+  });
+
   testWidgets('a picked repeat is saved and reaches the recitation', (tester) async {
     final recitation = await opened(tester);
 

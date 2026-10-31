@@ -6,7 +6,11 @@ import 'package:better_muslim/core/network/download.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+
+/// one for the player and the downloads, so they share the one download at a time
+final recitationFilesProvider = Provider<RecitationFiles>((ref) => RecitationFiles());
 
 class RecitationException implements Exception {
   const RecitationException(this.failure);
@@ -98,6 +102,50 @@ class RecitationFiles {
       if (!(await _file(reciter, key)).existsSync()) return false;
     }
     return true;
+  }
+
+  /// what's already here is kept, so after a lost connection a new tap goes on from there
+  Future<void> downloadSurah(
+    Reciter reciter,
+    List<AyahKey> keys, {
+    void Function(double progress)? onProgress,
+  }) async {
+    for (final (i, key) in keys.indexed) {
+      await file(reciter, key);
+      onProgress?.call((i + 1) / keys.length);
+    }
+  }
+
+  /// the surahs with every file on the phone and their size, the bismillah counts for al-fatiha
+  Future<List<({int surah, int bytes})>> downloaded(
+    Reciter reciter,
+    int Function(int surah) ayahs,
+  ) async {
+    /// listing makes no folder
+    final folder = Directory('${(await _root()).path}/recitations/${reciter.name}');
+    if (!folder.existsSync()) return [];
+    final counts = <int, int>{};
+    final sizes = <int, int>{};
+    for (final entry in folder.listSync().whereType<File>()) {
+      final name = entry.uri.pathSegments.last;
+      if (!name.endsWith('.mp3')) continue;
+      final surah = int.parse(name.substring(0, 3));
+      counts[surah] = (counts[surah] ?? 0) + 1;
+      sizes[surah] = (sizes[surah] ?? 0) + entry.lengthSync();
+    }
+    final bismillah = File('${folder.path}/${name(const AyahKey(1, 1))}').existsSync();
+    return [
+      for (final surah in counts.keys.toList()..sort())
+        if (counts[surah] == ayahs(surah) && (bismillah || surah == 9))
+          (surah: surah, bytes: sizes[surah]!),
+    ];
+  }
+
+  Future<void> deleteSurah(Reciter reciter, int surah) async {
+    final prefix = '$surah'.padLeft(3, '0');
+    for (final entry in (await folder(reciter)).listSync().whereType<File>()) {
+      if (entry.uri.pathSegments.last.startsWith(prefix)) entry.deleteSync();
+    }
   }
 
   Future<T> _one<T>(Future<T> Function() job) {

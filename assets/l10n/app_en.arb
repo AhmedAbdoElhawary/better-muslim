@@ -1082,5 +1082,18 @@
   "jumpToAyah": "JUMP TO AYAH",
   "numberName": "{n} · {name}",
   "noAyahsFound": "No ayahs found",
-  "searchQuranHint": "Search ignores diacritics and hamza forms."
+  "searchQuranHint": "Search ignores diacritics and hamza forms.",
+  "downloadSurah": "Download surah",
+  "surahDownloaded": "Downloaded",
+  "downloads": "Downloads",
+  "noDownloads": "No downloads yet",
+  "noDownloadsBody": "Download a surah from the recitation sheet to listen with no internet.",
+  "deleteDownloadTitle": "Delete this download?",
+  "deleteDownloadBody": "The surah plays from the internet again.",
+  "sizeMb": "{n} MB",
+  "@sizeMb": {
+    "placeholders": {
+      "n": {}
+    }
+  }
 }

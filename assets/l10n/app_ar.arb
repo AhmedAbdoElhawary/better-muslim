@@ -613,5 +613,13 @@
   "jumpToAyah": "الانتقال إلى الآية",
   "numberName": "{n} · {name}",
   "noAyahsFound": "لا توجد آيات",
-  "searchQuranHint": "البحث لا يتأثر بالتشكيل ولا بصور الهمزة."
+  "searchQuranHint": "البحث لا يتأثر بالتشكيل ولا بصور الهمزة.",
+  "downloadSurah": "تنزيل السورة",
+  "surahDownloaded": "تم التنزيل",
+  "downloads": "التنزيلات",
+  "noDownloads": "لا توجد تنزيلات بعد",
+  "noDownloadsBody": "نزّل سورة من شاشة التلاوة لتستمع إليها دون إنترنت.",
+  "deleteDownloadTitle": "حذف هذا التنزيل؟",
+  "deleteDownloadBody": "ستُشغَّل السورة من الإنترنت مرة أخرى.",
+  "sizeMb": "{n} م.ب"
 }

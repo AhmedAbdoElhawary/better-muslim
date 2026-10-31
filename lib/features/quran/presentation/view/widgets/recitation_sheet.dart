@@ -15,10 +15,13 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/picker_row.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
+import 'package:better_muslim/features/quran/data/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
@@ -41,12 +44,16 @@ class RecitationSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ready = ref.watch(
-      recitationStateProvider.select((state) => state.value?.surahReady ?? false),
-    );
     final reciter = ref.watch(
       settingsProvider.select((settings) => settings.value?.reciter ?? Reciter.alafasy),
     );
+    final surah = ref.watch(recitationStateProvider.select((state) => state.value?.from?.surah));
+    final ready =
+        ref.watch(recitationStateProvider.select((state) => state.value?.surahReady ?? false)) ||
+        (surah != null &&
+            ref.watch(
+              surahDownloadProvider((reciter, surah)).select((download) => download.ready),
+            ));
     return ReaderSheet(
       open: open,
       onClose: onClose,
@@ -102,6 +109,7 @@ class RecitationSheet extends ConsumerWidget {
                 ),
               ),
             ),
+            const _Download(),
             RoundButton(icon: BmUiIcon.chevron_down, label: StringsManager.close, onTap: onClose),
           ],
         ),
@@ -120,6 +128,57 @@ class RecitationSheet extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// the playing surah in the chosen voice, kept for offline. a lost connection keeps what came in
+class _Download extends ConsumerWidget {
+  const _Download();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reciter = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reciter ?? Reciter.alafasy),
+    );
+    final surah = ref.watch(recitationStateProvider.select((state) => state.value?.from?.surah));
+    if (surah == null) return const SizedBox.shrink();
+    final download = ref.watch(surahDownloadProvider((reciter, surah)));
+    if (download.downloading) {
+      return Semantics(
+        label: context.tr(StringsManager.downloading),
+        child: RSizedBox.square(
+          dimension: SizeManager.hit,
+          child: Center(
+            child: BmOilDrop(size: SizeManager.oilDropSmall, progress: download.progress),
+          ),
+        ),
+      );
+    }
+    if (download.ready) {
+      return const RoundButton(
+        icon: BmUiIcon.check,
+        label: StringsManager.surahDownloaded,
+        onTap: null,
+      );
+    }
+    return RoundButton(
+      icon: BmUiIcon.download,
+      label: StringsManager.downloadSurah,
+      onTap: () async {
+        try {
+          await ref.read(surahDownloadProvider((reciter, surah)).notifier).download();
+        } on RecitationException catch (error) {
+          if (!context.mounted) return;
+          showToast(
+            context,
+            error.failure == RecitationFailure.offline
+                ? StringsManager.recitationOffline
+                : StringsManager.downloadFailed,
+            icon: BmIconName.listen,
+          );
+        }
+      },
     );
   }
 }

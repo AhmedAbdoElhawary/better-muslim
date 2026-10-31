@@ -151,6 +151,12 @@ List<AyahKey> recitationQueue(AyahKey from, AyahKey to, {int repeat = 1}) => [
 /// the bismillah is al-fatiha's first ayah
 AyahKey recitationFile(AyahKey item) => item.ayah == 0 ? const AyahKey(1, 1) : item;
 
+/// every file a downloaded surah needs, its bismillah first
+List<AyahKey> surahFiles(int surah, int ayahs) => [
+  if (surah != 1 && surah != 9) const AyahKey(1, 1),
+  for (var ayah = 1; ayah <= ayahs; ayah++) AyahKey(surah, ayah),
+];
+
 /// the pause between ayahs only, never inside a repeat
 bool pausesBefore(List<AyahKey> queue, int index) =>
     index > 0 && index < queue.length && queue[index] != queue[index - 1];

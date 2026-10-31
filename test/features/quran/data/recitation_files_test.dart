@@ -173,4 +173,63 @@ void main() {
     expect(sent..sort(), ['accept-encoding', 'host']);
     await server.close();
   });
+
+  group('a downloaded surah', () {
+    /// al-ikhlas has 4 ayahs, its bismillah is al-fatiha's first
+    final ikhlas = surahFiles(112, 4);
+
+    test(
+      'fetches every ayah and the bismillah, with progress, and lists it with its size',
+      () async {
+        final recitations = files((_) => serve(_mp3));
+        final progress = <double>[];
+        await recitations.downloadSurah(Reciter.husary, ikhlas, onProgress: progress.add);
+
+        expect(asked.map((uri) => uri.toString()), [
+          'https://everyayah.com/data/Husary_128kbps/001001.mp3',
+          for (var ayah = 1; ayah <= 4; ayah++)
+            'https://everyayah.com/data/Husary_128kbps/11200$ayah.mp3',
+        ]);
+        expect(progress.last, 1);
+        expect(await recitations.isSurahReady(Reciter.husary, ikhlas), isTrue);
+        expect(await recitations.downloaded(Reciter.husary, (surah) => surah == 112 ? 4 : 7), [
+          (surah: 112, bytes: 4 * _mp3.length),
+        ]);
+        expect(await recitations.downloaded(Reciter.alafasy, (_) => 4), isEmpty);
+        expect(excluded, ['${root.path}/recitations/husary']);
+      },
+    );
+
+    test('a half surah is not listed, and offline keeps what is done and goes on later', () async {
+      var online = true;
+      final recitations = files((uri) {
+        if (!online) throw const SocketException('offline');
+        if (uri.pathSegments.last == '112002.mp3') online = false;
+        return serve(_mp3);
+      });
+      expect(
+        await failure(recitations.downloadSurah(Reciter.alafasy, ikhlas)),
+        RecitationFailure.offline,
+      );
+      expect(await recitations.downloaded(Reciter.alafasy, (_) => 4), isEmpty);
+
+      online = true;
+      asked.clear();
+      await recitations.downloadSurah(Reciter.alafasy, ikhlas);
+      expect(asked.map((uri) => uri.pathSegments.last), ['112003.mp3', '112004.mp3']);
+      expect(await recitations.downloaded(Reciter.alafasy, (_) => 4), [
+        (surah: 112, bytes: 4 * _mp3.length),
+      ]);
+    });
+
+    test("delete takes the surah's files and leaves the bismillah to al-fatiha", () async {
+      final recitations = files((_) => serve(_mp3));
+      await recitations.downloadSurah(Reciter.alafasy, ikhlas);
+      await recitations.file(Reciter.alafasy, const AyahKey(113, 1));
+      await recitations.deleteSurah(Reciter.alafasy, 112);
+
+      expect(left()..sort(), ['001001.mp3', '113001.mp3']);
+      expect(await recitations.isSurahReady(Reciter.alafasy, ikhlas), isFalse);
+    });
+  });
 }
