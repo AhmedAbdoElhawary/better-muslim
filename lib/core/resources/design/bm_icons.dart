@@ -54,6 +54,7 @@ enum BmUiIcon {
   lock,
   tafsir,
   note,
+  note_filled,
   plus,
   minus,
   more_h,
