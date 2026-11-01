@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/model/dua_search.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<DuaCategory> categories;
-  setUpAll(() async => categories = await loadDuas());
+  setUpAll(() async => categories = await loadDuas(await QuranAssets.load()));
 
   Set<String> found(String query) => {
     for (final (_, category) in searchDuas(query, categories)) category.name.en,
@@ -26,7 +27,12 @@ void main() {
     expect(found('4/325'), contains('Leaving the home'));
     expect(found('٤/٣٢٥'), contains('Leaving the home'));
     expect(found('sleeping'), {'Before sleeping'});
-    expect(found('النوم'), {'Before sleeping'});
+    expect(found('النوم'), contains('Before sleeping'));
+  });
+
+  test('finds the hisn al-muslim chapters past the 4.14 five', () {
+    expect(found('الريح'), contains('During a wind storm'));
+    expect(found('Muslim 3/1362'), {'Against enemies'});
   });
 
   test('every word counts, in any order', () {

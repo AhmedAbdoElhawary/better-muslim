@@ -26,10 +26,6 @@ Future<bool> showBmDialog(
   required String title,
   required String body,
   required String action,
-  String cancel = StringsManager.cancel,
-
-  /// false for the reset notice, where the action is a way forward
-  bool destructive = true,
 }) async {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
   final confirmed = await showGeneralDialog<bool>(
@@ -51,8 +47,7 @@ Future<bool> showBmDialog(
       },
       child: _Enter(animation: animation, reduceMotion: reduceMotion, child: child),
     ),
-    pageBuilder: (context, _, _) =>
-        _Dialog(title: title, body: body, action: action, cancel: cancel, destructive: destructive),
+    pageBuilder: (context, _, _) => _Dialog(title: title, body: body, action: action),
   );
   return confirmed ?? false;
 }
@@ -86,20 +81,12 @@ class _Enter extends StatelessWidget {
 }
 
 class _Dialog extends StatelessWidget {
-  const _Dialog({
-    required this.title,
-    required this.body,
-    required this.action,
-    required this.cancel,
-    required this.destructive,
-  });
+  const _Dialog({required this.title, required this.body, required this.action});
 
   /// StringsManager keys
   final String title;
   final String body;
   final String action;
-  final String cancel;
-  final bool destructive;
 
   @override
   Widget build(BuildContext context) {
@@ -152,10 +139,10 @@ class _Dialog extends StatelessWidget {
                       spacing: SpaceManager.s2.r,
                       runSpacing: SpaceManager.s2.r,
                       children: [
-                        _Action(cancel, onTap: () => Navigator.pop(context, false)),
+                        _Action(StringsManager.cancel, onTap: () => Navigator.pop(context, false)),
                         _Action(
                           action,
-                          destructive: destructive,
+                          destructive: true,
                           onTap: () => Navigator.pop(context, true),
                         ),
                       ],

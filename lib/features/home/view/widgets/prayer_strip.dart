@@ -12,8 +12,7 @@ class PrayerStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /// "12:05 PM" needs about 73 pt and a cell is 69, so 12 hour phones always get rows (R15)
-    if (context.isLargeText || !MediaQuery.alwaysUse24HourFormatOf(context)) {
+    if (context.isLargeText) {
       return Column(
         children: [
           for (final prayer in Prayer.values) ...[

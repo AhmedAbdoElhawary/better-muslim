@@ -1,11 +1,14 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/model/dua_search.dart';
 import 'package:better_muslim/features/duas/model/duas_view.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final duasContentProvider = FutureProvider<List<DuaCategory>>((ref) => loadDuas());
+final duasContentProvider = FutureProvider<List<DuaCategory>>(
+  (ref) async => loadDuas(await ref.watch(quranAssetsProvider.future)),
+);
 
 /// back to all each time duas opens
 final duaChipProvider = NotifierProvider.autoDispose<SelectedChip, DuaChip>(SelectedChip.new);

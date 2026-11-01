@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +10,7 @@ abstract final class BackupExclusion {
 
   /// a failure is reported, not thrown, so the app still starts
   static Future<void> exclude(String path) async {
+    if (!Platform.isIOS) return;
     try {
       await _channel.invokeMethod('exclude', path);
     } on PlatformException catch (error, stack) {

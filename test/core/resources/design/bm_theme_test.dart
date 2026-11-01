@@ -34,4 +34,19 @@ void main() {
     final quarter = BmColors(dark).lerp(BmColors(light), .25).p;
     expect(quarter.primary, Color.lerp(dark.primary, light.primary, .25));
   });
+
+  test('the 8 explored themes after the first 8, in the exploration order', () {
+    expect(bmThemeOrder.skip(8), [
+      BmThemeId.saharaSand,
+      BmThemeId.zaytun,
+      BmThemeId.attar,
+      BmThemeId.noorMidnight,
+      BmThemeId.qiyamDusk,
+      BmThemeId.qiyamCopper,
+      BmThemeId.qiyamLapis,
+      BmThemeId.qiyamSand,
+    ]);
+    expect(bmThemeOrder.toSet(), BmThemeId.values.toSet());
+    expect(bmThemes.keys.toSet(), BmThemeId.values.toSet());
+  });
 }

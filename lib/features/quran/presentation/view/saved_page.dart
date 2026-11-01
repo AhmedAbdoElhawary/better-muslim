@@ -2,6 +2,8 @@ import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/last_read.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/resources/design/bm_haptics.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -15,9 +17,14 @@ import 'package:better_muslim/core/widgets/empty_state.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
+import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/domain/bookmark.dart';
+import 'package:better_muslim/features/quran/domain/category.dart';
+import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_menu.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
@@ -28,14 +35,15 @@ import 'package:go_router/go_router.dart';
 
 enum _Tab {
   bookmarks(StringsManager.bookmarks),
-  notes(StringsManager.notes);
+  notes(StringsManager.notes),
+  highlights(StringsManager.highlights);
 
   const _Tab(this.label);
 
   final String label;
 }
 
-/// 4.29, bookmarks and notes. highlights and search wait for 7b
+/// 4.29, bookmarks by category, notes and highlights
 class SavedPage extends StatefulWidget {
   const SavedPage({this.notes = false, super.key});
 
@@ -79,6 +87,7 @@ class _SavedPageState extends State<SavedPage> {
                             child: switch (_tab) {
                               _Tab.bookmarks => const _Bookmarks(),
                               _Tab.notes => const _Notes(),
+                              _Tab.highlights => const _Highlights(),
                             },
                           ),
                         ),
@@ -95,26 +104,35 @@ class _SavedPageState extends State<SavedPage> {
   }
 }
 
-/// last read first, then mine newest first, then the recent note
+/// last read first, then mine under their categories newest first, then the recent note
 class _Bookmarks extends ConsumerWidget {
   const _Bookmarks();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
-    final note = ref.watch(notesProvider.select((notes) => notes.value?.firstOrNull));
+    final categories = ref.watch(categoriesProvider).value ?? const [];
+    final note = ref.watch(writtenNotesProvider.select((notes) => notes.firstOrNull));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _LastReadRow(),
-        for (final bookmark in bookmarks) ...[
-          const RSizedBox.vertical(SpaceManager.savedGap),
-          _BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
+        for (final category in categories) ...[
+          const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
+          _CategoryHeader(category, key: ObjectKey(category)),
+          for (final bookmark in bookmarks.where(
+            (bookmark) => bookmark.category == category.id,
+          )) ...[
+            const RSizedBox.vertical(SpaceManager.savedGap),
+            _BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
+          ],
         ],
         if (bookmarks.isEmpty) ...[
           const RSizedBox.vertical(SpaceManager.savedGap),
           const EmptyState(title: StringsManager.noBookmarks, body: StringsManager.noBookmarksBody),
         ],
+        const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
+        const _NewCategory(),
         if (note != null) ...[
           const RSizedBox.vertical(SpaceManager.recentNoteTop),
           const StartPadding(
@@ -130,6 +148,94 @@ class _Bookmarks extends ConsumerWidget {
           NoteCard(note, onTap: () => _open(context, ref, note.ayah)),
         ],
       ],
+    );
+  }
+}
+
+/// the category's dot and name, like the recent note's label. a tap renames or recolors it
+class _CategoryHeader extends StatelessWidget {
+  const _CategoryHeader(this.category, {super.key});
+
+  final Category category;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HeaderButton(
+      onTap: () => showCategorySheet(context, category: category),
+      child: Row(
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.getColor(category.color.theme),
+              shape: BoxShape.circle,
+            ),
+            child: const RSizedBox.square(dimension: SizeManager.categoryDot),
+          ),
+          const RSizedBox.horizontal(SpaceManager.s2),
+          Expanded(
+            child: MediumText(
+              categoryName(context, category),
+              translate: false,
+              fontSize: FontSizeManager.sectionLabel,
+              color: ThemeEnum.text2,
+            ),
+          ),
+          BmIcon.ui(BmUiIcon.note, size: 16),
+        ],
+      ),
+    );
+  }
+}
+
+/// the picker's New category, here so a category can be made before its first bookmark
+class _NewCategory extends StatelessWidget {
+  const _NewCategory();
+
+  @override
+  Widget build(BuildContext context) {
+    return _HeaderButton(
+      onTap: () => showCategorySheet(context),
+      child: Row(
+        children: [
+          BmIcon.ui(
+            BmUiIcon.plus,
+            size: SizeManager.iconInline.r,
+            color: context.getColor(ThemeEnum.primary),
+          ),
+          const RSizedBox.horizontal(SpaceManager.s2),
+          const Expanded(
+            child: MediumText(
+              StringsManager.newCategory,
+              fontSize: FontSizeManager.sectionLabel,
+              color: ThemeEnum.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// a header line with the 44 pt hit target
+class _HeaderButton extends StatelessWidget {
+  const _HeaderButton({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          constraints: BoxConstraints(minHeight: SizeManager.hit.r),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(RadiusManager.sm.r)),
+          child: StartPadding(padding: SpaceManager.s1, child: child),
+        ),
+      ),
     );
   }
 }
@@ -280,7 +386,7 @@ class _Notes extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notes = ref.watch(notesProvider).value ?? const [];
+    final notes = ref.watch(writtenNotesProvider);
     if (notes.isEmpty) {
       return const EmptyState(title: StringsManager.noNotes, body: StringsManager.noNotesBody);
     }
@@ -294,6 +400,55 @@ class _Notes extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// every highlighted ayah with its note, a long press takes the highlight off
+class _Highlights extends ConsumerWidget {
+  const _Highlights();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final highlights = ref.watch(highlightsProvider);
+    if (highlights.isEmpty) {
+      return const EmptyState(
+        title: StringsManager.noHighlights,
+        body: StringsManager.noHighlightsBody,
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, note) in highlights.indexed) ...[
+          if (i > 0) const RSizedBox.vertical(SpaceManager.savedGap),
+          NoteCard(
+            note,
+            key: ValueKey(note.ayah),
+            showArabic: true,
+            onTap: () => _open(context, ref, note.ayah),
+            onLongPress: () => _unhighlight(context, ref, note),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// the note text stays with its time, so it keeps its place in Notes. an empty one goes
+Future<void> _unhighlight(BuildContext context, WidgetRef ref, Note note) async {
+  final store = ref.read(quranStoreProvider);
+  BmHaptics.selection();
+  if (note.text.isEmpty) {
+    await store.deleteNote(note.ayah);
+  } else {
+    await store.restoreNote(Note(ayah: note.ayah, text: note.text, updatedAt: note.updatedAt));
+  }
+  if (!context.mounted) return;
+  showToast(
+    context,
+    StringsManager.highlightRemoved,
+    icon: BmIconName.quran,
+    onUndo: () => store.restoreNote(note),
+  );
 }
 
 /// a note opens its ayah washed on its page

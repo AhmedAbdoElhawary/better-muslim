@@ -46,7 +46,21 @@ abstract final class BmMotion {
   static const zoomFar = .9;
 
   // Motion v2 (11 Motion v2's spec table)
-  static const oilCycle = Duration(milliseconds: 1600);
+  /// the self-drawing star (Brand's Noor): each stroke draws for starDraw from its start, rests,
+  /// then the whole star fades
+  static const starStarts = [
+    Duration.zero,
+    Duration(milliseconds: 400),
+    Duration(milliseconds: 900),
+    Duration(milliseconds: 1400),
+  ];
+  static const starDraw = Duration(milliseconds: 3600);
+  static const starRest = Duration(milliseconds: 800);
+  static const starFade = Duration(milliseconds: 400);
+  static const starCycle = Duration(milliseconds: 1400 + 3600 + 800 + 400);
+
+  /// reduce motion's half breath, scale .96 to 1.04 and back
+  static const starBreathe = Duration(milliseconds: 3000);
   static const loaderDelay = Duration(milliseconds: 400);
   static const loaderMinimum = Duration(milliseconds: 600);
   static const shimmer = Duration(milliseconds: 1200);

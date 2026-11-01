@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/extensions/window_size.dart';
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
@@ -12,10 +13,10 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
-import 'package:better_muslim/features/prayer/presentation/providers/row_state.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/row_trailing.dart';
+import 'package:better_muslim/features/prayer/presentation/view/widgets/sound_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -52,6 +53,7 @@ class PrayerRow extends ConsumerWidget {
                     icon: _PrayerIcon(prayer: prayer, color: icon),
                     name: name,
                     time: clock,
+                    sound: SoundButton(prayer),
                     trailing: trailing,
                   )
                 : Row(
@@ -60,8 +62,7 @@ class PrayerRow extends ConsumerWidget {
                       const RSizedBox.horizontal(SpaceManager.prayerRowGap),
                       Expanded(child: name),
                       clock,
-                      const RSizedBox.horizontal(SpaceManager.s2),
-
+                      SoundButton(prayer),
                       RSizedBox(
                         width: SizeManager.rowTrailing,
                         height: SizeManager.hit,
@@ -110,8 +111,8 @@ class SunriseRow extends ConsumerWidget {
                 ),
               ),
               _Time(time: time, minor: true),
-              const RSizedBox.horizontal(SpaceManager.s2),
-              if (!context.isLargeText) const RSizedBox.horizontal(SizeManager.rowTrailing),
+              if (!context.isLargeText)
+                const RSizedBox.horizontal(SizeManager.hit + SizeManager.rowTrailing),
             ],
           ),
         ),
@@ -126,12 +127,14 @@ class _Stacked extends StatelessWidget {
     required this.icon,
     required this.name,
     required this.time,
+    required this.sound,
     required this.trailing,
   });
 
   final Widget icon;
   final Widget name;
   final Widget time;
+  final Widget sound;
   final Widget trailing;
 
   @override
@@ -151,6 +154,7 @@ class _Stacked extends StatelessWidget {
           Row(
             children: [
               Expanded(child: time),
+              sound,
               EndPadding(padding: SpaceManager.s2, child: trailing),
             ],
           ),

@@ -35,8 +35,9 @@ From the spec to the code:
 | `ICON outline/x`, `ICON ui/x` | `BmIcon(BmIconName.x)`, `BmIcon.ui(BmUiIcon.x)` |
 | animation, haptic | `BmMotion` + `MOTION.md`, `BmHaptics` |
 
-- Always-dark surfaces (adhan screen, system surfaces) may use literal colors: add that one file
-  to the allow list at the top of `test/architecture_test.dart`.
+- The always-dark adhan screen may use literal colors: add that one file to the allow list at the
+  top of `test/architecture_test.dart`. The widgets and the live countdown take the theme's colors
+  from the surface data.
 - Text scale is clamped at 2.0 in `App`. Above 1.4 the countdown and prayer rows stack.
 - Living Sky follows `BmSkyState`. The design scenario shows the theme's base sky.
 - Quran mockups use Amiri Quran. Production needs KFGQPC Hafs + QCF V2 (licensed separately).
@@ -62,8 +63,8 @@ From the spec to the code:
 9. More, Theme and Hijri calendar: every setting, the 8 themes with Follow sky, the calendar with its
    events and adjustment, the Adhan and reminders page, Reset prayer journey and Credits. **Done,
    waiting for my review.**
-10. Onboarding and backup: the sunrise first screen in liquid glass, the welcome, location,
-    notifications and theme steps, the backup file with Back up and Restore, the store reset notice.
+10. Onboarding: the sunrise first screen in liquid glass, the welcome, location, notifications and
+    theme steps. Backup and restore with the store reset notice was built here, then removed.
     **Done, waiting for my review.**
 11. Widgets and Live Activity: the iOS home widgets and lock screen accessories, the Android widget,
     the countdown before each prayer as a Live Activity with the Dynamic Island and as an Android

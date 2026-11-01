@@ -182,7 +182,7 @@ void main() {
 
     test('each prayer\'s recording goes to the scheduler', () async {
       await db.updateSettings(
-        const SettingsCompanion(maghribRecording: Value(AdhanRecording.madinah)),
+        const SettingsCompanion(maghribRecording: Value(AdhanRecording.alafasy)),
       );
       final scheduler = FakeScheduler();
       await topUp(
@@ -194,8 +194,8 @@ void main() {
         now: makkah(9, 0),
       );
       final recordings = scheduler.appliedRecordings.single;
-      expect(recordings[Prayer.maghrib], AdhanRecording.madinah);
-      expect(recordings[Prayer.fajr], AdhanRecording.madinah);
+      expect(recordings[Prayer.maghrib], AdhanRecording.alafasy);
+      expect(recordings[Prayer.fajr], AdhanRecording.alafasy);
     });
 
     test('on by default: 3 quiet nudges, tonight\'s first before asr + 20', () async {

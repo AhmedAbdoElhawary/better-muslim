@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/router/app_router.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
@@ -112,7 +112,7 @@ void main() {
     chunks.add(_body.sublist(0, _body.length ~/ 2));
     await settle(tester);
     expect(inStudy(find.text('Downloading')), findsOneWidget);
-    expect(inStudy(find.byType(BmOilDrop)), findsWidgets);
+    expect(inStudy(find.byType(BmStarLoader)), findsWidgets);
 
     chunks.add(_body.sublist(_body.length ~/ 2));
     unawaited(chunks.close());

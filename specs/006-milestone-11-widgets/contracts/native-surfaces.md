@@ -24,9 +24,10 @@ The same few rules in Swift (`ios/PrayerWidgets/`, `packages/prayer_surfaces/ios
 - `until`
 - whichever comes first. iOS puts them in the timeline, Android arms the non wakeup tick.
 
-## Countdown window covering `now`
+## The live countdown
 
-The window with `start <= now < end`. None: no countdown.
+The entry in force while the app is off screen (contracts/surfaces-channel.md). None with the
+switch off or no place.
 
 ## Never mirrored
 

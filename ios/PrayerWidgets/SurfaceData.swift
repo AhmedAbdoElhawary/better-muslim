@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 /// surfaces.json as the app writes it (contracts/surface-data.md). every text is final, only the
 /// countdown numbers and the shares are worked out here (contracts/native-surfaces.md)
@@ -8,10 +8,12 @@ struct SurfaceData: Decodable {
   let language: String
   let eastern: Bool
   let countdown: Bool
+  /// optional, a version 1 file from before an update still shows its times
+  let mode: String?
+  let colors: SurfaceColors?
   let until: Double
   let texts: Texts
   let entries: [Entry]
-  let countdowns: [Window]
 
   struct Texts: Decodable {
     let noPlace: String
@@ -49,6 +51,7 @@ struct SurfaceData: Decodable {
     let prayedLine: String
     let reminder: String?
     let next: Int?
+    let light: Bool?
     let strip: [Cell]
   }
 
@@ -58,12 +61,6 @@ struct SurfaceData: Decodable {
     let time: String
     let logged: Bool
     let past: Bool
-  }
-
-  struct Window: Decodable {
-    let start: Double
-    let end: Double
-    let entry: Int
   }
 
   /// the app group container the app writes into
@@ -76,6 +73,12 @@ struct SurfaceData: Decodable {
   }
 
   var isArabic: Bool { language == "ar" }
+
+  /// the entry's light or dark, follow sky already worked out per entry by the app
+  func palette(_ entry: Entry) -> SurfacePalette {
+    guard let colors, let light = entry.light else { return .system }
+    return light ? colors.light : colors.dark
+  }
 
   func entry(at date: Date) -> Entry? {
     let ms = date.millis
@@ -156,7 +159,7 @@ enum SurfaceFile {
     guard let url = SurfaceData.url, let raw = try? Data(contentsOf: url),
       let header = try? JSONDecoder().decode(Header.self, from: raw)
     else { return .missing }
-    guard header.version <= 1, let data = try? JSONDecoder().decode(SurfaceData.self, from: raw)
+    guard header.version <= 2, let data = try? JSONDecoder().decode(SurfaceData.self, from: raw)
     else { return .newer }
     return .data(data)
   }
@@ -188,6 +191,18 @@ enum SurfaceState {
       } else {
         self = .outdated(data.texts.outdated)
       }
+    }
+  }
+}
+
+extension SurfaceFile {
+  /// a message has no entry: the app's mode, or the phone's when following a sky it hasn't got
+  func palette(_ scheme: ColorScheme) -> SurfacePalette {
+    guard let colors = data?.colors else { return .system }
+    switch data?.mode {
+    case "light": return colors.light
+    case "dark": return colors.dark
+    default: return scheme == .light ? colors.light : colors.dark
     }
   }
 }

@@ -1,13 +1,17 @@
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/azkar.dart';
+import 'package:better_muslim/core/settings/quran.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// the text of a 4.14 dua card: title and source, the arabic, then in english the
 /// transliteration and the translation. arabic shows only the arabic and its source
-class DuaText extends StatelessWidget {
+class DuaText extends ConsumerWidget {
   const DuaText({
     required this.arabic,
     required this.transliteration,
@@ -45,7 +49,13 @@ class DuaText extends StatelessWidget {
   final bool centered;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final font = ref.watch(azkarFontProvider);
+
+    /// a verse looks the same here, in the reader and on its share card
+    final quranFont = ref.watch(
+      settingsProvider.select((settings) => (settings.value?.quranFont ?? QuranFont.kfgqpc).font),
+    );
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final title = this.title;
     final source = this.source;
@@ -85,7 +95,7 @@ class DuaText extends StatelessWidget {
           child: RegularText(
             arabic,
             translate: false,
-            font: quran ? FontEnum.quran : FontEnum.dua,
+            font: quran ? quranFont : font,
             fontSize: centered ? FontSizeManager.zikrAr : FontSizeManager.duaAr,
             height: quran ? LineHeightManager.quranAr : LineHeightManager.duaAr,
             textAlign: align,

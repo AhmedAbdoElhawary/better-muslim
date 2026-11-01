@@ -1,6 +1,5 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
-import 'package:better_muslim/core/database/civil_date.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/features/prayer/domain/week.dart';
 import 'package:drift/drift.dart';
@@ -17,8 +16,6 @@ class QadaRepository {
 
   final AppDatabase _db;
   final DateTime Function() _clock;
-
-  static const _date = CivilDate();
 
   $QadaEntriesTable get _qada => _db.qadaEntries;
 
@@ -39,14 +36,6 @@ class QadaRepository {
                 row.madeUpAt.isNull(),
           ))
           .go();
-
-  /// the dated entries of the 7 days from a sunday, one query per visible week
-  Stream<Map<(DateTime, Prayer), QadaEntry>> watchWeek(DateTime weekStart) {
-    final end = DateTime(weekStart.year, weekStart.month, weekStart.day + 6);
-    final query = _db.select(_qada)
-      ..where((row) => row.missedOn.isBetweenValues(_date.toSql(weekStart), _date.toSql(end)));
-    return query.watch().map((rows) => {for (final row in rows) (row.missedOn!, row.prayer): row});
-  }
 
   /// dateless entries were missed before any dated one, so they go first. null = nothing open
   Future<int?> makeUpOldest(Prayer prayer) => _db.transaction(() async {

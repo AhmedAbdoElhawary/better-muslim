@@ -25,23 +25,13 @@ void main() {
   }
 
   group('your data', () {
-    testWidgets('back up, restore from backup, then reset prayer journey', (tester) async {
+    testWidgets('downloads, then reset prayer journey', (tester) async {
       await pumpMore(tester, await designOverrides());
       await scrollTo(tester, 'Reset prayer journey');
-      final backUp = tester.getRect(find.text('Back up')).top;
-      final restore = tester.getRect(find.text('Restore from backup')).top;
+      final downloads = tester.getRect(find.text('Downloads')).top;
       final reset = tester.getRect(find.text('Reset prayer journey')).top;
-      expect(backUp, lessThan(restore));
-      expect(restore, lessThan(reset));
-      expect(tester.getRect(find.text('YOUR DATA')).top, lessThan(backUp));
-      await unmount(tester);
-    });
-
-    testWidgets('back up opens its sheet', (tester) async {
-      await pumpMore(tester, await designOverrides());
-      await tapText(tester, 'Back up');
-      expect(find.text('Save backup'), findsOneWidget);
-      expect(find.text('Confirm password'), findsOneWidget);
+      expect(downloads, lessThan(reset));
+      expect(tester.getRect(find.text('YOUR DATA')).top, lessThan(downloads));
       await unmount(tester);
     });
   });
@@ -103,8 +93,9 @@ void main() {
         'url': 'https://www.geonames.org',
       });
 
-      await scrollTo(tester, 'Adam Synagda');
-      expect(find.text('Adhan recordings · CC0'), findsOneWidget);
+      await scrollTo(tester, 'Mishary Rashid Alafasy · Adhan and Fajr');
+      expect(find.text('Adam Synagda'), findsNothing);
+      expect(find.text('Adhan recordings'), findsOneWidget);
       await tapText(tester, 'Open source licenses');
       expect(find.byType(LicensePage), findsOneWidget);
       await unmount(tester);

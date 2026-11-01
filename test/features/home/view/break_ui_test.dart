@@ -1,6 +1,8 @@
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/features/home/view/widgets/strip_cell.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -95,6 +97,38 @@ void main() {
           }
         }
       }
+    }
+  }
+
+  /// the strip's widest 12 hour times on the narrowest phone, one row up to 1.4
+  for (final locale in const [Locale('en'), Locale('ar')]) {
+    for (final scale in const [1.0, 1.4]) {
+      testWidgets('12 hour strip, ${locale.languageCode} $scale x 320', (tester) async {
+        await pumpHome(
+          tester,
+          makkahAt(
+            tester,
+            DateTime.utc(2026, 10, 15, 10, 32),
+            extra: [
+              dayTimesProvider.overrideWith(
+                (ref, date) => times(date, [4.95, 6.25, 12.1, 15.45, 22.95, 23.95]),
+              ),
+            ],
+          ),
+          locale: locale,
+          textScale: scale,
+          size: const Size(320, 852),
+          use24: false,
+        );
+        expect(tester.takeException(), isNull);
+        expect(find.byType(StripCell), findsNWidgets(5));
+        for (final text in tester.renderObjectList<RenderParagraph>(
+          find.descendant(of: find.byType(StripCell), matching: find.byType(RichText)),
+        )) {
+          expect(text.didExceedMaxLines, isFalse, reason: text.text.toPlainText());
+        }
+        await unmount(tester);
+      });
     }
   }
 }

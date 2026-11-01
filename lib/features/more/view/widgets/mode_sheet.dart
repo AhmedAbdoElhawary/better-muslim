@@ -13,8 +13,11 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> showModeSheet(BuildContext context) =>
-    showBmSheet(context, builder: (_) => const _ModeSheet());
+Future<void> showModeSheet(BuildContext context) => showBmSheet(
+  context,
+  title: const SheetTitle(StringsManager.lightAndDark),
+  builder: (_) => const _ModeSheet(),
+);
 
 /// dark, light or follow sky, applied the moment it's picked (FR-016)
 class _ModeSheet extends ConsumerWidget {
@@ -33,7 +36,6 @@ class _ModeSheet extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetTitle(StringsManager.lightAndDark),
               for (final mode in BmThemeMode.values)
                 PickerRow(
                   title: mode.nameKey,

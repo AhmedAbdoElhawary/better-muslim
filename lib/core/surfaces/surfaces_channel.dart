@@ -11,7 +11,4 @@ class SurfacesChannel {
   /// the plugin skips the file when it holds the same json, force writes it anyway
   Future<void> update(String json, {bool force = false}) =>
       _methods.invokeMethod<void>('update', {'json': json, 'force': force});
-
-  /// the next prayer's countdown from now, whatever the 2 hours. false when the phone refused it
-  Future<bool> startNow() async => await _methods.invokeMethod<bool>('startNow') ?? false;
 }

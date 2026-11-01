@@ -11,7 +11,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
@@ -40,6 +40,8 @@ extension on TafsirSource {
     TafsirSource.muyassar => StringsManager.alMuyassar,
     TafsirSource.ibnKathir => StringsManager.ibnKathir,
     TafsirSource.saadi => StringsManager.asSadi,
+    TafsirSource.tabari => StringsManager.atTabari,
+    TafsirSource.qurtubi => StringsManager.alQurtubi,
   };
 }
 
@@ -90,6 +92,10 @@ class _StudyTabsState extends ConsumerState<StudyTabs> {
   Widget build(BuildContext context) {
     final ayah = widget.ayah;
     return SingleChildScrollView(
+      primary: true,
+
+      /// a short pane still takes the drag that grows the sheet
+      physics: const AlwaysScrollableScrollPhysics(),
       child: SafeArea(
         top: false,
         child: BottomPadding(
@@ -156,21 +162,26 @@ class _AyahCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(RadiusManager.row.r),
         boxShadow: [BoxShadow(color: context.getColor(ThemeEnum.outline), spreadRadius: 1)],
       ),
-      child: OnlyPadding(
-        top: SpaceManager.studyCardPadTop,
-        bottom: SpaceManager.studyCardPadBottom,
-        start: SpaceManager.studyCardSide,
-        end: SpaceManager.studyCardSide,
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: RegularText(
-            line,
-            translate: false,
-            font: FontEnum.quran,
-            fontSize: FontSizeManager.quranStudy,
-            height: LineHeightManager.quranStudy,
-            color: ThemeEnum.ink,
-            textAlign: TextAlign.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: SizeManager.tasbihRingArc.r),
+        child: SingleChildScrollView(
+          child: OnlyPadding(
+            top: SpaceManager.studyCardPadTop,
+            bottom: SpaceManager.studyCardPadBottom,
+            start: SpaceManager.studyCardSide,
+            end: SpaceManager.studyCardSide,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: RegularText(
+                line,
+                translate: false,
+                font: FontEnum.quran,
+                fontSize: FontSizeManager.quranStudy,
+                height: LineHeightManager.quranStudy,
+                color: ThemeEnum.ink,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ),
       ),
@@ -261,7 +272,7 @@ class _Downloading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        BmOilDrop(size: SizeManager.oilDropInline, progress: progress),
+        BmStarLoader(size: SizeManager.loaderInline, progress: progress),
         const RSizedBox.horizontal(SpaceManager.s2),
         const Expanded(child: RegularText(StringsManager.downloading, color: ThemeEnum.text2)),
         BmButton.text(StringsManager.cancel, onPressed: onCancel),

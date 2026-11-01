@@ -62,8 +62,6 @@ void main() {
     expect(ch.taglineOpacity(.6), 1);
     expect(ch.getStartedIn(.6), 0);
     expect(ch.getStartedIn(.85), 1);
-    expect(ch.restoreIn(.85), lessThan(1));
-    expect(ch.restoreIn(1), 1);
     expect(ch.fillAt(1), 1);
   });
 

@@ -61,7 +61,6 @@ Future<void> showShareSheet(
   List<ShareOrnament> ornaments = ShareOrnament.patterns,
 }) => showBmSheet(
   context,
-  maxSheetHeight: true,
   builder: (_) => ShareSheet(content: content, rows: rows, ornaments: ornaments),
 );
 
@@ -135,148 +134,165 @@ class _ShareSheetState extends ConsumerState<ShareSheet> {
     final themeId = ref.watch(themeIdProvider);
     return SafeArea(
       top: false,
-      child: SingleChildScrollView(
-        child: BottomPadding(
-          padding: SpaceManager.s6,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SheetTitle(context.tr(content.title), subtitle: footer, translate: false),
-              TopPadding(
-                padding: SpaceManager.sharePreviewTop,
-                child: Center(
-                  child: RSizedBox.square(
-                    dimension: SizeManager.shareAyahCard,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
 
-                    /// the story shows whole in the square's place
-                    child: FittedBox(
-                      child: _Preview(
-                        child: RepaintBoundary(
-                          key: _card,
-                          child: ShareFrame(
-                            options: options,
-                            size: layout.size,
-                            footer: footer,
-                            child: content.build(context, options, layout),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (note != null)
-                OnlyPadding(
-                  top: SpaceManager.shareNoteTop,
-                  start: SpaceManager.s4,
-                  end: SpaceManager.s4,
-                  child: RegularText(
-                    note,
-                    translate: false,
-                    fontSize: FontSizeManager.label,
-                    color: ThemeEnum.text2,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              TopPadding(
-                padding: SpaceManager.shareSwatchTop,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: REdgeInsets.symmetric(horizontal: SpaceManager.shareSwatchGap),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: SizeManager.shareSwatchRow.r),
-                    child: Row(
-                      children: [
-                        for (final (i, background) in ShareBackground.values.indexed) ...[
-                          if (i > 0) const RSizedBox.horizontal(SpaceManager.shareSwatchGap),
-                          Swatch(
-                            label: background.label,
-                            selected: background == options.background,
-                            onTap: () => _set(options.copyWith(background: background)),
-                            fill: Theme(
-                              data: AppTheme.page(background.page, themeId),
-                              child: ShareBackgroundFill(background),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              OnlyPadding(
-                top: SpaceManager.s4,
-                start: SpaceManager.s4,
-                end: SpaceManager.s4,
+        children: [
+          SheetTitle(context.tr(content.title), subtitle: footer, translate: false),
+          Flexible(
+            child: SingleChildScrollView(
+              child: BottomPadding(
+                padding: SpaceManager.s6,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Segmented<ShareSize>(
-                      values: ShareSize.values,
-                      selected: layout.size,
-                      labelOf: (size) => size.label,
-                      onChanged: (size) => _set(options.copyWith(size: size, sizeLocked: true)),
-                    ),
-                    const RSizedBox.vertical(SpaceManager.s4),
-                    GroupedSection(
-                      children: [
-                        if (options.background.isGradient)
-                          ToggleRow(
-                            title: StringsManager.solidColor,
-                            value: options.solid,
-                            onChanged: (solid) => _set(options.copyWith(solid: solid)),
-                          ),
-                        ToggleRow(
-                          title: StringsManager.ornament,
-                          value: ornament != null,
-                          onChanged: (on) => _set(
-                            options.copyWith(ornament: () => on ? widget.ornaments.first : null),
+                    TopPadding(
+                      padding: SpaceManager.sharePreviewTop,
+                      child: Center(
+                        child: RSizedBox.square(
+                          dimension: SizeManager.shareAyahCard,
+
+                          /// the story shows whole in the square's place
+                          child: FittedBox(
+                            child: _Preview(
+                              child: RepaintBoundary(
+                                key: _card,
+                                child: ShareFrame(
+                                  options: options,
+                                  size: layout.size,
+                                  footer: footer,
+                                  child: content.build(context, options, layout),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                        ToggleRow(
-                          title: StringsManager.showAppName,
-                          value: options.appName,
-                          onChanged: (appName) => _set(options.copyWith(appName: appName)),
-                        ),
-                      ],
+                      ),
                     ),
-                    if (ornament != null) ...[
-                      const RSizedBox.vertical(SpaceManager.s4),
-                      Segmented<ShareOrnament>(
-                        values: widget.ornaments,
-                        selected: ornament,
-                        labelOf: (ornament) => ornament.label,
-                        onChanged: (ornament) => _set(options.copyWith(ornament: () => ornament)),
+                    if (note != null)
+                      OnlyPadding(
+                        top: SpaceManager.shareNoteTop,
+                        start: SpaceManager.s4,
+                        end: SpaceManager.s4,
+                        child: RegularText(
+                          note,
+                          translate: false,
+                          fontSize: FontSizeManager.label,
+                          color: ThemeEnum.text2,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ],
-                    if (content.usesFont) ...[
-                      const RSizedBox.vertical(SpaceManager.s4),
-                      Segmented<QuranFont>(
-                        values: QuranFont.values,
-                        selected: options.font,
-                        labelOf: (font) => font.label,
-                        onChanged: (font) => _set(options.copyWith(font: font)),
+                    TopPadding(
+                      padding: SpaceManager.shareSwatchTop,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: REdgeInsets.symmetric(horizontal: SpaceManager.shareSwatchGap),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: SizeManager.shareSwatchRow.r),
+                          child: Row(
+                            children: [
+                              for (final (i, background) in ShareBackground.values.indexed) ...[
+                                if (i > 0) const RSizedBox.horizontal(SpaceManager.shareSwatchGap),
+                                Swatch(
+                                  label: background.label,
+                                  selected: background == options.background,
+                                  onTap: () => _set(options.copyWith(background: background)),
+                                  fill: Theme(
+                                    data: AppTheme.page(background.page, themeId),
+                                    child: ShareBackgroundFill(background),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
+                    ),
+                    OnlyPadding(
+                      top: SpaceManager.s4,
+                      start: SpaceManager.s4,
+                      end: SpaceManager.s4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Segmented<ShareSize>(
+                            values: ShareSize.values,
+                            selected: layout.size,
+                            labelOf: (size) => size.label,
+                            onChanged: (size) =>
+                                _set(options.copyWith(size: size, sizeLocked: true)),
+                          ),
+                          const RSizedBox.vertical(SpaceManager.s4),
+                          GroupedSection(
+                            children: [
+                              if (options.background.isGradient)
+                                ToggleRow(
+                                  title: StringsManager.solidColor,
+                                  value: options.solid,
+                                  onChanged: (solid) => _set(options.copyWith(solid: solid)),
+                                ),
+                              ToggleRow(
+                                title: StringsManager.ornament,
+                                value: ornament != null,
+                                onChanged: (on) => _set(
+                                  options.copyWith(
+                                    ornament: () => on ? widget.ornaments.first : null,
+                                  ),
+                                ),
+                              ),
+                              ToggleRow(
+                                title: StringsManager.showAppName,
+                                value: options.appName,
+                                onChanged: (appName) => _set(options.copyWith(appName: appName)),
+                              ),
+                            ],
+                          ),
+                          if (ornament != null) ...[
+                            const RSizedBox.vertical(SpaceManager.s4),
+                            Segmented<ShareOrnament>(
+                              values: widget.ornaments,
+                              selected: ornament,
+                              labelOf: (ornament) => ornament.label,
+                              onChanged: (ornament) =>
+                                  _set(options.copyWith(ornament: () => ornament)),
+                            ),
+                          ],
+                          if (content.usesFont) ...[
+                            const RSizedBox.vertical(SpaceManager.s4),
+                            Segmented<QuranFont>(
+                              values: QuranFont.values,
+                              selected: options.font,
+                              labelOf: (font) => font.label,
+                              onChanged: (font) => _set(options.copyWith(font: font)),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                     for (final row in widget.rows) ...[
                       const RSizedBox.vertical(SpaceManager.s4),
                       row,
                     ],
                     const RSizedBox.vertical(SpaceManager.shareButtonsTop),
-                    Builder(
-                      builder: (button) => BmButton.primary(
-                        StringsManager.share,
-                        busy: _busy,
-                        onPressed: () => _share(button),
+                    OnlyPadding(
+                      start: SpaceManager.s4,
+                      end: SpaceManager.s4,
+                      child: Builder(
+                        builder: (button) => BmButton.primary(
+                          StringsManager.share,
+                          busy: _busy,
+                          onPressed: () => _share(button),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

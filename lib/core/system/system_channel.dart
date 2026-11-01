@@ -32,6 +32,10 @@ abstract final class SystemChannel {
     return (model: info?['model'] ?? '', os: info?['os'] ?? '');
   }
 
+  /// the sound a tone notification makes: the channel's on android, ios' default on ios
+  static Future<void> playTone(String channel) =>
+      _channel.invokeMethod<void>('playTone', {'channel': channel});
+
   /// the reader's setting, cleared again when the reader closes
   static Future<void> keepScreenOn(bool on) =>
       _channel.invokeMethod<void>('keepScreenOn', {'on': on});

@@ -3,21 +3,26 @@ import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/picker_row.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
@@ -40,9 +45,16 @@ class RecitationSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ready = ref.watch(
-      recitationStateProvider.select((state) => state.value?.surahReady ?? false),
+    final reciter = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reciter ?? Reciter.alafasy),
     );
+    final surah = ref.watch(recitationStateProvider.select((state) => state.value?.from?.surah));
+    final ready =
+        ref.watch(recitationStateProvider.select((state) => state.value?.surahReady ?? false)) ||
+        (surah != null &&
+            ref.watch(
+              surahDownloadProvider((reciter, surah)).select((download) => download.ready),
+            ));
     return ReaderSheet(
       open: open,
       onClose: onClose,
@@ -52,26 +64,53 @@ class RecitationSheet extends ConsumerWidget {
         end: SpaceManager.sheetHeadEnd,
         child: Row(
           children: [
-            const _Avatar(),
-            const RSizedBox.horizontal(SpaceManager.s3),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SemiBoldText(
-                    StringsManager.reciterName,
-                    fontSize: FontSizeManager.bodyLarge,
-                    maxLines: 2,
+              child: Semantics(
+                button: true,
+                hint: context.tr(StringsManager.reciter),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _Choices._pick(
+                    context,
+                    title: StringsManager.reciter,
+                    choices: Reciter.values,
+                    selected: reciter,
+                    label: (reciter) => (reciter.label, const {}),
+                    digits: (args) => args,
+                    onPick: (reciter) => ref
+                        .read(databaseProvider)
+                        .updateSettings(SettingsCompanion(reciter: Value(reciter))),
                   ),
-                  const RSizedBox.vertical(SpaceManager.quranHeaderGap),
-                  RegularText(
-                    ready ? StringsManager.murattalDownloaded : StringsManager.murattalHafs,
-                    fontSize: FontSizeManager.rowSubtitle,
-                    color: ThemeEnum.text2,
+                  child: Row(
+                    children: [
+                      _Avatar(reciter),
+                      const RSizedBox.horizontal(SpaceManager.s3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SemiBoldText(
+                              reciter.label,
+                              fontSize: FontSizeManager.bodyLarge,
+                              maxLines: 2,
+                            ),
+                            const RSizedBox.vertical(SpaceManager.quranHeaderGap),
+                            RegularText(
+                              ready
+                                  ? StringsManager.murattalDownloaded
+                                  : StringsManager.murattalHafs,
+                              fontSize: FontSizeManager.rowSubtitle,
+                              color: ThemeEnum.text2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
+            const _Download(),
             RoundButton(icon: BmUiIcon.chevron_down, label: StringsManager.close, onTap: onClose),
           ],
         ),
@@ -94,8 +133,61 @@ class RecitationSheet extends ConsumerWidget {
   }
 }
 
+/// the playing surah in the chosen voice, kept for offline. a lost connection keeps what came in
+class _Download extends ConsumerWidget {
+  const _Download();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reciter = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reciter ?? Reciter.alafasy),
+    );
+    final surah = ref.watch(recitationStateProvider.select((state) => state.value?.from?.surah));
+    if (surah == null) return const SizedBox.shrink();
+    final download = ref.watch(surahDownloadProvider((reciter, surah)));
+    if (download.downloading) {
+      return Semantics(
+        label: context.tr(StringsManager.downloading),
+        child: RSizedBox.square(
+          dimension: SizeManager.hit,
+          child: Center(
+            child: BmStarLoader(size: SizeManager.loaderSmall, progress: download.progress),
+          ),
+        ),
+      );
+    }
+    if (download.ready) {
+      return const RoundButton(
+        icon: BmUiIcon.check,
+        label: StringsManager.surahDownloaded,
+        onTap: null,
+      );
+    }
+    return RoundButton(
+      icon: BmUiIcon.download,
+      label: StringsManager.downloadSurah,
+      onTap: () async {
+        try {
+          await ref.read(surahDownloadProvider((reciter, surah)).notifier).download();
+        } on Object catch (error) {
+          if (!context.mounted) return;
+          showToast(
+            context,
+            error is RecitationException && error.failure == RecitationFailure.offline
+                ? StringsManager.recitationOffline
+                : StringsManager.downloadFailed,
+            icon: BmIconName.listen,
+          );
+        }
+      },
+    );
+  }
+}
+
 class _Avatar extends StatelessWidget {
-  const _Avatar();
+  const _Avatar(this.reciter);
+
+  final Reciter reciter;
 
   @override
   Widget build(BuildContext context) {
@@ -106,9 +198,9 @@ class _Avatar extends StatelessWidget {
           color: context.getColor(ThemeEnum.primaryContainer),
           shape: BoxShape.circle,
         ),
-        child: const Center(
+        child: Center(
           child: RegularText(
-            StringsManager.reciterInitials,
+            reciter.initials,
             font: FontEnum.display,
             fontSize: FontSizeManager.reciterInitials,
             color: ThemeEnum.onPrimaryContainer,
@@ -119,19 +211,52 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-/// "Al-Fatiha · Ayah 3 of 7", the ayah's time and how far into the range it is
-class _Progress extends ConsumerWidget {
+/// "Al-Fatiha · Ayah 3 of 7", the ayah's time and how far into the range it is. a drag along it
+/// shows the ayah under the finger and goes there on release (ADR 0001)
+class _Progress extends ConsumerStatefulWidget {
   const _Progress();
+
+  @override
+  ConsumerState<_Progress> createState() => _ProgressState();
+}
+
+class _ProgressState extends ConsumerState<_Progress> {
+  /// the ayah under the finger while dragging
+  int? _drag;
+  double _width = 1;
 
   static String _time(Duration time) =>
       '${time.inMinutes}:${'${time.inSeconds % 60}'.padLeft(2, '0')}';
 
+  void _dragTo(double dx, AyahKey? from, AyahKey? to) {
+    if (from == null || to == null) return;
+    final x = (dx - SpaceManager.s5.r) / _width;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final ayah = dragAyah(rtl ? 1 - x : x, from: from, to: to);
+    if (ayah == _drag) return;
+    BmHaptics.selection();
+    setState(() => _drag = ayah);
+  }
+
+  void _release(AyahKey? from) {
+    final ayah = _drag;
+    setState(() => _drag = null);
+    if (ayah == null || from == null) return;
+    ref.read(followingProvider.notifier).set(true);
+    ref.read(recitationProvider).seekToAyah(AyahKey(from.surah, ayah));
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ayah = ref.watch(playingAyahProvider);
-    final (position, duration) = ref.watch(
+    final (position, duration, from, to) = ref.watch(
       recitationStateProvider.select(
-        (state) => (state.value?.position ?? Duration.zero, state.value?.duration ?? Duration.zero),
+        (state) => (
+          state.value?.position ?? Duration.zero,
+          state.value?.duration ?? Duration.zero,
+          state.value?.from,
+          state.value?.to,
+        ),
       ),
     );
     final surah = ayah == null ? null : ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
@@ -144,60 +269,128 @@ class _Progress extends ConsumerWidget {
     final where = surah == null
         ? ''
         : '${isArabic ? surah.ar : surah.en} · ${context.tr(StringsManager.ayahOf, {'n': '$n', 'total': '$total'})}';
-    return OnlyPadding(
-      top: SpaceManager.recitationProgressTop,
-      start: SpaceManager.s5,
-      end: SpaceManager.s5,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+    final drag = _drag;
+    final shown = drag == null || from == null ? ayah : AyahKey(from.surah, drag);
+    final fraction = shown == null || from == null || to == null
+        ? 0.0
+        : rangeProgress(shown, from: from, to: to);
+
+    /// the whole block takes the drag, the bar alone is under the 44 pt a target needs
+    return Semantics(
+      label: context.tr(StringsManager.recitationBar),
+      value: context.formatDigits(where, digits),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: (details) => _dragTo(details.localPosition.dx, from, to),
+        onHorizontalDragUpdate: (details) => _dragTo(details.localPosition.dx, from, to),
+        onHorizontalDragEnd: (_) => _release(from),
+        onHorizontalDragCancel: () => setState(() => _drag = null),
+        child: OnlyPadding(
+          top: SpaceManager.recitationProgressTop,
+          start: SpaceManager.s5,
+          end: SpaceManager.s5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: RegularText(
-                  context.formatDigits(where, digits),
-                  translate: false,
-                  fontSize: FontSizeManager.rowSubtitle,
-                  color: ThemeEnum.text2,
-                  maxLines: 1,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: RegularText(
+                      context.formatDigits(where, digits),
+                      translate: false,
+                      fontSize: FontSizeManager.rowSubtitle,
+                      color: ThemeEnum.text2,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const RSizedBox.horizontal(SpaceManager.s2),
+                  RegularText(
+                    context.formatDigits('${_time(position)} / ${_time(duration)}', digits),
+                    translate: false,
+                    fontSize: FontSizeManager.rowSubtitle,
+                    color: ThemeEnum.text2,
+                    tabularFigures: true,
+                  ),
+                ],
               ),
-              const RSizedBox.horizontal(SpaceManager.s2),
-              RegularText(
-                context.formatDigits('${_time(position)} / ${_time(duration)}', digits),
-                translate: false,
-                fontSize: FontSizeManager.rowSubtitle,
-                color: ThemeEnum.text2,
-                tabularFigures: true,
+              const RSizedBox.vertical(SpaceManager.s2),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  _width = constraints.maxWidth;
+                  final rtl = Directionality.of(context) == TextDirection.rtl;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(RadiusManager.recitationBar.r),
+                        child: RSizedBox(
+                          height: SizeManager.recitationBar,
+                          child: ColoredBox(
+                            color: context.getColor(ThemeEnum.variant),
+                            child: AnimatedFractionallySizedBox(
+                              duration: MediaQuery.disableAnimationsOf(context) || drag != null
+                                  ? Duration.zero
+                                  : BmMotion.standard,
+                              curve: BmMotion.standardCurve,
+                              alignment: AlignmentDirectional.centerStart,
+                              widthFactor: fraction,
+                              child: ColoredBox(color: context.getColor(ThemeEnum.primary)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (drag != null)
+                        Positioned(
+                          left: (rtl ? 1 - fraction : fraction) * _width,
+                          bottom: SizeManager.recitationBar.r + SpaceManager.s2.r,
+                          child: FractionalTranslation(
+                            translation: const Offset(-.5, 0),
+                            child: _AyahBubble(drag, digits: digits),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
-          const RSizedBox.vertical(SpaceManager.s2),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusManager.recitationBar.r),
-            child: RSizedBox(
-              height: SizeManager.recitationBar,
-              child: ColoredBox(
-                color: context.getColor(ThemeEnum.variant),
-                child: AnimatedFractionallySizedBox(
-                  duration: MediaQuery.disableAnimationsOf(context)
-                      ? Duration.zero
-                      : BmMotion.standard,
-                  curve: BmMotion.standardCurve,
-                  alignment: AlignmentDirectional.centerStart,
-                  widthFactor: (n / total).clamp(0.0, 1.0),
-                  child: ColoredBox(color: context.getColor(ThemeEnum.primary)),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// repeat, previous, play or pause, next and the speed, left to right in arabic too (FR-029)
+/// "Ayah 45" over the finger while the bar is dragged
+class _AyahBubble extends StatelessWidget {
+  const _AyahBubble(this.ayah, {required this.digits});
+
+  final int ayah;
+  final Digits digits;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.getColor(ThemeEnum.primary),
+        borderRadius: BorderRadius.circular(RadiusManager.pill.r),
+      ),
+      child: SymmetricPadding(
+        horizontal: SpaceManager.s2,
+        vertical: SpaceManager.s1,
+        child: SemiBoldText(
+          StringsManager.ayahNumber,
+          args: {'n': context.formatDigits('$ayah', digits)},
+          fontSize: FontSizeManager.rowSubtitle,
+          color: ThemeEnum.onPrimary,
+          maxLines: 1,
+        ),
+      ),
+    );
+  }
+}
+
+/// repeat, previous, -10, play or pause, +10, next and the speed, left to right in arabic too
+/// (FR-029)
 class _Controls extends ConsumerWidget {
   const _Controls();
 
@@ -244,7 +437,27 @@ class _Controls extends ConsumerWidget {
                 color: context.getColor(ThemeEnum.text),
               ),
             ),
+            _Control(
+              label: StringsManager.back10,
+              onTap: () =>
+                  move(() => recitation.seekBy(Duration(seconds: context.isRtl ? 10 : -10))),
+              child: BmIcon.ui(
+                BmUiIcon.back_10,
+                size: SizeManager.recitationIcon.r,
+                color: context.getColor(ThemeEnum.text),
+              ),
+            ),
             const PlayButton(size: SizeManager.recitationPlay, icon: SizeManager.recitationIcon),
+            _Control(
+              label: StringsManager.forward10,
+              onTap: () =>
+                  move(() => recitation.seekBy(Duration(seconds: context.isRtl ? -10 : 10))),
+              child: BmIcon.ui(
+                BmUiIcon.forward_10,
+                size: SizeManager.recitationIcon.r,
+                color: context.getColor(ThemeEnum.text),
+              ),
+            ),
             _Control(
               label: StringsManager.nextAyah,
               onTap: () => move(recitation.next),
@@ -259,11 +472,14 @@ class _Controls extends ConsumerWidget {
               onTap: () => db.updateSettings(
                 SettingsCompanion(reciteSpeed: Value(after(reciteSpeeds, speed))),
               ),
-              child: SemiBoldText(
-                StringsManager.rate,
-                args: {'rate': speedLabel(context, speed, digits)},
-                fontSize: FontSizeManager.secondary,
-                tabularFigures: true,
+              child: MediaQuery.withClampedTextScaling(
+                maxScaleFactor: SizeManager.recitationRateMaxTextScale,
+                child: SemiBoldText(
+                  StringsManager.rate,
+                  args: {'rate': speedLabel(context, speed, digits)},
+                  fontSize: FontSizeManager.secondary,
+                  tabularFigures: true,
+                ),
               ),
             ),
           ],
@@ -302,7 +518,7 @@ class _Control extends StatelessWidget {
   }
 }
 
-/// the repeat icon in primary with its "3×" badge, no badge when off
+/// the repeat icon in primary with its "3×" badge, "∞" for surah loop, no badge when off
 class _RepeatIcon extends StatelessWidget {
   const _RepeatIcon({required this.repeat, required this.digits});
 
@@ -317,9 +533,9 @@ class _RepeatIcon extends StatelessWidget {
         BmIcon.ui(
           BmUiIcon.repeat,
           size: SizeManager.recitationRepeatIcon.r,
-          color: context.getColor(repeat > 1 ? ThemeEnum.primary : ThemeEnum.text2),
+          color: context.getColor(repeat != 1 ? ThemeEnum.primary : ThemeEnum.text2),
         ),
-        if (repeat > 1)
+        if (repeat != 1)
           PositionedDirectional(
             end: SpaceManager.repeatBadgeEnd.r,
             top: SpaceManager.repeatBadgeTop.r,
@@ -332,7 +548,7 @@ class _RepeatIcon extends StatelessWidget {
                 horizontal: SpaceManager.repeatBadgeH,
                 vertical: SpaceManager.repeatBadgeV,
                 child: SemiBoldText(
-                  context.formatDigits('$repeat×', digits),
+                  repeat == surahLoop ? '∞' : context.formatDigits('$repeat×', digits),
                   translate: false,
                   fontSize: FontSizeManager.repeatBadge,
                   color: ThemeEnum.onPrimary,
@@ -348,8 +564,11 @@ class _RepeatIcon extends StatelessWidget {
 class _Choices extends ConsumerWidget {
   const _Choices();
 
-  static _Label _repeat(int times) =>
-      times == 1 ? (StringsManager.off, const {}) : (StringsManager.nTimes, {'n': '$times'});
+  static _Label _repeat(int times) => switch (times) {
+    1 => (StringsManager.off, const {}),
+    surahLoop => (StringsManager.surahLoop, const {}),
+    _ => (StringsManager.nTimes, {'n': '$times'}),
+  };
 
   static _Label _pause(int seconds) =>
       seconds == 0 ? (StringsManager.off, const {}) : (StringsManager.nSeconds, {'n': '$seconds'});

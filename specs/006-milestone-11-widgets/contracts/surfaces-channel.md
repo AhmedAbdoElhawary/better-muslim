@@ -11,25 +11,29 @@ Dart side: `SurfacesChannel` in `lib/core/surfaces/surfaces_channel.dart`.
 | Method | Arguments | Does | Returns |
 | --- | --- | --- | --- |
 | `update` | `{json: String, force: bool}` | writes the file unless equal to it (or `force`), reloads every widget when written, then syncs the countdowns | null |
-| `startNow` | none | dev only: the next prayer's countdown from now to its time, whatever the 2 hours | `true` if it started, `false` when the system refused (no permission, Live Activities off) |
 
 Errors come back as `PlatformException(code: 'surfaces_failed', message: '<code>')` with only a short
 code (the exception's class name on Android, the error's code on iOS), never a path (like `better_muslim/backup`). The writer catches them and reports them through
 `CrashReporter.instance.recordError` with `{'reason': 'write surfaces'}`. A failed write leaves the last file in place.
 
-## Sync (inside `update`, and on the native side's own alarms)
+## The live countdown
 
-1. Read `countdowns` and `countdown`.
-2. iOS:
-   - end every activity whose prayer time has passed, whose window isn't in the file, or all of
-     them when `countdown` is false or `place` is false
-   - update the running one's content when it changed
-   - iOS 16.2 to 18: start the window covering now if none runs, the app is in front and
-     `ActivityAuthorizationInfo().areActivitiesEnabled`
-   - iOS 26+: also schedule the later windows not scheduled yet, in order, until iOS refuses one
-3. Android:
-   - post or update the notification of the window covering now, cancel it when none does
-   - arm the exact wakeup alarm for the next window's start
+It shows while the app is off screen and counts to the next prayer: the entry in force and its
+`at`. The native side knows when the app leaves and comes back, Dart doesn't take part.
+
+1. iOS (the plugin watches `willResignActive` and `didBecomeActive` once, whatever engine):
+   - resign: start the entry in force when `countdown`, `place` and
+     `ActivityAuthorizationInfo().areActivitiesEnabled`. iOS 26+ also schedules the next 4
+     prayers, each starting at the previous one's time, until iOS refuses one
+   - active: end every activity, scheduled ones too
+   - `update`: end them all when `countdown` or `place` is false, update the running ones'
+     content, and leave one past its time as "{prayer} · now" (iOS 18 to 25 can't start the next
+     one from the background) until the app opens or a later one is showing. iOS ends any after 8
+     hours
+2. Android (the plugin watches the app's activity start and stop, a reboot or an update counts
+   as off screen):
+   - post or update the notification of the entry in force while off screen, cancel it on screen
+   - arm the exact wakeup alarm at its `at`, where it rolls to the next prayer
    - arm the minute tick when a widget exists or a countdown shows
    - nothing when notifications aren't allowed or the channel is off (the widget still updates)
 
@@ -37,9 +41,9 @@ code (the exception's class name on Android, the error's code on iOS), never a p
 
 | Caller | When |
 | --- | --- |
-| `SurfacesBoot` | launch, resume, 500 ms after an input change, the boot's window timer |
+| `SurfacesBoot` | launch, resume, 500 ms after an input change |
 | `callbackDispatcher` | every background top-up, before the notification permission check |
 | `markFromPayload` | after mark prayed from a notification |
-| dev page | "Refresh widgets" (`force: true`), "Start countdown now" |
+| dev page | "Refresh widgets" (`force: true`) |
 
 Never from the design scenario.

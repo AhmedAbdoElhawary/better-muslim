@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum AudioUse { none, recitation, adhan }
+/// clip is a dua or an adhan preview
+enum AudioUse { none, recitation, adhan, clip }
 
 final audioUseProvider = NotifierProvider<AudioUseNotifier, AudioUse>(AudioUseNotifier.new);
 
@@ -13,6 +14,6 @@ class AudioUseNotifier extends Notifier<AudioUse> {
 
   /// only the holder lets go, a late release of the recitation never frees the adhan
   void release(AudioUse use) {
-    if (state == use) state = AudioUse.none;
+    if (ref.mounted && state == use) state = AudioUse.none;
   }
 }

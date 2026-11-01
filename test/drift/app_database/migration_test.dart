@@ -9,7 +9,16 @@ import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v13.dart' as v13;
+import 'generated/schema_v14.dart' as v14;
+import 'generated/schema_v15.dart' as v15;
+import 'generated/schema_v16.dart' as v16;
+import 'generated/schema_v17.dart' as v17;
+import 'generated/schema_v18.dart' as v18;
+import 'generated/schema_v19.dart' as v19;
 import 'generated/schema_v2.dart' as v2;
+import 'generated/schema_v20.dart' as v20;
+import 'generated/schema_v21.dart' as v21;
+import 'generated/schema_v22.dart' as v22;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
@@ -727,6 +736,241 @@ void main() {
           {'madinah'},
         );
         expect(row.maghribSound, 'tone');
+      },
+    );
+  });
+
+  test('v13 to v14 moves the removed recordings to madinah and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 13,
+      newVersion: 14,
+      createOld: v13.DatabaseAtV13.new,
+      createNew: v14.DatabaseAtV14.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) {
+        batch.insert(
+          oldDb.settings,
+          const v13.SettingsCompanion(
+            dhuhrRecording: Value('aaqibAzeez'),
+            asrRecording: Value('andrewler'),
+            maghribRecording: Value('synagda'),
+            maghribSound: Value('tone'),
+          ),
+        );
+      },
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(
+          {
+            row.fajrRecording,
+            row.dhuhrRecording,
+            row.asrRecording,
+            row.maghribRecording,
+            row.ishaRecording,
+          },
+          {'madinah'},
+        );
+        expect(row.maghribSound, 'tone');
+      },
+    );
+  });
+
+  test(
+    'v14 to v15 keeps every note, none highlighted, and an empty one only highlighted',
+    () async {
+      const old = v14.QuranNotesData(
+        surah: 1,
+        ayah: 5,
+        note: 'remember this one',
+        updatedAt: 1792400000,
+      );
+      await verifier.testWithDataIntegrity(
+        oldVersion: 14,
+        newVersion: 15,
+        createOld: v14.DatabaseAtV14.new,
+        createNew: v15.DatabaseAtV15.new,
+        openTestedDatabase: AppDatabase.forTesting,
+        createItems: (batch, oldDb) => batch.insert(oldDb.quranNotes, old),
+        validateItems: (newDb) async {
+          final row = await newDb.select(newDb.quranNotes).getSingle();
+          expect(row.toJson(), {...old.toJson(), 'highlight': 0});
+          await newDb
+              .into(newDb.quranNotes)
+              .insert(
+                const v15.QuranNotesCompanion(
+                  surah: Value(2),
+                  ayah: Value(255),
+                  note: Value(''),
+                  highlight: Value(1),
+                  updatedAt: Value(1792400000),
+                ),
+              );
+          await expectLater(
+            newDb
+                .into(newDb.quranNotes)
+                .insert(
+                  const v15.QuranNotesCompanion(
+                    surah: Value(2),
+                    ayah: Value(256),
+                    note: Value(' '),
+                    updatedAt: Value(1792400000),
+                  ),
+                ),
+            throwsA(anything),
+          );
+        },
+      );
+    },
+  );
+
+  test('v15 to v16 makes "Bookmarks" and moves every bookmark into it', () async {
+    const ayah = v15.QuranBookmarksData(
+      id: 1,
+      surah: 2,
+      ayah: 255,
+      page: 42,
+      name: 'Reflect',
+      color: 'accent',
+      createdAt: 1792400000,
+    );
+    const page = v15.QuranBookmarksData(id: 2, page: 582, color: 'neutral', createdAt: 1792400001);
+    await verifier.testWithDataIntegrity(
+      oldVersion: 15,
+      newVersion: 16,
+      createOld: v15.DatabaseAtV15.new,
+      createNew: v16.DatabaseAtV16.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insertAll(oldDb.quranBookmarks, [ayah, page]),
+      validateItems: (newDb) async {
+        final [category] = await newDb.select(newDb.quranCategories).get();
+        expect(category.toJson(), {'id': 1, 'name': null, 'color': 'primary', 'position': 0});
+        final rows = await newDb.select(newDb.quranBookmarks).get();
+        expect(rows.map((row) => row.toJson()), [
+          {...ayah.toJson()..remove('color'), 'category': 1},
+          {...page.toJson()..remove('color'), 'category': 1},
+        ]);
+      },
+    );
+  });
+
+  test('v16 to v17 keeps every row and reads alafasy as the reciter', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 16,
+      newVersion: 17,
+      createOld: v16.DatabaseAtV16.new,
+      createNew: v17.DatabaseAtV17.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v16.SettingsCompanion(reciteSpeed: Value(1.25), reciteRepeat: Value(3)),
+      ),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect((row.reciteSpeed, row.reciteRepeat, row.reciter), (1.25, 3, 'alafasy'));
+      },
+    );
+  });
+
+  test('v17 to v18 keeps every row and takes surah loop as a repeat', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 17,
+      newVersion: 18,
+      createOld: v17.DatabaseAtV17.new,
+      createNew: v18.DatabaseAtV18.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v17.SettingsCompanion(reciteRepeat: Value(5), reciter: Value('husary')),
+      ),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect((row.reciteRepeat, row.reciter), (5, 'husary'));
+        await newDb
+            .update(newDb.settings)
+            .write(const v18.SettingsCompanion(reciteRepeat: Value(0)));
+        expect((await newDb.select(newDb.settings).getSingle()).reciteRepeat, 0);
+      },
+    );
+  });
+
+  test('v18 to v19 keeps every row and reads amiri as the azkar font', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 18,
+      newVersion: 19,
+      createOld: v18.DatabaseAtV18.new,
+      createNew: v19.DatabaseAtV19.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v18.SettingsCompanion(quranFont: Value('scheherazade'), reciter: Value('husary')),
+      ),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect((row.quranFont, row.reciter, row.azkarFont), ('scheherazade', 'husary', 'amiri'));
+      },
+    );
+  });
+
+  test('v19 to v20 moves madinah to alafasy and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 19,
+      newVersion: 20,
+      createOld: v19.DatabaseAtV19.new,
+      createNew: v20.DatabaseAtV20.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v19.SettingsCompanion(
+          maghribRecording: Value('madinah'),
+          maghribSound: Value('tone'),
+        ),
+      ),
+      validateItems: (newDb) async {
+        final row = await newDb.select(newDb.settings).getSingle();
+        expect(
+          {
+            row.fajrRecording,
+            row.dhuhrRecording,
+            row.asrRecording,
+            row.maghribRecording,
+            row.ishaRecording,
+          },
+          {'alafasy'},
+        );
+        expect(row.maghribSound, 'tone');
+      },
+    );
+  });
+
+  test('v20 to v21 adds the recent searches and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 20,
+      newVersion: 21,
+      createOld: v20.DatabaseAtV20.new,
+      createNew: v21.DatabaseAtV21.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) =>
+          batch.insert(oldDb.settings, const v20.SettingsCompanion(reciter: Value('husary'))),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).reciter, 'husary');
+        expect(await newDb.select(newDb.quranSearches).get(), isEmpty);
+      },
+    );
+  });
+
+  test('v21 to v22 drops the reset notice flag and keeps the rest', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 21,
+      newVersion: 22,
+      createOld: v21.DatabaseAtV21.new,
+      createNew: v22.DatabaseAtV22.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v21.SettingsCompanion(storeResetPending: Value(1), reciter: Value('husary')),
+      ),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).reciter, 'husary');
       },
     );
   });

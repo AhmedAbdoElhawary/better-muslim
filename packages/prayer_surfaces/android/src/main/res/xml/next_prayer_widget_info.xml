@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- the sky band alone at 2 x 2, the same widget as prayer_widget_info resized -->
+<!-- 5.6 small, the next prayer with the sun on its arc -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/surfaces_next_description"
     android:initialLayout="@layout/prayer_widget"
     android:minWidth="110dp"
     android:minHeight="110dp"
     android:minResizeWidth="110dp"
-    android:minResizeHeight="40dp"
+    android:minResizeHeight="110dp"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
     android:targetCellHeight="2"

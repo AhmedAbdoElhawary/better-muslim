@@ -59,20 +59,20 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    /// a record, so the page rebuilds only when a prayer goes on or off adhan
-    final adhan = ref.watch(
+    /// a record, so the page rebuilds only when a prayer's sound changes
+    final sounds = ref.watch(
       settingsProvider.select((settings) {
-        bool on(Prayer prayer) => settings.value?.soundOf(prayer) == PrayerSound.adhan;
+        PrayerSound? of(Prayer prayer) => settings.value?.soundOf(prayer);
         return (
-          on(Prayer.fajr),
-          on(Prayer.dhuhr),
-          on(Prayer.asr),
-          on(Prayer.maghrib),
-          on(Prayer.isha),
+          of(Prayer.fajr),
+          of(Prayer.dhuhr),
+          of(Prayer.asr),
+          of(Prayer.maghrib),
+          of(Prayer.isha),
         );
       }),
     );
-    final onAdhan = [adhan.$1, adhan.$2, adhan.$3, adhan.$4, adhan.$5];
+    final soundOf = [sounds.$1, sounds.$2, sounds.$3, sounds.$4, sounds.$5];
     return Scaffold(
       body: TitleGlow(
         child: Column(
@@ -99,25 +99,30 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
 
                             /// in the same section child, so the row can grow in with its divider
                             BmSwitcher(
-                              child: onAdhan[index]
-                                  ? Column(
-                                      children: [
-                                        Divider(
-                                          height: SizeManager.divider,
-                                          thickness: SizeManager.divider,
-                                          color: context.getColor(ThemeEnum.outline),
-                                        ),
-                                        RecordingRow(prayer),
-                                      ],
-                                    )
-                                  : const SizedBox.shrink(),
+                              child: switch (soundOf[index]) {
+                                final sound? when sound != PrayerSound.silent => Column(
+                                  key: ValueKey(sound),
+                                  children: [
+                                    Divider(
+                                      height: SizeManager.divider,
+                                      thickness: SizeManager.divider,
+                                      color: context.getColor(ThemeEnum.outline),
+                                    ),
+                                    if (sound == PrayerSound.adhan)
+                                      RecordingRow(prayer)
+                                    else
+                                      ToneRow(prayer),
+                                  ],
+                                ),
+                                _ => const SizedBox.shrink(),
+                              },
                             ),
                           ],
                         ),
                     ],
                   ),
                   const RSizedBox.vertical(SpaceManager.s3),
-                  const GroupedSection(children: [ReminderRow()]),
+                  const GroupedSection(children: [ReminderRow(tone: true)]),
                   const RSizedBox.vertical(SpaceManager.s3),
                   const GroupedSection(children: [CountdownRow()]),
                 ],

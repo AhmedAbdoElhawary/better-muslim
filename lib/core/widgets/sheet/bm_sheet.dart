@@ -16,6 +16,7 @@ Future<T?> showBmSheet<T>(
   BuildContext context, {
   bool applyBlur = true,
   bool maxSheetHeight = false,
+  Widget? title,
   required WidgetBuilder builder,
 }) {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -40,8 +41,12 @@ Future<T?> showBmSheet<T>(
   const still = Threshold(0);
   final route = _BlurredModalBottomSheetRoute<T>(
     applyBlur: applyBlur,
-    builder: (context) =>
-        _Sheet(fade: reduceMotion, enableCustomCurve: !maxSheetHeight, child: builder(context)),
+    builder: (context) => _Sheet(
+      fade: reduceMotion,
+      enableCustomCurve: !maxSheetHeight,
+      title: title,
+      child: builder(context),
+    ),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
     isScrollControlled: true,
@@ -103,10 +108,16 @@ class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
 }
 
 class _Sheet extends StatelessWidget {
-  const _Sheet({this.enableCustomCurve = true, required this.fade, required this.child});
+  const _Sheet({
+    this.enableCustomCurve = true,
+    required this.fade,
+    required this.title,
+    required this.child,
+  });
   final bool fade;
   final Widget child;
   final bool enableCustomCurve;
+  final Widget? title;
   @override
   Widget build(BuildContext context) {
     final sheet = KeyboardPadding(
@@ -120,6 +131,7 @@ class _Sheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const VerticalPadding(padding: SpaceManager.s2, child: Grabber()),
+            title ?? const SizedBox.shrink(),
             Flexible(child: child),
           ],
         ),

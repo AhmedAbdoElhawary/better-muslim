@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/azkar.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/features/azkar/model/tasbih_dhikr.dart';
@@ -17,6 +18,7 @@ class DhikrText extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(tasbihControllerProvider.select((state) => state?.dhikr ?? 0));
     final dhikr = tasbihDhikr[index];
+    final font = ref.watch(azkarFontProvider);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return BmSwitcher(
       child: Column(
@@ -27,7 +29,7 @@ class DhikrText extends ConsumerWidget {
             child: RegularText(
               dhikr.arabic,
               translate: false,
-              font: FontEnum.dua,
+              font: font,
               fontSize: FontSizeManager.dhikrAr,
               height: LineHeightManager.dhikrAr,
               textAlign: TextAlign.center,

@@ -12,6 +12,7 @@ import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/tone_button.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,7 +80,7 @@ void main() {
     expect(find.byType(RecordingRow), findsNWidgets(2));
     expect(recordingOf(Prayer.fajr), findsOneWidget);
     expect(recordingOf(Prayer.maghrib), findsOneWidget);
-    expect(find.text('Madinah · full adhan'), findsNWidgets(2));
+    expect(find.text('Mishary Alafasy · full adhan'), findsNWidgets(2));
     expect(find.text('10 min'), findsOneWidget);
     expect(find.text('Notifications are off for this app.'), findsNothing);
     await unmount(tester);
@@ -97,69 +98,58 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the fajr sheet has the one fajr adhan, a tap plays, save keeps and stops', (
-    tester,
-  ) async {
+  testWidgets('a tone row under each tone prayer plays its channel\'s sound', (tester) async {
+    await open(tester);
+    expect(find.byType(ToneRow), findsNWidgets(3));
+
+    await tester.tap(inRow(Prayer.dhuhr, 'Silent'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ToneRow), findsNWidgets(2));
+
+    await tester.tap(
+      find.descendant(of: find.byType(ToneRow), matching: find.byType(ToneButton)).first,
+    );
+    expect(system.last.method, 'playTone');
+    expect(system.last.arguments, {'channel': 'adhan_asr_tone'});
+    await unmount(tester);
+  });
+
+  testWidgets('the fajr sheet plays alafasy fajr, save keeps and stops', (tester) async {
     await open(tester);
     await tester.tap(recordingOf(Prayer.fajr));
     await tester.pumpAndSettle();
 
     expect(find.text('Adhan sound'), findsWidgets);
     expect(find.text('For Fajr'), findsOneWidget);
-    expect(find.text('Full adhan · 4:02'), findsOneWidget);
-    expect(find.text('Aaqib Azeez'), findsNothing);
+    expect(find.text('Full adhan · 3:41'), findsOneWidget);
 
-    await tester.tap(find.text('Madinah'));
+    await tester.tap(find.text('Mishary Alafasy'));
     await tester.pumpAndSettle();
-    expect(clips.played, [AdhanRecording.madinah.fullAsset(Prayer.fajr)]);
+    expect(clips.played, [AdhanRecording.alafasy.fullAsset(Prayer.fajr)]);
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).fajrRecording, AdhanRecording.madinah);
+    expect((await settingsOf(tester)).fajrRecording, AdhanRecording.alafasy);
     expect(clips.stops, greaterThanOrEqualTo(1));
-    expect(find.text('Madinah · full adhan'), findsNWidgets(2));
+    expect(find.text('Mishary Alafasy · full adhan'), findsNWidgets(2));
     await unmount(tester);
   });
 
-  testWidgets('the maghrib sheet: four recordings, a downloaded one plays and save keeps it', (
-    tester,
-  ) async {
+  testWidgets('the maghrib sheet: alafasy only, it plays and save keeps it', (tester) async {
     await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
     await tester.tap(recordingOf(Prayer.maghrib));
     await tester.pumpAndSettle();
 
-    for (final line in [
-      'Full adhan · 3:06',
-      'Full adhan · 1:27',
-      'Full adhan · 2:38',
-      'Full adhan · 2:34',
-    ]) {
-      expect(find.text(line), findsOneWidget, reason: line);
-    }
+    expect(find.text('Full adhan · 2:34'), findsOneWidget);
+    expect(find.textContaining('Full adhan · '), findsOneWidget);
 
-    await tester.tap(find.text('Aaqib Azeez'));
+    await tester.tap(find.text('Mishary Alafasy'));
     await tester.pumpAndSettle();
-    expect(clips.played, [AdhanRecording.aaqibAzeez.fullAsset(Prayer.maghrib)]);
+    expect(clips.played, [AdhanRecording.alafasy.fullAsset(Prayer.maghrib)]);
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.aaqibAzeez);
-    await unmount(tester);
-  });
-
-  testWidgets('offline, a recording not on the phone says so and the pick stays', (tester) async {
-    await open(tester, downloads: (recording) => _FakeDownload(recording, ready: false));
-    await tester.tap(recordingOf(Prayer.maghrib));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Andrewler'));
-    await tester.pump();
-    expect(find.text('Needs internet once'), findsOneWidget);
-    expect(clips.played, isEmpty);
-
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.madinah);
+    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.alafasy);
     await unmount(tester);
   });
 
@@ -169,12 +159,12 @@ void main() {
     await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
     await tester.tap(recordingOf(Prayer.maghrib));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Adam Synagda'));
+    await tester.tap(find.text('Mishary Alafasy'));
     await tester.pumpAndSettle();
     final stops = clips.stops;
-    Navigator.of(tester.element(find.text('Adam Synagda'))).pop();
+    Navigator.of(tester.element(find.text('Mishary Alafasy'))).pop();
     await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.madinah);
+    expect((await settingsOf(tester)).maghribRecording, AdhanRecording.alafasy);
     expect(clips.stops, greaterThan(stops));
     await unmount(tester);
   });
@@ -247,7 +237,7 @@ void main() {
     await open(tester);
     final phone = recordPhone();
     await tester.scrollUntilVisible(find.text('Countdown before each prayer'), 100);
-    expect(find.text('Starts 2 hours before, ends at the adhan'), findsOneWidget);
+    expect(find.text('On the lock screen while the app is closed'), findsOneWidget);
     expect(
       find.ancestor(
         of: find.text('Countdown before each prayer'),

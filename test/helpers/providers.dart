@@ -6,6 +6,7 @@ import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
@@ -48,6 +49,7 @@ Future<List<Override>> designOverrides({
   bool onboarded = true,
   BmThemeId? theme,
   Override? tafsirFiles,
+  Override? recitationFiles,
 }) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final db = await designScenarioStore();
@@ -70,6 +72,7 @@ Future<List<Override>> designOverrides({
     onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
     surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
     tafsirFiles ?? _tafsirFiles,
+    recitationFiles ?? _recitationFiles,
   ];
 }
 
@@ -78,6 +81,15 @@ final _tafsirFiles = tafsirFilesProvider.overrideWith(
   (ref) => TafsirFiles(
     assets: () => ref.read(quranAssetsProvider.future),
     root: () async => Directory.systemTemp,
+    fetch: (_) async => throw const SocketException('offline'),
+    exclude: (_) async {},
+  ),
+);
+
+/// nothing is downloaded and the phone is offline, in a folder of its own for each test
+final _recitationFiles = recitationFilesProvider.overrideWith(
+  (ref) => RecitationFiles(
+    root: () async => Directory.systemTemp.createTempSync('recitations'),
     fetch: (_) async => throw const SocketException('offline'),
     exclude: (_) async {},
   ),

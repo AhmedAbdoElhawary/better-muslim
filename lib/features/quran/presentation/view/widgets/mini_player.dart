@@ -8,11 +8,12 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/motion/loader_gate.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
@@ -111,6 +112,9 @@ class _Player extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final speed = ref.watch(recitationStateProvider.select((state) => state.value?.speed ?? 1));
+    final reciter = ref.watch(
+      recitationStateProvider.select((state) => state.value?.reciter ?? Reciter.alafasy),
+    );
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
@@ -153,6 +157,7 @@ class _Player extends ConsumerWidget {
                           textDirection: direction,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const PlayingTitle(),
                               if (MediaQuery.textScalerOf(context).scale(1) <=
@@ -163,7 +168,10 @@ class _Player extends ConsumerWidget {
                                   fontSize: FontSizeManager.label,
                                   color: ThemeEnum.text2,
                                   maxLines: 1,
-                                  args: {'rate': speedLabel(context, speed, digits)},
+                                  args: {
+                                    'reciter': context.tr(reciter.short),
+                                    'rate': speedLabel(context, speed, digits),
+                                  },
                                 ),
                               ],
                             ],
@@ -195,7 +203,7 @@ class _Player extends ConsumerWidget {
   }
 }
 
-/// the primary circle, play or pause, the 16 pt oil drop in it while a file loads
+/// the primary circle, play or pause, the 16 pt star in it while a file loads
 class PlayButton extends ConsumerWidget {
   const PlayButton({
     this.size = SizeManager.hit,
@@ -224,7 +232,7 @@ class PlayButton extends ConsumerWidget {
           dimension: size,
           child: BmLoaderGate(
             loading: status == RecitationStatus.loading,
-            loader: const Center(child: BmOilDrop(size: SizeManager.oilDropSmall)),
+            loader: const Center(child: BmStarLoader(size: SizeManager.loaderSmall)),
             child: Center(
               child: BmIcon.ui(
                 playing ? BmUiIcon.pause : BmUiIcon.play,

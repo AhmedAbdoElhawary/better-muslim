@@ -275,17 +275,17 @@ Future<void> main(List<String> args) async {
 Future<void> _tafsirs() async {
   final index = jsonDecode(File('$_out/index.json').readAsStringSync()) as Map<String, dynamic>;
   final counts = [for (final surah in index['surahs'] as List) surah['ayahs'] as int];
-  for (final name in ['ibn_kathir', 'saadi']) {
+  for (final name in _tafsirIds.keys) {
     final rows = await _apiTafsir(name, counts.length);
     final surahs = <String, List<String>>{};
     for (final (i, count) in counts.indexed) {
       final texts = <String>[];
       for (var ayah = 1; ayah <= count; ayah++) {
-        /// quran.com leaves out some grouped ayahs, the ayah before already covers them
-        final text = rows['${i + 1}:$ayah'];
+        /// quran.com leaves out or empties some grouped ayahs, the ayah before already covers them
+        final text = _plain(rows['${i + 1}:$ayah'] ?? '');
         texts.add(
-          text != null
-              ? _plain(text)
+          text.isNotEmpty
+              ? text
               : ayah > 1
               ? texts.last
               : _fail('$name has no ${i + 1}:$ayah'),
@@ -302,7 +302,7 @@ Future<void> _tafsirs() async {
 }
 
 /// quran.com's ids, the same texts qul exports
-const _tafsirIds = {'ibn_kathir': 14, 'saadi': 91};
+const _tafsirIds = {'ibn_kathir': 14, 'saadi': 91, 'tabari': 15, 'qurtubi': 90};
 
 /// ayah key to text
 Future<Map<String, String>> _apiTafsir(String name, int surahs) async {

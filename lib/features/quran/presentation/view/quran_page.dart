@@ -73,9 +73,13 @@ class _Header extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  /// search waits for 7b
                   _HeaderButton(
-                    icon: BmIconName.bookmark,
+                    icon: BmIcon.ui(BmUiIcon.search, size: SizeManager.icon.r),
+                    label: StringsManager.searchQuran,
+                    onTap: () => context.push(Routes.quranSearch),
+                  ),
+                  _HeaderButton(
+                    icon: BmIcon(BmIconName.bookmark, size: SizeManager.icon.r),
                     label: StringsManager.bookmarks,
                     onTap: () => context.push(Routes.quranSaved),
                   ),
@@ -108,7 +112,7 @@ class _Header extends StatelessWidget {
 
 class _HeaderButton extends StatelessWidget {
   const _HeaderButton({required this.icon, required this.label, required this.onTap});
-  final BmIconName icon;
+  final BmIcon icon;
 
   /// a StringsManager key for screen readers
   final String label;
@@ -125,7 +129,10 @@ class _HeaderButton extends StatelessWidget {
         child: RSizedBox.square(
           dimension: SizeManager.hit,
           child: Center(
-            child: BmIcon(icon, size: SizeManager.icon.r, color: context.getColor(ThemeEnum.text)),
+            child: IconTheme.merge(
+              data: IconThemeData(color: context.getColor(ThemeEnum.text)),
+              child: icon,
+            ),
           ),
         ),
       ),

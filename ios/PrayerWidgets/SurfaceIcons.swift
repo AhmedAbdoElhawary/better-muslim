@@ -25,11 +25,12 @@ struct StarMark: Shape {
 struct Star: View {
   let size: CGFloat
   let stroke: CGFloat
-  var color: Color = SurfaceColors.primary
+  var color: Color?
+  @Environment(\.palette) private var palette
 
   var body: some View {
     StarMark()
-      .stroke(color, style: StrokeStyle(lineWidth: stroke * size / 22, lineJoin: .round))
+      .stroke(color ?? palette.primary, style: StrokeStyle(lineWidth: stroke * size / 22, lineJoin: .round))
       .frame(width: size, height: size)
       .accessibilityHidden(true)
   }
@@ -48,12 +49,13 @@ struct CheckMark: Shape {
 }
 
 struct Check: View {
+  @Environment(\.palette) private var palette
   let size: CGFloat
 
   var body: some View {
     CheckMark()
       .stroke(
-        SurfaceColors.success,
+        palette.success,
         style: StrokeStyle(lineWidth: 1.25 * size / 24, lineCap: .round, lineJoin: .round)
       )
       .frame(width: size, height: size)

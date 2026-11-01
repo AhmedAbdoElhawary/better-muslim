@@ -24,7 +24,6 @@ class WelcomeLayer extends ConsumerWidget {
     required this.covered,
     required this.interactive,
     required this.onGetStarted,
-    required this.onRestore,
     super.key,
   });
 
@@ -35,7 +34,6 @@ class WelcomeLayer extends ConsumerWidget {
   final double covered;
   final bool interactive;
   final VoidCallback onGetStarted;
-  final VoidCallback onRestore;
 
   /// the tree's .85
   static const _taglineAlpha = .85;
@@ -119,15 +117,6 @@ class WelcomeLayer extends ConsumerWidget {
                           child: BmButton.primary(
                             StringsManager.getStarted,
                             onPressed: onGetStarted,
-                          ),
-                        ),
-                        const RSizedBox.vertical(SpaceManager.welcomeButtonGap),
-                        _Rise(
-                          t: ch.restoreIn(b) * out(WelcomePart.buttons),
-                          child: BmButton.text(
-                            StringsManager.restoreBackup,
-                            color: ThemeEnum.onSky,
-                            onPressed: onRestore,
                           ),
                         ),
                       ],

@@ -13,6 +13,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/rolling_digits.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
@@ -68,6 +69,9 @@ void main() {
   /// the arc keeps a time only label for its middle points too
   Finder stripTime(String time) =>
       find.descendant(of: find.byType(PrayerStrip), matching: find.text(time));
+
+  bool cut(WidgetTester tester, Finder text) =>
+      tester.renderObject<RenderParagraph>(text).didExceedMaxLines;
 
   ProviderContainer containerOf(WidgetTester tester) =>
       ProviderScope.containerOf(tester.element(find.byType(HomePage)));
@@ -137,6 +141,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(flying, findsNothing);
       expect(tester.widget<Visibility>(cardRow).visible, isTrue);
+      await unmount(tester);
+    });
+
+    testWidgets('the sky glows under the bar once it shows, the top glow switch takes it off', (
+      tester,
+    ) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+      double glow() => tester
+          .widget<AnimatedOpacity>(
+            find
+                .descendant(
+                  of: find.ancestor(
+                    of: find.byType(CompactAppBar),
+                    matching: find.byType(TitleGlow),
+                  ),
+                  matching: find.byType(AnimatedOpacity),
+                )
+                .first,
+          )
+          .opacity;
+      expect(glow(), 0);
+
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(glow(), 1);
+
+      await containerOf(tester)
+          .read(databaseProvider)
+          .updateSettings(const SettingsCompanion(topGlow: Value(false)));
+      await tester.pumpAndSettle();
+      expect(glow(), 0);
       await unmount(tester);
     });
 
@@ -478,24 +513,37 @@ void main() {
       }
     }
 
-    testWidgets('24 hour times fit the strip cells, 12 hour phones get rows', (tester) async {
-      bool cut(Finder text) => tester.renderObject<RenderParagraph>(text).didExceedMaxLines;
-
+    testWidgets('24 hour times fit the strip cells', (tester) async {
       await pumpHome(tester, await designOverrides());
       expect(find.byType(StripCell), findsNWidgets(5));
       for (final time in ['04:58', '12:05', '15:27', '17:56', '19:26']) {
-        expect(cut(stripTime(time)), isFalse, reason: time);
+        expect(cut(tester, stripTime(time)), isFalse, reason: time);
       }
       await unmount(tester);
-
-      await pumpHome(tester, await designOverrides(), use24: false);
-      expect(find.byType(StripRow), findsNWidgets(5));
-
-      /// intl puts a narrow no-break space before PM
-      expect(cut(stripTime('12:05\u202fPM')), isFalse);
-      expect(stripTime('5:56\u202fPM'), findsOneWidget);
-      await unmount(tester);
     });
+
+    for (final scale in [1.0, 1.4]) {
+      testWidgets('a 12 hour phone at $scale keeps one row with no AM or PM', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pumpHome(tester, await designOverrides(), use24: false, textScale: scale);
+        expect(find.byType(StripCell), findsNWidgets(5));
+        expect(find.byType(StripRow), findsNothing);
+        for (final time in ['4:58', '12:05', '3:27', '5:56', '7:26']) {
+          expect(cut(tester, stripTime(time)), isFalse, reason: time);
+        }
+
+        /// intl puts a narrow no-break space before PM
+        final maghrib = find.byWidgetPredicate(
+          (widget) => widget is StripCell && widget.index == 3,
+        );
+        expect(tester.getSemantics(maghrib).label, contains('5:56\u202fPM'));
+
+        /// the rest of home keeps the period
+        expect(find.text('Until Maghrib at 5:56\u202fPM'), findsOneWidget);
+        semantics.dispose();
+        await unmount(tester);
+      });
+    }
 
     testWidgets('a screen reader hears hours and minutes, not every tick', (tester) async {
       final semantics = tester.ensureSemantics();

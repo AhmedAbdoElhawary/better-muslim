@@ -6,7 +6,7 @@
     <string name="surfaces_next_label">Next prayer</string>
     <string name="surfaces_next_description">The next prayer with the sun on its arc.</string>
     <string name="surfaces_times_label">Today\'s prayers</string>
-    <string name="surfaces_times_description">Today\'s five times in one row.</string>
+    <string name="surfaces_times_description">The day at a glance, with what you prayed.</string>
     <!-- no file yet, the app hasn't written. the same wording as openToSetPlace in the arbs -->
     <string name="surfaces_no_place">Open Better Muslim to set your place</string>
     <string name="surfaces_outdated">Open Better Muslim to update the times</string>

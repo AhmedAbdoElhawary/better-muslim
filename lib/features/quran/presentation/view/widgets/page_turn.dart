@@ -54,6 +54,9 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
   /// -1 the previous page laid over, 0 at rest, 1 the page turned away to the next
   late final _turn = AnimationController.unbounded(vsync: this)..addListener(_snap);
   double _from = 0;
+
+  /// where the running turn goes, -1, 0 or 1
+  double _target = 0;
   double _drag = 0;
   double _width = 1;
   double _ratio = 1;
@@ -61,8 +64,10 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
   /// one key per page on its boundary, so a page keeps its element when its wrappers change
   final _keys = <int, GlobalKey>{};
 
-  /// the pages built so far. a page measures every word, so a frame takes at most one new one
+  /// the pages built so far. a page measures every word, so a frame takes at most one new one.
+  /// two each side, so a fast reader turns onto a page laid out a turn ago
   final _ready = <int>{};
+  static const _around = 2;
   bool _warming = false;
 
   /// the leaf's picture while it curls, and which page it is
@@ -115,21 +120,25 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _warming = false;
       if (!mounted) return;
+      final page = widget.page.value;
+      final next = [
+        page + 1,
+        page - 1,
+        page + 2,
+        page - 2,
+      ].where((n) => n >= 1 && n <= quranPageCount && !_ready.contains(n)).firstOrNull;
+      if (next == null) return;
 
-      /// not while the reader opens or the page moves, a page's layout would drop one of their frames
+      /// not while the reader opens or the page moves, a page's layout would drop one of their
+      /// frames. a next door page missing mid turn comes anyway, a blank page is worse
       final moving = [widget.card, widget.recede, widget.lift, _turn].any((a) => a.isAnimating);
-      if (ModalRoute.of(context)?.animation?.isCompleted == false || moving) {
+      final opening = ModalRoute.of(context)?.animation?.isCompleted == false;
+      if (opening || (moving && (next - page).abs() > 1)) {
         _warm();
         SchedulerBinding.instance.scheduleFrame();
         return;
       }
-      final page = widget.page.value;
-      for (final n in [page + 1, page - 1]) {
-        if (n >= 1 && n <= quranPageCount && !_ready.contains(n)) {
-          setState(() => _ready.add(n));
-          return;
-        }
-      }
+      setState(() => _ready.add(next));
     });
   }
 
@@ -140,7 +149,20 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
     _leaf.value = null;
   }
 
+  /// a turn still settling looks done, so the page moves on now and the next turn never waits.
+  /// the turn shifts with it, the leaf stays where it is on screen
+  void _commit() {
+    if (_target == 0 || !_turn.isAnimating) return;
+    final target = _target;
+    _target = 0;
+    _turn
+      ..stop()
+      ..value -= target;
+    widget.page.value += target.toInt();
+  }
+
   void _start(DragStartDetails details) {
+    _commit();
     _turn.stop();
     _from = _turn.value;
     _drag = 0;
@@ -168,7 +190,9 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
 
   void _tap(TapUpDetails details) {
     if (details.localPosition.dx < _width * SizeManager.turnEdge) {
-      if (_can(1)) _go(1);
+      final velocity = _turn.velocity;
+      _commit();
+      if (_can(1)) _go(1, velocity: velocity);
       return;
     }
     widget.onTap?.call(details);
@@ -176,9 +200,11 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
 
   /// every move starts from where the page is now, so a grab mid turn carries on from there
   void _go(double target, {double velocity = 0}) {
+    _target = target;
     final TickerFuture run;
     if (_reduce) {
       if (target == 0) {
+        _target = 0;
         _turn.value = 0;
         _settle();
         return;
@@ -195,6 +221,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
       if (!mounted) return;
 
       /// the spring stops a hair off 0, a picture still queued for this frame would curl again
+      _target = 0;
       _turn.value = 0;
       if (target != 0) widget.page.value += target.toInt();
       _settle();
@@ -226,9 +253,9 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
           child: ValueListenableBuilder(
             valueListenable: widget.page,
             builder: (context, page, _) {
-              _keys.removeWhere((n, _) => (n - page).abs() > 1);
+              _keys.removeWhere((n, _) => (n - page).abs() > _around);
               _ready
-                ..removeWhere((n) => (n - page).abs() > 1)
+                ..removeWhere((n) => (n - page).abs() > _around)
                 ..add(page);
               _warm();
               return _Pages(
@@ -243,7 +270,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
                 fade: _reduce,
                 width: _width,
                 pages: {
-                  for (final n in [page - 1, page, page + 1])
+                  for (var n = page - _around; n <= page + _around; n++)
                     if (_ready.contains(n))
                       n: RepaintBoundary(
                         key: _keys.putIfAbsent(n, GlobalKey.new),
@@ -260,7 +287,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
   }
 }
 
-/// the current page and its two neighbours. a settled page has no transform or opacity layer
+/// the current page and the pages around it, only its two neighbours ever shown. a settled page has no transform or opacity layer
 /// above it (R11), a turn adds them and the page's key keeps it from being built again
 class _Pages extends StatelessWidget {
   const _Pages({

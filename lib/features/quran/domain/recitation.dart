@@ -1,9 +1,9 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/foundation.dart';
 
 enum RecitationStatus { idle, loading, playing, paused }
-
-enum RecitationFailure { offline, failed }
 
 /// off, after some minutes, or after the surah's last ayah. lives only for the session
 @immutable
@@ -36,13 +36,17 @@ class SleepTimer {
 }
 
 const reciteSpeeds = [.75, 1.0, 1.25, 1.5];
-const reciteRepeats = [1, 2, 3, 5, 10];
+
+/// in the repeat cycle after 10, each ayah once and the range again from its start
+const surahLoop = 0;
+const reciteRepeats = [1, 2, 3, 5, 10, surahLoop];
 const recitePauses = [0, 1, 2, 3, 5];
 
 @immutable
 class RecitationState {
   const RecitationState({
     this.status = RecitationStatus.idle,
+    this.reciter = Reciter.alafasy,
     this.ayah,
     this.from,
     this.to,
@@ -57,6 +61,7 @@ class RecitationState {
   });
 
   final RecitationStatus status;
+  final Reciter reciter;
 
   /// the playing item, ayah 0 is the surah's bismillah
   final AyahKey? ayah;
@@ -79,6 +84,7 @@ class RecitationState {
 
   RecitationState copyWith({
     RecitationStatus? status,
+    Reciter? reciter,
     AyahKey? ayah,
     AyahKey? from,
     AyahKey? to,
@@ -92,6 +98,7 @@ class RecitationState {
     RecitationFailure? failure,
   }) => RecitationState(
     status: status ?? this.status,
+    reciter: reciter ?? this.reciter,
     ayah: ayah ?? this.ayah,
     from: from ?? this.from,
     to: to ?? this.to,
@@ -109,7 +116,10 @@ class RecitationState {
 }
 
 /// the media notification's texts, in the app's language and digits
-typedef MediaText = ({String Function(AyahKey ayah) title, String artist});
+typedef MediaText = ({
+  String Function(AyahKey ayah) title,
+  String Function(Reciter reciter) artist,
+});
 
 /// contracts/recitation.md. the tests use a fake, only AudioServiceRecitation touches the phone
 abstract class Recitation {
@@ -122,9 +132,18 @@ abstract class Recitation {
   Future<void> resume();
   Future<void> next();
   Future<void> previous();
+
+  /// ±10 s through the audio, into the next or previous ayah past either end
+  Future<void> seekBy(Duration by);
+
+  /// the ayah's first play in the range, from the bar
+  Future<void> seekToAyah(AyahKey ayah);
   Future<void> setSpeed(double speed);
   Future<void> setRepeat(int times);
   Future<void> setPause(Duration gap);
+
+  /// while playing it goes on from the same ayah in the new voice
+  Future<void> setReciter(Reciter reciter);
   Future<void> setSleep(SleepTimer timer);
   Future<void> stop();
 }
@@ -134,11 +153,20 @@ abstract class Recitation {
 List<AyahKey> recitationQueue(AyahKey from, AyahKey to, {int repeat = 1}) => [
   if (from.ayah == 1 && from.surah != 1 && from.surah != 9) AyahKey(from.surah, 0),
   for (var ayah = from.ayah; ayah <= to.ayah; ayah++)
-    for (var i = 0; i < repeat; i++) AyahKey(from.surah, ayah),
+    for (var i = 0; i < (repeat == surahLoop ? 1 : repeat); i++) AyahKey(from.surah, ayah),
 ];
+
+/// surah loop plays the range again when it ends, end of surah still stops it there
+bool startsAgain(int repeat, SleepTimer sleep) => repeat == surahLoop && !sleep.endOfSurah;
 
 /// the bismillah is al-fatiha's first ayah
 AyahKey recitationFile(AyahKey item) => item.ayah == 0 ? const AyahKey(1, 1) : item;
+
+/// every file a downloaded surah needs, its bismillah first
+List<AyahKey> surahFiles(int surah, int ayahs) => [
+  if (surah != 1 && surah != 9) const AyahKey(1, 1),
+  for (var ayah = 1; ayah <= ayahs; ayah++) AyahKey(surah, ayah),
+];
 
 /// the pause between ayahs only, never inside a repeat
 bool pausesBefore(List<AyahKey> queue, int index) =>
@@ -161,6 +189,39 @@ int? previousAyahIndex(List<AyahKey> queue, int index) {
   if (start == 0) return null;
   return queue.indexOf(queue[start - 1]);
 }
+
+/// where a jump of by lands from position in the item at index, crossing into the next or
+/// previous items by what is left over. the first item stops at its start, null runs past the end
+Future<({int index, Duration position})?> seekAcross(
+  List<AyahKey> queue,
+  int index,
+  Duration position,
+  Duration by,
+  Future<Duration> Function(int index) length,
+) async {
+  var at = index;
+  var target = position + by;
+  while (target >= await length(at)) {
+    target -= await length(at);
+    if (++at >= queue.length) return null;
+  }
+  while (target < Duration.zero) {
+    if (at == 0) return (index: 0, position: Duration.zero);
+    target += await length(--at);
+  }
+  return (index: at, position: target);
+}
+
+/// the ayah under a drag along the bar, fraction 0 at the range's start and 1 at its end
+/// the ayah whose stretch of the bar holds the finger, the same stretches the fill uses
+int dragAyah(double fraction, {required AyahKey from, required AyahKey to}) {
+  final count = to.ayah - from.ayah + 1;
+  return from.ayah + ((fraction * count).ceil() - 1).clamp(0, count - 1);
+}
+
+/// how much of the range is played with this ayah, the bismillah reads as the first
+double rangeProgress(AyahKey playing, {required AyahKey from, required AyahKey to}) =>
+    ((readAyah(playing).ayah - from.ayah + 1) / (to.ayah - from.ayah + 1)).clamp(0.0, 1.0);
 
 /// following stays on while the page shown holds the playing ayah
 bool following({required int shownPage, required int playingPage}) => shownPage == playingPage;
@@ -194,6 +255,12 @@ class IdleRecitation implements Recitation {
   Future<void> previous() async {}
 
   @override
+  Future<void> seekBy(Duration by) async {}
+
+  @override
+  Future<void> seekToAyah(AyahKey ayah) async {}
+
+  @override
   Future<void> setSpeed(double speed) async {}
 
   @override
@@ -201,6 +268,9 @@ class IdleRecitation implements Recitation {
 
   @override
   Future<void> setPause(Duration gap) async {}
+
+  @override
+  Future<void> setReciter(Reciter reciter) async {}
 
   @override
   Future<void> setSleep(SleepTimer timer) async {}

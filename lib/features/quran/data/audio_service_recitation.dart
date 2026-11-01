@@ -5,7 +5,8 @@ import 'dart:math' as math;
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
-import 'package:better_muslim/features/quran/data/recitation_files.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -34,6 +35,10 @@ class AudioServiceRecitation implements Recitation {
 
   final RecitationFiles _files;
   final _player = AudioPlayer();
+
+  /// reads an ayah's length for ±10 s when it hasn't played yet, it never plays
+  final _probe = AudioPlayer();
+  final _lengths = <(Reciter, AyahKey), Duration>{};
   late final _Handler _handler;
   final _states = StreamController<RecitationState>.broadcast();
   RecitationState _state = const RecitationState();
@@ -76,6 +81,10 @@ class AudioServiceRecitation implements Recitation {
     _player.playerStateStream.listen(_changed);
     _player.positionStream.listen((position) {
       if (_state.active) {
+        if ((_index, _player.duration) case (final index?, final duration?)
+            when index < _queue.length) {
+          _lengths[(_state.reciter, recitationFile(_queue[index]))] = duration;
+        }
         _emit(_state.copyWith(position: position, duration: _player.duration ?? Duration.zero));
       }
     });
@@ -102,7 +111,7 @@ class AudioServiceRecitation implements Recitation {
         _waiting = true;
         _emit(_state.copyWith(status: RecitationStatus.loading));
       } else {
-        stop();
+        _ended();
       }
       return;
     }
@@ -116,7 +125,16 @@ class AudioServiceRecitation implements Recitation {
   }
 
   @override
-  Future<void> play(AyahKey from, {required AyahKey to, MediaText? media}) async {
+  Future<void> play(AyahKey from, {required AyahKey to, MediaText? media}) =>
+      _play(from, to: to, media: media);
+
+  /// paused loads the first file and waits there, for a new reciter picked while paused
+  Future<void> _play(
+    AyahKey from, {
+    required AyahKey to,
+    MediaText? media,
+    bool paused = false,
+  }) async {
     final session = ++_session;
     _cancelTimers();
     _waiting = false;
@@ -140,7 +158,7 @@ class AudioServiceRecitation implements Recitation {
 
     final File first;
     try {
-      first = await _files.file(recitationFile(_queue.first));
+      first = await _files.file(_state.reciter, recitationFile(_queue.first));
     } on RecitationException catch (error) {
       if (session == _session) {
         _emit(_state.copyWith(status: RecitationStatus.idle, failure: error.failure));
@@ -159,10 +177,14 @@ class AudioServiceRecitation implements Recitation {
       return;
     }
     _added = 1;
-    _files.ahead({for (final item in _queue.skip(1)) recitationFile(item)});
+    _files.ahead(_state.reciter, {for (final item in _queue.skip(1)) recitationFile(item)});
     unawaited(_feed(session));
     await _player.setSpeed(_state.speed);
     await _player.setVolume(1);
+    if (paused) {
+      _emit(_state.copyWith(status: RecitationStatus.paused));
+      return;
+    }
     await (await AudioSession.instance).setActive(true);
     unawaited(_player.play());
   }
@@ -172,7 +194,7 @@ class AudioServiceRecitation implements Recitation {
     while (_added < _queue.length) {
       final File file;
       try {
-        file = await _files.file(recitationFile(_queue[_added]));
+        file = await _files.file(_state.reciter, recitationFile(_queue[_added]));
       } on RecitationException catch (error) {
         /// what is in the playlist still plays, it stops where the files end
         if (session == _session && _waiting) {
@@ -195,7 +217,7 @@ class AudioServiceRecitation implements Recitation {
         unawaited(_player.play());
       }
     }
-    final ready = await _files.isSurahReady([
+    final ready = await _files.isSurahReady(_state.reciter, [
       for (var ayah = 1; ayah <= _queue.last.ayah; ayah++) AyahKey(_queue.last.surah, ayah),
       if (_queue.first.ayah == 0) const AyahKey(1, 1),
     ]);
@@ -238,8 +260,8 @@ class AudioServiceRecitation implements Recitation {
     final index = _index;
     if (index == null) return;
     final next = nextAyahIndex(_queue, index);
-    if (next == null) return stop();
-    if (next >= _added) return play(_queue[next], to: _state.to!);
+    if (next == null) return _ended();
+    if (next >= _added) return _replay(_queue[next]);
     _jump(next);
   }
 
@@ -248,6 +270,49 @@ class AudioServiceRecitation implements Recitation {
     final index = _index;
     if (index == null) return;
     _jump(previousAyahIndex(_queue, index) ?? _queue.indexOf(_queue[index]));
+  }
+
+  @override
+  Future<void> seekBy(Duration by) async {
+    final index = _index;
+    if (index == null || !_state.active) return;
+    final ({int index, Duration position})? landed;
+    try {
+      landed = await seekAcross(_queue, index, _player.position, by, _length);
+    } on Exception {
+      /// an ayah ahead that can't be read or downloaded now, the tap does nothing
+      return;
+    }
+    if (landed == null) return _ended();
+    if (landed.index >= _added) return _replay(_queue[landed.index]);
+    final waiting = _gap?.isActive ?? false;
+    _gap?.cancel();
+    if (landed.index != index) _jumped = true;
+    await _player.seek(landed.position, index: landed.index);
+    if (waiting) unawaited(_player.play());
+  }
+
+  /// surah loop starts the range again from its start, bismillah included
+  Future<void> _ended() => startsAgain(_state.repeat, _state.sleep) && _state.from != null
+      ? play(_state.from!, to: _state.to!)
+      : stop();
+
+  /// past what's in the playlist it stops the walk there, that file may not be on the phone yet
+  Future<Duration> _length(int index) async {
+    if (index >= _added) return const Duration(days: 1);
+    final key = (_state.reciter, recitationFile(_queue[index]));
+    if (_lengths[key] case final length?) return length;
+    final file = await _files.file(key.$1, key.$2);
+    return _lengths[key] = await _probe.setFilePath(file.path) ?? Duration.zero;
+  }
+
+  @override
+  Future<void> seekToAyah(AyahKey ayah) async {
+    final index = _queue.indexOf(ayah);
+
+    /// after a replay the queue starts at the ayah that played then, the range still starts before
+    if (index >= 0 && index < _added) return _jump(index);
+    await _replay(ayah);
   }
 
   void _jump(int index) {
@@ -267,10 +332,24 @@ class AudioServiceRecitation implements Recitation {
   @override
   Future<void> setRepeat(int times) async {
     _emit(_state.copyWith(repeat: times));
-    final ayah = _state.ayah;
-    if (_state.status == RecitationStatus.playing && ayah != null) {
-      await play(ayah, to: _state.to!);
-    }
+    if (_state.status == RecitationStatus.playing) await _replay();
+  }
+
+  @override
+  Future<void> setReciter(Reciter reciter) async {
+    if (reciter == _state.reciter) return;
+    final paused = _state.status == RecitationStatus.paused;
+    _emit(_state.copyWith(reciter: reciter));
+    if (!_state.active) return;
+    await _replay(null, paused);
+  }
+
+  /// the queue again from the playing ayah or the one given, the range keeps its start
+  Future<void> _replay([AyahKey? start, bool paused = false]) async {
+    final (ayah, from, to) = (start ?? _state.ayah, _state.from, _state.to);
+    if (ayah == null || to == null) return;
+    await _play(ayah, to: to, paused: paused);
+    _emit(_state.copyWith(from: from));
   }
 
   @override
@@ -320,9 +399,10 @@ class _Handler extends BaseAudioHandler {
 
   void publish(RecitationState state, MediaText? media) {
     final ayah = state.ayah;
-    if (media != null && ayah != null && mediaItem.value?.id != '$ayah') {
+    final id = '${state.reciter.name}/$ayah';
+    if (media != null && ayah != null && mediaItem.value?.id != id) {
       mediaItem.add(
-        MediaItem(id: '$ayah', title: media.title(readAyah(ayah)), artist: media.artist),
+        MediaItem(id: id, title: media.title(readAyah(ayah)), artist: media.artist(state.reciter)),
       );
     }
     final playing = state.status == RecitationStatus.playing;

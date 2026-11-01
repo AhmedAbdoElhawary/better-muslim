@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:flutter/widgets.dart';
@@ -56,7 +60,86 @@ Future<void> playFrom(BuildContext context, WidgetRef ref, AyahKey from, {AyahKe
             'surah': language == 'ar' ? surah.ar : surah.en,
             'n': formatDigitsIn('${ayah.ayah}', language: language, digits: digits),
           }),
-          artist: l10n.tr(StringsManager.reciterName, const {}),
+          artist: (reciter) => l10n.tr(reciter.label, const {}),
         ),
       );
 }
+
+/// progress is null until the first file is in
+typedef SurahDownload = ({bool ready, bool downloading, double? progress});
+
+const SurahDownload _idle = (ready: false, downloading: false, progress: null);
+const SurahDownload _ready = (ready: true, downloading: false, progress: null);
+
+/// one surah in one voice, checked again on each open since playing a surah keeps its files too
+final surahDownloadProvider = NotifierProvider.autoDispose
+    .family<SurahDownloadNotifier, SurahDownload, (Reciter, int)>(SurahDownloadNotifier.new);
+
+class SurahDownloadNotifier extends Notifier<SurahDownload> {
+  SurahDownloadNotifier(this.surah);
+
+  final (Reciter, int) surah;
+
+  Future<List<AyahKey>> get _files async {
+    final assets = await ref.read(quranAssetsProvider.future);
+    return surahFiles(surah.$2, assets.surah(surah.$2).ayahs);
+  }
+
+  @override
+  SurahDownload build() {
+    unawaited(() async {
+      final ready = await ref.read(recitationFilesProvider).isSurahReady(surah.$1, await _files);
+      if (ready && ref.mounted) state = _ready;
+    }());
+    return _idle;
+  }
+
+  /// throws a RecitationException, offline included, what came in stays for the next tap
+  Future<void> download() async {
+    if (state.ready || state.downloading) return;
+    state = (ready: false, downloading: true, progress: null);
+
+    /// the sheet may close, the download and its progress go on
+    final link = ref.keepAlive();
+    try {
+      await ref
+          .read(recitationFilesProvider)
+          .downloadSurah(
+            surah.$1,
+            await _files,
+            onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
+          );
+      state = _ready;
+    } on Object {
+      state = _idle;
+      rethrow;
+    } finally {
+      link.close();
+      ref.invalidate(downloadsProvider);
+    }
+  }
+
+  /// the downloads page only reads it for this call, so it lives until the files are gone
+  Future<void> delete() async {
+    final link = ref.keepAlive();
+    await ref.read(recitationFilesProvider).deleteSurah(surah.$1, surah.$2);
+    state = _idle;
+    ref.invalidate(downloadsProvider);
+    link.close();
+  }
+}
+
+/// More's Downloads page, the reciters with nothing downloaded left out.
+/// read again on each open, playing a surah fills the folder too
+final downloadsProvider = FutureProvider.autoDispose<Map<Reciter, List<({int surah, int bytes})>>>((
+  ref,
+) async {
+  final assets = await ref.watch(quranAssetsProvider.future);
+  final files = ref.watch(recitationFilesProvider);
+  return {
+    for (final reciter in Reciter.values)
+      if (await files.downloaded(reciter, (surah) => assets.surah(surah).ayahs) case final surahs
+          when surahs.isNotEmpty)
+        reciter: surahs,
+  };
+});

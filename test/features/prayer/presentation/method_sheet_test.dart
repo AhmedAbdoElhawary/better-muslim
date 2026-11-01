@@ -125,6 +125,26 @@ void main() {
     expect(containerOf(tester).read(todayTimesProvider)!.asr!.isAfter(before), isTrue);
     await unmount(tester);
   });
+
+  testWidgets('reset is off on the defaults, then puts both back to by country', (tester) async {
+    await openSheet(tester);
+    final reset = find.text('Reset');
+    expect(
+      tester
+          .widget<AnimatedOpacity>(find.ancestor(of: reset, matching: find.byType(AnimatedOpacity)))
+          .opacity,
+      lessThan(1),
+    );
+
+    await pick(tester, row(PrayerMethod.muslimWorldLeague.nameKey));
+    await pick(tester, row('asrHanafi'));
+    await reveal(tester, row('byCountry').first, delta: -100);
+    await tester.tap(reset);
+    await tester.pumpAndSettle();
+    expect(await picks(tester), (method: null, asr: null));
+    expect(selected(tester, row('byCountry').first), isTrue);
+    await unmount(tester);
+  });
 }
 
 typedef AppSettingsPicks = ({PrayerMethod? method, AsrMethod? asr});

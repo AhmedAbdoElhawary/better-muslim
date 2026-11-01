@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// listen, save and share under every dua card, listen only once the dua has its clip
+/// listen, save and share under every dua card, listen only once the dua has its clip or ayahs
 class DuaActions extends ConsumerWidget {
   const DuaActions({required this.dua, super.key});
   final Dua dua;
@@ -58,7 +58,7 @@ class DuaActions extends ConsumerWidget {
     return Row(
       children: [
         /// a listen with no clip behind it would only say it failed
-        if (dua.audio != null) ...[
+        if (dua.listenable) ...[
           _Action(
             icon: playing ? BmIcon.ui(BmUiIcon.stop) : BmIcon(BmIconName.listen),
             label: playing ? StringsManager.stop : StringsManager.listen,

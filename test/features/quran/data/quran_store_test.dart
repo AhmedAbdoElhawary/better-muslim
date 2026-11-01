@@ -1,5 +1,3 @@
-import 'package:better_muslim/core/backup/backup_file.dart';
-import 'package:better_muslim/core/backup/restore.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -7,9 +5,6 @@ import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../../helpers/backup.dart';
-import '../../../helpers/phone_storage.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +32,10 @@ void main() {
 
       final bookmarks = await store.watchBookmarks().first;
       expect(bookmarks.map((bookmark) => (bookmark.ayah, bookmark.page)), [(null, 1), (ayah, 1)]);
-      expect(bookmarks.map((bookmark) => bookmark.color), everyElement(RibbonColor.primary));
+      expect(
+        bookmarks.map((bookmark) => (bookmark.category, bookmark.color)),
+        everyElement((AppDatabase.defaultCategory, CategoryColor.primary)),
+      );
     });
 
     test('newest first', () async {
@@ -49,18 +47,19 @@ void main() {
       expect(bookmarks.map((bookmark) => bookmark.page), [42, 1]);
     });
 
-    test('rename, recolor and move keep the id', () async {
+    test('rename, move and a new category keep the id', () async {
       await store.addAyah(ayah, 1);
       final [before] = await store.watchBookmarks().first;
+      final rose = await store.addCategory(' Reflect ', CategoryColor.rose);
 
-      await store.rename(before.id, '  Reflect ');
-      await store.recolor(before.id, RibbonColor.accent);
+      await store.rename(before.id, '  Kursi ');
+      await store.setCategory(before.id, rose);
       await store.move(before.id, const AyahKey(2, 255), 42);
 
       final [after] = await store.watchBookmarks().first;
       expect(
-        (after.id, after.name, after.color, after.ayah, after.page),
-        (before.id, 'Reflect', RibbonColor.accent, const AyahKey(2, 255), 42),
+        (after.id, after.name, after.category, after.color, after.ayah, after.page),
+        (before.id, 'Kursi', rose, CategoryColor.rose, const AyahKey(2, 255), 42),
       );
     });
 
@@ -98,6 +97,52 @@ void main() {
     });
   });
 
+  group('categories', () {
+    test('"Bookmarks" first, a new one after it, trimmed', () async {
+      final id = await store.addCategory(' Reflect ', CategoryColor.teal);
+      await store.addCategory('Wird', CategoryColor.amber);
+
+      final categories = await store.watchCategories().first;
+      expect(categories.map((category) => (category.name, category.color)), [
+        (null, CategoryColor.primary),
+        ('Reflect', CategoryColor.teal),
+        ('Wird', CategoryColor.amber),
+      ]);
+      expect(categories[1].id, id);
+    });
+
+    test('a new category can hold a bookmark straight away', () async {
+      final id = await store.addCategory('Reflect', CategoryColor.teal);
+      await store.addAyah(ayah, 1, category: id);
+      await store.addPage(5, category: id);
+
+      final bookmarks = await store.watchBookmarks().first;
+      expect(bookmarks.map((bookmark) => bookmark.category), [id, id]);
+    });
+
+    test('rename and recolor, "Bookmarks" too', () async {
+      await store.addAyah(ayah, 1);
+      await store.updateCategory(AppDatabase.defaultCategory, ' Mine ', CategoryColor.violet);
+
+      final [category] = await store.watchCategories().first;
+      expect((category.name, category.color), ('Mine', CategoryColor.violet));
+      expect((await store.watchBookmarks().first).single.color, CategoryColor.violet);
+    });
+
+    test('deleting a category takes its bookmarks with it', () async {
+      final id = await store.addCategory('Reflect', CategoryColor.teal);
+      await store.addAyah(ayah, 1, category: id);
+      await store.addPage(5);
+
+      await store.deleteCategory(id);
+
+      expect((await store.watchCategories().first).map((category) => category.id), [
+        AppDatabase.defaultCategory,
+      ]);
+      expect((await store.watchBookmarks().first).single.page, 5);
+    });
+  });
+
   group('notes (US5)', () {
     test('one note per ayah, trimmed, the last one kept', () async {
       await store.saveNote(ayah, ' first ');
@@ -109,8 +154,20 @@ void main() {
       expect(note.updatedAt.isAtSameMomentAs(now), isTrue);
     });
 
-    test('an empty note is refused', () async {
-      expect(store.saveNote(ayah, '   '), throwsA(anything));
+    test('a highlight is kept with or without text, and goes when unchecked', () async {
+      await store.saveNote(ayah, '  ', highlight: true);
+      final [note] = await store.watchNotes().first;
+      expect((note.text, note.highlight), ('', true));
+
+      await store.saveNote(ayah, 'patience', highlight: true);
+      expect((await store.watchNotes().first).single.text, 'patience');
+      await store.saveNote(ayah, 'patience');
+      expect((await store.watchNotes().first).single.highlight, isFalse);
+    });
+
+    test('no text and no highlight deletes the note', () async {
+      await store.saveNote(ayah, 'remember', highlight: true);
+      await store.saveNote(ayah, '   ');
       expect(await store.watchNotes().first, isEmpty);
     });
 
@@ -124,7 +181,7 @@ void main() {
     });
 
     test('delete and undo put the same note back', () async {
-      await store.saveNote(ayah, 'remember');
+      await store.saveNote(ayah, 'remember', highlight: true);
       final [note] = await store.watchNotes().first;
 
       await store.deleteNote(ayah);
@@ -135,22 +192,31 @@ void main() {
     });
   });
 
-  test('a backup and restore carries both tables (SC-006)', () async {
-    usePhoneStorage();
-    final from = await seededStore();
-    addTearDown(from.close);
-    final file = await writeBackup(from, 'test1234', now: DateTime(2026, 10, 20));
-    final (backup, _) = await readBackup(file, 'test1234', schemaVersion: from.schemaVersion);
+  test('recent searches are newest first, a repeat moves up, only ten stay', () async {
+    for (var i = 1; i <= 11; i++) {
+      now = now.add(const Duration(minutes: 1));
+      await store.saveSearch('q$i');
+    }
+    now = now.add(const Duration(minutes: 1));
+    await store.saveSearch('q5');
 
-    await restore(db, backup!);
-    await closeBackup(backup);
+    expect(await store.watchSearches().first, [
+      'q5',
+      'q11',
+      'q10',
+      'q9',
+      'q8',
+      'q7',
+      'q6',
+      'q4',
+      'q3',
+      'q2',
+    ]);
+    expect(await db.select(db.quranSearches).get(), hasLength(10));
 
-    final [bookmark] = await store.watchBookmarks().first;
-    expect(
-      (bookmark.ayah, bookmark.page, bookmark.color),
-      (const AyahKey(2, 255), 42, RibbonColor.accent),
-    );
-    final [note] = await store.watchNotes().first;
-    expect((note.ayah, note.text), (const AyahKey(1, 5), 'remember this one'));
+    await store.removeSearch('q11');
+    expect((await store.watchSearches().first).take(2), ['q5', 'q10']);
+    await store.clearSearches();
+    expect(await store.watchSearches().first, isEmpty);
   });
 }

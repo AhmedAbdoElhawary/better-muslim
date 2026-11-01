@@ -13,30 +13,45 @@ final tafsirFilesProvider = Provider<TafsirFiles>(
   (ref) => TafsirFiles(assets: () => ref.read(quranAssetsProvider.future)),
 );
 
-/// al-muyassar ships in the surah files, the other two are downloaded once (contracts/tafsir-files)
+/// al-muyassar ships in the surah files, the rest are downloaded once (contracts/tafsir-files)
 enum TafsirSource {
-  muyassar(file: '', sha256: ''),
+  muyassar(file: '', sha256: '', release: ''),
 
   ibnKathir(
     file: 'ibn_kathir.json.gz',
     sha256: '2bfc4bebff51a65d4277dd5dda53c54bbf1aff5ed9e4ac1a009cd89151644673',
+    release: 'tafsir-v1',
   ),
   saadi(
     file: 'saadi.json.gz',
     sha256: '168779be2ff2c428af34445bf76294518c0fb433f7c5648ed6b355ab8d7fd7ee',
+    release: 'tafsir-v1',
+  ),
+  tabari(
+    file: 'tabari.json.gz',
+    sha256: '3849d44e535886ae8b085b911c0d7b4fbc0a5a85a1394a13eaf6fdaa6da55132',
+    release: 'tafsir-v2',
+  ),
+  qurtubi(
+    file: 'qurtubi.json.gz',
+    sha256: '0c6823245c7d2ad4f4709ce334f4d8b94a7adbe88e0d342cb93c1aa89cf1ae77',
+    release: 'tafsir-v2',
   );
 
-  const TafsirSource({required this.file, required this.sha256});
+  const TafsirSource({required this.file, required this.sha256, required this.release});
 
   final String file;
   final String sha256;
 
+  /// a release once uploaded is never changed, a new tafsir goes in a new one
+  final String release;
+
   /// a public repo of its own, this one is private and its releases need a token
   static final base = Uri.parse(
-    'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/tafsir-v1/',
+    'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/',
   );
 
-  Uri get address => base.resolve(file);
+  Uri get address => base.resolve('$release/$file');
 }
 
 /// each tafsir is one file for the whole quran, kept only when its sha256 matches (research R15)

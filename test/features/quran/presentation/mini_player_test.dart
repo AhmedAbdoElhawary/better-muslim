@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
@@ -93,6 +94,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(recitation.calls.last, 'pause');
     expect(recitation.current.status, RecitationStatus.paused);
+    await unmount(tester);
+  });
+
+  testWidgets('a dua pauses it and gives it back when done, the adhan never does', (tester) async {
+    final recitation = await playing(tester);
+    final use = containerOf(tester).read(audioUseProvider.notifier);
+
+    use.claim(AudioUse.clip);
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'pause');
+
+    use.release(AudioUse.clip);
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'resume');
+    expect(recitation.current.status, RecitationStatus.playing);
+
+    use.claim(AudioUse.adhan);
+    await tester.pumpAndSettle();
+    use.release(AudioUse.adhan);
+    await tester.pumpAndSettle();
+    expect(recitation.calls.last, 'pause');
     await unmount(tester);
   });
 

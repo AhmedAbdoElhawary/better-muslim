@@ -216,7 +216,6 @@ abstract final class SpaceManager {
   static const double welcomeTextSide = 24;
   static const double welcomeButtonsSide = 20;
   static const double welcomeButtonsBottom = 46;
-  static const double welcomeButtonGap = 8;
 
   /// around the sun's rest spot, so a thumb that lands a little off still grabs it
   static const double welcomeGrabMargin = 22;
@@ -283,6 +282,7 @@ abstract final class SpaceManager {
   static const double ayahWashV = 5;
   static const double ayahWashH = 2;
   static const double ayahMarkerGap = 2;
+  static const double ayahRibbonGap = 6;
   static const double cartoucheNameTop = 3;
   static const double mushafNumberTop = 2;
 
@@ -368,6 +368,7 @@ abstract final class SpaceManager {
   static const double savedRibbonGap = 14;
   static const double savedLineGap = 2;
   static const double recentNoteTop = 22;
+  static const double categoryHeaderTop = 22;
   static const double noteCardV = 14;
   static const double noteCardSide = 16;
   static const double noteLineGap = 6;
@@ -401,6 +402,16 @@ abstract final class SpaceManager {
   static const double verseCellSide = 18;
   static const double verseCellBottom = 14;
   static const double verseMarkerGap = 10;
+
+  /// search (4.27)
+  static const double searchBarTop = 6;
+  static const double searchFieldStart = 12;
+  static const double searchFieldEnd = 10;
+  static const double searchSection = 18;
+  static const double searchHitTop = 10;
+  static const double searchHitGap = 10;
+  static const double searchWashSide = 3;
+  static const double searchHintSide = 20;
 }
 
 abstract final class RadiusManager {
@@ -446,6 +457,9 @@ abstract final class RadiusManager {
   static const double sharePreview = 22;
   static const double displaySwatch = 12;
   static const double verseCell = 18;
+  static const double searchField = 12;
+  static const double searchJumpIcon = 12;
+  static const double searchWash = 6;
 }
 
 abstract final class SizeManager {
@@ -669,6 +683,10 @@ abstract final class SizeManager {
   static const double ribbonShadowY = 2;
   static const double ribbonShadowBlur = 6;
 
+  /// a bookmarked ayah's ribbon in the line, between its last word and its marker
+  static const double ayahRibbonW = 7;
+  static const double ayahRibbonH = 14;
+
   /// K.STAR's stroke on the page number and the surah rows, the arch's two lines, the marker's
   static const double starStroke = .9;
   static const double archStroke = .9;
@@ -710,7 +728,9 @@ abstract final class SizeManager {
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
   static const double sheetMax = 740;
-  static const double ayahSheet = 400;
+  static const double ayahSheet = 500;
+  static const double studySheet = 500;
+  static const double studySheetFull = 720;
   static const double recitationSheet = 452;
   static const double miniPlayer = 64;
   static const double miniPlayerIcon = 20;
@@ -718,13 +738,15 @@ abstract final class SizeManager {
   static const double recitationBar = 4;
   static const double recitationPlay = 64;
   static const double recitationIcon = 26;
+
+  /// seven controls fill the row, a bigger rate would push it past the sheet
+  static const double recitationRateMaxTextScale = 1.4;
   static const double recitationRepeatIcon = 24;
   static const double recitationRow = 46;
   static const double miniPlayerShadowBlur = 40;
   static const double miniPlayerShadowY = 16;
   static const double miniPlayerShadowSpread = -12;
   static const double displaySheet = 584;
-  static const double largeSheetTop = 70;
   static const double sheetIconButton = 36;
   static const double sheetIcon = 18;
   static const double ayahAction = 74;
@@ -761,11 +783,11 @@ abstract final class SizeManager {
   static const double shareSquare = 1080;
   static const double shareStory = 1920;
 
-  /// the oil drop loader (11 Motion v2), no falling drop below oilDropMin
-  static const double oilDrop = 48;
-  static const double oilDropMin = 32;
-  static const double oilDropInline = 24;
-  static const double oilDropSmall = 16;
+  /// the star loader (Brand's Noor) and its line, the same at every size
+  static const double loader = 48;
+  static const double loaderInline = 24;
+  static const double loaderSmall = 16;
+  static const double loaderLine = .5;
 
   /// tablets and foldables get the phone layout stretched to this, until they have their own design
   static const double maxContentWidth = 480;
@@ -775,6 +797,9 @@ abstract final class SizeManager {
   static const double savedRibbonW = 16;
   static const double savedRibbonH = 30;
   static const double savedRibbonNotch = .8;
+
+  /// the dot before a category's header in Saved
+  static const double categoryDot = 8;
 
   /// 4.30's card in design points, captured at shareSquare pixels wide
   static const double shareAyahCard = 300;
@@ -814,4 +839,12 @@ abstract final class SizeManager {
   static const double verseMarkerRing = 12;
   static const double verseMarkerStroke = 1.2;
   static const double verseMarkerStar = .9;
+
+  /// search (4.27)
+  static const double searchClear = 20;
+  static const double searchClearIcon = 12;
+  static const double searchJumpIcon = 40;
+  static const double searchRow = 46;
+  static const double searchRowNumber = 24;
+  static const double searchChevron = 18;
 }

@@ -14,7 +14,9 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
+import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/recording_sheet.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/tone_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -56,11 +58,7 @@ class PrayerSoundRow extends ConsumerWidget {
       values: PrayerSound.values,
       selected: sound,
       small: true,
-      labelOf: (sound) => switch (sound) {
-        PrayerSound.adhan => StringsManager.soundAdhan,
-        PrayerSound.tone => StringsManager.soundTone,
-        PrayerSound.silent => StringsManager.soundSilent,
-      },
+      labelOf: (sound) => sound.nameKey,
       onChanged: (sound) => ref.read(databaseProvider).updateSettings(soundChoice(prayer, sound)),
     );
     return ConstrainedBox(
@@ -99,7 +97,7 @@ class RecordingRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recording = ref.watch(
       settingsProvider.select(
-        (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.madinah,
+        (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.alafasy,
       ),
     );
     return NavRow(
@@ -107,6 +105,22 @@ class RecordingRow extends ConsumerWidget {
       value: StringsManager.recordingFull,
       args: {'recording': context.tr(recording.nameKey)},
       onTap: () => showRecordingSheet(context, prayer),
+    );
+  }
+}
+
+/// under a prayer on tone, plays the sound its notification will make
+class ToneRow extends StatelessWidget {
+  const ToneRow(this.prayer, {super.key});
+  final Prayer prayer;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavRow(
+      title: StringsManager.toneSound,
+      trailing: ToneButton(
+        NotificationScheduler.channelId(prayer, PrayerSound.tone, AdhanRecording.alafasy),
+      ),
     );
   }
 }

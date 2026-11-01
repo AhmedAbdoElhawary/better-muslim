@@ -1,19 +1,10 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-extension RibbonTheme on RibbonColor {
-  ThemeEnum get theme => switch (this) {
-    RibbonColor.primary => ThemeEnum.primary,
-    RibbonColor.accent => ThemeEnum.accent,
-    RibbonColor.neutral => ThemeEnum.text2,
-  };
-}
 
 /// data-ribbon of _gen/quran.js, hung from the page's top edge in the newest bookmark's color.
 /// on the page itself, so it turns with the leaf
@@ -112,14 +103,7 @@ class _Ribbon extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..addPolygon([
-        Offset.zero,
-        Offset(size.width, 0),
-        Offset(size.width, size.height),
-        Offset(size.width / 2, size.height * notch),
-        Offset(0, size.height),
-      ], true);
+    final path = ribbonPath(Offset.zero & size, notch);
     if (shadow case final shadow?) {
       canvas.drawPath(
         path.shift(Offset(0, shadowY)),
@@ -135,3 +119,13 @@ class _Ribbon extends CustomPainter {
   bool shouldRepaint(_Ribbon old) =>
       old.color != color || old.notch != notch || old.shadow != shadow;
 }
+
+/// the ribbon's outline in rect, also the mushaf's margin ribbons
+Path ribbonPath(Rect rect, double notch) => Path()
+  ..addPolygon([
+    rect.topLeft,
+    rect.topRight,
+    rect.bottomRight,
+    Offset(rect.center.dx, rect.top + rect.height * notch),
+    rect.bottomLeft,
+  ], true);

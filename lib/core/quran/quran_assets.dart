@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final quranAssetsProvider = FutureProvider<QuranAssets>((ref) => QuranAssets.load());
 
 const quranPageCount = 604;
+const quranSurahCount = 114;
 
 class QuranSurah {
   const QuranSurah({
@@ -144,12 +145,22 @@ class QuranAssets {
         if (words >= 6 && words <= 40) AyahKey(surah.n, i + 1),
   ];
 
-  /// the madinah pages always end on an ayah's end, so its page has all its words
-  Future<String> ayahText(AyahKey key) async => [
-    for (final line in ((await page(pageOf(key)))?['lines'] as List? ?? []).cast<Map>())
-      for (final word in (line['w'] as List? ?? []).cast<List<dynamic>>())
-        if (word[0] == key.surah && word[1] == key.ayah && word.length == 3) word[2] as String,
-  ].join(' ');
+  /// the madinah pages always end on an ayah's end, so one page has all its words
+  Future<String> ayahText(AyahKey key) async {
+    final n = pageOf(key);
+
+    /// the index and the page files disagree on 25 pages by an ayah or a few, a neighbour has it
+    for (final at in [n, n - 1, n + 1]) {
+      if (at < 1 || at > quranPageCount) continue;
+      final text = [
+        for (final line in ((await page(at))?['lines'] as List? ?? []).cast<Map>())
+          for (final word in (line['w'] as List? ?? []).cast<List<dynamic>>())
+            if (word[0] == key.surah && word[1] == key.ayah && word.length == 3) word[2] as String,
+      ].join(' ');
+      if (text.isNotEmpty) return text;
+    }
+    return '';
+  }
 
   /// the page's lines, null when its file is missing
   Future<Map<String, dynamic>?> page(int n) async {

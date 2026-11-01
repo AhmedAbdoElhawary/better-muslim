@@ -5,6 +5,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/empty_state.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
@@ -73,12 +74,24 @@ class _Content extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searching = ref.watch(duaQueryProvider.select((query) => query.trim().isNotEmpty));
     final chip = ref.watch(duaChipProvider);
+    final loading = ref.watch(duasContentProvider.select((content) => content.isLoading));
     return HorizontalPadding(
       padding: SpaceManager.screen,
       child: BmSwitcher(
         child: KeyedSubtree(
-          key: ValueKey(searching ? null : chip),
-          child: searching
+          key: ValueKey(
+            loading
+                ? false
+                : searching
+                ? null
+                : chip,
+          ),
+          child: loading
+              ? const VerticalPadding(
+                  padding: SpaceManager.s12,
+                  child: Center(child: BmStarLoader()),
+                )
+              : searching
               ? const _Results()
               : chip == DuaChip.saved
               ? const _Saved()

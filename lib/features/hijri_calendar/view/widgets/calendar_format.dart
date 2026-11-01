@@ -109,7 +109,10 @@ extension CalendarFormat on BuildContext {
     return '${hijriDayMonth(start, digits)} – ${hijriDayMonth(end, digits)}';
   }
 
-  /// "1 day", "12 days"
-  String daysAway(int days, Digits digits) =>
-      tr(StringsManager.days, {'sign': '', 'n': formatDigits('$days', digits)});
+  /// "Today", "in 12 days", "12 days ago"
+  String daysAway(int days, Digits digits) => days == 0
+      ? tr(StringsManager.today)
+      : tr(days > 0 ? StringsManager.inDays : StringsManager.daysAgo, {
+          'n': formatDigits('${days.abs()}', digits),
+        });
 }

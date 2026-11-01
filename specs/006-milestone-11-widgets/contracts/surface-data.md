@@ -11,11 +11,16 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "place": true,
   "language": "en",
   "eastern": false,
   "countdown": true,
+  "mode": "followSky",
+  "colors": {
+    "light": { "top": 4294967295, "text": 4279371027, "...": 0 },
+    "dark": { "top": 4278190080, "text": 4292465602, "...": 0 }
+  },
   "until": 1792646280000,
   "texts": {
     "noPlace": "Open Better Muslim to set your place",
@@ -43,6 +48,7 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
       "atTime": "at 17:56",
       "timeCity": "17:56 · Makkah",
       "nameTime": "Maghrib 17:56",
+      "nameNow": "Maghrib · now",
       "barFrom": 1792066020000,
       "barFromLabel": "Asr 15:27 · prayed",
       "sunrise": 1792043700000,
@@ -53,6 +59,7 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
       "prayedLine": "3 of 5 prayed today",
       "reminder": "Reminder 17:46",
       "next": 3,
+      "light": true,
       "strip": [
         { "prayer": "fajr", "name": "Fajr", "time": "04:58", "logged": true, "past": true },
         { "prayer": "dhuhr", "name": "Dhuhr", "time": "12:05", "logged": true, "past": true },
@@ -61,9 +68,6 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
         { "prayer": "isha", "name": "Isha", "time": "19:26", "logged": false, "past": false }
       ]
     }
-  ],
-  "countdowns": [
-    { "start": 1792068960000, "end": 1792076160000, "entry": 0 }
   ]
 }
 ```
@@ -72,11 +76,13 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 
 | Field | Rule |
 | --- | --- |
-| version | 1. A reader that finds a higher one shows "out of date" (an app update the extension hasn't caught up with) |
-| place | false: no entries, no countdowns, the no place state |
+| version | 2 (1 had no mode, colors, light or nameNow, and had the 2 hour `countdowns`). A reader that finds a higher one shows "out of date" (an app update the extension hasn't caught up with) |
+| place | false: no entries, no countdown, the no place state |
 | language | `en` or `ar`. `ar` lays out right to left, uses Reem Kufi for names and Noto Sans Arabic for the rest |
 | eastern | true only in Arabic with Eastern digits. The native countdowns map 0-9 to ٠-٩ |
-| countdown | the switch. false: `countdowns` is empty and every running one ends |
+| countdown | the switch. false: no live countdown and every running one ends |
+| mode | `dark`, `light` or `followSky`, the app's mode. A message (no place, out of date) uses it, and follows the phone with `followSky` |
+| colors | the theme's roles for `light` and `dark`, ARGB ints: `top`, `middle`, `bottom` (the small and medium sky), `deep` (the large sky's end), `text`, `label`, `dim`, `gold`, `live` (the live countdown's digits), `primary`, `container`, `success`, `ring`, `sun`, `outline`. Dark is the theme's sky, light the theme's surfaces. `bottom` goes toward `middle` where the text would be under AA on it. The live countdown always takes `dark`. A version 1 file has no `mode`, `colors` or entry `light`, and shows in the system's colors until the app writes again |
 | until | end of the last entry. Past it: the out of date state. 0 with no place |
 | texts | the strings that don't change with the moment. `{duration}`, `{hours}`, `{minutes}`, `{prayer}` are filled natively |
 | entries | ascending `from`, the first at the start of the stretch the write falls in (the last boundary at or before it), so two writes in the same stretch give the same file and the equal check skips the second |
@@ -84,7 +90,7 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 | entries[].next | 0 to 4, or null after Isha |
 | entries[].barFrom, sunrise, maghrib | null when the day has no such time |
 | entries[].reminder | null when the reminder is off |
-| countdowns | ascending `start`, at most 30 (6 days x 5) |
+| entries[].light | which of `colors` the widgets use for this entry. Follow sky is light from sunrise until maghrib, and entries change at both |
 
 Nothing else goes in: the test compares the key set of the built JSON with this list (SC-006).
 
@@ -102,6 +108,7 @@ What a running countdown shows, taken from `entries[entry]` and `texts`:
 | the bar | `barFrom` to `at` |
 | start label | `barFromLabel` |
 | end label | `nameTime` |
+| the prayer past its time (iOS 18 to 25) | `nameNow`, the countdown hidden |
 | "{city} · {method}" | `texts.methodLine` (expanded island) |
 | "Reminder {time}" | `reminder`, the chip only when not null |
 | Android title | `nameTime` |

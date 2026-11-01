@@ -24,8 +24,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// 4.31, every page choice in one sheet, kept in settings. tajweed colors wait for 7b
-Future<void> showDisplaySheet(BuildContext context) =>
-    showBmSheet(context, applyBlur: false, builder: (_) => const _DisplaySheet());
+Future<void> showDisplaySheet(BuildContext context) => showBmSheet(
+  context,
+  applyBlur: false,
+  title: const SheetTitle(StringsManager.display, subtitle: StringsManager.appliesToEveryPage),
+  builder: (_) => const _DisplaySheet(),
+);
 
 /// the translation layout's size steps around 4.07's sizes
 const quranSizeSteps = (min: -2, max: 3);
@@ -61,7 +65,6 @@ class _DisplaySheet extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetTitle(StringsManager.display, subtitle: StringsManager.appliesToEveryPage),
               const OnlyPadding(
                 top: SpaceManager.s2,
                 start: SpaceManager.s4,

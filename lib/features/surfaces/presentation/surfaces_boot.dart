@@ -40,6 +40,8 @@ final _surfaceInputsProvider = Provider((ref) {
         row?.reminderMinutes,
         row?.prayerCountdown,
         row?.language,
+        row?.theme,
+        row?.themeMode,
       );
     }),
   );
@@ -60,9 +62,6 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
   late final AppLifecycleListener _lifecycle;
   StreamSubscription<Object?>? _marks;
   Timer? _debounce;
-
-  /// the next countdown window's start or end, ios 16.2 to 18 can only start one from an open app
-  Timer? _window;
 
   /// a sheet's slider, a fast location fix or a restore changes several things in a row
   static const _debounceTime = Duration(milliseconds: 500);
@@ -95,7 +94,6 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
   @override
   void dispose() {
     _debounce?.cancel();
-    _window?.cancel();
     _marks?.cancel();
     _lifecycle.dispose();
     super.dispose();
@@ -113,18 +111,16 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
     final channel = ref.read(surfacesChannelProvider);
     final phoneZone = ref.read(phoneZoneProvider);
     final clock = ref.read(clockProvider);
-    return _running = _running.then((_) async {
-      final next = await writeSurfaces(
+    return _running = _running.then(
+      (_) => writeSurfaces(
         db,
         channel: channel,
         locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
         use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
         phoneZone: phoneZone,
         now: clock(),
-      );
-      _window?.cancel();
-      if (next != null && mounted) _window = Timer(next.difference(clock()), _write);
-    });
+      ),
+    );
   }
 
   @override

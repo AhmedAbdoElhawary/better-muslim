@@ -19,7 +19,7 @@ import 'package:better_muslim/core/surfaces/write_surfaces.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
@@ -41,7 +41,6 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _testAdhanIn1Minute = 'Test adhan in 1 min';
   static const _replayOnboarding = 'Replay onboarding';
   static const _refreshWidgets = 'Refresh widgets';
-  static const _startCountdown = 'Start countdown now';
 
   /// the next prayer as an alert, on its own prayer day
   static Alert? nextAlert(WidgetRef ref) {
@@ -74,7 +73,7 @@ class DevNotificationsPage extends ConsumerWidget {
         .testIn1Minute(
           alert,
           texts,
-          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.madinah,
+          ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.alafasy,
         );
   }
 
@@ -133,9 +132,6 @@ class DevNotificationsPage extends ConsumerWidget {
                     force: true,
                   ),
                 ),
-
-                /// the next prayer's countdown whatever the 2 hours, so it shows without waiting
-                _Row(_startCountdown, onTap: () => ref.read(surfacesChannelProvider).startNow()),
                 const _FastDayRow(),
               ],
 
@@ -264,7 +260,7 @@ class _AdhanCheckState extends ConsumerState<_AdhanCheck> {
   }
 }
 
-/// the oil drop at its three sizes and one following a slider (FR-059). shut until tapped, its
+/// the star loader at its three sizes and one following a slider (FR-059). shut until tapped, its
 /// loops would keep the page from ever settling
 class _Loader extends StatefulWidget {
   const _Loader();
@@ -275,7 +271,7 @@ class _Loader extends StatefulWidget {
 
 class _LoaderState extends State<_Loader> {
   static const _label = 'Loader';
-  static const _sizes = [SizeManager.oilDrop, SizeManager.oilDropInline, SizeManager.oilDropSmall];
+  static const _sizes = [SizeManager.loader, SizeManager.loaderInline, SizeManager.loaderSmall];
 
   double _progress = .43;
   bool _open = false;
@@ -293,14 +289,14 @@ class _LoaderState extends State<_Loader> {
                 padding: SpaceManager.card,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [for (final size in _sizes) BmOilDrop(size: size)],
+                  children: [for (final size in _sizes) BmStarLoader(size: size)],
                 ),
               ),
               AllPadding(
                 padding: SpaceManager.card,
                 child: Row(
                   children: [
-                    BmOilDrop(progress: _progress),
+                    BmStarLoader(progress: _progress),
                     Expanded(
                       child: Slider(
                         value: _progress,

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/router/app_router.dart';
-import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
@@ -90,7 +89,7 @@ void main() {
                 ayah: Value(i % 286 + 1),
                 page: 2 + i % 48,
                 name: const Value('A bookmark with a long name that has to fit on one line'),
-                color: RibbonColor.values[i % RibbonColor.values.length],
+                category: AppDatabase.defaultCategory,
                 createdAt: DateTime.utc(2026, 10, 1).add(Duration(hours: i)),
               ),
           ]),

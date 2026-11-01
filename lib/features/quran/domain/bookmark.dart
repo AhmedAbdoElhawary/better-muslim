@@ -8,6 +8,7 @@ class Bookmark {
   const Bookmark({
     required this.id,
     required this.page,
+    required this.category,
     required this.color,
     required this.createdAt,
     this.ayah,
@@ -22,7 +23,10 @@ class Bookmark {
 
   /// null shows the reference
   final String? name;
-  final RibbonColor color;
+  final int category;
+
+  /// its category's
+  final CategoryColor color;
   final DateTime createdAt;
 
   @override
@@ -32,9 +36,10 @@ class Bookmark {
       other.ayah == ayah &&
       other.page == page &&
       other.name == name &&
+      other.category == category &&
       other.color == color &&
       other.createdAt == createdAt;
 
   @override
-  int get hashCode => Object.hash(id, ayah, page, name, color, createdAt);
+  int get hashCode => Object.hash(id, ayah, page, name, category, color, createdAt);
 }

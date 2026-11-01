@@ -14,8 +14,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
 
 /// the same steps in the app and in the background, with no riverpod, so both write the same
-/// file. returns the next countdown start or end after now, the open app writes again then
-Future<DateTime?> writeSurfaces(
+/// file
+Future<void> writeSurfaces(
   AppDatabase db, {
   required SurfacesChannel channel,
   required Locale locale,
@@ -63,12 +63,4 @@ Future<DateTime?> writeSurfaces(
   } on PlatformException catch (error, stack) {
     await CrashReporter.instance.recordError(error, stack, context: {'reason': 'write surfaces'});
   }
-
-  final moments = [
-    for (final window in data['countdowns']! as List<Map<String, Object?>>)
-      for (final ms in [window['start']! as int, window['end']! as int])
-        if (ms > at.millisecondsSinceEpoch) ms,
-  ];
-  if (moments.isEmpty) return null;
-  return DateTime.fromMillisecondsSinceEpoch(moments.reduce((a, b) => a < b ? a : b));
 }

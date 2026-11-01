@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:flutter/material.dart';
 
-/// a quick wait shows nothing, a slow one the loader, and a shown loader stays until its ripple
-/// ends so it never flashes. one loader on screen at a time
+/// a quick wait shows nothing, a slow one the loader, and a shown loader stays at least
+/// loaderMinimum so it never flashes. one loader on screen at a time
 class BmLoaderGate extends StatefulWidget {
   const BmLoaderGate({
     required this.loading,
     required this.child,
-    this.loader = const Center(child: BmOilDrop()),
+    this.loader = const Center(child: BmStarLoader()),
     super.key,
   });
 
@@ -29,8 +29,7 @@ class BmLoaderGate extends StatefulWidget {
 
 class _BmLoaderGateState extends State<BmLoaderGate> {
   Timer? _delay;
-  Timer? _cycles;
-  int _cycleCount = 0;
+  Timer? _minimum;
   bool _shown = false;
 
   @override
@@ -46,6 +45,8 @@ class _BmLoaderGateState extends State<BmLoaderGate> {
       _wait();
     } else if (!widget.loading && !_shown) {
       _delay?.cancel();
+    } else if (!widget.loading && !(_minimum?.isActive ?? false)) {
+      _hide();
     }
   }
 
@@ -55,22 +56,16 @@ class _BmLoaderGateState extends State<BmLoaderGate> {
     _delay = Timer(BmMotion.loaderDelay, () {
       if (BmLoaderGate.showing > 0) return;
       BmLoaderGate.showing++;
-      _cycleCount = 0;
-      _cycles = Timer.periodic(BmMotion.oilCycle, (_) => _cycleEnded());
+      _minimum = Timer(BmMotion.loaderMinimum, () {
+        if (!widget.loading) setState(_hide);
+      });
       setState(() => _shown = true);
     });
   }
 
-  void _cycleEnded() {
-    _cycleCount++;
-    if (widget.loading || BmMotion.oilCycle * _cycleCount < BmMotion.loaderMinimum) return;
-    _hide();
-    setState(() {});
-  }
-
   void _hide() {
     if (!_shown) return;
-    _cycles?.cancel();
+    _minimum?.cancel();
     _shown = false;
     BmLoaderGate.showing--;
   }

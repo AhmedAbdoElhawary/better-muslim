@@ -18,7 +18,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// 4.30, the ayahs as a still image on a brand background (FR-041, FR-015)
 Future<void> showAyahShare(BuildContext context, List<AyahKey> keys) =>
-    showBmSheet(context, maxSheetHeight: true, builder: (_) => _AyahShareSheet(keys));
+    showBmSheet(context, builder: (_) => _AyahShareSheet(keys));
 
 class _AyahShareSheet extends ConsumerStatefulWidget {
   const _AyahShareSheet(this.keys);
@@ -99,6 +99,7 @@ class _TextPicker extends ConsumerWidget {
       child: Row(
         children: [
           for (final (i, source) in ShareTextSource.values.indexed) ...[
+            if (i == 0) const RSizedBox.horizontal(SpaceManager.s4),
             if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
             TafsirChip(
               source.label,
@@ -109,6 +110,7 @@ class _TextPicker extends ConsumerWidget {
               },
               onTap: () => onPick(source),
             ),
+            if (i == ShareTextSource.values.length - 1) const RSizedBox.horizontal(SpaceManager.s4),
           ],
         ],
       ),

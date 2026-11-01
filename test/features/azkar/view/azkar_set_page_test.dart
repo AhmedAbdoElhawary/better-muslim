@@ -113,14 +113,14 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a verse keeps the quran font and doesn\'t move on a tap', (tester) async {
+  testWidgets('a verse keeps the mushaf font and doesn\'t move on a tap', (tester) async {
     await openEvening(tester, counts: {'e1': 1, 'e2': 3});
     final verse = find.text('قُلْ هُوَ اللَّهُ أَحَدٌ');
     final before = tester.getRect(verse);
 
     expect(
       tester.widget<RegularText>(find.ancestor(of: verse, matching: find.byType(RegularText))).font,
-      FontEnum.quran,
+      FontEnum.kfgqpc,
     );
     await tapCard(tester);
     expect(tester.getRect(verse), before);

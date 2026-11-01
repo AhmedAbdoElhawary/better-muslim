@@ -2,16 +2,20 @@ import 'dart:math' as math;
 
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/resources/theme_sky.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
 import 'package:better_muslim/features/home/view/widgets/date_line.dart';
 import 'package:better_muslim/features/home/view/widgets/location_pill.dart';
@@ -234,27 +238,48 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
   }
 }
 
-/// the compact bar the next prayer lands on, a tap goes back to the top
-class _Bar extends StatelessWidget {
+/// the compact bar the next prayer lands on, a tap goes back to the top. the sky's lit bottom
+/// glows under its glass, clipped to the bar so the cards below keep their colors
+class _Bar extends ConsumerWidget {
   const _Bar({required this.collapsed, required this.onTap});
 
   final ValueListenable<bool> collapsed;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: collapsed,
-      builder: (context, collapsed, _) => IgnorePointer(
-        ignoring: !collapsed,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: CompactAppBar(
-            StringsManager.tabHome,
-            back: false,
-            collapsed: collapsed,
-            titleChild: const SizedBox.shrink(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(skyStateProvider);
+    final theme = ref.watch(themeIdProvider);
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    final glow = TitleGlow.legible(
+      state == null ? context.getColor(ThemeEnum.sky3) : themeSky(theme)[state]!.bottom,
+      bg: context.getColor(ThemeEnum.bg),
+      surface: context.getColor(ThemeEnum.surface),
+      text: context.getColor(ThemeEnum.text),
+    );
+    return ClipRect(
+      child: TweenAnimationBuilder<Color?>(
+        tween: ColorTween(end: glow),
+        duration: reduce ? BmMotion.standard : BmMotion.skyChange,
+        curve: reduce ? Curves.linear : BmMotion.sacred,
+        builder: (context, glow, child) => ValueListenableBuilder<bool>(
+          valueListenable: collapsed,
+          builder: (context, collapsed, _) => TitleGlow(
+            color: glow,
+            visible: collapsed,
+            child: IgnorePointer(
+              ignoring: !collapsed,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap,
+                child: CompactAppBar(
+                  StringsManager.tabHome,
+                  back: false,
+                  collapsed: collapsed,
+                  titleChild: const SizedBox.shrink(),
+                ),
+              ),
+            ),
           ),
         ),
       ),

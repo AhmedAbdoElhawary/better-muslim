@@ -1,13 +1,17 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
-import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart' show Prayer;
+import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/day_dots.dart';
+import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_cell.dart';
+import 'package:better_muslim/features/hijri_calendar/view/widgets/day_times.dart';
+import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +19,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
 import '../../../helpers/more.dart';
+import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
 
 void main() {
@@ -109,6 +114,57 @@ void main() {
       await unmount(tester);
     });
 
+    testWidgets('each prayer shows its status, sunrise never, a full day checks the tab', (
+      tester,
+    ) async {
+      await open(tester);
+      Finder checks() => find.descendant(
+        of: find.byType(DayTimes),
+        matching: find.byWidgetPredicate((w) => w is BmIcon && w.asset.endsWith('ui/check.svg')),
+      );
+      Finder tabCheck() => find.descendant(
+        of: find.byType(Segmented<DayTab>),
+        matching: find.byWidgetPredicate((w) => w is BmIcon && w.asset.endsWith('ui/check.svg')),
+      );
+
+      /// thu 15 at 16:32: fajr and dhuhr prayed, asr open, maghrib and isha ahead
+      expect(checks(), findsNWidgets(2));
+      expect(find.text('In qada'), findsNothing);
+      expect(tabCheck(), findsNothing);
+
+      await tap(tester, day('2'));
+      expect(checks(), findsNWidgets(4));
+      expect(find.text('In qada'), findsOneWidget);
+      expect(tabCheck(), findsNothing);
+
+      await tap(tester, day('3'));
+      expect(checks(), findsNWidgets(5));
+      expect(tabCheck(), findsOneWidget);
+      expect(tester.widget<DayDots>(find.byType(DayDots)).prayed, Prayer.values.toSet());
+      await unmount(tester);
+    });
+
+    testWidgets('a prayer tap opens the prayer tab at that day and prayer', (tester) async {
+      await open(tester);
+      await tap(tester, day('2'));
+      await tap(tester, find.text('Isha'));
+
+      expect(
+        '${containerOf(tester).read(routerProvider).routerDelegate.currentConfiguration.uri}',
+        Routes.prayerAt(DateTime(2026, 10, 13), Prayer.isha),
+      );
+      await unmount(tester);
+    });
+
+    testWidgets('the marks hold in arabic at text scale 2.0', (tester) async {
+      await open(tester, locale: const Locale('ar'), textScale: 2);
+      await tap(tester, day('٢'));
+      await tester.scrollUntilVisible(find.text('في القضاء'), 200);
+      expect(find.text('في القضاء'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await unmount(tester);
+    });
+
     testWidgets('a day tap selects it in place, the open tab stays on another day', (tester) async {
       await open(tester);
       await tap(tester, day('13'));
@@ -139,8 +195,11 @@ void main() {
 
       expect(find.text('This year (1448)'), findsOneWidget);
       expect(find.text('This month'), findsOneWidget);
-      expect(find.text('9 days'), findsOneWidget);
+      expect(find.text('in 9 days'), findsOneWidget);
       expect(find.text('Ayyam al-Bid'), findsWidgets);
+
+      await tap(tester, day('1'));
+      expect(find.text('in 9 days'), findsOneWidget, reason: 'counted from today');
 
       await tap(tester, find.text('Ramadan begins'));
       expect(find.text('Ramadan 1448'), findsOneWidget);
@@ -148,6 +207,19 @@ void main() {
       expect(find.text('1 Ramadan 1448'), findsOneWidget);
       expect(find.text('Ramadan begins'), findsOneWidget, reason: 'events is open');
       expect(find.text('This year (1448)'), findsNothing);
+      await unmount(tester);
+    });
+
+    testWidgets('coming up from a past day shows the passed events muted, in days ago', (
+      tester,
+    ) async {
+      await open(tester);
+      await tap(tester, find.bySemanticsLabel('Previous month'));
+      await tap(tester, day('1'));
+      await tap(tester, find.text('Coming up'));
+
+      expect(find.textContaining(RegExp(r'^\d+ days ago$')), findsOneWidget);
+      expect(find.text('in 9 days'), findsOneWidget);
       await unmount(tester);
     });
 

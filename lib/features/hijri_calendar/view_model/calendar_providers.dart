@@ -1,3 +1,5 @@
+import 'package:better_muslim/core/prayer_log/prayer_log.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/hijri_calendar/model/calendar_month.dart';
@@ -132,5 +134,12 @@ final comingUpProvider = Provider.autoDispose<ComingUp>(
     ref.watch(todayProvider),
     ref.watch(hijriAdjustProvider),
     ref.watch(calendarModeProvider),
+  ),
+);
+
+/// all five prayed or made up, the check after Prayer times
+final dayDoneProvider = Provider.autoDispose.family<bool, DateTime>(
+  (ref, day) => Prayer.values.every(
+    (prayer) => ref.watch(rowStateProvider((day, prayer)).select((row) => row.state.done)),
   ),
 );

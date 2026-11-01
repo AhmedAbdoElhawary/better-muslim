@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,12 +35,14 @@ void main() {
     WidgetTester tester, {
     Locale locale = const Locale('en'),
     double textScale = 1,
+    bool reduceMotion = false,
   }) async {
     await pumpHome(
       tester,
       await designOverrides(),
       locale: locale,
       textScale: textScale,
+      reduceMotion: reduceMotion,
       settle: false,
     );
     await tester.pump();
@@ -65,6 +70,23 @@ void main() {
   }
 
   AyahKey? selected(WidgetTester tester) => containerOf(tester).read(selectionProvider).sheet;
+
+  /// how much of the study sheet is on screen, from its grabber down
+  double shown(WidgetTester tester) =>
+      tester.view.physicalSize.height / 3 -
+      tester.getTopLeft(inSheet(StudySheet, find.byType(Grabber))).dy +
+      SpaceManager.s2;
+
+  ScrollPosition studyScroll(WidgetTester tester) => tester
+      .state<ScrollableState>(
+        find.descendant(of: find.byType(StudyTabs), matching: find.byType(Scrollable)).first,
+      )
+      .position;
+
+  Future<void> drag(WidgetTester tester, Finder finder, double dy) async {
+    await tester.drag(finder, Offset(0, dy));
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('the medium detent shows the ayah, its translation and six actions', (tester) async {
     await pumpReader(tester);
@@ -133,6 +155,126 @@ void main() {
     await unmount(tester);
   });
 
+  group('the study sheet', () {
+    Finder head() => inSheet(StudySheet, find.text('Al-Fatiha · Ayah 5'));
+
+    testWidgets('opens at 400, its head grows it to 720 and steps back to 400 and closed', (
+      tester,
+    ) async {
+      await pumpReader(tester);
+      await select(tester, 5);
+      await tapIn(tester, AyahSheet, find.text('Tafsir'));
+      expect(shown(tester), closeTo(500, 1));
+
+      await drag(tester, head(), -200);
+      expect(shown(tester), closeTo(720, 1));
+
+      await drag(tester, head(), 200);
+      expect(shown(tester), closeTo(500, 1));
+      expect(selected(tester), isNotNull);
+
+      await drag(tester, head(), 200);
+      expect(selected(tester), isNull);
+      await unmount(tester);
+    });
+
+    testWidgets('a pull on its text grows it to 720 before the text scrolls, and back', (
+      tester,
+    ) async {
+      await pumpReader(tester, textScale: 2);
+      await select(tester, 5);
+      await tapIn(tester, AyahSheet, find.text('Tafsir'));
+
+      /// 200 under the grabber is the ayah's text at any height, the tafsir is still under the screen
+      Future<void> pull(double dy) async {
+        final grabber = tester.getTopLeft(inSheet(StudySheet, find.byType(Grabber)));
+        await tester.dragFrom(Offset(196, grabber.dy + 200), Offset(0, dy));
+        await tester.pumpAndSettle();
+      }
+
+      await pull(-200);
+      expect(shown(tester), closeTo(720, 1));
+      expect(studyScroll(tester).pixels, 0);
+
+      await pull(-100);
+      expect(shown(tester), closeTo(720, 1));
+      expect(studyScroll(tester).pixels, greaterThan(0));
+
+      /// the text goes back to its top first, then the sheet follows the rest of the drag
+      await pull(100 + 250);
+      expect(studyScroll(tester).pixels, 0);
+      expect(shown(tester), closeTo(500, 1));
+
+      await pull(-320);
+      await pull(-100);
+      await tester.tap(labelled(StudySheet, 'Close'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      final open = tester.widget<PageTurner>(find.byType(PageTurner)).recede.value;
+      expect(open, lessThan(.9));
+      expect(shown(tester), closeTo(720 * open, 1), reason: 'the whole sheet slides down');
+      await tester.pumpAndSettle();
+      expect(selected(tester), isNull);
+
+      await select(tester, 5);
+      await tapIn(tester, AyahSheet, find.text('Tafsir'));
+      expect(shown(tester), closeTo(500, 1));
+      expect(studyScroll(tester).pixels, 0);
+      await unmount(tester);
+    });
+
+    testWidgets('720 is capped to what fits under the status bar', (tester) async {
+      tester.view.padding = const FakeViewPadding(top: 200 * 3);
+      await pumpReader(tester);
+      await select(tester, 5);
+      await tapIn(tester, AyahSheet, find.text('Tafsir'));
+      await drag(tester, head(), -300);
+      expect(shown(tester), closeTo(852 - 200, 1));
+      await unmount(tester);
+    });
+
+    testWidgets('with reduce motion it opens at 400 in place and still grows', (tester) async {
+      await pumpReader(tester, reduceMotion: true);
+      await select(tester, 5);
+      await tapIn(tester, AyahSheet, find.text('Tafsir'));
+      expect(shown(tester), closeTo(500, 1));
+
+      await drag(tester, head(), -200);
+      expect(shown(tester), closeTo(720, 1));
+      await unmount(tester);
+    });
+  });
+
+  testWidgets('the note\'s checkbox highlights the ayah with no text, unchecked it goes', (
+    tester,
+  ) async {
+    Set<AyahKey> highlighted() => tester.allRenderObjects
+        .whereType<RenderMushafPage>()
+        .expand((page) => page.highlighted)
+        .toSet();
+    Future<void> toggleAndSave() async {
+      await tester.tap(find.text('Highlight in mushaf'));
+      await tester.pump();
+      await tester.tap(find.text('Save'));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      await tester.pumpAndSettle();
+    }
+
+    await pumpReader(tester);
+    await select(tester, 5);
+    await tapIn(tester, AyahSheet, find.text('Note'));
+    await tapIn(tester, StudySheet, find.text('Add note'));
+    await toggleAndSave();
+    expect(highlighted(), {const AyahKey(1, 5)});
+    expect(inSheet(StudySheet, find.text('Highlighted in mushaf')), findsOneWidget);
+
+    await tapIn(tester, StudySheet, find.text('Highlighted in mushaf'));
+    await toggleAndSave();
+    expect(highlighted(), isEmpty);
+    expect(inSheet(StudySheet, find.text('Add note')), findsOneWidget);
+    await unmount(tester);
+  });
+
   testWidgets('in arabic the translation slot is al-muyassar', (tester) async {
     await pumpReader(tester, locale: const Locale('ar'));
     await select(tester, 5);
@@ -147,6 +289,7 @@ void main() {
     await pumpReader(tester, locale: const Locale('ar'), textScale: 2);
     await select(tester, 5);
     await tapIn(tester, AyahSheet, find.text('التفسير'));
+    await drag(tester, inSheet(StudySheet, find.byType(Grabber)), -320);
     await tapIn(tester, StudySheet, find.text('الترجمة'));
     expect(tester.takeException(), isNull);
     await unmount(tester);

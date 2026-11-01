@@ -66,6 +66,12 @@ const credits = [
     license: _ofl,
     link: 'https://software.sil.org/scheherazade',
   ),
+  Credit(
+    source: 'Noto Naskh Arabic',
+    useKey: StringsManager.useFonts,
+    license: _ofl,
+    link: 'https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic',
+  ),
 
   /// its license lets it be used and shipped for free, never sold or modified
   Credit(
@@ -93,12 +99,39 @@ const credits = [
     link: 'https://tanzil.net',
   ),
   Credit(
-    source: "Quran.com · Tafsir Ibn Kathir · Tafsir as-Sa'di",
+    source:
+        "Quran.com · Tafsir Ibn Kathir · Tafsir as-Sa'di · Tafsir al-Tabari · Tafsir al-Qurtubi",
     useKey: StringsManager.useTafsir,
     link: 'https://quran.com',
   ),
   Credit(
+    source: 'Quranic Arabic Corpus · Kais Dukes',
+    useKey: StringsManager.useWordRoots,
+    license: 'GNU GPL',
+    link: 'https://corpus.quran.com',
+  ),
+  Credit(
     source: 'EveryAyah · Mishary Rashid Alafasy',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Mahmoud Khalil Al-Husary',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Abdul Basit Abdul Samad',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Mohamed Siddiq Al-Minshawi',
+    useKey: StringsManager.useRecitation,
+    link: 'https://everyayah.com',
+  ),
+  Credit(
+    source: 'EveryAyah · Maher Al-Muaiqly',
     useKey: StringsManager.useRecitation,
     link: 'https://everyayah.com',
   ),
@@ -108,33 +141,12 @@ const credits = [
     link: 'https://www.hisnmuslim.com',
   ),
   Credit(
-    source: 'ejaz215 · Freesound · Madinah',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY 3.0',
-    link: 'https://freesound.org/people/ejaz215/sounds/33937/',
+    source: 'Sunnah.com · Hisn al-Muslim references',
+    useKey: StringsManager.useAzkarDuas,
+    link: 'https://sunnah.com/hisn',
   ),
   Credit(
-    source: 'Besim Azemi · Islamic Center Malmö · Fajr',
+    source: 'Mishary Rashid Alafasy · Adhan and Fajr',
     useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY 3.0',
-    link: 'https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm',
-  ),
-  Credit(
-    source: 'Aaqib Azeez',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY-SA 4.0',
-    link: 'https://commons.wikimedia.org/wiki/File:The_Adhan_-_Muslim_Call_to_Prayer_-_Aaqib_Azeez.mp3',
-  ),
-  Credit(
-    source: 'Andrewler',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC BY-SA 4.0',
-    link: 'https://commons.wikimedia.org/wiki/File:Azan.ogg',
-  ),
-  Credit(
-    source: 'Adam Synagda',
-    useKey: StringsManager.useAdhanRecordings,
-    license: 'CC0',
-    link: 'https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg',
   ),
 ];

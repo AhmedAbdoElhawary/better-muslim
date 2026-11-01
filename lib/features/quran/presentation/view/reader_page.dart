@@ -3,6 +3,7 @@ import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/last_read.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
@@ -109,7 +110,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   /// the playing ayah's page, otherwise the page settled is last read
   Future<void> _turned() async {
     final page = _page.value;
-    _pages.removeWhere((n, _) => (n - page).abs() > 1);
+
+    /// the turner keeps two pages each side built, a new key would build one again
+    _pages.removeWhere((n, _) => (n - page).abs() > 2);
     final key = ref.read(selectionProvider).sheet;
     if (key != null && !(ref.read(mushafPageProvider(page)).value?.has(key) ?? false)) _close();
     final assets = await _assets;

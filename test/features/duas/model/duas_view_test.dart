@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/model/duas_view.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<DuaCategory> categories;
-  setUpAll(() async => categories = await loadDuas());
+  setUpAll(() async => categories = await loadDuas(await QuranAssets.load()));
 
   /// the card's category first, then the rows
   List<String?> view(DuaChip chip) {
@@ -13,8 +14,8 @@ void main() {
     return [if (card != null) cardCategory!.name.en, for (final row in rows) row.name.en];
   }
 
-  test('all: the 4.14 card, its category\'s row and the four rows', () {
-    expect(view(DuaChip.all), [
+  test('all: the 4.14 card, its category\'s row and every category after it', () {
+    expect(view(DuaChip.all).take(6), [
       'Leaving the home',
       'Leaving the home',
       'Waking up',
@@ -22,6 +23,7 @@ void main() {
       'Entering and leaving the mosque',
       'Before and after eating',
     ]);
+    expect(view(DuaChip.all), hasLength(categories.length + 1));
   });
 
   test('home: its first dua on the card, the other home categories as rows', () {
@@ -29,16 +31,18 @@ void main() {
       'Leaving the home',
       'Leaving the home',
       'Entering and leaving the mosque',
-      'Before and after eating',
+      'Before entering the bathroom',
+      'After leaving the bathroom',
+      'Remembrance upon entering the home',
     ]);
   });
 
   test('a first category with more than the card\'s dua keeps its row', () {
-    expect(view(DuaChip.sleep), ['Before sleeping', 'Before sleeping']);
+    expect(view(DuaChip.sleep).take(2), ['Before sleeping', 'Before sleeping']);
   });
 
-  test('travel has nothing yet', () {
-    expect(view(DuaChip.travel), isEmpty);
-    expect(duasViewFor(DuaChip.travel, categories).card, isNull);
+  test('food starts with eating, travel has its duas', () {
+    expect(view(DuaChip.food).first, 'Before and after eating');
+    expect(view(DuaChip.travel).first, 'When mounting an animal or any means of transport');
   });
 }

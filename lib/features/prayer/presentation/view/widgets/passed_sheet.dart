@@ -17,6 +17,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Day complete go on the row's context, the sheet's is gone by then
 Future<void> showPassedSheet(BuildContext context, DateTime day, Prayer prayer) => showBmSheet(
   context,
+  title: SheetTitle(
+    StringsManager.prayerPassedTitle,
+    args: {'prayer': context.tr(prayer.nameKey)},
+    subtitle: StringsManager.prayerPassedBody,
+  ),
   builder: (_) => _PassedSheet(rowContext: context, day: day, prayer: prayer),
 );
 
@@ -56,11 +61,6 @@ class _PassedSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SheetTitle(
-              StringsManager.prayerPassedTitle,
-              args: {'prayer': context.tr(prayer.nameKey)},
-              subtitle: StringsManager.prayerPassedBody,
-            ),
             HorizontalPadding(
               padding: SpaceManager.s1,
               child: Column(

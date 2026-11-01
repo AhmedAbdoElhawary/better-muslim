@@ -32,9 +32,11 @@ import 'package:better_muslim/features/onboarding/view/welcome_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/downloads_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/saved_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/search_page.dart';
 import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,6 +58,7 @@ abstract final class Routes {
   static const String hijriCalendar = '/hijri-calendar';
   static const String adhanSettings = '/adhan-settings';
   static const String acknowledgements = '/acknowledgements';
+  static const String downloads = '/downloads';
 
   /// inside the azkar tab, so the tab bar stays
   static String azkarSet(AzkarSet set) => '$azkar/${set.name}';
@@ -90,6 +93,7 @@ abstract final class Routes {
   ).toString();
 
   static const String quranSaved = '$quran/saved';
+  static const String quranSearch = '$quran/search';
   static const String quranNotes = '$quranSaved?tab=notes';
 
   /// dev builds only
@@ -254,10 +258,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             _page(state, SavedPage(notes: state.uri.queryParameters['tab'] == 'notes')),
       ),
 
+      GoRoute(
+        path: Routes.quranSearch,
+        pageBuilder: (context, state) => _page(state, const SearchPage()),
+      ),
       GoRoute(path: Routes.theme, pageBuilder: (context, state) => _page(state, const ThemePage())),
       GoRoute(
         path: Routes.adhanSettings,
         pageBuilder: (context, state) => _page(state, const AdhanSettingsPage()),
+      ),
+      GoRoute(
+        path: Routes.downloads,
+        pageBuilder: (context, state) => _page(state, const DownloadsPage()),
       ),
       GoRoute(
         path: Routes.acknowledgements,

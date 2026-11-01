@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
@@ -17,7 +18,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
@@ -26,8 +27,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-Future<void> showRecordingSheet(BuildContext context, Prayer prayer) =>
-    showBmSheet(context, builder: (_) => _RecordingSheet(prayer));
+Future<void> showRecordingSheet(BuildContext context, Prayer prayer) => showBmSheet(
+  context,
+  title: SheetTitle(
+    StringsManager.adhanSound,
+    subtitle: StringsManager.forPrayer,
+    subtitleArgs: {'prayer': context.tr(prayer.nameKey)},
+  ),
+  builder: (_) => _RecordingSheet(prayer),
+);
 
 /// the components' "Adhan sound" sheet: a tap picks and plays, only save keeps it (FR-027)
 class _RecordingSheet extends ConsumerStatefulWidget {
@@ -40,8 +48,9 @@ class _RecordingSheet extends ConsumerStatefulWidget {
 
 class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   late AdhanRecording _picked =
-      ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.madinah;
+      ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.alafasy;
   late final ClipPlayer _player;
+  late final AudioUseNotifier _use;
   late final StreamSubscription<void> _ended;
   AdhanRecording? _playing;
 
@@ -49,22 +58,33 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   void initState() {
     super.initState();
     _player = ref.read(clipPlayerProvider);
-    _ended = _player.ended.listen((_) => setState(() => _playing = null));
+    _use = ref.read(audioUseProvider.notifier);
+    _ended = _player.ended.listen((_) => _setPlaying(null));
+    ref.listenManual(audioUseProvider, (_, use) {
+      if (_playing != null && (use == AudioUse.recitation || use == AudioUse.adhan)) _stop();
+    });
   }
 
   @override
   void dispose() {
     _ended.cancel();
     _player.stop();
+
+    /// riverpod lets no widget change a provider while the tree builds
+    if (_playing != null) Future(() => _use.release(AudioUse.clip));
     super.dispose();
+  }
+
+  /// the quran pauses while a preview plays and comes back after
+  void _setPlaying(AdhanRecording? recording) {
+    setState(() => _playing = recording);
+    recording == null ? _use.release(AudioUse.clip) : _use.claim(AudioUse.clip);
   }
 
   Future<void> _play(AdhanRecording recording) async {
     BmHaptics.selection();
-    setState(() {
-      _picked = recording;
-      _playing = recording;
-    });
+    setState(() => _picked = recording);
+    _setPlaying(recording);
     await _player.stop();
 
     /// fajr always previews and plays the recording's fajr variant
@@ -92,7 +112,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   }
 
   Future<void> _stop() async {
-    setState(() => _playing = null);
+    _setPlaying(null);
     await _player.stop();
   }
 
@@ -104,17 +124,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SheetTitle(
-              StringsManager.adhanSound,
-              subtitle: StringsManager.forPrayer,
-              subtitleArgs: {'prayer': context.tr(widget.prayer.nameKey)},
-            ),
-
-            /// every recording plays the same fajr, so fajr has one row
-            for (final recording
-                in widget.prayer == Prayer.fajr
-                    ? const [AdhanRecording.madinah]
-                    : AdhanRecording.values)
+            for (final recording in AdhanRecording.values)
               _RecordingRow(
                 recording,
                 length: recording.lengthOf(widget.prayer),
@@ -278,7 +288,7 @@ class _PlayButton extends ConsumerWidget {
             ),
             child: Center(
               child: status.downloading
-                  ? BmOilDrop(size: SizeManager.oilDropInline, progress: status.progress)
+                  ? BmStarLoader(size: SizeManager.loaderInline, progress: status.progress)
                   : BmIcon.ui(
                       !status.ready
                           ? BmUiIcon.download

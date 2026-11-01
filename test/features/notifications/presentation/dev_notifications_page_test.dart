@@ -68,21 +68,6 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('start countdown now asks the plugin for the next prayer\'s countdown', (
-    tester,
-  ) async {
-    await pumpHome(tester, testOverrides());
-    containerOf(tester).read(routerProvider).push(Routes.devNotifications);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Start countdown now'));
-    await tester.pump();
-
-    final channel = containerOf(tester).read(surfacesChannelProvider) as FakeSurfacesChannel;
-    expect(channel.starts, 1);
-    await unmount(tester);
-  });
-
   for (final flavor in [Flavor.staging, Flavor.production]) {
     testWidgets('${flavor.name} has neither the row nor the route', (tester) async {
       await pumpHome(

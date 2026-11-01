@@ -34,18 +34,17 @@ void main() {
     expect(reported, isNot(contains('Makkah')));
   }
 
-  test('a store whose key is gone starts fresh and remembers it (FR-024)', () async {
+  test('a store whose key is gone starts fresh (FR-024)', () async {
     FlutterSecureStorage.setMockInitialValues({});
 
     final settings = await openAgain();
 
     expect(settings.placeName, isNull);
-    expect(settings.storeResetPending, isTrue);
     expect(reporter.contexts.single, {'reason': 'no key'});
     expectOneReportWithReasonOnly();
   });
 
-  test('a store with the wrong key starts fresh and remembers it', () async {
+  test('a store with the wrong key starts fresh', () async {
     FlutterSecureStorage.setMockInitialValues({'database_key': 'not the key'});
 
     final settings = await openAgain();
@@ -54,7 +53,6 @@ void main() {
     expect(reporter.contexts.single, {'reason': 'cannot open'});
     expect('${reporter.errors.single}', contains('file is not a database'));
     expect(settings.haptics, isTrue);
-    expect(settings.storeResetPending, isTrue);
     expectOneReportWithReasonOnly();
   });
 }

@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
@@ -66,6 +68,15 @@ class FakeRecitation implements Recitation {
   }
 
   @override
+  Future<void> seekBy(Duration by) async => calls.add('seek ${by.inSeconds}');
+
+  @override
+  Future<void> seekToAyah(AyahKey ayah) async {
+    calls.add('seek to $ayah');
+    emit(_state.copyWith(ayah: ayah));
+  }
+
+  @override
   Future<void> setSpeed(double speed) async {
     calls.add('speed $speed');
     emit(_state.copyWith(speed: speed));
@@ -81,6 +92,14 @@ class FakeRecitation implements Recitation {
   Future<void> setPause(Duration gap) async {
     calls.add('pause ${gap.inSeconds}');
     emit(_state.copyWith(pause: gap));
+  }
+
+  /// like the player, the same reciter again does nothing
+  @override
+  Future<void> setReciter(Reciter reciter) async {
+    if (reciter == _state.reciter) return;
+    calls.add('reciter ${reciter.name}');
+    emit(_state.copyWith(reciter: reciter));
   }
 
   @override

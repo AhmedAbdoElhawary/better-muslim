@@ -22,8 +22,11 @@ const _step = 5;
 const _most = 30;
 const _overlayAlpha = .18;
 
-Future<void> showReminderSheet(BuildContext context) =>
-    showBmSheet(context, builder: (_) => const _ReminderSheet());
+Future<void> showReminderSheet(BuildContext context) => showBmSheet(
+  context,
+  title: const SheetTitle(StringsManager.reminderBefore),
+  builder: (_) => const _ReminderSheet(),
+);
 
 /// the components' slider. kept when the sheet closes, so a drag doesn't remake the schedule six
 /// times (R9)
@@ -75,7 +78,6 @@ class _ReminderSheetState extends ConsumerState<_ReminderSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SheetTitle(StringsManager.reminderBefore),
             MediumText(label, translate: false, textAlign: TextAlign.center),
             const RSizedBox.vertical(SpaceManager.s2),
             HorizontalPadding(

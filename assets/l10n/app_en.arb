@@ -75,8 +75,7 @@
   "readDua": "Read dua",
   "markPrayed": "Mark prayed",
   "stopAdhan": "Stop adhan",
-  "adhanOfMadinah": "Adhan of Madinah",
-  "adhanOfFajr": "Fajr adhan · Malmö",
+  "alafasyFajr": "Fajr adhan · Alafasy",
   "prayerTimes": "Prayer times",
   "prayedToday": "{count} of 5 prayed today",
   "@prayedToday": {
@@ -224,7 +223,6 @@
   "uiSounds": "UI sounds",
   "welcomeTagline": "Prayer, Quran and remembrance, moving with the sky above you.",
   "getStarted": "Get started",
-  "restoreBackup": "Restore from backup",
   "locTitle": "Prayer times for where you are",
   "locBody": "Your location sets the prayer times, the Qibla and the calculation method for your region.",
   "locB1": "Accurate prayer times",
@@ -258,12 +256,30 @@
       "n": {}
     }
   },
+  "inDays": "{n, plural, one{in {n} day} other{in {n} days}}",
+  "@inDays": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "daysAgo": "{n, plural, one{{n} day ago} other{{n} days ago}}",
+  "@daysAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "searchDuas": "Search in English or Arabic",
   "catAll": "All",
   "catMorningEvening": "Morning and evening",
   "catHome": "Home",
+  "catPrayer": "Prayer",
   "catTravel": "Travel",
   "catSleep": "Sleep",
+  "catFood": "Food",
+  "catDistress": "Distress",
+  "catIllness": "Illness",
+  "catWeather": "Weather",
+  "catQuranic": "Quran",
   "listen": "Listen",
   "save": "Save",
   "share": "Share",
@@ -573,16 +589,14 @@
   "noteQadr": "Seek Laylat al-Qadr",
   "noteNoFasting": "No fasting",
   "adhanSound": "Adhan sound",
+  "toneSound": "Tone sound",
   "forPrayer": "For {prayer}",
   "@forPrayer": {
     "placeholders": {
       "prayer": {}
     }
   },
-  "recordingMadinah": "Madinah",
-  "recordingAaqibAzeez": "Aaqib Azeez",
-  "recordingAndrewler": "Andrewler",
-  "recordingSynagda": "Adam Synagda",
+  "recordingAlafasy": "Mishary Alafasy",
   "fullAdhanLength": "Full adhan · {length}",
   "@fullAdhanLength": {
     "placeholders": {
@@ -627,6 +641,14 @@
   "themeAndalus": "Andalus",
   "themeMoonlight": "Moonlight",
   "themeQiyamRose": "Qiyam Rose",
+  "themeSaharaSand": "Sahara Sand",
+  "themeZaytun": "Zaytun",
+  "themeAttar": "Attar",
+  "themeNoorMidnight": "Noor Midnight",
+  "themeQiyamDusk": "Qiyam Dusk",
+  "themeQiyamCopper": "Qiyam Copper",
+  "themeQiyamLapis": "Qiyam Lapis",
+  "themeQiyamSand": "Qiyam Sand",
   "firstHeadline": "Every prayer, in its time.",
   "swipeToBegin": "Swipe up to begin",
   "letGoToBegin": "Let go to begin",
@@ -639,30 +661,6 @@
       "total": {}
     }
   },
-  "backUp": "Back up",
-  "password": "Password",
-  "confirmPassword": "Confirm password",
-  "passwordNote": "Keep this password safe. Without it the backup can't be opened.",
-  "passwordTooShort": "Use at least {count} characters.",
-  "@passwordTooShort": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "passwordsDontMatch": "The passwords don't match.",
-  "saveBackup": "Save backup",
-  "restorePasswordNote": "Enter the password you chose for this backup.",
-  "restore": "Restore",
-  "wrongPassword": "Wrong password. Check it and try again.",
-  "notABackup": "This file isn't a Better Muslim backup.",
-  "damagedBackup": "This backup is damaged and can't be opened.",
-  "newerBackup": "This backup is from a newer version. Update the app, then restore.",
-  "restoreTitle": "Restore this backup?",
-  "restoreBody": "It replaces everything on this phone. It can't be undone.",
-  "backupRestored": "Backup restored",
-  "resetNoticeTitle": "Your saved data couldn't be opened",
-  "resetNoticeBody": "The app started fresh on this phone. If you have a backup, you can restore it now.",
-  "startFresh": "Start fresh",
   "surfaceNext": "NEXT",
   "surfaceNextCity": "NEXT · {city}",
   "@surfaceNextCity": {
@@ -690,6 +688,12 @@
       "time": {}
     }
   },
+  "prayerNow": "{prayer} · now",
+  "@prayerNow": {
+    "placeholders": {
+      "prayer": {}
+    }
+  },
   "reminderChip": "Reminder {time}",
   "@reminderChip": {
     "placeholders": {
@@ -697,7 +701,7 @@
     }
   },
   "prayerCountdown": "Countdown before each prayer",
-  "prayerCountdownLine": "Starts 2 hours before, ends at the adhan",
+  "prayerCountdownLine": "On the lock screen while the app is closed",
   "countdownChannel": "Prayer countdown",
   "openToSetPlace": "Open Better Muslim to set your place",
   "openToUpdateTimes": "Open Better Muslim to update the times",
@@ -867,6 +871,7 @@
       "n": {}
     }
   },
+  "surahLoop": "Surah loop",
   "range": "Range",
   "ayahRange": "Ayah {from} – {to}",
   "@ayahRange": {
@@ -891,14 +896,29 @@
   "sleepTimer": "Sleep timer",
   "endOfSurah": "End of surah",
   "speed": "Speed",
-  "reciterName": "Mishary Rashid Alafasy",
-  "reciterRate": "Mishary Alafasy · {rate}×",
+  "reciter": "Reciter",
+  "reciterAlafasy": "Mishary Rashid Alafasy",
+  "reciterHusary": "Mahmoud Khalil Al-Husary",
+  "reciterAbdulBasit": "Abdul Basit Abdul Samad (Murattal)",
+  "reciterMinshawi": "Mohamed Siddiq Al-Minshawi (Murattal)",
+  "reciterMaher": "Maher Al-Muaiqly",
+  "reciterAlafasyShort": "Mishary Alafasy",
+  "reciterHusaryShort": "Al-Husary",
+  "reciterAbdulBasitShort": "Abdul Basit",
+  "reciterMinshawiShort": "Al-Minshawi",
+  "reciterMaherShort": "Maher Al-Muaiqly",
+  "reciterAlafasyInitials": "MA",
+  "reciterHusaryInitials": "MH",
+  "reciterAbdulBasitInitials": "AB",
+  "reciterMinshawiInitials": "MS",
+  "reciterMaherInitials": "MM",
+  "reciterRate": "{reciter} · {rate}×",
   "@reciterRate": {
     "placeholders": {
+      "reciter": {},
       "rate": {}
     }
   },
-  "reciterInitials": "MA",
   "murattalHafs": "Murattal · Hafs",
   "off": "Off",
   "savedTitle": "Saved",
@@ -938,6 +958,8 @@
   "alMuyassar": "Al-Muyassar",
   "ibnKathir": "Ibn Kathir",
   "asSadi": "As-Sa'di",
+  "atTabari": "At-Tabari",
+  "alQurtubi": "Al-Qurtubi",
   "muyassarSummary": "Arabic · Al-Muyassar summary",
   "muyassarCredit": "At-Tafsir al-Muyassar · King Fahd Complex",
   "previousAyah": "Previous ayah",
@@ -952,16 +974,34 @@
   "bookmarkRef": "{surah} {s}:{a} · Page {p}",
   "pageRef": "{surah} · Page {p}",
   "noteRef": "{s}:{a}",
-  "whenPrivate": "{when} · Private",
+  "whenPrivate": "{when}",
   "noNotes": "No notes yet",
   "noNotesBody": "Tap Note on any ayah to write one only you can see.",
   "removeBookmark": "Remove bookmark",
   "deleteNote": "Delete note",
   "noteHint": "Write a private note",
+  "highlightInMushaf": "Highlight in mushaf",
+  "highlightedInMushaf": "Highlighted in mushaf",
   "bookmarkName": "Name",
-  "ribbonPrimary": "Main",
-  "ribbonAccent": "Accent",
-  "ribbonNeutral": "Neutral",
+  "highlights": "Highlights",
+  "noHighlights": "No highlights yet",
+  "noHighlightsBody": "Turn on Highlight in mushaf in any ayah's note to find it here.",
+  "highlightRemoved": "Highlight removed",
+  "newCategory": "New category",
+  "editCategory": "Edit category",
+  "categoryHint": "Category name",
+  "deleteCategory": "Delete category",
+  "deleteCategoryTitle": "Delete this category?",
+  "deleteCategoryBody": "Its bookmarks are deleted with it. It can't be undone.",
+  "delete": "Delete",
+  "colorPrimary": "Main",
+  "colorGreen": "Green",
+  "colorTeal": "Teal",
+  "colorBlue": "Blue",
+  "colorViolet": "Violet",
+  "colorRose": "Rose",
+  "colorAmber": "Amber",
+  "colorSlate": "Slate",
   "shareSquare": "Square",
   "shareStory": "Story",
   "arabicSize": "Arabic size",
@@ -972,6 +1012,7 @@
   "useTranslation": "Translation",
   "useTafsir": "Tafsir",
   "useRecitation": "Recitation",
+  "useWordRoots": "Word roots",
   "showSurahName": "Show surah name",
   "recitationPlaying": "Playing",
   "recitationPaused": "Paused",
@@ -1007,6 +1048,9 @@
   "fontAmiri": "Amiri Quran",
   "fontKfgqpc": "KFGQPC Hafs",
   "fontScheherazade": "Scheherazade",
+  "azkarFont": "Azkar font",
+  "azkarFontAmiri": "Amiri",
+  "azkarFontNaskh": "Noto Naskh Arabic",
   "ornament": "Ornament",
   "solidColor": "Solid color",
   "patternKhatam": "Khatam",
@@ -1030,5 +1074,43 @@
   "percent": "{n}%",
   "prayedOfFive": "{count} of 5 prayed",
   "notifQuietTitle": "Keep the adhan coming",
-  "notifQuietBody": "Open the app so the next days' prayers are scheduled."
+  "notifQuietBody": "Open the app so the next days' prayers are scheduled.",
+  "searchQuran": "Search the Quran",
+  "ayahText": "Ayah text",
+  "root": "Root",
+  "jumpToSurah": "JUMP TO SURAH",
+  "jumpToPage": "JUMP TO PAGE",
+  "jumpToAyah": "JUMP TO AYAH",
+  "numberName": "{n} · {name}",
+  "noAyahsFound": "No ayahs found",
+  "searchQuranHint": "Search ignores diacritics and hamza forms.",
+  "downloadSurah": "Download surah",
+  "surahDownloaded": "Downloaded",
+  "downloads": "Downloads",
+  "noDownloads": "No downloads yet",
+  "noDownloadsBody": "Download a surah from the recitation sheet to listen with no internet.",
+  "deleteDownloadTitle": "Delete this download?",
+  "deleteDownloadBody": "The surah plays from the internet again.",
+  "sizeMb": "{n} MB",
+  "@sizeMb": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "back10": "Back 10 seconds",
+  "forward10": "Forward 10 seconds",
+  "ayahNumber": "Ayah {n}",
+  "@ayahNumber": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "recitationBar": "Ayah in the range",
+  "searchCount": "{matches, plural, one{{matches} time} other{{matches} times}} in {ayahs, plural, one{{ayahs} ayah} other{{ayahs} ayahs}} in {surahs, plural, one{{surahs} surah} other{{surahs} surahs}}",
+  "expandAll": "Expand all",
+  "foldAll": "Fold all",
+  "recentSearches": "Recent searches",
+  "clearAll": "Clear",
+  "removeSearch": "Remove {query}",
+  "prayerSound": "{prayer}: {sound}"
 }

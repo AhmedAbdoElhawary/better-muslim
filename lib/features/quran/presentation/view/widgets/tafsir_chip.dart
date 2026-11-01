@@ -6,7 +6,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/core/widgets/motion/oil_drop.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -69,7 +69,7 @@ class TafsirChip extends StatelessWidget {
                     RegularText(label, fontSize: FontSizeManager.tafsirChip, color: color),
                   if (status.downloading) ...[
                     const RSizedBox.horizontal(SpaceManager.s1),
-                    BmOilDrop(size: SizeManager.oilDropSmall, progress: status.progress),
+                    BmStarLoader(size: SizeManager.loaderSmall, progress: status.progress),
                   ] else if (!status.ready) ...[
                     const RSizedBox.horizontal(SpaceManager.s1),
                     BmIcon.ui(

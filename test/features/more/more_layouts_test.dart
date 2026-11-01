@@ -27,6 +27,7 @@ void main() {
     'the hijri calendar': Routes.hijriCalendar,
     'adhan and reminders': Routes.adhanSettings,
     'acknowledgements': Routes.acknowledgements,
+    'downloads': Routes.downloads,
   };
 
   for (final (way, brightness, reduceMotion, size) in ways) {

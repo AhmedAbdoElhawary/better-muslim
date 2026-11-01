@@ -25,6 +25,9 @@ class RecitationBoot extends ConsumerStatefulWidget {
 class _RecitationBootState extends ConsumerState<RecitationBoot> {
   StreamSubscription<bool>? _clicks;
 
+  /// paused by a clip, not by me
+  var _resume = false;
+
   Recitation get _recitation => ref.read(recitationProvider);
 
   @override
@@ -35,11 +38,14 @@ class _RecitationBootState extends ConsumerState<RecitationBoot> {
     ref.listenManual(
       settingsProvider.select((settings) {
         final row = settings.value;
-        return row == null ? null : (row.reciteSpeed, row.reciteRepeat, row.recitePause);
+        return row == null
+            ? null
+            : (row.reciteSpeed, row.reciteRepeat, row.recitePause, row.reciter);
       }),
       (previous, next) {
         if (next == null) return;
-        final (speed, repeat, pause) = next;
+        final (speed, repeat, pause, reciter) = next;
+        if (reciter != previous?.$4) _recitation.setReciter(reciter);
         if (speed != previous?.$1) _recitation.setSpeed(speed);
         if (repeat != previous?.$2) _recitation.setRepeat(repeat);
         if (pause != previous?.$3) _recitation.setPause(Duration(seconds: pause));
@@ -54,9 +60,23 @@ class _RecitationBootState extends ConsumerState<RecitationBoot> {
       },
     );
 
-    /// the adhan's claim pauses it, it never comes back on its own (FR-028)
-    ref.listenManual(audioUseProvider, (_, use) {
-      if (use == AudioUse.adhan) _recitation.pause();
+    /// the adhan's claim pauses it, it never comes back on its own (FR-028). a dua or a preview
+    /// gives it back when it's done
+    ref.listenManual(audioUseProvider, (previous, use) {
+      switch (use) {
+        case AudioUse.adhan:
+          _resume = false;
+          _recitation.pause();
+        case AudioUse.clip when previous == AudioUse.recitation:
+          _resume = true;
+          _recitation.pause();
+        case AudioUse.none when _resume:
+          _resume = false;
+          _recitation.resume();
+        case AudioUse.recitation:
+          _resume = false;
+        case AudioUse.none || AudioUse.clip:
+      }
     });
     ref.listenManual(playingAyahProvider, (_, ayah) async {
       if (ayah == null) return;

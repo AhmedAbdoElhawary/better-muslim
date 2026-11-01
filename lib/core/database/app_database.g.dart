@@ -189,21 +189,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("ui_sounds" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _storeResetPendingMeta = const VerificationMeta(
-    'storeResetPending',
-  );
-  @override
-  late final GeneratedColumn<bool> storeResetPending = GeneratedColumn<bool>(
-    'store_reset_pending',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("store_reset_pending" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
   @override
   late final GeneratedColumnWithTypeConverter<DateTime?, String> firstUse = GeneratedColumn<String>(
     'first_use',
@@ -270,7 +255,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('madinah'),
+        defaultValue: const Constant('alafasy'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterfajrRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> dhuhrRecording =
@@ -280,7 +265,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('madinah'),
+        defaultValue: const Constant('alafasy'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterdhuhrRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> asrRecording =
@@ -290,7 +275,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('madinah'),
+        defaultValue: const Constant('alafasy'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterasrRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> maghribRecording =
@@ -300,7 +285,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('madinah'),
+        defaultValue: const Constant('alafasy'),
       ).withConverter<AdhanRecording>($SettingsTable.$convertermaghribRecording);
   @override
   late final GeneratedColumnWithTypeConverter<AdhanRecording, String> ishaRecording =
@@ -310,7 +295,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('madinah'),
+        defaultValue: const Constant('alafasy'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterishaRecording);
   static const VerificationMeta _reminderMinutesMeta = const VerificationMeta('reminderMinutes');
   @override
@@ -607,11 +592,30 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     'recite_repeat',
     aliasedName,
     false,
-    check: () => reciteRepeat.isIn(const [1, 2, 3, 5, 10]),
+    check: () => reciteRepeat.isIn(const [1, 2, 3, 5, 10, 0]),
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<Reciter, String> reciter = GeneratedColumn<String>(
+    'reciter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('alafasy'),
+  ).withConverter<Reciter>($SettingsTable.$converterreciter);
+  @override
+  late final GeneratedColumnWithTypeConverter<AzkarFont, String> azkarFont =
+      GeneratedColumn<String>(
+        'azkar_font',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('amiri'),
+      ).withConverter<AzkarFont>($SettingsTable.$converterazkarFont);
   static const VerificationMeta _recitePauseMeta = const VerificationMeta('recitePause');
   @override
   late final GeneratedColumn<int> recitePause = GeneratedColumn<int>(
@@ -644,7 +648,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     reduceMotion,
     haptics,
     uiSounds,
-    storeResetPending,
     firstUse,
     fajrSound,
     dhuhrSound,
@@ -684,6 +687,8 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     quranTranslationSize,
     reciteSpeed,
     reciteRepeat,
+    reciter,
+    azkarFont,
     recitePause,
   ];
   @override
@@ -768,15 +773,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _uiSoundsMeta,
         uiSounds.isAcceptableOrUnknown(data['ui_sounds']!, _uiSoundsMeta),
-      );
-    }
-    if (data.containsKey('store_reset_pending')) {
-      context.handle(
-        _storeResetPendingMeta,
-        storeResetPending.isAcceptableOrUnknown(
-          data['store_reset_pending']!,
-          _storeResetPendingMeta,
-        ),
       );
     }
     if (data.containsKey('reminder_minutes')) {
@@ -996,10 +992,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}ui_sounds'],
       )!,
-      storeResetPending: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}store_reset_pending'],
-      )!,
       firstUse: $SettingsTable.$converterfirstUsen.fromSql(
         attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}first_use']),
       ),
@@ -1188,6 +1180,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.int,
         data['${effectivePrefix}recite_repeat'],
       )!,
+      reciter: $SettingsTable.$converterreciter.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}reciter'])!,
+      ),
+      azkarFont: $SettingsTable.$converterazkarFont.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}azkar_font'],
+        )!,
+      ),
       recitePause: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}recite_pause'],
@@ -1262,6 +1263,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<PageTurn>(PageTurn.values);
   static JsonTypeConverter2<QuranFont, String, String> $converterquranFont =
       const EnumNameConverter<QuranFont>(QuranFont.values);
+  static JsonTypeConverter2<Reciter, String, String> $converterreciter =
+      const EnumNameConverter<Reciter>(Reciter.values);
+  static JsonTypeConverter2<AzkarFont, String, String> $converterazkarFont =
+      const EnumNameConverter<AzkarFont>(AzkarFont.values);
 }
 
 class AppSettings extends DataClass implements Insertable<AppSettings> {
@@ -1292,9 +1297,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final bool reduceMotion;
   final bool haptics;
   final bool uiSounds;
-
-  /// set by a store reset, cleared once the user has been told (milestone 10)
-  final bool storeResetPending;
 
   /// the strip's earliest week. the v2 migration fills it with the upgrade date
   final DateTime? firstUse;
@@ -1333,8 +1335,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final CalendarMode calendarMode;
   final bool topGlow;
   final Language language;
-
-  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
   final bool onboarded;
   final int lastReadSurah;
   final int lastReadAyah;
@@ -1356,8 +1356,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final int quranTranslationSize;
   final double reciteSpeed;
 
-  /// 1 is off
+  /// 1 is off, 0 is surah loop
   final int reciteRepeat;
+  final Reciter reciter;
+  final AzkarFont azkarFont;
 
   /// seconds between ayahs
   final int recitePause;
@@ -1381,7 +1383,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.reduceMotion,
     required this.haptics,
     required this.uiSounds,
-    required this.storeResetPending,
     this.firstUse,
     required this.fajrSound,
     required this.dhuhrSound,
@@ -1421,6 +1422,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.quranTranslationSize,
     required this.reciteSpeed,
     required this.reciteRepeat,
+    required this.reciter,
+    required this.azkarFont,
     required this.recitePause,
   });
   @override
@@ -1475,7 +1478,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['reduce_motion'] = Variable<bool>(reduceMotion);
     map['haptics'] = Variable<bool>(haptics);
     map['ui_sounds'] = Variable<bool>(uiSounds);
-    map['store_reset_pending'] = Variable<bool>(storeResetPending);
     if (!nullToAbsent || firstUse != null) {
       map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse));
     }
@@ -1575,6 +1577,12 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['quran_translation_size'] = Variable<int>(quranTranslationSize);
     map['recite_speed'] = Variable<double>(reciteSpeed);
     map['recite_repeat'] = Variable<int>(reciteRepeat);
+    {
+      map['reciter'] = Variable<String>($SettingsTable.$converterreciter.toSql(reciter));
+    }
+    {
+      map['azkar_font'] = Variable<String>($SettingsTable.$converterazkarFont.toSql(azkarFont));
+    }
     map['recite_pause'] = Variable<int>(recitePause);
     return map;
   }
@@ -1604,7 +1612,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reduceMotion: Value(reduceMotion),
       haptics: Value(haptics),
       uiSounds: Value(uiSounds),
-      storeResetPending: Value(storeResetPending),
       firstUse: firstUse == null && nullToAbsent ? const Value.absent() : Value(firstUse),
       fajrSound: Value(fajrSound),
       dhuhrSound: Value(dhuhrSound),
@@ -1648,6 +1655,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranTranslationSize: Value(quranTranslationSize),
       reciteSpeed: Value(reciteSpeed),
       reciteRepeat: Value(reciteRepeat),
+      reciter: Value(reciter),
+      azkarFont: Value(azkarFont),
       recitePause: Value(recitePause),
     );
   }
@@ -1682,7 +1691,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reduceMotion: serializer.fromJson<bool>(json['reduceMotion']),
       haptics: serializer.fromJson<bool>(json['haptics']),
       uiSounds: serializer.fromJson<bool>(json['uiSounds']),
-      storeResetPending: serializer.fromJson<bool>(json['storeResetPending']),
       firstUse: serializer.fromJson<DateTime?>(json['firstUse']),
       fajrSound: $SettingsTable.$converterfajrSound.fromJson(
         serializer.fromJson<String>(json['fajrSound']),
@@ -1754,6 +1762,12 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranTranslationSize: serializer.fromJson<int>(json['quranTranslationSize']),
       reciteSpeed: serializer.fromJson<double>(json['reciteSpeed']),
       reciteRepeat: serializer.fromJson<int>(json['reciteRepeat']),
+      reciter: $SettingsTable.$converterreciter.fromJson(
+        serializer.fromJson<String>(json['reciter']),
+      ),
+      azkarFont: $SettingsTable.$converterazkarFont.fromJson(
+        serializer.fromJson<String>(json['azkarFont']),
+      ),
       recitePause: serializer.fromJson<int>(json['recitePause']),
     );
   }
@@ -1784,7 +1798,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'reduceMotion': serializer.toJson<bool>(reduceMotion),
       'haptics': serializer.toJson<bool>(haptics),
       'uiSounds': serializer.toJson<bool>(uiSounds),
-      'storeResetPending': serializer.toJson<bool>(storeResetPending),
       'firstUse': serializer.toJson<DateTime?>(firstUse),
       'fajrSound': serializer.toJson<String>($SettingsTable.$converterfajrSound.toJson(fajrSound)),
       'dhuhrSound': serializer.toJson<String>(
@@ -1842,6 +1855,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'quranTranslationSize': serializer.toJson<int>(quranTranslationSize),
       'reciteSpeed': serializer.toJson<double>(reciteSpeed),
       'reciteRepeat': serializer.toJson<int>(reciteRepeat),
+      'reciter': serializer.toJson<String>($SettingsTable.$converterreciter.toJson(reciter)),
+      'azkarFont': serializer.toJson<String>($SettingsTable.$converterazkarFont.toJson(azkarFont)),
       'recitePause': serializer.toJson<int>(recitePause),
     };
   }
@@ -1866,7 +1881,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     bool? reduceMotion,
     bool? haptics,
     bool? uiSounds,
-    bool? storeResetPending,
     Value<DateTime?> firstUse = const Value.absent(),
     PrayerSound? fajrSound,
     PrayerSound? dhuhrSound,
@@ -1906,6 +1920,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     int? quranTranslationSize,
     double? reciteSpeed,
     int? reciteRepeat,
+    Reciter? reciter,
+    AzkarFont? azkarFont,
     int? recitePause,
   }) => AppSettings(
     id: id ?? this.id,
@@ -1927,7 +1943,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reduceMotion: reduceMotion ?? this.reduceMotion,
     haptics: haptics ?? this.haptics,
     uiSounds: uiSounds ?? this.uiSounds,
-    storeResetPending: storeResetPending ?? this.storeResetPending,
     firstUse: firstUse.present ? firstUse.value : this.firstUse,
     fajrSound: fajrSound ?? this.fajrSound,
     dhuhrSound: dhuhrSound ?? this.dhuhrSound,
@@ -1967,6 +1982,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
     reciteSpeed: reciteSpeed ?? this.reciteSpeed,
     reciteRepeat: reciteRepeat ?? this.reciteRepeat,
+    reciter: reciter ?? this.reciter,
+    azkarFont: azkarFont ?? this.azkarFont,
     recitePause: recitePause ?? this.recitePause,
   );
   AppSettings copyWithCompanion(SettingsCompanion data) {
@@ -1990,9 +2007,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       reduceMotion: data.reduceMotion.present ? data.reduceMotion.value : this.reduceMotion,
       haptics: data.haptics.present ? data.haptics.value : this.haptics,
       uiSounds: data.uiSounds.present ? data.uiSounds.value : this.uiSounds,
-      storeResetPending: data.storeResetPending.present
-          ? data.storeResetPending.value
-          : this.storeResetPending,
       firstUse: data.firstUse.present ? data.firstUse.value : this.firstUse,
       fajrSound: data.fajrSound.present ? data.fajrSound.value : this.fajrSound,
       dhuhrSound: data.dhuhrSound.present ? data.dhuhrSound.value : this.dhuhrSound,
@@ -2054,6 +2068,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           : this.quranTranslationSize,
       reciteSpeed: data.reciteSpeed.present ? data.reciteSpeed.value : this.reciteSpeed,
       reciteRepeat: data.reciteRepeat.present ? data.reciteRepeat.value : this.reciteRepeat,
+      reciter: data.reciter.present ? data.reciter.value : this.reciter,
+      azkarFont: data.azkarFont.present ? data.azkarFont.value : this.azkarFont,
       recitePause: data.recitePause.present ? data.recitePause.value : this.recitePause,
     );
   }
@@ -2080,7 +2096,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('reduceMotion: $reduceMotion, ')
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
-          ..write('storeResetPending: $storeResetPending, ')
           ..write('firstUse: $firstUse, ')
           ..write('fajrSound: $fajrSound, ')
           ..write('dhuhrSound: $dhuhrSound, ')
@@ -2120,6 +2135,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('quranTranslationSize: $quranTranslationSize, ')
           ..write('reciteSpeed: $reciteSpeed, ')
           ..write('reciteRepeat: $reciteRepeat, ')
+          ..write('reciter: $reciter, ')
+          ..write('azkarFont: $azkarFont, ')
           ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
@@ -2146,7 +2163,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     reduceMotion,
     haptics,
     uiSounds,
-    storeResetPending,
     firstUse,
     fajrSound,
     dhuhrSound,
@@ -2186,6 +2202,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranTranslationSize,
     reciteSpeed,
     reciteRepeat,
+    reciter,
+    azkarFont,
     recitePause,
   ]);
   @override
@@ -2211,7 +2229,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.reduceMotion == this.reduceMotion &&
           other.haptics == this.haptics &&
           other.uiSounds == this.uiSounds &&
-          other.storeResetPending == this.storeResetPending &&
           other.firstUse == this.firstUse &&
           other.fajrSound == this.fajrSound &&
           other.dhuhrSound == this.dhuhrSound &&
@@ -2251,6 +2268,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.quranTranslationSize == this.quranTranslationSize &&
           other.reciteSpeed == this.reciteSpeed &&
           other.reciteRepeat == this.reciteRepeat &&
+          other.reciter == this.reciter &&
+          other.azkarFont == this.azkarFont &&
           other.recitePause == this.recitePause);
 }
 
@@ -2274,7 +2293,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<bool> reduceMotion;
   final Value<bool> haptics;
   final Value<bool> uiSounds;
-  final Value<bool> storeResetPending;
   final Value<DateTime?> firstUse;
   final Value<PrayerSound> fajrSound;
   final Value<PrayerSound> dhuhrSound;
@@ -2314,6 +2332,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<int> quranTranslationSize;
   final Value<double> reciteSpeed;
   final Value<int> reciteRepeat;
+  final Value<Reciter> reciter;
+  final Value<AzkarFont> azkarFont;
   final Value<int> recitePause;
   const SettingsCompanion({
     this.id = const Value.absent(),
@@ -2335,7 +2355,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reduceMotion = const Value.absent(),
     this.haptics = const Value.absent(),
     this.uiSounds = const Value.absent(),
-    this.storeResetPending = const Value.absent(),
     this.firstUse = const Value.absent(),
     this.fajrSound = const Value.absent(),
     this.dhuhrSound = const Value.absent(),
@@ -2375,6 +2394,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranTranslationSize = const Value.absent(),
     this.reciteSpeed = const Value.absent(),
     this.reciteRepeat = const Value.absent(),
+    this.reciter = const Value.absent(),
+    this.azkarFont = const Value.absent(),
     this.recitePause = const Value.absent(),
   });
   SettingsCompanion.insert({
@@ -2397,7 +2418,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.reduceMotion = const Value.absent(),
     this.haptics = const Value.absent(),
     this.uiSounds = const Value.absent(),
-    this.storeResetPending = const Value.absent(),
     this.firstUse = const Value.absent(),
     this.fajrSound = const Value.absent(),
     this.dhuhrSound = const Value.absent(),
@@ -2437,6 +2457,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranTranslationSize = const Value.absent(),
     this.reciteSpeed = const Value.absent(),
     this.reciteRepeat = const Value.absent(),
+    this.reciter = const Value.absent(),
+    this.azkarFont = const Value.absent(),
     this.recitePause = const Value.absent(),
   });
   static Insertable<AppSettings> custom({
@@ -2459,7 +2481,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<bool>? reduceMotion,
     Expression<bool>? haptics,
     Expression<bool>? uiSounds,
-    Expression<bool>? storeResetPending,
     Expression<String>? firstUse,
     Expression<String>? fajrSound,
     Expression<String>? dhuhrSound,
@@ -2499,6 +2520,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<int>? quranTranslationSize,
     Expression<double>? reciteSpeed,
     Expression<int>? reciteRepeat,
+    Expression<String>? reciter,
+    Expression<String>? azkarFont,
     Expression<int>? recitePause,
   }) {
     return RawValuesInsertable({
@@ -2521,7 +2544,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (reduceMotion != null) 'reduce_motion': reduceMotion,
       if (haptics != null) 'haptics': haptics,
       if (uiSounds != null) 'ui_sounds': uiSounds,
-      if (storeResetPending != null) 'store_reset_pending': storeResetPending,
       if (firstUse != null) 'first_use': firstUse,
       if (fajrSound != null) 'fajr_sound': fajrSound,
       if (dhuhrSound != null) 'dhuhr_sound': dhuhrSound,
@@ -2561,6 +2583,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (quranTranslationSize != null) 'quran_translation_size': quranTranslationSize,
       if (reciteSpeed != null) 'recite_speed': reciteSpeed,
       if (reciteRepeat != null) 'recite_repeat': reciteRepeat,
+      if (reciter != null) 'reciter': reciter,
+      if (azkarFont != null) 'azkar_font': azkarFont,
       if (recitePause != null) 'recite_pause': recitePause,
     });
   }
@@ -2585,7 +2609,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<bool>? reduceMotion,
     Value<bool>? haptics,
     Value<bool>? uiSounds,
-    Value<bool>? storeResetPending,
     Value<DateTime?>? firstUse,
     Value<PrayerSound>? fajrSound,
     Value<PrayerSound>? dhuhrSound,
@@ -2625,6 +2648,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<int>? quranTranslationSize,
     Value<double>? reciteSpeed,
     Value<int>? reciteRepeat,
+    Value<Reciter>? reciter,
+    Value<AzkarFont>? azkarFont,
     Value<int>? recitePause,
   }) {
     return SettingsCompanion(
@@ -2647,7 +2672,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       reduceMotion: reduceMotion ?? this.reduceMotion,
       haptics: haptics ?? this.haptics,
       uiSounds: uiSounds ?? this.uiSounds,
-      storeResetPending: storeResetPending ?? this.storeResetPending,
       firstUse: firstUse ?? this.firstUse,
       fajrSound: fajrSound ?? this.fajrSound,
       dhuhrSound: dhuhrSound ?? this.dhuhrSound,
@@ -2687,6 +2711,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
       reciteSpeed: reciteSpeed ?? this.reciteSpeed,
       reciteRepeat: reciteRepeat ?? this.reciteRepeat,
+      reciter: reciter ?? this.reciter,
+      azkarFont: azkarFont ?? this.azkarFont,
       recitePause: recitePause ?? this.recitePause,
     );
   }
@@ -2756,9 +2782,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     }
     if (uiSounds.present) {
       map['ui_sounds'] = Variable<bool>(uiSounds.value);
-    }
-    if (storeResetPending.present) {
-      map['store_reset_pending'] = Variable<bool>(storeResetPending.value);
     }
     if (firstUse.present) {
       map['first_use'] = Variable<String>($SettingsTable.$converterfirstUsen.toSql(firstUse.value));
@@ -2907,6 +2930,14 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (reciteRepeat.present) {
       map['recite_repeat'] = Variable<int>(reciteRepeat.value);
     }
+    if (reciter.present) {
+      map['reciter'] = Variable<String>($SettingsTable.$converterreciter.toSql(reciter.value));
+    }
+    if (azkarFont.present) {
+      map['azkar_font'] = Variable<String>(
+        $SettingsTable.$converterazkarFont.toSql(azkarFont.value),
+      );
+    }
     if (recitePause.present) {
       map['recite_pause'] = Variable<int>(recitePause.value);
     }
@@ -2935,7 +2966,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('reduceMotion: $reduceMotion, ')
           ..write('haptics: $haptics, ')
           ..write('uiSounds: $uiSounds, ')
-          ..write('storeResetPending: $storeResetPending, ')
           ..write('firstUse: $firstUse, ')
           ..write('fajrSound: $fajrSound, ')
           ..write('dhuhrSound: $dhuhrSound, ')
@@ -2975,6 +3005,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('quranTranslationSize: $quranTranslationSize, ')
           ..write('reciteSpeed: $reciteSpeed, ')
           ..write('reciteRepeat: $reciteRepeat, ')
+          ..write('reciter: $reciter, ')
+          ..write('azkarFont: $azkarFont, ')
           ..write('recitePause: $recitePause')
           ..write(')'))
         .toString();
@@ -3902,6 +3934,280 @@ class SavedDuasCompanion extends UpdateCompanion<SavedDua> {
   }
 }
 
+class $QuranCategoriesTable extends QuranCategories
+    with TableInfo<$QuranCategoriesTable, QuranCategory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuranCategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<CategoryColor, String> color =
+      GeneratedColumn<String>(
+        'color',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<CategoryColor>($QuranCategoriesTable.$convertercolor);
+  static const VerificationMeta _positionMeta = const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quran_categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuranCategory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuranCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuranCategory(
+      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name']),
+      color: $QuranCategoriesTable.$convertercolor.fromSql(
+        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}color'])!,
+      ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $QuranCategoriesTable createAlias(String alias) {
+    return $QuranCategoriesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<CategoryColor, String, String> $convertercolor =
+      const EnumNameConverter<CategoryColor>(CategoryColor.values);
+}
+
+class QuranCategory extends DataClass implements Insertable<QuranCategory> {
+  final int id;
+
+  /// null on the default shows "Bookmarks" in the app's language
+  final String? name;
+  final CategoryColor color;
+  final int position;
+  const QuranCategory({required this.id, this.name, required this.color, required this.position});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    {
+      map['color'] = Variable<String>($QuranCategoriesTable.$convertercolor.toSql(color));
+    }
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  QuranCategoriesCompanion toCompanion(bool nullToAbsent) {
+    return QuranCategoriesCompanion(
+      id: Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      color: Value(color),
+      position: Value(position),
+    );
+  }
+
+  factory QuranCategory.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuranCategory(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      color: $QuranCategoriesTable.$convertercolor.fromJson(
+        serializer.fromJson<String>(json['color']),
+      ),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String?>(name),
+      'color': serializer.toJson<String>($QuranCategoriesTable.$convertercolor.toJson(color)),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  QuranCategory copyWith({
+    int? id,
+    Value<String?> name = const Value.absent(),
+    CategoryColor? color,
+    int? position,
+  }) => QuranCategory(
+    id: id ?? this.id,
+    name: name.present ? name.value : this.name,
+    color: color ?? this.color,
+    position: position ?? this.position,
+  );
+  QuranCategory copyWithCompanion(QuranCategoriesCompanion data) {
+    return QuranCategory(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranCategory(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, color, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuranCategory &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.position == this.position);
+}
+
+class QuranCategoriesCompanion extends UpdateCompanion<QuranCategory> {
+  final Value<int> id;
+  final Value<String?> name;
+  final Value<CategoryColor> color;
+  final Value<int> position;
+  const QuranCategoriesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  QuranCategoriesCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    required CategoryColor color,
+    required int position,
+  }) : color = Value(color),
+       position = Value(position);
+  static Insertable<QuranCategory> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? color,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (position != null) 'position': position,
+    });
+  }
+
+  QuranCategoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? name,
+    Value<CategoryColor>? color,
+    Value<int>? position,
+  }) {
+    return QuranCategoriesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>($QuranCategoriesTable.$convertercolor.toSql(color.value));
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranCategoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $QuranBookmarksTable extends QuranBookmarks
     with TableInfo<$QuranBookmarksTable, QuranBookmark> {
   @override
@@ -3956,14 +4262,15 @@ class $QuranBookmarksTable extends QuranBookmarks
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta('category');
   @override
-  late final GeneratedColumnWithTypeConverter<RibbonColor, String> color = GeneratedColumn<String>(
-    'color',
+  late final GeneratedColumn<int> category = GeneratedColumn<int>(
+    'category',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
-  ).withConverter<RibbonColor>($QuranBookmarksTable.$convertercolor);
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
@@ -3974,7 +4281,7 @@ class $QuranBookmarksTable extends QuranBookmarks
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, surah, ayah, page, name, color, createdAt];
+  List<GeneratedColumn> get $columns => [id, surah, ayah, page, name, category, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4004,6 +4311,14 @@ class $QuranBookmarksTable extends QuranBookmarks
     if (data.containsKey('name')) {
       context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4026,9 +4341,10 @@ class $QuranBookmarksTable extends QuranBookmarks
       ayah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}ayah']),
       page: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}page'])!,
       name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name']),
-      color: $QuranBookmarksTable.$convertercolor.fromSql(
-        attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}color'])!,
-      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4040,9 +4356,6 @@ class $QuranBookmarksTable extends QuranBookmarks
   $QuranBookmarksTable createAlias(String alias) {
     return $QuranBookmarksTable(attachedDatabase, alias);
   }
-
-  static JsonTypeConverter2<RibbonColor, String, String> $convertercolor =
-      const EnumNameConverter<RibbonColor>(RibbonColor.values);
 }
 
 class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
@@ -4057,7 +4370,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
 
   /// null shows the reference
   final String? name;
-  final RibbonColor color;
+  final int category;
   final DateTime createdAt;
   const QuranBookmark({
     required this.id,
@@ -4065,7 +4378,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     this.ayah,
     required this.page,
     this.name,
-    required this.color,
+    required this.category,
     required this.createdAt,
   });
   @override
@@ -4082,9 +4395,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
-    {
-      map['color'] = Variable<String>($QuranBookmarksTable.$convertercolor.toSql(color));
-    }
+    map['category'] = Variable<int>(category);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -4096,7 +4407,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       ayah: ayah == null && nullToAbsent ? const Value.absent() : Value(ayah),
       page: Value(page),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      color: Value(color),
+      category: Value(category),
       createdAt: Value(createdAt),
     );
   }
@@ -4109,9 +4420,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       ayah: serializer.fromJson<int?>(json['ayah']),
       page: serializer.fromJson<int>(json['page']),
       name: serializer.fromJson<String?>(json['name']),
-      color: $QuranBookmarksTable.$convertercolor.fromJson(
-        serializer.fromJson<String>(json['color']),
-      ),
+      category: serializer.fromJson<int>(json['category']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -4124,7 +4433,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       'ayah': serializer.toJson<int?>(ayah),
       'page': serializer.toJson<int>(page),
       'name': serializer.toJson<String?>(name),
-      'color': serializer.toJson<String>($QuranBookmarksTable.$convertercolor.toJson(color)),
+      'category': serializer.toJson<int>(category),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -4135,7 +4444,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     Value<int?> ayah = const Value.absent(),
     int? page,
     Value<String?> name = const Value.absent(),
-    RibbonColor? color,
+    int? category,
     DateTime? createdAt,
   }) => QuranBookmark(
     id: id ?? this.id,
@@ -4143,7 +4452,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
     ayah: ayah.present ? ayah.value : this.ayah,
     page: page ?? this.page,
     name: name.present ? name.value : this.name,
-    color: color ?? this.color,
+    category: category ?? this.category,
     createdAt: createdAt ?? this.createdAt,
   );
   QuranBookmark copyWithCompanion(QuranBookmarksCompanion data) {
@@ -4153,7 +4462,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
       ayah: data.ayah.present ? data.ayah.value : this.ayah,
       page: data.page.present ? data.page.value : this.page,
       name: data.name.present ? data.name.value : this.name,
-      color: data.color.present ? data.color.value : this.color,
+      category: data.category.present ? data.category.value : this.category,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -4166,14 +4475,14 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
           ..write('ayah: $ayah, ')
           ..write('page: $page, ')
           ..write('name: $name, ')
-          ..write('color: $color, ')
+          ..write('category: $category, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, surah, ayah, page, name, color, createdAt);
+  int get hashCode => Object.hash(id, surah, ayah, page, name, category, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4183,7 +4492,7 @@ class QuranBookmark extends DataClass implements Insertable<QuranBookmark> {
           other.ayah == this.ayah &&
           other.page == this.page &&
           other.name == this.name &&
-          other.color == this.color &&
+          other.category == this.category &&
           other.createdAt == this.createdAt);
 }
 
@@ -4193,7 +4502,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
   final Value<int?> ayah;
   final Value<int> page;
   final Value<String?> name;
-  final Value<RibbonColor> color;
+  final Value<int> category;
   final Value<DateTime> createdAt;
   const QuranBookmarksCompanion({
     this.id = const Value.absent(),
@@ -4201,7 +4510,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     this.ayah = const Value.absent(),
     this.page = const Value.absent(),
     this.name = const Value.absent(),
-    this.color = const Value.absent(),
+    this.category = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   QuranBookmarksCompanion.insert({
@@ -4210,10 +4519,10 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     this.ayah = const Value.absent(),
     required int page,
     this.name = const Value.absent(),
-    required RibbonColor color,
+    required int category,
     required DateTime createdAt,
   }) : page = Value(page),
-       color = Value(color),
+       category = Value(category),
        createdAt = Value(createdAt);
   static Insertable<QuranBookmark> custom({
     Expression<int>? id,
@@ -4221,7 +4530,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     Expression<int>? ayah,
     Expression<int>? page,
     Expression<String>? name,
-    Expression<String>? color,
+    Expression<int>? category,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -4230,7 +4539,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
       if (ayah != null) 'ayah': ayah,
       if (page != null) 'page': page,
       if (name != null) 'name': name,
-      if (color != null) 'color': color,
+      if (category != null) 'category': category,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -4241,7 +4550,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     Value<int?>? ayah,
     Value<int>? page,
     Value<String?>? name,
-    Value<RibbonColor>? color,
+    Value<int>? category,
     Value<DateTime>? createdAt,
   }) {
     return QuranBookmarksCompanion(
@@ -4250,7 +4559,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
       ayah: ayah ?? this.ayah,
       page: page ?? this.page,
       name: name ?? this.name,
-      color: color ?? this.color,
+      category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -4273,8 +4582,8 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (color.present) {
-      map['color'] = Variable<String>($QuranBookmarksTable.$convertercolor.toSql(color.value));
+    if (category.present) {
+      map['category'] = Variable<int>(category.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -4290,7 +4599,7 @@ class QuranBookmarksCompanion extends UpdateCompanion<QuranBookmark> {
           ..write('ayah: $ayah, ')
           ..write('page: $page, ')
           ..write('name: $name, ')
-          ..write('color: $color, ')
+          ..write('category: $category, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -4326,9 +4635,19 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
     'note',
     aliasedName,
     false,
-    check: () => ComparableExpr(StringExpressionOperators(note).trim().length).isBiggerThanValue(0),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _highlightMeta = const VerificationMeta('highlight');
+  @override
+  late final GeneratedColumn<bool> highlight = GeneratedColumn<bool>(
+    'highlight',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("highlight" IN (0, 1))'),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   @override
@@ -4340,7 +4659,7 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [surah, ayah, note, updatedAt];
+  List<GeneratedColumn> get $columns => [surah, ayah, note, highlight, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4368,6 +4687,12 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
     } else if (isInserting) {
       context.missing(_noteMeta);
     }
+    if (data.containsKey('highlight')) {
+      context.handle(
+        _highlightMeta,
+        highlight.isAcceptableOrUnknown(data['highlight']!, _highlightMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -4388,6 +4713,10 @@ class $QuranNotesTable extends QuranNotes with TableInfo<$QuranNotesTable, Quran
       surah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}surah'])!,
       ayah: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}ayah'])!,
       note: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      highlight: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}highlight'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -4405,11 +4734,13 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
   final int surah;
   final int ayah;
   final String note;
+  final bool highlight;
   final DateTime updatedAt;
   const QuranNote({
     required this.surah,
     required this.ayah,
     required this.note,
+    required this.highlight,
     required this.updatedAt,
   });
   @override
@@ -4418,6 +4749,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
     map['surah'] = Variable<int>(surah);
     map['ayah'] = Variable<int>(ayah);
     map['note'] = Variable<String>(note);
+    map['highlight'] = Variable<bool>(highlight);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -4427,6 +4759,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
       surah: Value(surah),
       ayah: Value(ayah),
       note: Value(note),
+      highlight: Value(highlight),
       updatedAt: Value(updatedAt),
     );
   }
@@ -4437,6 +4770,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
       surah: serializer.fromJson<int>(json['surah']),
       ayah: serializer.fromJson<int>(json['ayah']),
       note: serializer.fromJson<String>(json['note']),
+      highlight: serializer.fromJson<bool>(json['highlight']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -4447,21 +4781,25 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
       'surah': serializer.toJson<int>(surah),
       'ayah': serializer.toJson<int>(ayah),
       'note': serializer.toJson<String>(note),
+      'highlight': serializer.toJson<bool>(highlight),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
-  QuranNote copyWith({int? surah, int? ayah, String? note, DateTime? updatedAt}) => QuranNote(
-    surah: surah ?? this.surah,
-    ayah: ayah ?? this.ayah,
-    note: note ?? this.note,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
+  QuranNote copyWith({int? surah, int? ayah, String? note, bool? highlight, DateTime? updatedAt}) =>
+      QuranNote(
+        surah: surah ?? this.surah,
+        ayah: ayah ?? this.ayah,
+        note: note ?? this.note,
+        highlight: highlight ?? this.highlight,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
   QuranNote copyWithCompanion(QuranNotesCompanion data) {
     return QuranNote(
       surah: data.surah.present ? data.surah.value : this.surah,
       ayah: data.ayah.present ? data.ayah.value : this.ayah,
       note: data.note.present ? data.note.value : this.note,
+      highlight: data.highlight.present ? data.highlight.value : this.highlight,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -4472,13 +4810,14 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
           ..write('surah: $surah, ')
           ..write('ayah: $ayah, ')
           ..write('note: $note, ')
+          ..write('highlight: $highlight, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(surah, ayah, note, updatedAt);
+  int get hashCode => Object.hash(surah, ayah, note, highlight, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4486,6 +4825,7 @@ class QuranNote extends DataClass implements Insertable<QuranNote> {
           other.surah == this.surah &&
           other.ayah == this.ayah &&
           other.note == this.note &&
+          other.highlight == this.highlight &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -4493,12 +4833,14 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
   final Value<int> surah;
   final Value<int> ayah;
   final Value<String> note;
+  final Value<bool> highlight;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const QuranNotesCompanion({
     this.surah = const Value.absent(),
     this.ayah = const Value.absent(),
     this.note = const Value.absent(),
+    this.highlight = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4506,6 +4848,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     required int surah,
     required int ayah,
     required String note,
+    this.highlight = const Value.absent(),
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   }) : surah = Value(surah),
@@ -4516,6 +4859,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     Expression<int>? surah,
     Expression<int>? ayah,
     Expression<String>? note,
+    Expression<bool>? highlight,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -4523,6 +4867,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
       if (surah != null) 'surah': surah,
       if (ayah != null) 'ayah': ayah,
       if (note != null) 'note': note,
+      if (highlight != null) 'highlight': highlight,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4532,6 +4877,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     Value<int>? surah,
     Value<int>? ayah,
     Value<String>? note,
+    Value<bool>? highlight,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -4539,6 +4885,7 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
       surah: surah ?? this.surah,
       ayah: ayah ?? this.ayah,
       note: note ?? this.note,
+      highlight: highlight ?? this.highlight,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -4556,6 +4903,9 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
+    if (highlight.present) {
+      map['highlight'] = Variable<bool>(highlight.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -4571,7 +4921,207 @@ class QuranNotesCompanion extends UpdateCompanion<QuranNote> {
           ..write('surah: $surah, ')
           ..write('ayah: $ayah, ')
           ..write('note: $note, ')
+          ..write('highlight: $highlight, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $QuranSearchesTable extends QuranSearches with TableInfo<$QuranSearchesTable, QuranSearche> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuranSearchesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _queryMeta = const VerificationMeta('query');
+  @override
+  late final GeneratedColumn<String> query = GeneratedColumn<String>(
+    'query',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _searchedAtMeta = const VerificationMeta('searchedAt');
+  @override
+  late final GeneratedColumn<DateTime> searchedAt = GeneratedColumn<DateTime>(
+    'searched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [query, searchedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quran_searches';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuranSearche> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('query')) {
+      context.handle(_queryMeta, query.isAcceptableOrUnknown(data['query']!, _queryMeta));
+    } else if (isInserting) {
+      context.missing(_queryMeta);
+    }
+    if (data.containsKey('searched_at')) {
+      context.handle(
+        _searchedAtMeta,
+        searchedAt.isAcceptableOrUnknown(data['searched_at']!, _searchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_searchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {query};
+  @override
+  QuranSearche map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuranSearche(
+      query: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}query'],
+      )!,
+      searchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}searched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QuranSearchesTable createAlias(String alias) {
+    return $QuranSearchesTable(attachedDatabase, alias);
+  }
+}
+
+class QuranSearche extends DataClass implements Insertable<QuranSearche> {
+  final String query;
+  final DateTime searchedAt;
+  const QuranSearche({required this.query, required this.searchedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['query'] = Variable<String>(query);
+    map['searched_at'] = Variable<DateTime>(searchedAt);
+    return map;
+  }
+
+  QuranSearchesCompanion toCompanion(bool nullToAbsent) {
+    return QuranSearchesCompanion(query: Value(query), searchedAt: Value(searchedAt));
+  }
+
+  factory QuranSearche.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuranSearche(
+      query: serializer.fromJson<String>(json['query']),
+      searchedAt: serializer.fromJson<DateTime>(json['searchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'query': serializer.toJson<String>(query),
+      'searchedAt': serializer.toJson<DateTime>(searchedAt),
+    };
+  }
+
+  QuranSearche copyWith({String? query, DateTime? searchedAt}) =>
+      QuranSearche(query: query ?? this.query, searchedAt: searchedAt ?? this.searchedAt);
+  QuranSearche copyWithCompanion(QuranSearchesCompanion data) {
+    return QuranSearche(
+      query: data.query.present ? data.query.value : this.query,
+      searchedAt: data.searchedAt.present ? data.searchedAt.value : this.searchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranSearche(')
+          ..write('query: $query, ')
+          ..write('searchedAt: $searchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(query, searchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuranSearche && other.query == this.query && other.searchedAt == this.searchedAt);
+}
+
+class QuranSearchesCompanion extends UpdateCompanion<QuranSearche> {
+  final Value<String> query;
+  final Value<DateTime> searchedAt;
+  final Value<int> rowid;
+  const QuranSearchesCompanion({
+    this.query = const Value.absent(),
+    this.searchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  QuranSearchesCompanion.insert({
+    required String query,
+    required DateTime searchedAt,
+    this.rowid = const Value.absent(),
+  }) : query = Value(query),
+       searchedAt = Value(searchedAt);
+  static Insertable<QuranSearche> custom({
+    Expression<String>? query,
+    Expression<DateTime>? searchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (query != null) 'query': query,
+      if (searchedAt != null) 'searched_at': searchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QuranSearchesCompanion copyWith({
+    Value<String>? query,
+    Value<DateTime>? searchedAt,
+    Value<int>? rowid,
+  }) {
+    return QuranSearchesCompanion(
+      query: query ?? this.query,
+      searchedAt: searchedAt ?? this.searchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (query.present) {
+      map['query'] = Variable<String>(query.value);
+    }
+    if (searchedAt.present) {
+      map['searched_at'] = Variable<DateTime>(searchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuranSearchesCompanion(')
+          ..write('query: $query, ')
+          ..write('searchedAt: $searchedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4586,8 +5136,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $QadaEntriesTable qadaEntries = $QadaEntriesTable(this);
   late final $AzkarCountsTable azkarCounts = $AzkarCountsTable(this);
   late final $SavedDuasTable savedDuas = $SavedDuasTable(this);
+  late final $QuranCategoriesTable quranCategories = $QuranCategoriesTable(this);
   late final $QuranBookmarksTable quranBookmarks = $QuranBookmarksTable(this);
   late final $QuranNotesTable quranNotes = $QuranNotesTable(this);
+  late final $QuranSearchesTable quranSearches = $QuranSearchesTable(this);
   late final Index qadaDay = Index(
     'qada_day',
     'CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)',
@@ -4610,8 +5162,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     qadaEntries,
     azkarCounts,
     savedDuas,
+    quranCategories,
     quranBookmarks,
     quranNotes,
+    quranSearches,
     qadaDay,
     quranBookmarkAyah,
     quranBookmarkPage,
@@ -4638,7 +5192,6 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<bool> reduceMotion,
   Value<bool> haptics,
   Value<bool> uiSounds,
-  Value<bool> storeResetPending,
   Value<DateTime?> firstUse,
   Value<PrayerSound> fajrSound,
   Value<PrayerSound> dhuhrSound,
@@ -4678,6 +5231,8 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<int> quranTranslationSize,
   Value<double> reciteSpeed,
   Value<int> reciteRepeat,
+  Value<Reciter> reciter,
+  Value<AzkarFont> azkarFont,
   Value<int> recitePause,
 });
 typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
@@ -4700,7 +5255,6 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<bool> reduceMotion,
   Value<bool> haptics,
   Value<bool> uiSounds,
-  Value<bool> storeResetPending,
   Value<DateTime?> firstUse,
   Value<PrayerSound> fajrSound,
   Value<PrayerSound> dhuhrSound,
@@ -4740,6 +5294,8 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<int> quranTranslationSize,
   Value<double> reciteSpeed,
   Value<int> reciteRepeat,
+  Value<Reciter> reciter,
+  Value<AzkarFont> azkarFont,
   Value<int> recitePause,
 });
 
@@ -4822,11 +5378,6 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
 
   ColumnFilters<bool> get uiSounds =>
       $composableBuilder(column: $table.uiSounds, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get storeResetPending => $composableBuilder(
-    column: $table.storeResetPending,
-    builder: (column) => ColumnFilters(column),
-  );
 
   ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get firstUse => $composableBuilder(
     column: $table.firstUse,
@@ -5013,6 +5564,16 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
   ColumnFilters<int> get reciteRepeat =>
       $composableBuilder(column: $table.reciteRepeat, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<Reciter, Reciter, String> get reciter => $composableBuilder(
+    column: $table.reciter,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<AzkarFont, AzkarFont, String> get azkarFont => $composableBuilder(
+    column: $table.azkarFont,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => ColumnFilters(column));
 }
@@ -5081,11 +5642,6 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
 
   ColumnOrderings<bool> get uiSounds =>
       $composableBuilder(column: $table.uiSounds, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<bool> get storeResetPending => $composableBuilder(
-    column: $table.storeResetPending,
-    builder: (column) => ColumnOrderings(column),
-  );
 
   ColumnOrderings<String> get firstUse =>
       $composableBuilder(column: $table.firstUse, builder: (column) => ColumnOrderings(column));
@@ -5234,6 +5790,12 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<int> get reciteRepeat =>
       $composableBuilder(column: $table.reciteRepeat, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get reciter =>
+      $composableBuilder(column: $table.reciter, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get azkarFont =>
+      $composableBuilder(column: $table.azkarFont, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => ColumnOrderings(column));
 }
@@ -5301,9 +5863,6 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumn<bool> get uiSounds =>
       $composableBuilder(column: $table.uiSounds, builder: (column) => column);
-
-  GeneratedColumn<bool> get storeResetPending =>
-      $composableBuilder(column: $table.storeResetPending, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<DateTime?, String> get firstUse =>
       $composableBuilder(column: $table.firstUse, builder: (column) => column);
@@ -5422,6 +5981,12 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<int> get reciteRepeat =>
       $composableBuilder(column: $table.reciteRepeat, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<Reciter, String> get reciter =>
+      $composableBuilder(column: $table.reciter, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AzkarFont, String> get azkarFont =>
+      $composableBuilder(column: $table.azkarFont, builder: (column) => column);
+
   GeneratedColumn<int> get recitePause =>
       $composableBuilder(column: $table.recitePause, builder: (column) => column);
 }
@@ -5471,7 +6036,6 @@ class $$SettingsTableTableManager
                 Value<bool> reduceMotion = const Value.absent(),
                 Value<bool> haptics = const Value.absent(),
                 Value<bool> uiSounds = const Value.absent(),
-                Value<bool> storeResetPending = const Value.absent(),
                 Value<DateTime?> firstUse = const Value.absent(),
                 Value<PrayerSound> fajrSound = const Value.absent(),
                 Value<PrayerSound> dhuhrSound = const Value.absent(),
@@ -5511,6 +6075,8 @@ class $$SettingsTableTableManager
                 Value<int> quranTranslationSize = const Value.absent(),
                 Value<double> reciteSpeed = const Value.absent(),
                 Value<int> reciteRepeat = const Value.absent(),
+                Value<Reciter> reciter = const Value.absent(),
+                Value<AzkarFont> azkarFont = const Value.absent(),
                 Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
@@ -5532,7 +6098,6 @@ class $$SettingsTableTableManager
                 reduceMotion: reduceMotion,
                 haptics: haptics,
                 uiSounds: uiSounds,
-                storeResetPending: storeResetPending,
                 firstUse: firstUse,
                 fajrSound: fajrSound,
                 dhuhrSound: dhuhrSound,
@@ -5572,6 +6137,8 @@ class $$SettingsTableTableManager
                 quranTranslationSize: quranTranslationSize,
                 reciteSpeed: reciteSpeed,
                 reciteRepeat: reciteRepeat,
+                reciter: reciter,
+                azkarFont: azkarFont,
                 recitePause: recitePause,
               ),
           createCompanionCallback:
@@ -5595,7 +6162,6 @@ class $$SettingsTableTableManager
                 Value<bool> reduceMotion = const Value.absent(),
                 Value<bool> haptics = const Value.absent(),
                 Value<bool> uiSounds = const Value.absent(),
-                Value<bool> storeResetPending = const Value.absent(),
                 Value<DateTime?> firstUse = const Value.absent(),
                 Value<PrayerSound> fajrSound = const Value.absent(),
                 Value<PrayerSound> dhuhrSound = const Value.absent(),
@@ -5635,6 +6201,8 @@ class $$SettingsTableTableManager
                 Value<int> quranTranslationSize = const Value.absent(),
                 Value<double> reciteSpeed = const Value.absent(),
                 Value<int> reciteRepeat = const Value.absent(),
+                Value<Reciter> reciter = const Value.absent(),
+                Value<AzkarFont> azkarFont = const Value.absent(),
                 Value<int> recitePause = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
@@ -5656,7 +6224,6 @@ class $$SettingsTableTableManager
                 reduceMotion: reduceMotion,
                 haptics: haptics,
                 uiSounds: uiSounds,
-                storeResetPending: storeResetPending,
                 firstUse: firstUse,
                 fajrSound: fajrSound,
                 dhuhrSound: dhuhrSound,
@@ -5696,6 +6263,8 @@ class $$SettingsTableTableManager
                 quranTranslationSize: quranTranslationSize,
                 reciteSpeed: reciteSpeed,
                 reciteRepeat: reciteRepeat,
+                reciter: reciter,
+                azkarFont: azkarFont,
                 recitePause: recitePause,
               ),
           withReferenceMapper: (p0) => p0
@@ -6278,13 +6847,164 @@ typedef $$SavedDuasTableProcessedTableManager =
       SavedDua,
       PrefetchHooks Function()
     >;
+typedef $$QuranCategoriesTableCreateCompanionBuilder = QuranCategoriesCompanion Function({
+  Value<int> id,
+  Value<String?> name,
+  required CategoryColor color,
+  required int position,
+});
+typedef $$QuranCategoriesTableUpdateCompanionBuilder = QuranCategoriesCompanion Function({
+  Value<int> id,
+  Value<String?> name,
+  Value<CategoryColor> color,
+  Value<int> position,
+});
+
+class $$QuranCategoriesTableFilterComposer extends Composer<_$AppDatabase, $QuranCategoriesTable> {
+  $$QuranCategoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<CategoryColor, CategoryColor, String> get color =>
+      $composableBuilder(
+        column: $table.color,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuranCategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuranCategoriesTable> {
+  $$QuranCategoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuranCategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuranCategoriesTable> {
+  $$QuranCategoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<CategoryColor, String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+}
+
+class $$QuranCategoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuranCategoriesTable,
+          QuranCategory,
+          $$QuranCategoriesTableFilterComposer,
+          $$QuranCategoriesTableOrderingComposer,
+          $$QuranCategoriesTableAnnotationComposer,
+          $$QuranCategoriesTableCreateCompanionBuilder,
+          $$QuranCategoriesTableUpdateCompanionBuilder,
+          (QuranCategory, BaseReferences<_$AppDatabase, $QuranCategoriesTable, QuranCategory>),
+          QuranCategory,
+          PrefetchHooks Function()
+        > {
+  $$QuranCategoriesTableTableManager(_$AppDatabase db, $QuranCategoriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuranCategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuranCategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuranCategoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<CategoryColor> color = const Value.absent(),
+            Value<int> position = const Value.absent(),
+          }) => QuranCategoriesCompanion(id: id, name: name, color: color, position: position),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                required CategoryColor color,
+                required int position,
+              }) => QuranCategoriesCompanion.insert(
+                id: id,
+                name: name,
+                color: color,
+                position: position,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QuranCategoriesTable, QuranCategory>(table),
+                  BaseReferences<_$AppDatabase, $QuranCategoriesTable, QuranCategory>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuranCategoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuranCategoriesTable,
+      QuranCategory,
+      $$QuranCategoriesTableFilterComposer,
+      $$QuranCategoriesTableOrderingComposer,
+      $$QuranCategoriesTableAnnotationComposer,
+      $$QuranCategoriesTableCreateCompanionBuilder,
+      $$QuranCategoriesTableUpdateCompanionBuilder,
+      (QuranCategory, BaseReferences<_$AppDatabase, $QuranCategoriesTable, QuranCategory>),
+      QuranCategory,
+      PrefetchHooks Function()
+    >;
 typedef $$QuranBookmarksTableCreateCompanionBuilder = QuranBookmarksCompanion Function({
   Value<int> id,
   Value<int?> surah,
   Value<int?> ayah,
   required int page,
   Value<String?> name,
-  required RibbonColor color,
+  required int category,
   required DateTime createdAt,
 });
 typedef $$QuranBookmarksTableUpdateCompanionBuilder = QuranBookmarksCompanion Function({
@@ -6293,7 +7013,7 @@ typedef $$QuranBookmarksTableUpdateCompanionBuilder = QuranBookmarksCompanion Fu
   Value<int?> ayah,
   Value<int> page,
   Value<String?> name,
-  Value<RibbonColor> color,
+  Value<int> category,
   Value<DateTime> createdAt,
 });
 
@@ -6320,10 +7040,8 @@ class $$QuranBookmarksTableFilterComposer extends Composer<_$AppDatabase, $Quran
   ColumnFilters<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
 
-  ColumnWithTypeConverterFilters<RibbonColor, RibbonColor, String> get color => $composableBuilder(
-    column: $table.color,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnFilters<int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6352,8 +7070,8 @@ class $$QuranBookmarksTableOrderingComposer extends Composer<_$AppDatabase, $Qur
   ColumnOrderings<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
@@ -6382,8 +7100,8 @@ class $$QuranBookmarksTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<RibbonColor, String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => column);
+  GeneratedColumn<int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -6422,7 +7140,7 @@ class $$QuranBookmarksTableTableManager
                 Value<int?> ayah = const Value.absent(),
                 Value<int> page = const Value.absent(),
                 Value<String?> name = const Value.absent(),
-                Value<RibbonColor> color = const Value.absent(),
+                Value<int> category = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => QuranBookmarksCompanion(
                 id: id,
@@ -6430,7 +7148,7 @@ class $$QuranBookmarksTableTableManager
                 ayah: ayah,
                 page: page,
                 name: name,
-                color: color,
+                category: category,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -6440,7 +7158,7 @@ class $$QuranBookmarksTableTableManager
                 Value<int?> ayah = const Value.absent(),
                 required int page,
                 Value<String?> name = const Value.absent(),
-                required RibbonColor color,
+                required int category,
                 required DateTime createdAt,
               }) => QuranBookmarksCompanion.insert(
                 id: id,
@@ -6448,7 +7166,7 @@ class $$QuranBookmarksTableTableManager
                 ayah: ayah,
                 page: page,
                 name: name,
-                color: color,
+                category: category,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -6482,6 +7200,7 @@ typedef $$QuranNotesTableCreateCompanionBuilder = QuranNotesCompanion Function({
   required int surah,
   required int ayah,
   required String note,
+  Value<bool> highlight,
   required DateTime updatedAt,
   Value<int> rowid,
 });
@@ -6489,6 +7208,7 @@ typedef $$QuranNotesTableUpdateCompanionBuilder = QuranNotesCompanion Function({
   Value<int> surah,
   Value<int> ayah,
   Value<String> note,
+  Value<bool> highlight,
   Value<DateTime> updatedAt,
   Value<int> rowid,
 });
@@ -6509,6 +7229,9 @@ class $$QuranNotesTableFilterComposer extends Composer<_$AppDatabase, $QuranNote
 
   ColumnFilters<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get highlight =>
+      $composableBuilder(column: $table.highlight, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
@@ -6531,6 +7254,9 @@ class $$QuranNotesTableOrderingComposer extends Composer<_$AppDatabase, $QuranNo
   ColumnOrderings<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get highlight =>
+      $composableBuilder(column: $table.highlight, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 }
@@ -6551,6 +7277,9 @@ class $$QuranNotesTableAnnotationComposer extends Composer<_$AppDatabase, $Quran
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<bool> get highlight =>
+      $composableBuilder(column: $table.highlight, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -6585,12 +7314,14 @@ class $$QuranNotesTableTableManager
                 Value<int> surah = const Value.absent(),
                 Value<int> ayah = const Value.absent(),
                 Value<String> note = const Value.absent(),
+                Value<bool> highlight = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => QuranNotesCompanion(
                 surah: surah,
                 ayah: ayah,
                 note: note,
+                highlight: highlight,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -6599,12 +7330,14 @@ class $$QuranNotesTableTableManager
                 required int surah,
                 required int ayah,
                 required String note,
+                Value<bool> highlight = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => QuranNotesCompanion.insert(
                 surah: surah,
                 ayah: ayah,
                 note: note,
+                highlight: highlight,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -6635,6 +7368,124 @@ typedef $$QuranNotesTableProcessedTableManager =
       QuranNote,
       PrefetchHooks Function()
     >;
+typedef $$QuranSearchesTableCreateCompanionBuilder = QuranSearchesCompanion Function({
+  required String query,
+  required DateTime searchedAt,
+  Value<int> rowid,
+});
+typedef $$QuranSearchesTableUpdateCompanionBuilder = QuranSearchesCompanion Function({
+  Value<String> query,
+  Value<DateTime> searchedAt,
+  Value<int> rowid,
+});
+
+class $$QuranSearchesTableFilterComposer extends Composer<_$AppDatabase, $QuranSearchesTable> {
+  $$QuranSearchesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get query =>
+      $composableBuilder(column: $table.query, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get searchedAt =>
+      $composableBuilder(column: $table.searchedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuranSearchesTableOrderingComposer extends Composer<_$AppDatabase, $QuranSearchesTable> {
+  $$QuranSearchesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get query =>
+      $composableBuilder(column: $table.query, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get searchedAt =>
+      $composableBuilder(column: $table.searchedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuranSearchesTableAnnotationComposer extends Composer<_$AppDatabase, $QuranSearchesTable> {
+  $$QuranSearchesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get query =>
+      $composableBuilder(column: $table.query, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get searchedAt =>
+      $composableBuilder(column: $table.searchedAt, builder: (column) => column);
+}
+
+class $$QuranSearchesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuranSearchesTable,
+          QuranSearche,
+          $$QuranSearchesTableFilterComposer,
+          $$QuranSearchesTableOrderingComposer,
+          $$QuranSearchesTableAnnotationComposer,
+          $$QuranSearchesTableCreateCompanionBuilder,
+          $$QuranSearchesTableUpdateCompanionBuilder,
+          (QuranSearche, BaseReferences<_$AppDatabase, $QuranSearchesTable, QuranSearche>),
+          QuranSearche,
+          PrefetchHooks Function()
+        > {
+  $$QuranSearchesTableTableManager(_$AppDatabase db, $QuranSearchesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$QuranSearchesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuranSearchesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuranSearchesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> query = const Value.absent(),
+            Value<DateTime> searchedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => QuranSearchesCompanion(query: query, searchedAt: searchedAt, rowid: rowid),
+          createCompanionCallback: ({
+            required String query,
+            required DateTime searchedAt,
+            Value<int> rowid = const Value.absent(),
+          }) => QuranSearchesCompanion.insert(query: query, searchedAt: searchedAt, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QuranSearchesTable, QuranSearche>(table),
+                  BaseReferences<_$AppDatabase, $QuranSearchesTable, QuranSearche>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuranSearchesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuranSearchesTable,
+      QuranSearche,
+      $$QuranSearchesTableFilterComposer,
+      $$QuranSearchesTableOrderingComposer,
+      $$QuranSearchesTableAnnotationComposer,
+      $$QuranSearchesTableCreateCompanionBuilder,
+      $$QuranSearchesTableUpdateCompanionBuilder,
+      (QuranSearche, BaseReferences<_$AppDatabase, $QuranSearchesTable, QuranSearche>),
+      QuranSearche,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6646,8 +7497,12 @@ class $AppDatabaseManager {
   $$AzkarCountsTableTableManager get azkarCounts =>
       $$AzkarCountsTableTableManager(_db, _db.azkarCounts);
   $$SavedDuasTableTableManager get savedDuas => $$SavedDuasTableTableManager(_db, _db.savedDuas);
+  $$QuranCategoriesTableTableManager get quranCategories =>
+      $$QuranCategoriesTableTableManager(_db, _db.quranCategories);
   $$QuranBookmarksTableTableManager get quranBookmarks =>
       $$QuranBookmarksTableTableManager(_db, _db.quranBookmarks);
   $$QuranNotesTableTableManager get quranNotes =>
       $$QuranNotesTableTableManager(_db, _db.quranNotes);
+  $$QuranSearchesTableTableManager get quranSearches =>
+      $$QuranSearchesTableTableManager(_db, _db.quranSearches);
 }

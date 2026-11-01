@@ -12,6 +12,7 @@ class QuranTile extends StatelessWidget {
   const QuranTile({
     required this.icon,
     required this.label,
+    this.highlight = false,
     this.onTap,
     this.height = SizeManager.quranTool,
     this.radius = RadiusManager.quranTool,
@@ -19,6 +20,7 @@ class QuranTile extends StatelessWidget {
   });
 
   final BmIcon icon;
+  final bool highlight;
 
   /// a StringsManager key
   final String label;
@@ -37,7 +39,12 @@ class QuranTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.getColor(ThemeEnum.surface),
             borderRadius: BorderRadius.circular(radius.r),
-            boxShadow: [BoxShadow(color: context.getColor(ThemeEnum.outline), spreadRadius: 1)],
+            boxShadow: [
+              BoxShadow(
+                color: context.getColor(highlight ? ThemeEnum.glow : ThemeEnum.outline),
+                spreadRadius: 1,
+              ),
+            ],
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: height.r),

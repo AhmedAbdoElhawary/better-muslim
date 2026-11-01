@@ -2,8 +2,10 @@ import 'dart:ui' show CheckedState;
 
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/day_dots.dart';
-import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
+import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
+import 'package:better_muslim/features/notifications/presentation/view/adhan_settings_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/mark_button.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_header.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/progress_ring.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
+import '../../../helpers/notifications.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
 
@@ -46,7 +49,7 @@ void main() {
     expect(inRow(Prayer.asr, find.text('NOW')), findsOneWidget);
     expect(mark(), findsOneWidget);
     expect(inRow(Prayer.maghrib, find.text('in 1:24')), findsOneWidget);
-    expect(inRow(Prayer.isha, icon('outline/adhan.svg')), findsOneWidget);
+    expect(inRow(Prayer.isha, icon('ui/sound.svg')), findsOneWidget);
     expect(find.text('2 of 5 prayed today'), findsOneWidget);
     expect(find.text('3 missed this month to make up'), findsOneWidget);
     expect(dotsOf(tester, DateTime(2026, 10, 13)), hasLength(4));
@@ -83,12 +86,34 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the calendar button opens the hijri calendar', (tester) async {
-    await pumpPrayer(tester, await designOverrides());
+  testWidgets('the adhan button opens adhan and reminders', (tester) async {
+    await pumpPrayer(tester, [
+      ...await designOverrides(),
+      notificationSchedulerProvider.overrideWithValue(FakeScheduler()),
+    ]);
 
-    await tester.tap(find.bySemanticsLabel('Hijri calendar'));
+    await tester.tap(find.bySemanticsLabel('Adhan and reminders'));
     await tester.pumpAndSettle();
-    expect(find.byType(HijriCalendarPage), findsOneWidget);
+    expect(find.byType(AdhanSettingsPage), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('the bell moves isha from tone to silent to adhan', (tester) async {
+    await pumpPrayer(tester, await designOverrides());
+    final db = dbOf(tester);
+    Future<PrayerSound> isha() async =>
+        (await tester.runAsync(() => db.select(db.settings).getSingle()))!.ishaSound;
+
+    await tester.tap(inRow(Prayer.isha, icon('ui/sound.svg')));
+    await tester.pumpAndSettle();
+    expect(await isha(), PrayerSound.silent);
+    expect(find.text('Isha: Silent'), findsOneWidget);
+    expect(inRow(Prayer.isha, icon('ui/bell_off.svg')), findsOneWidget);
+
+    await tester.tap(inRow(Prayer.isha, icon('ui/bell_off.svg')));
+    await tester.pumpAndSettle();
+    expect(await isha(), PrayerSound.adhan);
+    expect(inRow(Prayer.isha, icon('outline/adhan.svg')), findsOneWidget);
     await unmount(tester);
   });
 

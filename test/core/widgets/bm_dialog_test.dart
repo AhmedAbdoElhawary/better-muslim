@@ -9,11 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/widgets.dart';
 
 void main() {
-  Future<Future<bool>> open(
-    WidgetTester tester, {
-    String cancel = StringsManager.cancel,
-    bool destructive = true,
-  }) async {
+  Future<Future<bool>> open(WidgetTester tester) async {
     late Future<bool> answer;
     await pumpCoreWidget(
       tester,
@@ -24,8 +20,6 @@ void main() {
             title: StringsManager.resetJourneyTitle,
             body: StringsManager.resetJourneyBody,
             action: StringsManager.reset,
-            cancel: cancel,
-            destructive: destructive,
           ),
           child: const SizedBox.square(dimension: 44),
         ),
@@ -70,16 +64,6 @@ void main() {
     await open(tester);
     final error = bmThemes[BmThemeId.qiyamEmerald]!.dark.error;
     expect(actionFill(tester, 'Reset'), error.withValues(alpha: .16));
-  });
-
-  testWidgets('a plain action and its own cancel, for the reset notice', (tester) async {
-    final answer = await open(tester, cancel: StringsManager.startFresh, destructive: false);
-    expect(find.text('Start fresh'), findsOneWidget);
-    expect(find.text('Cancel'), findsNothing);
-    expect(actionFill(tester, 'Reset'), isNull);
-    await tester.tap(find.text('Start fresh'));
-    await tester.pumpAndSettle();
-    expect(await answer, isFalse);
   });
 
   group('the way in (FR-034)', () {

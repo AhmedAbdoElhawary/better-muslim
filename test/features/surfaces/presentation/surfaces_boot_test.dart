@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:better_muslim/core/app/app.dart';
-import 'package:better_muslim/core/backup/restore.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
@@ -145,6 +146,25 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('one write after a theme change and one after a mode change', (tester) async {
+    final channel = await pumpBoot(tester);
+
+    await dbOf(tester).updateSettings(const SettingsCompanion(theme: Value(BmThemeId.andalus)));
+    await settle(tester, const Duration(milliseconds: 700));
+    expect(channel.updates, hasLength(2));
+    final data = jsonDecode(channel.updates.last.json) as Map<String, Object?>;
+    expect(
+      ((data['colors']! as Map)['dark'] as Map)['text'],
+      bmThemes[BmThemeId.andalus]!.dark.text.toARGB32(),
+    );
+
+    await dbOf(tester).updateSettings(const SettingsCompanion(themeMode: Value(BmThemeMode.dark)));
+    await settle(tester, const Duration(milliseconds: 700));
+    expect(channel.updates, hasLength(3));
+    expect(jsonDecode(channel.updates.last.json)['mode'], 'dark');
+    await unmount(tester);
+  });
+
   testWidgets('one write after a mark and one after an unmark', (tester) async {
     final channel = await pumpBoot(tester);
     final day = DateTime(2026, 10, 15);
@@ -161,7 +181,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('one write after reset prayer journey, one after a restore', (tester) async {
+  testWidgets('one write after reset prayer journey', (tester) async {
     final channel = await pumpBoot(tester);
     final db = dbOf(tester);
     await db.markPrayed(DateTime(2026, 10, 15), Prayer.asr);
@@ -171,15 +191,6 @@ void main() {
     await db.resetPrayerJourney();
     await settle(tester, const Duration(milliseconds: 700));
     expect(channel.updates, hasLength(before + 1));
-
-    final backup = AppDatabase.forTesting(NativeDatabase.memory());
-    await backup.updateSettings(makkahPlace);
-    await backup.markPrayed(DateTime(2026, 10, 15), Prayer.dhuhr);
-    await restore(db, backup);
-    await backup.close();
-    await settle(tester, const Duration(milliseconds: 700));
-    expect(channel.updates, hasLength(before + 2));
-    expect(channel.updates.last.json, contains('1 of 5 prayed today'));
     await unmount(tester);
   });
 
@@ -190,21 +201,6 @@ void main() {
     await settle(tester);
 
     expect(channel.updates, hasLength(2));
-    await unmount(tester);
-  });
-
-  /// maghrib 17:56, its window opens 2 hours before at 15:56
-  testWidgets('one write when a window opens and one when it ends, the app open', (tester) async {
-    final channel = await pumpBoot(tester, hour: 15, minute: 46);
-    expect(channel.updates, hasLength(1));
-
-    await tester.pump(const Duration(minutes: 10));
-    await settle(tester);
-    expect(channel.updates, hasLength(2));
-
-    await tester.pump(const Duration(hours: 2));
-    await settle(tester);
-    expect(channel.updates, hasLength(3));
     await unmount(tester);
   });
 

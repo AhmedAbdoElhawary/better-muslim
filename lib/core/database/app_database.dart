@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/azkar/azkar_window.dart';
@@ -12,10 +11,10 @@ import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/azkar.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -59,9 +58,6 @@ class Settings extends Table {
   BoolColumn get haptics => boolean().withDefault(const Constant(true))();
   BoolColumn get uiSounds => boolean().withDefault(const Constant(false))();
 
-  /// set by a store reset, cleared once the user has been told (milestone 10)
-  BoolColumn get storeResetPending => boolean().withDefault(const Constant(false))();
-
   /// the strip's earliest week. the v2 migration fills it with the upgrade date
   TextColumn get firstUse => text().map(const CivilDate()).nullable()();
 
@@ -73,15 +69,15 @@ class Settings extends Table {
 
   /// each prayer's own recording, android fixes a channel's sound so it can't be one for all
   TextColumn get fajrRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
   TextColumn get dhuhrRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
   TextColumn get asrRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
   TextColumn get maghribRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
   TextColumn get ishaRecording =>
-      textEnum<AdhanRecording>().withDefault(const Constant('madinah'))();
+      textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
 
   /// minutes before each prayer, 0 is off
   IntColumn get reminderMinutes => integer()
@@ -122,7 +118,6 @@ class Settings extends Table {
   BoolColumn get topGlow => boolean().withDefault(const Constant(true))();
   TextColumn get language => textEnum<Language>().withDefault(const Constant('phone'))();
 
-  /// belongs to the phone, a backup never carries it (milestone 10 FR-030)
   BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
 
   IntColumn get lastReadSurah => integer().withDefault(const Constant(1))();
@@ -160,11 +155,14 @@ class Settings extends Table {
       // ignore: recursive_getters, drift reads the column inside its own check
       .check(reciteSpeed.isIn(const [0.75, 1.0, 1.25, 1.5]))();
 
-  /// 1 is off
+  /// 1 is off, 0 is surah loop
   IntColumn get reciteRepeat => integer()
       .withDefault(const Constant(1))
       // ignore: recursive_getters, drift reads the column inside its own check
-      .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10]))();
+      .check(reciteRepeat.isIn(const [1, 2, 3, 5, 10, 0]))();
+
+  TextColumn get reciter => textEnum<Reciter>().withDefault(const Constant('alafasy'))();
+  TextColumn get azkarFont => textEnum<AzkarFont>().withDefault(const Constant('amiri'))();
 
   /// seconds between ayahs
   IntColumn get recitePause => integer()
@@ -240,25 +238,56 @@ class QuranBookmarks extends Table {
 
   /// null shows the reference
   TextColumn get name => text().nullable()();
-  TextColumn get color => textEnum<RibbonColor>()();
+  IntColumn get category => integer()();
   DateTimeColumn get createdAt => dateTime()();
 }
 
-/// one note per ayah
+/// a named and colored group of bookmarks, id 1 is the "Bookmarks" that is never deleted
+class QuranCategories extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// null on the default shows "Bookmarks" in the app's language
+  TextColumn get name => text().nullable()();
+  TextColumn get color => textEnum<CategoryColor>()();
+  IntColumn get position => integer()();
+}
+
+/// one note per ayah, a highlighted one may have no text
 class QuranNotes extends Table {
   IntColumn get surah => integer()();
   IntColumn get ayah => integer()();
-
-  // ignore: recursive_getters, drift reads the column inside its own check
-  TextColumn get note => text().check(note.trim().length.isBiggerThanValue(0))();
+  TextColumn get note => text()();
+  BoolColumn get highlight => boolean().withDefault(const Constant(false))();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override
   Set<Column<Object>> get primaryKey => {surah, ayah};
+
+  @override
+  List<String> get customConstraints => ['CHECK (length(trim(note)) > 0 OR highlight)'];
+}
+
+/// the last searches on the quran search page
+class QuranSearches extends Table {
+  TextColumn get query => text()();
+  DateTimeColumn get searchedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {query};
 }
 
 @DriftDatabase(
-  tables: [Settings, PrayerLog, QadaEntries, AzkarCounts, SavedDuas, QuranBookmarks, QuranNotes],
+  tables: [
+    Settings,
+    PrayerLog,
+    QadaEntries,
+    AzkarCounts,
+    SavedDuas,
+    QuranCategories,
+    QuranBookmarks,
+    QuranNotes,
+    QuranSearches,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.executor);
@@ -267,7 +296,7 @@ class AppDatabase extends _$AppDatabase {
 
   static const _name = 'better_muslim';
 
-  /// a store that can't be opened starts fresh instead of crashing, and remembers it (FR-024)
+  /// a store that can't be opened starts fresh instead of crashing (FR-024)
   static Future<AppDatabase> open() async {
     /// Documents is backed up and shown in the Files app, Application Support is not
     final directory = await getApplicationSupportDirectory();
@@ -284,7 +313,7 @@ class AppDatabase extends _$AppDatabase {
       await db.close();
       return _reset(file, error, stack, 'cannot open');
     }
-    if (Platform.isIOS) await BackupExclusion.exclude(file.path);
+    await BackupExclusion.exclude(file.path);
     return db;
   }
 
@@ -317,24 +346,8 @@ class AppDatabase extends _$AppDatabase {
       if (leftover.existsSync()) leftover.deleteSync();
     }
     final db = _connect(file, await DatabaseKey.create());
-    await db.updateSettings(const SettingsCompanion(storeResetPending: Value(true)));
-    if (Platform.isIOS) await BackupExclusion.exclude(file.path);
+    await BackupExclusion.exclude(file.path);
     return db;
-  }
-
-  /// a backup's store, locked with the password (contracts/backup-file.md). hex, so any password
-  /// works with no quoting
-  static AppDatabase backup(File file, String password) {
-    final key = utf8.encode(password).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
-    return AppDatabase._(
-      NativeDatabase.createInBackground(
-        file,
-        setup: (db) => db
-          ..execute("pragma cipher = 'chacha20'")
-          ..execute('pragma kdf_iter = 600000')
-          ..execute("pragma hexkey = '$key'"),
-      ),
-    );
   }
 
   /// its own function, so the setup closure sent to drift's isolate captures only sendable values
@@ -352,10 +365,17 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 22;
+
+  /// the category every bookmark lands in until I pick another
+  static const defaultCategory = 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+      await _addDefaultCategory();
+    },
     onUpgrade: stepByStep(
       from1To2: (m, schema) async {
         await m.createTable(schema.prayerLog);
@@ -502,7 +522,82 @@ class AppDatabase extends _$AppDatabase {
           ),
         );
       },
+      from13To14: (m, schema) async {
+        /// a removed name fails to read as the enum, madinah is the one left
+        for (final column in [
+          'fajr_recording',
+          'dhuhr_recording',
+          'asr_recording',
+          'maghrib_recording',
+          'isha_recording',
+        ]) {
+          await customStatement(
+            "update settings set $column = 'madinah' "
+            "where $column in ('aaqibAzeez', 'andrewler', 'synagda')",
+          );
+        }
+      },
+      from14To15: (m, schema) async {
+        /// sqlite can't change a check in place, the table is remade with every note kept
+        await m.alterTable(
+          TableMigration(schema.quranNotes, newColumns: [schema.quranNotes.highlight]),
+        );
+      },
+      from15To16: (m, schema) async {
+        await m.createTable(schema.quranCategories);
+        await _addDefaultCategory();
+
+        /// every bookmark moves into the default, the old ribbon colors go
+        await m.alterTable(
+          TableMigration(
+            schema.quranBookmarks,
+            newColumns: [schema.quranBookmarks.category],
+            columnTransformer: {schema.quranBookmarks.category: const Constant(defaultCategory)},
+          ),
+        );
+      },
+      from16To17: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.reciter);
+      },
+      from17To18: (m, schema) async {
+        /// the repeat check takes surah loop, sqlite remakes the table for it
+        await m.alterTable(TableMigration(schema.settings));
+      },
+      from18To19: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.azkarFont);
+      },
+      from19To20: (m, schema) async {
+        /// madinah left the app, alafasy is the one left. sqlite can't change a default in place
+        await m.alterTable(
+          TableMigration(
+            schema.settings,
+            columnTransformer: {
+              for (final column in [
+                schema.settings.fajrRecording,
+                schema.settings.dhuhrRecording,
+                schema.settings.asrRecording,
+                schema.settings.maghribRecording,
+                schema.settings.ishaRecording,
+              ])
+                column: const Constant('alafasy'),
+            },
+          ),
+        );
+      },
+      from20To21: (m, schema) async {
+        await m.createTable(schema.quranSearches);
+      },
+      from21To22: (m, schema) async {
+        /// the reset notice left with backup and restore
+        await m.alterTable(TableMigration(schema.settings));
+      },
     ),
+  );
+
+  /// raw sql, the step's schema and this one's tables are not the same classes
+  Future<void> _addDefaultCategory() => customStatement(
+    'insert into quran_categories (id, color, position) '
+    "values ($defaultCategory, '${CategoryColor.primary.name}', 0)",
   );
 
   /// an existing row keeps its first use, now is passed so tests and the scenario control it

@@ -40,7 +40,8 @@ double mushafScale(int step) => 1 + step / 10;
 
 enum PageTurn { book, slide }
 
-enum RibbonColor { primary, accent, neutral }
+/// a bookmark category's, primary is the theme's own and the rest are fixed
+enum CategoryColor { primary, green, teal, blue, violet, rose, amber, slate }
 
 /// the mushaf and share font, picked in Display (FR-011, FR-026)
 enum QuranFont {
@@ -54,4 +55,46 @@ enum QuranFont {
   final FontEnum font;
 
   String get family => font.arabic;
+}
+
+/// a voice for the recitation, one everyayah folder each. label, short and initials are
+/// StringsManager keys
+enum Reciter {
+  alafasy(
+    'Alafasy_128kbps',
+    StringsManager.reciterAlafasy,
+    StringsManager.reciterAlafasyShort,
+    StringsManager.reciterAlafasyInitials,
+  ),
+  husary(
+    'Husary_128kbps',
+    StringsManager.reciterHusary,
+    StringsManager.reciterHusaryShort,
+    StringsManager.reciterHusaryInitials,
+  ),
+  abdulBasit(
+    'Abdul_Basit_Murattal_192kbps',
+    StringsManager.reciterAbdulBasit,
+    StringsManager.reciterAbdulBasitShort,
+    StringsManager.reciterAbdulBasitInitials,
+  ),
+  minshawi(
+    'Minshawy_Murattal_128kbps',
+    StringsManager.reciterMinshawi,
+    StringsManager.reciterMinshawiShort,
+    StringsManager.reciterMinshawiInitials,
+  ),
+  maher(
+    'MaherAlMuaiqly128kbps',
+    StringsManager.reciterMaher,
+    StringsManager.reciterMaherShort,
+    StringsManager.reciterMaherInitials,
+  );
+
+  const Reciter(this.folder, this.label, this.short, this.initials);
+
+  final String folder;
+  final String label;
+  final String short;
+  final String initials;
 }

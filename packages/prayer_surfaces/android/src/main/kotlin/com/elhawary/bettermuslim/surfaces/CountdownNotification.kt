@@ -8,20 +8,29 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
 import org.json.JSONObject
-import java.io.File
 
-// the ongoing countdown before each prayer, counted by the system to the second (research R9)
+// the ongoing countdown to the next prayer while the app is off screen, counted by the system to
+// the second (research R9). it rolls to the next one at each prayer time
 object CountdownNotification {
     private const val CHANNEL = "prayer_countdown"
     private const val ID = 7300
-    private const val STARTED = "countdown_now"
+
+    // in memory, not saved: a crash, a kill or a reboot starts a new process with the app off screen
+    private var onScreen = false
+
+    // the app's activity started or stopped
+    fun onScreen(context: Context, on: Boolean) {
+        onScreen = on
+        sync(context)
+        SurfaceTicks.arm(context)
+    }
 
     // with notifications or the channel off there's no countdown, the widget still works (FR-021)
     fun sync(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val data = SurfaceData.load(context)
         val now = System.currentTimeMillis()
-        val entry = data?.let { shown(context, it, now) }
+        val entry = data?.let { shown(it, now) }
         if (data == null || entry == null || !allowed(context, data)) {
             manager.cancel(ID)
             return
@@ -29,24 +38,12 @@ object CountdownNotification {
         manager.notify(ID, build(context, data, entry, now))
     }
 
-    // the window covering now, or the one the dev page started until its prayer time
-    fun shown(context: Context, data: SurfaceData, now: Long): JSONObject? {
+    // the entry in force names the next prayer, none while the app is on screen
+    fun shown(data: SurfaceData, now: Long): JSONObject? {
         if (!data.place || !data.countdown) return null
-        data.windowAt(now)?.let { return data.entries[it.getInt("entry")] }
-        val started = started(context).takeIf { it.exists() }?.readText()?.toLongOrNull() ?: return null
-        if (started <= now) return null
-        return data.entryAt(now)?.takeIf { it.getLong("at") == started }
-    }
-
-    // the next prayer's countdown from now whatever the 2 hours, for the dev page (FR-033)
-    fun startNow(context: Context): Boolean {
-        val data = SurfaceData.load(context) ?: return false
-        val entry = data.entryAt(System.currentTimeMillis()) ?: return false
-        if (!data.place || !data.countdown || !allowed(context, data)) return false
-        started(context).writeText("${entry.getLong("at")}")
-        sync(context)
-        SurfaceTicks.arm(context)
-        return true
+        if (onScreen) return null
+        if (now >= data.until) return null
+        return data.entryAt(now)
     }
 
     // made or renamed each time, so the app's language reaches the phone's settings
@@ -66,6 +63,8 @@ object CountdownNotification {
         val at = entry.getLong("at")
         val builder = Notification.Builder(context, CHANNEL)
             .setSmallIcon(smallIcon(context))
+            // the theme's dark palette, as the ios lock screen
+            .setColor(data.palette(false).color(context, "gold"))
             .setContentTitle(entry.getString("nameTime"))
             .setContentText(data.text("liveNext"))
             .setWhen(at)
@@ -85,7 +84,7 @@ object CountdownNotification {
                     Notification.ProgressStyle()
                         .setProgressSegments(listOf(Notification.ProgressStyle.Segment(BAR)))
                         .setProgress(share)
-                        .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.surfaces_sun)),
+                        .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.surfaces_sun).setTint(data.palette(false).color(context, "live"))),
                 )
             }
         } else if (share != null) {
@@ -98,8 +97,6 @@ object CountdownNotification {
     private fun smallIcon(context: Context): Int =
         context.resources.getIdentifier("ic_notification", "drawable", context.packageName)
             .takeIf { it != 0 } ?: context.applicationInfo.icon
-
-    private fun started(context: Context) = File(context.filesDir, STARTED)
 
     private const val BAR = 1000
     private const val PROMOTED = "android.requestPromotedOngoing"

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
@@ -8,17 +10,17 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_colors.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:flutter/painting.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
-
-/// the notifications' 6 days, ios 26 schedules no countdown further than they go
-const _windowDays = 6;
-const _windowLength = Duration(hours: 2);
 
 /// the file the widgets, the live activity and the android countdown read
 /// (contracts/surface-data.md). the prayer rules stay in dart, the native side only picks the
-/// entry in force and counts
+/// entry in force and counts. the countdown shows while the app is off screen, the native side
+/// knows when
 Map<String, Object?> buildSurfaceData({
   required DateTime now,
   required Location? location,
@@ -34,12 +36,15 @@ Map<String, Object?> buildSurfaceData({
   final city = location?.nameIn(language) ?? '';
   final method =
       settings.method ?? PrayerMethod.forCountry(location?.countryCode ?? settings.countryCode);
+  final theme = bmThemes[settings.theme]!;
   final data = <String, Object?>{
-    'version': 1,
+    'version': 2,
     'place': location != null,
     'language': language,
     'eastern': language == 'ar' && digits == Digits.eastern,
     'countdown': settings.prayerCountdown,
+    'mode': settings.themeMode.name,
+    'colors': {'light': _colorsOf(theme.light, dark: false), 'dark': _colorsOf(theme.dark)},
     'until': 0,
     'texts': {
       'noPlace': tr(StringsManager.openToSetPlace),
@@ -59,7 +64,6 @@ Map<String, Object?> buildSurfaceData({
       'channel': tr(StringsManager.countdownChannel),
     },
     'entries': const <Map<String, Object?>>[],
-    'countdowns': const <Map<String, Object?>>[],
   };
   if (location == null) return data;
 
@@ -126,6 +130,18 @@ Map<String, Object?> buildSurfaceData({
     final time = clock(at);
     final minutes = settings.reminderMinutes;
 
+    /// entries change at sunrise and maghrib, so follow sky holds for a whole entry. no sunrise
+    /// or no maghrib as followSkyProvider has it
+    final light = switch (settings.themeMode) {
+      BmThemeMode.dark => false,
+      BmThemeMode.light => true,
+      BmThemeMode.followSky => switch ((times.sunrise, times.maghrib)) {
+        (null, _) => false,
+        (_, null) => true,
+        (final sunrise?, final maghrib?) => !moment.isBefore(sunrise) && moment.isBefore(maghrib),
+      },
+    };
+
     String? barFromLabel;
     if (period != null && barFrom != null) {
       final started = Prayer.values.asNameMap()[period.name];
@@ -147,6 +163,7 @@ Map<String, Object?> buildSurfaceData({
       'atTime': tr(StringsManager.atTime, {'time': time}),
       'timeCity': tr(StringsManager.notifReminderBody, {'time': time, 'city': city}),
       'nameTime': tr(StringsManager.nameTime, {'prayer': name, 'time': time}),
+      'nameNow': tr(StringsManager.prayerNow, {'prayer': name}),
       'barFrom': barFrom?.millisecondsSinceEpoch,
       'barFromLabel': barFromLabel,
       'sunrise': times.sunrise?.millisecondsSinceEpoch,
@@ -161,6 +178,7 @@ Map<String, Object?> buildSurfaceData({
               'time': clock(at.subtract(Duration(minutes: minutes))),
             }),
       'next': next,
+      'light': light,
       'strip': [
         for (final cell in Prayer.values)
           {
@@ -177,35 +195,55 @@ Map<String, Object?> buildSurfaceData({
     };
   }
 
-  int entryIndexAt(int ms) => froms.lastIndexWhere((from) => from <= ms);
-
-  /// a prayer with no time (polar) has no window and isn't the previous one of the next
-  final prayerTimes = [
-    for (var i = -1; i < _windowDays; i++)
-      for (final prayer in Prayer.values)
-        if (timesOn(plus(first, i)).timeOf(prayer) case final time?) (day: i, time: time),
-  ]..sort((a, b) => a.time.compareTo(b.time));
-  final countdowns = <Map<String, Object?>>[];
-  if (settings.prayerCountdown) {
-    for (var i = 1; i < prayerTimes.length; i++) {
-      final (:day, :time) = prayerTimes[i];
-      final previous = prayerTimes[i - 1].time;
-      final twoHours = time.subtract(_windowLength);
-      final windowStart = previous.isAfter(twoHours) ? previous : twoHours;
-      if (day < 0 || !time.isAfter(now) || !windowStart.isBefore(time)) continue;
-      final shown = windowStart.isAfter(now) ? windowStart : now;
-      countdowns.add({
-        'start': windowStart.millisecondsSinceEpoch,
-        'end': time.millisecondsSinceEpoch,
-        'entry': entryIndexAt(shown.millisecondsSinceEpoch),
-      });
-    }
-  }
-
   return {
     ...data,
     'until': until.millisecondsSinceEpoch,
     'entries': [for (final from in froms) entryAt(from)],
-    'countdowns': countdowns,
   };
+}
+
+/// the 5.6 trees' colors as roles: the dark sky behind dark widgets, and light ones on the theme's
+/// own surfaces, since its light sky stays dark
+Map<String, int> _colorsOf(BmPalette palette, {bool dark = true}) {
+  final (top, middle, sky) = dark
+      ? (palette.sky1, palette.sky2, palette.sky3)
+      : (palette.surface, palette.raised, palette.variant);
+  final gold = HSLColor.fromColor(palette.onPrimaryContainer);
+
+  /// the live countdown's digits a step brighter than gold, lighter on dark and darker on light
+  final live = gold.withLightness((gold.lightness + (dark ? .1 : -.1)).clamp(0, 1)).toColor();
+  final label = palette.text.withValues(alpha: .85);
+  final texts = [palette.text, label, palette.onPrimaryContainer, live];
+
+  /// some themes' last sky is too light under the text, it goes toward the middle until aa
+  var bottom = sky;
+  for (var t = .05; texts.any((text) => _ratio(text, bottom) < 4.5) && t <= 1; t += .05) {
+    bottom = Color.lerp(sky, middle, t)!;
+  }
+  return {
+    'top': top.toARGB32(),
+    'middle': middle.toARGB32(),
+    'bottom': bottom.toARGB32(),
+    'deep': Color.lerp(middle, bottom, .4)!.toARGB32(),
+    'text': palette.text.toARGB32(),
+    'label': label.toARGB32(),
+    'dim': palette.text2.toARGB32(),
+    'gold': palette.onPrimaryContainer.toARGB32(),
+    'live': live.toARGB32(),
+    'primary': palette.primary.toARGB32(),
+    'container': palette.primaryContainer.toARGB32(),
+    'success': palette.success.toARGB32(),
+    'ring': palette.outlineStrong.toARGB32(),
+
+    /// a light sun disappears on a light surface
+    'sun': (dark ? palette.sun : palette.glow).toARGB32(),
+    'outline': palette.outline.toARGB32(),
+  };
+}
+
+/// wcag's ratio, a see through text laid over what it sits on first
+double _ratio(Color text, Color under) {
+  final front = Color.alphaBlend(text, under).computeLuminance();
+  final back = under.computeLuminance();
+  return (math.max(front, back) + .05) / (math.min(front, back) + .05);
 }

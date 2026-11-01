@@ -6,6 +6,7 @@ import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/quran/domain/category.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -69,3 +70,7 @@ String savedSurahName(
   final surah = assets.surah(ayah?.surah ?? assets.pageInfo(page).start.surah);
   return Localizations.localeOf(context).languageCode == 'ar' ? surah.ar : surah.en;
 }
+
+/// my name for it, or "Bookmarks" in the app's language for the default
+String categoryName(BuildContext context, Category category) =>
+    category.name ?? context.tr(StringsManager.bookmarks);

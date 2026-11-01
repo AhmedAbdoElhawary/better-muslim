@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- the store and its keystore key stay on this phone, a new phone gets data only from the app's own backup file -->
+<!-- the store and its keystore key stay on this phone -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" />

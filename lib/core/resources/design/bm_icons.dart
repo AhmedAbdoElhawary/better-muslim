@@ -54,6 +54,7 @@ enum BmUiIcon {
   lock,
   tafsir,
   note,
+  note_filled,
   plus,
   minus,
   more_h,
@@ -68,6 +69,8 @@ enum BmUiIcon {
   timer,
   chevron_down,
   download,
+  back_10,
+  forward_10,
 }
 
 class BmIcon extends StatelessWidget {

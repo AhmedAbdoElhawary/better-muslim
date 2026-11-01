@@ -18,6 +18,7 @@ class PickerRow extends StatelessWidget {
     this.args = const {},
     this.subtitle,
     this.value,
+    this.font = FontEnum.body,
     super.key,
   });
 
@@ -26,6 +27,9 @@ class PickerRow extends StatelessWidget {
   final Map<String, String> args;
   final String? subtitle;
   final String? value;
+
+  /// a font row writes its name in itself
+  final FontEnum font;
   final bool selected;
   final VoidCallback onTap;
 
@@ -55,7 +59,7 @@ class PickerRow extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RegularText(title, args: args, fontSize: FontSizeManager.body),
+                      RegularText(title, args: args, font: font, fontSize: FontSizeManager.body),
                       if (subtitle != null) ...[
                         const RSizedBox.vertical(SpaceManager.rowLineGap),
                         RegularText(

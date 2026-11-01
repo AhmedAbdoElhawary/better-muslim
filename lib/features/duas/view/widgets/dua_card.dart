@@ -38,6 +38,7 @@ class DuaCard extends StatelessWidget {
                 arabic: dua.arabic,
                 transliteration: dua.transliteration,
                 translation: dua.translation,
+                quran: dua.quran,
               ),
             ),
             const RSizedBox.vertical(SpaceManager.duaGap),
