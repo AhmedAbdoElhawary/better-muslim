@@ -28,6 +28,19 @@ enum Language {
   final String nameKey;
 }
 
+/// on top of the phone's own text size, still capped at bmMaxTextScale
+enum TextSize {
+  small(StringsManager.textSizeSmall, 0.85),
+  standard(StringsManager.textSizeDefault, 1),
+  large(StringsManager.textSizeLarge, 1.15),
+  larger(StringsManager.textSizeLarger, 1.3),
+  largest(StringsManager.textSizeLargest, 1.5);
+
+  const TextSize(this.nameKey, this.scale);
+  final String nameKey;
+  final double scale;
+}
+
 /// how each prayer reaches the phone. silent still shows the notification, with no sound
 enum PrayerSound {
   adhan(StringsManager.soundAdhan),
@@ -36,6 +49,30 @@ enum PrayerSound {
 
   const PrayerSound(this.nameKey);
   final String nameKey;
+}
+
+/// takbir only plays the opening takbir as the notification's own sound, no adhan screen
+enum AdhanLength {
+  full(StringsManager.adhanFull),
+  takbir(StringsManager.adhanTakbir);
+
+  const AdhanLength(this.nameKey);
+  final String nameKey;
+}
+
+/// the phone's own notification sound, or one shipped in the app
+enum PrayerTone {
+  phone(StringsManager.tonePhone),
+  calm(StringsManager.toneCalm, file: 'tone_calm'),
+  glass(StringsManager.toneGlass, file: 'tone_glass'),
+  bright(StringsManager.toneBright, file: 'tone_bright'),
+  echo(StringsManager.toneEcho, file: 'tone_echo');
+
+  const PrayerTone(this.nameKey, {this.file});
+  final String nameKey;
+
+  /// the same name in assets/audio, res/raw and ios/Runner/Sounds
+  final String? file;
 }
 
 extension PrayerSoundOf on AppSettings {
@@ -58,6 +95,22 @@ extension PrayerSoundOf on AppSettings {
     };
     return AdhanFiles.isReady(recording) ? recording : AdhanRecording.alafasy;
   }
+
+  AdhanLength adhanLengthOf(Prayer prayer) => switch (prayer) {
+    Prayer.fajr => fajrAdhanLength,
+    Prayer.dhuhr => dhuhrAdhanLength,
+    Prayer.asr => asrAdhanLength,
+    Prayer.maghrib => maghribAdhanLength,
+    Prayer.isha => ishaAdhanLength,
+  };
+
+  PrayerTone toneOf(Prayer prayer) => switch (prayer) {
+    Prayer.fajr => fajrTone,
+    Prayer.dhuhr => dhuhrTone,
+    Prayer.asr => asrTone,
+    Prayer.maghrib => maghribTone,
+    Prayer.isha => ishaTone,
+  };
 }
 
 SettingsCompanion soundChoice(Prayer prayer, PrayerSound sound) => switch (prayer) {
@@ -68,10 +121,29 @@ SettingsCompanion soundChoice(Prayer prayer, PrayerSound sound) => switch (praye
   Prayer.isha => SettingsCompanion(ishaSound: Value(sound)),
 };
 
-SettingsCompanion recordingChoice(Prayer prayer, AdhanRecording recording) => switch (prayer) {
-  Prayer.fajr => SettingsCompanion(fajrRecording: Value(recording)),
-  Prayer.dhuhr => SettingsCompanion(dhuhrRecording: Value(recording)),
-  Prayer.asr => SettingsCompanion(asrRecording: Value(recording)),
-  Prayer.maghrib => SettingsCompanion(maghribRecording: Value(recording)),
-  Prayer.isha => SettingsCompanion(ishaRecording: Value(recording)),
+/// one write, so the schedule is remade once for both
+SettingsCompanion recordingChoice(
+  Prayer prayer,
+  AdhanRecording recording,
+  AdhanLength length,
+) => switch (prayer) {
+  Prayer.fajr => SettingsCompanion(fajrRecording: Value(recording), fajrAdhanLength: Value(length)),
+  Prayer.dhuhr => SettingsCompanion(
+    dhuhrRecording: Value(recording),
+    dhuhrAdhanLength: Value(length),
+  ),
+  Prayer.asr => SettingsCompanion(asrRecording: Value(recording), asrAdhanLength: Value(length)),
+  Prayer.maghrib => SettingsCompanion(
+    maghribRecording: Value(recording),
+    maghribAdhanLength: Value(length),
+  ),
+  Prayer.isha => SettingsCompanion(ishaRecording: Value(recording), ishaAdhanLength: Value(length)),
+};
+
+SettingsCompanion toneChoice(Prayer prayer, PrayerTone tone) => switch (prayer) {
+  Prayer.fajr => SettingsCompanion(fajrTone: Value(tone)),
+  Prayer.dhuhr => SettingsCompanion(dhuhrTone: Value(tone)),
+  Prayer.asr => SettingsCompanion(asrTone: Value(tone)),
+  Prayer.maghrib => SettingsCompanion(maghribTone: Value(tone)),
+  Prayer.isha => SettingsCompanion(ishaTone: Value(tone)),
 };
