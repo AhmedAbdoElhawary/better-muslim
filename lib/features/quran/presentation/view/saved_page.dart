@@ -180,7 +180,7 @@ class _CategoryHeader extends StatelessWidget {
               color: ThemeEnum.text2,
             ),
           ),
-          BmIcon.ui(BmUiIcon.note, size: 16),
+          BmIcon.ui(BmUiIcon.note, size: SizeManager.iconInline.r),
         ],
       ),
     );
@@ -440,7 +440,9 @@ Future<void> _unhighlight(BuildContext context, WidgetRef ref, Note note) async 
   if (note.text.isEmpty) {
     await store.deleteNote(note.ayah);
   } else {
-    await store.restoreNote(Note(ayah: note.ayah, text: note.text, updatedAt: note.updatedAt));
+    await store.restoreNote(
+      Note(ayah: note.ayah, text: note.text, highlight: false, updatedAt: note.updatedAt),
+    );
   }
   if (!context.mounted) return;
   showToast(

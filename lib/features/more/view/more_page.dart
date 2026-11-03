@@ -27,6 +27,7 @@ import 'package:better_muslim/features/more/view/widgets/language_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/mode_sheet.dart';
 import 'package:better_muslim/features/more/view/widgets/more_tiles.dart';
 import 'package:better_muslim/features/more/view/widgets/reset_row.dart';
+import 'package:better_muslim/features/more/view/widgets/text_size_sheet.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -218,6 +219,9 @@ class _AppearanceSection extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
+    final textSize = ref.watch(
+      settingsProvider.select((settings) => settings.value?.textSize ?? TextSize.standard),
+    );
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final db = ref.read(databaseProvider);
     return GroupedSection(
@@ -241,6 +245,12 @@ class _AppearanceSection extends ConsumerWidget {
           title: StringsManager.lightAndDark,
           value: mode.nameKey,
           onTap: () => showModeSheet(context),
+        ),
+        NavRow(
+          icon: BmIcon.ui(BmUiIcon.text_size, size: SizeManager.iconList.r),
+          title: StringsManager.textSize,
+          value: textSize.nameKey,
+          onTap: () => showTextSizeSheet(context),
         ),
         NavRow(
           icon: BmIcon.ui(BmUiIcon.motion, size: SizeManager.iconList.r),

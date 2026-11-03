@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:drift/drift.dart' show Value;
@@ -56,6 +57,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(disabled(), isTrue);
+    await unmount(tester);
+  });
+
+  testWidgets('the text size multiplies the phone scale and keeps the 2.0 cap', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(ProviderScope(overrides: testOverrides(), child: const App()));
+    await tester.pumpAndSettle();
+    double scale() => MediaQuery.textScalerOf(tester.element(find.byType(HomePage))).scale(1);
+    final db = ProviderScope.containerOf(tester.element(find.byType(HomePage)))
+        .read(databaseProvider);
+
+    expect(scale(), 1.5);
+
+    await db.updateSettings(const SettingsCompanion(textSize: Value(TextSize.large)));
+    await tester.pumpAndSettle();
+    expect(scale(), closeTo(1.725, 0.001));
+
+    await db.updateSettings(const SettingsCompanion(textSize: Value(TextSize.largest)));
+    await tester.pumpAndSettle();
+    expect(scale(), 2.0);
     await unmount(tester);
   });
 }

@@ -52,12 +52,12 @@ void main() {
     shown.value = 1;
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
-    expect(offsetOf(tester, '1').dy, moreOrLessEquals(BmMotion.shift.r, epsilon: .5));
+    expect(offsetOf(tester, '1').dy, moreOrLessEquals((BmMotion.shift * 2).r, epsilon: .5));
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
-    expect(offsetOf(tester, '1').dy, inExclusiveRange(0, BmMotion.shift.r));
+    expect(offsetOf(tester, '1').dy, inExclusiveRange(0, (BmMotion.shift * 2).r));
     expect(heightOf(tester), inExclusiveRange(40, 80));
 
     await tester.pumpAndSettle();

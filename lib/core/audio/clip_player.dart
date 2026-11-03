@@ -6,12 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
 /// a downloaded adhan is a path on the phone, everything else a flutter asset
-AudioSource sourceOf(String asset) =>
+UriAudioSource sourceOf(String asset) =>
     asset.startsWith('/') ? AudioSource.file(asset) : AudioSource.asset(asset);
 
 /// the one thing the tests replace, so no test reaches the phone's audio
 abstract class ClipPlayer {
-  Future<void> play(String asset);
+  /// end stops it early, the takbir preview is the full adhan's start
+  Future<void> play(String asset, {Duration? end});
   Future<void> stop();
 
   /// a clip played to its end
@@ -24,7 +25,7 @@ class JustAudioClipPlayer implements ClipPlayer {
   StreamSubscription<PlayerState>? _busy;
 
   @override
-  Future<void> play(String asset) async {
+  Future<void> play(String asset, {Duration? end}) async {
     /// music like the adhan, so a preview is heard with the silent switch on
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
@@ -32,7 +33,10 @@ class JustAudioClipPlayer implements ClipPlayer {
       (state) =>
           BmSounds.busy = state.playing && state.processingState != ProcessingState.completed,
     );
-    await _player.setAudioSource(sourceOf(asset));
+    final source = sourceOf(asset);
+    await _player.setAudioSource(
+      end == null ? source : ClippingAudioSource(child: source, end: end),
+    );
     unawaited(_player.play());
   }
 

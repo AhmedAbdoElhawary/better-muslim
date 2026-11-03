@@ -10,22 +10,20 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
-import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
-import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
-import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/motion/star_loader.dart';
+import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 Future<void> showRecordingSheet(BuildContext context, Prayer prayer) => showBmSheet(
   context,
@@ -37,7 +35,8 @@ Future<void> showRecordingSheet(BuildContext context, Prayer prayer) => showBmSh
   builder: (_) => _RecordingSheet(prayer),
 );
 
-/// the components' "Adhan sound" sheet: a tap picks and plays, only save keeps it (FR-027)
+/// the components' "Adhan sound" sheet: full or takbir, a tap picks and plays, only save keeps it
+/// (FR-027)
 class _RecordingSheet extends ConsumerStatefulWidget {
   const _RecordingSheet(this.prayer);
   final Prayer prayer;
@@ -49,6 +48,8 @@ class _RecordingSheet extends ConsumerStatefulWidget {
 class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   late AdhanRecording _picked =
       ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.alafasy;
+  late AdhanLength _length =
+      ref.read(settingsProvider).value?.adhanLengthOf(widget.prayer) ?? AdhanLength.full;
   late final ClipPlayer _player;
   late final AudioUseNotifier _use;
   late final StreamSubscription<void> _ended;
@@ -88,7 +89,10 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
     await _player.stop();
 
     /// fajr always previews and plays the recording's fajr variant
-    await _player.play(recording.fullAsset(widget.prayer));
+    await _player.play(
+      recording.fullAsset(widget.prayer),
+      end: _length == AdhanLength.takbir ? recording.clipLengthOf(widget.prayer) : null,
+    );
   }
 
   /// downloaded on the first tap, then it picks and plays like the others
@@ -124,10 +128,26 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SymmetricPadding(
+              horizontal: SpaceManager.s5,
+              vertical: SpaceManager.s2,
+              child: Segmented(
+                values: AdhanLength.values,
+                selected: _length,
+                labelOf: (length) => length.nameKey,
+                onChanged: (length) {
+                  if (_playing != null) _stop();
+                  setState(() => _length = length);
+                },
+              ),
+            ),
             for (final recording in AdhanRecording.values)
               _RecordingRow(
                 recording,
-                length: recording.lengthOf(widget.prayer),
+                takbir: _length == AdhanLength.takbir,
+                length: _length == AdhanLength.takbir
+                    ? recording.clipLabelOf(widget.prayer)
+                    : recording.lengthOf(widget.prayer),
                 picked: recording == _picked,
                 playing: recording == _playing,
                 onTap: () => _pick(recording),
@@ -143,7 +163,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
                 onPressed: () {
                   ref
                       .read(databaseProvider)
-                      .updateSettings(recordingChoice(widget.prayer, _picked));
+                      .updateSettings(recordingChoice(widget.prayer, _picked, _length));
                   Navigator.pop(context);
                 },
               ),
@@ -158,6 +178,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
 class _RecordingRow extends ConsumerWidget {
   const _RecordingRow(
     this.recording, {
+    required this.takbir,
     required this.length,
     required this.picked,
     required this.playing,
@@ -166,6 +187,7 @@ class _RecordingRow extends ConsumerWidget {
   });
 
   final AdhanRecording recording;
+  final bool takbir;
   final String length;
   final bool picked;
   final bool playing;
@@ -177,78 +199,13 @@ class _RecordingRow extends ConsumerWidget {
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
-    return Semantics(
-      button: true,
-      selected: picked,
-      inMutuallyExclusiveGroup: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: SizeManager.pickerRow.r),
-          child: SymmetricPadding(
-            horizontal: SpaceManager.s6,
-            vertical: SpaceManager.s1,
-            child: Row(
-              children: [
-                _Radio(picked),
-                const RSizedBox.horizontal(SpaceManager.listRowGap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      RegularText(recording.nameKey, fontSize: FontSizeManager.body),
-                      const RSizedBox.vertical(SpaceManager.rowLineGap),
-                      RegularText(
-                        StringsManager.fullAdhanLength,
-                        args: {'length': context.formatDigits(length, digits)},
-                        fontSize: FontSizeManager.rowSubtitle,
-                        color: ThemeEnum.text2,
-                      ),
-                    ],
-                  ),
-                ),
-                _PlayButton(recording, playing: playing, onTap: onPlay),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Radio extends StatelessWidget {
-  const _Radio(this.picked);
-  final bool picked;
-
-  @override
-  Widget build(BuildContext context) {
-    return RSizedBox.square(
-      dimension: SizeManager.radio,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: context.getColor(picked ? ThemeEnum.primary : ThemeEnum.outlineStrong),
-            width: (picked ? SizeManager.radioRing : SizeManager.radioRingOff).r,
-          ),
-        ),
-        child: picked
-            ? Center(
-                child: RSizedBox.square(
-                  dimension: SizeManager.radioDot,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.getColor(ThemeEnum.primary),
-                    ),
-                  ),
-                ),
-              )
-            : null,
-      ),
+    return SoundRow(
+      title: recording.nameKey,
+      subtitle: takbir ? StringsManager.takbirLength : StringsManager.fullAdhanLength,
+      subtitleArgs: {'length': context.formatDigits(length, digits)},
+      picked: picked,
+      onTap: onTap,
+      trailing: _PlayButton(recording, playing: playing, onTap: onPlay),
     );
   }
 }
@@ -270,38 +227,19 @@ class _PlayButton extends ConsumerWidget {
         : playing
         ? StringsManager.stop
         : StringsManager.play;
-    return Semantics(
-      button: true,
-      label: context.tr(label),
-      excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: status.downloading
-            ? ref.read(adhanDownloadProvider(recording).notifier).cancel
-            : onTap,
-        child: RSizedBox.square(
-          dimension: SizeManager.playButton,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: context.getColor(ThemeEnum.variant),
-            ),
-            child: Center(
-              child: status.downloading
-                  ? BmStarLoader(size: SizeManager.loaderInline, progress: status.progress)
-                  : BmIcon.ui(
-                      !status.ready
-                          ? BmUiIcon.download
-                          : playing
-                          ? BmUiIcon.stop
-                          : BmUiIcon.play,
-                      size: SizeManager.iconList.r,
-                      color: context.getColor(ThemeEnum.text),
-                    ),
-            ),
-          ),
-        ),
-      ),
+    return SoundPlayButton(
+      label: label,
+      icon: !status.ready
+          ? BmUiIcon.download
+          : playing
+          ? BmUiIcon.stop
+          : BmUiIcon.play,
+      onTap: status.downloading
+          ? ref.read(adhanDownloadProvider(recording).notifier).cancel
+          : onTap,
+      child: status.downloading
+          ? BmStarLoader(size: SizeManager.loaderInline, progress: status.progress)
+          : null,
     );
   }
 }

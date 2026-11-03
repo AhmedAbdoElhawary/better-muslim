@@ -149,4 +149,10 @@ const credits = [
     source: 'Mishary Rashid Alafasy · Adhan and Fajr',
     useKey: StringsManager.useAdhanRecordings,
   ),
+  Credit(
+    source: 'Aarni Koskela · Notifications',
+    useKey: StringsManager.useTones,
+    license: 'CC0',
+    link: 'https://github.com/akx/Notifications',
+  ),
 ];
