@@ -33,6 +33,10 @@
 		B5A0ECA132D16D588AE1F5A8 /* ReemKufi-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0037BAE9848733D3511C594F /* ReemKufi-Variable.ttf */; };
 		B946F3A339671A48A0AF3E38 /* SurfaceIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E60C5E0BBBA12032C0245B7F /* SurfaceIcons.swift */; };
 		CF9FC525E985492713D23A1E /* adhan_alafasy_clip.caf in Resources */ = {isa = PBXBuildFile; fileRef = 5F45266AC54B882DEF248600 /* adhan_alafasy_clip.caf */; };
+		B1A000132F00000000000001 /* tone_calm.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1A000232F00000000000001 /* tone_calm.caf */; };
+		B1A000142F00000000000001 /* tone_glass.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1A000242F00000000000001 /* tone_glass.caf */; };
+		B1A000152F00000000000001 /* tone_bright.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1A000252F00000000000001 /* tone_bright.caf */; };
+		B1A000162F00000000000001 /* tone_echo.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1A000262F00000000000001 /* tone_echo.caf */; };
 		D9FE579ECDF0781B59F056B2 /* silence.caf in Resources */ = {isa = PBXBuildFile; fileRef = 0BD67DACB14DF9B7FD3FBC96 /* silence.caf */; };
 		DB9B76081F8AD02E2E377E57 /* PrayerWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F92EAFE292C7BA865842C9E1 /* PrayerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DDCD013CF7C62693EB2C794C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B5BFDEB01BBC80F6FF090226 /* Localizable.strings */; };
@@ -85,6 +89,10 @@
 
 /* Begin PBXFileReference section */
 		0037BAE9848733D3511C594F /* ReemKufi-Variable.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "ReemKufi-Variable.ttf"; sourceTree = "<group>"; };
+		B1A000232F00000000000001 /* tone_calm.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = tone_calm.caf; sourceTree = "<group>"; };
+		B1A000242F00000000000001 /* tone_glass.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = tone_glass.caf; sourceTree = "<group>"; };
+		B1A000252F00000000000001 /* tone_bright.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = tone_bright.caf; sourceTree = "<group>"; };
+		B1A000262F00000000000001 /* tone_echo.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = tone_echo.caf; sourceTree = "<group>"; };
 		0BD67DACB14DF9B7FD3FBC96 /* silence.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = silence.caf; sourceTree = "<group>"; };
 		0CF784FE3092E6757742FC06 /* SurfaceFonts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SurfaceFonts.swift; sourceTree = "<group>"; };
 		0D7B6D4DA5D829737559BC1C /* NotoSansArabic-Variable.ttf */ = {isa = PBXFileReference; includeInIndex = 1; path = "NotoSansArabic-Variable.ttf"; sourceTree = "<group>"; };
@@ -191,6 +199,10 @@
 				5F45266AC54B882DEF248600 /* adhan_alafasy_clip.caf */,
 				2B24F090FB64DD309ED84CA7 /* adhan_alafasy_fajr_clip.caf */,
 				0BD67DACB14DF9B7FD3FBC96 /* silence.caf */,
+				B1A000232F00000000000001 /* tone_calm.caf */,
+				B1A000242F00000000000001 /* tone_glass.caf */,
+				B1A000252F00000000000001 /* tone_bright.caf */,
+				B1A000262F00000000000001 /* tone_echo.caf */,
 			);
 			name = Sounds;
 			path = Sounds;
@@ -399,6 +411,10 @@
 				CF9FC525E985492713D23A1E /* adhan_alafasy_clip.caf in Resources */,
 				F702FD8337D3DBD10BEC10C1 /* adhan_alafasy_fajr_clip.caf in Resources */,
 				D9FE579ECDF0781B59F056B2 /* silence.caf in Resources */,
+				B1A000132F00000000000001 /* tone_calm.caf in Resources */,
+				B1A000142F00000000000001 /* tone_glass.caf in Resources */,
+				B1A000152F00000000000001 /* tone_bright.caf in Resources */,
+				B1A000162F00000000000001 /* tone_echo.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
