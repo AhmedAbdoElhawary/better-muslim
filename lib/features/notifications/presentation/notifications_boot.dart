@@ -61,6 +61,16 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.asrRecording,
         row?.maghribRecording,
         row?.ishaRecording,
+        row?.fajrAdhanLength,
+        row?.dhuhrAdhanLength,
+        row?.asrAdhanLength,
+        row?.maghribAdhanLength,
+        row?.ishaAdhanLength,
+        row?.fajrTone,
+        row?.dhuhrTone,
+        row?.asrTone,
+        row?.maghribTone,
+        row?.ishaTone,
         row?.azkarNudges,
         row?.language,
 
@@ -199,10 +209,13 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final prayer = Prayer.values.asNameMap()[period.name];
     if (prayer == null || _isScenario) return;
     if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
-    final sound = ref.read(settingsProvider).value?.soundOf(prayer);
+    final settings = ref.read(settingsProvider).value;
     final location = ref.read(locationProvider);
     final at = ref.read(todayTimesProvider)?.timeOf(prayer);
-    if (sound != PrayerSound.adhan || location == null || at == null) return;
+    if (settings?.soundOf(prayer) != PrayerSound.adhan || location == null || at == null) return;
+
+    /// the takbir is the notification's own sound
+    if (settings?.adhanLengthOf(prayer) == AdhanLength.takbir) return;
 
     /// a jump back from a fast day is a period change too, only a prayer that just began plays
     if (ref.read(clockProvider)().difference(at) > const Duration(minutes: 1)) return;
@@ -235,7 +248,16 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final alert = alertFromPayload(payload);
     if (alert == null || !mounted) return;
     final player = ref.read(adhanPlayerProvider);
-    final length = await player.length(alert.prayer, _recordingOf(alert.prayer));
+
+    /// a launch from the notification comes before the store has answered
+    final settings = await ref.read(settingsProvider.future);
+    if (!mounted) return;
+    final takbir = settings.adhanLengthOf(alert.prayer) == AdhanLength.takbir;
+
+    /// no adhan is playing after a takbir, so its tap opens the prayer
+    final length = takbir
+        ? Duration.zero
+        : await player.length(alert.prayer, _recordingOf(alert.prayer));
     if (!mounted) return;
     final target = tapTarget(payload, ref.read(clockProvider)(), length);
     final router = ref.read(routerProvider);
