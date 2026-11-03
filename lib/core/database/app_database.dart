@@ -78,6 +78,19 @@ class Settings extends Table {
       textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
   TextColumn get ishaRecording =>
       textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
+  TextColumn get fajrAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
+  TextColumn get dhuhrAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
+  TextColumn get asrAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
+  TextColumn get maghribAdhanLength =>
+      textEnum<AdhanLength>().withDefault(const Constant('full'))();
+  TextColumn get ishaAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
+
+  /// each prayer's own tone, android fixes a channel's sound like the recordings
+  TextColumn get fajrTone => textEnum<PrayerTone>().withDefault(const Constant('phone'))();
+  TextColumn get dhuhrTone => textEnum<PrayerTone>().withDefault(const Constant('phone'))();
+  TextColumn get asrTone => textEnum<PrayerTone>().withDefault(const Constant('phone'))();
+  TextColumn get maghribTone => textEnum<PrayerTone>().withDefault(const Constant('phone'))();
+  TextColumn get ishaTone => textEnum<PrayerTone>().withDefault(const Constant('phone'))();
 
   /// minutes before each prayer, 0 is off
   IntColumn get reminderMinutes => integer()
@@ -117,6 +130,7 @@ class Settings extends Table {
   TextColumn get calendarMode => textEnum<CalendarMode>().withDefault(const Constant('hijri'))();
   BoolColumn get topGlow => boolean().withDefault(const Constant(true))();
   TextColumn get language => textEnum<Language>().withDefault(const Constant('phone'))();
+  TextColumn get textSize => textEnum<TextSize>().withDefault(const Constant('standard'))();
 
   BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
 
@@ -365,7 +379,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 24;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -590,6 +604,25 @@ class AppDatabase extends _$AppDatabase {
       from21To22: (m, schema) async {
         /// the reset notice left with backup and restore
         await m.alterTable(TableMigration(schema.settings));
+      },
+      from22To23: (m, schema) async {
+        for (final column in [
+          schema.settings.fajrAdhanLength,
+          schema.settings.dhuhrAdhanLength,
+          schema.settings.asrAdhanLength,
+          schema.settings.maghribAdhanLength,
+          schema.settings.ishaAdhanLength,
+          schema.settings.fajrTone,
+          schema.settings.dhuhrTone,
+          schema.settings.asrTone,
+          schema.settings.maghribTone,
+          schema.settings.ishaTone,
+        ]) {
+          await m.addColumn(schema.settings, column);
+        }
+      },
+      from23To24: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.textSize);
       },
     ),
   );
