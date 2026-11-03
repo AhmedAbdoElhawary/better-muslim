@@ -59,7 +59,7 @@ class DevNotificationsPage extends ConsumerWidget {
     );
   }
 
-  static Future<void> _test(WidgetRef ref, Alert? alert) async {
+  static Future<void> _test(WidgetRef ref, Alert? alert, {bool full = false}) async {
     final location = ref.read(locationProvider);
     if (alert == null || location == null) return;
     final texts = await AlertTexts.load(
@@ -74,6 +74,10 @@ class DevNotificationsPage extends ConsumerWidget {
           alert,
           texts,
           ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.alafasy,
+          ref.read(settingsProvider).value?.toneOf(alert.prayer) ?? PrayerTone.phone,
+          full
+              ? AdhanLength.full
+              : ref.read(settingsProvider).value?.adhanLengthOf(alert.prayer) ?? AdhanLength.full,
         );
   }
 
@@ -115,6 +119,7 @@ class DevNotificationsPage extends ConsumerWidget {
                               at: next.at,
                               sound: PrayerSound.adhan,
                             ),
+                      full: true,
                     );
                   },
                 ),
