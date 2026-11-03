@@ -12,7 +12,6 @@ import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
-import 'package:better_muslim/features/notifications/presentation/view/widgets/tone_button.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -98,7 +97,9 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a tone row under each tone prayer plays its channel\'s sound', (tester) async {
+  testWidgets('a tone row under each tone prayer opens its tone sheet, save keeps it', (
+    tester,
+  ) async {
     await open(tester);
     expect(find.byType(ToneRow), findsNWidgets(3));
 
@@ -106,11 +107,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ToneRow), findsNWidgets(2));
 
-    await tester.tap(
-      find.descendant(of: find.byType(ToneRow), matching: find.byType(ToneButton)).first,
-    );
+    await tester.tap(find.byType(ToneRow).first);
+    await tester.pumpAndSettle();
+    expect(find.text('For Asr'), findsOneWidget);
+    for (final name in ['Calm', 'Glass', 'Bright', 'Echo']) {
+      expect(find.text(name), findsOneWidget, reason: name);
+    }
+
+    await tester.tap(find.text('Phone default').last);
+    await tester.pumpAndSettle();
     expect(system.last.method, 'playTone');
     expect(system.last.arguments, {'channel': 'adhan_asr_tone'});
+
+    await tester.tap(find.text('Glass'));
+    await tester.pumpAndSettle();
+    expect(clips.played.last, 'assets/audio/tone_glass.m4a');
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).toneOf(Prayer.asr), PrayerTone.glass);
+    expect(find.text('Glass'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('takbir only previews the opening takbir and save keeps both', (tester) async {
+    await open(tester);
+    await tester.tap(recordingOf(Prayer.fajr));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Takbir only'));
+    await tester.pumpAndSettle();
+    expect(find.text('Takbir only · 0:22'), findsOneWidget);
+
+    await tester.tap(find.text('Mishary Alafasy'));
+    await tester.pumpAndSettle();
+    expect(clips.played.last, AdhanRecording.alafasy.fullAsset(Prayer.fajr));
+    expect(clips.ends.last, AdhanRecording.alafasy.clipLengthOf(Prayer.fajr));
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect((await settingsOf(tester)).adhanLengthOf(Prayer.fajr), AdhanLength.takbir);
+    expect(find.text('Mishary Alafasy · takbir only'), findsOneWidget);
+    expect(find.text('Mishary Alafasy · full adhan'), findsOneWidget);
     await unmount(tester);
   });
 
