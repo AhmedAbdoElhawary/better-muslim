@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- the clips are named only from dart, shrinkResources would drop them from a release -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@raw/adhan_*" />
+    tools:keep="@raw/adhan_*,@raw/tone_*" />
