@@ -245,16 +245,12 @@ void main() {
     });
   });
 
-  testWidgets('the note\'s checkbox highlights the ayah with no text, unchecked it goes', (
-    tester,
-  ) async {
+  testWidgets('a new note highlights the ayah with no text, unchecked it goes', (tester) async {
     Set<AyahKey> highlighted() => tester.allRenderObjects
         .whereType<RenderMushafPage>()
         .expand((page) => page.highlighted)
         .toSet();
-    Future<void> toggleAndSave() async {
-      await tester.tap(find.text('Highlight in mushaf'));
-      await tester.pump();
+    Future<void> save() async {
       await tester.tap(find.text('Save'));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
       await tester.pumpAndSettle();
@@ -264,12 +260,14 @@ void main() {
     await select(tester, 5);
     await tapIn(tester, AyahSheet, find.text('Note'));
     await tapIn(tester, StudySheet, find.text('Add note'));
-    await toggleAndSave();
+    await save();
     expect(highlighted(), {const AyahKey(1, 5)});
     expect(inSheet(StudySheet, find.text('Highlighted in mushaf')), findsOneWidget);
 
     await tapIn(tester, StudySheet, find.text('Highlighted in mushaf'));
-    await toggleAndSave();
+    await tester.tap(find.text('Highlight in mushaf'));
+    await tester.pump();
+    await save();
     expect(highlighted(), isEmpty);
     expect(inSheet(StudySheet, find.text('Add note')), findsOneWidget);
     await unmount(tester);
