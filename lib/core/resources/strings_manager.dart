@@ -270,6 +270,15 @@ abstract final class StringsManager {
   static const String recordingAlafasy = 'recordingAlafasy';
   static const String fullAdhanLength = 'fullAdhanLength';
   static const String recordingFull = 'recordingFull';
+  static const String adhanFull = 'adhanFull';
+  static const String adhanTakbir = 'adhanTakbir';
+  static const String takbirLength = 'takbirLength';
+  static const String recordingTakbir = 'recordingTakbir';
+  static const String tonePhone = 'tonePhone';
+  static const String toneCalm = 'toneCalm';
+  static const String toneGlass = 'toneGlass';
+  static const String toneBright = 'toneBright';
+  static const String toneEcho = 'toneEcho';
   static const String notificationsOff = 'notificationsOff';
   static const String openSettings = 'openSettings';
   static const String sectionYourData = 'sectionYourData';
@@ -285,6 +294,7 @@ abstract final class StringsManager {
   static const String useFonts = 'useFonts';
   static const String useAzkarDuas = 'useAzkarDuas';
   static const String useAdhanRecordings = 'useAdhanRecordings';
+  static const String useTones = 'useTones';
   static const String creditLine = 'creditLine';
   static const String version = 'version';
   static const String easternDigits = 'easternDigits';
@@ -596,4 +606,11 @@ abstract final class StringsManager {
   static const String clearAll = 'clearAll';
   static const String removeSearch = 'removeSearch';
   static const String prayerSound = 'prayerSound';
+  static const String textSize = 'textSize';
+  static const String textSizeSmall = 'textSizeSmall';
+  static const String textSizeDefault = 'textSizeDefault';
+  static const String textSizeLarge = 'textSizeLarge';
+  static const String textSizeLarger = 'textSizeLarger';
+  static const String textSizeLargest = 'textSizeLargest';
+  static const String textSizeNote = 'textSizeNote';
 }

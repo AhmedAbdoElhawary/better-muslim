@@ -609,6 +609,25 @@
       "recording": {}
     }
   },
+  "adhanFull": "Full adhan",
+  "adhanTakbir": "Takbir only",
+  "takbirLength": "Takbir only · {length}",
+  "@takbirLength": {
+    "placeholders": {
+      "length": {}
+    }
+  },
+  "recordingTakbir": "{recording} · takbir only",
+  "@recordingTakbir": {
+    "placeholders": {
+      "recording": {}
+    }
+  },
+  "tonePhone": "Phone default",
+  "toneCalm": "Calm",
+  "toneGlass": "Glass",
+  "toneBright": "Bright",
+  "toneEcho": "Echo",
   "notificationsOff": "Notifications are off for this app.",
   "openSettings": "Open settings",
   "sectionYourData": "YOUR DATA",
@@ -624,6 +643,7 @@
   "useFonts": "Fonts",
   "useAzkarDuas": "Azkar and duas",
   "useAdhanRecordings": "Adhan recordings",
+  "useTones": "Notification tones",
   "creditLine": "{use} · {license}",
   "@creditLine": {
     "placeholders": {
@@ -1112,5 +1132,12 @@
   "recentSearches": "Recent searches",
   "clearAll": "Clear",
   "removeSearch": "Remove {query}",
-  "prayerSound": "{prayer}: {sound}"
+  "prayerSound": "{prayer}: {sound}",
+  "textSize": "Text size",
+  "textSizeSmall": "Small",
+  "textSizeDefault": "Default",
+  "textSizeLarge": "Large",
+  "textSizeLarger": "Larger",
+  "textSizeLargest": "Largest",
+  "textSizeNote": "Works on top of your phone's text size. The Quran page keeps its own size in Display."
 }
