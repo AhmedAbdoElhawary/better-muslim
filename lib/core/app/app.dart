@@ -51,6 +51,9 @@ class _AppState extends ConsumerState<App> {
     final reduceMotion = ref.watch(
       settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
     );
+    final textSize = ref.watch(
+      settingsProvider.select((settings) => settings.value?.textSize ?? TextSize.standard),
+    );
     return AppScreenUtilInit(
       child: MaterialApp.router(
         onGenerateTitle: (context) => context.tr(StringsManager.appName),
@@ -71,8 +74,14 @@ class _AppState extends ConsumerState<App> {
 
         /// the in-app switch joins the os flag here, so every widget reads one flag (R4)
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(disableAnimations: MediaQuery.disableAnimationsOf(context) || reduceMotion),
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: MediaQuery.disableAnimationsOf(context) || reduceMotion,
+
+            /// default keeps the phone's own scaler, android 14 grows big text less than linear
+            textScaler: textSize == TextSize.standard
+                ? null
+                : TextScaler.linear(MediaQuery.textScalerOf(context).scale(1) * textSize.scale),
+          ),
           child: MediaQuery.withClampedTextScaling(
             maxScaleFactor: bmMaxTextScale,
             child: ColoredBox(
