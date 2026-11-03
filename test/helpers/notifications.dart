@@ -103,6 +103,8 @@ class FakeScheduler extends NotificationScheduler {
     required List<Alert> alerts,
     required Map<Prayer, PrayerSound> sounds,
     required Map<Prayer, AdhanRecording> recordings,
+    required Map<Prayer, AdhanLength> lengths,
+    required Map<Prayer, PrayerTone> tones,
     required AlertTexts texts,
   }) async {
     applied.add(alerts);
