@@ -132,26 +132,35 @@ class NotificationScheduler {
     required List<Alert> alerts,
     required Map<Prayer, PrayerSound> sounds,
     required Map<Prayer, AdhanRecording> recordings,
+    required Map<Prayer, AdhanLength> lengths,
+    required Map<Prayer, PrayerTone> tones,
     required AlertTexts texts,
   }) async {
     try {
       await _plugin.cancelAllPendingNotifications();
       await _channel.cancelAll();
-      await _ensureChannels(sounds, recordings, texts);
+      await _ensureChannels(sounds, recordings, tones, texts);
       final exact = await _android?.canScheduleExactNotifications() ?? false;
       final native = <Map<String, Object?>>[];
       for (final alert in alerts) {
         /// the full adhan needs code at prayer time with the app closed, the plugin can't run it.
         /// without exact alarms it stays with the plugin and its clip (FR-023)
         final recording = recordings[alert.prayer] ?? AdhanRecording.alafasy;
-        if (exact && alert.kind == AlertKind.adhan && alert.sound == PrayerSound.adhan) {
+        final length = lengths[alert.prayer] ?? AdhanLength.full;
+        if (exact && alert.kind == AlertKind.adhan && _isFull(alert.sound, length)) {
           native.add(entryOf(alert, texts, recording));
           continue;
         }
         await _plugin.zonedSchedule(
           id: alert.id,
           scheduledDate: alert.at,
-          notificationDetails: _details(alert, texts, recording),
+          notificationDetails: _details(
+            alert,
+            texts,
+            recording,
+            tones[alert.prayer] ?? PrayerTone.phone,
+            length,
+          ),
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
               : AndroidScheduleMode.inexactAllowWhileIdle,
@@ -182,7 +191,13 @@ class NotificationScheduler {
   }
 
   /// the dev page's check: the next prayer's notification with its sound, a minute from now
-  Future<void> testIn1Minute(Alert next, AlertTexts texts, AdhanRecording recording) async {
+  Future<void> testIn1Minute(
+    Alert next,
+    AlertTexts texts,
+    AdhanRecording recording,
+    PrayerTone tone,
+    AdhanLength length,
+  ) async {
     final at = TZDateTime.now(next.at.location).add(const Duration(minutes: 1));
     final alert = Alert(
       day: next.day,
@@ -192,7 +207,7 @@ class NotificationScheduler {
       sound: next.sound,
     );
     final exact = await _android?.canScheduleExactNotifications() ?? false;
-    if (exact && alert.sound == PrayerSound.adhan) {
+    if (exact && _isFull(alert.sound, length)) {
       await _channel.schedule([
         ..._native,
         {...entryOf(alert, texts, recording), 'id': testAlertId},
@@ -202,7 +217,7 @@ class NotificationScheduler {
     await _plugin.zonedSchedule(
       id: testAlertId,
       scheduledDate: at,
-      notificationDetails: _details(alert, texts, recording),
+      notificationDetails: _details(alert, texts, recording, tone, length),
       androidScheduleMode: exact
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
@@ -212,11 +227,16 @@ class NotificationScheduler {
     );
   }
 
+  /// takbir only is the clip alone, so it needs no adhan screen and no native player
+  static bool _isFull(PrayerSound sound, AdhanLength length) =>
+      sound == PrayerSound.adhan && length == AdhanLength.full;
+
   /// one entry per prayer in the phone's settings: every other channel of the prayer is deleted,
   /// milestone 5's adhan_{prayer}_adhan too
   Future<void> _ensureChannels(
     Map<Prayer, PrayerSound> sounds,
     Map<Prayer, AdhanRecording> recordings,
+    Map<Prayer, PrayerTone> tones,
     AlertTexts texts,
   ) async {
     final android = _android;
@@ -228,19 +248,27 @@ class NotificationScheduler {
     );
     for (final MapEntry(key: prayer, value: sound) in sounds.entries) {
       final recording = recordings[prayer] ?? AdhanRecording.alafasy;
-      final kept = channelId(prayer, sound, recording);
-      await android.createNotificationChannel(_channelOf(prayer, sound, recording, texts));
+      final tone = tones[prayer] ?? PrayerTone.phone;
+      final kept = channelId(prayer, sound, recording, tone: tone);
+      await android.createNotificationChannel(_channelOf(prayer, sound, recording, tone, texts));
       for (final other in channelIdsOf(prayer).where((id) => id != kept)) {
         await android.deleteNotificationChannel(channelId: other);
       }
     }
   }
 
-  /// android fixes a channel's sound when it is made, so each recording needs its own id
-  static String channelId(Prayer prayer, PrayerSound sound, AdhanRecording recording) =>
-      sound == PrayerSound.adhan
-      ? 'adhan_${prayer.name}_adhan_${recording.name}'
-      : 'adhan_${prayer.name}_${sound.name}';
+  /// android fixes a channel's sound when it is made, so each recording and tone needs its own id.
+  /// the phone's tone keeps the old id, a sound changed in the phone's settings stays
+  static String channelId(
+    Prayer prayer,
+    PrayerSound sound,
+    AdhanRecording recording, {
+    PrayerTone tone = PrayerTone.phone,
+  }) => switch (sound) {
+    PrayerSound.adhan => 'adhan_${prayer.name}_adhan_${recording.name}',
+    PrayerSound.tone when tone != PrayerTone.phone => 'adhan_${prayer.name}_tone_${tone.name}',
+    _ => 'adhan_${prayer.name}_${sound.name}',
+  };
 
   /// every id the prayer has ever had, so an apply can leave exactly one
   static List<String> channelIdsOf(Prayer prayer) => [
@@ -248,6 +276,9 @@ class NotificationScheduler {
     for (final sound in PrayerSound.values)
       if (sound != PrayerSound.adhan) channelId(prayer, sound, AdhanRecording.alafasy),
     for (final recording in AdhanRecording.values) channelId(prayer, PrayerSound.adhan, recording),
+    for (final tone in PrayerTone.values)
+      if (tone != PrayerTone.phone)
+        channelId(prayer, PrayerSound.tone, AdhanRecording.alafasy, tone: tone),
     for (final name in _removedRecordings) 'adhan_${prayer.name}_adhan_$name',
   ];
 
@@ -258,16 +289,19 @@ class NotificationScheduler {
     Prayer prayer,
     PrayerSound sound,
     AdhanRecording recording,
+    PrayerTone tone,
     AlertTexts texts,
   ) => AndroidNotificationChannel(
-    channelId(prayer, sound, recording),
+    channelId(prayer, sound, recording, tone: tone),
     texts.tr(prayer.nameKey),
     groupId: _group,
     importance: Importance.high,
     playSound: sound != PrayerSound.silent,
-    sound: sound == PrayerSound.adhan
-        ? RawResourceAndroidNotificationSound(recording.androidClipOf(prayer))
-        : null,
+    sound: switch (sound) {
+      PrayerSound.adhan => RawResourceAndroidNotificationSound(recording.androidClipOf(prayer)),
+      PrayerSound.tone when tone.file != null => RawResourceAndroidNotificationSound(tone.file),
+      _ => null,
+    },
     enableVibration: sound != PrayerSound.silent,
   );
 
@@ -283,7 +317,13 @@ class NotificationScheduler {
     enableVibration: false,
   );
 
-  NotificationDetails _details(Alert alert, AlertTexts texts, AdhanRecording recording) {
+  NotificationDetails _details(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording,
+    PrayerTone tone,
+    AdhanLength length,
+  ) {
     if (alert.kind == AlertKind.azkar) {
       final channel = _azkar(texts);
       return NotificationDetails(
@@ -322,8 +362,9 @@ class NotificationScheduler {
         ),
       );
     }
-    final channel = _channelOf(alert.prayer, alert.sound, recording, texts);
+    final channel = _channelOf(alert.prayer, alert.sound, recording, tone, texts);
     final sound = alert.sound;
+    final full = _isFull(sound, length);
     return NotificationDetails(
       android: AndroidNotificationDetails(
         channel.id,
@@ -349,9 +390,13 @@ class NotificationScheduler {
       /// ios plays the clip with the app closed. in front the adhan screen plays the full adhan
       /// instead, so the adhan notification itself stays out of the way (FR-021)
       iOS: DarwinNotificationDetails(
-        sound: sound == PrayerSound.adhan ? '${recording.clipOf(alert.prayer)}.caf' : null,
-        presentSound: sound == PrayerSound.tone,
-        presentBanner: sound != PrayerSound.adhan,
+        sound: switch (sound) {
+          PrayerSound.adhan => '${recording.clipOf(alert.prayer)}.caf',
+          PrayerSound.tone when tone.file != null => '${tone.file}.caf',
+          _ => null,
+        },
+        presentSound: sound != PrayerSound.silent && !full,
+        presentBanner: !full,
         presentList: true,
         interruptionLevel: InterruptionLevel.timeSensitive,
         categoryIdentifier: _group,
