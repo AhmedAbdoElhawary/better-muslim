@@ -24,6 +24,7 @@ import 'package:better_muslim/features/notifications/presentation/providers/adha
 import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
 
 Future<void> showRecordingSheet(BuildContext context, Prayer prayer) => showBmSheet(
   context,
@@ -89,10 +90,14 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
     await _player.stop();
 
     /// fajr always previews and plays the recording's fajr variant
-    await _player.play(
-      recording.fullAsset(widget.prayer),
-      end: _length == AdhanLength.takbir ? recording.clipLengthOf(widget.prayer) : null,
-    );
+    try {
+      await _player.play(
+        recording.fullAsset(widget.prayer),
+        end: _length == AdhanLength.takbir ? recording.clipLengthOf(widget.prayer) : null,
+      );
+    } on PlayerException {
+      if (mounted && _playing == recording) _setPlaying(null);
+    }
   }
 
   /// downloaded on the first tap, then it picks and plays like the others

@@ -20,6 +20,7 @@ import 'package:better_muslim/features/notifications/data/notification_scheduler
 import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
 
 Future<void> showToneSheet(BuildContext context, Prayer prayer) => showBmSheet(
   context,
@@ -89,7 +90,12 @@ class _ToneSheetState extends ConsumerState<_ToneSheet> {
     }
     _setPlaying(tone);
     await _player.stop();
-    await _player.play('assets/audio/$file.m4a');
+    try {
+      await _player.play('assets/audio/$file.m4a');
+    } on PlayerException {
+      /// no audio output (a simulator after the mac's output changed), the row goes back to play
+      if (mounted && _playing == tone) _setPlaying(null);
+    }
   }
 
   Future<void> _stop() async {
