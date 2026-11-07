@@ -212,12 +212,16 @@ every recommendation on 2026-10-20 (plan.md, "Answered"), and the spec says so.
     fonts load (`Typeface.Builder` on the Flutter assets inside the APK,
     `flutter_assets/assets/fonts/`, with `'wght'` variation settings). Exact 5.8 fonts, sizes,
     colors and RTL.
-  - Layout: a `FrameLayout` with the drawn picture, a small picture for the countdown on top, and
-    5 transparent click cells over the times row. A minute redraws only the countdown picture
-    (`partiallyUpdateAppWidget`), an entry change or a data write redraws everything.
-  - Sizes: drawn at the size the launcher reports (`getAppWidgetOptions`). Default 4 x 2. Narrower
-    than 3 cells → 2 x 2 (the sky band only), lower than 2 cells → 4 x 1 (the times row only),
-    else 4 x 2. `targetCellWidth/Height` and `minResizeWidth/Height` in `appwidget-provider`.
+  - Layout: a `FrameLayout` with the sky, which stretches to the box, the drawn layers pinned to
+    its top and bottom edges, which never stretch and only shrink evenly, a small picture for the
+    countdown, and 5 transparent click cells. A minute redraws every layer: a sized `RemoteViews`
+    can't take `partiallyUpdateAppWidget`.
+  - Sizes: the launcher's width holds, its height doesn't (an Oppo reports 151 for a box of 78, and
+    shows a 2 x 2 only to 142 of its 172), so nothing but the sky uses the height, and the small
+    widget is one square pinned to the top. From Android 12 the host picks the medium's version by its
+    real box: under the header and the row together, 4 x 1 (the times row only). Before 12 the
+    reported height picks it. `targetCellWidth/Height` and `minResizeWidth/Height` in
+    `appwidget-provider`.
   - The move every minute: an exact **non wakeup** alarm (`RTC`) at the next countdown flip or
     entry change. It never wakes the phone: with the screen off it fires the moment the phone
     wakes, so the widget is right whenever it's seen, for almost no battery. Armed only while a
