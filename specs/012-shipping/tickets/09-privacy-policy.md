@@ -6,6 +6,6 @@
 
 **Status:** open, approving it is mine
 
-- [ ] It covers no account, location on the phone, Sentry, opt-in analytics, the country from Google, and downloads from EveryAyah, Hisn al-Muslim and GitHub.
+- [x] It covers no account, location on the phone, Sentry, opt-in analytics, the country from Google, Shorebird's update check, and downloads from EveryAyah, Hisn al-Muslim and GitHub. The draft is `specs/012-shipping/privacy-policy.md`.
 - [ ] I approved the text.
 - [ ] The page is live and linked from More.
