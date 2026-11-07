@@ -5,8 +5,6 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_sheet.dart';
-import 'package:better_muslim/features/notifications/presentation/view/widgets/tone_button.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,9 +33,6 @@ class ReminderRow extends ConsumerWidget {
       title: StringsManager.reminderBefore,
       value: minutes == 0 ? StringsManager.reminderOff : StringsManager.reminderValue,
       args: {'minutes': context.formatDigits('$minutes', digits)},
-      trailing: tone && minutes > 0 && defaultTargetPlatform == TargetPlatform.android
-          ? const ToneButton('reminders')
-          : null,
       onTap: () => showReminderSheet(context),
     );
   }
