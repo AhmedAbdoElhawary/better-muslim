@@ -1137,13 +1137,13 @@ final Map<BmThemeId, BmThemeDef> bmThemes = {
 
 /// Order shown in the theme picker (4.15).
 const bmThemeOrder = [
+  BmThemeId.moonlight,
   BmThemeId.qiyamEmerald,
   BmThemeId.qiyam,
   BmThemeId.noor,
   BmThemeId.livingSky,
   BmThemeId.iznik,
   BmThemeId.andalus,
-  BmThemeId.moonlight,
   BmThemeId.qiyamRose,
   BmThemeId.saharaSand,
   BmThemeId.zaytun,
