@@ -55,7 +55,8 @@ class AdhanChannel {
     return _methods.invokeMethod<String>('launchPayload');
   }
 
-  Stream<Map<Object?, Object?>> get state => _isAndroid
+  /// one stream, flutter sends an event channel only to the newest one made from it
+  late final Stream<Map<Object?, Object?>> state = _isAndroid
       ? _state.receiveBroadcastStream().cast<Map<Object?, Object?>>()
       : const Stream.empty();
 
