@@ -573,12 +573,15 @@ than before.
   leaves out MUST repeat the ayah before it, as a group does.
 - **FR-041**: They MUST be downloaded from the public `better-muslim-content` release over https
   and kept only when their sha256 matches.
-- **FR-042**: The card's name and countdown MUST fly into the compact glass bar with the scroll,
-  moving and shrinking from their place in the card to the bar's title, from the top until the
-  card reaches the bar or the scroll ends. The card's own copies hide while they fly.
+- **FR-042**: The card's name and countdown MUST stay in the card until the card's top reaches the
+  bottom of the compact glass bar. From there they fly with the scroll, level with the card,
+  shrinking and sliding to the bar's title, until the name is on it. The card's own copies hide
+  while they fly. A page too short for that gets blank room under the shortcuts, only as much as
+  it needs.
 - **FR-043**: The glass MUST come in for the last 30% of the flight. A flight halfway MUST settle to
-  either end when the scroll stops. With reduce motion nothing flies, the bar crossfades in. A tap
-  MUST scroll Home to the top.
+  its start or end when the scroll stops, and before the flight the page rests anywhere. With
+  reduce motion nothing flies, the bar crossfades in at the same point. A tap MUST scroll Home to
+  the top.
 - **FR-044**: While the bar shows, the status bar icons MUST follow the theme. With no location
   there is no bar.
 - **FR-045**: The launch splash MUST be vector on Android and iOS, the star 40% of the splash icon,
