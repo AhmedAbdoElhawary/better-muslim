@@ -49,12 +49,14 @@ object AdhanAlarms {
 
     private fun set(context: Context, entry: JSONObject) {
         val alarms = context.getSystemService(AlarmManager::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarms.canScheduleExactAlarms()) return
-        alarms.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            entry.getLong("atMillis"),
-            fireIntent(context, entry.getInt("id")),
-        )
+        val at = entry.getLong("atMillis")
+        val fire = fireIntent(context, entry.getInt("id"))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarms.canScheduleExactAlarms()) {
+            alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, fire)
+            return
+        }
+        // oppo gives exact alarms a window of up to an hour, an alarm clock is never moved
+        alarms.setAlarmClock(AlarmManager.AlarmClockInfo(at, AdhanReceiver.openIntent(context, entry)), fire)
     }
 
     private fun fireIntent(context: Context, id: Int): PendingIntent = PendingIntent.getBroadcast(
