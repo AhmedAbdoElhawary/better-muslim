@@ -9,24 +9,16 @@ import android.os.Build
 import android.os.Bundle
 import org.json.JSONObject
 
-// the ongoing countdown to the next prayer while the app is off screen, counted by the system to
-// the second (research R9). it rolls to the next one at each prayer time
+// the reminder before a prayer: an ongoing countdown, counted by the system to the second (research
+// R9). it shows with the app open too, and the system takes it away at the prayer time
 object CountdownNotification {
-    private const val CHANNEL = "prayer_countdown"
+    private const val CHANNEL = "prayer_reminders"
+    private const val PRAYER_CHANNELS = "adhan_"
     private const val ID = 7300
-
-    // in memory, not saved: a crash, a kill or a reboot starts a new process with the app off screen
-    private var onScreen = false
-
-    // the app's activity started or stopped
-    fun onScreen(context: Context, on: Boolean) {
-        onScreen = on
-        sync(context)
-        SurfaceTicks.arm(context)
-    }
+    private const val QUIET_GROUP = "countdown_quiet"
 
     // with notifications or the channel off there's no countdown, the widget still works (FR-021)
-    fun sync(context: Context) {
+    fun sync(context: Context, alert: Boolean = false) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val data = SurfaceData.load(context)
         val now = System.currentTimeMillis()
@@ -35,31 +27,39 @@ object CountdownNotification {
             manager.cancel(ID)
             return
         }
-        manager.notify(ID, build(context, data, entry, now))
+        manager.notify(ID, build(context, data, entry, now, alert))
     }
 
-    // the entry in force names the next prayer, none while the app is on screen
+    // the entry in force names the next prayer, none before its reminder or with the reminder off
     fun shown(data: SurfaceData, now: Long): JSONObject? {
-        if (!data.place || !data.countdown) return null
-        if (onScreen) return null
+        if (!data.place) return null
         if (now >= data.until) return null
-        return data.entryAt(now)
+        return data.entryAt(now)?.takeIf { entry -> data.startOf(entry)?.let { now >= it } == true }
     }
 
-    // made or renamed each time, so the app's language reaches the phone's settings
+    // the dev page's check, a phone's settings can turn a channel down
+    fun importance(context: Context): Int? =
+        context.getSystemService(NotificationManager::class.java).getNotificationChannel(CHANNEL)?.importance
+
+    // one prayer notification at a time, the unanswered one gives way to the next reminder
+    fun clearPrayer(context: Context) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        for (shown in manager.activeNotifications) {
+            if (shown.notification.channelId.startsWith(PRAYER_CHANNELS)) manager.cancel(shown.id)
+        }
+    }
+
+    // dart makes the channel, a phone that hasn't scheduled yet still needs one
     private fun allowed(context: Context, data: SurfaceData): Boolean {
         val manager = context.getSystemService(NotificationManager::class.java)
         if (!manager.areNotificationsEnabled()) return false
-        val channel = NotificationChannel(CHANNEL, data.text("channel"), NotificationManager.IMPORTANCE_LOW).apply {
-            setSound(null, null)
-            enableVibration(false)
-            setShowBadge(false)
+        if (manager.getNotificationChannel(CHANNEL) == null) {
+            manager.createNotificationChannel(NotificationChannel(CHANNEL, data.text("channel"), NotificationManager.IMPORTANCE_HIGH))
         }
-        manager.createNotificationChannel(channel)
         return manager.getNotificationChannel(CHANNEL).importance != NotificationManager.IMPORTANCE_NONE
     }
 
-    private fun build(context: Context, data: SurfaceData, entry: JSONObject, now: Long): Notification {
+    private fun build(context: Context, data: SurfaceData, entry: JSONObject, now: Long, alert: Boolean): Notification {
         val at = entry.getLong("at")
         val builder = Notification.Builder(context, CHANNEL)
             .setSmallIcon(smallIcon(context))
@@ -75,6 +75,9 @@ object CountdownNotification {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(PrayerWidget.open(context, PrayerWidget.HOME))
+        // only its alarm makes a sound, not a swiped one coming back with the next tick. the platform
+        // builder has no setSilent, a child of a group with no summary never alerts
+        if (!alert) builder.setGroup(QUIET_GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
         val share = data.barShare(entry, now)?.let { (it * BAR).toInt() }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             // a live update: the status bar chip and the lock screen. its setter and constant are api 37
