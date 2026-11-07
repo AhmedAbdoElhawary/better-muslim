@@ -29,7 +29,7 @@ void main() {
     expect(settings.asrMethod, isNull);
     expect(settings.hijriAdjust, 0);
     expect(settings.digits, Digits.eastern);
-    expect(settings.theme, BmThemeId.qiyamEmerald);
+    expect(settings.theme, BmThemeId.moonlight);
     expect(settings.themeMode, BmThemeMode.followSky);
     expect(settings.reduceMotion, isFalse);
     expect(settings.haptics, isTrue);
