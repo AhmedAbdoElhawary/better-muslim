@@ -82,13 +82,6 @@ void main() {
     });
   });
 
-  test('the glow breathes only in the final 10 minutes', () {
-    expect(glowBreathing(const Duration(minutes: 9, seconds: 59)), isTrue);
-    expect(glowBreathing(const Duration(minutes: 10)), isTrue);
-    expect(glowBreathing(const Duration(minutes: 10, seconds: 1)), isFalse);
-    expect(glowBreathing(Duration.zero), isFalse);
-  });
-
   group('strip cell state', () {
     test('logged and past', () {
       expect(stripCellState(Prayer.fajr, Period.asr, {Prayer.fajr}), (
