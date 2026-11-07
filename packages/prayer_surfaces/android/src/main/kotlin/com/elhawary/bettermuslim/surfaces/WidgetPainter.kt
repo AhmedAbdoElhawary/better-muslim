@@ -12,6 +12,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
+import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -24,7 +25,8 @@ import kotlin.math.max
 import kotlin.math.sin
 
 // the ios 5.6 trees drawn in the app's own fonts, which widget layouts can't load (research R8, Q1).
-// sizes are the tree's in dp, never scaled by the phone's font size (FR-029)
+// sizes are the tree's in dp, never scaled by the phone's font size (FR-029). only the sky stretches
+// to the box, a launcher can report a height far from it (oppo says 151 for a box of 78)
 class WidgetPainter(
     private val context: Context,
     val kind: Kind,
@@ -40,44 +42,46 @@ class WidgetPainter(
 
     class Countdown(val bitmap: Bitmap, val left: Int, val top: Int)
 
-    // the click cells over the five, as padding on their row or column
-    val cellsLeft: Int get() = dp(if (kind == Kind.LARGE) 16f else 14f).toInt()
-    val cellsTop: Int get() = when (kind) {
-        Kind.MEDIUM -> height - dp(12f + CELL).toInt()
-        else -> dp(LARGE_ROWS_TOP).toInt()
-    }
-    val cellsBottom: Int get() = when (kind) {
-        Kind.MEDIUM -> dp(12f).toInt()
-        else -> height - dp(LARGE_ROWS_TOP + 5 * ROW).toInt()
-    }
+    val hairline: Int get() = color("text")
 
-    // everything but the countdown, so it stays the same for a whole entry. the small widget's sun
-    // moves, so it is drawn whole on every tick with its countdown inside
-    fun picture(state: SurfaceState, now: Long): Bitmap {
+    // the reported height, for a launcher before android 12 that can't pick by its real box
+    val short: Boolean get() = kind == Kind.MEDIUM && height < dp(MEDIUM_HEIGHT)
+
+    // android 12 clips the root to its outline, before it the corners are in the sky itself
+    fun sky(state: SurfaceState): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val frame = RectF(0f, 0f, width.toFloat(), height.toFloat())
-        val radius = dp(24f)
-        canvas.save()
-        canvas.clipPath(Path().apply { addRoundRect(frame, radius, radius, Path.Direction.CW) })
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            canvas.clipPath(Path().apply { addRoundRect(frame, dp(24f), dp(24f), Path.Direction.CW) })
+        }
         drawSky(canvas, frame, deep = kind == Kind.LARGE && state is SurfaceState.Ready)
-        when (state) {
-            is SurfaceState.Ready -> when (kind) {
-                Kind.SMALL -> drawSmall(canvas, state.data, state.entry, now)
-                Kind.MEDIUM -> drawMedium(canvas, state.data, state.entry)
-                Kind.LARGE -> drawLarge(canvas, state.data, state.entry)
-            }
-            else -> drawMessage(canvas, frame, message(state)!!)
-        }
-        canvas.restore()
-        // the trees' inset 0.5 hairline at 10%
-        val hairline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = dp(0.5f)
-            color = alpha(color("text"), 0.1f)
-        }
-        val inset = dp(0.25f)
-        canvas.drawRoundRect(RectF(inset, inset, width - inset, height - inset), radius - inset, radius - inset, hairline)
+        return bitmap
+    }
+
+    // what hangs from the top, the countdown is on its own. the small widget is one square, its sun
+    // moves so it is drawn on every tick. never pinned to the bottom, oppo cuts a 2 x 2 at 142 of 172
+    fun top(state: SurfaceState.Ready, now: Long): Bitmap = when (kind) {
+        Kind.SMALL -> layer(width.toFloat()) { drawSmall(it, state.data, state.entry, now) }
+        Kind.MEDIUM -> layer(dp(MEDIUM_TOP)) { drawMediumTop(it, state.data, state.entry) }
+        Kind.LARGE -> layer(dp(LARGE_ROWS_TOP + 5 * ROW)) { drawLargeTop(it, state.data, state.entry) }
+    }
+
+    // what sits on the bottom edge of the medium and the large
+    fun bottom(state: SurfaceState.Ready): Bitmap =
+        if (kind == Kind.MEDIUM) layer(dp(12f + CELL)) { drawStrip(it, state.data, state.entry) }
+        else layer(dp(LARGE_BOTTOM)) { drawLargeBottom(it, state.data, state.entry) }
+
+    // 5.8's 4 x 1, the times row only
+    fun strip(state: SurfaceState.Ready): Bitmap = layer(dp(CELL)) { drawStrip(it, state.data, state.entry) }
+
+    fun messagePicture(state: SurfaceState): Bitmap = layer(dp(MESSAGE)) {
+        drawMessage(it, RectF(0f, 0f, width.toFloat(), dp(MESSAGE)), message(state)!!)
+    }
+
+    private fun layer(height: Float, draw: (Canvas) -> Unit): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, max(1, ceil(height).toInt()), Bitmap.Config.ARGB_8888)
+        draw(Canvas(bitmap))
         return bitmap
     }
 
@@ -112,7 +116,8 @@ class WidgetPainter(
 
     // widget3: the next prayer with the sun on its arc, padding 14 16
     private fun drawSmall(canvas: Canvas, data: SurfaceData, entry: JSONObject, now: Long) {
-        drawArc(canvas, data.sunShare(entry, now))
+        val night = data.nightShare(entry, now)
+        drawArc(canvas, night ?: data.sunShare(entry, now), night != null)
         val side = dp(16f)
         val arabic = data.isArabic
         val x = if (arabic) width - side else side
@@ -131,17 +136,16 @@ class WidgetPainter(
 
         // a long city is cut, never the time, which comes first
         val city = text(12f, body(data, 400), color("label"), tabular = true)
-        val bottom = height - dp(14f) - dp(12f * NORMAL)
+        val bottom = canvas.height - dp(14f) - dp(12f * NORMAL)
         drawLine(canvas, ellipsize(entry.getString("timeCity"), city, inner), city, x, bottom, dp(12f * NORMAL), align)
     }
 
-    // the 170 box's arc, centre 85 128 and radius 65, scaled to the widget. never mirrored
-    private fun drawArc(canvas: Canvas, share: Float?) {
-        val scaleX = width / 170f
-        val scaleY = height / 170f
+    // the 170 box's arc, centre 85 128 and radius 65, scaled evenly to the widget. never mirrored
+    private fun drawArc(canvas: Canvas, share: Float?, night: Boolean) {
+        val scale = width / 170f
         fun point(at: Float): Pair<Float, Float> {
             val angle = PI * (1 - at)
-            return (85 + 65 * cos(angle)).toFloat() * scaleX to (128 - 65 * sin(angle)).toFloat() * scaleY
+            return (85 + 65 * cos(angle)).toFloat() * scale to (128 - 65 * sin(angle)).toFloat() * scale
         }
         fun arc(to: Float) = Path().apply {
             val (startX, startY) = point(0f)
@@ -162,7 +166,7 @@ class WidgetPainter(
                 color = alpha(text, 0.35f)
             },
         )
-        val horizon = 128 * scaleY
+        val horizon = 128 * scale
         canvas.drawLine(0f, horizon, width.toFloat(), horizon, Paint(Paint.ANTI_ALIAS_FLAG).apply {
             strokeWidth = dp(1f)
             color = alpha(text, 0.2f)
@@ -177,9 +181,20 @@ class WidgetPainter(
                 color = alpha(text, 0.75f)
             },
         )
-        // 14 with its glow, 0 0 14px 5px at 45%
         val (sunX, sunY) = point(share)
         val sun = color("sun")
+        if (night) {
+            // home's three, 7 and 5 from their middle, the first on top
+            val star = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = sun }
+            for (index in 0 until 3) {
+                val angle = -PI / 2 + index * 2 * PI / 3
+                val x = sunX + dp(5f) * cos(angle).toFloat()
+                val y = sunY + dp(5f) * sin(angle).toFloat()
+                canvas.drawPath(starPath(x, y, dp(7f)), star)
+            }
+            return
+        }
+        // 14 with its glow, 0 0 14px 5px at 45%
         canvas.drawCircle(sunX, sunY, dp(12f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = alpha(sun, 0.45f)
             maskFilter = BlurMaskFilter(dp(7f), BlurMaskFilter.Blur.NORMAL)
@@ -188,7 +203,7 @@ class WidgetPainter(
     }
 
     // widget1: the prayer and the hijri line over all five, padding 14 14 12
-    private fun drawMedium(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
+    private fun drawMediumTop(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
         val side = dp(16f)
         val arabic = data.isArabic
         val x = if (arabic) width - side else side
@@ -203,9 +218,12 @@ class WidgetPainter(
         top += dp(24f * MARCELLUS)
         val hijri = text(12f, body(data, 400), color("label"))
         drawLine(canvas, ellipsize(entry.getString("hijriCity"), hijri, inner), hijri, x, top, dp(12f * NORMAL), align)
+    }
 
-        // grid of 5, gap 4, each 8 0 7 with a gap of 3
-        val row = RectF(dp(14f), height - dp(12f + CELL), width - dp(14f), height - dp(12f))
+    // grid of 5, gap 4, the text in the middle of each with a gap of 3
+    private fun drawStrip(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
+        val arabic = data.isArabic
+        val row = RectF(dp(14f), 0f, width - dp(14f), dp(CELL))
         val gap = dp(4f)
         val cellWidth = (row.width() - 4 * gap) / 5
         val strip = entry.getJSONArray("strip")
@@ -218,19 +236,19 @@ class WidgetPainter(
             val box = RectF(left, row.top, left + cellWidth, row.bottom)
             val current = index == next
             drawHighlight(canvas, box, current, plain = alpha(color("text"), 0.05f))
-            val label = text(11f, body(data, if (current) 600 else 400), color(if (current) "gold" else "label"))
-            val time = text(14f, body(data, 500), color("text"), tabular = true)
-            var y = box.top + dp(8f)
-            drawLine(canvas, ellipsize(cell.getString("name"), label, cellWidth), label, box.centerX(), y, dp(11f * NORMAL), Paint.Align.CENTER)
-            y += dp(11f * NORMAL) + dp(3f)
-            drawLine(canvas, cell.getString("time"), time, box.centerX(), y, dp(14f * NORMAL), Paint.Align.CENTER)
-            y += dp(14f * NORMAL) + dp(3f)
+            val label = text(10f, body(data, if (current) 600 else 400), color(if (current) "gold" else "label"))
+            val time = text(12f, body(data, 500), color("text"), tabular = true)
+            var y = box.centerY() - dp(CELL_TEXT) / 2
+            drawLine(canvas, ellipsize(cell.getString("name"), label, cellWidth), label, box.centerX(), y, dp(10f * NORMAL), Paint.Align.CENTER)
+            y += dp(10f * NORMAL) + dp(3f)
+            drawLine(canvas, cell.getString("time"), time, box.centerX(), y, dp(12f * NORMAL), Paint.Align.CENTER)
+            y += dp(12f * NORMAL) + dp(3f)
             if (cell.getBoolean("logged")) drawCheck(canvas, box.centerX(), y + dp(5f), dp(10f))
         }
     }
 
     // widget2: the day at a glance with what was prayed, padding 16 16 14, gap 10
-    private fun drawLarge(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
+    private fun drawLargeTop(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
         val side = dp(18f)
         val arabic = data.isArabic
         val start = if (arabic) width - side else side
@@ -283,10 +301,17 @@ class WidgetPainter(
                 })
             }
         }
+    }
 
-        // the footer at the bottom, a hairline over it, padding 10 4 0
+    // the footer at the bottom, a hairline over it, padding 10 4 0
+    private fun drawLargeBottom(canvas: Canvas, data: SurfaceData, entry: JSONObject) {
+        val arabic = data.isArabic
+        val startAlign = if (arabic) Paint.Align.RIGHT else Paint.Align.LEFT
+        val endAlign = if (arabic) Paint.Align.LEFT else Paint.Align.RIGHT
+        val left = dp(16f)
+        val right = width - dp(16f)
         val footer = text(12.5f, body(data, 400), color("label"))
-        val footerTop = height - dp(14f) - dp(12.5f * NORMAL)
+        val footerTop = canvas.height - dp(14f) - dp(12.5f * NORMAL)
         val lineY = footerTop - dp(10f)
         canvas.drawLine(left, lineY, right, lineY, Paint().apply {
             strokeWidth = dp(1f)
@@ -364,6 +389,18 @@ class WidgetPainter(
 
     // the trees' 8 point star, viewBox -11 -11 22 22, stroke 1.1 at 23
     private fun drawStar(canvas: Canvas, centerX: Float, centerY: Float, size: Float) {
+        canvas.drawPath(
+            starPath(centerX, centerY, size),
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = 1.1f * size / 22f
+                strokeJoin = Paint.Join.ROUND
+                color = color("primary")
+            },
+        )
+    }
+
+    private fun starPath(centerX: Float, centerY: Float, size: Float): Path {
         val scale = size / 22f
         val path = Path()
         STAR.forEachIndexed { index, (x, y) ->
@@ -372,15 +409,7 @@ class WidgetPainter(
             if (index == 0) path.moveTo(px, py) else path.lineTo(px, py)
         }
         path.close()
-        canvas.drawPath(
-            path,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                strokeWidth = 1.1f * scale
-                strokeJoin = Paint.Join.ROUND
-                color = color("primary")
-            },
-        )
+        return path
     }
 
     // css's line box: the text centred in it, as the trees lay their spans out
@@ -417,8 +446,20 @@ class WidgetPainter(
         private const val NORMAL = 1.2f
         private const val MARCELLUS = 1.15f
 
-        // a medium cell: 8, the name, 3, the time, 3, the 10 mark, 7
+        // a medium cell: 8, the name, 3, the time, 3, the 10 mark, 7. the tree's height, only the
+        // text went smaller to fit the width
         private const val CELL = 8f + 11f * NORMAL + 3f + 14f * NORMAL + 3f + 10f + 7f
+        private const val CELL_TEXT = 10f * NORMAL + 3f + 12f * NORMAL + 3f + 10f
+
+        private const val MEDIUM_TOP = 14f + 24f * MARCELLUS + 12f * NORMAL
+
+        // under this the header and the row don't both fit
+        const val MEDIUM_HEIGHT = MEDIUM_TOP + 12f + CELL
+
+        private const val LARGE_BOTTOM = 14f + 12.5f * NORMAL + 10f + 1f
+
+        // the star, its gap and three lines
+        private const val MESSAGE = 100f
 
         // a large row with its 2 gap, under the header and the 10 gap
         private const val ROW = 42f
