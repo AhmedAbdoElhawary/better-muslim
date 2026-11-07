@@ -75,6 +75,14 @@ A home screen tile: small, medium or large.
 
 ## Design
 
+**Arc**:
+The half circle in Home's sky. Sunrise to Maghrib by day, Maghrib to Sunrise by night.
+_Avoid_: half circle
+
+**Arc label**:
+The name and time of a point on the arc, beside it.
+_Avoid_: arc text, point name
+
 **Sky event**:
 A short moment in Home's sky: a burst, a shooting star, a rock or a glint. One comes on its own every few seconds, and one answers a tap on the sky.
 _Avoid_: sky animation, effect

@@ -559,7 +559,8 @@ than before.
   horizon over 1800 ms on the sacred curve, taking the points and marker with it. With reduce
   motion it MUST be a 300 ms crossfade.
 - **FR-037**: The arc MUST never be mirrored in Arabic, and its times MUST follow the digit
-  setting.
+  setting. In Arabic the Asr arc label MUST sit inside the arc, and so must any other middle
+  arc label the screen edge pushes onto it.
 
 **Everywhere**
 

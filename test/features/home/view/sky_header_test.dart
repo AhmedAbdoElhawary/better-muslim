@@ -4,6 +4,7 @@ import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
+import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -161,6 +162,56 @@ void main() {
 
       expect(labels.first.text, 'الشروق ٠٦:١٦');
       expect(labels.first.rect.left, lessThan(labels.last.rect.left));
+      await unmount(tester);
+    });
+
+    /// every corner of the label is under the arc
+    bool insideArc(WidgetTester tester, Rect rect) {
+      final flow = find.descendant(of: find.byType(SkyLabels), matching: find.byType(Flow));
+      final delegate = tester.widget<Flow>(flow).delegate as SkyLabelsFlow;
+      final box = tester.renderObject<RenderBox>(flow);
+      final center = box.localToGlobal(
+        Offset(delegate.center, box.size.height - delegate.horizonAboveBottom),
+      );
+      return [
+        rect.topLeft,
+        rect.topRight,
+        rect.bottomLeft,
+        rect.bottomRight,
+      ].every((corner) => (corner - center).distance < delegate.radius);
+    }
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('arabic at $scale keeps asr inside the arc', (tester) async {
+        await pumpHome(
+          tester,
+          makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)),
+          locale: const Locale('ar'),
+          textScale: scale,
+        );
+
+        expect(insideArc(tester, skyLabels(tester)[2].rect), isTrue);
+        await unmount(tester);
+      });
+    }
+
+    testWidgets('arabic moves isha inside at night, fajr stays outside', (tester) async {
+      await pumpHome(
+        tester,
+        makkahAt(tester, DateTime.utc(2026, 10, 15, 20)),
+        locale: const Locale('ar'),
+      );
+      final labels = skyLabels(tester);
+
+      expect(insideArc(tester, labels[1].rect), isTrue);
+      expect(insideArc(tester, labels[3].rect), isFalse);
+      await unmount(tester);
+    });
+
+    testWidgets('english keeps asr outside the arc', (tester) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+
+      expect(insideArc(tester, skyLabels(tester)[2].rect), isFalse);
       await unmount(tester);
     });
   });
