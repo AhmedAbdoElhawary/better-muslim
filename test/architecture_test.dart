@@ -31,6 +31,12 @@ const _appRoot = 'lib/core/app/app.dart';
 /// the one place that downloads content (VIII): recitation, tafsir, adhan and dua audio
 const _download = 'lib/core/network/download.dart';
 
+/// a loader runs only while something loads
+const _loaders = [
+  'lib/core/widgets/motion/skeleton.dart',
+  'lib/core/widgets/motion/star_loader.dart',
+];
+
 /// a layer may not import the layers listed for it
 const _forbiddenLayers = {
   'domain': {'data', 'presentation'},
@@ -43,6 +49,11 @@ const _mvvm = {'model', 'view_model', 'view'};
 const _clean = {'data', 'domain', 'presentation'};
 
 final _rules = [
+  _Rule(
+    'nothing loops without a finger, only the loaders',
+    RegExp(r'\.repeat\((?!count:)'),
+    allowedIn: _loaders,
+  ),
   _Rule(
     'colors come from context.getColor(ThemeEnum.x)',
     RegExp(r'\bColors\.|\bColor\(0x|\bColor\.from(ARGB|RGBO)\('),
