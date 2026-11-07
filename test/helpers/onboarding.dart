@@ -1,5 +1,4 @@
 import 'package:better_muslim/core/app/app.dart';
-import 'package:better_muslim/core/power/power_saving.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'providers.dart';
 
-/// a new install on the welcome at 393 x 852. power saving holds the ambient loop still unless a
-/// test wants it, so the frames settle. the real channel never answers in a test
+/// a new install on the welcome at 393 x 852
 Future<void> pumpWelcome(
   WidgetTester tester, {
   List<Override>? overrides,
@@ -19,7 +17,6 @@ Future<void> pumpWelcome(
   Brightness brightness = Brightness.dark,
   double textScale = 1,
   bool reduceMotion = false,
-  bool ambient = false,
   bool use24 = true,
 }) async {
   tester.view.physicalSize = size * 3;
@@ -30,10 +27,7 @@ Future<void> pumpWelcome(
   addTearDown(tester.platformDispatcher.clearAllTestValues);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        ...overrides ?? testOverrides(onboarded: false),
-        powerSavingProvider.overrideWith((ref) async => !ambient),
-      ],
+      overrides: overrides ?? testOverrides(onboarded: false),
       child: MediaQuery(
         data: MediaQueryData.fromView(tester.view).copyWith(
           alwaysUse24HourFormat: use24,
