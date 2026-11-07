@@ -1,4 +1,3 @@
-import 'package:better_muslim/core/power/power_saving.dart';
 import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
@@ -11,12 +10,10 @@ import 'package:better_muslim/features/home/view/widgets/arc_turn.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// the living sky (MOTION 02, 03). one ticker writes the elapsed time into a notifier the painter
-/// listens to, so the loop repaints one layer and rebuilds nothing
+/// the living sky, still until the sky changes at a prayer. its short events are SkyEvents
 class SkyHeader extends ConsumerStatefulWidget {
   const SkyHeader({required this.overlap, super.key});
 
@@ -43,45 +40,16 @@ class SkyHeader extends ConsumerStatefulWidget {
   ConsumerState<SkyHeader> createState() => _SkyHeaderState();
 }
 
-class _SkyHeaderState extends ConsumerState<SkyHeader> with SingleTickerProviderStateMixin {
-  static const _frame = Duration(milliseconds: 33);
-
-  late final Ticker _ticker = createTicker(_onTick);
-  final _elapsed = ValueNotifier(Duration.zero);
-
+class _SkyHeaderState extends ConsumerState<SkyHeader> {
   /// kept while the colors stay, BmSkyStops has no == and a new one restarts the sky change
   BmSkyStops? _stops;
-
-  void _onTick(Duration elapsed) {
-    /// 30 fps is enough for a slow loop and halves the repaints (MOTION tiers)
-    if (elapsed - _elapsed.value >= _frame) _elapsed.value = elapsed;
-  }
-
-  @override
-  void dispose() {
-    _ticker.dispose();
-    _elapsed.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(skyStateProvider);
     final starsOn = ref.watch(starsOnProvider);
     final markerShare = ref.watch(markerShareProvider);
-
-    /// unknown while it is read again on resume, so the loop restarts and fades back in
-    final powerSavingOff = ref.watch(
-      powerSavingProvider.select((saving) => !saving.isLoading && saving.value == false),
-    );
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final run = powerSavingOff && !reduceMotion && TickerMode.valuesOf(context).enabled;
-    if (run && !_ticker.isActive) {
-      _elapsed.value = Duration.zero;
-      _ticker.start();
-    } else if (!run && _ticker.isActive) {
-      _ticker.stop();
-    }
 
     final next = state == null
         ? BmSkyStops(
@@ -126,7 +94,6 @@ class _SkyHeaderState extends ConsumerState<SkyHeader> with SingleTickerProvider
                 overlap: widget.overlap,
                 bleed: MediaQuery.sizeOf(context).height,
                 rtl: Directionality.of(context) == TextDirection.rtl,
-                elapsed: run ? _elapsed : null,
               ),
             ),
           ),
