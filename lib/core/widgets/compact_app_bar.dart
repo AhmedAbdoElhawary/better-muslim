@@ -355,7 +355,11 @@ class _LargeTitleState extends State<LargeTitle> {
         return ValueListenableBuilder<bool>(
           valueListenable: scope.collapsed,
           builder: (context, collapsed, child) {
-            return CustomOpacity(opacity: collapsed ? 0 : 1, child: child);
+            return AnimatedOpacity(
+              duration: BmMotion.standard,
+              opacity: collapsed ? 0 : 1,
+              child: child,
+            );
           },
           child: Transform(
             key: _box,
