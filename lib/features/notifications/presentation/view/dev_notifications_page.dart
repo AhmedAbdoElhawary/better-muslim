@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
@@ -14,6 +12,7 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/surfaces/surface_data.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
 import 'package:better_muslim/core/surfaces/write_surfaces.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
@@ -26,6 +25,7 @@ import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -39,6 +39,7 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _openAdhan = 'Open adhan screen';
   static const _testIn1Minute = 'Test notification in 1 min';
   static const _testAdhanIn1Minute = 'Test adhan in 1 min';
+  static const _rehearse = 'Rehearse a prayer: reminder in 30 s, prayer in 90 s';
   static const _replayOnboarding = 'Replay onboarding';
   static const _refreshWidgets = 'Refresh widgets';
 
@@ -59,7 +60,26 @@ class DevNotificationsPage extends ConsumerWidget {
     );
   }
 
-  static Future<void> _test(WidgetRef ref, Alert? alert, {bool full = false}) async {
+  /// opening the app again ends it, a resume writes the real surfaces and schedule
+  static Future<void> _rehearsal(WidgetRef ref) async {
+    await writeSurfaces(
+      ref.read(databaseProvider),
+      channel: ref.read(surfacesChannelProvider),
+      locale: AppLocalizations.localeOf(ref.read(settingsProvider).value?.language),
+      use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+      phoneZone: ref.read(phoneZoneProvider),
+      force: true,
+      rehearsal: true,
+    );
+    await _test(ref, nextAlert(ref), after: rehearsalPrayer);
+  }
+
+  static Future<void> _test(
+    WidgetRef ref,
+    Alert? alert, {
+    bool full = false,
+    Duration after = const Duration(minutes: 1),
+  }) async {
     final location = ref.read(locationProvider);
     if (alert == null || location == null) return;
     final texts = await AlertTexts.load(
@@ -78,6 +98,7 @@ class DevNotificationsPage extends ConsumerWidget {
           full
               ? AdhanLength.full
               : ref.read(settingsProvider).value?.adhanLengthOf(alert.prayer) ?? AdhanLength.full,
+          after: after,
         );
   }
 
@@ -123,6 +144,8 @@ class DevNotificationsPage extends ConsumerWidget {
                     );
                   },
                 ),
+                if (defaultTargetPlatform == TargetPlatform.android)
+                  _Row(_rehearse, onTap: () => _rehearsal(ref)),
                 const _AdhanCheck(),
 
                 /// past the plugin's equal check, so the widgets reload even with the same data
@@ -230,10 +253,24 @@ class _AdhanCheckState extends ConsumerState<_AdhanCheck> {
       ('Alarms & reminders allowed', await scheduler.canExactAlarms()),
       ('Ringer on, no do not disturb', await ref.read(adhanChannelProvider).canSound()),
     ];
+    final status = await ref.read(surfacesChannelProvider).status();
+    final next = status?['nextReminder'] as int?;
+    final importance = status?['importance'] as int?;
+    final auto = status?['autoTime'] as bool?;
     return [
       for (final (label, ok) in checks) ('$label: ${ok == null ? '-' : (ok ? 'yes' : 'NO')}', ok),
+      ('Automatic time: ${auto == null ? '-' : (auto ? 'yes' : 'NO')}', auto),
+      ('Reminder banner: ${_banner(importance)}', importance == null ? null : importance >= 4),
+      ('Next reminder: ${next == null ? 'none' : DateTime.fromMillisecondsSinceEpoch(next)}', null),
     ];
   }
+
+  /// 4 is android's high, what drops down on the screen
+  String _banner(int? importance) => switch (importance) {
+    null => '-',
+    >= 4 => 'yes',
+    _ => 'NO (importance $importance)',
+  };
 
   @override
   Widget build(BuildContext context) {
