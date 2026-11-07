@@ -42,7 +42,7 @@ Map<String, Object?> buildSurfaceData({
     'place': location != null,
     'language': language,
     'eastern': language == 'ar' && digits == Digits.eastern,
-    'countdown': settings.prayerCountdown,
+    'reminderMinutes': settings.reminderMinutes,
     'mode': settings.themeMode.name,
     'colors': {'light': _colorsOf(theme.light, dark: false), 'dark': _colorsOf(theme.dark)},
     'until': 0,
@@ -246,4 +246,31 @@ double _ratio(Color text, Color under) {
   final front = Color.alphaBlend(text, under).computeLuminance();
   final back = under.computeLuminance();
   return (math.max(front, back) + .05) / (math.min(front, back) + .05);
+}
+
+/// the dev page's rehearsal, the real alarms with no clock to change
+const rehearsalReminder = Duration(seconds: 30);
+const rehearsalPrayer = Duration(seconds: 90);
+
+/// the entry in force goes on after it, so a killed app leaves nothing to clean up
+Map<String, Object?> withRehearsal(Map<String, Object?> data, DateTime now) {
+  final entries = (data['entries']! as List).cast<Map<String, Object?>>();
+  final from = now.millisecondsSinceEpoch;
+  final at = now.add(rehearsalPrayer).millisecondsSinceEpoch;
+  int fromOf(Map<String, Object?> entry) => entry['from']! as int;
+  final shown = entries.lastWhere((entry) => fromOf(entry) <= from);
+  return {
+    ...data,
+    'entries': [
+      ...entries.where((entry) => fromOf(entry) <= from),
+      {
+        ...shown,
+        'from': from,
+        'at': at,
+        'start': now.add(rehearsalReminder).millisecondsSinceEpoch,
+      },
+      {...shown, 'from': at},
+      ...entries.where((entry) => fromOf(entry) > at),
+    ],
+  };
 }
