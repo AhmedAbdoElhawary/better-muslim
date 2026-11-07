@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** open
+**Status:** done
 
-- [ ] Android has icons under `src/dev` and `src/staging`.
-- [ ] iOS picks its app icon per flavor.
-- [ ] The production icon is unchanged.
+- [x] Android has icons under `src/dev` and `src/staging`.
+- [x] iOS picks its app icon per flavor.
+- [x] The production icon is unchanged.
