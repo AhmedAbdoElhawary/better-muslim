@@ -10,7 +10,6 @@ import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
-import 'package:better_muslim/features/notifications/presentation/view/widgets/countdown_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/notifications_off_line.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_row.dart';
@@ -123,8 +122,6 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
                   ),
                   const RSizedBox.vertical(SpaceManager.s3),
                   const GroupedSection(children: [ReminderRow(tone: true)]),
-                  const RSizedBox.vertical(SpaceManager.s3),
-                  const GroupedSection(children: [CountdownRow()]),
                 ],
               ),
             ),
