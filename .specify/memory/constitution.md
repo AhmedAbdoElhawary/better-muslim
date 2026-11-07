@@ -68,6 +68,12 @@ languages keep working.
 - Contrast meets WCAG AA in both modes. Every hit target is at least 44 x 44.
 - Every animation follows `MOTION.md` and has its reduce-motion fallback. Haptics only through
   `BmHaptics`.
+- Nothing loops without a finger. The handoff's ambient loops (sky, stars, sun, glow, adhan halo,
+  Qibla breathing) stand still, only a loader runs for as long as it loads. A screen at rest draws
+  no frames, except a real change like the countdown's second and Home's sky events: one short
+  event every 6 to 10 seconds and one a second after a tap on the sky, only while Home is on
+  screen with its sky showing, none in the background or with reduce motion. `architecture_test`
+  bans `.repeat(` outside the loaders.
 - Quran text is never animated, recolored, overlapped, cropped or used as decoration. The page as
   a whole may turn, open from a card, recede behind a sheet and peek beside the controls as the
   handoff designs it, the glyphs never move on their own.
@@ -189,4 +195,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 4.0.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-31
+**Version**: 5.2.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-11-07
