@@ -58,16 +58,22 @@ List<Alert> buildNudges({
   required DateTime now,
   required List<DayTimes?> days,
   required Set<(AzkarSet, DateTime)> done,
-}) => [
-  for (final day in days.nonNulls)
-    for (final set in AzkarSet.values)
-      if (day.timeOf(set.nudgePrayer)?.add(azkarNudgeDelay) case final at?)
-        if (at.isAfter(now) && !done.contains((set, day.date)))
-          Alert(
-            day: day.date,
-            prayer: set.nudgePrayer,
-            kind: AlertKind.azkar,
-            at: at,
-            sound: PrayerSound.silent,
-          ),
-].take(nudgeCount).toList();
+}) {
+  final slots = [
+    for (final day in days.nonNulls)
+      for (final set in AzkarSet.values)
+        if (day.timeOf(set.nudgePrayer)?.add(azkarNudgeDelay) case final at?) (day, set, at),
+  ];
+  return [
+    for (final (index, (day, set, at)) in slots.indexed)
+      if (at.isAfter(now) && !done.contains((set, day.date)))
+        Alert(
+          day: day.date,
+          prayer: set.nudgePrayer,
+          kind: AlertKind.azkar,
+          at: at,
+          sound: PrayerSound.silent,
+          lasts: index + 1 < slots.length ? slots[index + 1].$3.difference(at) : null,
+        ),
+  ].take(nudgeCount).toList();
+}
