@@ -102,3 +102,21 @@ _Avoid_: collapse, transition
 **Echo**:
 The sky's color carried outside the sky as a trace, like a glow behind a header.
 _Avoid_: repeat, sky copy
+
+## Shipping
+
+**Version tag**:
+The name CI gives one merge, like v1.0.0-stag.1. Everything that ships comes from one.
+_Avoid_: release, build tag
+
+**Tester build**:
+A build of one flavor for the people testing it, never for the public.
+_Avoid_: release, beta
+
+**Store release**:
+A version that reaches people through Google Play or the App Store.
+_Avoid_: release, production build
+
+**Patch**:
+A Dart-only update to a Store release that arrives with no store update.
+_Avoid_: hotfix, code push, update

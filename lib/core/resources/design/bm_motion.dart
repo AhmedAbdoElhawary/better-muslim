@@ -32,9 +32,9 @@ abstract final class BmMotion {
   static const skyChange = Duration(milliseconds: 1800);
   static const checkStroke = Duration(milliseconds: 220);
   static const burst = Duration(milliseconds: 700);
-  static const skyEventGap = Duration(seconds: 2); // plus up to skyEventSpread, picked each time
-  static const skyEventSpread = Duration(seconds: 1);
-  static const skyTapDelay = Duration(milliseconds: 500);
+  static const skyEventGap = Duration(seconds: 6); // plus up to skyEventSpread, picked each time
+  static const skyEventSpread = Duration(seconds: 4);
+  static const skyTapDelay = Duration(seconds: 1);
   static const skyBurst = Duration(milliseconds: 900);
   static const skyShootingStar = Duration(milliseconds: 850);
   static const skyRock = Duration(milliseconds: 1600);
