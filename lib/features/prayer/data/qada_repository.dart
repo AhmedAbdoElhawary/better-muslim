@@ -19,23 +19,9 @@ class QadaRepository {
 
   $QadaEntriesTable get _qada => _db.qadaEntries;
 
-  /// a prayer day is in qada once, a second add changes nothing
-  Future<void> add(DateTime day, Prayer prayer) => _db
-      .into(_qada)
-      .insert(
-        QadaEntriesCompanion.insert(prayer: prayer, missedOn: Value(day)),
-        mode: InsertMode.insertOrIgnore,
-      );
+  Future<void> add(DateTime day, Prayer prayer) => _db.addQada(day, prayer);
 
-  /// only the open one, a made up entry stays as it is
-  Future<void> remove(DateTime day, Prayer prayer) =>
-      (_db.delete(_qada)..where(
-            (row) =>
-                row.missedOn.equalsValue(day) &
-                row.prayer.equalsValue(prayer) &
-                row.madeUpAt.isNull(),
-          ))
-          .go();
+  Future<void> remove(DateTime day, Prayer prayer) => _db.removeQada(day, prayer);
 
   /// dateless entries were missed before any dated one, so they go first. null = nothing open
   Future<int?> makeUpOldest(Prayer prayer) => _db.transaction(() async {
