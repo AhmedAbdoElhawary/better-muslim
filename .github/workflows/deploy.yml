@@ -78,7 +78,7 @@ jobs:
     needs: resolve
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve.outputs.tag }}
           fetch-depth: 0
@@ -92,13 +92,15 @@ jobs:
             exit 1
           fi
 
+  # a called deploy already passed ci-ok, only a break-glass tag skipped it
   verify:
     name: Analyze & test
+    if: github.event_name == 'push'
     needs: [resolve, guard]
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve.outputs.tag }}
 
@@ -115,6 +117,8 @@ jobs:
   android:
     name: Build & distribute (Android)
     needs: [resolve, guard, verify]
+    # a skipped need skips this job too unless the condition says otherwise
+    if: ${{ !cancelled() && needs.guard.result == 'success' && (needs.verify.result == 'success' || needs.verify.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -124,12 +128,12 @@ jobs:
       VERSION: ${{ needs.resolve.outputs.version }}
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.resolve.outputs.tag }}
           fetch-depth: 0 # the auto release notes need the full tag history
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -144,7 +148,7 @@ jobs:
       # and keeping code push to one flavor saves the free patch-install allowance
       - name: Setup Shorebird
         if: needs.resolve.outputs.is_production == 'true'
-        uses: shorebirdtech/setup-shorebird@4dd9d7dc2d7930bfeadb053b6e94b5110779d1e5 # v1.0.1
+        uses: shorebirdtech/setup-shorebird@8b1059ddb56a926f0146edf4133cc647775c162f # v1.4.1
         with:
           cache: true
 
@@ -152,6 +156,7 @@ jobs:
 
       # the DSN is never committed, it goes into the git-ignored *.secret.json and is scrubbed below.
       # a DSN is only a client key, but leaking it lets a stranger burn the free event quota.
+      # SENTRY_RELEASE too, a background engine has no other way to know its version.
       - name: Write Sentry DSN for this flavor
         env:
           SENTRY_DSN: ${{ secrets[format('{0}_SENTRY_DSN', needs.resolve.outputs.prefix)] }}
@@ -160,7 +165,7 @@ jobs:
             echo "::warning::${{ needs.resolve.outputs.prefix }}_SENTRY_DSN is not set — this build will ship with crash reporting disabled"
             printf '{}\n' > "dart_define/${FLAVOR}.secret.json"
           else
-            python3 -c 'import json,os,sys; json.dump({"SENTRY_DSN": os.environ["SENTRY_DSN"]}, open(sys.argv[1],"w"))' "dart_define/${FLAVOR}.secret.json"
+            python3 -c 'import json,os,sys; json.dump({"SENTRY_DSN": os.environ["SENTRY_DSN"], "SENTRY_RELEASE": "better-muslim@" + os.environ["VERSION"]}, open(sys.argv[1],"w"))' "dart_define/${FLAVOR}.secret.json"
           fi
 
       - name: Restore release keystore
@@ -324,7 +329,7 @@ jobs:
 
       - name: Upload release notes + bundle for the release job
         if: needs.resolve.outputs.is_production == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-assets
           path: |
@@ -341,17 +346,18 @@ jobs:
 
   release:
     name: Create GitHub Release
-    if: needs.resolve.outputs.is_production == 'true'
+    # same as android, the skip of verify reaches this job through it
+    if: ${{ !cancelled() && needs.android.result == 'success' && needs.resolve.outputs.is_production == 'true' }}
     needs: [resolve, android]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: release-assets
 
       - name: Create the release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: ${{ needs.resolve.outputs.tag }}
           name: ${{ needs.resolve.outputs.tag }}
