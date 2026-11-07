@@ -29,12 +29,16 @@ abstract final class BmMotion {
   ); // ≈1030 ms
 
   // Per-animation constants (see MOTION.md for the full table)
-  static const launch = Duration(milliseconds: 1200);
   static const skyChange = Duration(milliseconds: 1800);
-  static const skyLoop = Duration(milliseconds: 12000); // Living Sky gradient drift, alternate
-  static const glowLoop = Duration(milliseconds: 3000); // half-cycle; repeat(reverse: true) = 6 s
   static const checkStroke = Duration(milliseconds: 220);
   static const burst = Duration(milliseconds: 700);
+  static const skyEventGap = Duration(seconds: 2); // plus up to skyEventSpread, picked each time
+  static const skyEventSpread = Duration(seconds: 1);
+  static const skyTapDelay = Duration(milliseconds: 500);
+  static const skyBurst = Duration(milliseconds: 900);
+  static const skyShootingStar = Duration(milliseconds: 850);
+  static const skyRock = Duration(milliseconds: 1600);
+  static const skyGlint = Duration(milliseconds: 1100);
   static const alignPulse = Duration(milliseconds: 900);
   static const beadStep = 44.0; // px the tasbih strip moves per count
 
