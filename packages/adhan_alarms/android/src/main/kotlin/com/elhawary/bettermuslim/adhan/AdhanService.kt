@@ -18,6 +18,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
+import android.util.Log
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -36,6 +37,9 @@ class AdhanService : Service() {
     private var session: MediaSessionCompat? = null
     private var focus: AudioFocusRequest? = null
     private var marked = false
+
+    // the shade and the session only redraw when this changes
+    private var shown: String? = null
     private val handler = Handler(Looper.getMainLooper())
 
     private val tick = object : Runnable {
@@ -87,6 +91,7 @@ class AdhanService : Service() {
         release()
         entry = next
         marked = false
+        shown = null
         session = MediaSessionCompat(this, "adhan").apply {
             setCallback(callback)
             isActive = true
@@ -102,17 +107,22 @@ class AdhanService : Service() {
             .build()
         focus = request
         val audio = getSystemService(AudioManager::class.java)
-        if (audio.requestAudioFocus(request) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return stop()
+        if (audio.requestAudioFocus(request) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return failed("no audio focus")
 
-        val media = MediaPlayer().apply {
-            setAudioAttributes(attributes)
-            setSource(this@AdhanService, next.getString("asset"))
-            setWakeMode(this@AdhanService, PowerManager.PARTIAL_WAKE_LOCK)
-            setOnCompletionListener { finished() }
-            prepare()
-            seekTo(fromMillis)
-            setVolume(0f, 0f)
-            start()
+        val media = try {
+            MediaPlayer().apply {
+                setAudioAttributes(attributes)
+                setSource(this@AdhanService, next.getString("asset"))
+                setWakeMode(this@AdhanService, PowerManager.PARTIAL_WAKE_LOCK)
+                setOnCompletionListener { finished() }
+                prepare()
+                seekTo(fromMillis)
+                setVolume(0f, 0f)
+                start()
+            }
+        } catch (error: Exception) {
+            Log.e(TAG, "the adhan can't play", error)
+            return failed("no playback")
         }
         player = media
         session?.setMetadata(
@@ -149,25 +159,40 @@ class AdhanService : Service() {
         publish()
     }
 
-    // silent at once, and the notification goes with it (FR-026)
+    // the adhan screen is already open and nothing will ever end it, so it ends here
+    private fun failed(reason: String) {
+        Log.e(TAG, reason)
+        entry?.let { emit(it.getInt("id"), playing = false, position = 0, duration = 0, ended = true) }
+        stop()
+    }
+
+    // silent at once, the prayer stays to answer until it is marked (FR-026)
     private fun stop() {
-        val id = entry?.getInt("id")
         release()
         stopForeground(STOP_FOREGROUND_REMOVE)
-        if (id != null) NotificationManagerCompat.from(this).cancel(id)
+        leave()
         emit(null, playing = false, position = 0, duration = 0, ended = false)
         stopSelf()
     }
 
-    // the media notification turns into the plain one, still with mark prayed (FR-027)
+    // the media notification turns into the prayer's (FR-027)
     private fun finished() {
         val done = entry ?: return
         val duration = player?.duration ?: 0
         emit(done.getInt("id"), playing = false, position = duration, duration = duration, ended = true)
         release()
         stopForeground(STOP_FOREGROUND_DETACH)
-        AdhanReceiver.postPlain(this, done, markPrayed = !marked)
+        leave()
         stopSelf()
+    }
+
+    private fun leave() {
+        val done = entry ?: return
+        if (marked) {
+            NotificationManagerCompat.from(this).cancel(done.getInt("id"))
+        } else {
+            AdhanReceiver.postPrayer(this, done, quiet = true)
+        }
     }
 
     fun markPrayed(id: Int) {
@@ -201,26 +226,30 @@ class AdhanService : Service() {
         val media = player ?: return
         val playing = media.isPlaying
         val actions = current.getJSONObject("actions")
-        session?.setPlaybackState(
-            PlaybackStateCompat.Builder()
-                .setActions(
-                    PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
-                        PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_STOP,
-                )
-                .setState(
-                    if (playing) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
-                    media.currentPosition.toLong(),
-                    if (playing) 1f else 0f,
-                )
-                .apply {
-                    // android 13+ draws the media controls from the session, not the notification
-                    if (!marked) addCustomAction(CUSTOM_MARK, actions.getString("markPrayed"), R.drawable.ic_adhan_check)
-                    addCustomAction(CUSTOM_STOP, actions.getString("stop"), R.drawable.ic_adhan_stop)
-                }
-                .build(),
-        )
-        val manager = NotificationManagerCompat.from(this)
-        if (manager.areNotificationsEnabled()) manager.notify(current.getInt("id"), notification())
+        val state = "$playing $marked"
+        if (state != shown) {
+            shown = state
+            session?.setPlaybackState(
+                PlaybackStateCompat.Builder()
+                    .setActions(
+                        PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
+                            PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_STOP,
+                    )
+                    .setState(
+                        if (playing) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+                        media.currentPosition.toLong(),
+                        if (playing) 1f else 0f,
+                    )
+                    .apply {
+                        // android 13+ draws the media controls from the session, not the notification
+                        if (!marked) addCustomAction(CUSTOM_MARK, actions.getString("markPrayed"), R.drawable.ic_adhan_check)
+                        addCustomAction(CUSTOM_STOP, actions.getString("stop"), R.drawable.ic_adhan_stop)
+                    }
+                    .build(),
+            )
+            val manager = NotificationManagerCompat.from(this)
+            if (manager.areNotificationsEnabled()) manager.notify(current.getInt("id"), notification())
+        }
         emit(current.getInt("id"), playing, media.currentPosition, media.duration, ended = false)
     }
 
@@ -287,7 +316,8 @@ class AdhanService : Service() {
         private const val EXTRA_FROM = "fromMillis"
         private const val CUSTOM_MARK = "mark_prayed"
         private const val CUSTOM_STOP = "stop"
-        private const val TICK_MILLIS = 500L
+        private const val TAG = "AdhanService"
+        private const val TICK_MILLIS = 1000L
         private const val FADE_MILLIS = 1500L
 
         var current: AdhanService? = null
