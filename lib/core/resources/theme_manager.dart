@@ -212,7 +212,7 @@ abstract final class AppTheme {
 
   /// the reader's chrome takes the page's palette tinted by the app's theme (research R5).
   /// follow sky is resolved before, see PageColor.resolve
-  static ThemeData page(PageColor color, [BmThemeId id = BmThemeId.qiyamEmerald]) {
+  static ThemeData page(PageColor color, [BmThemeId id = BmThemeId.moonlight]) {
     final theme = bmThemes[id]!;
     final base = switch (color) {
       PageColor.paper || PageColor.followSky => BmPagePalette.paper,
