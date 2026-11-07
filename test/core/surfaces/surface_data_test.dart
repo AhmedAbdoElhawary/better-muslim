@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/clock/clock.dart';
@@ -16,6 +17,7 @@ import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surface_data.dart';
+import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
@@ -196,6 +198,14 @@ void main() {
           );
           expect(entry['sunrise'], todayTimes.sunrise?.millisecondsSinceEpoch, reason: reason);
           expect(entry['maghrib'], todayTimes.maghrib?.millisecondsSinceEpoch, reason: reason);
+          final arc = home.read(arcPointsProvider);
+          final night = arc?.kind == ArcKind.night;
+          expect(
+            entry['nightFrom'],
+            night ? arc!.start.millisecondsSinceEpoch : null,
+            reason: reason,
+          );
+          expect(entry['nightTo'], night ? arc!.end.millisecondsSinceEpoch : null, reason: reason);
 
           final hijri = home.read(hijriDateProvider(today));
           final month = l10n['en']!.tr(hijri.monthKey, const {});
@@ -355,7 +365,7 @@ void main() {
     test('12 hour', () {
       final entry = first(build(makkah, now, use24h: false));
       expect(entry['time'], matches(r'^5:56\sPM$'));
-      expect(stripOf(entry)[3]['time'], matches(r'^5:56\sPM$'));
+      expect(stripOf(entry)[3]['time'], '5:56');
     });
 
     test('arabic with eastern digits', () {
@@ -533,6 +543,8 @@ void main() {
       'barFromLabel',
       'sunrise',
       'maghrib',
+      'nightFrom',
+      'nightTo',
       'hijri',
       'hijriCity',
       'dateLine',
@@ -555,6 +567,19 @@ void main() {
         for (final strip in stripOf(item)) {
           expect(strip.keys.toSet(), cell.toSet());
         }
+      }
+    });
+
+    test('the ios widgets need only keys that are written, one missing fails the whole file', () {
+      final source = File('ios/PrayerWidgets/SurfaceData.swift').readAsStringSync();
+      final owners = {'Texts': texts, 'Entry': entry, 'Cell': cell};
+      var owner = top;
+      for (final line in source.split('enum SurfaceFile').first.split('\n')) {
+        final nested = RegExp(r'^  struct (\w+): Decodable').firstMatch(line);
+        if (nested != null) owner = owners[nested[1]]!;
+        final field = RegExp(r'^ +let (\w+): [^?]+$').firstMatch(line);
+        if (field == null) continue;
+        expect(line.startsWith('    ') ? owner : top, contains(field[1]), reason: line);
       }
     });
 
