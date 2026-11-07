@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -70,6 +71,12 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
   static const _around = 2;
   bool _warming = false;
 
+  /// the frame a turn lands in shows the most change, it rebuilds none of the pages it kept
+  final _built = <int, Widget>{};
+
+  /// the next page's layout waits this long after a turn lands, it dropped the frames after it
+  Timer? _rest;
+
   /// the leaf's picture while it curls, and which page it is
   final _leaf = ValueNotifier<(int, ui.Image)?>(null);
 
@@ -89,6 +96,13 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
       if (program == null || !mounted) return;
       setState(() => _shader = program.fragmentShader());
     });
+  }
+
+  /// the reader's state reaches the pages through pageBuilder
+  @override
+  void didUpdateWidget(PageTurner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _built.clear();
   }
 
   bool _can(double direction) => direction > 0
@@ -128,12 +142,14 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
         page - 2,
       ].where((n) => n >= 1 && n <= quranPageCount && !_ready.contains(n)).firstOrNull;
       if (next == null) return;
+      final far = (next - page).abs() > 1;
+      if (far && (_rest?.isActive ?? false)) return;
 
       /// not while the reader opens or the page moves, a page's layout would drop one of their
       /// frames. a next door page missing mid turn comes anyway, a blank page is worse
       final moving = [widget.card, widget.recede, widget.lift, _turn].any((a) => a.isAnimating);
       final opening = ModalRoute.of(context)?.animation?.isCompleted == false;
-      if (opening || (moving && (next - page).abs() > 1)) {
+      if (opening || (moving && far)) {
         _warm();
         SchedulerBinding.instance.scheduleFrame();
         return;
@@ -223,13 +239,21 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
       /// the spring stops a hair off 0, a picture still queued for this frame would curl again
       _target = 0;
       _turn.value = 0;
-      if (target != 0) widget.page.value += target.toInt();
+      if (target != 0) {
+        _rest?.cancel();
+        _rest = Timer(BmMotion.standard, () {
+          _warm();
+          SchedulerBinding.instance.scheduleFrame();
+        });
+        widget.page.value += target.toInt();
+      }
       _settle();
     });
   }
 
   @override
   void dispose() {
+    _rest?.cancel();
     _turn.dispose();
     _leaf.value?.$2.dispose();
     _leaf.dispose();
@@ -254,6 +278,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
             valueListenable: widget.page,
             builder: (context, page, _) {
               _keys.removeWhere((n, _) => (n - page).abs() > _around);
+              _built.removeWhere((n, _) => (n - page).abs() > _around);
               _ready
                 ..removeWhere((n) => (n - page).abs() > _around)
                 ..add(page);
@@ -272,9 +297,12 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
                 pages: {
                   for (var n = page - _around; n <= page + _around; n++)
                     if (_ready.contains(n))
-                      n: RepaintBoundary(
-                        key: _keys.putIfAbsent(n, GlobalKey.new),
-                        child: widget.pageBuilder(n),
+                      n: _built.putIfAbsent(
+                        n,
+                        () => RepaintBoundary(
+                          key: _keys.putIfAbsent(n, GlobalKey.new),
+                          child: widget.pageBuilder(n),
+                        ),
                       ),
                 },
                 current: page,
