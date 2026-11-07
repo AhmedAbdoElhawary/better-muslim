@@ -46,6 +46,7 @@ void main() {
     expect(find.byType(DevNotificationsPage), findsOneWidget);
     expect(find.text('Open adhan screen'), findsOneWidget);
     expect(find.text('Test notification in 1 min'), findsOneWidget);
+    expect(find.text('Rehearse a prayer: reminder in 30 s, prayer in 90 s'), findsOneWidget);
     expect(find.text('Test adhan in 1 min'), findsOneWidget);
     await unmount(tester);
   });
