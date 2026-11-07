@@ -4,10 +4,10 @@ import 'dart:math' as math;
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -91,7 +91,8 @@ class StepButtonState extends State<StepButton> {
         child: RSizedBox.square(
           dimension: SizeManager.hit,
           child: Center(
-            child: CustomOpacity(
+            child: AnimatedOpacity(
+              duration: BmMotion.standard,
               opacity: widget.enabled ? 1 : BmOpacity.disabled,
               child: BmIcon.ui(
                 widget.icon,
