@@ -62,14 +62,34 @@ _Avoid_: sound, voice, track
 
 ## Surfaces
 
+**Reminder**:
+The alert before a prayer, at the time set in "Reminder before each prayer". It comes whether the app is open or not.
+_Avoid_: notification before the prayer, pre-adhan alert
+
 **Live countdown**:
-The next prayer counting down on the lock screen while the app isn't on screen. A Live Activity on iOS, an ongoing notification on Android.
+The next prayer counting down from its Reminder until its time. An ongoing notification on Android, where it is the Reminder itself. A Live Activity on iOS, which only starts as the app leaves.
 _Avoid_: live activity (for both), countdown widget
 
 **Widget**:
 A home screen tile: small, medium or large.
 
 ## Design
+
+**Sky event**:
+A short moment in Home's sky: a burst, a shooting star, a rock or a glint. One comes on its own every few seconds, and one answers a tap on the sky.
+_Avoid_: sky animation, effect
+
+**Glint**:
+The warm spark that leaves the sun, or the three stars by night. A tapped one starts at the tap.
+_Avoid_: burst, sparkle
+
+**Home bar**:
+The compact glass bar at the top of Home. It shows the next prayer and its countdown once the card has gone under it.
+_Avoid_: app bar, compact bar, glass bar
+
+**Flight**:
+The next prayer's name and countdown leaving the card for the Home bar as the page scrolls. It starts when the card reaches the Home bar.
+_Avoid_: collapse, transition
 
 **Echo**:
 The sky's color carried outside the sky as a trace, like a glow behind a header.
