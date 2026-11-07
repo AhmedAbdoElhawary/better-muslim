@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
-import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/widgets/ellipse_transform.dart';
@@ -13,7 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// maghrib is 4.03 exactly. the others get their own sky with the sun where it really is, and no
 /// sun at fajr and isha (FR-029)
-class AdhanSky extends ConsumerStatefulWidget {
+class AdhanSky extends ConsumerWidget {
   const AdhanSky({required this.prayer, required this.day, super.key});
 
   final Prayer prayer;
@@ -33,37 +32,14 @@ class AdhanSky extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<AdhanSky> createState() => _AdhanSkyState();
-}
-
-class _AdhanSkyState extends ConsumerState<AdhanSky> with SingleTickerProviderStateMixin {
-  /// MOTION halo: 3000 ms each way
-  late final _controller = AnimationController(vsync: this, duration: BmMotion.glowLoop);
-  late final _breath = CurvedAnimation(parent: _controller, curve: BmMotion.breathe);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final times = ref.watch(dayTimesProvider(widget.day));
-    final sunY = AdhanSky.sunY(widget.prayer, times);
-    final still = MediaQuery.disableAnimationsOf(context) || sunY == null;
-    if (still) {
-      _controller.stop();
-    } else if (!_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final times = ref.watch(dayTimesProvider(day));
     return RepaintBoundary(
       child: CustomPaint(
         size: Size.infinite,
         painter: _AdhanSkyPainter(
-          prayer: widget.prayer,
-          sunY: sunY,
-          breath: still ? null : _breath,
+          prayer: prayer,
+          sunY: AdhanSky.sunY(prayer, times),
 
           /// the .r factor, the painter works in the mockup's points
           scale: ScreenUtil().radius(1),
@@ -74,18 +50,11 @@ class _AdhanSkyState extends ConsumerState<AdhanSky> with SingleTickerProviderSt
 }
 
 class _AdhanSkyPainter extends CustomPainter {
-  _AdhanSkyPainter({
-    required this.prayer,
-    required this.sunY,
-    required this.breath,
-    required this.scale,
-  }) : super(repaint: breath);
+  _AdhanSkyPainter({required this.prayer, required this.sunY, required this.scale});
 
   final Prayer prayer;
   final double? sunY;
 
-  /// null stands still at full opacity and size
-  final Animation<double>? breath;
   final double scale;
 
   /// 4.03 puts the halo's center 2 pt above the sun's
@@ -127,27 +96,20 @@ class _AdhanSkyPainter extends CustomPainter {
     if (sunY == null) return;
     final center = Offset(size.width / 2, sunY * scale);
 
-    /// opacity .7 to 1 and scale .97 to 1.04, the halo's center stays on the sun
-    final t = breath?.value;
-    final opacity = t == null ? 1.0 : .7 + .3 * t;
-    final grow = t == null ? 1.0 : .97 + .07 * t;
     final halo = Rect.fromCenter(
       center: center.translate(0, _haloBelowSun * scale),
-      width: SizeManager.adhanHaloW * scale * grow,
-      height: SizeManager.adhanHaloH * scale * grow,
+      width: SizeManager.adhanHaloW * scale,
+      height: SizeManager.adhanHaloH * scale,
     );
     canvas.drawOval(
       halo,
       Paint()
-        ..shader = RadialGradient(
+        ..shader = const RadialGradient(
           /// css "ellipse" reaches the corners, half the diagonal of a square
           radius: math.sqrt1_2,
-          colors: [
-            AdhanColors.halo.withValues(alpha: AdhanColors.halo.a * opacity),
-            AdhanColors.haloEdge,
-          ],
-          stops: const [0, .65],
-          transform: const EllipseTransform(),
+          colors: [AdhanColors.halo, AdhanColors.haloEdge],
+          stops: [0, .65],
+          transform: EllipseTransform(),
         ).createShader(halo),
     );
 
@@ -171,5 +133,5 @@ class _AdhanSkyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_AdhanSkyPainter old) =>
-      old.prayer != prayer || old.sunY != sunY || old.breath != breath || old.scale != scale;
+      old.prayer != prayer || old.sunY != sunY || old.scale != scale;
 }
