@@ -5,6 +5,7 @@ import 'package:better_muslim/core/hijri/hijri_date.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -13,7 +14,6 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
-import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:drift/drift.dart' show Value;
@@ -138,7 +138,8 @@ class _StepButton extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: CustomOpacity(
+        child: AnimatedOpacity(
+          duration: BmMotion.standard,
           opacity: onTap == null ? BmOpacity.disabled : 1,
           child: RSizedBox.square(
             dimension: SizeManager.playButton,
