@@ -8,6 +8,7 @@ import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -62,6 +63,60 @@ void main() {
     await markFromPayload(payload(Prayer.fajr, DateTime(2026, 10, 1), hour: 5), db: db);
 
     expect((await log()).single.prayer, Prayer.fajr);
+  });
+
+  group('add to qada', () {
+    final day = DateTime(2026, 10, 15);
+    Future<List<QadaEntry>> qada() => db.select(db.qadaEntries).get();
+
+    test('saves the prayer once and logs nothing', () async {
+      await markFromPayload(payload(Prayer.maghrib, day), qada: true, db: db);
+      await markFromPayload(payload(Prayer.maghrib, day), qada: true, db: db);
+
+      final [row] = await qada();
+      expect(row.prayer, Prayer.maghrib);
+      expect(row.missedOn, day);
+      expect(await log(), isEmpty);
+    });
+
+    test('marking it prayed after takes it back', () async {
+      await markFromPayload(payload(Prayer.maghrib, day), qada: true, db: db);
+      await markFromPayload(payload(Prayer.maghrib, day), db: db);
+
+      expect(await qada(), isEmpty);
+      expect(await log(), hasLength(1));
+    });
+  });
+
+  group('cleanDelivered', () {
+    final day = DateTime(2026, 10, 15);
+    final maghrib = alertId(day, Prayer.maghrib, AlertKind.adhan);
+
+    test('a prayer prayed or in qada takes its notification, the playing one stays', () async {
+      final scheduler = FakeScheduler();
+      final isha = alertId(day, Prayer.isha, AlertKind.adhan);
+      final asr = alertId(day, Prayer.asr, AlertKind.adhan);
+      scheduler.active.addAll([maghrib, isha, asr]);
+      await db.markPrayed(day, Prayer.maghrib);
+      await db.addQada(day, Prayer.isha);
+      await db.markPrayed(day, Prayer.asr);
+
+      await cleanDelivered(db, scheduler: scheduler, playing: asr);
+
+      expect(scheduler.cancelled, unorderedEquals([maghrib, isha]));
+    });
+
+    test('ios keeps only the newest one', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final scheduler = FakeScheduler();
+      final asr = alertId(day, Prayer.asr, AlertKind.adhan);
+      scheduler.active.addAll([asr, maghrib]);
+
+      await cleanDelivered(db, scheduler: scheduler);
+
+      expect(scheduler.cancelled, [asr]);
+    });
   });
 
   test('no store to open does nothing and never makes one', () async {
