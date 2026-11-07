@@ -57,7 +57,6 @@ void main() {
             const FlavorConfig(
               flavor: Flavor.dev,
               appName: 'Better Muslim',
-              apiBaseUrl: '',
               sentryDsn: '',
               scenario: 'design',
             ),
