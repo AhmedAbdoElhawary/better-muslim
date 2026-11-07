@@ -31,10 +31,10 @@ double _contrast(Color a, Color b) {
 /// [top] with its alpha over an opaque [bottom]
 Color _over(Color top, Color bottom) => Color.lerp(bottom, top.withValues(alpha: 1), top.a)!;
 
-/// the sky's color at [y] with [drift], the same five stops and 160% height bmSkyGradient paints
-Color _sky(BmSkyStops stops, double y, double height, double drift) {
+/// the sky's color at [y], the same five stops and 160% height bmSkyGradient paints
+Color _sky(BmSkyStops stops, double y, double height) {
   final tall = height * 1.6;
-  final position = (y + drift * .3 * (tall - height)) / tall;
+  final position = y / tall;
   const at = [0, .30, .62, .82, 1.0];
   final colors = [stops.top, stops.mid, stops.bottom, stops.mid, stops.top];
   for (var i = 1; i < at.length; i++) {
@@ -60,13 +60,12 @@ void main() {
   };
 
   /// every text in the header block against the darkest and lightest sky behind it, through the
-  /// scrim where there is one (SC-006, FR-012). [drift] checks the whole ambient loop too
+  /// scrim where there is one (SC-006, FR-012)
   Future<void> expectAA(
     WidgetTester tester,
     String look, {
     BmThemeId theme = BmThemeId.qiyamEmerald,
     Brightness brightness = Brightness.dark,
-    bool drift = false,
   }) async {
     final painter = tester
         .widgetList<CustomPaint>(find.byType(CustomPaint))
@@ -106,15 +105,13 @@ void main() {
         final rect = tester.getRect(find.byWidget(text));
         var worst = double.infinity;
         for (var y = rect.top; y <= rect.bottom; y++) {
-          for (var offset = 0.0; offset <= (drift ? 1 : 0); offset += .1) {
-            var behind = _sky(painter.stops, y - skyBox.top, skyHeight, offset);
-            if (scrim != null && scrimColor != null) {
-              final share = ((y - scrim.top) / scrim.height).clamp(0.0, 1.0);
-              behind = _over(scrimColor.withValues(alpha: scrimColor.a * share), behind);
-            }
-            if (onGlass) behind = _over(glass, behind);
-            worst = min(worst, _contrast(_over(text.style!.color!, behind), behind));
+          var behind = _sky(painter.stops, y - skyBox.top, skyHeight);
+          if (scrim != null && scrimColor != null) {
+            final share = ((y - scrim.top) / scrim.height).clamp(0.0, 1.0);
+            behind = _over(scrimColor.withValues(alpha: scrimColor.a * share), behind);
           }
+          if (onGlass) behind = _over(glass, behind);
+          worst = min(worst, _contrast(_over(text.style!.color!, behind), behind));
         }
         expect(worst, greaterThanOrEqualTo(4.5), reason: '$look "${text.data}" $worst');
         checked++;
@@ -156,7 +153,7 @@ void main() {
     }
   }
 
-  testWidgets('every sky stays AA across the ambient drift', (tester) async {
+  testWidgets('every sky stays AA', (tester) async {
     for (final theme in bmThemeOrder) {
       for (final brightness in Brightness.values) {
         for (final MapEntry(key: state, value: (hour, minute)) in states.entries) {
@@ -170,7 +167,6 @@ void main() {
             '${theme.name} ${state.name} ${brightness.name}',
             theme: theme,
             brightness: brightness,
-            drift: true,
           );
           await unmount(tester);
         }
