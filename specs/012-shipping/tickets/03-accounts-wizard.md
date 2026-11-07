@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** open, running it is mine
+**Status:** wizard built (`tool/accounts_wizard.sh`), running it is mine
 
 - [ ] The Firebase project has its apps, the `testers` group and a service account.
 - [ ] Analytics has the ad settings, granular location and retention from the spec.
