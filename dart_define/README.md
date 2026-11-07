@@ -11,8 +11,7 @@ Non-secret selectors only.
 ```json
 {
   "FLAVOR": "dev",
-  "APP_NAME": "My App Dev",
-  "API_BASE_URL": "https://dev.api.example.com"
+  "APP_NAME": "My App Dev"
 }
 ```
 
@@ -27,7 +26,9 @@ Values that must not sit in the repo. Same shape, different file:
 ```
 
 Ignored by `/dart_define/*.secret.json` in `.gitignore`. In CI it is written at
-build time from a GitHub secret and deleted after the build.
+build time from a GitHub secret and deleted after the build. CI adds
+`SENTRY_RELEASE` next to the DSN, so the app and its background engines report
+the same version.
 
 ## How both get passed
 
