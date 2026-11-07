@@ -13,4 +13,7 @@ class FakeSurfacesChannel extends SurfacesChannel {
     if (error case final error?) throw error;
     updates.add((json: json, force: force));
   }
+
+  @override
+  Future<Map<Object?, Object?>?> status() async => null;
 }
