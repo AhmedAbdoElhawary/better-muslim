@@ -9,7 +9,6 @@ import android.content.Intent
 class SurfacesReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            SurfaceTicks.ACTION_TICK -> PrayerWidget.tick(context)
             SurfaceTicks.ACTION_START -> CountdownNotification.clearPrayer(context)
             else -> PrayerWidget.refresh(context)
         }
