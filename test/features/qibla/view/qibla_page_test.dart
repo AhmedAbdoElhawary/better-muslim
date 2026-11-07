@@ -358,7 +358,7 @@ void main() {
       expect(haptics, [approach, aligned]);
       expect(announcements, ['Facing the Qibla']);
       expect(pulsing(tester), isTrue);
-      expect(find.byType(FadeTransition).evaluate().where(inGlow), isNotEmpty);
+      expect(find.byType(DecoratedBox).evaluate().where(inGlow), isNotEmpty);
 
       await tester.pump(const Duration(seconds: 3));
       expect(haptics, [approach, aligned]);
@@ -411,7 +411,7 @@ void main() {
       expect(find.text('Facing the Qibla'), findsOneWidget);
       expect(ringColor(tester), colorOf(tester, ThemeEnum.accent));
       expect(pulsing(tester), isFalse);
-      expect(find.byType(FadeTransition).evaluate().where(inGlow), isEmpty);
+      expect(find.byType(DecoratedBox).evaluate().where(inGlow), isEmpty);
       expect(haptics, [approach, aligned]);
       await tester.pumpAndSettle();
       await unmount(tester);
