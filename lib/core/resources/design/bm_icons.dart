@@ -93,7 +93,9 @@ class BmIcon extends StatelessWidget {
       asset,
       width: size,
       height: size,
-      colorFilter: ColorFilter.mode(c, BlendMode.srcIn),
+
+      /// the color baked in, a colorFilter takes a saveLayer per icon, a render pass every frame
+      theme: SvgTheme(currentColor: c),
     );
   }
 }
