@@ -60,6 +60,12 @@ app.*.map.json
 *.keystore
 # tier 2 config, CI writes it and deletes it after the build
 /dart_define/*.secret.json
+
+# written by tool/accounts_wizard.sh, CI writes the same files from its secrets
+/.accounts.env
+/android/app/src/*/google-services.json
+/ios/Runner/Firebase/
+/ios/Runner/GoogleService-Info.plist
 # coverage gate output
 /coverage/
 /test/coverage_helper_test.dart
