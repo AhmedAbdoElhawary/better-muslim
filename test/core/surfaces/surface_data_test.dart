@@ -224,7 +224,7 @@ void main() {
 
     test('no windows, it follows the app leaving and coming back', () {
       expect(data.containsKey('countdowns'), isFalse);
-      expect(data['countdown'], true);
+      expect(data['reminderMinutes'], defaults.reminderMinutes);
     });
 
     test('rolls to the next prayer at each prayer time', () {
@@ -253,9 +253,37 @@ void main() {
       expect(entryAt(now)['barFromLabel'], 'Asr ${clock(timeOf(0, Prayer.asr), makkah)} · prayed');
     });
 
-    test('the switch off and no place are sent as they are', () {
-      final off = build(makkah, now, settings: defaults.copyWith(prayerCountdown: false));
-      expect(off['countdown'], false);
+    group('the rehearsal', () {
+      late List<Json> entries;
+      final prayerAt = now.add(rehearsalPrayer).millisecondsSinceEpoch;
+      setUp(() => entries = entriesOf(withRehearsal(data, now)));
+
+      Json force(int millis) => entries.lastWhere((entry) => (entry['from']! as int) <= millis);
+
+      test('its entry counts down to the prayer from its own start', () {
+        final entry = force(now.millisecondsSinceEpoch);
+        expect(entry['at'], prayerAt);
+        expect(entry['start'], now.add(rehearsalReminder).millisecondsSinceEpoch);
+        expect(entry['prayer'], 'maghrib');
+      });
+
+      test('the real entry comes back after it, the minutes stay', () {
+        final real = entryAt(now);
+        final after = force(prayerAt);
+        expect(after['at'], real['at']);
+        expect(after.containsKey('start'), isFalse);
+        expect(withRehearsal(data, now)['reminderMinutes'], data['reminderMinutes']);
+      });
+
+      test('every entry keeps its order', () {
+        final froms = [for (final entry in entries) entry['from']! as int];
+        expect(froms, [...froms]..sort());
+      });
+    });
+
+    test('the reminder off and no place are sent as they are', () {
+      final off = build(makkah, now, settings: defaults.copyWith(reminderMinutes: 0));
+      expect(off['reminderMinutes'], 0);
       expect(entriesOf(off), isNotEmpty);
       expect(build(null, now)['place'], false);
     });
@@ -376,7 +404,8 @@ void main() {
     Json colorsOf(Json data, String mode) => (data['colors']! as Json)[mode]! as Json;
 
     test("emerald's dark is the 5.6 tree's", () {
-      expect(colorsOf(build(makkah, now), 'dark'), {
+      final data = build(makkah, now, settings: defaults.copyWith(theme: BmThemeId.qiyamEmerald));
+      expect(colorsOf(data, 'dark'), {
         'top': 0xFF000000,
         'middle': 0xFF04100C,
         'bottom': 0xFF173328,
@@ -387,7 +416,7 @@ void main() {
         'label': 0xD9D9D3C2,
         'dim': 0xFF878C82,
         'gold': 0xFFD9C08A,
-        'live': colorsOf(build(makkah, now), 'dark')['live'],
+        'live': colorsOf(data, 'dark')['live'],
         'primary': 0xFFA88A52,
         'container': 0xFF221C10,
         'success': 0xFF5FB389,
@@ -457,10 +486,7 @@ void main() {
     test('no place still sends the mode and the colors', () {
       final data = build(null, now, settings: defaults.copyWith(themeMode: BmThemeMode.light));
       expect(data['mode'], 'light');
-      expect(
-        colorsOf(data, 'light')['text'],
-        bmThemes[BmThemeId.qiyamEmerald]!.light.text.toARGB32(),
-      );
+      expect(colorsOf(data, 'light')['text'], bmThemes[BmThemeId.moonlight]!.light.text.toARGB32());
     });
   });
 
@@ -470,7 +496,7 @@ void main() {
       'place',
       'language',
       'eastern',
-      'countdown',
+      'reminderMinutes',
       'mode',
       'colors',
       'until',
