@@ -69,6 +69,15 @@ class SurfaceData(private val json: JSONObject) {
         return ((now - sunrise).toDouble() / (maghrib - sunrise) * 1000).roundToLong() / 1000f
     }
 
+    // home's three stars share, only between maghrib and the next sunrise
+    fun nightShare(entry: JSONObject, now: Long): Float? {
+        if (entry.isNull("nightFrom") || entry.isNull("nightTo")) return null
+        val from = entry.getLong("nightFrom")
+        val to = entry.getLong("nightTo")
+        if (to <= from || now < from || now > to) return null
+        return ((now - from).toDouble() / (to - from) * 1000).roundToLong() / 1000f
+    }
+
     // the prayer, the time left, its time and the place, as one line for talkback
     fun spoken(entry: JSONObject, now: Long): String {
         val minutes = minutesLeft(entry, now)
