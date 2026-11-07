@@ -32,6 +32,11 @@ extension View {
     if on { accentable() } else { self }
   }
 
+  /// the tree's line box, the arabic fonts' own is taller and pushed the large out of a small phone
+  func line(_ size: CGFloat, _ height: CGFloat = 1.2) -> some View {
+    frame(height: size * height)
+  }
+
   /// the app's language, whatever the phone's. the arc, bar, ring and clock times opt out
   func surfaceLanguage(_ data: SurfaceData) -> some View {
     environment(\.layoutDirection, data.isArabic ? .rightToLeft : .leftToRight)
