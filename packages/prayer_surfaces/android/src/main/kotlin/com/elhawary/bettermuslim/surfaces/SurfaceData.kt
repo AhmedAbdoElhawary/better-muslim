@@ -14,7 +14,7 @@ class SurfaceData(private val json: JSONObject) {
     val place get() = json.optBoolean("place")
     val isArabic get() = json.optString("language") == "ar"
     val eastern get() = json.optBoolean("eastern")
-    val countdown get() = json.optBoolean("countdown")
+    val reminderMinutes get() = json.optInt("reminderMinutes")
     val mode get() = json.optString("mode")
     val until get() = json.optLong("until")
     val texts: JSONObject get() = json.getJSONObject("texts")
@@ -30,6 +30,15 @@ class SurfaceData(private val json: JSONObject) {
     fun palette(light: Boolean) = Palette(json.optJSONObject("colors")?.optJSONObject(if (light) "light" else "dark"))
 
     fun entryAt(now: Long): JSONObject? = entries.lastOrNull { it.getLong("from") <= now }
+
+    // when the countdown to this entry's prayer appears, the dev page's rehearsal says its own
+    fun startOf(entry: JSONObject): Long? = when {
+        entry.has("start") -> entry.getLong("start")
+        reminderMinutes > 0 -> entry.getLong("at") - reminderMinutes * MINUTE
+        else -> null
+    }
+
+    fun nextStart(now: Long): Long? = entries.mapNotNull { startOf(it) }.filter { it > now }.minOrNull()
 
     fun minutesLeft(entry: JSONObject, now: Long): Long =
         Math.floorDiv(entry.getLong("at") - now, MINUTE).coerceAtLeast(0)
