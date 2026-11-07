@@ -40,6 +40,9 @@ abstract class AdhanPlayer {
     Duration from = Duration.zero,
   });
 
+  /// false on android's silent, vibrate and do not disturb, nothing would play
+  Future<bool> canSound() async => true;
+
   Future<void> pause();
 
   Future<void> resume();
@@ -74,6 +77,9 @@ class NativeAdhanPlayer extends AdhanPlayer {
     _busy ??= playback.listen((state) => BmSounds.busy = state.playing && !state.ended);
     await _channel.play(NotificationScheduler.entryOf(alert, texts, recording), from: from);
   }
+
+  @override
+  Future<bool> canSound() async => await _channel.canSound() ?? true;
 
   @override
   Future<void> pause() => _channel.pause();
