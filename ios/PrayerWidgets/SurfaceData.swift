@@ -7,7 +7,6 @@ struct SurfaceData: Decodable {
   let place: Bool
   let language: String
   let eastern: Bool
-  let countdown: Bool
   /// optional, a version 1 file from before an update still shows its times
   let mode: String?
   let colors: SurfaceColors?
@@ -45,6 +44,8 @@ struct SurfaceData: Decodable {
     let barFromLabel: String?
     let sunrise: Double?
     let maghrib: Double?
+    let nightFrom: Double?
+    let nightTo: Double?
     let hijri: String
     let hijriCity: String
     let dateLine: String
@@ -125,6 +126,14 @@ struct SurfaceData: Decodable {
     let ms = date.millis
     guard ms >= sunrise, ms <= maghrib else { return nil }
     return ((ms - sunrise) / (maghrib - sunrise) * 1000).rounded() / 1000
+  }
+
+  /// home's three stars share, only between maghrib and the next sunrise
+  func nightShare(_ entry: Entry, at date: Date) -> Double? {
+    guard let from = entry.nightFrom, let to = entry.nightTo, to > from else { return nil }
+    let ms = date.millis
+    guard ms >= from, ms <= to else { return nil }
+    return ((ms - from) / (to - from) * 1000).rounded() / 1000
   }
 
   /// the prayer, the time left, its time and the place, as one line for voiceover
