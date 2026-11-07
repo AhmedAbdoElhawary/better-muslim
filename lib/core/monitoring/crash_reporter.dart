@@ -39,6 +39,16 @@ class SentryCrashReporter implements CrashReporter {
   }
 }
 
+final _url = RegExp(r'https?://\S+');
+
+/// sqlite prints the row it failed on, which can be a note, and a url says what someone was playing
+SentryEvent scrubbed(SentryEvent event) {
+  for (final exception in event.exceptions ?? const <SentryException>[]) {
+    exception.value = exception.value?.split('Causing statement').first.replaceAll(_url, '<url>');
+  }
+  return event;
+}
+
 /// one error in a loop would eat the free monthly quota
 class SentryEventCap {
   SentryEventCap({this.maxPerErrorType = 3});
