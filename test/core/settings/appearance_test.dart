@@ -143,9 +143,9 @@ void main() {
     expect(changes, 1);
   });
 
-  test('the theme id is the saved one, qiyam emerald before the store answers', () async {
+  test('the theme id is the saved one, moonlight before the store answers', () async {
     await open(DateTime.utc(2026, 10, 15, 9));
-    expect(container.read(themeIdProvider), BmThemeId.qiyamEmerald);
+    expect(container.read(themeIdProvider), BmThemeId.moonlight);
     await container
         .read(databaseProvider)
         .updateSettings(const SettingsCompanion(theme: Value(BmThemeId.iznik)));

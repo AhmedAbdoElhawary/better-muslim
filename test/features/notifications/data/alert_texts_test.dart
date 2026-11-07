@@ -67,21 +67,21 @@ void main() {
   test('english', () async {
     final english = await texts('en');
 
-    expect(english.titleOf(maghrib()), 'Maghrib · 17:56');
-    expect(english.bodyOf(maghrib()), 'It is time for Maghrib in Makkah. Tap to mark it prayed.');
+    expect(english.titleOf(maghrib()), 'Maghrib time in Makkah');
+    expect(english.bodyOf(maghrib()), '17:56');
   });
 
   test('arabic with eastern digits and the arabic place name', () async {
     final arabic = await texts('ar');
 
-    expect(arabic.titleOf(maghrib()), 'المغرب · ١٧:٥٦');
-    expect(arabic.bodyOf(maghrib()), 'حان وقت المغرب في مكة المكرمة. اضغط لتسجيل الصلاة.');
+    expect(arabic.titleOf(maghrib()), 'حان وقت المغرب في مكة المكرمة');
+    expect(arabic.bodyOf(maghrib()), '١٧:٥٦');
   });
 
   test('a 12 hour phone', () async {
     final english = await texts('en', use24h: false);
 
-    expect(english.titleOf(maghrib()), matches(r'^Maghrib · 5:56\sPM$'));
+    expect(english.bodyOf(maghrib()), matches(r'^5:56\sPM$'));
   });
 
   test('the place\'s clock, not the phone\'s', () async {
@@ -94,7 +94,7 @@ void main() {
       sound: PrayerSound.adhan,
     );
 
-    expect(english.titleOf(alert), 'Maghrib · 17:56');
+    expect(english.bodyOf(alert), '17:56');
   });
 
   Alert reminder() => Alert(

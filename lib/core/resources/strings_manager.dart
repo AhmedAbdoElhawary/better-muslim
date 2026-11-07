@@ -138,7 +138,6 @@ abstract final class StringsManager {
   static const String light = 'light';
   static const String followSkyNote = 'followSkyNote';
   static const String notifAdhanTitle = 'notifAdhanTitle';
-  static const String notifAdhanBody = 'notifAdhanBody';
   static const String notifReminderTitle = 'notifReminderTitle';
   static const String notifReminderBody = 'notifReminderBody';
   static const String reminders = 'reminders';
@@ -327,8 +326,6 @@ abstract final class StringsManager {
   static const String nameTimePrayed = 'nameTimePrayed';
   static const String prayerNow = 'prayerNow';
   static const String reminderChip = 'reminderChip';
-  static const String prayerCountdown = 'prayerCountdown';
-  static const String prayerCountdownLine = 'prayerCountdownLine';
   static const String countdownChannel = 'countdownChannel';
   static const String openToSetPlace = 'openToSetPlace';
   static const String openToUpdateTimes = 'openToUpdateTimes';

@@ -8,7 +8,6 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
 import android.provider.Settings
 import android.view.WindowManager
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -22,16 +21,6 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-
-        // home's sky pauses its ambient motion in battery saver (MOTION tiers)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "better_muslim/power")
-            .setMethodCallHandler { call, result ->
-                if (call.method == "isPowerSaving") {
-                    result.success(getSystemService(PowerManager::class.java).isPowerSaveMode)
-                } else {
-                    result.notImplemented()
-                }
-            }
 
         // the small calls for More, the app's own channel instead of five packages (R10)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "better_muslim/system")

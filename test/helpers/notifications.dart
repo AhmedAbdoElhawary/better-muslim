@@ -53,6 +53,7 @@ class FakeScheduler extends NotificationScheduler {
   @override
   Future<void> init({
     required String markPrayed,
+    required String addToQada,
     DidReceiveNotificationResponseCallback? onTap,
   }) async {
     inits++;

@@ -3,12 +3,16 @@
 Live demos: `design/05 Motion.dc.html` (click a demo to replay; Tweaks: speed 0.25×, reduce motion).
 Tokens: `lib/theme/bm_motion.dart`. Haptics: `lib/theme/bm_haptics.dart`.
 
+The app doesn't run the ambient loops in this file (Living Sky, twinkle, prayer glow, sun, adhan
+halo, Qibla breathing). They all stand still, as under reduce motion. Only loaders repeat. Home's
+sky events (row 17) are the one thing that moves on its own, short and spaced out, and not a loop.
+
 ## Tiers
 - **Ambient** (time-driven, never touch): Living Sky, countdown tick, prayer glow. 4–8 s loops and 300 ms ticks. Curves: breathe, standard. No haptics. Render at 30 fps inside a RepaintBoundary; pause when off-screen, app in background, or Low Power Mode / Battery Saver.
 - **Responsive** (touch/sensor): mark prayed, Qibla needle, tasbih bead, page turn, ayah follow, bottom sheet, tab switch. 150–380 ms. Start on the first frame after input; always interruptible. A new input **retargets** a running spring from its current position and velocity; never queue.
 - **Ceremonial**: launch, sky change, adhan reveal, day complete, Qibla aligned, set complete. 520–1800 ms. One at a time. Priority: adhan > completions (08, 10, 12) > responsive > ambient. A higher tier pauses lower ones; ambient resumes with a 300 ms fade. If two ceremonies collide (fifth prayer marked as the Isha adhan starts) the adhan plays and Day complete shows on return to the Prayer tab. No animation ever blocks input; ceremonial overlays dismiss on any tap; launch skips to Home as soon as data is ready.
 
-## The 16 animations
+## The 17 animations
 | # | Name | Screen | Trigger | Duration | Curve / spring | Reduce motion | Flutter |
 |---|---|---|---|---|---|---|---|
 | 01 | App launch | Splash | Cold start, until Home first frame | 1200 ms | sacred · decelerate | Logo fades in, 300 ms. No sun rise. | flutter_native_splash → AnimationController(1200 ms) with staggered Interval curves |
@@ -27,6 +31,7 @@ Tokens: `lib/theme/bm_motion.dart`. Haptics: `lib/theme/bm_haptics.dart`.
 | 14 | Ayah follow | Quran reader | Recitation timing cue | 300 ms | standard | Highlight jumps | AnimatedPositioned over line rects from the QCF glyph layout |
 | 15 | Bottom sheet | Global | Open picker or settings; dismiss | ≈520 ms in · 300 ms out | spring.gentle · accelerate | 150 ms fade in place | showModalBottomSheet with sheetAnimationStyle; SpringSimulation on drag release |
 | 16 | Tab switch | Root navigation | Tab tap | 300 ms | standard (shared axis) | 150 ms crossfade | NavigationBar + IndexedStack; FadeThroughTransition (animations package) |
+| 17 | Sky event | Home | Every 6–10 s, random, while Home shows its sky, and 1 s after a tap on the sky, around the tap | 720–1840 ms | sin fade | None | One CustomPainter per event, at most 3 at once. Any sky: star burst, shooting star, glint, rare rock, in the sun's color by day. A glint leaves the sun, or the three stars by night. Each streak picks its own angle, length and speed. Stops on another tab or route, in the background and once the sky has scrolled away, a tap still waiting is dropped. None with reduce motion |
 
 ## In-screen ambient animations (06 Screens, `data-a` attributes)
 | data-a | Element | Keyframes | Duration | Repeat | Curve |

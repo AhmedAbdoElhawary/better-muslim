@@ -144,7 +144,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('qiyamEmerald'),
+    defaultValue: const Constant('moonlight'),
   ).withConverter<BmThemeId>($SettingsTable.$convertertheme);
   @override
   late final GeneratedColumnWithTypeConverter<BmThemeMode, String> themeMode =

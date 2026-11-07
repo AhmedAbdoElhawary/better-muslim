@@ -52,7 +52,7 @@ void main() {
     for (final tile in ['Qibla', 'Calendar', 'Duas']) {
       expect(find.text(tile), findsOneWidget);
     }
-    for (final value in ['Umm al-Qura', '10 min before', 'Makkah · auto', 'Qiyam Emerald']) {
+    for (final value in ['Umm al-Qura', '10 min before', 'Makkah · auto', 'Moonlight']) {
       expect(find.text(value), findsOneWidget, reason: value);
     }
     expect(find.text('Follow sky'), findsOneWidget);

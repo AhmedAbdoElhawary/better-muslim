@@ -36,13 +36,18 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
 
   @override
   Widget build(BuildContext context) {
-    final assets = ref.watch(quranAssetsProvider).value;
+    final assetRaw = ref.watch(quranAssetsProvider);
+    final digits = ref.watch(_digitsProvider);
+    final assets = assetRaw.value;
+    final surah = assetRaw.requireValue;
+
     final count = switch (_index) {
       _ when assets == null => _skeletonRows,
       _Index.surah => assets.surahs.length,
       _Index.juz => assets.juzs.length,
       _Index.page => quranPageCount,
     };
+
     return SliverMainAxisGroup(
       slivers: [
         SliverToBoxAdapter(
@@ -70,9 +75,13 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
             child: assets == null
                 ? const _SkeletonRow()
                 : switch (_index) {
-                    _Index.surah => _SurahRow(assets.surahs[i]),
-                    _Index.juz => _JuzRow(assets.juzs[i]),
-                    _Index.page => _PageRow(i + 1),
+                    _Index.surah => _SurahRow(digits: digits, surah: assets.surahs[i]),
+                    _Index.juz => _JuzRow(
+                      surah: surah.surah(assets.juzs[i].start.surah),
+                      digits: digits,
+                      juz: assets.juzs[i],
+                    ),
+                    _Index.page => _PageRow(digits: digits, assets: assets, page: i + 1),
                   },
           ),
         ),
@@ -82,13 +91,12 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
 }
 
 class _SurahRow extends ConsumerWidget {
-  const _SurahRow(this.surah);
+  const _SurahRow({required this.surah, required this.digits});
 
   final QuranSurah surah;
-
+  final Digits digits;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final digits = ref.watch(_digitsProvider);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return _Row(
       number: context.formatDigits('${surah.n}', digits),
@@ -106,14 +114,13 @@ class _SurahRow extends ConsumerWidget {
 }
 
 class _JuzRow extends ConsumerWidget {
-  const _JuzRow(this.juz);
+  const _JuzRow({required this.juz, required this.digits, required this.surah});
 
   final QuranJuz juz;
-
+  final Digits digits;
+  final QuranSurah surah;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final digits = ref.watch(_digitsProvider);
-    final surah = ref.watch(quranAssetsProvider).requireValue.surah(juz.start.surah);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final number = context.formatDigits('${juz.n}', digits);
     return _Row(
@@ -132,18 +139,18 @@ class _JuzRow extends ConsumerWidget {
 }
 
 class _PageRow extends ConsumerWidget {
-  const _PageRow(this.page);
+  const _PageRow({required this.page, required this.digits, required this.assets});
 
   final int page;
-
+  final Digits digits;
+  final QuranAssets assets;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final digits = ref.watch(_digitsProvider);
-    final assets = ref.watch(quranAssetsProvider).requireValue;
     final info = assets.pageInfo(page);
     final surah = assets.surah(info.start.surah);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final number = context.formatDigits('$page', digits);
+
     return _Row(
       number: number,
       page: page,

@@ -9,6 +9,14 @@
             "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json"]
         },
         {
+            "name": "Dev · profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main_dev.dart",
+            "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json"]
+        },
+        {
             "name": "Dev · design scenario",
             "request": "launch",
             "type": "dart",

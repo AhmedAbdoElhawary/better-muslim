@@ -1,7 +1,6 @@
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
-import 'package:better_muslim/core/prayer_times/next_prayer.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
@@ -10,10 +9,6 @@ import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/model/verse_of_day.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart';
-
-final glowBreathingProvider = Provider<bool>(
-  (ref) => glowBreathing(ref.watch(timeLeftProvider) ?? Duration.zero),
-);
 
 typedef StripEntry = ({Prayer prayer, TZDateTime? time, bool current, bool logged, bool past});
 

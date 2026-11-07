@@ -47,16 +47,16 @@ void main() {
 
   testWidgets('4.15: the saved theme selected, the swatches in order, the preview', (tester) async {
     await open(tester);
-    expect(find.text('Live preview · Qiyam Emerald'), findsOneWidget);
-    expect(selected(tester, 'Qiyam Emerald'), isTrue);
+    expect(find.text('Live preview · Moonlight'), findsOneWidget);
+    expect(selected(tester, 'Moonlight'), isTrue);
     final names = [
+      'Moonlight',
       'Qiyam Emerald',
       'Qiyam',
       'Noor',
       'Living Sky',
       'Iznik',
       'Andalus',
-      'Moonlight',
       'Qiyam Rose',
       'Sahara Sand',
       'Zaytun',
@@ -90,7 +90,7 @@ void main() {
     expect(find.text('Live preview · Iznik'), findsOneWidget);
     expect(selected(tester, 'Iznik'), isTrue);
     expect(preview(tester).primary, bmThemes[BmThemeId.iznik]!.dark.primary);
-    expect(page(tester).primary, bmThemes[BmThemeId.qiyamEmerald]!.dark.primary);
+    expect(page(tester).primary, bmThemes[BmThemeId.moonlight]!.dark.primary);
 
     await tester.tap(find.text('Light'));
     await tester.pumpAndSettle();
@@ -99,7 +99,7 @@ void main() {
     containerOf(tester).read(routerProvider).pop();
     await tester.pumpAndSettle();
     final settings = await settingsOf(tester);
-    expect((settings.theme, settings.themeMode), (BmThemeId.qiyamEmerald, BmThemeMode.followSky));
+    expect((settings.theme, settings.themeMode), (BmThemeId.moonlight, BmThemeMode.followSky));
     await unmount(tester);
   });
 

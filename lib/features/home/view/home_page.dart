@@ -24,6 +24,7 @@ import 'package:better_muslim/features/home/view/widgets/no_location_card.dart';
 import 'package:better_muslim/features/home/view/widgets/now_block.dart';
 import 'package:better_muslim/features/home/view/widgets/prayer_strip.dart';
 import 'package:better_muslim/features/home/view/widgets/shortcuts_card.dart';
+import 'package:better_muslim/features/home/view/widgets/sky_events.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
 import 'package:better_muslim/features/home/view/widgets/verse_card.dart';
@@ -45,6 +46,7 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
   final _controller = ScrollController();
   final _view = GlobalKey();
   final _card = GlobalKey();
+  final _events = GlobalKey<SkyEventsState>();
   final _flight = CardFlight();
   final _slots = (name: GlobalKey(), countdown: GlobalKey());
   final _collapsed = ValueNotifier(false);
@@ -52,12 +54,17 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
   /// the flying layer is built only off the top, its countdown ticks only then
   final _aloft = ValueNotifier(false);
 
-  /// from each slot in the bar to the card's name and countdown, null until both are laid out
+  /// from each slot in the bar to where the card's name and countdown start flying, null until
+  /// both are laid out
   final _from = ValueNotifier<({Offset name, Offset countdown})?>(null);
 
-  /// 0 to 1 from the top until the card reaches the bar, or the end of the scroll
+  /// 0 to 1 from the card reaching the bar until its name reaches the bar's title
   late final _progress = AnimationController(vsync: this);
-  var _span = 0.0;
+  var _start = 0.0;
+  var _end = 0.0;
+
+  /// the page is often too short for the card to reach the bar, so it's at least this tall
+  final _height = ValueNotifier(0.0);
 
   /// the glass comes in for the last part of the flight, so the text lands on it
   static const _glassAt = .7;
@@ -68,15 +75,27 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
     if (notification.depth != 0) return false;
     final view = _view.currentContext?.findRenderObject();
     final card = _card.currentContext?.findRenderObject() as RenderBox?;
+    final name = _flight.name.currentContext?.findRenderObject() as RenderBox?;
     if (view == null || card == null || !card.attached) return false;
-    final ScrollMetrics(:pixels, :maxScrollExtent) = notification.metrics;
-    final reachesBar =
-        pixels +
-        card.localToGlobal(Offset.zero, ancestor: view).dy -
-        MediaQuery.paddingOf(context).top -
-        SizeManager.appBar.r;
-    _span = math.min(reachesBar, maxScrollExtent);
-    final progress = _span > 0 ? (pixels / _span).clamp(0.0, 1.0) : 0.0;
+    final ScrollMetrics(:pixels, :maxScrollExtent, :viewportDimension) = notification.metrics;
+    final top = MediaQuery.paddingOf(context).top;
+    final bar = SizeManager.appBar.r;
+    _start = pixels + card.localToGlobal(Offset.zero, ancestor: view).dy - top - bar;
+    final end = name == null
+        ? _start
+        : pixels +
+              name.localToGlobal(name.size.center(Offset.zero), ancestor: view).dy -
+              top -
+              bar / 2;
+    _end = math.min(end, maxScrollExtent);
+
+    /// not exact from one scroll to the next, and a change lays the page out again
+    final height = name == null ? 0.0 : viewportDimension + end;
+    if ((height - _height.value).abs() > 1) _height.value = height;
+    final span = _end - _start;
+    final progress = span > 0
+        ? ((pixels - _start) / span).clamp(0.0, 1.0)
+        : (pixels >= _end ? 1.0 : 0.0);
     _progress.value = progress;
     _aloft.value = progress > 0;
     _collapsed.value = progress >= _glassAt;
@@ -111,15 +130,18 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
         slotCountdown == null) {
       return;
     }
-    _from.value = (name: name - slotName, countdown: countdown - slotCountdown);
+
+    /// taken back to the flight's start, so the text keeps pace with the card until it lands
+    final rise = Offset(0, _progress.value * (_end - _start));
+    _from.value = (name: name - slotName + rise, countdown: countdown - slotCountdown + rise);
     _flight.flying.value = !_reduce;
   }
 
-  /// a flight halfway doesn't stay, the scroll settles to either end like the large titles
+  /// a flight halfway doesn't stay, the scroll settles to its start or end like the large titles
   void _snap() {
     final progress = _progress.value;
     if (progress <= .01 || progress >= .99) return;
-    final to = progress < .5 ? 0.0 : _span;
+    final to = progress < .5 ? _start : _end;
     Future.microtask(() {
       if (!_controller.hasClients) return;
       _controller.animateTo(to, duration: BmMotion.standard, curve: BmMotion.standardCurve);
@@ -137,6 +159,7 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
     _collapsed.dispose();
     _aloft.dispose();
     _from.dispose();
+    _height.dispose();
     _flight.flying.dispose();
     _progress.dispose();
     super.dispose();
@@ -159,51 +182,62 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
         body: Stack(
           key: _view,
           children: [
-            NotificationListener<ScrollNotification>(
-              onNotification: _onScroll,
-              child: SingleChildScrollView(
-                controller: _controller,
+            /// the card moves with the layout too, not only the scroll
+            NotificationListener<ScrollMetricsNotification>(
+              onNotification: (notification) => _onScroll(notification.asScrollUpdate()),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: _onScroll,
+                child: SingleChildScrollView(
+                  controller: _controller,
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: _height,
+                    builder: (context, height, child) => ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: height),
+                      child: child,
+                    ),
 
-                /// the tab bar's glass covers the bottom, the shortcuts end above it
-                child: SafeArea(
-                  top: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _Sky(),
-                      HorizontalPadding(
-                        key: _card,
-                        padding: SpaceManager.screen,
-                        child: BmSwitcher(
-                          child: hasLocation
-                              ? NextPrayerCard(key: const ValueKey(true), flight: _flight)
-                              : const NoLocationCard(key: ValueKey(false)),
-                        ),
+                    /// the tab bar's glass covers the bottom, the shortcuts end above it
+                    child: SafeArea(
+                      top: false,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _Sky(collapsed: _collapsed, events: _events),
+                          HorizontalPadding(
+                            key: _card,
+                            padding: SpaceManager.screen,
+                            child: BmSwitcher(
+                              child: hasLocation
+                                  ? NextPrayerCard(key: const ValueKey(true), flight: _flight)
+                                  : const NoLocationCard(key: ValueKey(false)),
+                            ),
+                          ),
+                          BmSwitcher(
+                            child: hasLocation
+                                ? const OnlyPadding(
+                                    top: SpaceManager.s4,
+                                    start: SpaceManager.stripSide,
+                                    end: SpaceManager.stripSide,
+                                    child: PrayerStrip(),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                          const OnlyPadding(
+                            top: SpaceManager.homeCardGap,
+                            start: SpaceManager.screen,
+                            end: SpaceManager.screen,
+                            child: VerseCard(),
+                          ),
+                          const OnlyPadding(
+                            top: SpaceManager.homeCardGap,
+                            start: SpaceManager.screen,
+                            end: SpaceManager.screen,
+                            bottom: SpaceManager.s4,
+                            child: ShortcutsCard(),
+                          ),
+                        ],
                       ),
-                      BmSwitcher(
-                        child: hasLocation
-                            ? const OnlyPadding(
-                                top: SpaceManager.s4,
-                                start: SpaceManager.stripSide,
-                                end: SpaceManager.stripSide,
-                                child: PrayerStrip(),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                      const OnlyPadding(
-                        top: SpaceManager.homeCardGap,
-                        start: SpaceManager.screen,
-                        end: SpaceManager.screen,
-                        child: VerseCard(),
-                      ),
-                      const OnlyPadding(
-                        top: SpaceManager.homeCardGap,
-                        start: SpaceManager.screen,
-                        end: SpaceManager.screen,
-                        bottom: SpaceManager.s4,
-                        child: ShortcutsCard(),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -360,7 +394,7 @@ class _FlyingPrayer extends ConsumerWidget {
           from: from,
           pick: (from) => from.countdown,
           scale: FontSizeManager.countdown / FontSizeManager.title,
-          child: const Countdown(fontSize: FontSizeManager.title),
+          child: const RepaintBoundary(child: Countdown(fontSize: FontSizeManager.title)),
         ),
       ],
     );
@@ -442,7 +476,10 @@ class _Slot extends StatelessWidget {
 /// the sky's box ends where the card starts, the painter goes on 60 pt under the card. it grows
 /// with the header text, and the arc keeps its place from the box's bottom
 class _Sky extends ConsumerWidget {
-  const _Sky();
+  const _Sky({required this.collapsed, required this.events});
+
+  final ValueListenable<bool> collapsed;
+  final GlobalKey<SkyEventsState> events;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -450,35 +487,45 @@ class _Sky extends ConsumerWidget {
 
     /// above 1.0 the text reaches the arc's side, so the arc and its top label go under it
     final scaled = MediaQuery.textScalerOf(context).scale(1) > 1;
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minHeight: (SizeManager.homeSkyHeight - SpaceManager.homeCardOverlap).r,
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(child: SkyHeader(overlap: SpaceManager.homeCardOverlap.r)),
-          Positioned.fill(
-            child: AnimatedSwitcher(
-              duration: BmMotion.standard,
-              layoutBuilder: (current, previous) =>
-                  Stack(fit: StackFit.expand, children: [...previous, ?current]),
-              child: hasLocation ? const SkyLabels() : null,
+
+    /// around the whole stack, the text above the sky would take the hit from anything under it
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: true,
+      onTapUp: (details) => events.currentState?.tap(details.localPosition),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: (SizeManager.homeSkyHeight - SpaceManager.homeCardOverlap).r,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(child: SkyHeader(overlap: SpaceManager.homeCardOverlap.r)),
+            Positioned.fill(
+              child: SkyEvents(key: events, collapsed: collapsed),
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _HeaderText(),
-              if (scaled)
-                RSizedBox.vertical(
-                  BmSunArc.radius +
-                      SkyHeader.labelRoom(context) +
-                      SkyHeader.horizonAboveBottom(context),
-                ),
-            ],
-          ),
-        ],
+            Positioned.fill(
+              child: AnimatedSwitcher(
+                duration: BmMotion.standard,
+                layoutBuilder: (current, previous) =>
+                    Stack(fit: StackFit.expand, children: [...previous, ?current]),
+                child: hasLocation ? const SkyLabels() : null,
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _HeaderText(),
+                if (scaled)
+                  RSizedBox.vertical(
+                    BmSunArc.radius +
+                        SkyHeader.labelRoom(context) +
+                        SkyHeader.horizonAboveBottom(context),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

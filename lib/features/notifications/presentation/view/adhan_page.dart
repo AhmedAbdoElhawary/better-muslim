@@ -25,6 +25,17 @@ class AdhanPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    /// the dua sheet on top keeps the screen, it is being read. stopped from the shade counts too
+    ref.listen(playbackProvider.select((playback) => (playback.value?.id, playback.value?.ended)), (
+      last,
+      now,
+    ) {
+      final stopped = last?.$1 != null && now.$1 == null;
+      if ((stopped || now.$2 == true) && ModalRoute.of(context)?.isCurrent == true) {
+        Navigator.of(context).pop();
+      }
+    });
+
     /// leaving the screen is the same as stop, ios has no other place to stop it from
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {

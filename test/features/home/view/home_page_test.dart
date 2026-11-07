@@ -8,6 +8,7 @@ import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -118,6 +119,16 @@ void main() {
       await unmount(tester);
     });
 
+    testWidgets('a tick repaints only the countdown', (tester) async {
+      await pumpHome(tester, await designOverrides());
+
+      expect(
+        find.descendant(of: find.byType(Countdown), matching: find.byType(RepaintBoundary)),
+        findsOneWidget,
+      );
+      await unmount(tester);
+    });
+
     testWidgets('the card\'s name and countdown fly into the bar, a tap brings them back', (
       tester,
     ) async {
@@ -142,6 +153,91 @@ void main() {
       expect(flying, findsNothing);
       expect(tester.widget<Visibility>(cardRow).visible, isTrue);
       await unmount(tester);
+    });
+
+    group('the flight waits for the card', () {
+      final flying = find.byWidgetPredicate(
+        (widget) => widget is SemiBoldText && widget.text == Prayer.maghrib.nameKey,
+      );
+      final cardRow = find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.byType(Visibility),
+      );
+      final cardCountdown = find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.byType(Countdown),
+      );
+      ScrollPosition position(WidgetTester tester) =>
+          tester.state<ScrollableState>(find.byType(Scrollable).first).position;
+      Future<void> scrollBy(WidgetTester tester, double distance) async {
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          Offset(0, -(distance + kDragSlopDefault)),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      double start(WidgetTester tester) =>
+          tester.getTopLeft(find.byType(NextPrayerCard)).dy +
+          position(tester).pixels -
+          SizeManager.appBar;
+
+      testWidgets('the text stays in the card and the page rests until the card reaches the bar', (
+        tester,
+      ) async {
+        await pumpHome(tester, await designOverrides());
+        final rest = start(tester) - 20;
+        await scrollBy(tester, rest);
+
+        expect(position(tester).pixels, closeTo(rest, 1));
+        expect(flying, findsNothing);
+        expect(tester.widget<Visibility>(cardRow).visible, isTrue);
+        await unmount(tester);
+      });
+
+      testWidgets('a short page scrolls until the name is on the bar\'s title', (tester) async {
+        await pumpHome(tester, await designOverrides());
+        await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -800));
+        await tester.pumpAndSettle();
+
+        expect(tester.getTopLeft(find.byType(NextPrayerCard)).dy, lessThan(SizeManager.appBar));
+        expect(tester.getCenter(cardCountdown).dy, closeTo(SizeManager.appBar / 2, 8));
+        await unmount(tester);
+      });
+
+      testWidgets('halfway the text is level with the card', (tester) async {
+        await pumpHome(tester, await designOverrides());
+        final from = start(tester);
+        final to = position(tester).maxScrollExtent;
+        final gesture = await tester.startGesture(const Offset(200, 600));
+        await gesture.moveBy(const Offset(0, -40));
+        await tester.pump();
+        await gesture.moveBy(Offset(0, -(from + (to - from) / 2 - position(tester).pixels)));
+        await tester.pump();
+        await tester.pump();
+
+        expect(position(tester).pixels, closeTo(from + (to - from) / 2, 1));
+        final inBar = find.descendant(
+          of: find.byWidgetPredicate((widget) => widget.runtimeType.toString() == '_FlyingPrayer'),
+          matching: find.byType(Countdown),
+        );
+        expect(tester.getCenter(inBar).dy, closeTo(tester.getCenter(cardCountdown).dy, 1));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        await unmount(tester);
+      });
+
+      testWidgets('a stop inside the flight settles to its start or end', (tester) async {
+        await pumpHome(tester, await designOverrides());
+        final from = start(tester);
+        final to = position(tester).maxScrollExtent;
+        await scrollBy(tester, from + (to - from) * .3);
+        expect(position(tester).pixels, closeTo(from, 1));
+
+        await scrollBy(tester, (to - from) * .7);
+        expect(position(tester).pixels, closeTo(to, 1));
+        await unmount(tester);
+      });
     });
 
     testWidgets('the sky glows under the bar once it shows, the top glow switch takes it off', (
@@ -429,7 +525,8 @@ void main() {
       ];
       for (final (target, page) in taps) {
         await pumpHome(tester, await designOverrides());
-        await tester.ensureVisible(target);
+        if (target.hitTestable().evaluate().isEmpty) await tester.ensureVisible(target);
+        await tester.pumpAndSettle();
         await tester.tap(target);
         await tester.pumpAndSettle();
 

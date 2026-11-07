@@ -34,12 +34,14 @@ class DownloadsPage extends ConsumerWidget {
           children: [
             const CompactAppBar(StringsManager.downloads, heroTag: Routes.downloads),
             if (downloads == null || downloads.isEmpty) ...[
-              const Spacer(),
-              const EmptyState(
-                title: StringsManager.noDownloads,
-                body: StringsManager.noDownloadsBody,
+              const SymmetricPadding(
+                horizontal: SpaceManager.s4,
+                vertical: SpaceManager.savedGap,
+                child: EmptyState(
+                  title: StringsManager.noDownloads,
+                  body: StringsManager.noDownloadsBody,
+                ),
               ),
-              const Spacer(),
             ] else ...[
               Expanded(
                 child: ListView(

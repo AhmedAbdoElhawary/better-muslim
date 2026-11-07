@@ -27,6 +27,9 @@ abstract final class SpaceManager {
   static const double skyLabelEndAr = 100;
   static const double skyLabelEdge = 14;
   static const double arcLabelGap = 6;
+
+  /// the sun's radius is 8, it passes these labels without touching them
+  static const double arcLabelInsideGap = 10;
   static const double homeCardOverlap = 60;
   static const double homeGlowInset = 18;
   static const double homeCardGap = 14;

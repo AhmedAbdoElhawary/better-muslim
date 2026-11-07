@@ -52,7 +52,7 @@ class Settings extends Table {
 
   /// literal names, so drift exports the schema without running flutter code (the theme enums)
   TextColumn get digits => textEnum<Digits>().withDefault(const Constant('eastern'))();
-  TextColumn get theme => textEnum<BmThemeId>().withDefault(const Constant('qiyamEmerald'))();
+  TextColumn get theme => textEnum<BmThemeId>().withDefault(const Constant('moonlight'))();
   TextColumn get themeMode => textEnum<BmThemeMode>().withDefault(const Constant('followSky'))();
   BoolColumn get reduceMotion => boolean().withDefault(const Constant(false))();
   BoolColumn get haptics => boolean().withDefault(const Constant(true))();
@@ -379,7 +379,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 25;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -624,6 +624,10 @@ class AppDatabase extends _$AppDatabase {
       from23To24: (m, schema) async {
         await m.addColumn(schema.settings, schema.settings.textSize);
       },
+      from24To25: (m, schema) async {
+        /// only the column's default moves to moonlight, a saved theme stays
+        await m.alterTable(TableMigration(schema.settings));
+      },
     ),
   );
 
@@ -647,11 +651,37 @@ class AppDatabase extends _$AppDatabase {
   Future<void> updateSettings(SettingsCompanion values) =>
       into(settings).insertOnConflictUpdate(values.copyWith(id: const Value(1)));
 
-  /// a plain call with no riverpod, so milestone 5 can log from a notification. twice is once
-  Future<void> markPrayed(DateTime day, Prayer prayer) => into(prayerLog).insert(
-    PrayerLogCompanion.insert(date: day, prayer: prayer),
+  /// a plain call with no riverpod, so milestone 5 can log from a notification. twice is once.
+  /// a qada added from the notification is taken back, the prayer was prayed after all
+  Future<void> markPrayed(DateTime day, Prayer prayer) => transaction(() async {
+    await into(prayerLog).insert(
+      PrayerLogCompanion.insert(date: day, prayer: prayer),
+      mode: InsertMode.insertOrIgnore,
+    );
+    await removeQada(day, prayer);
+  });
+
+  /// a prayer day is in qada once, a second add changes nothing
+  Future<void> addQada(DateTime day, Prayer prayer) => into(qadaEntries).insert(
+    QadaEntriesCompanion.insert(prayer: prayer, missedOn: Value(day)),
     mode: InsertMode.insertOrIgnore,
   );
+
+  /// only the open one, a made up entry stays as it is
+  Future<void> removeQada(DateTime day, Prayer prayer) =>
+      (delete(qadaEntries)..where(
+            (row) =>
+                row.missedOn.equalsValue(day) &
+                row.prayer.equalsValue(prayer) &
+                row.madeUpAt.isNull(),
+          ))
+          .go();
+
+  Future<bool> isInQada(DateTime day, Prayer prayer) async =>
+      await (select(qadaEntries)
+            ..where((row) => row.missedOn.equalsValue(day) & row.prayer.equalsValue(prayer)))
+          .getSingleOrNull() !=
+      null;
 
   /// a plain call with no riverpod, like markPrayed
   Future<bool> isPrayed(DateTime day, Prayer prayer) async =>

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/clock/clock.dart';
@@ -16,6 +17,7 @@ import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/surfaces/surface_data.dart';
+import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
@@ -196,6 +198,14 @@ void main() {
           );
           expect(entry['sunrise'], todayTimes.sunrise?.millisecondsSinceEpoch, reason: reason);
           expect(entry['maghrib'], todayTimes.maghrib?.millisecondsSinceEpoch, reason: reason);
+          final arc = home.read(arcPointsProvider);
+          final night = arc?.kind == ArcKind.night;
+          expect(
+            entry['nightFrom'],
+            night ? arc!.start.millisecondsSinceEpoch : null,
+            reason: reason,
+          );
+          expect(entry['nightTo'], night ? arc!.end.millisecondsSinceEpoch : null, reason: reason);
 
           final hijri = home.read(hijriDateProvider(today));
           final month = l10n['en']!.tr(hijri.monthKey, const {});
@@ -224,7 +234,7 @@ void main() {
 
     test('no windows, it follows the app leaving and coming back', () {
       expect(data.containsKey('countdowns'), isFalse);
-      expect(data['countdown'], true);
+      expect(data['reminderMinutes'], defaults.reminderMinutes);
     });
 
     test('rolls to the next prayer at each prayer time', () {
@@ -253,9 +263,37 @@ void main() {
       expect(entryAt(now)['barFromLabel'], 'Asr ${clock(timeOf(0, Prayer.asr), makkah)} · prayed');
     });
 
-    test('the switch off and no place are sent as they are', () {
-      final off = build(makkah, now, settings: defaults.copyWith(prayerCountdown: false));
-      expect(off['countdown'], false);
+    group('the rehearsal', () {
+      late List<Json> entries;
+      final prayerAt = now.add(rehearsalPrayer).millisecondsSinceEpoch;
+      setUp(() => entries = entriesOf(withRehearsal(data, now)));
+
+      Json force(int millis) => entries.lastWhere((entry) => (entry['from']! as int) <= millis);
+
+      test('its entry counts down to the prayer from its own start', () {
+        final entry = force(now.millisecondsSinceEpoch);
+        expect(entry['at'], prayerAt);
+        expect(entry['start'], now.add(rehearsalReminder).millisecondsSinceEpoch);
+        expect(entry['prayer'], 'maghrib');
+      });
+
+      test('the real entry comes back after it, the minutes stay', () {
+        final real = entryAt(now);
+        final after = force(prayerAt);
+        expect(after['at'], real['at']);
+        expect(after.containsKey('start'), isFalse);
+        expect(withRehearsal(data, now)['reminderMinutes'], data['reminderMinutes']);
+      });
+
+      test('every entry keeps its order', () {
+        final froms = [for (final entry in entries) entry['from']! as int];
+        expect(froms, [...froms]..sort());
+      });
+    });
+
+    test('the reminder off and no place are sent as they are', () {
+      final off = build(makkah, now, settings: defaults.copyWith(reminderMinutes: 0));
+      expect(off['reminderMinutes'], 0);
       expect(entriesOf(off), isNotEmpty);
       expect(build(null, now)['place'], false);
     });
@@ -327,7 +365,7 @@ void main() {
     test('12 hour', () {
       final entry = first(build(makkah, now, use24h: false));
       expect(entry['time'], matches(r'^5:56\sPM$'));
-      expect(stripOf(entry)[3]['time'], matches(r'^5:56\sPM$'));
+      expect(stripOf(entry)[3]['time'], '5:56');
     });
 
     test('arabic with eastern digits', () {
@@ -376,7 +414,8 @@ void main() {
     Json colorsOf(Json data, String mode) => (data['colors']! as Json)[mode]! as Json;
 
     test("emerald's dark is the 5.6 tree's", () {
-      expect(colorsOf(build(makkah, now), 'dark'), {
+      final data = build(makkah, now, settings: defaults.copyWith(theme: BmThemeId.qiyamEmerald));
+      expect(colorsOf(data, 'dark'), {
         'top': 0xFF000000,
         'middle': 0xFF04100C,
         'bottom': 0xFF173328,
@@ -387,7 +426,7 @@ void main() {
         'label': 0xD9D9D3C2,
         'dim': 0xFF878C82,
         'gold': 0xFFD9C08A,
-        'live': colorsOf(build(makkah, now), 'dark')['live'],
+        'live': colorsOf(data, 'dark')['live'],
         'primary': 0xFFA88A52,
         'container': 0xFF221C10,
         'success': 0xFF5FB389,
@@ -457,10 +496,7 @@ void main() {
     test('no place still sends the mode and the colors', () {
       final data = build(null, now, settings: defaults.copyWith(themeMode: BmThemeMode.light));
       expect(data['mode'], 'light');
-      expect(
-        colorsOf(data, 'light')['text'],
-        bmThemes[BmThemeId.qiyamEmerald]!.light.text.toARGB32(),
-      );
+      expect(colorsOf(data, 'light')['text'], bmThemes[BmThemeId.moonlight]!.light.text.toARGB32());
     });
   });
 
@@ -470,7 +506,7 @@ void main() {
       'place',
       'language',
       'eastern',
-      'countdown',
+      'reminderMinutes',
       'mode',
       'colors',
       'until',
@@ -507,6 +543,8 @@ void main() {
       'barFromLabel',
       'sunrise',
       'maghrib',
+      'nightFrom',
+      'nightTo',
       'hijri',
       'hijriCity',
       'dateLine',
@@ -529,6 +567,19 @@ void main() {
         for (final strip in stripOf(item)) {
           expect(strip.keys.toSet(), cell.toSet());
         }
+      }
+    });
+
+    test('the ios widgets need only keys that are written, one missing fails the whole file', () {
+      final source = File('ios/PrayerWidgets/SurfaceData.swift').readAsStringSync();
+      final owners = {'Texts': texts, 'Entry': entry, 'Cell': cell};
+      var owner = top;
+      for (final line in source.split('enum SurfaceFile').first.split('\n')) {
+        final nested = RegExp(r'^  struct (\w+): Decodable').firstMatch(line);
+        if (nested != null) owner = owners[nested[1]]!;
+        final field = RegExp(r'^ +let (\w+): [^?]+$').firstMatch(line);
+        if (field == null) continue;
+        expect(line.startsWith('    ') ? owner : top, contains(field[1]), reason: line);
       }
     });
 

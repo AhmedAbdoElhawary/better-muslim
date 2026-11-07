@@ -31,39 +31,42 @@ class Countdown extends ConsumerWidget {
       digits,
     );
 
-    /// read once a minute and not a live region, so a screen reader isn't told every second
-    return Semantics(
-      label: prayer == null
-          ? null
-          : context.tr(StringsManager.timeLeftSemantics, {
-              'hours': context.formatDigits('$hours', digits),
-              'minutes': context.formatDigits('$minutes', digits),
-              'prayer': context.tr(prayer.nameKey),
-            }),
-      excludeSemantics: true,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            /// keyed from the end, so the seconds keep their slot when the hours lose a digit
-            for (final (index, digit) in text.split('').indexed)
-              RollingDigit(
-                digit,
-                key: ValueKey(text.length - index),
-                child: fontSize == null
-                    ? null
-                    : MediumText(
-                        digit,
-                        fontSize: fontSize,
-                        color: ThemeEnum.primary,
-                        translate: false,
-                        tabularFigures: true,
-                      ),
-              ),
-          ],
+    /// the roll repaints every second, without the boundary all of home repaints with it. read once
+    /// a minute and not a live region, so a screen reader isn't told every second
+    return RepaintBoundary(
+      child: Semantics(
+        label: prayer == null
+            ? null
+            : context.tr(StringsManager.timeLeftSemantics, {
+                'hours': context.formatDigits('$hours', digits),
+                'minutes': context.formatDigits('$minutes', digits),
+                'prayer': context.tr(prayer.nameKey),
+              }),
+        excludeSemantics: true,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              /// keyed from the end, so the seconds keep their slot when the hours lose a digit
+              for (final (index, digit) in text.split('').indexed)
+                RollingDigit(
+                  digit,
+                  key: ValueKey(text.length - index),
+                  child: fontSize == null
+                      ? null
+                      : MediumText(
+                          digit,
+                          fontSize: fontSize,
+                          color: ThemeEnum.primary,
+                          translate: false,
+                          tabularFigures: true,
+                        ),
+                ),
+            ],
+          ),
         ),
       ),
     );

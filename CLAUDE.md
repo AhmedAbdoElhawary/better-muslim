@@ -80,6 +80,11 @@ From the spec to the code:
     bar flight, the animated vector splash, the mushaf ink with no layer) **done, waiting for my
     review**, the tafsir release (T081) is mine.
 
+14. Performance and notifications (specs/011): nothing loops at rest, the adhan's sound and progress
+    on Android, one notification for the prayer with Mark prayed and Add to qada, the countdown set
+    by "Reminder before each prayer", azkar replacing each other. **Built, the numbers and the sound
+    wait for a run on my phone.**
+
 ## Run
 
 VS Code (Run and Debug) and Android Studio (run configurations) both have Dev, Staging and Prod.

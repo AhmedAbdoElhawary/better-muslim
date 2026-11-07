@@ -11,4 +11,7 @@ class SurfacesChannel {
   /// the plugin skips the file when it holds the same json, force writes it anyway
   Future<void> update(String json, {bool force = false}) =>
       _methods.invokeMethod<void>('update', {'json': json, 'force': force});
+
+  /// the dev page's check, android only
+  Future<Map<Object?, Object?>?> status() => _methods.invokeMethod('status');
 }

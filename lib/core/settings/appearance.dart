@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final themeIdProvider = Provider<BmThemeId>(
   (ref) => ref.watch(
-    settingsProvider.select((settings) => settings.value?.theme ?? BmThemeId.qiyamEmerald),
+    settingsProvider.select((settings) => settings.value?.theme ?? BmThemeId.moonlight),
   ),
 );
 

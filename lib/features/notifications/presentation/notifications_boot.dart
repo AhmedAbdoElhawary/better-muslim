@@ -138,6 +138,11 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       if (previous != null && next != null && previous != next) _onPeriod(next);
     });
 
+    /// a prayer logged while its adhan played keeps its notification until the adhan is over
+    ref.listenManual(playbackProvider.select((playback) => playback.value?.id), (_, id) {
+      if (id == null) _cleanUp();
+    });
+
     /// what changed during a fast day is scheduled on real times once it is off
     ref.listenManual(fastDayProvider, (_, on) {
       if (!on) _reschedule();
@@ -165,7 +170,12 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
       ..add(
         ref
             .read(databaseProvider)
-            .tableUpdates(const TableUpdateQuery.onTableName('prayer_log'))
+            .tableUpdates(
+              const TableUpdateQuery.allOf([
+                TableUpdateQuery.onTableName('prayer_log'),
+                TableUpdateQuery.onTableName('qada_entries'),
+              ]),
+            )
             .listen((_) => _cleanUp()),
       );
     final launched = await scheduler.launchPayload() ?? await channel.launchPayload();
@@ -181,7 +191,11 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     if (!mounted) return;
     await ref
         .read(notificationSchedulerProvider)
-        .init(markPrayed: l10n.tr(StringsManager.markPrayed, const {}), onTap: _onTap);
+        .init(
+          markPrayed: l10n.tr(StringsManager.markPrayed, const {}),
+          addToQada: l10n.tr(StringsManager.addToQada, const {}),
+          onTap: _onTap,
+        );
   }
 
   /// the design scenario never schedules, whatever calls this (FR-013)
@@ -219,6 +233,8 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
 
     /// a jump back from a fast day is a period change too, only a prayer that just began plays
     if (ref.read(clockProvider)().difference(at) > const Duration(minutes: 1)) return;
+    final player = ref.read(adhanPlayerProvider);
+    if (!await player.canSound() || !mounted) return;
     final day = ref.read(prayerDayProvider);
     final alert = Alert(
       day: day,
@@ -229,15 +245,16 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     );
     ref.read(routerProvider).push(Routes.adhan(prayer, day));
     _stopPreview();
-    await ref.read(adhanPlayerProvider).play(alert, await _texts(location), _recordingOf(prayer));
+    await player.play(alert, await _texts(location), _recordingOf(prayer));
   }
 
   /// mark prayed while the app runs comes here instead of the background isolate
   void _onTap(NotificationResponse response) {
     final payload = response.payload;
     if (payload == null || !mounted) return;
-    if (response.actionId == markPrayedAction) {
-      markFromPayload(payload, db: ref.read(databaseProvider));
+    final action = response.actionId;
+    if (action == markPrayedAction || action == addToQadaAction) {
+      markFromPayload(payload, qada: action == addToQadaAction, db: ref.read(databaseProvider));
     } else {
       _open(payload);
     }
@@ -267,6 +284,9 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     if ((!onboarding.done || onboarding.replay) && target is! AdhanTarget) return;
     switch (target) {
       case AdhanTarget(:final prayer, :final day, :final from):
+
+        /// nothing would play, an adhan screen with no sound never ends
+        if (!await player.canSound()) return router.go(Routes.prayerAt(day, prayer));
         router.push(Routes.adhan(prayer, day, from: from));
         _stopPreview();
         final location = ref.read(locationProvider);
@@ -281,17 +301,13 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     }
   }
 
-  /// a prayer logged anywhere takes its delivered adhan notification with it (FR-039)
   Future<void> _cleanUp() async {
     if (!mounted) return;
-    final scheduler = ref.read(notificationSchedulerProvider);
-    final db = ref.read(databaseProvider);
-    final playing = ref.read(playbackProvider).value?.id;
-    for (final id in await scheduler.activeIds()) {
-      final alert = alertFromId(id);
-      if (alert == null || alert.kind != AlertKind.adhan || id == playing) continue;
-      if (await db.isPrayed(alert.day, alert.prayer)) await scheduler.cancel(id);
-    }
+    await cleanDelivered(
+      ref.read(databaseProvider),
+      scheduler: ref.read(notificationSchedulerProvider),
+      playing: ref.read(playbackProvider).value?.id,
+    );
   }
 
   AdhanRecording _recordingOf(Prayer prayer) =>

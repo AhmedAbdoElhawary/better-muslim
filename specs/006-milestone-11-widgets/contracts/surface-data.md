@@ -53,6 +53,8 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
       "barFromLabel": "Asr 15:27 · prayed",
       "sunrise": 1792043700000,
       "maghrib": 1792076160000,
+      "nightFrom": null,
+      "nightTo": null,
       "hijri": "4 Jumada I 1448",
       "hijriCity": "4 Jumada I 1448 · Makkah",
       "dateLine": "Thu 15 Oct · 4 Jumada I",
@@ -86,9 +88,10 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 | until | end of the last entry. Past it: the out of date state. 0 with no place |
 | texts | the strings that don't change with the moment. `{duration}`, `{hours}`, `{minutes}`, `{prayer}` are filled natively |
 | entries | ascending `from`, the first at the start of the stretch the write falls in (the last boundary at or before it), so two writes in the same stretch give the same file and the equal check skips the second |
-| entries[].strip | always 5, Fajr first. Times of a polar day without one are "—" (as Home's strip) |
+| entries[].strip | always 5, Fajr first. Times have no AM or PM and a polar day without one is "—" (as Home's strip) |
 | entries[].next | 0 to 4, or null after Isha |
 | entries[].barFrom, sunrise, maghrib | null when the day has no such time |
+| entries[].nightFrom, nightTo | Home's night arc, maghrib to the next sunrise. Null by day and when the night has no such end |
 | entries[].reminder | null when the reminder is off |
 | entries[].light | which of `colors` the widgets use for this entry. Follow sky is light from sunrise until maghrib, and entries change at both |
 

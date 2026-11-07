@@ -3,9 +3,6 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:timezone/timezone.dart';
 
-/// MOTION 05, the final 10 minutes before the next prayer
-bool glowBreathing(Duration left) => left > Duration.zero && left <= const Duration(minutes: 10);
-
 /// duha has no prayer, so no cell is current then
 ({bool current, bool logged, bool past}) stripCellState(
   Prayer prayer,

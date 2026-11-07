@@ -199,6 +199,17 @@ void main() {
       expect(nudges.first.prayer, Prayer.asr);
     });
 
+    test('a nudge lasts until the next one, whether that one shows or not', () {
+      final days = daysFrom(DateTime(2026, 10, 15));
+      final nudges = buildNudges(
+        now: makkah(15, 15, 30),
+        days: days,
+        done: {(AzkarSet.morning, DateTime(2026, 10, 16))},
+      );
+
+      expect(nudges.first.lasts, days[1].fajr!.difference(days[0].asr!));
+    });
+
     test('a done window gets no nudge', () {
       final nudges = buildNudges(
         now: makkah(15, 15, 30),

@@ -15,6 +15,7 @@ class Alert {
     required this.at,
     required this.sound,
     this.before = Duration.zero,
+    this.lasts,
   });
 
   /// the prayer day it belongs to, so isha after midnight stays on the day it started
@@ -28,6 +29,9 @@ class Alert {
 
   /// how long before the prayer a reminder comes, zero for the adhan
   final Duration before;
+
+  /// a nudge goes when the next one's time comes, whether that one shows or not
+  final Duration? lasts;
 
   TZDateTime get prayerTime => at.add(before);
 
@@ -59,6 +63,22 @@ int azkarAlertId(DateTime day, AzkarSet set) {
 }
 
 const _firstAzkarId = 2000000;
+
+/// ios can't take a delivered notification away at a prayer time, so this runs when it can: all
+/// but the newest prayer one and the newest nudge
+List<int> staleDelivered(List<int> ids) {
+  /// a prayer's reminder comes before its adhan, their ids don't say so
+  int rank(int id) {
+    final slot = id % 10;
+    final count = Prayer.values.length;
+    return id - slot + slot % count * 2 + (slot < count ? 1 : 0);
+  }
+
+  final nudges = ids.where((id) => id >= _firstAzkarId).toList()..sort();
+  final prayers = ids.where((id) => alertFromId(id) != null).toList()
+    ..sort((a, b) => rank(a).compareTo(rank(b)));
+  return [...nudges.reversed.skip(1), ...prayers.reversed.skip(1)];
+}
 
 ({DateTime day, Prayer prayer, AlertKind kind})? alertFromId(int id) {
   if (id < 0 || id >= testAlertId) return null;

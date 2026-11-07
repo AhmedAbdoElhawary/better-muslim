@@ -10,6 +10,7 @@ import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:better_muslim/features/notifications/domain/schedule.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
@@ -30,6 +31,10 @@ class NotificationScheduler {
 
   static const _group = 'adhan';
 
+  /// a channel's importance can't be raised once made, so the banner needed a new id
+  static const reminderChannel = 'prayer_reminders';
+  static const _oldReminderChannels = ['reminders', 'prayer_countdown'];
+
   /// system surfaces use the dark qiyam emerald, whatever the app's theme
   static final _accent = ThemeEnum.primary.resolve(bmThemes[BmThemeId.qiyamEmerald]!.dark);
 
@@ -39,28 +44,34 @@ class NotificationScheduler {
   IOSFlutterLocalNotificationsPlugin? get _ios =>
       _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
 
-  /// asking is its own step, after the location (FR-004). ios keeps the action's title from here,
+  /// asking is its own step, after the location (FR-004). ios keeps the actions' titles from here,
   /// so this runs again when the language changes
-  Future<void> init({required String markPrayed, DidReceiveNotificationResponseCallback? onTap}) =>
-      _plugin.initialize(
-        settings: InitializationSettings(
-          android: const AndroidInitializationSettings('ic_notification'),
-          iOS: DarwinInitializationSettings(
-            requestAlertPermission: false,
-            requestBadgePermission: false,
-            requestSoundPermission: false,
-            notificationCategories: [
-              /// no foreground and no unlock, the log is written from the lock screen (research R5)
-              DarwinNotificationCategory(
-                _group,
-                actions: [DarwinNotificationAction.plain(markPrayedAction, markPrayed)],
-              ),
+  Future<void> init({
+    required String markPrayed,
+    required String addToQada,
+    DidReceiveNotificationResponseCallback? onTap,
+  }) => _plugin.initialize(
+    settings: InitializationSettings(
+      android: const AndroidInitializationSettings('ic_notification'),
+      iOS: DarwinInitializationSettings(
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+        notificationCategories: [
+          /// no foreground and no unlock, the log is written from the lock screen (research R5)
+          DarwinNotificationCategory(
+            _group,
+            actions: [
+              DarwinNotificationAction.plain(markPrayedAction, markPrayed),
+              DarwinNotificationAction.plain(addToQadaAction, addToQada),
             ],
           ),
-        ),
-        onDidReceiveNotificationResponse: onTap,
-        onDidReceiveBackgroundNotificationResponse: onNotificationActionInBackground,
-      );
+        ],
+      ),
+    ),
+    onDidReceiveNotificationResponse: onTap,
+    onDidReceiveBackgroundNotificationResponse: onNotificationActionInBackground,
+  );
 
   Future<bool> askPermission() async =>
       await (_ios?.requestPermissions(alert: true, sound: true) ??
@@ -92,6 +103,9 @@ class NotificationScheduler {
     return response?.payload;
   }
 
+  /// android replaces its own at each prayer, ios only here
+  bool get keepsOldOnes => defaultTargetPlatform == TargetPlatform.iOS;
+
   Future<List<int>> activeIds() async => [
     for (final notification in await _plugin.getActiveNotifications()) ?notification.id,
   ];
@@ -106,12 +120,30 @@ class NotificationScheduler {
   }
 
   /// what kotlin needs to fire and play an adhan on its own (data-model.md, alarm entry)
-  static Map<String, Object?> entryOf(Alert alert, AlertTexts texts, AdhanRecording recording) => {
+  static Map<String, Object?> entryOf(
+    Alert alert,
+    AlertTexts texts,
+    AdhanRecording recording, {
+    PrayerTone tone = PrayerTone.phone,
+    bool full = true,
+  }) => {
     'id': alert.id,
     'atMillis': alert.at.millisecondsSinceEpoch,
+    'full': full,
     'payload': payloadOf(alert),
+
+    /// its tap after the adhan, a sound of silent opens the prayer instead of the adhan again
+    'quietPayload': payloadOf(
+      Alert(
+        day: alert.day,
+        prayer: alert.prayer,
+        kind: alert.kind,
+        at: alert.at,
+        sound: PrayerSound.silent,
+      ),
+    ),
     'asset': recording.fullAsset(alert.prayer),
-    'channel': channelId(alert.prayer, PrayerSound.adhan, recording),
+    'channel': channelId(alert.prayer, alert.sound, recording, tone: tone),
     'title': texts.titleOf(alert),
     'body': texts.bodyOf(alert),
     'mediaTitle': texts.titleOf(alert),
@@ -121,6 +153,7 @@ class NotificationScheduler {
     'subText': texts.tr(StringsManager.soundAdhan),
     'actions': {
       'markPrayed': texts.tr(StringsManager.markPrayed),
+      'addToQada': texts.tr(StringsManager.addToQada),
       'stop': texts.tr(StringsManager.stop),
       'pause': texts.tr(StringsManager.pause),
       'play': texts.tr(StringsManager.play),
@@ -143,24 +176,24 @@ class NotificationScheduler {
       final exact = await _android?.canScheduleExactNotifications() ?? false;
       final native = <Map<String, Object?>>[];
       for (final alert in alerts) {
-        /// the full adhan needs code at prayer time with the app closed, the plugin can't run it.
-        /// without exact alarms it stays with the plugin and its clip (FR-023)
+        /// the countdown is android's reminder
+        if (_android != null && alert.kind == AlertKind.reminder) continue;
+
+        /// every prayer time needs code on android: it removes the last prayer's notification and
+        /// posts one that stays. without exact alarms the full adhan can't start, the clip plays
+        /// (FR-023)
         final recording = recordings[alert.prayer] ?? AdhanRecording.alafasy;
         final length = lengths[alert.prayer] ?? AdhanLength.full;
-        if (exact && alert.kind == AlertKind.adhan && _isFull(alert.sound, length)) {
-          native.add(entryOf(alert, texts, recording));
+        final tone = tones[alert.prayer] ?? PrayerTone.phone;
+        if (_android != null && alert.kind == AlertKind.adhan) {
+          final full = exact && _isFull(alert.sound, length);
+          native.add(entryOf(alert, texts, recording, tone: tone, full: full));
           continue;
         }
         await _plugin.zonedSchedule(
           id: alert.id,
           scheduledDate: alert.at,
-          notificationDetails: _details(
-            alert,
-            texts,
-            recording,
-            tones[alert.prayer] ?? PrayerTone.phone,
-            length,
-          ),
+          notificationDetails: _details(alert, texts, recording, tone, length),
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
               : AndroidScheduleMode.inexactAllowWhileIdle,
@@ -196,9 +229,10 @@ class NotificationScheduler {
     AlertTexts texts,
     AdhanRecording recording,
     PrayerTone tone,
-    AdhanLength length,
-  ) async {
-    final at = TZDateTime.now(next.at.location).add(const Duration(minutes: 1));
+    AdhanLength length, {
+    Duration after = const Duration(minutes: 1),
+  }) async {
+    final at = TZDateTime.now(next.at.location).add(after);
     final alert = Alert(
       day: next.day,
       prayer: next.prayer,
@@ -207,10 +241,11 @@ class NotificationScheduler {
       sound: next.sound,
     );
     final exact = await _android?.canScheduleExactNotifications() ?? false;
-    if (exact && _isFull(alert.sound, length)) {
+    if (_android != null) {
+      final full = exact && _isFull(alert.sound, length);
       await _channel.schedule([
         ..._native,
-        {...entryOf(alert, texts, recording), 'id': testAlertId},
+        {...entryOf(alert, texts, recording, tone: tone, full: full), 'id': testAlertId},
       ]);
       return;
     }
@@ -242,6 +277,9 @@ class NotificationScheduler {
     final android = _android;
     if (android == null) return;
     await android.createNotificationChannel(_reminders(texts));
+    for (final old in _oldReminderChannels) {
+      await android.deleteNotificationChannel(channelId: old);
+    }
     await android.createNotificationChannel(_azkar(texts));
     await android.createNotificationChannelGroup(
       AndroidNotificationChannelGroup(_group, texts.tr(StringsManager.soundAdhan)),
@@ -306,8 +344,11 @@ class NotificationScheduler {
   );
 
   /// one category for all five, default importance and the phone's own sound (FR-017)
-  static AndroidNotificationChannel _reminders(AlertTexts texts) =>
-      AndroidNotificationChannel('reminders', texts.tr(StringsManager.reminders));
+  static AndroidNotificationChannel _reminders(AlertTexts texts) => AndroidNotificationChannel(
+    reminderChannel,
+    texts.tr(StringsManager.reminders),
+    importance: Importance.high,
+  );
 
   /// the nudges never make a sound or buzz (FR-037)
   static AndroidNotificationChannel _azkar(AlertTexts texts) => AndroidNotificationChannel(
@@ -334,6 +375,7 @@ class NotificationScheduler {
           enableVibration: false,
           color: _accent,
           category: AndroidNotificationCategory.reminder,
+          timeoutAfter: alert.lasts?.inMilliseconds,
         ),
         iOS: const DarwinNotificationDetails(
           presentSound: false,
@@ -343,50 +385,22 @@ class NotificationScheduler {
         ),
       );
     }
-    if (alert.kind == AlertKind.reminder) {
-      final channel = _reminders(texts);
-      return NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          color: _accent,
-          category: AndroidNotificationCategory.reminder,
-        ),
 
-        /// into the list, no sound and no lit screen (FR-035)
-        iOS: const DarwinNotificationDetails(
+    /// into the list, no sound and no lit screen (FR-035)
+    if (alert.kind == AlertKind.reminder) {
+      return const NotificationDetails(
+        iOS: DarwinNotificationDetails(
           presentSound: false,
           presentBanner: true,
           presentList: true,
           interruptionLevel: InterruptionLevel.passive,
+          threadIdentifier: _group,
         ),
       );
     }
-    final channel = _channelOf(alert.prayer, alert.sound, recording, tone, texts);
     final sound = alert.sound;
     final full = _isFull(sound, length);
     return NotificationDetails(
-      android: AndroidNotificationDetails(
-        channel.id,
-        channel.name,
-        groupKey: _group,
-        importance: channel.importance,
-        priority: Priority.high,
-        playSound: channel.playSound,
-        sound: channel.sound,
-        enableVibration: channel.enableVibration,
-        color: _accent,
-        category: AndroidNotificationCategory.reminder,
-        actions: [
-          AndroidNotificationAction(
-            markPrayedAction,
-            texts.tr(StringsManager.markPrayed),
-            showsUserInterface: false,
-            cancelNotification: true,
-          ),
-        ],
-      ),
-
       /// ios plays the clip with the app closed. in front the adhan screen plays the full adhan
       /// instead, so the adhan notification itself stays out of the way (FR-021)
       iOS: DarwinNotificationDetails(
@@ -400,6 +414,7 @@ class NotificationScheduler {
         presentList: true,
         interruptionLevel: InterruptionLevel.timeSensitive,
         categoryIdentifier: _group,
+        threadIdentifier: _group,
       ),
     );
   }

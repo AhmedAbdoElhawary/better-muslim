@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/features/notifications/data/adhan_player.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +34,9 @@ void main() {
     double textScale = 1,
     bool reduceMotion = false,
     List<Override> extra = const [],
+    FakePlayer? given,
   }) async {
-    final player = FakePlayer();
+    final player = given ?? FakePlayer();
     await pumpHome(
       tester,
       [...await designOverrides(), adhanPlayerProvider.overrideWithValue(player), ...extra],
@@ -42,7 +46,6 @@ void main() {
     );
     containerOf(tester).read(routerProvider).push(Routes.adhan(Prayer.maghrib, day));
 
-    /// the halo breathes for ever, so no pumpAndSettle
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     return player;
@@ -67,6 +70,33 @@ void main() {
     }
     await unmount(tester);
   });
+
+  testWidgets('nothing runs on the screen while the adhan plays', (tester) async {
+    await openAdhan(tester);
+
+    expect(tester.binding.transientCallbackCount, 0);
+    await unmount(tester);
+  });
+
+  for (final (name, last) in [
+    ('the adhan ending', const Playback(id: 1, playing: false, ended: true)),
+    ('a stop from the shade', const Playback()),
+  ]) {
+    testWidgets('$name closes the screen', (tester) async {
+      final player = _LivePlayer();
+      addTearDown(player.states.close);
+      await openAdhan(tester, given: player);
+      player.states.add(const Playback(id: 1, playing: true));
+      await tester.pump();
+      expect(find.text('Stop adhan'), findsOneWidget);
+
+      player.states.add(last);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Stop adhan'), findsNothing);
+      await unmount(tester);
+    });
+  }
 
   testWidgets('stop silences the adhan and closes the screen', (tester) async {
     final player = await openAdhan(tester);
@@ -134,4 +164,11 @@ void main() {
     expect(find.text('Stop adhan').hitTestable(), findsOneWidget);
     await unmount(tester);
   });
+}
+
+class _LivePlayer extends FakePlayer {
+  final states = StreamController<Playback>.broadcast();
+
+  @override
+  Stream<Playback> get playback => states.stream;
 }

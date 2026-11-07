@@ -69,43 +69,15 @@ class _AlignedPulseState extends ConsumerState<AlignedPulse> with SingleTickerPr
   }
 }
 
-/// the 420 pt accent glow behind the dial, breathing while aligned (MOTION aglow). none under
-/// reduce motion
-class AlignedGlow extends ConsumerStatefulWidget {
+/// the 420 pt accent glow behind the dial while aligned. none under reduce motion
+class AlignedGlow extends ConsumerWidget {
   const AlignedGlow({super.key});
 
-  @override
-  ConsumerState<AlignedGlow> createState() => _AlignedGlowState();
-}
-
-class _AlignedGlowState extends ConsumerState<AlignedGlow> with SingleTickerProviderStateMixin {
-  late final _breathe = AnimationController(vsync: this, duration: BmMotion.glowLoop);
-
-  static const _low = .6;
-  static const _high = 1.0;
   static const _accent = .3;
   static const _fade = .62;
 
   @override
-  void initState() {
-    super.initState();
-    ref.listenManual(qiblaAlignedProvider, (_, aligned) {
-      if (aligned && !MediaQuery.disableAnimationsOf(context)) {
-        _breathe.repeat(reverse: true);
-      } else {
-        _breathe.stop();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _breathe.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final aligned = ref.watch(qiblaAlignedProvider);
     if (!aligned || MediaQuery.disableAnimationsOf(context)) return const SizedBox.shrink();
     final accent = context.getColor(ThemeEnum.accent);
@@ -116,21 +88,15 @@ class _AlignedGlowState extends ConsumerState<AlignedGlow> with SingleTickerProv
       right: -overhang,
       bottom: -overhang,
       child: IgnorePointer(
-        child: FadeTransition(
-          opacity: Tween(
-            begin: _low,
-            end: _high,
-          ).animate(CurvedAnimation(parent: _breathe, curve: BmMotion.breathe)),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  accent.withValues(alpha: _accent),
-                  accent.withValues(alpha: 0),
-                ],
-                stops: const [0, _fade],
-              ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                accent.withValues(alpha: _accent),
+                accent.withValues(alpha: 0),
+              ],
+              stops: const [0, _fade],
             ),
           ),
         ),

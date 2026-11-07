@@ -293,15 +293,8 @@
   "dark": "Dark",
   "light": "Light",
   "followSkyNote": "Follow sky switches to light after sunrise and back to dark at Maghrib.",
-  "notifAdhanTitle": "{prayer} · {time}",
+  "notifAdhanTitle": "{prayer} time in {city}",
   "@notifAdhanTitle": {
-    "placeholders": {
-      "prayer": {},
-      "time": {}
-    }
-  },
-  "notifAdhanBody": "It is time for {prayer} in {city}. Tap to mark it prayed.",
-  "@notifAdhanBody": {
     "placeholders": {
       "prayer": {},
       "city": {}
@@ -720,8 +713,6 @@
       "time": {}
     }
   },
-  "prayerCountdown": "Countdown before each prayer",
-  "prayerCountdownLine": "On the lock screen while the app is closed",
   "countdownChannel": "Prayer countdown",
   "openToSetPlace": "Open Better Muslim to set your place",
   "openToUpdateTimes": "Open Better Muslim to update the times",

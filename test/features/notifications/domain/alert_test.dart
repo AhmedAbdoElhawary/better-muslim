@@ -91,6 +91,33 @@ void main() {
     expect(back.id, alert.id);
   });
 
+  group('staleDelivered', () {
+    final day = DateTime(2026, 10, 15);
+    int id(Prayer prayer, AlertKind kind) => alertId(day, prayer, kind);
+
+    test('a prayer gives way to the next one, its reminder or its adhan', () {
+      final asr = id(Prayer.asr, AlertKind.adhan);
+      final reminder = id(Prayer.maghrib, AlertKind.reminder);
+      final maghrib = id(Prayer.maghrib, AlertKind.adhan);
+
+      expect(staleDelivered([asr, reminder]), [asr]);
+      expect(staleDelivered([reminder, maghrib, asr]), unorderedEquals([reminder, asr]));
+    });
+
+    test('evening replaces morning, and the prayers leave the nudges alone', () {
+      final morning = azkarAlertId(day, AzkarSet.morning);
+      final evening = azkarAlertId(day, AzkarSet.evening);
+      final asr = id(Prayer.asr, AlertKind.adhan);
+
+      expect(staleDelivered([morning, evening, asr]), [morning]);
+      expect(staleDelivered([morning, asr]), isEmpty);
+    });
+
+    test('the test and the open the app ones stay', () {
+      expect(staleDelivered([testAlertId, quietAlertId]), isEmpty);
+    });
+  });
+
   test('a broken payload gives null', () {
     expect(alertFromPayload('2026-10-15|maghrib'), isNull);
     expect(alertFromPayload('2026-10-15|noon|adhan|adhan|1'), isNull);

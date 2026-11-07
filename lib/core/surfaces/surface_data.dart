@@ -42,7 +42,7 @@ Map<String, Object?> buildSurfaceData({
     'place': location != null,
     'language': language,
     'eastern': language == 'ar' && digits == Digits.eastern,
-    'countdown': settings.prayerCountdown,
+    'reminderMinutes': settings.reminderMinutes,
     'mode': settings.themeMode.name,
     'colors': {'light': _colorsOf(theme.light, dark: false), 'dark': _colorsOf(theme.dark)},
     'until': 0,
@@ -80,8 +80,13 @@ Map<String, Object?> buildSurfaceData({
       hijriAdjust: settings.hijriAdjust,
     ),
   );
-  String clock(DateTime time) =>
-      formatTimeIn(TZDateTime.from(time, zone), language: language, use24h: use24h, digits: digits);
+  String clock(DateTime time, {bool period = true}) => formatTimeIn(
+    TZDateTime.from(time, zone),
+    language: language,
+    use24h: use24h,
+    digits: digits,
+    period: period,
+  );
 
   final local = TZDateTime.from(now, zone);
   final today = DateTime(local.year, local.month, local.day);
@@ -142,6 +147,16 @@ Map<String, Object?> buildSurfaceData({
       },
     };
 
+    /// home's night arc, before sunrise the night is yesterday's. null by day and without both ends
+    final sunrise = times.sunrise;
+    final maghrib = times.maghrib;
+    final daytime =
+        sunrise != null && maghrib != null && !moment.isBefore(sunrise) && moment.isBefore(maghrib);
+    final evening = maghrib != null && !moment.isBefore(maghrib);
+    final nightFrom = evening ? maghrib : timesOn(plus(date, -1)).maghrib;
+    final nightTo = evening ? timesOn(plus(date, 1)).sunrise : sunrise;
+    final night = !daytime && nightFrom != null && nightTo != null;
+
     String? barFromLabel;
     if (period != null && barFrom != null) {
       final started = Prayer.values.asNameMap()[period.name];
@@ -166,8 +181,10 @@ Map<String, Object?> buildSurfaceData({
       'nameNow': tr(StringsManager.prayerNow, {'prayer': name}),
       'barFrom': barFrom?.millisecondsSinceEpoch,
       'barFromLabel': barFromLabel,
-      'sunrise': times.sunrise?.millisecondsSinceEpoch,
-      'maghrib': times.maghrib?.millisecondsSinceEpoch,
+      'sunrise': sunrise?.millisecondsSinceEpoch,
+      'maghrib': maghrib?.millisecondsSinceEpoch,
+      'nightFrom': night ? nightFrom.millisecondsSinceEpoch : null,
+      'nightTo': night ? nightTo.millisecondsSinceEpoch : null,
       'hijri': hijriLine,
       'hijriCity': '$hijriLine · $city',
       'dateLine': number(dateLineIn(date, hijriLineIn(hijri, month, year: false), language)),
@@ -185,7 +202,7 @@ Map<String, Object?> buildSurfaceData({
             'prayer': cell.name,
             'name': tr(cell.nameKey),
             'time': switch (shown.timeOf(cell)) {
-              final time? => clock(time),
+              final time? => clock(time, period: false),
               null => '—',
             },
             'logged': marks.contains(cell),
@@ -246,4 +263,31 @@ double _ratio(Color text, Color under) {
   final front = Color.alphaBlend(text, under).computeLuminance();
   final back = under.computeLuminance();
   return (math.max(front, back) + .05) / (math.min(front, back) + .05);
+}
+
+/// the dev page's rehearsal, the real alarms with no clock to change
+const rehearsalReminder = Duration(seconds: 30);
+const rehearsalPrayer = Duration(seconds: 90);
+
+/// the entry in force goes on after it, so a killed app leaves nothing to clean up
+Map<String, Object?> withRehearsal(Map<String, Object?> data, DateTime now) {
+  final entries = (data['entries']! as List).cast<Map<String, Object?>>();
+  final from = now.millisecondsSinceEpoch;
+  final at = now.add(rehearsalPrayer).millisecondsSinceEpoch;
+  int fromOf(Map<String, Object?> entry) => entry['from']! as int;
+  final shown = entries.lastWhere((entry) => fromOf(entry) <= from);
+  return {
+    ...data,
+    'entries': [
+      ...entries.where((entry) => fromOf(entry) <= from),
+      {
+        ...shown,
+        'from': from,
+        'at': at,
+        'start': now.add(rehearsalReminder).millisecondsSinceEpoch,
+      },
+      {...shown, 'from': at},
+      ...entries.where((entry) => fromOf(entry) > at),
+    ],
+  };
 }

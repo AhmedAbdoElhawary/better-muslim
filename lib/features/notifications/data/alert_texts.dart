@@ -53,7 +53,7 @@ class AlertTexts {
   String titleOf(Alert alert) => switch (alert.kind) {
     AlertKind.adhan => l10n.tr(StringsManager.notifAdhanTitle, {
       'prayer': tr(alert.prayer.nameKey),
-      'time': timeOf(alert),
+      'city': city,
     }),
     AlertKind.reminder => l10n.tr(StringsManager.notifReminderTitle, {
       'prayer': tr(alert.prayer.nameKey),
@@ -63,10 +63,7 @@ class AlertTexts {
   };
 
   String bodyOf(Alert alert) => switch (alert.kind) {
-    AlertKind.adhan => l10n.tr(StringsManager.notifAdhanBody, {
-      'prayer': tr(alert.prayer.nameKey),
-      'city': city,
-    }),
+    AlertKind.adhan => timeOf(alert),
     AlertKind.reminder => l10n.tr(StringsManager.notifReminderBody, {
       'time': timeOf(alert),
       'city': city,

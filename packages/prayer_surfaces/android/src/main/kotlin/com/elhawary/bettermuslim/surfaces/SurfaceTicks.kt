@@ -7,10 +7,10 @@ import android.content.Intent
 import android.os.Build
 
 // the minute tick at the next moment anything shown changes (contracts/native-surfaces.md), and
-// the alarm at the shown countdown's prayer time, where it rolls to the next
+// the alarm at the next reminder, where its countdown appears
 object SurfaceTicks {
     const val ACTION_TICK = "com.elhawary.bettermuslim.surfaces.TICK"
-    const val ACTION_ROLL = "com.elhawary.bettermuslim.surfaces.ROLL"
+    const val ACTION_START = "com.elhawary.bettermuslim.surfaces.START"
 
     fun arm(context: Context) {
         val data = SurfaceData.load(context)
@@ -28,14 +28,17 @@ object SurfaceTicks {
             alarms.set(AlarmManager.RTC, data.nextRedraw(now), intent(context, ACTION_TICK))
         }
 
-        // wakeup, so a sleeping phone's lock screen shows the next prayer right away
-        val roll = shown?.getLong("at")
-        if (roll == null) {
-            alarms.cancel(intent(context, ACTION_ROLL))
+        // an alarm clock, oppo gives exact alarms a window of up to an hour
+        val start = data?.nextStart(now)
+        if (start == null) {
+            alarms.cancel(intent(context, ACTION_START))
         } else if (exact) {
-            alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, roll, intent(context, ACTION_ROLL))
+            alarms.setAlarmClock(
+                AlarmManager.AlarmClockInfo(start, PrayerWidget.open(context, PrayerWidget.HOME)),
+                intent(context, ACTION_START),
+            )
         } else {
-            alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, roll, intent(context, ACTION_ROLL))
+            alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, start, intent(context, ACTION_START))
         }
     }
 

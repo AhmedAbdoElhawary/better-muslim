@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:better_muslim/core/extensions/l10n.dart';
-import 'package:better_muslim/core/power/power_saving.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -45,9 +44,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
   late final AnimationController _stars = AnimationController(vsync: this, value: 1);
 
   late final Ticker _ticker = createTicker(_onTick);
-  late final Ticker _ambientTicker = createTicker(_onAmbient);
   final _frame = ValueNotifier(0);
-  final _ambient = ValueNotifier(Duration.zero);
   final _ready = ValueNotifier(false);
   late final AppLifecycleListener _lifecycle;
 
@@ -94,8 +91,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
 
   var _lastTick = Duration.zero;
 
-  static const _frameTime = Duration(milliseconds: 33);
-
   /// the entrance's parts: the sky, then the dome rising, then the words
   static const _skyIn = Interval(0, .35);
   static const _domeAt = .15;
@@ -129,12 +124,10 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
   void dispose() {
     _lifecycle.dispose();
     _ticker.dispose();
-    _ambientTicker.dispose();
     _build.dispose();
     _entrance.dispose();
     _stars.dispose();
     _frame.dispose();
-    _ambient.dispose();
     _ready.dispose();
     _shader?.dispose();
     super.dispose();
@@ -146,11 +139,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
     if (_ticker.isActive) return;
     _lastTick = Duration.zero;
     _ticker.start();
-  }
-
-  void _onAmbient(Duration elapsed) {
-    /// 30 fps is enough for a slow loop and halves the repaints (MOTION tiers)
-    if (elapsed - _ambient.value >= _frameTime) _ambient.value = elapsed;
   }
 
   void _onTick(Duration elapsed) {
@@ -425,19 +413,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final scope = StepScope.maybeOf(context);
-
-    /// unknown while it is read again on resume, so the loop restarts and fades back in
-    final powerSavingOff = ref.watch(
-      powerSavingProvider.select((saving) => !saving.isLoading && saving.value == false),
-    );
-    final run = powerSavingOff && !_reduce && TickerMode.valuesOf(context).enabled;
-    if (run && !_ambientTicker.isActive) {
-      _ambient.value = Duration.zero;
-      _ambientTicker.start();
-    } else if (!run && _ambientTicker.isActive) {
-      _ambientTicker.stop();
-    }
-    final ambient = run ? _ambient : null;
     final secondary = scope?.secondaryAnimation ?? kAlwaysDismissedAnimation;
 
     return PopScope(
@@ -489,14 +464,12 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
                           shown: _reduce ? _entrance.value : _skyIn.transform(_entrance.value),
                           horizon: ch.horizonIn(b) * out(WelcomePart.sky),
                           mark: ch.markIn(b) * out(WelcomePart.sky),
-                          ambient: ambient,
                         ),
                         WelcomeStars(
                           ch: ch,
                           origin: ball,
                           flight: _flight,
                           shown: _stars.value * out(WelcomePart.stars),
-                          ambient: ambient,
                         ),
                         WelcomeSun(
                           center: ball,
@@ -504,7 +477,6 @@ class _WelcomePageState extends ConsumerState<WelcomePage> with TickerProviderSt
                           opacity: _fill,
                           horizonY: ch.horizonY,
                           unit: ch.unit,
-                          ambient: ambient,
                         ),
                         IntroLayer(
                           ch: ch,

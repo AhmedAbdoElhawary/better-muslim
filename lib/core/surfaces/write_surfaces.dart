@@ -22,6 +22,7 @@ Future<void> writeSurfaces(
   required bool use24h,
   required String? phoneZone,
   bool force = false,
+  bool rehearsal = false,
   DateTime? now,
 }) async {
   final at = now ?? DateTime.now();
@@ -59,7 +60,7 @@ Future<void> writeSurfaces(
     use24h: use24h,
   );
   try {
-    await channel.update(jsonEncode(data), force: force);
+    await channel.update(jsonEncode(rehearsal ? withRehearsal(data, at) : data), force: force);
   } on PlatformException catch (error, stack) {
     await CrashReporter.instance.recordError(error, stack, context: {'reason': 'write surfaces'});
   }

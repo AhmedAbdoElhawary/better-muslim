@@ -2,20 +2,17 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:better_muslim/core/widgets/ambient.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// 4.10's ten stars: out of the sun to their places, then twinkling (R7)
+/// 4.10's ten stars: out of the sun to their places (R7)
 class WelcomeStars extends ConsumerWidget {
   const WelcomeStars({
     required this.ch,
     required this.origin,
     required this.flight,
     required this.shown,
-    required this.ambient,
     super.key,
   });
 
@@ -29,8 +26,6 @@ class WelcomeStars extends ConsumerWidget {
 
   /// 0 hides them, the fade when going back and 4.11 covering the welcome
   final double shown;
-
-  final ValueListenable<Duration>? ambient;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,7 +41,6 @@ class WelcomeStars extends ConsumerWidget {
           starOpacity: context.starOpacity,
           color: context.getColor(ThemeEnum.onSkyBright),
           still: MediaQuery.disableAnimationsOf(context),
-          ambient: ambient,
         ),
       ),
     );
@@ -63,8 +57,7 @@ class WelcomeStarsPainter extends CustomPainter {
     required this.starOpacity,
     required this.color,
     required this.still,
-    this.ambient,
-  }) : super(repaint: ambient);
+  });
 
   final SunChoreography ch;
   final Offset origin;
@@ -78,7 +71,6 @@ class WelcomeStarsPainter extends CustomPainter {
 
   /// reduce motion: they fade in place, no flight
   final bool still;
-  final ValueListenable<Duration>? ambient;
 
   /// x, y, size from the 4.10 tree
   static const stars = [
@@ -94,8 +86,6 @@ class WelcomeStarsPainter extends CustomPainter {
     [300.0, 320.0, 1.5],
   ];
 
-  static const _fadeIn = 300.0;
-
   @override
   void paint(Canvas canvas, Size size) {
     if (shown <= 0) return;
@@ -103,18 +93,15 @@ class WelcomeStarsPainter extends CustomPainter {
 
     /// the tree's 393 pt frame, centred on a wider screen like the sun
     final left = size.width / 2 - SunChoreography.designWidth / 2 * u;
-    final ms = ambient?.value.inMilliseconds.toDouble();
-    final loop = ms == null ? 0.0 : (ms / _fadeIn).clamp(0.0, 1.0);
     for (final (i, star) in stars.indexed) {
       final t = still ? ch.starsInPlace(flight) : ch.starFlight(flight, i);
       if (t <= 0) continue;
       final place = Offset(left + (star[0] + star[2] / 2) * u, (star[1] + star[2] / 2) * u);
       final at = still ? place : Offset.lerp(origin, place, t)!;
-      final twinkle = .15 + .85 * ambientBreathe((ms ?? 0) + (i % 5) * 600, 1800 + (i % 7) * 410);
 
       /// bright as they leave the sun, the sky's own strength once landed
       final land = lerpDouble(1, strength, t)!;
-      final opacity = starOpacity * land * shown * (still ? t : 1) * (1 + loop * t * (twinkle - 1));
+      final opacity = starOpacity * land * shown * (still ? t : 1);
       canvas.drawCircle(
         at,
         star[2] / 2 * u * (still ? 1 : t),
@@ -133,6 +120,5 @@ class WelcomeStarsPainter extends CustomPainter {
       old.strength != strength ||
       old.starOpacity != starOpacity ||
       old.color != color ||
-      old.still != still ||
-      old.ambient != ambient;
+      old.still != still;
 }

@@ -1,12 +1,11 @@
-import 'package:better_muslim/core/power/power_saving.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
+import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -31,21 +30,18 @@ void main() {
   bool same(BmSkyStops a, BmSkyStops b) =>
       close(a.top, b.top) && close(a.mid, b.mid) && close(a.bottom, b.bottom);
 
-  /// the channel never answers under fake time, so tests that want the loop say what it is
-  Override powerSaving(bool saving) => powerSavingProvider.overrideWith((ref) async => saving);
-
   testWidgets('16:32 has the asr sky with no stars, 21:00 the isha sky with stars and no sun', (
     tester,
   ) async {
     await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
-    expect(same(painter(tester).stops, themeSky(BmThemeId.qiyamEmerald)[BmSkyState.asr]!), isTrue);
+    expect(same(painter(tester).stops, themeSky(BmThemeId.moonlight)[BmSkyState.asr]!), isTrue);
     expect(painter(tester).starsStrength, 0);
     expect(painter(tester).points!.kind, ArcKind.day);
     expect(painter(tester).markerShare, isNotNull);
     await unmount(tester);
 
     await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 18)));
-    expect(same(painter(tester).stops, themeSky(BmThemeId.qiyamEmerald)[BmSkyState.isha]!), isTrue);
+    expect(same(painter(tester).stops, themeSky(BmThemeId.moonlight)[BmSkyState.isha]!), isTrue);
     expect(painter(tester).starsStrength, 1);
     expect(painter(tester).points!.kind, ArcKind.night);
     await unmount(tester);
@@ -75,8 +71,8 @@ void main() {
         settle: false,
       );
       await tester.pump();
-      final asr = themeSky(BmThemeId.qiyamEmerald)[BmSkyState.asr]!;
-      final maghrib = themeSky(BmThemeId.qiyamEmerald)[BmSkyState.maghrib]!;
+      final asr = themeSky(BmThemeId.moonlight)[BmSkyState.asr]!;
+      final maghrib = themeSky(BmThemeId.moonlight)[BmSkyState.maghrib]!;
       expect(same(painter(tester).stops, asr), isTrue);
 
       await tester.pump(const Duration(seconds: 1));
@@ -91,57 +87,16 @@ void main() {
     });
   }
 
-  group('the ambient loop', () {
-    testWidgets('runs while home is visible', (tester) async {
-      await pumpHome(
-        tester,
-        makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32), extra: [powerSaving(false)]),
-        settle: false,
-      );
+  testWidgets('nothing runs while home is at rest', (tester) async {
+    await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
 
-      /// the power check answers after the first frame
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(painter(tester).elapsed, isNotNull);
-      expect(tester.binding.transientCallbackCount, greaterThan(0));
-
-      /// another tab: TickerMode turns it off
-      await tester.tap(find.text('Prayer'));
-      await tester.pump(const Duration(seconds: 1));
-      await tester.pump(const Duration(seconds: 1));
-      await tester.pump(const Duration(seconds: 1));
-      expect(tester.binding.transientCallbackCount, 0);
-      await unmount(tester);
-    });
-
-    testWidgets('stops with reduce motion', (tester) async {
-      await pumpHome(
-        tester,
-        makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32), extra: [powerSaving(false)]),
-        reduceMotion: true,
-      );
-
-      expect(painter(tester).elapsed, isNull);
-      expect(tester.binding.transientCallbackCount, 0);
-      await unmount(tester);
-    });
-
-    testWidgets('stops in low power mode or battery saver', (tester) async {
-      await pumpHome(
-        tester,
-        makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32), extra: [powerSaving(true)]),
-      );
-
-      expect(painter(tester).elapsed, isNull);
-      expect(tester.binding.transientCallbackCount, 0);
-      await unmount(tester);
-    });
+    expect(tester.binding.transientCallbackCount, 0);
+    await unmount(tester);
   });
 
   testWidgets('the design scenario paints the theme base sky (FR-013)', (tester) async {
     await pumpHome(tester, await designOverrides());
-    final dark = bmThemes[BmThemeId.qiyamEmerald]!.dark;
+    final dark = bmThemes[BmThemeId.moonlight]!.dark;
 
     expect(same(painter(tester).stops, BmSkyStops(dark.sky1, dark.sky2, dark.sky3)), isTrue);
     expect(painter(tester).starsStrength, 1);
@@ -209,6 +164,56 @@ void main() {
       expect(labels.first.rect.left, lessThan(labels.last.rect.left));
       await unmount(tester);
     });
+
+    /// every corner of the label is under the arc
+    bool insideArc(WidgetTester tester, Rect rect) {
+      final flow = find.descendant(of: find.byType(SkyLabels), matching: find.byType(Flow));
+      final delegate = tester.widget<Flow>(flow).delegate as SkyLabelsFlow;
+      final box = tester.renderObject<RenderBox>(flow);
+      final center = box.localToGlobal(
+        Offset(delegate.center, box.size.height - delegate.horizonAboveBottom),
+      );
+      return [
+        rect.topLeft,
+        rect.topRight,
+        rect.bottomLeft,
+        rect.bottomRight,
+      ].every((corner) => (corner - center).distance < delegate.radius);
+    }
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('arabic at $scale keeps asr inside the arc', (tester) async {
+        await pumpHome(
+          tester,
+          makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)),
+          locale: const Locale('ar'),
+          textScale: scale,
+        );
+
+        expect(insideArc(tester, skyLabels(tester)[2].rect), isTrue);
+        await unmount(tester);
+      });
+    }
+
+    testWidgets('arabic moves isha inside at night, fajr stays outside', (tester) async {
+      await pumpHome(
+        tester,
+        makkahAt(tester, DateTime.utc(2026, 10, 15, 20)),
+        locale: const Locale('ar'),
+      );
+      final labels = skyLabels(tester);
+
+      expect(insideArc(tester, labels[1].rect), isTrue);
+      expect(insideArc(tester, labels[3].rect), isFalse);
+      await unmount(tester);
+    });
+
+    testWidgets('english keeps asr outside the arc', (tester) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+
+      expect(insideArc(tester, skyLabels(tester)[2].rect), isFalse);
+      await unmount(tester);
+    });
   });
 
   group('day turns into night (US10)', () {
@@ -262,7 +267,7 @@ void main() {
       await unmount(tester);
     });
 
-    SkyHeaderPainter still(ArcKind kind, ValueNotifier<Duration>? elapsed) {
+    SkyHeaderPainter still(ArcKind kind) {
       final zone = tz.getLocation('Asia/Riyadh');
       final start = tz.TZDateTime(zone, 2026, 10, 15, 6);
       final end = tz.TZDateTime(zone, 2026, 10, 15, 18);
@@ -281,7 +286,6 @@ void main() {
         starOpacity: 1,
         unit: 1,
         horizonAboveBottom: 80,
-        elapsed: elapsed,
       );
     }
 
@@ -291,26 +295,13 @@ void main() {
       return canvas.invocations.where((i) => i.invocation.memberName == call).toList();
     }
 
-    test('the sun has twelve rays only while the loop runs', () {
-      final lines = drawn(still(ArcKind.day, null), #drawLine).length;
-
-      expect(
-        drawn(still(ArcKind.day, ValueNotifier(const Duration(seconds: 2))), #drawLine),
-        hasLength(lines + 12),
-      );
-    });
-
-    test('the night stars twinkle only while the loop runs', () {
-      List<double> alphas(ValueNotifier<Duration>? elapsed) => [
-        for (final call in drawn(still(ArcKind.night, elapsed), #drawPath))
+    test('the night stars stay still', () {
+      final alphas = [
+        for (final call in drawn(still(ArcKind.night), #drawPath))
           (call.invocation.positionalArguments[1] as Paint).color.a,
       ];
 
-      expect(alphas(null), [1.0, 1.0, 1.0]);
-      final a = alphas(ValueNotifier(const Duration(milliseconds: 1000)));
-      final b = alphas(ValueNotifier(const Duration(milliseconds: 1900)));
-      expect(a, hasLength(3));
-      expect(a, isNot(b));
+      expect(alphas, [1.0, 1.0, 1.0]);
     });
   });
 }

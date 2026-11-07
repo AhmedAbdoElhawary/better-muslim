@@ -19,6 +19,8 @@ import 'generated/schema_v2.dart' as v2;
 import 'generated/schema_v20.dart' as v20;
 import 'generated/schema_v21.dart' as v21;
 import 'generated/schema_v22.dart' as v22;
+import 'generated/schema_v24.dart' as v24;
+import 'generated/schema_v25.dart' as v25;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
@@ -971,6 +973,21 @@ void main() {
       ),
       validateItems: (newDb) async {
         expect((await newDb.select(newDb.settings).getSingle()).reciter, 'husary');
+      },
+    );
+  });
+
+  test('v24 to v25 keeps the saved theme', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 24,
+      newVersion: 25,
+      createOld: v24.DatabaseAtV24.new,
+      createNew: v25.DatabaseAtV25.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) =>
+          batch.insert(oldDb.settings, const v24.SettingsCompanion(theme: Value('iznik'))),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).theme, 'iznik');
       },
     );
   });

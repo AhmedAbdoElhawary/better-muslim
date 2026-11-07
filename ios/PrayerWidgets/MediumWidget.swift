@@ -33,11 +33,13 @@ private struct MediumContent: View {
             .font(fonts.display(24))
             .foregroundColor(palette.text)
             .lineLimit(1)
+            .line(24, 1.15)
           Text(entry.hijriCity)
             .font(fonts.body(12))
             .foregroundColor(palette.label)
             .lineLimit(1)
             .truncationMode(.tail)
+            .line(12)
         }
         Spacer(minLength: 8)
         Text(data.hm(entry, at: date))
@@ -72,23 +74,25 @@ private struct StripCell: View {
   var body: some View {
     VStack(spacing: 3) {
       Text(cell.name)
-        .font(fonts.body(11, weight: current ? 600 : 400))
+        .font(fonts.body(10, weight: current ? 600 : 400))
         .foregroundColor(current ? palette.gold : palette.label)
         .lineLimit(1)
         .minimumScaleFactor(0.8)
+        .line(10)
       Text(cell.time)
-        .font(fonts.numbers(14, weight: 500))
+        .font(fonts.numbers(12, weight: 500))
         .foregroundColor(palette.text)
         .lineLimit(1)
         .minimumScaleFactor(0.7)
+        .line(12)
       ZStack {
         if cell.logged { Check(size: 10) }
       }
       .frame(height: 10)
     }
     .frame(maxWidth: .infinity)
-    .padding(.top, 8)
-    .padding(.bottom, 7)
+    /// the tree's height, only the text went smaller to fit the width
+    .frame(height: 61)
     .background(
       RoundedRectangle(cornerRadius: 12, style: .continuous)
         .fill(current ? palette.primary.opacity(0.2) : palette.text.opacity(0.05))

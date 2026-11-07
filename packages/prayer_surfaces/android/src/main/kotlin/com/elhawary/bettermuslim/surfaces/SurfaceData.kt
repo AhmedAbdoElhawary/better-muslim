@@ -14,7 +14,7 @@ class SurfaceData(private val json: JSONObject) {
     val place get() = json.optBoolean("place")
     val isArabic get() = json.optString("language") == "ar"
     val eastern get() = json.optBoolean("eastern")
-    val countdown get() = json.optBoolean("countdown")
+    val reminderMinutes get() = json.optInt("reminderMinutes")
     val mode get() = json.optString("mode")
     val until get() = json.optLong("until")
     val texts: JSONObject get() = json.getJSONObject("texts")
@@ -30,6 +30,15 @@ class SurfaceData(private val json: JSONObject) {
     fun palette(light: Boolean) = Palette(json.optJSONObject("colors")?.optJSONObject(if (light) "light" else "dark"))
 
     fun entryAt(now: Long): JSONObject? = entries.lastOrNull { it.getLong("from") <= now }
+
+    // when the countdown to this entry's prayer appears, the dev page's rehearsal says its own
+    fun startOf(entry: JSONObject): Long? = when {
+        entry.has("start") -> entry.getLong("start")
+        reminderMinutes > 0 -> entry.getLong("at") - reminderMinutes * MINUTE
+        else -> null
+    }
+
+    fun nextStart(now: Long): Long? = entries.mapNotNull { startOf(it) }.filter { it > now }.minOrNull()
 
     fun minutesLeft(entry: JSONObject, now: Long): Long =
         Math.floorDiv(entry.getLong("at") - now, MINUTE).coerceAtLeast(0)
@@ -58,6 +67,15 @@ class SurfaceData(private val json: JSONObject) {
         val maghrib = entry.getLong("maghrib")
         if (maghrib <= sunrise || now < sunrise || now > maghrib) return null
         return ((now - sunrise).toDouble() / (maghrib - sunrise) * 1000).roundToLong() / 1000f
+    }
+
+    // home's three stars share, only between maghrib and the next sunrise
+    fun nightShare(entry: JSONObject, now: Long): Float? {
+        if (entry.isNull("nightFrom") || entry.isNull("nightTo")) return null
+        val from = entry.getLong("nightFrom")
+        val to = entry.getLong("nightTo")
+        if (to <= from || now < from || now > to) return null
+        return ((now - from).toDouble() / (to - from) * 1000).roundToLong() / 1000f
     }
 
     // the prayer, the time left, its time and the place, as one line for talkback

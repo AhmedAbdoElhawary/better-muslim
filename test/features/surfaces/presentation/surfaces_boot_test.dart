@@ -134,14 +134,13 @@ void main() {
     await db.updateSettings(const SettingsCompanion(hijriAdjust: Value(1)));
     await db.updateSettings(const SettingsCompanion(digits: Value(Digits.western)));
     await db.updateSettings(const SettingsCompanion(reminderMinutes: Value(5)));
-    await db.updateSettings(const SettingsCompanion(prayerCountdown: Value(false)));
     await settle(tester, const Duration(milliseconds: 300));
     expect(channel.updates, hasLength(1));
 
     await settle(tester, const Duration(milliseconds: 500));
     expect(channel.updates, hasLength(2));
     final data = jsonDecode(channel.updates.last.json) as Map<String, Object?>;
-    expect(data['countdown'], false);
+    expect(data['reminderMinutes'], 5);
     expect((data['texts']! as Map)['liveNext'], 'Next prayer · Istanbul');
     await unmount(tester);
   });
