@@ -20,12 +20,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'surfaces.dart';
 
-const devConfig = FlavorConfig(
-  flavor: Flavor.dev,
-  appName: 'Better Muslim',
-  apiBaseUrl: '',
-  sentryDsn: '',
-);
+const devConfig = FlavorConfig(flavor: Flavor.dev, appName: 'Better Muslim', sentryDsn: '');
 
 /// an in-memory store, the dev flavor, no gps, no surfaces plugin and no app folder, so a widget
 /// test never reaches the phone. onboarded, so the app opens on home unless a test says otherwise
@@ -63,7 +58,6 @@ Future<List<Override>> designOverrides({
       const FlavorConfig(
         flavor: Flavor.dev,
         appName: 'Better Muslim',
-        apiBaseUrl: '',
         sentryDsn: '',
         scenario: 'design',
       ),
@@ -80,7 +74,11 @@ Future<List<Override>> designOverrides({
 final _tafsirFiles = tafsirFilesProvider.overrideWith(
   (ref) => TafsirFiles(
     assets: () => ref.read(quranAssetsProvider.future),
-    root: () async => Directory.systemTemp,
+    root: () async {
+      /// made here, on a clean runner the real create never ends on the fake clock
+      Directory('${Directory.systemTemp.path}/tafsir').createSync();
+      return Directory.systemTemp;
+    },
     fetch: (_) async => throw const SocketException('offline'),
     exclude: (_) async {},
   ),
