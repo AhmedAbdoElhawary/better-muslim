@@ -23,8 +23,6 @@ final _targetProvider = Provider.autoDispose<double?>((ref) {
 });
 
 /// MOTION ndlA, ±0.8° while aligned
-const _breatheDegrees = .8;
-const _breathePeriod = Duration(milliseconds: 2400);
 
 /// Motion 09: each reading retargets spring.needle from where the needle is and how fast it
 /// moves, never queues. reduce motion: standard 300 ms, no overshoot
@@ -35,9 +33,8 @@ class QiblaNeedle extends ConsumerStatefulWidget {
   ConsumerState<QiblaNeedle> createState() => _QiblaNeedleState();
 }
 
-class _QiblaNeedleState extends ConsumerState<QiblaNeedle> with TickerProviderStateMixin {
+class _QiblaNeedleState extends ConsumerState<QiblaNeedle> with SingleTickerProviderStateMixin {
   late final _angle = AnimationController.unbounded(vsync: this);
-  late final _breathe = AnimationController(vsync: this, duration: _breathePeriod);
   var _shown = false;
   var _reduceMotion = false;
   var _started = false;
@@ -46,7 +43,6 @@ class _QiblaNeedleState extends ConsumerState<QiblaNeedle> with TickerProviderSt
   void initState() {
     super.initState();
     ref.listenManual(_targetProvider, (_, target) => _retarget(target));
-    ref.listenManual(qiblaAlignedProvider, (_, aligned) => _breatheWhile(aligned));
   }
 
   @override
@@ -56,7 +52,6 @@ class _QiblaNeedleState extends ConsumerState<QiblaNeedle> with TickerProviderSt
     if (_started) return;
     _started = true;
     _retarget(ref.read(_targetProvider));
-    _breatheWhile(ref.read(qiblaAlignedProvider));
   }
 
   void _retarget(double? degrees) {
@@ -81,20 +76,9 @@ class _QiblaNeedleState extends ConsumerState<QiblaNeedle> with TickerProviderSt
     }
   }
 
-  void _breatheWhile(bool aligned) {
-    if (aligned && !_reduceMotion) {
-      _breathe.repeat(reverse: true);
-    } else {
-      _breathe
-        ..stop()
-        ..value = .5;
-    }
-  }
-
   @override
   void dispose() {
     _angle.dispose();
-    _breathe.dispose();
     super.dispose();
   }
 
@@ -102,11 +86,9 @@ class _QiblaNeedleState extends ConsumerState<QiblaNeedle> with TickerProviderSt
   Widget build(BuildContext context) {
     if (!_shown) return const SizedBox.shrink();
     return AnimatedBuilder(
-      animation: Listenable.merge([_angle, _breathe]),
-      builder: (context, child) {
-        final breathe = (BmMotion.breathe.transform(_breathe.value) * 2 - 1) * _breatheDegrees;
-        return Transform.rotate(angle: (_angle.value + breathe) * math.pi / 180, child: child);
-      },
+      animation: _angle,
+      builder: (context, child) =>
+          Transform.rotate(angle: _angle.value * math.pi / 180, child: child),
       child: const _Needle(),
     );
   }
