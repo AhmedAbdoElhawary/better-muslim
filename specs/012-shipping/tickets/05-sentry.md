@@ -4,9 +4,10 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** open
+**Status:** done
 
-- [ ] Every page has a fixed name with no ids in it, and tab pages reach the observer.
-- [ ] Production traces are 10%.
-- [ ] Errors in the background engines reach Sentry, with no sessions or traces.
-- [ ] A test proves no route parameter reaches a breadcrumb.
+- [x] Every route has a fixed name with no ids in it, and each change leaves that name as a breadcrumb.
+- [x] Production traces are 10%.
+- [x] Errors in the background engines reach Sentry, with no sessions or traces.
+- [x] A test proves no route parameter reaches a breadcrumb.
+- [x] Error text loses sqlite's statement and parameters and any url before it is sent.
