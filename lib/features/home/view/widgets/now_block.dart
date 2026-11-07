@@ -93,7 +93,7 @@ class _Names extends StatelessWidget {
       textBaseline: TextBaseline.alphabetic,
       children: [
         name,
-        const RSizedBox.horizontal(SpaceManager.s3),
+        const RSizedBox.horizontal(SpaceManager.s1),
         Flexible(child: nameAr),
       ],
     );
