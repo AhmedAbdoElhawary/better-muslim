@@ -26,21 +26,25 @@ private struct SmallContent: View {
 
   var body: some View {
     let fonts = SurfaceFonts(arabic: data.isArabic)
+    let night = data.nightShare(entry, at: date)
     ZStack {
-      SunArc(share: data.sunShare(entry, at: date))
+      SunArc(share: night ?? data.sunShare(entry, at: date), night: night != nil)
       VStack(alignment: .leading, spacing: 0) {
         Text(data.texts.next)
           .font(fonts.body(11))
           .tracking(11 * 0.12)
           .foregroundColor(palette.label)
+          .line(11)
         Text(entry.name)
           .font(fonts.display(24))
           .foregroundColor(palette.text)
           .lineLimit(1)
+          .line(24, 1.15)
         Text(data.inDuration(entry, at: date))
           .font(fonts.numbers(15, weight: 600))
           .foregroundColor(palette.gold)
           .accentable()
+          .line(15)
         Spacer(minLength: 0)
         /// a long city is cut, never the time, which comes first
         Text(entry.timeCity)
@@ -48,6 +52,7 @@ private struct SmallContent: View {
           .foregroundColor(palette.label)
           .lineLimit(1)
           .truncationMode(.tail)
+          .line(12)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .padding(.vertical, 14)
@@ -59,11 +64,12 @@ private struct SmallContent: View {
   }
 }
 
-/// the 170 x 170 drawing of the tree, scaled to the widget. by night only the dotted arc, as
-/// home's. never mirrored
+/// the 170 x 170 drawing of the tree, scaled to the widget. by night the three stars, as home's.
+/// never mirrored
 private struct SunArc: View {
   @Environment(\.palette) private var palette
   let share: Double?
+  let night: Bool
 
   var body: some View {
     GeometryReader { geometry in
@@ -78,9 +84,11 @@ private struct SunArc: View {
             .stroke(
               palette.text.opacity(0.75),
               style: StrokeStyle(lineWidth: 1.2, lineCap: .round))
-          Sun()
-            .position(ArcGeometry(size: geometry.size).point(share))
-            .accentable()
+          Group {
+            if night { NightStars() } else { Sun() }
+          }
+          .position(ArcGeometry(size: geometry.size).point(share))
+          .accentable()
         }
       }
     }
@@ -135,6 +143,22 @@ struct Sun: View {
       Circle()
         .fill(palette.sun)
         .frame(width: 14, height: 14)
+    }
+  }
+}
+
+/// home's three, 7 pt and 5 from their middle, the first on top
+private struct NightStars: View {
+  @Environment(\.palette) private var palette
+  var body: some View {
+    ZStack {
+      ForEach(0..<3, id: \.self) { index in
+        let angle = -Double.pi / 2 + Double(index) * 2 * Double.pi / 3
+        StarMark()
+          .fill(palette.sun)
+          .frame(width: 7, height: 7)
+          .offset(x: 5 * cos(angle), y: 5 * sin(angle))
+      }
     }
   }
 }
