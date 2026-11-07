@@ -35,10 +35,12 @@ private struct LargeContent: View {
             .foregroundColor(palette.label)
             .lineLimit(1)
             .truncationMode(.tail)
+            .line(11)
           Text(entry.name)
             .font(fonts.display(28))
             .foregroundColor(palette.text)
             .lineLimit(1)
+            .line(28, 1.15)
         }
         Spacer(minLength: 8)
         VStack(alignment: .trailing, spacing: 0) {
@@ -47,9 +49,11 @@ private struct LargeContent: View {
             .foregroundColor(palette.gold)
             .environment(\.layoutDirection, .leftToRight)
             .accentable()
+            .line(24)
           Text(entry.atTime)
             .font(fonts.body(12))
             .foregroundColor(palette.label)
+            .line(12)
         }
       }
       .padding(.horizontal, 2)
@@ -74,6 +78,7 @@ private struct LargeContent: View {
       }
       .font(fonts.body(12.5))
       .foregroundColor(palette.label)
+      .line(12.5)
       .padding(EdgeInsets(top: 10, leading: 4, bottom: 0, trailing: 4))
       .overlay(alignment: .top) {
         Rectangle().fill(palette.text.opacity(0.08)).frame(height: 1)
