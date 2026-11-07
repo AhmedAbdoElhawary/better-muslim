@@ -29,7 +29,7 @@ struct CountdownFile: Decodable {
   }
 
   let place: Bool
-  let countdown: Bool
+  let reminderMinutes: Int
   let colors: Colors
   let language: String
   let eastern: Bool
@@ -46,8 +46,9 @@ struct CountdownFile: Decodable {
   }
 }
 
-/// the live countdown while the app is off screen (contracts/surfaces-channel.md "Sync"). it starts
-/// as the app leaves and ends as it comes back
+/// the live countdown while the app is off screen (contracts/surfaces-channel.md "Sync"). ios lets
+/// it start only as the app leaves, so before ios 26 that has to be inside the reminder time. it
+/// ends as the app comes back
 @available(iOS 16.2, *)
 enum Countdowns {
   /// ios keeps only a few at once, these cover about a day
@@ -57,28 +58,34 @@ enum Countdowns {
   private static var ending = Set<String>()
 
   /// the app is still in front while it resigns, the last moment ios lets it start one. ios 26
-  /// schedules the next prayers too, each from the one before's time
+  /// schedules the next prayers too, each at its own reminder time
   static func start(_ file: CountdownFile) {
     let now = Date()
-    guard file.place, file.countdown, ActivityAuthorizationInfo().areActivitiesEnabled,
+    let lead = Double(file.reminderMinutes) * 60_000
+    guard file.place, lead > 0, ActivityAuthorizationInfo().areActivitiesEnabled,
       let entry = file.entries.last(where: { Date(millis: $0.from) <= now }),
       Date(millis: entry.at) > now
     else { return }
     let running = Set(live.filter { !ending.contains($0.id) }.map { key($0.attributes) })
-    if !running.contains(key(entry)) { _ = try? request(file, entry) }
+    let due = Date(millis: entry.at - lead) <= now
+    if due, !running.contains(key(entry)) { _ = try? request(file, entry) }
     guard #available(iOS 26.0, *) else { return }
-    var at = entry.at
+
+    /// a prayer time is always an entry's start, the next prayer's entry
+    func after(_ at: Double) -> CountdownFile.Entry? {
+      file.entries.first { $0.from >= at && $0.at > at }
+    }
+    var upcoming = due ? after(entry.at) : entry
     for score in 1...ahead {
-      /// a prayer time is always an entry's start, the next prayer's entry
-      guard let next = file.entries.first(where: { $0.from >= at }), next.at > at else { break }
+      guard let next = upcoming else { break }
       if !running.contains(key(next)) {
         do {
-          _ = try schedule(file, next, at: Date(millis: at), relevance: Double(score))
+          _ = try schedule(file, next, at: Date(millis: next.at - lead), relevance: Double(score))
         } catch {
           break
         }
       }
-      at = next.at
+      upcoming = after(next.at)
     }
   }
 
@@ -97,7 +104,7 @@ enum Countdowns {
   /// next one is showing
   static func sync(_ file: CountdownFile) async {
     let now = Date()
-    let on = file.place && file.countdown
+    let on = file.place && file.reminderMinutes > 0
     let activities = live
     let nextShowing = activities.contains {
       $0.activityState == .active && $0.content.state.at > now
