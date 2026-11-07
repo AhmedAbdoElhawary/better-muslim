@@ -105,17 +105,23 @@ Future<Set<(AzkarSet, DateTime)>> _doneWindows(
 }
 
 const markPrayedAction = 'mark_prayed';
+const addToQadaAction = 'add_to_qada';
 
 /// milestone 4's markPrayed, on the payload's prayer day, so isha after midnight lands on the day
 /// it started (FR-038). a store that can't be opened stays as it is, the user can mark in the app.
 /// in the app the boot writes the surfaces, in the background `surfaces` does
-Future<void> markFromPayload(String payload, {AppDatabase? db, SurfacesChannel? surfaces}) async {
+Future<void> markFromPayload(
+  String payload, {
+  bool qada = false,
+  AppDatabase? db,
+  SurfacesChannel? surfaces,
+}) async {
   final alert = alertFromPayload(payload);
   if (alert == null) return;
   final store = db ?? await AppDatabase.openExisting();
   if (store == null) return;
   try {
-    await store.markPrayed(alert.day, alert.prayer);
+    await (qada ? store.addQada : store.markPrayed)(alert.day, alert.prayer);
     if (surfaces != null) {
       await writeSurfaces(
         store,
@@ -130,24 +136,48 @@ Future<void> markFromPayload(String payload, {AppDatabase? db, SurfacesChannel? 
   }
 }
 
-/// mark prayed on a notification the plugin shows, on ios and android
+/// a prayer answered in the app or out of date takes its delivered notification with it (FR-039)
+Future<void> cleanDelivered(
+  AppDatabase db, {
+  required NotificationScheduler scheduler,
+  int? playing,
+}) async {
+  var ids = await scheduler.activeIds();
+  if (scheduler.keepsOldOnes) {
+    final stale = staleDelivered(ids);
+    for (final id in stale) {
+      await scheduler.cancel(id);
+    }
+    ids = [...ids.where((id) => !stale.contains(id))];
+  }
+  for (final id in ids) {
+    final alert = alertFromId(id);
+    if (alert == null || alert.kind != AlertKind.adhan || id == playing) continue;
+    if (await db.isPrayed(alert.day, alert.prayer) || await db.isInQada(alert.day, alert.prayer)) {
+      await scheduler.cancel(id);
+    }
+  }
+}
+
+/// a button on ios's notification
 @pragma('vm:entry-point')
 Future<void> onNotificationActionInBackground(NotificationResponse response) async {
   final payload = response.payload;
-  if (response.actionId != markPrayedAction || payload == null) return;
+  final action = response.actionId;
+  if ((action != markPrayedAction && action != addToQadaAction) || payload == null) return;
   DartPluginRegistrant.ensureInitialized();
   tz.initializeTimeZones();
-  await markFromPayload(payload, surfaces: SurfacesChannel());
+  await markFromPayload(payload, qada: action == addToQadaAction, surfaces: SurfacesChannel());
 }
 
-/// kotlin's MarkPrayedReceiver runs this in a headless engine, args = [payload]
+/// kotlin's MarkPrayedReceiver runs this in a headless engine, args = [payload] or [payload, 'qada']
 @pragma('vm:entry-point')
 Future<void> markPrayedInBackground(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   tz.initializeTimeZones();
   try {
-    await markFromPayload(args.first, surfaces: SurfacesChannel());
+    await markFromPayload(args.first, qada: args.length > 1, surfaces: SurfacesChannel());
   } finally {
     /// kotlin destroys the engine on this
     await const MethodChannel('better_muslim/adhan/background').invokeMethod<void>('done');
@@ -181,6 +211,7 @@ Future<void> backgroundTopUp(
     phoneZone: phoneZone,
     now: now,
   );
+  await cleanDelivered(db, scheduler: scheduler);
 }
 
 /// the same name on both platforms, ios only runs a task listed in BGTaskSchedulerPermittedIdentifiers
@@ -200,7 +231,10 @@ void callbackDispatcher() {
       final locale = AppLocalizations.localeOf((await db.watchSettings().first).language);
       final l10n = await AppLocalizations.load(locale);
       final scheduler = NotificationScheduler(AdhanChannel());
-      await scheduler.init(markPrayed: l10n.tr(StringsManager.markPrayed, const {}));
+      await scheduler.init(
+        markPrayed: l10n.tr(StringsManager.markPrayed, const {}),
+        addToQada: l10n.tr(StringsManager.addToQada, const {}),
+      );
       await backgroundTopUp(
         db,
         scheduler: scheduler,
