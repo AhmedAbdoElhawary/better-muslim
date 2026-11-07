@@ -120,6 +120,10 @@ void main() {
 
     await drag(tester, 393 * .6);
     expect(page.value, 6);
+    expect(built, isEmpty, reason: 'nothing is laid out around the end of a turn');
+
+    await tester.pump(BmMotion.standard);
+    await tester.pumpAndSettle();
     expect(built, [8], reason: 'the pages already there keep their elements');
   });
 
@@ -199,10 +203,14 @@ void main() {
     expect(layersAbove(tester, 6), isEmpty);
 
     final slide = await pumpTurner(tester, start: 5, book: false);
+    await tester.pump(BmMotion.standard);
+    await tester.pumpAndSettle();
     built.clear();
     await drag(tester, 393 * .6);
     expect(slide.value, 6);
     expect(layersAbove(tester, 6), isEmpty);
+    await tester.pump(BmMotion.standard);
+    await tester.pumpAndSettle();
     expect(built, [8], reason: 'the wrappers come and go, the pages stay');
   });
 
