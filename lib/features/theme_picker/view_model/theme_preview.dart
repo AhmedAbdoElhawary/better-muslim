@@ -17,7 +17,7 @@ class ThemePreview extends Notifier<ThemePick> {
   ThemePick build() {
     final settings = ref.read(settingsProvider).value;
     return (
-      theme: settings?.theme ?? BmThemeId.qiyamEmerald,
+      theme: settings?.theme ?? BmThemeId.moonlight,
       mode: settings?.themeMode ?? BmThemeMode.followSky,
     );
   }
