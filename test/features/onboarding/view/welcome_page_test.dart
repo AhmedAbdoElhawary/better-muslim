@@ -299,15 +299,16 @@ void main() {
     await frames(tester, const Duration(milliseconds: 500));
     expect(onWelcome(tester), isTrue);
     expect(stars(tester).still, isTrue);
-    expect(stars(tester).ambient, isNull);
     await unmount(tester);
   });
 
-  testWidgets('the ambient loop runs on 4.10, stopped by reduce motion', (tester) async {
-    await pumpWelcome(tester, ambient: true);
+  testWidgets('nothing runs while the first screen and 4.10 are at rest', (tester) async {
+    await pumpWelcome(tester);
+    expect(tester.binding.transientCallbackCount, 0);
+
     await tester.tap(find.text('Swipe up to begin'));
     await frames(tester, const Duration(milliseconds: 2400));
-    expect(stars(tester).ambient, isNotNull);
+    expect(tester.binding.transientCallbackCount, 0);
     await unmount(tester);
   });
 
