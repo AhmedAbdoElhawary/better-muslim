@@ -10,9 +10,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
 import com.elhawary.bettermuslim.surfaces.WidgetPainter.Kind
+import kotlin.math.max
 
 // the ios three on the home screen: small 2 x 2, medium 4 x 2 and large 4 x 4, each its own picker
 // entry. this one is the medium, the two below the small and the large
@@ -60,30 +62,6 @@ open class PrayerWidget : AppWidgetProvider() {
             draw(context, manager, ids(context))
         }
 
-        // a minute flip redraws the countdown alone, a new entry or state the whole picture. the
-        // small one's sun moves, so it is drawn whole each time
-        fun tick(context: Context) {
-            val now = System.currentTimeMillis()
-            val data = SurfaceData.load(context)
-            val state = SurfaceState.of(data, now)
-            if (state !is SurfaceState.Ready || drawn(state) != prefs(context).getLong(DRAWN, -1)) {
-                refresh(context)
-                return
-            }
-            val manager = AppWidgetManager.getInstance(context)
-            for ((id, provider) in placed(context)) {
-                val painter = painter(context, manager, id, provider.kind, data, state)
-                if (provider.kind == Kind.SMALL) {
-                    manager.updateAppWidget(id, views(context, painter, state, now))
-                    continue
-                }
-                val views = RemoteViews(context.packageName, layout(provider.kind))
-                countdown(views, painter, state, now)
-                views.setContentDescription(R.id.surfaces_root, state.data.spoken(state.entry, now))
-                manager.partiallyUpdateAppWidget(id, views)
-            }
-        }
-
         private fun draw(context: Context, manager: AppWidgetManager, ids: IntArray) {
             val now = System.currentTimeMillis()
             val data = SurfaceData.load(context)
@@ -91,7 +69,7 @@ open class PrayerWidget : AppWidgetProvider() {
             val kinds = placed(context).toMap()
             for (id in ids) {
                 val kind = kinds[id]?.kind ?: continue
-                manager.updateAppWidget(id, views(context, painter(context, manager, id, kind, data, state), state, now))
+                manager.updateAppWidget(id, sized(context, painter(context, manager, id, kind, data, state), state, now))
             }
             if (drawn(state) != prefs(context).getLong(DRAWN, -1)) preview(context, manager, data, state, now)
             prefs(context).edit().putLong(DRAWN, drawn(state)).apply()
@@ -110,24 +88,54 @@ open class PrayerWidget : AppWidgetProvider() {
             }
         }
 
-        private fun views(context: Context, painter: WidgetPainter, state: SurfaceState, now: Long): RemoteViews {
+        // only the host knows its real box, a launcher's numbers can be far from it, so from android
+        // 12 it picks the medium's version itself
+        private fun sized(context: Context, painter: WidgetPainter, state: SurfaceState, now: Long): RemoteViews {
+            if (painter.kind != Kind.MEDIUM || state !is SurfaceState.Ready || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                return views(context, painter, state, now, painter.short)
+            }
+            return RemoteViews(
+                mapOf(
+                    SizeF(1f, 1f) to views(context, painter, state, now, short = true),
+                    SizeF(1f, WidgetPainter.MEDIUM_HEIGHT) to views(context, painter, state, now),
+                ),
+            )
+        }
+
+        private fun views(context: Context, painter: WidgetPainter, state: SurfaceState, now: Long, short: Boolean = false): RemoteViews {
             val views = RemoteViews(context.packageName, layout(painter.kind))
-            views.setImageViewBitmap(R.id.surfaces_picture, painter.picture(state, now))
+            views.setImageViewBitmap(R.id.surfaces_sky, painter.sky(state))
+            // the trees' inset 0.5 hairline at 10%
+            views.setInt(R.id.surfaces_hairline, "setColorFilter", painter.hairline)
+            views.setInt(R.id.surfaces_hairline, "setImageAlpha", 26)
             views.setOnClickPendingIntent(R.id.surfaces_root, open(context, HOME))
             if (state !is SurfaceState.Ready) {
+                views.setImageViewBitmap(R.id.surfaces_center, painter.messagePicture(state))
+                views.setViewVisibility(R.id.surfaces_center, View.VISIBLE)
+                views.setViewVisibility(R.id.surfaces_top, View.GONE)
+                views.setViewVisibility(R.id.surfaces_bottom, View.GONE)
                 views.setViewVisibility(R.id.surfaces_countdown, View.GONE)
                 views.setViewVisibility(R.id.surfaces_cells, View.GONE)
                 views.setContentDescription(R.id.surfaces_root, painter.message(state))
                 return views
             }
-            countdown(views, painter, state, now)
+            views.setViewVisibility(R.id.surfaces_center, if (short) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.surfaces_top, if (short) View.GONE else View.VISIBLE)
+            views.setViewVisibility(R.id.surfaces_bottom, if (short || painter.kind == Kind.SMALL) View.GONE else View.VISIBLE)
+            if (short) {
+                views.setImageViewBitmap(R.id.surfaces_center, painter.strip(state))
+                views.setViewVisibility(R.id.surfaces_countdown, View.GONE)
+            } else {
+                views.setImageViewBitmap(R.id.surfaces_top, painter.top(state, now))
+                if (painter.kind != Kind.SMALL) views.setImageViewBitmap(R.id.surfaces_bottom, painter.bottom(state))
+                countdown(views, painter, state, now)
+            }
             views.setContentDescription(R.id.surfaces_root, state.data.spoken(state.entry, now))
             if (painter.kind == Kind.SMALL) {
                 views.setViewVisibility(R.id.surfaces_cells, View.GONE)
                 return views
             }
             views.setViewVisibility(R.id.surfaces_cells, View.VISIBLE)
-            views.setViewPadding(R.id.surfaces_cells, painter.cellsLeft, painter.cellsTop, painter.cellsLeft, painter.cellsBottom)
             val strip = state.entry.getJSONArray("strip")
             val day = state.entry.getString("day")
             CELLS.forEachIndexed { index, id ->
@@ -152,11 +160,14 @@ open class PrayerWidget : AppWidgetProvider() {
 
         private fun layout(kind: Kind) = if (kind == Kind.LARGE) R.layout.prayer_widget_large else R.layout.prayer_widget
 
-        // the portrait size: the launcher reports the narrowest width and the tallest height
+        // the portrait size: the launcher reports the narrowest width and the tallest height. the
+        // width holds on every launcher seen, the height is only the sky's, see WidgetPainter
         private fun painter(context: Context, manager: AppWidgetManager, id: Int, kind: Kind, data: SurfaceData?, state: SurfaceState): WidgetPainter {
             val options = manager.getAppWidgetOptions(id)
             val provider = PROVIDERS.first { it.kind == kind }
-            val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 }?.toFloat() ?: provider.width
+            val reported = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 }?.toFloat() ?: provider.width
+            // the small's arc and text keep the tree's proportions, a narrower box shrinks them evenly
+            val width = if (kind == Kind.SMALL) max(reported, provider.width) else reported
             val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 }?.toFloat() ?: provider.height
             return WidgetPainter(context, kind, width, height, palette(context, data, state))
         }
