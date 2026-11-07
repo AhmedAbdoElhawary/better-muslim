@@ -6,6 +6,7 @@ import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/monitoring/monitoring.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -167,7 +168,9 @@ Future<void> onNotificationActionInBackground(NotificationResponse response) asy
   if ((action != markPrayedAction && action != addToQadaAction) || payload == null) return;
   DartPluginRegistrant.ensureInitialized();
   tz.initializeTimeZones();
-  await markFromPayload(payload, qada: action == addToQadaAction, surfaces: SurfacesChannel());
+  await Monitoring.runInBackground(
+    () => markFromPayload(payload, qada: action == addToQadaAction, surfaces: SurfacesChannel()),
+  );
 }
 
 /// kotlin's MarkPrayedReceiver runs this in a headless engine, args = [payload] or [payload, 'qada']
@@ -177,7 +180,9 @@ Future<void> markPrayedInBackground(List<String> args) async {
   DartPluginRegistrant.ensureInitialized();
   tz.initializeTimeZones();
   try {
-    await markFromPayload(args.first, qada: args.length > 1, surfaces: SurfacesChannel());
+    await Monitoring.runInBackground(
+      () => markFromPayload(args.first, qada: args.length > 1, surfaces: SurfacesChannel()),
+    );
   } finally {
     /// kotlin destroys the engine on this
     await const MethodChannel('better_muslim/adhan/background').invokeMethod<void>('done');
@@ -217,35 +222,38 @@ Future<void> backgroundTopUp(
 /// the same name on both platforms, ios only runs a task listed in BGTaskSchedulerPermittedIdentifiers
 const topUpTask = 'better_muslim.topup';
 
-/// the phone left alone still gets 6 days: android every 12 h, ios when it allows (FR-009).
-/// errors aren't reported from here, the next launch tries again (research R14)
+/// the phone left alone still gets 6 days: android every 12 h, ios when it allows (FR-009)
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, input) async {
     DartPluginRegistrant.ensureInitialized();
     tz.initializeTimeZones();
-    final db = await AppDatabase.openExisting();
-    if (db == null) return true;
-    try {
-      await AdhanFiles.init();
-      final locale = AppLocalizations.localeOf((await db.watchSettings().first).language);
-      final l10n = await AppLocalizations.load(locale);
-      final scheduler = NotificationScheduler(AdhanChannel());
-      await scheduler.init(
-        markPrayed: l10n.tr(StringsManager.markPrayed, const {}),
-        addToQada: l10n.tr(StringsManager.addToQada, const {}),
-      );
-      await backgroundTopUp(
-        db,
-        scheduler: scheduler,
-        surfaces: SurfacesChannel(),
-        locale: locale,
-        use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
-        phoneZone: await PhoneZone.read(),
-      );
-    } finally {
-      await db.close();
-    }
+    await Monitoring.runInBackground(_topUpNow);
     return true;
   });
+}
+
+Future<void> _topUpNow() async {
+  final db = await AppDatabase.openExisting();
+  if (db == null) return;
+  try {
+    await AdhanFiles.init();
+    final locale = AppLocalizations.localeOf((await db.watchSettings().first).language);
+    final l10n = await AppLocalizations.load(locale);
+    final scheduler = NotificationScheduler(AdhanChannel());
+    await scheduler.init(
+      markPrayed: l10n.tr(StringsManager.markPrayed, const {}),
+      addToQada: l10n.tr(StringsManager.addToQada, const {}),
+    );
+    await backgroundTopUp(
+      db,
+      scheduler: scheduler,
+      surfaces: SurfacesChannel(),
+      locale: locale,
+      use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+      phoneZone: await PhoneZone.read(),
+    );
+  } finally {
+    await db.close();
+  }
 }

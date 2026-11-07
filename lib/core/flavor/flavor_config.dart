@@ -12,7 +12,6 @@ class FlavorConfig {
   const FlavorConfig({
     required this.flavor,
     required this.appName,
-    required this.apiBaseUrl,
     required this.sentryDsn,
     this.scenario = '',
   });
@@ -25,7 +24,6 @@ class FlavorConfig {
         orElse: () => fallbackFlavor,
       ),
       appName: const String.fromEnvironment('APP_NAME', defaultValue: 'Better Muslim'),
-      apiBaseUrl: const String.fromEnvironment('API_BASE_URL'),
       sentryDsn: const String.fromEnvironment('SENTRY_DSN'),
       scenario: const String.fromEnvironment('SCENARIO'),
     );
@@ -33,7 +31,6 @@ class FlavorConfig {
 
   final Flavor flavor;
   final String appName;
-  final String apiBaseUrl;
   final String sentryDsn;
   final String scenario;
 

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
-import 'package:better_muslim/core/monitoring/monitoring.dart';
+import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
@@ -127,7 +127,6 @@ String? onboardingRedirect(Onboarding onboarding, String location) {
 /// one router per ProviderScope, so tests never share a location
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    observers: Monitoring.navigatorObservers,
     redirect: (context, state) =>
         onboardingRedirect(ref.read(onboardingProvider), state.uri.toString()),
     routes: [
@@ -146,6 +145,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                name: 'home',
                 path: Routes.home,
                 pageBuilder: (context, state) => _page(state, const HomePage()),
               ),
@@ -154,6 +154,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                name: 'prayer',
                 path: Routes.prayer,
                 pageBuilder: (context, state) => _page(
                   state,
@@ -164,6 +165,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ),
                 routes: [
                   GoRoute(
+                    name: 'qada',
                     path: 'qada',
                     pageBuilder: (context, state) => _page(state, const QadaPage()),
                   ),
@@ -174,6 +176,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                name: 'quran',
                 path: Routes.quran,
                 pageBuilder: (context, state) => _page(state, const QuranPage()),
               ),
@@ -182,14 +185,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                name: 'azkar',
                 path: Routes.azkar,
                 pageBuilder: (context, state) => _page(state, const AzkarPage()),
                 routes: [
                   GoRoute(
+                    name: 'tasbih',
                     path: 'tasbih',
                     pageBuilder: (context, state) => _page(state, const TasbihPage()),
                   ),
                   GoRoute(
+                    name: 'azkar_set',
                     path: ':set',
                     redirect: (context, state) =>
                         AzkarSet.values.asNameMap()[state.pathParameters['set']] == null
@@ -205,6 +211,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                name: 'more',
                 path: Routes.more,
                 pageBuilder: (context, state) => _page(state, const MorePage()),
               ),
@@ -214,14 +221,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       /// outside the shell, the qibla tree has no tab bar
-      GoRoute(path: Routes.qibla, pageBuilder: (context, state) => _page(state, const QiblaPage())),
+      GoRoute(
+        name: 'qibla',
+        path: Routes.qibla,
+        pageBuilder: (context, state) => _page(state, const QiblaPage()),
+      ),
 
       /// outside the shell, the 4.14 tree has no tab bar
       GoRoute(
+        name: 'duas',
         path: Routes.duas,
         pageBuilder: (context, state) => _page(state, const DuasPage()),
         routes: [
           GoRoute(
+            name: 'dua_category',
             path: ':id',
             redirect: (context, state) {
               final categories = ref.read(duasContentProvider).value;
@@ -239,6 +252,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       /// outside the shell, the reader and saved have no tab bar
       GoRoute(
+        name: 'quran_reader',
         path: '${Routes.quran}/page/:page',
         redirect: (context, state) {
           final page = int.tryParse(state.pathParameters['page']!);
@@ -253,29 +267,39 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        name: 'quran_saved',
         path: Routes.quranSaved,
         pageBuilder: (context, state) =>
             _page(state, SavedPage(notes: state.uri.queryParameters['tab'] == 'notes')),
       ),
 
       GoRoute(
+        name: 'quran_search',
         path: Routes.quranSearch,
         pageBuilder: (context, state) => _page(state, const SearchPage()),
       ),
-      GoRoute(path: Routes.theme, pageBuilder: (context, state) => _page(state, const ThemePage())),
       GoRoute(
+        name: 'theme',
+        path: Routes.theme,
+        pageBuilder: (context, state) => _page(state, const ThemePage()),
+      ),
+      GoRoute(
+        name: 'adhan_settings',
         path: Routes.adhanSettings,
         pageBuilder: (context, state) => _page(state, const AdhanSettingsPage()),
       ),
       GoRoute(
+        name: 'downloads',
         path: Routes.downloads,
         pageBuilder: (context, state) => _page(state, const DownloadsPage()),
       ),
       GoRoute(
+        name: 'acknowledgements',
         path: Routes.acknowledgements,
         pageBuilder: (context, state) => _page(state, const AcknowledgementsPage()),
       ),
       GoRoute(
+        name: 'hijri_calendar',
         path: Routes.hijriCalendar,
         pageBuilder: (context, state) => _page(state, const HijriCalendarPage()),
       ),
@@ -283,6 +307,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       /// staging and production don't have the route at all (FR-041)
       if (ref.read(flavorProvider).flavor.isDev)
         GoRoute(
+          name: 'dev_notifications',
           path: Routes.devNotifications,
           pageBuilder: (context, state) => _page(state, const DevNotificationsPage()),
         ),
@@ -290,6 +315,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       /// the first route on a new install, so it has no transition of its own. its scope gives the
       /// welcome the steps' secondary animation (FR-015)
       GoRoute(
+        name: 'onboarding',
         path: Routes.onboarding,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
@@ -301,15 +327,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
         routes: [
           GoRoute(
+            name: 'onboarding_location',
             path: 'location',
             pageBuilder: (context, state) => _stepPage(context, state, const LocationStepPage()),
           ),
           GoRoute(
+            name: 'onboarding_notifications',
             path: 'notifications',
             pageBuilder: (context, state) =>
                 _stepPage(context, state, const NotificationsStepPage()),
           ),
           GoRoute(
+            name: 'onboarding_theme',
             path: 'theme',
             pageBuilder: (context, state) =>
                 _stepPage(context, state, const ThemePage(onboarding: true)),
@@ -319,6 +348,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       /// outside the shell, so it covers the nav bar too
       GoRoute(
+        name: 'adhan',
         path: Routes.adhanPath,
         redirect: (context, state) =>
             Prayer.values.asNameMap()[state.uri.queryParameters['prayer']] == null
@@ -336,6 +366,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
   ref.listen(onboardingProvider, (_, _) => router.refresh());
+
+  /// the route's fixed name and never the uri, which holds the page, ayah or dua someone is on.
+  /// a link that matches nothing has no state to read
+  router.routerDelegate.addListener(() {
+    if (router.routerDelegate.currentConfiguration.isEmpty) return;
+    CrashReporter.instance.addBreadcrumb(router.state.name ?? 'unnamed', category: 'navigation');
+  });
   ref.onDispose(router.dispose);
   return router;
 });

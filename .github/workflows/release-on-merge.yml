@@ -40,7 +40,7 @@ jobs:
       tag: ${{ steps.decide.outputs.tag }}
     steps:
       # merge_commit_sha is what landed on the base branch for a merge, a squash and a rebase alike
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0

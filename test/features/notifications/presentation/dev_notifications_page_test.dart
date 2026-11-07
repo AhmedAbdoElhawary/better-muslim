@@ -74,12 +74,7 @@ void main() {
       await pumpHome(
         tester,
         testOverrides(
-          flavor: FlavorConfig(
-            flavor: flavor,
-            appName: 'Better Muslim',
-            apiBaseUrl: '',
-            sentryDsn: '',
-          ),
+          flavor: FlavorConfig(flavor: flavor, appName: 'Better Muslim', sentryDsn: ''),
         ),
       );
       await openMore(tester);

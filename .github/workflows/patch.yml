@@ -27,7 +27,9 @@ jobs:
       DART_DEFINE: dart_define/prod.json
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the live version comes from the last production tag
 
       # the patch must be built from the code that is actually live
       - name: Refuse to patch anything but production
@@ -38,7 +40,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -50,7 +52,7 @@ jobs:
           cache: true
 
       - name: Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@4dd9d7dc2d7930bfeadb053b6e94b5110779d1e5 # v1.0.1
+        uses: shorebirdtech/setup-shorebird@8b1059ddb56a926f0146edf4133cc647775c162f # v1.4.1
         with:
           cache: true
 
@@ -65,7 +67,9 @@ jobs:
             echo "::warning::PROD_SENTRY_DSN is not set — this patch would disable crash reporting"
             printf '{}\n' > "dart_define/${FLAVOR}.secret.json"
           else
-            python3 -c 'import json,os,sys; json.dump({"SENTRY_DSN": os.environ["SENTRY_DSN"]}, open(sys.argv[1],"w"))' "dart_define/${FLAVOR}.secret.json"
+            tag="$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*')"
+            export VERSION="${tag#v}"
+            python3 -c 'import json,os,sys; json.dump({"SENTRY_DSN": os.environ["SENTRY_DSN"], "SENTRY_RELEASE": "better-muslim@" + os.environ["VERSION"]}, open(sys.argv[1],"w"))' "dart_define/${FLAVOR}.secret.json"
           fi
 
       # --release-version=latest builds with the exact Flutter the release used,
@@ -75,11 +79,28 @@ jobs:
           shorebird patch android \
             --flavor "$FLAVOR" \
             --release-version=latest \
+            --split-debug-info=build/symbols \
             -t "$TARGET" \
             --no-confirm \
             -- \
             --dart-define-from-file="$DART_DEFINE" \
             --dart-define-from-file="dart_define/${FLAVOR}.secret.json"
+
+      # a patch is a new build with its own symbols, without them its crashes are hex addresses.
+      # after the patch on purpose, a failed upload must not stop a fix that is already live
+      - name: Upload debug symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG || secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT || secrets.SENTRY_PROJECT }}
+          SENTRY_URL: ${{ vars.SENTRY_URL || secrets.SENTRY_URL || 'https://de.sentry.io/' }}
+        run: |
+          test -d build/symbols || { echo "::error::build/symbols is missing, this patch's crashes can't be read"; exit 1; }
+          curl -sSfL -o "$RUNNER_TEMP/sentry-cli" \
+            https://github.com/getsentry/sentry-cli/releases/download/3.8.0/sentry-cli-Linux-x86_64
+          echo "13f8cb34ae01a6a272d7d7c22e277a105286615b4020de900ea95a8de47cdbb6  $RUNNER_TEMP/sentry-cli" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/sentry-cli"
+          "$RUNNER_TEMP/sentry-cli" debug-files upload --include-sources build/symbols
 
       - name: Scrub secrets from the runner
         if: always()

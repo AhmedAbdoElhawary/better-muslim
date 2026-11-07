@@ -25,13 +25,8 @@ void main() {
   setUpAll(tz.initializeTimeZones);
 
   test('only dev with SCENARIO=design turns it on (FR-026)', () {
-    FlavorConfig config(Flavor flavor, String scenario) => FlavorConfig(
-      flavor: flavor,
-      appName: 'Better Muslim',
-      apiBaseUrl: '',
-      sentryDsn: '',
-      scenario: scenario,
-    );
+    FlavorConfig config(Flavor flavor, String scenario) =>
+        FlavorConfig(flavor: flavor, appName: 'Better Muslim', sentryDsn: '', scenario: scenario);
 
     expect(config(Flavor.dev, 'design').isDesignScenario, isTrue);
     expect(config(Flavor.dev, '').isDesignScenario, isFalse);

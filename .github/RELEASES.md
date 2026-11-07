@@ -102,6 +102,9 @@ release brings the bug back.
 
 ## Secrets and variables
 
+`tool/accounts_wizard.sh` sets everything below except the keystore. Run it from
+the repo root, it can be re-run and keeps what is done.
+
 All are **repository** secrets/variables (Settings → Secrets and variables →
 Actions). GitHub Free has no environment secrets on a private repo, so values
 that differ per flavor carry a prefix.
@@ -111,6 +114,12 @@ that differ per flavor carry a prefix.
 | `DEV_FIREBASE_APP_ID` | secret | the `1:...:android:...` id of the dev app in Firebase |
 | `STAGING_FIREBASE_APP_ID` | secret | same, staging app |
 | `PROD_FIREBASE_APP_ID` | secret | same, production app |
+| `DEV_GOOGLE_SERVICES_JSON` | secret | the dev Android app's `google-services.json`, raw text |
+| `STAGING_GOOGLE_SERVICES_JSON` | secret | same, staging app |
+| `PROD_GOOGLE_SERVICES_JSON` | secret | same, production app |
+| `DEV_GOOGLE_SERVICE_INFO_PLIST` | secret | the dev iOS app's `GoogleService-Info.plist`, raw text |
+| `STAGING_GOOGLE_SERVICE_INFO_PLIST` | secret | same, staging app |
+| `PROD_GOOGLE_SERVICE_INFO_PLIST` | secret | same, production app |
 | `FIREBASE_SERVICE_ACCOUNT` | secret | JSON key of a service account with the *Firebase App Distribution Admin* role |
 | `DEV_SENTRY_DSN` | secret | Sentry DSN for dev builds |
 | `STAGING_SENTRY_DSN` | secret | Sentry DSN for staging builds |
@@ -134,4 +143,5 @@ its flavor as the Sentry environment.
 A tag pushed with `GITHUB_TOKEN` deliberately does not fire another workflow's
 `on: push`. So `deploy.yml` is a reusable workflow and `release-on-merge.yml`
 calls it with the tag it just created. Its `on: push: tags` trigger is kept as
-break-glass only.
+break-glass only, and only that path runs `verify`: a called deploy already
+passed `ci-ok`.
