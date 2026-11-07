@@ -1,15 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/prayer_times/sky_state.dart';
-import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/core/settings/appearance.dart';
-import 'package:better_muslim/core/widgets/ambient.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +17,6 @@ class WelcomeSky extends ConsumerWidget {
     required this.shown,
     required this.horizon,
     required this.mark,
-    required this.ambient,
     super.key,
   });
 
@@ -32,9 +28,6 @@ class WelcomeSky extends ConsumerWidget {
   /// 0 to 1, the horizon and the arc draw out from the middle
   final double horizon;
   final double mark;
-
-  /// null = still, with reduce motion or power saving
-  final ValueListenable<Duration>? ambient;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +49,6 @@ class WelcomeSky extends ConsumerWidget {
         onSky: context.getColor(ThemeEnum.onSky),
         primary: context.getColor(ThemeEnum.primary),
         scrim: context.getColor(ThemeEnum.welcomeScrim),
-        ambient: ambient,
       ),
     );
   }
@@ -72,8 +64,7 @@ class WelcomeSkyPainter extends CustomPainter {
     required this.onSky,
     required this.primary,
     required this.scrim,
-    this.ambient,
-  }) : super(repaint: ambient);
+  });
 
   final SunChoreography ch;
   final BmSkyStops stops;
@@ -83,7 +74,6 @@ class WelcomeSkyPainter extends CustomPainter {
   final Color onSky;
   final Color primary;
   final Color scrim;
-  final ValueListenable<Duration>? ambient;
 
   /// the tree's svg: the arc at 45% onSky, dash 1 gap 5, the horizon at 30%
   static const _arcAlpha = .45;
@@ -101,19 +91,13 @@ class WelcomeSkyPainter extends CustomPainter {
     [-10.0, 0.0], [-7.07, -2.93], [-7.07, -7.07], [-2.93, -7.07],
   ];
 
-  /// the loop fades back in when it starts again (MOTION tiers)
-  static const _fadeIn = 300.0;
-
   @override
   void paint(Canvas canvas, Size size) {
-    final ms = ambient?.value.inMilliseconds.toDouble();
-    final strength = ms == null ? 0.0 : (ms / _fadeIn).clamp(0.0, 1.0);
-    final drift = strength * ambientBreathe(ms ?? 0, BmMotion.skyLoop.inMilliseconds.toDouble());
     final full = Offset.zero & size;
 
     /// a layer only reads its paint's alpha
     canvas.saveLayer(full, Paint()..color = scrim.withValues(alpha: shown));
-    canvas.drawRect(full, Paint()..shader = bmSkyGradient(stops, drift).createShader(full));
+    canvas.drawRect(full, Paint()..shader = bmSkyGradient(stops, 0).createShader(full));
 
     /// fades in under the horizon, full from where the title starts
     final fade = SizeManager.skyScrimFade * ch.unit;
@@ -195,6 +179,5 @@ class WelcomeSkyPainter extends CustomPainter {
       old.mark != mark ||
       old.onSky != onSky ||
       old.primary != primary ||
-      old.scrim != scrim ||
-      old.ambient != ambient;
+      old.scrim != scrim;
 }
