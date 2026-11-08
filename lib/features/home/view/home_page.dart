@@ -31,6 +31,7 @@ import 'package:better_muslim/features/home/view/widgets/verse_card.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -73,6 +74,14 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
 
   bool _onScroll(ScrollNotification notification) {
     if (notification.depth != 0) return false;
+
+    /// a new page height ends the scroll inside layout, sizes can't be read until it's done
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onScroll(notification);
+      });
+      return false;
+    }
     final view = _view.currentContext?.findRenderObject();
     final card = _card.currentContext?.findRenderObject() as RenderBox?;
     final name = _flight.name.currentContext?.findRenderObject() as RenderBox?;
