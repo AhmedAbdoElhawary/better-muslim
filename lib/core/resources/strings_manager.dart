@@ -87,6 +87,7 @@ abstract final class StringsManager {
   static const String theme = 'theme';
   static const String lightAndDark = 'lightAndDark';
   static const String followSky = 'followSky';
+  static const String followPhoneMode = 'followPhoneMode';
   static const String reduceMotion = 'reduceMotion';
   static const String sectionSoundTouch = 'sectionSoundTouch';
   static const String haptics = 'haptics';
@@ -140,7 +141,6 @@ abstract final class StringsManager {
   static const String notifAdhanTitle = 'notifAdhanTitle';
   static const String notifReminderTitle = 'notifReminderTitle';
   static const String notifReminderBody = 'notifReminderBody';
-  static const String reminders = 'reminders';
   static const String stop = 'stop';
   static const String pause = 'pause';
   static const String play = 'play';
@@ -229,6 +229,8 @@ abstract final class StringsManager {
   static const String notifAzkarMorningBody = 'notifAzkarMorningBody';
   static const String azkarReminders = 'azkarReminders';
   static const String azkarRemindersSub = 'azkarRemindersSub';
+  static const String azkarVoice = 'azkarVoice';
+  static const String azkarVoiceSub = 'azkarVoiceSub';
   static const String newAzkarSet = 'newAzkarSet';
   static const String reminderOff = 'reminderOff';
   static const String reminderValue = 'reminderValue';
@@ -268,11 +270,7 @@ abstract final class StringsManager {
   static const String forPrayer = 'forPrayer';
   static const String recordingAlafasy = 'recordingAlafasy';
   static const String fullAdhanLength = 'fullAdhanLength';
-  static const String recordingFull = 'recordingFull';
-  static const String adhanFull = 'adhanFull';
-  static const String adhanTakbir = 'adhanTakbir';
-  static const String takbirLength = 'takbirLength';
-  static const String recordingTakbir = 'recordingTakbir';
+  static const String takbirWithReminder = 'takbirWithReminder';
   static const String tonePhone = 'tonePhone';
   static const String toneCalm = 'toneCalm';
   static const String toneGlass = 'toneGlass';
@@ -294,6 +292,7 @@ abstract final class StringsManager {
   static const String useAzkarDuas = 'useAzkarDuas';
   static const String useAdhanRecordings = 'useAdhanRecordings';
   static const String useTones = 'useTones';
+  static const String useAzkarVoice = 'useAzkarVoice';
   static const String creditLine = 'creditLine';
   static const String version = 'version';
   static const String easternDigits = 'easternDigits';
@@ -326,7 +325,6 @@ abstract final class StringsManager {
   static const String nameTimePrayed = 'nameTimePrayed';
   static const String prayerNow = 'prayerNow';
   static const String reminderChip = 'reminderChip';
-  static const String countdownChannel = 'countdownChannel';
   static const String openToSetPlace = 'openToSetPlace';
   static const String openToUpdateTimes = 'openToUpdateTimes';
   static const String openApp = 'openApp';
@@ -438,11 +436,29 @@ abstract final class StringsManager {
   static const String shareAyah = 'shareAyah';
   static const String showAppName = 'showAppName';
   static const String showSurahName = 'showSurahName';
+  static const String matchApp = 'matchApp';
   static const String paper = 'paper';
   static const String night = 'night';
   static const String emerald = 'emerald';
   static const String sky = 'sky';
   static const String cream = 'cream';
+  static const String white = 'white';
+  static const String pickthall = 'pickthall';
+  static const String yusufAli = 'yusufAli';
+  static const String hilaliKhan = 'hilaliKhan';
+  static const String alJalalayn = 'alJalalayn';
+  static const String englishTranslation = 'englishTranslation';
+  static const String arabicShortTafsir = 'arabicShortTafsir';
+
+  /// the printed tajweed key, arabic in both languages like the mushaf
+  static const String tajweedLazim = 'tajweedLazim';
+  static const String tajweedWajib = 'tajweedWajib';
+  static const String tajweedJaiz = 'tajweedJaiz';
+  static const String tajweedTabii = 'tajweedTabii';
+  static const String tajweedIkhfa = 'tajweedIkhfa';
+  static const String tajweedIdgham = 'tajweedIdgham';
+  static const String tajweedTafkheem = 'tajweedTafkheem';
+  static const String tajweedQalqalah = 'tajweedQalqalah';
   static const String appliesToEveryPage = 'appliesToEveryPage';
   static const String pageSection = 'pageSection';
   static const String layout = 'layout';
@@ -610,4 +626,14 @@ abstract final class StringsManager {
   static const String textSizeLarger = 'textSizeLarger';
   static const String textSizeLargest = 'textSizeLargest';
   static const String textSizeNote = 'textSizeNote';
+  static const String nextAt = 'nextAt';
+  static const String mushafStyleText = 'mushafStyleText';
+  static const String mushafStyleTextBody = 'mushafStyleTextBody';
+  static const String mushafStyleQcfV2 = 'mushafStyleQcfV2';
+  static const String mushafStyleQcfV2Body = 'mushafStyleQcfV2Body';
+  static const String mushafStyleQcfV4 = 'mushafStyleQcfV4';
+  static const String mushafStyleQcfV4Body = 'mushafStyleQcfV4Body';
+  static const String mushafStyleQcfV1 = 'mushafStyleQcfV1';
+  static const String mushafStyleQcfV1Body = 'mushafStyleQcfV1Body';
+  static const String deleteMushafStyleBody = 'deleteMushafStyleBody';
 }
