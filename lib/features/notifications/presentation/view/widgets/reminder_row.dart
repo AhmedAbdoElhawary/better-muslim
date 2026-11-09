@@ -11,12 +11,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// the reminder's minutes, the reminder sheet on a tap. 4.12 shows it with the adhan icon
 class ReminderRow extends ConsumerWidget {
-  const ReminderRow({this.icon = false, this.tone = false, super.key});
+  const ReminderRow({this.icon = false, super.key});
 
   final bool icon;
-
-  /// its play button, android only since ios reminders come silent (FR-035)
-  final bool tone;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
