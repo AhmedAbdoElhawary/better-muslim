@@ -99,7 +99,7 @@ void main() {
     containerOf(tester).read(routerProvider).pop();
     await tester.pumpAndSettle();
     final settings = await settingsOf(tester);
-    expect((settings.theme, settings.themeMode), (BmThemeId.moonlight, BmThemeMode.followSky));
+    expect((settings.theme, settings.themeMode), (BmThemeId.moonlight, BmThemeMode.followPhone));
     await unmount(tester);
   });
 
