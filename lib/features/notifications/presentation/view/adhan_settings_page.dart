@@ -121,7 +121,7 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
                     ],
                   ),
                   const RSizedBox.vertical(SpaceManager.s3),
-                  const GroupedSection(children: [ReminderRow(tone: true)]),
+                  const GroupedSection(children: [ReminderRow()]),
                 ],
               ),
             ),
