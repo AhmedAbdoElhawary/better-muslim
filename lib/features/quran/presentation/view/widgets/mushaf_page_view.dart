@@ -15,15 +15,17 @@ import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/mushaf_star.dart';
+import 'package:better_muslim/features/quran/data/mushaf_files.dart';
 import 'package:better_muslim/features/quran/domain/bookmark.dart';
+import 'package:better_muslim/features/quran/domain/kashida.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
+import 'package:better_muslim/features/quran/presentation/providers/mushaf_style_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
-import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -44,17 +46,22 @@ typedef MushafColors = ({
   Color highlight,
 });
 
-/// how a screen reader reads an ayah, on the page and in its cell (FR-052). in arabic the
-/// translation slot is al-muyassar (FR-020)
+/// a qcf style's page font and where its ink sits, null for text. a colored one keeps its own colors
+typedef MushafGlyphs = ({String family, double ink, bool colored});
+
+/// one color of V4's tajweed key and its name
+typedef TajweedRule = ({Color color, String label});
+
+/// how a screen reader reads an ayah, on the page and in its cell (FR-052), with the translation
+/// shown
 String ayahLabel(
   BuildContext context, {
   required QuranSurah surah,
   required AyahKey ayah,
   required String arabic,
-  required SurahText? text,
+  required String? translation,
 }) {
   final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-  final translation = isArabic ? text?.tafsir[ayah.ayah - 1] : text?.translation[ayah.ayah - 1];
   return [
     context.tr(StringsManager.quranAyahN, {
       'surah': isArabic ? surah.ar : surah.en,
@@ -66,13 +73,13 @@ String ayahLabel(
 }
 
 /// one page of the mushaf as printed (4.19), painted by one render object instead of a widget
-/// per word, so a turn only paints. a tap or a long press on a word gives its ayah
+/// per word, so a turn only paints. a long press or a double tap on a word gives its ayah
 class MushafPageView extends ConsumerStatefulWidget {
-  const MushafPageView(this.number, {this.onAyah, this.onLongAyah, super.key});
+  const MushafPageView(this.number, {this.onAyah, this.onCheck, super.key});
 
   final int number;
   final ValueChanged<AyahKey>? onAyah;
-  final ValueChanged<AyahKey>? onLongAyah;
+  final ValueChanged<AyahKey>? onCheck;
 
   @override
   ConsumerState<MushafPageView> createState() => _MushafPageViewState();
@@ -111,16 +118,45 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
   Widget build(BuildContext context) {
     final number = widget.number;
     final page = ref.watch(mushafPageProvider(number));
+    final style = ref.watch(
+      settingsProvider.select((settings) => settings.value?.mushafStyle ?? MushafStyle.text),
+    );
+
+    /// the page waits for its font, a font loaded once lays out in the first frame
+    String? family;
+    List<Color>? palette;
+    var waiting = false;
+    if (style != MushafStyle.text) {
+      final files = ref.watch(mushafFilesProvider);
+      final index = style.palette(ref.watch(pageColorProvider).resolve(dark: context.isThemeDark));
+      family = files.loaded(style, number, palette: index);
+      if (family == null) {
+        final font = ref.watch(qcfFontProvider((style, number, index)));
+
+        /// a page color change keeps the old palette's words until the new one is loaded
+        family =
+            font.value ??
+            [for (var other = 0; other < 3; other++) files.loaded(style, number, palette: other)]
+                .nonNulls
+                .firstOrNull;
+        waiting = family == null && font.isLoading;
+      }
+      if (style.colored && family != null) {
+        palette = ref.watch(tajweedColorsProvider((number, index))).value;
+      }
+    }
     final assets = ref.watch(quranAssetsProvider).value;
     final info = assets?.pageInfo(number);
     final lines = page.value?.lines ?? const <MushafLine>[];
     final keys = {for (final line in lines) ...line.words.map((word) => word.key)};
+    final shown = shownTranslation(context, ref);
     final texts = {
       for (final surah in keys.map((key) => key.surah).toSet())
-        surah: ref.watch(surahTextProvider(surah)).value,
+        surah: ref.watch(translationProvider((shown, surah))).value,
     };
     return _MushafPaper(
-      page: page.value,
+      /// a switch to or from V1 reloads the page, the old print's words never meet the new font
+      page: waiting || page.isLoading ? null : page.value,
       number: _eastern(number),
       placeholder: page.hasValue && page.value == null,
       surah: info == null ? '' : assets!.surah(info.start.surah).ar,
@@ -139,7 +175,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
           },
         ),
       ),
-      ribbons: {
+      bookmarked: {
         for (final bookmark
             in ref.watch(bookmarksProvider.select((bookmarks) => bookmarks.value)) ??
                 const <Bookmark>[])
@@ -150,7 +186,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
       onAyah: widget.onAyah,
-      onLongAyah: widget.onLongAyah,
+      onCheck: widget.onCheck,
       labels: {
         if (assets != null)
           for (final key in keys)
@@ -159,15 +195,21 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
               surah: assets.surah(key.surah),
               ayah: key,
               arabic: ayahText([?page.value], key),
-              text: texts[key.surah],
+              translation: texts[key.surah]?.elementAtOrNull(key.ayah - 1),
             ),
       },
       direction: Directionality.of(context),
-      family: ref.watch(
-        settingsProvider.select(
-          (settings) => (settings.value?.quranFont ?? QuranFont.kfgqpc).family,
-        ),
+      font: ref.watch(
+        settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.kfgqpc),
       ),
+      glyphs: family == null ? null : (family: family, ink: style.ink, colored: style.colored),
+      tajweed:
+          palette == null || palette.length <= _tajweedKey.map((rule) => rule.$1).reduce(math.max)
+          ? null
+          : [
+              for (final (entry, label) in _tajweedKey)
+                (color: palette[entry], label: context.tr(label)),
+            ],
       step: ref.watch(settingsProvider.select((settings) => settings.value?.mushafSize ?? 0)),
       colors: (
         page: context.getColor(ThemeEnum.page),
@@ -183,6 +225,18 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
     );
   }
 }
+
+/// the printed key with each rule's entry in V4's palettes, the madd first for the right side
+const _tajweedKey = [
+  (3, StringsManager.tajweedLazim),
+  (9, StringsManager.tajweedWajib),
+  (4, StringsManager.tajweedJaiz),
+  (5, StringsManager.tajweedTabii),
+  (6, StringsManager.tajweedIkhfa),
+  (1, StringsManager.tajweedIdgham),
+  (7, StringsManager.tajweedTafkheem),
+  (8, StringsManager.tajweedQalqalah),
+];
 
 /// the page's digits as the mushaf prints them, in both languages
 String _eastern(int n) => formatDigitsIn('$n', language: 'ar', digits: Digits.eastern);
@@ -207,22 +261,25 @@ Future<void> warmMushafPage(BuildContext context, WidgetRef ref, int number) asy
   }) {
     await assets.surahText(surah);
   }
-  if (!context.mounted) return;
   final settings = ref.read(settingsProvider).value;
+  final style = settings?.mushafStyle ?? MushafStyle.text;
+  if (!context.mounted) return;
   final color = ref.read(pageColorProvider).resolve(dark: context.isThemeDark);
+  String? family;
+  if (style != MushafStyle.text) {
+    family = await ref.read(qcfFontProvider((style, number, style.palette(color))).future);
+  }
+  if (!context.mounted) return;
   _laidOf((
     page: page,
     number: _eastern(number),
     names: _names(page, assets),
     eastern: _eastern,
     unit: ScreenUtil().scaleWidth,
-    family: (settings?.quranFont ?? QuranFont.kfgqpc).family,
+    font: settings?.quranFont ?? QuranFont.kfgqpc,
+    glyphs: family == null ? null : (family: family, ink: style.ink, colored: style.colored),
     step: settings?.mushafSize ?? 0,
     ink: AppTheme.page(color, ref.read(themeIdProvider)).getColor(ThemeEnum.ink),
-    marked: {
-      for (final bookmark in ref.read(bookmarksProvider).value ?? const <Bookmark>[])
-        if (bookmark.ayah case final ayah? when bookmark.page == number) ayah,
-    },
 
     /// the reader fills the root navigator, in its transition too. a copy, in debug a size belongs
     /// to its render object and the page may not adopt it
@@ -244,13 +301,15 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.wash,
     required this.chosen,
     required this.highlighted,
-    required this.ribbons,
+    required this.bookmarked,
     required this.following,
     required this.onAyah,
-    required this.onLongAyah,
+    required this.onCheck,
     required this.labels,
     required this.direction,
-    required this.family,
+    required this.font,
+    required this.glyphs,
+    required this.tajweed,
     required this.step,
     required this.colors,
   });
@@ -267,13 +326,15 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final Animation<double> wash;
   final Set<AyahKey> chosen;
   final Set<AyahKey> highlighted;
-  final Map<AyahKey, Color> ribbons;
+  final Map<AyahKey, Color> bookmarked;
   final AyahKey? following;
   final ValueChanged<AyahKey>? onAyah;
-  final ValueChanged<AyahKey>? onLongAyah;
+  final ValueChanged<AyahKey>? onCheck;
   final Map<AyahKey, String> labels;
   final TextDirection direction;
-  final String family;
+  final QuranFont font;
+  final MushafGlyphs? glyphs;
+  final List<TajweedRule>? tajweed;
   final int step;
   final MushafColors colors;
 
@@ -291,13 +352,15 @@ class _MushafPaper extends LeafRenderObjectWidget {
     wash: wash,
     chosen: chosen,
     highlighted: highlighted,
-    ribbons: ribbons,
+    bookmarked: bookmarked,
     following: following,
     onAyah: onAyah,
-    onLongAyah: onLongAyah,
+    onCheck: onCheck,
     labels: labels,
     direction: direction,
-    family: family,
+    font: font,
+    glyphs: glyphs,
+    tajweed: tajweed,
     step: step,
     colors: colors,
   );
@@ -317,13 +380,15 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..wash = wash
       ..chosen = chosen
       ..highlighted = highlighted
-      ..ribbons = ribbons
+      ..bookmarked = bookmarked
       ..following = following
       ..onAyah = onAyah
-      ..onLongAyah = onLongAyah
+      ..onCheck = onCheck
       ..labels = labels
       ..direction = direction
-      ..family = family
+      ..font = font
+      ..glyphs = glyphs
+      ..tajweed = tajweed
       ..step = step
       ..colors = colors;
   }
@@ -345,13 +410,15 @@ class RenderMushafPage extends RenderBox {
     required this._wash,
     required this._chosen,
     required this._highlighted,
-    required this._ribbons,
+    required this._bookmarked,
     required this._following,
     required this.onAyah,
-    required this.onLongAyah,
+    required this._onCheck,
     required this._labels,
     required this._direction,
-    required this._family,
+    required this._font,
+    required this._glyphs,
+    required this._tajweed,
     required this._step,
     required this._colors,
   });
@@ -445,15 +512,12 @@ class RenderMushafPage extends RenderBox {
   }
 
   /// each bookmarked ayah on the page in its category's color
-  Map<AyahKey, Color> _ribbons;
-  Map<AyahKey, Color> get ribbons => _ribbons;
-  set ribbons(Map<AyahKey, Color> value) {
-    if (mapEquals(value, _ribbons)) return;
-    final moved = !setEquals(value.keys.toSet(), _ribbons.keys.toSet());
-    _ribbons = value;
-
-    /// the ribbon takes room in the line, a new color only repaints
-    moved ? _relayout() : markNeedsPaint();
+  Map<AyahKey, Color> _bookmarked;
+  Map<AyahKey, Color> get bookmarked => _bookmarked;
+  set bookmarked(Map<AyahKey, Color> value) {
+    if (mapEquals(value, _bookmarked)) return;
+    _bookmarked = value;
+    markNeedsPaint();
   }
 
   AyahKey? _following;
@@ -464,10 +528,16 @@ class RenderMushafPage extends RenderBox {
     markNeedsPaint();
   }
 
+  /// a long press or a double tap on a word
   ValueChanged<AyahKey>? onAyah;
 
-  /// starts choosing ayahs to share, a tap selects when it's null
-  ValueChanged<AyahKey>? onLongAyah;
+  /// while choosing ayahs to share a tap checks or unchecks one at once, nothing waits for a
+  /// double tap
+  ValueChanged<AyahKey>? _onCheck;
+  set onCheck(ValueChanged<AyahKey>? value) {
+    if ((value == null) != (_onCheck == null)) markNeedsSemanticsUpdate();
+    _onCheck = value;
+  }
 
   /// what a screen reader reads for each ayah on the page
   Map<AyahKey, String> _labels;
@@ -485,10 +555,18 @@ class RenderMushafPage extends RenderBox {
   }
 
   /// another font measures every word again
-  String _family;
-  set family(String value) {
-    if (value == _family) return;
-    _family = value;
+  QuranFont _font;
+  set font(QuranFont value) {
+    if (value == _font) return;
+    _font = value;
+    _relayout();
+  }
+
+  MushafGlyphs? _glyphs;
+  MushafGlyphs? get glyphs => _glyphs;
+  set glyphs(MushafGlyphs? value) {
+    if (value == _glyphs) return;
+    _glyphs = value;
     _relayout();
   }
 
@@ -501,10 +579,24 @@ class RenderMushafPage extends RenderBox {
     _relayout();
   }
 
+  List<TajweedRule>? _tajweed;
+  List<TajweedRule>? get tajweed => _tajweed;
+  set tajweed(List<TajweedRule>? value) {
+    if (listEquals(value, _tajweed)) return;
+    _tajweed = value;
+    _tajweedLabels = null;
+    markNeedsPaint();
+  }
+
+  List<TextPainter>? _tajweedLabels;
+
   MushafColors _colors;
   set colors(MushafColors value) {
     if (value == _colors) return;
-    if (value.ink2 != _colors.ink2) _header = null;
+    if (value.ink2 != _colors.ink2) {
+      _header = null;
+      _tajweedLabels = null;
+    }
     if (value.ink != _colors.ink) {
       _settle?.cancel();
       _settle = Timer(BmMotion.standard, _relayout);
@@ -521,6 +613,7 @@ class RenderMushafPage extends RenderBox {
 
   void _relayout() {
     _laid = null;
+    _tajweedLabels = null;
     markNeedsLayout();
   }
 
@@ -542,10 +635,10 @@ class RenderMushafPage extends RenderBox {
         names: _names,
         eastern: eastern,
         unit: _unit,
-        family: _family,
+        font: _font,
+        glyphs: _glyphs,
         step: _step,
         ink: _colors.ink,
-        marked: _ribbons.keys.toSet(),
         viewport: viewport,
       ));
       markNeedsSemanticsUpdate();
@@ -567,34 +660,40 @@ class RenderMushafPage extends RenderBox {
 
   /// the ayah under the pointer when it went down
   AyahKey? _down;
-  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = _select;
-  late final _long = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _choose;
+  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = () => _call(_onCheck);
+  late final _double = DoubleTapGestureRecognizer(debugOwner: this)
+    ..onDoubleTap = () => _call(onAyah);
+  late final _long = LongPressGestureRecognizer(debugOwner: this)
+    ..onLongPress = () => _call(onAyah);
 
-  void _select() {
-    if (_down case final key?) onAyah?.call(key);
-  }
-
-  void _choose() {
-    if (_down case final key?) (onLongAyah ?? onAyah)?.call(key);
+  void _call(ValueChanged<AyahKey>? callback) {
+    if (_down case final key?) callback?.call(key);
   }
 
   @override
   void dispose() {
     _settle?.cancel();
     _tap.dispose();
+    _double.dispose();
     _long.dispose();
     super.dispose();
   }
 
-  /// only the words are hit, a tap on the margin goes on to the turner and toggles the controls
+  /// only the words are hit. a single tap on them waits out a double tap, then goes on to the
+  /// turner like a tap on the margin and toggles the controls
   @override
-  bool hitTestSelf(Offset position) => onAyah != null && ayahAt(position) != null;
+  bool hitTestSelf(Offset position) =>
+      (onAyah != null || _onCheck != null) && ayahAt(position) != null;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is! PointerDownEvent) return;
     _down = ayahAt(entry.localPosition);
-    _tap.addPointer(event);
+    if (_onCheck != null) {
+      _tap.addPointer(event);
+      return;
+    }
+    _double.addPointer(event);
     _long.addPointer(event);
   }
 
@@ -623,7 +722,7 @@ class RenderMushafPage extends RenderBox {
     final height = laid.textHeight + 2 * SpaceManager.ayahWashV * _unit;
     final side = SpaceManager.ayahWashH * _unit;
     if (key.ayah == 0) return [?_basmallahRect(laid, key.surah, height, side)];
-    return washRects(laid.page, laid.layout, key, height: height, side: side);
+    return washRects(laid.page, laid.layout, key, height: height, side: side, shift: laid.inkShift);
   }
 
   /// ayah 0 is the surah's bismillah, the line after its name
@@ -635,15 +734,19 @@ class RenderMushafPage extends RenderBox {
       if (line.type != MushafLineType.basmallah) continue;
       if (owner == surah) {
         final (band, text) = laid.basmallahs[index];
-        return Rect.fromCenter(center: band.center, width: text.width + 2 * side, height: height);
+        return Rect.fromCenter(
+          center: band.center.translate(0, laid.inkShift),
+          width: text.width + 2 * side,
+          height: height,
+        );
       }
       index++;
     }
     return null;
   }
 
-  /// the ayah's wash on this page in its own coordinates, null when it isn't on it
-  /// one node per ayah over its words, read in the mushaf's order, a tap selects it (FR-052)
+  /// one node per ayah over its words, read in the mushaf's order. a tap opens its sheet, or checks
+  /// it while choosing (FR-052)
   final _nodes = <AyahKey, SemanticsNode>{};
 
   @override
@@ -659,19 +762,16 @@ class RenderMushafPage extends RenderBox {
     Iterable<SemanticsNode> children,
   ) {
     _nodes.removeWhere((key, _) => !_labels.containsKey(key));
-    final onAyah = this.onAyah;
+    final action = _onCheck ?? onAyah;
     final nodes = [
       for (final (i, MapEntry(:key, :value)) in _labels.entries.indexed)
         if (washBounds(key) case final rect?)
           (_nodes[key] ??= SemanticsNode())
-            /// a short line's wash can be under the 44 pt a tap target needs, also on the card
+            /// a short line's wash can be under the 44 pt a tap target needs
             ..rect = Rect.fromCenter(
               center: rect.center,
               width: rect.width,
-              height: math.max(
-                rect.height,
-                (SizeManager.hit / SizeManager.pageCardScale).ceil() * _unit,
-              ),
+              height: math.max(rect.height, SizeManager.hit * _unit),
             )
             ..updateWith(
               config: SemanticsConfiguration()
@@ -680,7 +780,7 @@ class RenderMushafPage extends RenderBox {
                 ..textDirection = _direction
                 ..isButton = true
                 ..isSelected = key == _selected
-                ..onTap = onAyah == null ? null : () => onAyah(key),
+                ..onTap = action == null ? null : () => action(key),
             ),
     ];
     node.updateWith(config: config, childrenInInversePaintOrder: nodes);
@@ -692,12 +792,32 @@ class RenderMushafPage extends RenderBox {
     _nodes.clear();
   }
 
-  /// between the ayah's last word and its marker, in room the line keeps for it
-  Rect? ribbonRect(AyahKey key) {
-    if (_page == null || !_ribbons.containsKey(key)) return null;
-    return _laid?.ribbons[key];
+  /// a bookmarked ayah's number on this page, the text's star or the qcf font's circle. null on a
+  /// page the ayah doesn't end on
+  Path? bookmarkedNumber(AyahKey key) {
+    final laid = _laid;
+    if (laid == null || _page == null || !_bookmarked.containsKey(key)) return null;
+    final lines = laid.page.lines;
+    for (var i = 0; i < lines.length; i++) {
+      for (var j = 0; j < lines[i].words.length; j++) {
+        final word = lines[i].words[j];
+        if (!word.end || word.key != key) continue;
+        final rect = laid.layout.words[i][j];
+        if (_glyphs == null) return mushafStar(rect.center, laid.marker);
+
+        /// the font's circle sits on the ink like the words, as wide as its glyph
+        return Path()..addOval(
+          Rect.fromCircle(
+            center: rect.center.translate(0, laid.inkShift),
+            radius: math.min(rect.width, laid.textHeight) / 2,
+          ),
+        );
+      }
+    }
+    return null;
   }
 
+  /// the ayah's wash on this page in its own coordinates, null when it isn't on it
   Rect? washBounds(AyahKey key) {
     final laid = _laid;
     if (laid == null || _page == null) return null;
@@ -719,13 +839,12 @@ class RenderMushafPage extends RenderBox {
       _paintCartouche(canvas, rect);
     }
     if (_placeholder) _paintPlaceholder(canvas, laid);
-    _paintRibbons(canvas);
     _paintWash(canvas, laid);
     _paintMarkers(canvas, laid);
 
     /// the text carries its own ink, an offscreen layer makes it soft on android (T085). only while
-    /// the ink crossfades a layer tints the text laid out in the old one
-    final tinted = laid.ink != _colors.ink;
+    /// the ink crossfades a layer tints the text laid out in the old one, never a colored font's
+    final tinted = laid.ink != _colors.ink && !(_glyphs?.colored ?? false);
     if (tinted) {
       canvas.saveLayer(
         Offset.zero & size,
@@ -838,7 +957,61 @@ class RenderMushafPage extends RenderBox {
       mushafStar(number, SizeManager.mushafNumber * _unit),
       _stroke(ornament.withValues(alpha: .9), SizeManager.starStroke),
     );
+    _paintTajweed(canvas, laid, number);
   }
+
+  /// two rows of two on each side of the number, read right to left
+  void _paintTajweed(Canvas canvas, _Laid laid, Offset number) {
+    final key = _tajweed;
+    if (key == null) return;
+    final scale = tajweedKeyScale(_step) * _unit;
+    final side = (SizeManager.mushafNumber / 2 + SpaceManager.tajweedKeyGap) * _unit;
+    final column = (laid.frame.width / 2 - side) / 2;
+    final dot = SizeManager.tajweedDot * scale;
+    final gap = SpaceManager.tajweedDotGap * scale;
+    final labels = _tajweedLabels ??= _tajweedLabelsOf(
+      key,
+      fontSize: FontSizeManager.tajweedKey * scale,
+      room: column - dot - gap,
+    );
+    for (var i = 0; i < key.length; i++) {
+      final right = (i < 4 ? laid.frame.right : number.dx - side) - i % 2 * column;
+      final y = number.dy + ((i % 4) ~/ 2 - .5) * SizeManager.tajweedKeyRow * scale;
+      canvas.drawCircle(Offset(right - dot / 2, y), dot / 2, Paint()..color = key[i].color);
+      labels[i].paint(
+        canvas,
+        Offset(right - dot - gap - labels[i].width, y - labels[i].height / 2),
+      );
+    }
+  }
+
+  /// the longest name sets one size for all eight, a cut name loses its rule
+  List<TextPainter> _tajweedLabelsOf(
+    List<TajweedRule> key, {
+    required double fontSize,
+    required double room,
+  }) {
+    List<TextPainter> at(double fontSize) => [
+      for (final rule in key)
+        TextPainter(
+          text: TextSpan(
+            text: rule.label,
+            style: GetRegularStyle(
+              fontSize: fontSize,
+              fontFamily: FontEnum.body.arabic,
+              color: _colors.ink2,
+            ),
+          ),
+          textDirection: TextDirection.rtl,
+        )..layout(),
+    ];
+    final labels = at(fontSize);
+    final widest = labels.map((label) => label.width).reduce(math.max);
+    return widest <= room ? labels : at(fontSize * room / widest);
+  }
+
+  @visibleForTesting
+  List<TextPainter>? get tajweedLabels => _tajweedLabels;
 
   /// page 1's arch, the two paths of page1() in its 319 x 612 box
   void _paintArch(Canvas canvas, _Laid laid) {
@@ -915,31 +1088,19 @@ class RenderMushafPage extends RenderBox {
     }
   }
 
-  void _paintRibbons(Canvas canvas) {
-    for (final MapEntry(:key, :value) in _ribbons.entries) {
-      if (ribbonRect(key) case final rect?) {
-        canvas.drawPath(ribbonPath(rect, SizeManager.ribbonNotch), Paint()..color = value);
-      }
-    }
-  }
-
   /// behind the markers and the ink, so the glyphs are never recolored
   void _paintWash(Canvas canvas, _Laid laid) {
     if (_page == null) return;
     final radius = Radius.circular(RadiusManager.ayahWash * _unit);
-    void wash(AyahKey key, Color color, {bool lower = false}) {
+    void wash(AyahKey key, Color color) {
       final paint = Paint()..color = color;
       for (final rect in _washRects(laid, key)) {
-        final shape = lower
-            ? Rect.fromLTRB(rect.left, rect.center.dy, rect.right, rect.bottom)
-            : rect;
-        canvas.drawRRect(RRect.fromRectAndRadius(shape, radius), paint);
+        canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
       }
     }
 
-    /// only the lower half, so it never reads as the selection or the follow wash
     for (final key in _highlighted) {
-      wash(key, _colors.highlight, lower: true);
+      wash(key, _colors.highlight);
     }
     if (_following case final key?) wash(key, _colors.follow);
     for (final key in _chosen) {
@@ -948,6 +1109,16 @@ class RenderMushafPage extends RenderBox {
     final key = _selected;
     if (key != null && _wash.value > 0) {
       wash(key, _colors.selection.withValues(alpha: _colors.selection.a * _wash.value));
+    }
+
+    /// over the washes, so its color stays the category's
+    for (final MapEntry(:key, :value) in _bookmarked.entries) {
+      if (bookmarkedNumber(key) case final path?) {
+        canvas.drawPath(
+          path,
+          Paint()..color = value.withValues(alpha: SizeManager.bookmarkedNumber),
+        );
+      }
     }
   }
 
@@ -1016,12 +1187,10 @@ typedef _LaidInput = ({
   Map<int, String> names,
   String Function(int n) eastern,
   double unit,
-  String family,
+  QuranFont font,
+  MushafGlyphs? glyphs,
   int step,
   Color ink,
-
-  /// the bookmarked ayahs, each keeps room for its ribbon
-  Set<AyahKey> marked,
   Size viewport,
 });
 
@@ -1032,10 +1201,18 @@ _Laid _laidOf(_LaidInput input) {
   final page = input.page;
   if (page == null) return _Laid.of(input);
 
-  /// the names and digits follow from the page number
-  final key = (page.number, input.viewport, input.unit, input.family, input.step, input.ink);
-  final kept = _laids.remove(key);
-  final laid = kept != null && setEquals(kept.marked, input.marked) ? kept : _Laid.of(input);
+  /// the words, names and digits follow from the page number and its print, which the glyphs'
+  /// style decides (text is always 1421H)
+  final key = (
+    page.number,
+    input.viewport,
+    input.unit,
+    input.font,
+    input.glyphs,
+    input.step,
+    input.ink,
+  );
+  final laid = _laids.remove(key) ?? _Laid.of(input);
   _laids[key] = laid;
   if (_laids.length > 5) _laids.remove(_laids.keys.first);
   return laid;
@@ -1056,18 +1233,16 @@ class _Laid {
     required this.marker,
     required this.markerScale,
     required this.markers,
-    required this.marked,
-    required this.ribbons,
     required this.cartouches,
     required this.basmallahs,
     required this.number,
     required this.textHeight,
+    required this.inkShift,
     required this.ink,
   });
 
   factory _Laid.of(_LaidInput input) {
-    final (:page, :number, :names, :eastern, :unit, :family, :step, :ink, :marked, :viewport) =
-        input;
+    final (:page, :number, :names, :eastern, :unit, :font, :glyphs, :step, :ink, :viewport) = input;
     final reflow = step > 0;
     Rect frameOf(Size size) => Rect.fromLTRB(
       SpaceManager.mushafFrameLeft * unit,
@@ -1139,8 +1314,17 @@ class _Laid {
 
     TextPainter quran(String text, double fontSize) => TextPainter(
       text: TextSpan(
-        text: text,
-        style: GetRegularStyle(fontSize: fontSize, fontFamily: family, color: ink),
+        text: font.drawn(text),
+        style: GetRegularStyle(fontSize: fontSize, fontFamily: font.family, color: ink),
+      ),
+      textDirection: TextDirection.rtl,
+    )..layout();
+
+    /// a qcf word is one glyph of the page's own font, its end marker too
+    TextPainter glyph(String code, double fontSize) => TextPainter(
+      text: TextSpan(
+        text: code,
+        style: GetRegularStyle(fontSize: fontSize, fontFamily: glyphs!.family, color: ink),
       ),
       textDirection: TextDirection.rtl,
     )..layout();
@@ -1152,27 +1336,41 @@ class _Laid {
     var scale = fontSize / (FontSizeManager.quranPage * unit);
     List<List<TextPainter?>> measure() => [
       for (final line in lines)
-        [for (final word in line.words) word.end ? null : quran(word.text, fontSize)],
+        [
+          for (final word in line.words)
+            glyphs != null
+                ? glyph(word.glyph, fontSize)
+                : word.end
+                ? null
+                : quran(word.text, fontSize),
+        ],
     ];
     double markerWidth() =>
         (SizeManager.ayahMarker * scale + 2 * SpaceManager.ayahMarkerGap) * unit;
-    double ribbonWidth() =>
-        (SizeManager.ayahRibbonW * scale +
-            SpaceManager.ayahMarkerGap +
-            SpaceManager.ayahRibbonGap) *
-        unit;
-    double endWidth(MushafWord word) =>
-        markerWidth() + (marked.contains(word.key) ? ribbonWidth() : 0);
     List<List<double>> widths(List<MushafLine> lines, List<List<TextPainter?>> words) => [
       for (var i = 0; i < lines.length; i++)
-        [
-          for (var j = 0; j < words[i].length; j++)
-            words[i][j]?.width ?? endWidth(lines[i].words[j]),
-        ],
+        [for (var j = 0; j < words[i].length; j++) words[i][j]?.width ?? markerWidth()],
     ];
 
-    var gap = quran(' ', fontSize).width;
-    if (!opening && !reflow) {
+    /// a qcf glyph carries its word's spacing, the print's usual line fills the area
+    var gap = glyphs != null ? 0.0 : quran(' ', fontSize).width;
+
+    /// a page still loading has no lines, while its qcf font can already be there
+    if (glyphs != null && !reflow && lines.any((line) => line.words.isNotEmpty)) {
+      final widths = [
+        for (final (i, line) in measure().indexed)
+          if (line.isNotEmpty)
+            (lines[i].centered, line.fold(0.0, (sum, word) => sum + word!.width)),
+      ];
+      final full = [
+        for (final (centered, width) in widths)
+          if (!centered) width,
+      ]..sort();
+      scale =
+          area.width /
+          (full.isEmpty ? widths.map((line) => line.$2).reduce(math.max) : full[full.length ~/ 2]);
+      fontSize *= scale;
+    } else if (!opening && !reflow) {
       /// a whole line in one painter is as wide as its words and spaces, so the words are measured
       /// once, at the size the page ends up with
       final widest = lines.fold(0.0, (widest, line) {
@@ -1180,9 +1378,7 @@ class _Laid {
           for (final word in line.words)
             if (!word.end) word.text,
         ];
-        final ends = line.words
-            .where((word) => word.end)
-            .fold(0.0, (sum, word) => sum + endWidth(word));
+        final ends = line.words.where((word) => word.end).length * markerWidth();
         final spaces = math.max(0, line.words.length - 1) - math.max(0, text.length - 1);
         final width =
             (text.isEmpty ? 0.0 : quran(text.join(' '), fontSize).width) + ends + spaces * gap;
@@ -1209,6 +1405,40 @@ class _Laid {
       frame = frameOf(size);
       inner = frame.deflate(SpaceManager.mushafFrameInner * unit);
     }
+
+    /// a justified line's gaps stop at one and a half spaces, the rest goes into kashidas (ADR 0003).
+    /// a stretched line still wider than the area keeps its words as they are
+    if (glyphs == null && !opening && step >= 0) {
+      final tatweel = quran(kashidaTatweel, fontSize).width;
+      final all = widths(lines, words);
+      for (var i = 0; i < lines.length; i++) {
+        final row = all[i];
+        final total = row.fold(0.0, (sum, width) => sum + width);
+        final spaces = gap * (row.length - 1);
+        if (lines[i].centered || row.length < 2 || total + spaces > area.width) continue;
+        final counts = shareKashidas(
+          widths: row,
+          stretchable: [
+            for (final word in lines[i].words) !word.end && kashidaPoint(word.text) != null,
+          ],
+          width: area.width,
+          cap: gap * kashidaGap,
+          tatweel: tatweel,
+        );
+        if (counts.every((n) => n == 0)) continue;
+        final stretched = [
+          for (var j = 0; j < row.length; j++)
+            counts[j] == 0
+                ? words[i][j]
+                : quran(kashida(lines[i].words[j].text, counts[j]), fontSize),
+        ];
+        var wide = 0.0;
+        for (var j = 0; j < row.length; j++) {
+          wide += stretched[j]?.width ?? row[j];
+        }
+        if (wide + spaces <= area.width) words[i] = stretched;
+      }
+    }
     final layout = layoutMushaf(
       page: mushaf,
       widths: widths(lines, words),
@@ -1218,6 +1448,9 @@ class _Laid {
     );
 
     final marker = SizeManager.ayahMarker * scale * unit;
+    final space = glyphs != null
+        ? words.expand((line) => line).nonNulls.firstOrNull ?? quran(' ', fontSize)
+        : quran(' ', fontSize);
     TextPainter amiri(String text, double fontSize, {bool bold = false}) => TextPainter(
       text: TextSpan(
         text: text,
@@ -1228,7 +1461,6 @@ class _Laid {
       textDirection: TextDirection.rtl,
     )..layout();
     final markers = <(Offset, TextPainter)>[];
-    final ribbons = <AyahKey, Rect>{};
     final cartouches = <(Rect, TextPainter)>[];
     final basmallahs = <(Rect, TextPainter)>[];
     for (var i = 0; i < lines.length; i++) {
@@ -1236,25 +1468,9 @@ class _Laid {
       final band = layout.lines[i];
       for (var j = 0; j < line.words.length; j++) {
         final word = line.words[j];
-        if (!word.end) continue;
-        final rect = layout.words[i][j];
-        var center = rect.center;
-
-        /// the line reads right to left, the ribbon sits on the word's side and the marker past it
-        if (marked.contains(word.key)) {
-          center = Offset(rect.left + markerWidth() / 2, center.dy);
-          ribbons[word.key] = Rect.fromCenter(
-            center: Offset(
-              rect.right -
-                  (SpaceManager.ayahMarkerGap + SizeManager.ayahRibbonW * scale / 2) * unit,
-              center.dy,
-            ),
-            width: SizeManager.ayahRibbonW * scale * unit,
-            height: SizeManager.ayahRibbonH * scale * unit,
-          );
-        }
+        if (!word.end || glyphs != null) continue;
         markers.add((
-          center,
+          layout.words[i][j].center,
           amiri(eastern(word.key.ayah), FontSizeManager.ayahMarker * scale * unit),
         ));
       }
@@ -1296,12 +1512,14 @@ class _Laid {
       marker: marker,
       markerScale: scale,
       markers: markers,
-      marked: marked,
-      ribbons: ribbons,
       cartouches: cartouches,
       basmallahs: basmallahs,
       number: amiri(number, FontSizeManager.mushafHeader * unit),
-      textHeight: quran(' ', fontSize).height,
+      textHeight: space.height,
+      inkShift:
+          space.computeDistanceToActualBaseline(TextBaseline.alphabetic) -
+          space.height / 2 -
+          (glyphs?.ink ?? font.ink) * fontSize,
       ink: ink,
     );
   }
@@ -1322,14 +1540,15 @@ class _Laid {
   final double marker;
   final double markerScale;
   final List<(Offset, TextPainter)> markers;
-  final Set<AyahKey> marked;
-  final Map<AyahKey, Rect> ribbons;
   final List<(Rect, TextPainter)> cartouches;
   final List<(Rect, TextPainter)> basmallahs;
   final TextPainter number;
 
   /// a line's text box, the wash is this plus its padding
   final double textHeight;
+
+  /// from the middle of a line to the middle of its ink, where the washes center
+  final double inkShift;
 
   /// the color the text was laid out in
   final Color ink;
