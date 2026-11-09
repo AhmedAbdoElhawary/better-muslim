@@ -10,6 +10,7 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/choosing_
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -65,6 +66,14 @@ void main() {
       expect(RadiusManager.ayahWash, 9);
     });
 
+    test('a shift moves every rect onto the ink, the same height', () {
+      final rects = washRects(page, layout, const AyahKey(1, 2), height: 30, side: 2, shift: -3);
+      for (final (i, rect) in rects.indexed) {
+        expect(rect.height, 30);
+        expect(rect.center.dy, layout.lines[i].center.dy - 3);
+      }
+    });
+
     test('the page goes up only as far as keeps the ayah 24 pt above the sheet', () {
       expect(ayahLift(bottom: 300, sheetTop: 452, gap: 24), 0);
       expect(ayahLift(bottom: 520, sheetTop: 452, gap: 24), 92);
@@ -85,12 +94,14 @@ void main() {
   });
 
   group('on the reader', () {
-    Future<void> pumpReader(WidgetTester tester) async {
+    Future<void> pumpAt(WidgetTester tester, int page) async {
       await pumpHome(tester, await designOverrides(), settle: false);
       await tester.pump();
-      containerOf(tester).read(routerProvider).push(Routes.quranPage(1));
+      containerOf(tester).read(routerProvider).push(Routes.quranPage(page));
       await tester.pumpAndSettle();
     }
+
+    Future<void> pumpReader(WidgetTester tester) => pumpAt(tester, 1);
 
     RenderMushafPage pageOne(WidgetTester tester) => tester.allRenderObjects
         .whereType<RenderMushafPage>()
@@ -111,37 +122,129 @@ void main() {
 
     AyahKey? selected(WidgetTester tester) => containerOf(tester).read(selectionProvider).sheet;
 
-    testWidgets('a tap on a word selects its ayah with the light haptic', (tester) async {
+    Offset at(WidgetTester tester, AyahKey key) {
+      final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
+        (page) => page.washBounds(key) != null,
+      );
+      return page.localToGlobal(page.washBounds(key)!.center);
+    }
+
+    bool chrome(WidgetTester tester) => tester.widget<PageChrome>(find.byType(PageChrome)).shown;
+
+    int shown(WidgetTester tester) => tester.widget<PageTurner>(find.byType(PageTurner)).page.value;
+
+    Future<void> doubleTapAt(WidgetTester tester, Offset position) async {
+      await tester.tapAt(position);
+      await tester.pump(kDoubleTapMinTime * 2);
+      await tester.tapAt(position);
+      await tester.pumpAndSettle();
+    }
+
+    /// the page's header, off the words and the strips
+    const header = Offset(200, 40);
+    const left = Offset(20, 250);
+    const right = Offset(373, 250);
+
+    testWidgets('a long press or a double tap on a word opens its ayah with a medium impact', (
+      tester,
+    ) async {
       await pumpReader(tester);
       final haptics = recordHaptics();
 
-      await tester.tapAt(ayahAt(tester, 5));
+      await tester.longPressAt(ayahAt(tester, 5));
       await tester.pumpAndSettle();
       expect(selected(tester), const AyahKey(1, 5));
       expect(inSheet('Al-Fatiha · Ayah 5'), findsOneWidget);
-      expect(haptics, ['HapticFeedbackType.lightImpact']);
+      expect(haptics, ['HapticFeedbackType.mediumImpact']);
 
       /// the sheet stays, the selection moves
-      await tester.tapAt(ayahAt(tester, 2));
-      await tester.pumpAndSettle();
+      await doubleTapAt(tester, ayahAt(tester, 2));
       expect(selected(tester), const AyahKey(1, 2));
       expect(inSheet('Al-Fatiha · Ayah 2'), findsOneWidget);
+      expect(haptics, hasLength(2));
+      expect(chrome(tester), isFalse);
+      await unmount(tester);
+    });
+
+    testWidgets('opening the reader at an ayah has no haptic', (tester) async {
+      await pumpHome(tester, await designOverrides(), settle: false);
+      await tester.pump();
+      final haptics = recordHaptics();
+      containerOf(tester).read(routerProvider).push(Routes.quranPage(1, ayah: const AyahKey(1, 5)));
+      await tester.pumpAndSettle();
+      expect(selected(tester), const AyahKey(1, 5));
+      expect(haptics, isEmpty);
+      await unmount(tester);
+    });
+
+    testWidgets('a tap on the words toggles the controls once it is no double tap', (tester) async {
+      await pumpReader(tester);
+      await tester.tapAt(ayahAt(tester, 5));
+      await tester.pump();
+      expect(chrome(tester), isFalse, reason: 'it waits for a second tap');
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pumpAndSettle();
+      expect(chrome(tester), isTrue);
+      expect(selected(tester), isNull);
+
+      await tester.tapAt(ayahAt(tester, 5));
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pumpAndSettle();
+      expect(chrome(tester), isFalse);
+      await unmount(tester);
+    });
+
+    testWidgets(
+      'the left strip turns to the next page and the right one back, controls shown too',
+      (tester) async {
+        await pumpAt(tester, 5);
+        await tester.tapAt(left);
+        await tester.pumpAndSettle();
+        expect(shown(tester), 6);
+        await tester.tapAt(right);
+        await tester.pumpAndSettle();
+        expect(shown(tester), 5);
+
+        await tester.tapAt(header);
+        await tester.pumpAndSettle();
+        expect(chrome(tester), isTrue);
+        await tester.tapAt(left);
+        await tester.pumpAndSettle();
+        expect(shown(tester), 6);
+        expect(chrome(tester), isTrue, reason: 'a turn leaves the controls as they are');
+        await unmount(tester);
+      },
+    );
+
+    testWidgets('with a sheet open a tap only closes it, on the strips too', (tester) async {
+      await pumpAt(tester, 5);
+      await tester.longPressAt(at(tester, const AyahKey(2, 26)));
+      await tester.pumpAndSettle();
+      expect(selected(tester), const AyahKey(2, 26));
+
+      await tester.tapAt(left);
+      await tester.pumpAndSettle();
+      expect(selected(tester), isNull);
+      expect(shown(tester), 5);
+
+      /// the lifted page has its words under the header now, the tap waits out a double tap
+      await tester.longPressAt(at(tester, const AyahKey(2, 26)));
+      await tester.pumpAndSettle();
+      await tester.tapAt(header);
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pumpAndSettle();
+      expect(selected(tester), isNull);
+      expect(chrome(tester), isFalse);
       await unmount(tester);
     });
 
     group('select mode', () {
-      Future<void> pumpAt(WidgetTester tester, int page) async {
-        await pumpHome(tester, await designOverrides(), settle: false);
-        await tester.pump();
-        containerOf(tester).read(routerProvider).push(Routes.quranPage(page));
+      /// Share on the ayah's sheet starts it with the ayah checked
+      Future<void> startChoosing(WidgetTester tester, Offset ayah) async {
+        await tester.longPressAt(ayah);
         await tester.pumpAndSettle();
-      }
-
-      Offset at(WidgetTester tester, AyahKey key) {
-        final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
-          (page) => page.washBounds(key) != null,
-        );
-        return page.localToGlobal(page.washBounds(key)!.center);
+        await tester.tap(inSheet('Share'));
+        await tester.pumpAndSettle();
       }
 
       /// the fit check reads the ayah's page off the bundle
@@ -164,38 +267,36 @@ void main() {
       Set<AyahKey> chosen(WidgetTester tester) =>
           containerOf(tester).read(selectionProvider).chosen;
 
-      testWidgets('a long press starts it, taps toggle, the bar counts', (tester) async {
+      testWidgets("the sheet's Share starts it, taps toggle at once, the bar counts", (
+        tester,
+      ) async {
         await pumpReader(tester);
-        await tester.longPressAt(ayahAt(tester, 4));
-        await tester.pumpAndSettle();
+        await startChoosing(tester, ayahAt(tester, 4));
         expect(chosen(tester), {const AyahKey(1, 4)});
         expect(selected(tester), isNull);
-        expect(find.byType(AyahSheet), findsNothing);
         expect(find.text('Share (1)'), findsOneWidget);
 
         await tester.tapAt(ayahAt(tester, 5));
         await settle(tester);
         expect(chosen(tester), {const AyahKey(1, 4), const AyahKey(1, 5)});
         expect(find.text('Share (2)'), findsOneWidget);
-        expect(find.byType(AyahSheet), findsNothing);
+        expect(selected(tester), isNull);
 
         await tester.tapAt(ayahAt(tester, 4));
-        await settle(tester);
-        expect(chosen(tester), {const AyahKey(1, 5)});
+        await tester.pump();
+        expect(chosen(tester), {const AyahKey(1, 5)}, reason: 'no wait for a double tap');
         await unmount(tester);
       });
 
       testWidgets('cancel and back both end it', (tester) async {
         await pumpReader(tester);
-        await tester.longPressAt(ayahAt(tester, 4));
-        await tester.pumpAndSettle();
+        await startChoosing(tester, ayahAt(tester, 4));
         await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
         expect(chosen(tester), isEmpty);
         expect(find.byType(ChoosingBar), findsNothing);
 
-        await tester.longPressAt(ayahAt(tester, 4));
-        await tester.pumpAndSettle();
+        await startChoosing(tester, ayahAt(tester, 4));
         await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();
         expect(chosen(tester), isEmpty);
@@ -209,18 +310,21 @@ void main() {
 
       testWidgets('turning the page keeps the choices', (tester) async {
         await pumpReader(tester);
-        await tester.longPressAt(ayahAt(tester, 4));
-        await tester.pumpAndSettle();
+        await startChoosing(tester, ayahAt(tester, 4));
         await nextPage(tester);
         expect(chosen(tester), {const AyahKey(1, 4)});
         expect(find.text('Share (1)'), findsOneWidget);
+
+        await tester.tapAt(right);
+        await tester.pumpAndSettle();
+        expect(shown(tester), 1, reason: 'the strips still turn');
+        expect(chosen(tester), {const AyahKey(1, 4)});
         await unmount(tester);
       });
 
       testWidgets("2:282 alone always starts it, 2:283 doesn't fit beside it", (tester) async {
         await pumpAt(tester, 48);
-        await tester.longPressAt(at(tester, const AyahKey(2, 282)));
-        await tester.pumpAndSettle();
+        await startChoosing(tester, at(tester, const AyahKey(2, 282)));
         expect(chosen(tester), {const AyahKey(2, 282)});
 
         await nextPage(tester);
@@ -233,28 +337,12 @@ void main() {
       });
     });
 
-    testWidgets('a tap off the text toggles the controls, or closes the sheet', (tester) async {
+    testWidgets('a tap on the header toggles the controls', (tester) async {
       await pumpReader(tester);
-      bool chrome() => tester.widget<PageChrome>(find.byType(PageChrome)).shown;
-
-      /// the page's top margin, above the frame
-      /// the right margin past the spine, the top bar covers the top one while it shows
-      const margin = Offset(385, 400);
-      await tester.tapAt(margin);
+      await tester.tapAt(header);
       await tester.pumpAndSettle();
-      expect(chrome(), isTrue);
+      expect(chrome(tester), isTrue);
       expect(selected(tester), isNull);
-      await tester.tapAt(margin);
-      await tester.pumpAndSettle();
-      expect(chrome(), isFalse);
-
-      await tester.tapAt(ayahAt(tester, 5));
-      await tester.pumpAndSettle();
-      expect(selected(tester), isNotNull);
-      await tester.tapAt(margin);
-      await tester.pumpAndSettle();
-      // expect(selected(tester), isNull);
-      expect(chrome(), isFalse);
       await unmount(tester);
     });
 
@@ -266,7 +354,7 @@ void main() {
       }
 
       final rest = bottom();
-      await tester.tapAt(ayahAt(tester, 7));
+      await tester.longPressAt(ayahAt(tester, 7));
       await tester.pumpAndSettle();
       final sheetTop = tester.getTopLeft(find.byType(AyahSheet)).dy;
       expect(rest, greaterThan(sheetTop - SpaceManager.ayahLift), reason: 'ayah 7 needs a lift');
