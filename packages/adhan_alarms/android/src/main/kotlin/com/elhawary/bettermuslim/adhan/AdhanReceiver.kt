@@ -20,11 +20,11 @@ class AdhanReceiver : BroadcastReceiver() {
             AdhanAlarms.ACTION_FIRE -> {
                 val entry = AdhanAlarms.entry(context, intent.getIntExtra(AdhanAlarms.EXTRA_ID, -1)) ?: return
                 clearPrayer(context)
-                val full = entry.optBoolean("full")
-                if (full && AdhanAlarms.canSound(context)) {
+                if (entry.optBoolean("full") && AdhanAlarms.canSound(context)) {
                     AdhanService.play(context, entry, 0)
                 } else {
-                    postPrayer(context, entry, quiet = full)
+                    // the prayer's channel sounds the reminder's takbir, an adhan that can't play is quiet
+                    postPrayer(context, entry, quiet = entry.optBoolean("adhan"))
                 }
             }
             ACTION_SWIPED -> postPrayer(context, JSONObject(intent.getStringExtra(EXTRA_ENTRY)!!), quiet = true)
@@ -46,8 +46,8 @@ class AdhanReceiver : BroadcastReceiver() {
             }
         }
 
-        // stays until it is answered or the next prayer takes its place. quiet after the full adhan
-        // or on a silent phone, its tap has no adhan left to open
+        // stays until it is answered or the next prayer takes its place. quiet after the full adhan,
+        // on a silent phone or without exact alarms, its tap has no adhan left to open
         @SuppressLint("MissingPermission")
         fun postPrayer(context: Context, entry: JSONObject, quiet: Boolean) {
             val manager = NotificationManagerCompat.from(context)
