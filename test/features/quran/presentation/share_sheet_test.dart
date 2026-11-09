@@ -42,9 +42,13 @@ void main() {
     final mushaf = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (mushaf) => mushaf.washBounds(ayah) != null,
     );
-    await tester.tapAt(mushaf.localToGlobal(mushaf.washBounds(ayah)!.center));
+    await tester.longPressAt(mushaf.localToGlobal(mushaf.washBounds(ayah)!.center));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Share'));
+    await tester.pumpAndSettle();
+
+    /// the sheet's Share starts choosing with the ayah checked, the bar makes the card
+    await tester.tap(find.text('Share (1)'));
     await tester.pumpAndSettle();
   }
 
