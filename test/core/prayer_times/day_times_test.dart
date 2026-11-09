@@ -191,6 +191,63 @@ void main() {
       expect(today.next(at(23, 0), tomorrow), (Prayer.fajr, tomorrow.fajr));
     });
   });
+
+  group('now window', () {
+    final today = makkah(DateTime(2026, 10, 15));
+    final asr = today.asr!;
+    const second = Duration(seconds: 1);
+
+    test('a prayer is now from its time for 20 minutes', () {
+      expect(today.inWindow(asr.subtract(second)), isNull);
+      expect(today.inWindow(asr), (Prayer.asr, asr));
+      expect(today.inWindow(asr.add(DayTimes.nowWindow - second)), (Prayer.asr, asr));
+      expect(today.inWindow(asr.add(DayTimes.nowWindow)), isNull);
+    });
+
+    test('sunrise is not a prayer, so fajr\'s window is all of it', () {
+      final fajr = today.fajr!;
+      expect(today.inWindow(fajr.add(const Duration(minutes: 10))), (Prayer.fajr, fajr));
+      expect(today.inWindow(today.sunrise!.add(const Duration(minutes: 10))), isNull);
+    });
+
+    test('isha keeps its window past midnight on its own day', () {
+      final zone = tz.getLocation('Asia/Riyadh');
+      DayTimes late(tz.TZDateTime isha) => DayTimes(
+        date: DateTime(2026, 6, 20),
+        fajr: tz.TZDateTime(zone, 2026, 6, 20, 3),
+        sunrise: tz.TZDateTime(zone, 2026, 6, 20, 4, 30),
+        dhuhr: tz.TZDateTime(zone, 2026, 6, 20, 12),
+        asr: tz.TZDateTime(zone, 2026, 6, 20, 16),
+        maghrib: tz.TZDateTime(zone, 2026, 6, 20, 22),
+        isha: isha,
+        method: PrayerMethod.muslimWorldLeague,
+        asrMethod: AsrMethod.standard,
+      );
+      final isha = tz.TZDateTime(zone, 2026, 6, 20, 23, 50);
+
+      expect(late(isha).inWindow(tz.TZDateTime(zone, 2026, 6, 21, 0, 5)), (Prayer.isha, isha));
+    });
+
+    test('a next prayer that comes sooner ends the window', () {
+      final zone = tz.getLocation('Asia/Riyadh');
+      final maghrib = tz.TZDateTime(zone, 2026, 6, 20, 22);
+      final isha = maghrib.add(const Duration(minutes: 10));
+      final day = DayTimes(
+        date: DateTime(2026, 6, 20),
+        fajr: tz.TZDateTime(zone, 2026, 6, 20, 3),
+        sunrise: tz.TZDateTime(zone, 2026, 6, 20, 4, 30),
+        dhuhr: tz.TZDateTime(zone, 2026, 6, 20, 12),
+        asr: tz.TZDateTime(zone, 2026, 6, 20, 16),
+        maghrib: maghrib,
+        isha: isha,
+        method: PrayerMethod.muslimWorldLeague,
+        asrMethod: AsrMethod.standard,
+      );
+
+      expect(day.inWindow(isha.subtract(second)), (Prayer.maghrib, maghrib));
+      expect(day.inWindow(isha), (Prayer.isha, isha));
+    });
+  });
 }
 
 int _minutes(String hhmm) {
