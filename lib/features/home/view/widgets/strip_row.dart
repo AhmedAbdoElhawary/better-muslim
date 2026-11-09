@@ -27,11 +27,7 @@ class StripRow extends ConsumerWidget {
         behavior: HitTestBehavior.opaque,
         onTap: () => context.go(Routes.prayerAt(ref.read(prayerDayProvider), cell.prayer)),
         child: AnimatedDecoratedBox(
-          decoration: BoxDecoration(
-            color: cell.current ? context.getColor(ThemeEnum.primaryContainer) : null,
-            borderRadius: BorderRadius.circular(RadiusManager.md.r),
-            border: cell.current ? Border.all(color: StripCell.currentBorder(context)) : null,
-          ),
+          decoration: StripCell.decoration(context, cell),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: SizeManager.hit.r),
             child: SymmetricPadding(
@@ -44,7 +40,7 @@ class StripRow extends ConsumerWidget {
                         ? SemiBoldText(
                             cell.prayer.nameKey,
                             fontSize: FontSizeManager.label,
-                            color: ThemeEnum.onPrimaryContainer,
+                            color: cell.now ? ThemeEnum.onPrimaryContainer : ThemeEnum.primary,
                           )
                         : RegularText(
                             cell.prayer.nameKey,
