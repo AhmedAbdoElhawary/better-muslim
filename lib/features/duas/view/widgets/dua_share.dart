@@ -90,7 +90,7 @@ class DuaShare extends ShareContent {
     );
     return [
       painter(
-        dua.arabic,
+        dua.quran ? options.font.drawn(dua.arabic) : dua.arabic,
         GetRegularStyle(
           fontSize: FontSizeManager.shareAyah.sp * scale,
           height: LineHeightManager.shareAyah,
