@@ -64,5 +64,6 @@ final rowStateProvider = Provider.autoDispose.family<RowState, (DateTime, Prayer
     logged: ref.watch(prayedProvider(day).select((prayed) => prayed.contains(prayer))),
     qada: qada,
     next: ref.watch(nextPrayerProvider),
+    highlighted: ref.watch(highlightedPrayerProvider),
   );
 });
