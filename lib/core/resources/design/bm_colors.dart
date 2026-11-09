@@ -259,6 +259,16 @@ abstract final class BmPagePalette {
   );
 
   /// cream, sepia, green and navy have no design, they're mine to check on the phone (R12)
+  static final white = _on(
+    paper,
+    page: const Color(0xFFFFFFFF),
+    ink: const Color(0xFF161616),
+    ink2: const Color(0xFF5C5C5C),
+    hidden: const Color(0xFFEDEDED),
+    gutter: const Color(0x24000000),
+    keepText: true,
+  );
+
   static final cream = _on(
     paper,
     page: const Color(0xFFF4E9CF),
@@ -304,6 +314,9 @@ abstract final class BmPagePalette {
     required Color ink2,
     required Color hidden,
     required Color gutter,
+
+    /// white is lighter than paper, its shift would take text3 under aa
+    bool keepText = false,
   }) {
     final was = from.page!;
     Color shift(Color color) => Color.from(
@@ -320,9 +333,9 @@ abstract final class BmPagePalette {
       variant: shift(from.variant),
       outline: shift(from.outline),
       outlineStrong: shift(from.outlineStrong),
-      text: shift(from.text),
-      text2: shift(from.text2),
-      text3: shift(from.text3),
+      text: keepText ? from.text : shift(from.text),
+      text2: keepText ? from.text2 : shift(from.text2),
+      text3: keepText ? from.text3 : shift(from.text3),
       primary: from.primary,
       onPrimary: from.onPrimary,
       primaryContainer: from.primaryContainer,
