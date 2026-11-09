@@ -1,7 +1,9 @@
+import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/quran/data/search_text.dart';
 import 'package:better_muslim/features/quran/domain/quran_search.dart';
+import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/search_page.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +45,10 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Search the Quran'));
       await tester.pumpAndSettle();
       expect(find.byType(SearchPage), findsOneWidget);
-      expect(find.text('Search ignores diacritics and hamza forms.'), findsOneWidget);
+      expect(
+        find.text('Search is smart enough to ignore diacritics and hamza forms.'),
+        findsOneWidget,
+      );
       expect(find.text('No ayahs found'), findsNothing);
 
       await tester.enterText(find.byType(TextField), 'الرحمن');
@@ -114,4 +119,33 @@ void main() {
       await unmount(tester);
     },
   );
+
+  testWidgets('from the reader a hit turns that reader and opens the ayah', (tester) async {
+    await pumpHome(tester, [
+      ...await designOverrides(),
+      searchAyahsProvider.overrideWith((ref) async => ayahs),
+    ], settle: false);
+    await tester.pump();
+    containerOf(tester).read(routerProvider).push(Routes.quranPage(3));
+    await tester.pumpAndSettle();
+
+    await tester.tapAt(const Offset(200, 40));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Search the Quran'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchPage), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'الحمد لله رب العالمين');
+    await tester.pump(typingPause);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Al-Fatiha'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1:2'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SearchPage), findsNothing);
+    expect(find.byType(ReaderPage), findsOneWidget);
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 2));
+    await unmount(tester);
+  });
 }
