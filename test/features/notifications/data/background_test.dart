@@ -276,5 +276,21 @@ void main() {
 
       expect(await nudgesAt(makkah(15, 30)), isEmpty);
     });
+
+    test('the voice switch reaches the scheduler', () async {
+      await db.updateSettings(const SettingsCompanion(azkarVoice: Value(false)));
+      final scheduler = FakeScheduler();
+
+      await topUp(
+        db,
+        scheduler: scheduler,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: makkah(15, 30),
+      );
+
+      expect(scheduler.appliedVoices, [false]);
+    });
   });
 }
