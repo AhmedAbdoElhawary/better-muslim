@@ -79,7 +79,7 @@ class Segmented<T> extends StatelessWidget {
           ),
         ),
         HorizontalPadding(
-          padding: SpaceManager.segmentTrack,
+          padding: SpaceManager.previewChipBottom,
           child: SlidingSelection(
             selected: values.indexOf(selected),
             highlight: VerticalPadding(
@@ -174,7 +174,10 @@ class _Segment extends StatelessWidget {
                             ),
                           ],
                         )
-                      : KeyedSubtree(key: const ValueKey(false), child: text),
+                      : KeyedSubtree(
+                          key: const ValueKey(false),
+                          child: FittedBox(child: text),
+                        ),
                 ),
               ),
             ),
