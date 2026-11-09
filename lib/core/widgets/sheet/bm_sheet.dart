@@ -15,7 +15,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 Future<T?> showBmSheet<T>(
   BuildContext context, {
   bool applyBlur = true,
-  bool maxSheetHeight = false,
+  double? maxSheetHeight,
   Widget? title,
   required WidgetBuilder builder,
 }) {
@@ -43,7 +43,7 @@ Future<T?> showBmSheet<T>(
     applyBlur: applyBlur,
     builder: (context) => _Sheet(
       fade: reduceMotion,
-      enableCustomCurve: !maxSheetHeight,
+      enableCustomCurve: maxSheetHeight != null,
       title: title,
       child: builder(context),
     ),
@@ -53,7 +53,7 @@ Future<T?> showBmSheet<T>(
     useSafeArea: true,
     backgroundColor: context.getColor(ThemeEnum.transparent),
     elevation: 0,
-    constraints: maxSheetHeight ? null : BoxConstraints(maxHeight: SizeManager.sheetMax.r),
+    constraints: BoxConstraints(maxHeight: maxSheetHeight ?? SizeManager.sheetMax.r),
     modalBarrierColor: context.getColor(ThemeEnum.scrim).withValues(alpha: BmOpacity.pressed),
     transitionAnimationController: controller,
     sheetAnimationStyle: AnimationStyle(
