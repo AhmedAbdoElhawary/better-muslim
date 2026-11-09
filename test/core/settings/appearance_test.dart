@@ -90,8 +90,15 @@ void main() {
     expect(await at(DateTime.utc(2026, 10, 15, 21)), ThemeMode.light);
   });
 
-  test('follow sky is light from sunrise to maghrib, dark around them (SC-004)', () async {
+  test('follow phone is the default and leaves light and dark to the phone', () async {
     await open(DateTime.utc(2026, 10, 15, 9), place: _makkah);
+    final (:sunrise, :maghrib) = sky();
+    expect(await at(sunrise.add(minute)), ThemeMode.system);
+    expect(await at(maghrib.add(minute)), ThemeMode.system);
+  });
+
+  test('follow sky is light from sunrise to maghrib, dark around them (SC-004)', () async {
+    await open(DateTime.utc(2026, 10, 15, 9), place: _makkah, mode: BmThemeMode.followSky);
     final (:sunrise, :maghrib) = sky();
     expect(await at(sunrise.subtract(minute)), ThemeMode.dark);
     expect(await at(sunrise.add(minute)), ThemeMode.light);
@@ -101,12 +108,12 @@ void main() {
   });
 
   test('follow sky with no location follows the phone', () async {
-    await open(DateTime.utc(2026, 10, 15, 9));
+    await open(DateTime.utc(2026, 10, 15, 9), mode: BmThemeMode.followSky);
     expect(await at(DateTime.utc(2026, 10, 15, 9)), ThemeMode.system);
   });
 
   test('follow sky on a daylight saving day keeps to the local sky', () async {
-    await open(DateTime.utc(2026, 3, 29, 12), place: _london);
+    await open(DateTime.utc(2026, 3, 29, 12), place: _london, mode: BmThemeMode.followSky);
     final (:sunrise, :maghrib) = sky();
     expect(await at(sunrise.subtract(minute)), ThemeMode.dark);
     expect(await at(sunrise.add(minute)), ThemeMode.light);
@@ -115,7 +122,7 @@ void main() {
   });
 
   test('a location change moves the switch to the new place', () async {
-    await open(DateTime.utc(2026, 10, 15, 12), place: _makkah);
+    await open(DateTime.utc(2026, 10, 15, 12), place: _makkah, mode: BmThemeMode.followSky);
     final makkahMaghrib = sky().maghrib;
     await container.read(databaseProvider).updateSettings(_cairo);
     await pumpEventQueue();
@@ -126,7 +133,7 @@ void main() {
   });
 
   test('the same value between boundaries notifies nobody', () async {
-    await open(DateTime.utc(2026, 10, 15, 9), place: _makkah);
+    await open(DateTime.utc(2026, 10, 15, 9), place: _makkah, mode: BmThemeMode.followSky);
     final (:sunrise, :maghrib) = sky();
     await at(sunrise.add(minute));
     var changes = 0;
