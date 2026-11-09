@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/app/launch.dart';
 import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/azkar/azkar_window.dart';
@@ -61,17 +62,13 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.asrRecording,
         row?.maghribRecording,
         row?.ishaRecording,
-        row?.fajrAdhanLength,
-        row?.dhuhrAdhanLength,
-        row?.asrAdhanLength,
-        row?.maghribAdhanLength,
-        row?.ishaAdhanLength,
         row?.fajrTone,
         row?.dhuhrTone,
         row?.asrTone,
         row?.maghribTone,
         row?.ishaTone,
         row?.azkarNudges,
+        row?.azkarVoice,
         row?.language,
 
         /// written after 4.12's answer, so a grant there schedules at once (R10)
@@ -181,6 +178,10 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final launched = await scheduler.launchPayload() ?? await channel.launchPayload();
     if (launched != null) await _open(launched);
     if (_isScenario || !mounted) return;
+
+    /// six days of times built here would take Home's first frames
+    await ref.read(launchSettledProvider);
+    if (!mounted) return;
     await _reschedule();
     await _cleanUp();
   }
@@ -228,9 +229,6 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final at = ref.read(todayTimesProvider)?.timeOf(prayer);
     if (settings?.soundOf(prayer) != PrayerSound.adhan || location == null || at == null) return;
 
-    /// the takbir is the notification's own sound
-    if (settings?.adhanLengthOf(prayer) == AdhanLength.takbir) return;
-
     /// a jump back from a fast day is a period change too, only a prayer that just began plays
     if (ref.read(clockProvider)().difference(at) > const Duration(minutes: 1)) return;
     final player = ref.read(adhanPlayerProvider);
@@ -267,14 +265,9 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
     final player = ref.read(adhanPlayerProvider);
 
     /// a launch from the notification comes before the store has answered
-    final settings = await ref.read(settingsProvider.future);
+    await ref.read(settingsProvider.future);
     if (!mounted) return;
-    final takbir = settings.adhanLengthOf(alert.prayer) == AdhanLength.takbir;
-
-    /// no adhan is playing after a takbir, so its tap opens the prayer
-    final length = takbir
-        ? Duration.zero
-        : await player.length(alert.prayer, _recordingOf(alert.prayer));
+    final length = await player.length(alert.prayer, _recordingOf(alert.prayer));
     if (!mounted) return;
     final target = tapTarget(payload, ref.read(clockProvider)(), length);
     final router = ref.read(routerProvider);
