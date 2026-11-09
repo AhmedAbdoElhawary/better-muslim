@@ -49,9 +49,9 @@ class AdhanService : Service() {
         }
     }
 
-    // alarm volume, media volume is often left at 0 after a video
+    // media volume, the volume keys only reach the media session's stream while it plays
     private val attributes = AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_ALARM)
+        .setUsage(AudioAttributes.USAGE_MEDIA)
         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
         .build()
 
