@@ -1,14 +1,26 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/domain/bookmark.dart';
 import 'package:better_muslim/features/quran/domain/category.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// newest first
-final bookmarksProvider = StreamProvider<List<Bookmark>>(
-  (ref) => ref.watch(quranStoreProvider).watchBookmarks(),
-);
+/// newest first, on their pages in the print shown
+final bookmarksProvider = StreamProvider<List<Bookmark>>((ref) {
+  final v1 = ref.watch(
+    quranAssetsProvider.select(
+      (assets) => switch (assets.value) {
+        final assets? when assets != assets.stored => assets,
+        _ => null,
+      },
+    ),
+  );
+  final bookmarks = ref.watch(quranStoreProvider).watchBookmarks();
+  return v1 == null
+      ? bookmarks
+      : bookmarks.map((bookmarks) => [for (final bookmark in bookmarks) bookmark.shownIn(v1)]);
+});
 
 /// "Bookmarks" first, then in the order I made them
 final categoriesProvider = StreamProvider<List<Category>>(
