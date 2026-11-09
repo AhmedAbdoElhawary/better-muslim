@@ -5,7 +5,7 @@ import 'package:better_muslim/features/theme_picker/view_model/theme_preview.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// dark, light and follow sky for the preview only, saved on apply
+/// dark, light, follow sky and follow phone for the preview only, saved on apply
 class ModeControl extends ConsumerWidget {
   const ModeControl({super.key});
 
@@ -17,8 +17,8 @@ class ModeControl extends ConsumerWidget {
       selected: mode,
       labelOf: (mode) => mode.nameKey,
 
-      /// 4.15 draws follow sky in text2 while it isn't picked
-      muted: const {BmThemeMode.followSky},
+      /// 4.15 draws follow sky in text2 while it isn't picked, follow phone is the same kind
+      muted: const {BmThemeMode.followSky, BmThemeMode.followPhone},
       onChanged: ref.read(themePreviewProvider.notifier).pickMode,
     );
   }
