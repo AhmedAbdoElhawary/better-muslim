@@ -22,7 +22,6 @@ import 'package:better_muslim/features/quran/presentation/providers/page_provide
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/quran_tile.dart';
-import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -448,6 +447,7 @@ class AyahSheet extends ConsumerWidget {
     required this.onClose,
     required this.onStudy,
     required this.onPlay,
+    required this.onShare,
     super.key,
   });
 
@@ -457,13 +457,17 @@ class AyahSheet extends ConsumerWidget {
   final ValueChanged<StudyTab> onStudy;
   final VoidCallback onPlay;
 
+  /// starts choosing ayahs to share with this one checked
+  final VoidCallback onShare;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final text = ref.watch(surahTextProvider(ayah.surah)).value;
-
-    /// in arabic the translation slot is al-muyassar (FR-020)
-    final translation = isArabic ? text?.tafsir[ayah.ayah - 1] : text?.translation[ayah.ayah - 1];
+    final shown = shownTranslation(context, ref);
+    final translation = ref
+        .watch(translationProvider((shown, ayah.surah)))
+        .value
+        ?.elementAtOrNull(ayah.ayah - 1);
     final arabic = ref.watch(ayahTextProvider(ayah)).value;
     final surah = ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
     final saved = ref.watch(ayahBookmarkProvider(ayah).select((bookmark) => bookmark?.color));
@@ -496,7 +500,7 @@ class AyahSheet extends ConsumerWidget {
         StringsManager.note,
         () => onStudy(StudyTab.notes),
       ),
-      (BmIcon.ui(BmUiIcon.share), StringsManager.share, () => showAyahShare(context, [ayah])),
+      (BmIcon.ui(BmUiIcon.share), StringsManager.share, onShare),
       (BmIcon.ui(BmUiIcon.copy), StringsManager.copy, copy),
     ];
     return ReaderSheet(
@@ -525,13 +529,16 @@ class AyahSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       /// the whole translation is one tap away on the large detent
-                      RegularText(
-                        translation ?? '',
-                        translate: false,
-                        fontSize: FontSizeManager.bodyLarge,
-                        height: LineHeightManager.verseTranslation,
-                        color: ThemeEnum.text,
-                        maxLines: 4,
+                      Directionality(
+                        textDirection: shown.arabic ? TextDirection.rtl : TextDirection.ltr,
+                        child: RegularText(
+                          translation ?? '',
+                          translate: false,
+                          fontSize: FontSizeManager.bodyLarge,
+                          height: LineHeightManager.verseTranslation,
+                          color: ThemeEnum.text,
+                          maxLines: 4,
+                        ),
                       ),
                       const RSizedBox.vertical(SpaceManager.ayahCreditGap),
                       Row(
@@ -543,9 +550,7 @@ class AyahSheet extends ConsumerWidget {
                           ),
                           const RSizedBox.horizontal(SpaceManager.ayahCreditGap),
                           RegularText(
-                            isArabic
-                                ? StringsManager.alMuyassar
-                                : StringsManager.sahihInternational,
+                            shown.label,
                             fontSize: FontSizeManager.label,
                             color: ThemeEnum.text3,
                           ),
