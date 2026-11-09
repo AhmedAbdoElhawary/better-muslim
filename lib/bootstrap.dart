@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/app/launch.dart';
 import 'package:better_muslim/core/audio/adhan_files.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
@@ -13,6 +14,7 @@ import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:better_muslim/features/notifications/data/background.dart';
 import 'package:better_muslim/features/notifications/presentation/notifications_boot.dart';
 import 'package:better_muslim/features/quran/data/audio_service_recitation.dart';
@@ -31,6 +33,7 @@ Future<void> bootstrap(FlavorConfig config) {
 }
 
 Future<void> _boot(FlavorConfig config) async {
+  final launch = Stopwatch()..start();
   WidgetsFlutterBinding.ensureInitialized();
   Monitoring.installErrorHandlers();
   Monitoring.activate(config: config);
@@ -38,61 +41,85 @@ Future<void> _boot(FlavorConfig config) async {
   /// GeoNames is CC BY 4.0, the credit line in More comes in milestone 9
   LicenseRegistry.addLicense(_placesLicense);
 
+  /// all at once, the store opens in drift's isolate and the rest waits on the phone while the
+  /// time zones decode here
+  var store = Duration.zero;
+  final ready = (
+    (config.isDesignScenario ? designScenarioStore() : AppDatabase.open()).then((db) {
+      store = launch.elapsed;
+      return db;
+    }),
+    PhoneZone.read(),
+    AppLocalizations.preload(),
+    config.isDesignScenario ? Future<void>.value() : AdhanFiles.init(),
+  ).wait;
+
   /// latest.dart lacks zones like Europe/Oslo
   tz.initializeTimeZones();
-  final db = config.isDesignScenario ? await designScenarioStore() : await AppDatabase.open();
-  final phoneZone = await PhoneZone.read();
-  if (!config.isDesignScenario) {
-    await AdhanFiles.init();
-    unawaited(AdhanFiles.deleteRemoved());
-  }
+  final (db, phoneZone, _, _) = await ready;
 
   /// before the first frame, so a new install never flashes home and a set up one never the
   /// welcome (R2)
   final settings = await db.watchSettings().first;
 
-  /// keep, so every launch doesn't push the next run 12 hours away
-  if (!config.isDesignScenario) {
-    await Workmanager().initialize(callbackDispatcher);
-    await Workmanager().registerPeriodicTask(
-      topUpTask,
-      topUpTask,
-      frequency: const Duration(hours: 12),
-      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-    );
-  }
-
   /// here and not in a provider, audio_service starts once and only in the app's own engine
   final recitationFiles = RecitationFiles();
-  final recitation = config.isDesignScenario
-      ? null
-      : await AudioServiceRecitation.init(
-          recitationFiles,
-          channel: (await AppLocalizations.load(AppLocalizations.localeOf(settings.language)))
-              .tr(StringsManager.tabQuran, const {}),
-        );
-  runApp(
-    ProviderScope(
-      overrides: [
-        databaseProvider.overrideWithValue(db),
-        flavorProvider.overrideWithValue(config),
-        phoneZoneProvider.overrideWith(() => PhoneZone(phoneZone)),
+  final recitation = config.isDesignScenario ? null : AudioServiceRecitation(recitationFiles);
+  final settled = launchSettled();
+  final container = ProviderContainer(
+    overrides: [
+      databaseProvider.overrideWithValue(db),
+      flavorProvider.overrideWithValue(config),
+      phoneZoneProvider.overrideWith(() => PhoneZone(phoneZone)),
 
-        /// starts with the row read above, the first frame has the saved theme not the fallback
-        settingsProvider.overrideWith((ref) async* {
-          yield settings;
-          yield* db.watchSettings(now: ref.read(clockProvider)());
-        }),
-        onboardingProvider.overrideWith(() => OnboardingNotifier(done: settings.onboarded)),
-        if (config.isDesignScenario) ...designScenarioOverrides(),
-        if (recitation != null) recitationProvider.overrideWithValue(recitation),
-        recitationFilesProvider.overrideWithValue(recitationFiles),
-      ],
+      /// starts with the row read above, the first frame has the saved theme not the fallback
+      settingsProvider.overrideWith((ref) async* {
+        yield settings;
+        yield* db.watchSettings(now: ref.read(clockProvider)());
+      }),
+      onboardingProvider.overrideWith(() => OnboardingNotifier(done: settings.onboarded)),
+      if (config.isDesignScenario) ...designScenarioOverrides(),
+      if (recitation != null) recitationProvider.overrideWithValue(recitation),
+      recitationFilesProvider.overrideWithValue(recitationFiles),
+      launchSettledProvider.overrideWithValue(settled),
+    ],
+  );
+
+  /// the verse card is on the first screen, so it never pops in after it. a slow or failed read
+  /// leaves the card to show it when it comes
+  if (settings.onboarded) {
+    final verse = container.listen(verseOfDayProvider.future, (_, _) {});
+    await verse.read().timeout(const Duration(milliseconds: 300)).then((_) {}, onError: (_) {});
+    verse.close();
+  }
+  if (kProfileMode) {
+    debugPrint('cold open: store ${store.inMilliseconds} ms, run ${launch.elapsedMilliseconds} ms');
+  }
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
       child: const NotificationsBoot(
         child: SurfacesBoot(child: RecitationBoot(child: App())),
       ),
     ),
   );
+  if (!config.isDesignScenario) unawaited(settled.then((_) => _later(settings, recitation)));
+}
+
+/// what Home's first frame doesn't need
+Future<void> _later(AppSettings settings, AudioServiceRecitation? recitation) async {
+  final l10n = await AppLocalizations.load(AppLocalizations.localeOf(settings.language));
+  await recitation?.start(channel: l10n.tr(StringsManager.tabQuran, const {}));
+
+  /// keep, so every launch doesn't push the next run 12 hours away
+  await Workmanager().initialize(callbackDispatcher);
+  await Workmanager().registerPeriodicTask(
+    topUpTask,
+    topUpTask,
+    frequency: const Duration(hours: 12),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+  );
+  await AdhanFiles.deleteRemoved();
 }
 
 Stream<LicenseEntry> _placesLicense() async* {
