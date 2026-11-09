@@ -5,6 +5,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -91,9 +92,9 @@ class VerseCard extends ConsumerWidget {
                       Directionality(
                         textDirection: TextDirection.rtl,
                         child: RegularText(
-                          verse?.text ?? '',
+                          QuranFont.amiri.drawn(verse?.text ?? ''),
                           translate: false,
-                          font: FontEnum.quran,
+                          font: QuranFont.amiri.font,
                           fontSize: FontSizeManager.quranAr,
                           height: LineHeightManager.quranAr,
                           textAlign: TextAlign.center,
