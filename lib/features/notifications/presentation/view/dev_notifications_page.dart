@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
@@ -39,6 +40,8 @@ class DevNotificationsPage extends ConsumerWidget {
   static const _openAdhan = 'Open adhan screen';
   static const _testIn1Minute = 'Test notification in 1 min';
   static const _testAdhanIn1Minute = 'Test adhan in 1 min';
+  static const _testMorningAzkar = 'Test morning azkar in 1 min';
+  static const _testEveningAzkar = 'Test evening azkar in 1 min';
   static const _rehearse = 'Rehearse a prayer: reminder in 30 s, prayer in 90 s';
   static const _replayOnboarding = 'Replay onboarding';
   static const _refreshWidgets = 'Refresh widgets';
@@ -77,7 +80,6 @@ class DevNotificationsPage extends ConsumerWidget {
   static Future<void> _test(
     WidgetRef ref,
     Alert? alert, {
-    bool full = false,
     Duration after = const Duration(minutes: 1),
   }) async {
     final location = ref.read(locationProvider);
@@ -95,10 +97,27 @@ class DevNotificationsPage extends ConsumerWidget {
           texts,
           ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.alafasy,
           ref.read(settingsProvider).value?.toneOf(alert.prayer) ?? PrayerTone.phone,
-          full
-              ? AdhanLength.full
-              : ref.read(settingsProvider).value?.adhanLengthOf(alert.prayer) ?? AdhanLength.full,
           after: after,
+        );
+  }
+
+  static Future<void> _testAzkar(WidgetRef ref, AzkarSet set) async {
+    final location = ref.read(locationProvider);
+    if (location == null) return;
+    final settings = ref.read(settingsProvider).value;
+    final texts = await AlertTexts.load(
+      locale: AppLocalizations.localeOf(settings?.language),
+      use24h: PlatformDispatcher.instance.alwaysUse24HourFormat,
+      digits: settings?.digits ?? Digits.eastern,
+      location: location,
+    );
+    await ref
+        .read(notificationSchedulerProvider)
+        .testAzkarIn1Minute(
+          set,
+          ref.read(todayProvider),
+          texts,
+          voice: settings?.azkarVoice ?? true,
         );
   }
 
@@ -140,10 +159,11 @@ class DevNotificationsPage extends ConsumerWidget {
                               at: next.at,
                               sound: PrayerSound.adhan,
                             ),
-                      full: true,
                     );
                   },
                 ),
+                _Row(_testMorningAzkar, onTap: () => _testAzkar(ref, AzkarSet.morning)),
+                _Row(_testEveningAzkar, onTap: () => _testAzkar(ref, AzkarSet.evening)),
                 if (defaultTargetPlatform == TargetPlatform.android)
                   _Row(_rehearse, onTap: () => _rehearsal(ref)),
                 const _AdhanCheck(),
