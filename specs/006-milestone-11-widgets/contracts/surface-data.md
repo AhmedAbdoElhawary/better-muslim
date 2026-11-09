@@ -34,8 +34,7 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
     "nextCity": "NEXT · MAKKAH",
     "nextCityShort": "Next · Makkah",
     "liveNext": "Next prayer · Makkah",
-    "methodLine": "Makkah · Umm al-Qura",
-    "channel": "Prayer countdown"
+    "methodLine": "Makkah · Umm al-Qura"
   },
   "entries": [
     {
@@ -83,17 +82,17 @@ native side makes are the countdown numbers and the shares (contracts/native-sur
 | language | `en` or `ar`. `ar` lays out right to left, uses Reem Kufi for names and Noto Sans Arabic for the rest |
 | eastern | true only in Arabic with Eastern digits. The native countdowns map 0-9 to ٠-٩ |
 | countdown | the switch. false: no live countdown and every running one ends |
-| mode | `dark`, `light` or `followSky`, the app's mode. A message (no place, out of date) uses it, and follows the phone with `followSky` |
+| mode | `dark`, `light`, `followSky` or `followPhone`, the app's mode. A message (no place, out of date) uses it, and follows the phone with `followSky` and `followPhone` |
 | colors | the theme's roles for `light` and `dark`, ARGB ints: `top`, `middle`, `bottom` (the small and medium sky), `deep` (the large sky's end), `text`, `label`, `dim`, `gold`, `live` (the live countdown's digits), `primary`, `container`, `success`, `ring`, `sun`, `outline`. Dark is the theme's sky, light the theme's surfaces. `bottom` goes toward `middle` where the text would be under AA on it. The live countdown always takes `dark`. A version 1 file has no `mode`, `colors` or entry `light`, and shows in the system's colors until the app writes again |
 | until | end of the last entry. Past it: the out of date state. 0 with no place |
 | texts | the strings that don't change with the moment. `{duration}`, `{hours}`, `{minutes}`, `{prayer}` are filled natively |
 | entries | ascending `from`, the first at the start of the stretch the write falls in (the last boundary at or before it), so two writes in the same stretch give the same file and the equal check skips the second |
 | entries[].strip | always 5, Fajr first. Times have no AM or PM and a polar day without one is "—" (as Home's strip) |
-| entries[].next | 0 to 4, or null after Isha |
+| entries[].next | the highlighted cell, 0 to 4: the prayer in its now window, otherwise the next one. Null after Isha's now window |
 | entries[].barFrom, sunrise, maghrib | null when the day has no such time |
 | entries[].nightFrom, nightTo | Home's night arc, maghrib to the next sunrise. Null by day and when the night has no such end |
 | entries[].reminder | null when the reminder is off |
-| entries[].light | which of `colors` the widgets use for this entry. Follow sky is light from sunrise until maghrib, and entries change at both |
+| entries[].light | which of `colors` the widgets use for this entry. Follow sky is light from sunrise until maghrib, and entries change at both. Null with `followPhone`: the widget takes the phone's light or dark, and from Android 12 holds both pictures so the launcher switches with the phone |
 
 Nothing else goes in: the test compares the key set of the built JSON with this list (SC-006).
 
