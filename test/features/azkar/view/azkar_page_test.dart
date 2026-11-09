@@ -96,12 +96,32 @@ void main() {
     await pumpAzkar(tester, await designOverrides());
     expect(find.text('Azkar reminders'), findsOneWidget);
     expect(find.text('20 min after Fajr and Asr'), findsOneWidget);
-    expect(tester.getSemantics(find.byType(ToggleRow)).flagsCollection.isToggled, Tristate.isTrue);
+    expect(
+      tester.getSemantics(find.byType(ToggleRow).first).flagsCollection.isToggled,
+      Tristate.isTrue,
+    );
 
     await tester.tap(find.text('Azkar reminders'));
     await tester.pumpAndSettle();
     expect(containerOf(tester).read(settingsProvider).value!.azkarNudges, isFalse);
     expect(phone.haptics, [selection]);
+    await unmount(tester);
+  });
+
+  testWidgets('the voice switch is on under the reminders, a flip writes it', (tester) async {
+    await pumpAzkar(tester, await designOverrides());
+    expect(find.text("Say the azkar's name"), findsOneWidget);
+    expect(find.text('A calm voice with the reminder'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byType(ToggleRow).last).flagsCollection.isToggled,
+      Tristate.isTrue,
+    );
+
+    await tester.tap(find.text("Say the azkar's name"));
+    await tester.pumpAndSettle();
+    final settings = containerOf(tester).read(settingsProvider).value!;
+    expect(settings.azkarVoice, isFalse);
+    expect(settings.azkarNudges, isTrue);
     await unmount(tester);
   });
 
