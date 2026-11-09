@@ -86,9 +86,9 @@ void main() {
     test('follow sky follows the phone, dark and light stay as saved (FR-041)', () async {
       container.listen(themeModeProvider, (_, _) {});
       await container.read(settingsProvider.future);
-      expect(container.read(themeModeProvider), ThemeMode.system);
       final db = container.read(databaseProvider);
       for (final (mode, expected) in [
+        (BmThemeMode.followSky, ThemeMode.system),
         (BmThemeMode.dark, ThemeMode.dark),
         (BmThemeMode.light, ThemeMode.light),
       ]) {
@@ -108,6 +108,10 @@ void main() {
         const Duration(hours: 1, minutes: 24),
       );
       expect(container.read(periodProvider), Period.asr);
+
+      /// 65 minutes into asr, past its now window, so home and the prayer tab point at maghrib
+      expect(container.read(nowPrayerProvider), isNull);
+      expect(container.read(highlightedPrayerProvider), (prayer, time));
       expect((hijri.day, hijri.month, hijri.year), (4, 5, 1448));
     });
 
