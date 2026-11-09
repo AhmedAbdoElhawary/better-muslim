@@ -229,7 +229,7 @@ class AyahShare extends ShareContent {
               style: style,
               children: [
                 for (final (i, key) in run.indexed) ...[
-                  TextSpan(text: '${i == 0 ? '' : ' '}${arabic[key]} '),
+                  TextSpan(text: '${i == 0 ? '' : ' '}${font.drawn(arabic[key] ?? '')} '),
 
                   /// quran markers are eastern whatever the app's digits
                   TextSpan(
