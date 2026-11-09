@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -39,7 +40,10 @@ extension on SearchScope {
 
 /// 4.27. every surah starts as a row with its count, a tap opens its hits in place
 class SearchPage extends ConsumerStatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({this.fromReader = false, super.key});
+
+  /// a result goes back to the reader that opened it instead of opening another one
+  final bool fromReader;
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -86,6 +90,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     if (query.isNotEmpty) ref.read(quranStoreProvider).saveSearch(query);
   }
 
+  void _go(int page, AyahKey? ayah) {
+    _save();
+    if (widget.fromReader) {
+      context.pop((page, ayah));
+    } else {
+      context.push(Routes.quranPage(page, ayah: ayah));
+    }
+  }
+
   void _submit(String text) {
     _typing?.cancel();
     setState(() {
@@ -121,11 +134,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final (:jump, :groups) = _result;
     final open = _open;
     final entries = <Widget>[
-      if (jump != null) _JumpCard(jump, onOpen: _save),
+      if (jump != null) _JumpCard(jump, onOpen: _go),
       for (final (i, surah) in groups.keys.indexed)
         if (open.contains(surah)) ...[
           _GroupHeader(surah, count: groups[surah]!.length, onTap: () => _toggle(surah)),
-          for (final hit in groups[surah]!) _HitCard(hit, onOpen: _save),
+          for (final hit in groups[surah]!) _HitCard(hit, onOpen: _go),
         ] else if (i == 0 || open.contains(groups.keys.elementAt(i - 1)))
           _SurahRows([
             for (final next in groups.keys.skip(i).takeWhile((n) => !open.contains(n)))
@@ -245,7 +258,7 @@ class _JumpCard extends ConsumerWidget {
   const _JumpCard(this.jump, {required this.onOpen});
 
   final QuranJump jump;
-  final VoidCallback onOpen;
+  final void Function(int page, AyahKey? ayah) onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -289,10 +302,7 @@ class _JumpCard extends ConsumerWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          onOpen();
-          context.push(Routes.quranPage(jump.page, ayah: ayah));
-        },
+        onTap: () => onOpen(jump.page, ayah),
         child: SurfaceCard(
           child: OnlyPadding(
             top: SpaceManager.s3,
@@ -411,7 +421,7 @@ class _HitCard extends ConsumerWidget {
   const _HitCard(this.hit, {required this.onOpen});
 
   final SearchHit hit;
-  final VoidCallback onOpen;
+  final void Function(int page, AyahKey? ayah) onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -431,10 +441,7 @@ class _HitCard extends ConsumerWidget {
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () {
-            onOpen();
-            context.push(Routes.quranPage(page, ayah: key));
-          },
+          onTap: () => onOpen(page, key),
           child: SurfaceCard(
             child: OnlyPadding(
               top: SpaceManager.searchHitTop,
@@ -463,7 +470,7 @@ class _HitCard extends ConsumerWidget {
                     ],
                   ),
                   _Words(
-                    hit.ayah.words,
+                    [for (final word in hit.ayah.words) font.drawn(word)],
                     washed: hit.arabic,
                     direction: TextDirection.rtl,
                     font: font.font,
