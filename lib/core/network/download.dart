@@ -2,6 +2,12 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
+/// the tafsirs and mushaf styles. a public repo of its own, this one is private and its releases
+/// need a token
+final contentReleases = Uri.parse(
+  'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/',
+);
+
 /// a download's length from its header and its body
 typedef Fetched = ({int? length, Stream<List<int>> bytes});
 
