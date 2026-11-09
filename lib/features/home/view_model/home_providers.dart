@@ -10,18 +10,37 @@ import 'package:better_muslim/features/home/model/verse_of_day.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart';
 
-typedef StripEntry = ({Prayer prayer, TZDateTime? time, bool current, bool logged, bool past});
+typedef StripEntry = ({
+  Prayer prayer,
+  TZDateTime? time,
+  bool current,
+  bool now,
+  bool logged,
+  bool past,
+});
 
 /// the prayer day's five times and marks, so last night's isha stays until fajr
 final stripProvider = Provider<List<StripEntry>>((ref) {
   final day = ref.watch(prayerDayProvider);
   final times = ref.watch(dayTimesProvider(day));
   final prayed = ref.watch(prayedProvider(day));
-  final period = ref.watch(periodProvider);
+  final highlighted = ref.watch(highlightedPrayerProvider);
+  final inWindow = ref.watch(nowPrayerProvider.select((now) => now != null));
   return [
     for (final prayer in Prayer.values)
-      if (stripCellState(prayer, period, prayed) case (:final current, :final logged, :final past))
-        (prayer: prayer, time: times?.timeOf(prayer), current: current, logged: logged, past: past),
+      if (stripCellState(prayer, times?.timeOf(prayer), highlighted, prayed) case (
+        :final current,
+        :final logged,
+        :final past,
+      ))
+        (
+          prayer: prayer,
+          time: times?.timeOf(prayer),
+          current: current,
+          now: current && inWindow,
+          logged: logged,
+          past: past,
+        ),
   ];
 });
 
