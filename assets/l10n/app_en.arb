@@ -217,6 +217,7 @@
   "theme": "Theme",
   "lightAndDark": "Light and dark",
   "followSky": "Follow sky",
+  "followPhoneMode": "Follow phone",
   "reduceMotion": "Reduce motion",
   "sectionSoundTouch": "SOUND AND TOUCH",
   "haptics": "Haptics",
@@ -314,7 +315,6 @@
       "city": {}
     }
   },
-  "reminders": "Reminders",
   "stop": "Stop",
   "pause": "Pause",
   "play": "Play",
@@ -527,6 +527,8 @@
       "minutes": {}
     }
   },
+  "azkarVoice": "Say the azkar's name",
+  "azkarVoiceSub": "A calm voice with the reminder",
   "newAzkarSet": "New azkar set",
   "reminderOff": "Off",
   "reminderValue": "{minutes} min",
@@ -596,26 +598,7 @@
       "length": {}
     }
   },
-  "recordingFull": "{recording} · full adhan",
-  "@recordingFull": {
-    "placeholders": {
-      "recording": {}
-    }
-  },
-  "adhanFull": "Full adhan",
-  "adhanTakbir": "Takbir only",
-  "takbirLength": "Takbir only · {length}",
-  "@takbirLength": {
-    "placeholders": {
-      "length": {}
-    }
-  },
-  "recordingTakbir": "{recording} · takbir only",
-  "@recordingTakbir": {
-    "placeholders": {
-      "recording": {}
-    }
-  },
+  "takbirWithReminder": "The takbir plays with the reminder, the full adhan at the prayer time.",
   "tonePhone": "Phone default",
   "toneCalm": "Calm",
   "toneGlass": "Glass",
@@ -637,6 +620,7 @@
   "useAzkarDuas": "Azkar and duas",
   "useAdhanRecordings": "Adhan recordings",
   "useTones": "Notification tones",
+  "useAzkarVoice": "The azkar reminder's voice",
   "creditLine": "{use} · {license}",
   "@creditLine": {
     "placeholders": {
@@ -713,7 +697,6 @@
       "time": {}
     }
   },
-  "countdownChannel": "Prayer countdown",
   "openToSetPlace": "Open Better Muslim to set your place",
   "openToUpdateTimes": "Open Better Muslim to update the times",
   "openApp": "Open Better Muslim",
@@ -943,11 +926,27 @@
   "recentNote": "RECENT NOTE",
   "shareAyah": "Share ayah",
   "showAppName": "Show app name",
+  "matchApp": "Match app",
   "paper": "Paper",
   "night": "Night",
   "emerald": "Emerald",
   "sky": "Sky",
   "cream": "Cream",
+  "white": "White",
+  "pickthall": "Pickthall",
+  "yusufAli": "Yusuf Ali",
+  "hilaliKhan": "Hilali & Khan",
+  "alJalalayn": "Al-Jalalayn",
+  "englishTranslation": "English translation",
+  "arabicShortTafsir": "Arabic, a short tafsir",
+  "tajweedLazim": "مد لازم ٦",
+  "tajweedWajib": "مد واجب ٤-٥",
+  "tajweedJaiz": "مد جائز ٢-٤-٦",
+  "tajweedTabii": "مد طبيعي ٢",
+  "tajweedIkhfa": "إخفاء وغنة",
+  "tajweedIdgham": "إدغام",
+  "tajweedTafkheem": "تفخيم",
+  "tajweedQalqalah": "قلقلة",
   "appliesToEveryPage": "Applies to every page",
   "pageSection": "PAGE",
   "layout": "Layout",
@@ -1094,7 +1093,7 @@
   "jumpToAyah": "JUMP TO AYAH",
   "numberName": "{n} · {name}",
   "noAyahsFound": "No ayahs found",
-  "searchQuranHint": "Search ignores diacritics and hamza forms.",
+  "searchQuranHint": "Search is smart enough to ignore diacritics and hamza forms.",
   "downloadSurah": "Download surah",
   "surahDownloaded": "Downloaded",
   "downloads": "Downloads",
@@ -1130,5 +1129,20 @@
   "textSizeLarge": "Large",
   "textSizeLarger": "Larger",
   "textSizeLargest": "Largest",
-  "textSizeNote": "Works on top of your phone's text size. The Quran page keeps its own size in Display."
+  "textSizeNote": "Works on top of your phone's text size. The Quran page keeps its own size in Display.",
+  "nextAt": "At {time}",
+  "@nextAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "mushafStyleText": "Text",
+  "mushafStyleTextBody": "Your font, on the 1421H lines",
+  "mushafStyleQcfV2": "Printed page",
+  "mushafStyleQcfV2Body": "Every word as the book prints it\nMadinah Mushaf, 1421H print",
+  "mushafStyleQcfV4": "Tajweed colors",
+  "mushafStyleQcfV4Body": "The printed page, color-coded by tajweed rule",
+  "mushafStyleQcfV1": "Old print",
+  "mushafStyleQcfV1Body": "Madinah Mushaf, 1405H print",
+  "deleteMushafStyleBody": "It downloads again when you pick it."
 }
