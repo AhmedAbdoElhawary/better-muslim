@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -173,9 +174,9 @@ class _AyahCard extends ConsumerWidget {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: RegularText(
-                line,
+                QuranFont.amiri.drawn(line),
                 translate: false,
-                font: FontEnum.quran,
+                font: QuranFont.amiri.font,
                 fontSize: FontSizeManager.quranStudy,
                 height: LineHeightManager.quranStudy,
                 color: ThemeEnum.ink,
@@ -309,7 +310,7 @@ class _NotesPane extends ConsumerWidget {
   }
 }
 
-/// the slot's source is marked in primary: sahih international, al-muyassar in arabic
+/// the translation shown first, marked in primary, then sahih international and al-muyassar
 class _TranslationPane extends ConsumerWidget {
   const _TranslationPane(this.ayah);
 
@@ -317,15 +318,18 @@ class _TranslationPane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = ref.watch(surahTextProvider(ayah.surah)).value;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final shown = shownTranslation(context, ref);
     final cards = [
-      (
-        StringsManager.sahihInternational,
-        text?.translation[ayah.ayah - 1] ?? '',
-        TextDirection.ltr,
-      ),
-      (StringsManager.muyassarSummary, text?.tafsir[ayah.ayah - 1] ?? '', TextDirection.rtl),
+      for (final translation in {shown, Translation.sahih, Translation.muyassar})
+        (
+          translation == Translation.muyassar ? StringsManager.muyassarSummary : translation.label,
+          ref
+                  .watch(translationProvider((translation, ayah.surah)))
+                  .value
+                  ?.elementAtOrNull(ayah.ayah - 1) ??
+              '',
+          translation.arabic ? TextDirection.rtl : TextDirection.ltr,
+        ),
     ];
     return OnlyPadding(
       top: SpaceManager.s4,
@@ -336,12 +340,7 @@ class _TranslationPane extends ConsumerWidget {
         children: [
           for (final (i, (name, text, direction)) in cards.indexed) ...[
             if (i > 0) const RSizedBox.vertical(SpaceManager.studyCardGap),
-            _TranslationCard(
-              name: name,
-              text: text,
-              direction: direction,
-              slot: i == (isArabic ? 1 : 0),
-            ),
+            _TranslationCard(name: name, text: text, direction: direction, slot: i == 0),
           ],
         ],
       ),
