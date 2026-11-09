@@ -58,7 +58,7 @@ ThemeData bmThemeData(BmPalette p, Brightness b) {
   );
 }
 
-enum BmThemeMode { dark, light, followSky }
+enum BmThemeMode { dark, light, followSky, followPhone }
 
 /// followSky: light from Sunrise until Maghrib, dark from Maghrib until Sunrise.
 Brightness resolveBrightness(
@@ -74,5 +74,7 @@ Brightness resolveBrightness(
       return Brightness.light;
     case BmThemeMode.followSky:
       return (now.isAfter(sunrise) && now.isBefore(maghrib)) ? Brightness.light : Brightness.dark;
+    case BmThemeMode.followPhone:
+      return WidgetsBinding.instance.platformDispatcher.platformBrightness;
   }
 }
