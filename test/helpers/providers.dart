@@ -10,6 +10,7 @@ import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/surfaces/surfaces_channel.dart';
+import 'package:better_muslim/features/quran/data/mushaf_files.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -36,6 +37,7 @@ List<Override> testOverrides({
   onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
   surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
   _tafsirFiles,
+  _mushafFiles,
 ];
 
 /// the moment every PNG shows (FR-026), on the scenario's seeded in-memory store. onboarded
@@ -45,6 +47,7 @@ Future<List<Override>> designOverrides({
   BmThemeId? theme,
   Override? tafsirFiles,
   Override? recitationFiles,
+  Override? mushafFiles,
 }) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final db = await designScenarioStore();
@@ -67,6 +70,7 @@ Future<List<Override>> designOverrides({
     surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
     tafsirFiles ?? _tafsirFiles,
     recitationFiles ?? _recitationFiles,
+    mushafFiles ?? _mushafFiles,
   ];
 }
 
@@ -88,6 +92,21 @@ final _tafsirFiles = tafsirFilesProvider.overrideWith(
 final _recitationFiles = recitationFilesProvider.overrideWith(
   (ref) => RecitationFiles(
     root: () async => Directory.systemTemp.createTempSync('recitations'),
+    fetch: (_) async => throw const SocketException('offline'),
+    exclude: (_) async {},
+  ),
+);
+
+/// no style is downloaded and the phone is offline, in a folder of its own for each test
+final _mushafFiles = mushafFilesProvider.overrideWith(
+  (ref) => MushafFiles(
+    root: () async {
+      final root = Directory.systemTemp.createTempSync('mushaf');
+
+      /// made here, the real create never ends on the fake clock
+      Directory('${root.path}/mushaf').createSync();
+      return root;
+    },
     fetch: (_) async => throw const SocketException('offline'),
     exclude: (_) async {},
   ),
