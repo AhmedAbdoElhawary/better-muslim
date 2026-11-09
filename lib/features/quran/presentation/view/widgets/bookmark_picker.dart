@@ -109,10 +109,11 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
     if (ref.read(_bookmark) case final bookmark?) {
       await store.setCategory(bookmark.id, category);
     } else if (widget.ayah case final ayah?) {
-      final page = (await ref.read(quranAssetsProvider.future)).pageOf(ayah);
+      final page = (await ref.read(quranAssetsProvider.future)).stored.pageOf(ayah);
       await store.addAyah(ayah, page, category: category);
     } else {
-      await store.addPage(widget.page!, category: category);
+      final page = (await ref.read(quranAssetsProvider.future)).storedPage(widget.page!);
+      await store.addPage(page, category: category);
     }
     if (mounted) Navigator.of(context).pop();
   }
