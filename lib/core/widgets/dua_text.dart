@@ -54,7 +54,7 @@ class DuaText extends ConsumerWidget {
 
     /// a verse looks the same here, in the reader and on its share card
     final quranFont = ref.watch(
-      settingsProvider.select((settings) => (settings.value?.quranFont ?? QuranFont.kfgqpc).font),
+      settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.kfgqpc),
     );
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final title = this.title;
@@ -93,9 +93,9 @@ class DuaText extends ConsumerWidget {
         Directionality(
           textDirection: TextDirection.rtl,
           child: RegularText(
-            arabic,
+            quran ? quranFont.drawn(arabic) : arabic,
             translate: false,
-            font: quran ? quranFont : font,
+            font: quran ? quranFont.font : font,
             fontSize: centered ? FontSizeManager.zikrAr : FontSizeManager.duaAr,
             height: quran ? LineHeightManager.quranAr : LineHeightManager.duaAr,
             textAlign: align,
