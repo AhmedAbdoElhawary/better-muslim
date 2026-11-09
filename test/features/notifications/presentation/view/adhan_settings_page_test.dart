@@ -8,6 +8,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,7 +76,7 @@ void main() {
     expect(find.byType(RecordingRow), findsNWidgets(2));
     expect(recordingOf(Prayer.fajr), findsOneWidget);
     expect(recordingOf(Prayer.maghrib), findsOneWidget);
-    expect(find.text('Mishary Alafasy · full adhan'), findsNWidgets(2));
+    expect(find.text('Mishary Alafasy'), findsNWidgets(2));
     expect(find.text('10 min'), findsOneWidget);
     expect(find.text('Notifications are off for this app.'), findsNothing);
     await unmount(tester);
@@ -126,25 +127,24 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('takbir only previews the opening takbir and save keeps both', (tester) async {
+  testWidgets('the adhan sheet previews the full adhan and says the takbir is the reminder\'s', (
+    tester,
+  ) async {
     await open(tester);
     await tester.tap(recordingOf(Prayer.fajr));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Takbir only'));
-    await tester.pumpAndSettle();
-    expect(find.text('Takbir only · 0:22'), findsOneWidget);
+    expect(find.text('Takbir only'), findsNothing);
+    expect(find.text('Full adhan · 3:41'), findsOneWidget);
+    expect(
+      find.text('The takbir plays with the reminder, the full adhan at the prayer time.'),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Mishary Alafasy'));
+    await tester.tap(_sheetRow);
     await tester.pumpAndSettle();
     expect(clips.played.last, AdhanRecording.alafasy.fullAsset(Prayer.fajr));
-    expect(clips.ends.last, AdhanRecording.alafasy.clipLengthOf(Prayer.fajr));
-
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect((await settingsOf(tester)).adhanLengthOf(Prayer.fajr), AdhanLength.takbir);
-    expect(find.text('Mishary Alafasy · takbir only'), findsOneWidget);
-    expect(find.text('Mishary Alafasy · full adhan'), findsOneWidget);
+    expect(clips.ends.last, isNull);
     await unmount(tester);
   });
 
@@ -157,7 +157,7 @@ void main() {
     expect(find.text('For Fajr'), findsOneWidget);
     expect(find.text('Full adhan · 3:41'), findsOneWidget);
 
-    await tester.tap(find.text('Mishary Alafasy'));
+    await tester.tap(_sheetRow);
     await tester.pumpAndSettle();
     expect(clips.played, [AdhanRecording.alafasy.fullAsset(Prayer.fajr)]);
 
@@ -165,7 +165,7 @@ void main() {
     await tester.pumpAndSettle();
     expect((await settingsOf(tester)).fajrRecording, AdhanRecording.alafasy);
     expect(clips.stops, greaterThanOrEqualTo(1));
-    expect(find.text('Mishary Alafasy · full adhan'), findsNWidgets(2));
+    expect(find.text('Mishary Alafasy'), findsNWidgets(2));
     await unmount(tester);
   });
 
@@ -177,7 +177,7 @@ void main() {
     expect(find.text('Full adhan · 2:34'), findsOneWidget);
     expect(find.textContaining('Full adhan · '), findsOneWidget);
 
-    await tester.tap(find.text('Mishary Alafasy'));
+    await tester.tap(_sheetRow);
     await tester.pumpAndSettle();
     expect(clips.played, [AdhanRecording.alafasy.fullAsset(Prayer.maghrib)]);
 
@@ -193,10 +193,10 @@ void main() {
     await open(tester, downloads: (recording) => _FakeDownload(recording, ready: true));
     await tester.tap(recordingOf(Prayer.maghrib));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Mishary Alafasy'));
+    await tester.tap(_sheetRow);
     await tester.pumpAndSettle();
     final stops = clips.stops;
-    Navigator.of(tester.element(find.text('Mishary Alafasy'))).pop();
+    Navigator.of(tester.element(_sheetRow)).pop();
     await tester.pumpAndSettle();
     expect((await settingsOf(tester)).maghribRecording, AdhanRecording.alafasy);
     expect(clips.stops, greaterThan(stops));
@@ -290,3 +290,6 @@ class _FakeDownload extends AdhanDownloadNotifier {
   @override
   Future<void> download() async => throw const DownloadException(DownloadFailure.offline);
 }
+
+/// the page's adhan rows show the name too
+final _sheetRow = find.widgetWithText(SoundRow, 'Mishary Alafasy');
