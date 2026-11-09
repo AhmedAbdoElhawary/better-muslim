@@ -27,7 +27,6 @@ struct SurfaceData: Decodable {
     let nextCityShort: String
     let liveNext: String
     let methodLine: String
-    let channel: String
   }
 
   struct Entry: Decodable {
@@ -75,10 +74,11 @@ struct SurfaceData: Decodable {
 
   var isArabic: Bool { language == "ar" }
 
-  /// the entry's light or dark, follow sky already worked out per entry by the app
-  func palette(_ entry: Entry) -> SurfacePalette {
-    guard let colors, let light = entry.light else { return .system }
-    return light ? colors.light : colors.dark
+  /// the entry's light or dark, follow sky already worked out per entry by the app. follow phone
+  /// has none, the phone's scheme picks
+  func palette(_ entry: Entry, _ scheme: ColorScheme) -> SurfacePalette {
+    guard let colors else { return .system }
+    return (entry.light ?? (scheme == .light)) ? colors.light : colors.dark
   }
 
   func entry(at date: Date) -> Entry? {
