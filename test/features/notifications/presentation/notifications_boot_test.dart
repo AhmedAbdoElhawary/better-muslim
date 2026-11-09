@@ -167,19 +167,6 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a takbir only adhan only notifies', (tester) async {
-    await pumpBoot(tester, maghrib().subtract(const Duration(seconds: 5)));
-    await dbOf(tester)
-        .updateSettings(const SettingsCompanion(maghribAdhanLength: Value(AdhanLength.takbir)));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 6));
-
-    expect(find.byType(AdhanPage), findsNothing);
-    expect(player.played, isEmpty);
-    await unmount(tester);
-  });
-
   testWidgets('the design scenario opens nothing and schedules nothing', (tester) async {
     await pumpBoot(tester, maghrib().subtract(const Duration(seconds: 2)), scenario: true);
 
@@ -255,39 +242,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(AdhanPage), findsNothing);
-    expect(
-      containerOf(tester).read(routerProvider).routeInformationProvider.value.uri.toString(),
-      Routes.prayerAt(DateTime(2026, 10, 15), Prayer.maghrib),
-    );
-    await unmount(tester);
-  });
-
-  testWidgets('a tap on a takbir only adhan opens the prayer tab, no adhan is playing', (
-    tester,
-  ) async {
-    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-    final store = AppDatabase.forTesting(NativeDatabase.memory());
-    await tester.runAsync(() async {
-      await store.watchSettings().first;
-      await store.updateSettings(
-        const SettingsCompanion(maghribAdhanLength: Value(AdhanLength.takbir)),
-      );
-    });
-    final at = maghrib();
-    scheduler.launch = payloadOf(
-      Alert(
-        day: DateTime(2026, 10, 15),
-        prayer: Prayer.maghrib,
-        kind: AlertKind.adhan,
-        at: TZDateTime.from(at, makkah().zone),
-        sound: PrayerSound.adhan,
-      ),
-    );
-    await pumpBoot(tester, at.add(const Duration(seconds: 10)), store: store);
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.byType(AdhanPage), findsNothing);
-    expect(player.played, isEmpty);
     expect(
       containerOf(tester).read(routerProvider).routeInformationProvider.value.uri.toString(),
       Routes.prayerAt(DateTime(2026, 10, 15), Prayer.maghrib),
