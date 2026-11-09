@@ -3,13 +3,16 @@ import 'package:better_muslim/core/quran/ayah_key.dart';
 enum MushafLineType { ayah, surahName, basmallah }
 
 class MushafWord {
-  const MushafWord({required this.key, required this.text, this.end = false});
+  const MushafWord({required this.key, required this.text, this.end = false, this.glyph = ''});
 
   final AyahKey key;
   final String text;
 
   /// the ayah's end marker, its text is the ayah number
   final bool end;
+
+  /// its glyph in the page's qcf font, empty for a word drawn in the glyph before it
+  final String glyph;
 }
 
 class MushafLine {
@@ -38,11 +41,12 @@ class MushafPage {
             type: MushafLineType.ayah,
             centered: line['c'] == true,
             words: [
-              for (final word in (line['w'] as List).cast<List<dynamic>>())
+              for (final (i, word) in (line['w'] as List).cast<List<dynamic>>().indexed)
                 MushafWord(
                   key: AyahKey(word[0] as int, word[1] as int),
                   text: word[2] as String,
                   end: word.length > 3 && word[3] == 1,
+                  glyph: (line['g'] as List?)?[i] as String? ?? '',
                 ),
             ],
           ),
