@@ -27,7 +27,80 @@ void main() {
     expect(assets.pageOf(const AyahKey(2, 255)), 42);
     expect(assets.pageOf(const AyahKey(1, 1)), 1);
     expect(assets.pageOf(const AyahKey(114, 6)), quranPageCount);
+
+    /// one of the pages where the 1405H print starts an ayah earlier
+    expect(assets.pageOf(const AyahKey(5, 77)), 120);
   });
+
+  test('the 1405H pages have the 1421H words in order, a glyph for every word', () {
+    List<String> words(String folder) {
+      final words = <String>[];
+      for (var n = 1; n <= quranPageCount; n++) {
+        final file = File('assets/quran/$folder/${'$n'.padLeft(3, '0')}.json');
+        final lines = (jsonDecode(file.readAsStringSync()) as Map)['lines'] as List;
+        expect(lines, hasLength(15), reason: '$folder $n');
+        for (final line in lines.cast<Map>().where((line) => line['t'] == 'a')) {
+          expect((line['g'] as List).length, (line['w'] as List).length, reason: '$folder $n');
+          for (final word in (line['w'] as List).cast<List>()) {
+            words.add('${word[0]}:${word[1]} ${word[2]}');
+          }
+        }
+      }
+      return words;
+    }
+
+    expect(words('pages_v1'), words('pages'));
+  });
+
+  test('the 1405H index has its own page starts', () {
+    final index = jsonDecode(File('assets/quran/index.json').readAsStringSync()) as Map;
+    final v1 = index['v1'] as Map;
+    expect(v1['pages'], hasLength(quranPageCount));
+    expect(v1['surahs'], hasLength(114));
+    expect(v1['juz'], hasLength(30));
+    expect((v1['pages'] as List)[120], containsPair('ayah', 77));
+    expect((index['pages'] as List)[120], containsPair('ayah', 78));
+  });
+
+  test(
+    'the 1405H print has its own pages, a kept 1421H page maps through its first ayah',
+    () async {
+      final assets = await QuranAssets.load();
+      final v1 = assets.v1;
+      expect(v1.stored, assets);
+      expect(assets.stored, assets);
+
+      /// 5:77 opens page 121 in 1405H and ends page 120 in 1421H
+      expect(v1.pageOf(const AyahKey(5, 77)), 121);
+      expect(assets.pageOf(const AyahKey(5, 77)), 120);
+      final line = ((await v1.page(121))!['lines'] as List).first as Map;
+      expect((line['w'] as List).first, [5, 77, 'قُلۡ']);
+
+      /// 1421H 121 starts at 5:78, on 1405H 121. kept back as 121, which shows again as itself
+      expect(v1.shownPage(121), 121);
+      expect(v1.storedPage(121), 121);
+
+      /// 1421H 586 starts at 80:41, still on 1405H 585. 1405H 586 starts at 81:1, on 1421H 586
+      expect(v1.shownPage(586), 585);
+      expect(v1.storedPage(586), 586);
+      expect(v1.shownPage(585), 585);
+      expect(v1.storedPage(585), 585);
+
+      /// only where no 1421H page starts on the 1405H one does a kept page show one page before
+      expect(
+        [
+          for (var n = 1; n <= quranPageCount; n++)
+            if (v1.shownPage(v1.storedPage(n)) != n) n,
+        ],
+        [145, 586, 590, 600],
+      );
+      for (var n = 1; n <= quranPageCount; n++) {
+        expect((assets.shownPage(n), assets.storedPage(n)), (n, n), reason: 'page $n');
+      }
+      expect(v1.surah(81).page, 586);
+      expect(v1.juz(30).page, 582);
+    },
+  );
 
   test('verse candidates are 6 to 40 words, an ayah\'s text is its words', () async {
     final assets = await QuranAssets.load();
@@ -100,7 +173,7 @@ void main() {
     'every word equals its QUL word',
     () async {
       final result = await Process.run('sqlite3', [
-        '$_cache/qpc_hafs_words.sqlite',
+        '$_cache/qpc_hafs_words.db',
         '-json',
         'select surah, ayah, text from words order by id',
       ]);
@@ -117,7 +190,7 @@ void main() {
       ];
       expect(words, source);
     },
-    skip: File('$_cache/qpc_hafs_words.sqlite').existsSync()
+    skip: File('$_cache/qpc_hafs_words.db').existsSync()
         ? false
         : 'no QUL files in $_cache, the pages are not built yet',
   );
