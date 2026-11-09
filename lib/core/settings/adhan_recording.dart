@@ -11,8 +11,6 @@ enum AdhanRecording {
     fajrSubtitleKey: StringsManager.alafasyFajr,
     lengthLabel: '2:34',
     fajrLengthLabel: '3:41',
-    clipLength: Duration(milliseconds: 19800),
-    fajrClipLength: Duration(milliseconds: 22400),
   );
 
   const AdhanRecording({
@@ -21,8 +19,6 @@ enum AdhanRecording {
     required this.fajrSubtitleKey,
     required this.lengthLabel,
     required this.fajrLengthLabel,
-    required this.clipLength,
-    required this.fajrClipLength,
     // ignore: unused_element_parameter, al-qatami's download comes once he sends his fajr
     this.sha256,
   });
@@ -38,10 +34,6 @@ enum AdhanRecording {
   final String lengthLabel;
   final String fajrLengthLabel;
 
-  /// the notification clip is the opening takbir, the takbir preview stops the full file here
-  final Duration clipLength;
-  final Duration fajrClipLength;
-
   /// by the release file's name
   final Map<String, String>? sha256;
 
@@ -53,19 +45,12 @@ enum AdhanRecording {
 
   String lengthOf(Prayer prayer) => prayer == Prayer.fajr ? fajrLengthLabel : lengthLabel;
 
-  Duration clipLengthOf(Prayer prayer) => prayer == Prayer.fajr ? fajrClipLength : clipLength;
-
-  /// m:ss like the length labels
-  String clipLabelOf(Prayer prayer) {
-    final seconds = (clipLengthOf(prayer).inMilliseconds / 1000).round();
-    return '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
-  }
-
   /// a flutter asset, or the downloaded file's path
   String fullAsset(Prayer prayer) =>
       isBundled ? 'assets/audio/${fileOf(prayer)}.m4a' : AdhanFiles.pathOf(fileOf(prayer));
 
-  /// 30 s or less, without the extension. a .caf in ios/Runner/Sounds/ or Library/Sounds/
+  /// the opening takbir for the reminder, 30 s or less, without the extension. a .caf in
+  /// ios/Runner/Sounds/ or Library/Sounds/
   String clipOf(Prayer prayer) => '${fileOf(prayer)}_clip';
 
   /// the res/raw clip, a downloaded recording's isn't there
