@@ -43,6 +43,7 @@ void main() {
     logged: logged,
     qada: qada,
     next: day.next(now, tomorrow),
+    highlighted: day.inWindow(now) ?? day.next(now, tomorrow),
   );
 
   final days = {
@@ -79,27 +80,45 @@ void main() {
       final tomorrow = times(DateTime(date.year, date.month, date.day + 1));
 
       for (final prayer in Prayer.values) {
-        test('${prayer.name} a minute either side of its time and its end (SC-004)', () {
-          final time = day.timeOf(prayer)!;
-          final end = day.endOf(prayer, tomorrow)!;
+        test(
+          '${prayer.name} a minute either side of its time, its window and its end (SC-004)',
+          () {
+            final time = day.timeOf(prayer)!;
+            final window = time.add(DayTimes.nowWindow);
+            final end = day.endOf(prayer, tomorrow)!;
 
-          expect(at(day, tomorrow, prayer, time.subtract(minute)), (
-            state: PrayerRowState.next,
-            isOpen: false,
-          ));
-          expect(at(day, tomorrow, prayer, time.add(minute)), (
-            state: PrayerRowState.mark,
-            isOpen: true,
-          ));
-          expect(at(day, tomorrow, prayer, end.subtract(minute)), (
-            state: PrayerRowState.mark,
-            isOpen: true,
-          ));
-          expect(at(day, tomorrow, prayer, end.add(minute)), (
-            state: PrayerRowState.addToQada,
-            isOpen: false,
-          ));
-        });
+            expect(at(day, tomorrow, prayer, time.subtract(minute)), (
+              state: PrayerRowState.next,
+              isHighlighted: true,
+              isNow: false,
+            ));
+            expect(at(day, tomorrow, prayer, time.add(minute)), (
+              state: PrayerRowState.mark,
+              isHighlighted: true,
+              isNow: true,
+            ));
+            expect(at(day, tomorrow, prayer, window.subtract(minute)), (
+              state: PrayerRowState.mark,
+              isHighlighted: true,
+              isNow: true,
+            ));
+            expect(at(day, tomorrow, prayer, window), (
+              state: PrayerRowState.mark,
+              isHighlighted: false,
+              isNow: false,
+            ));
+            expect(at(day, tomorrow, prayer, end.subtract(minute)), (
+              state: PrayerRowState.mark,
+              isHighlighted: false,
+              isNow: false,
+            ));
+            expect(at(day, tomorrow, prayer, end.add(minute)), (
+              state: PrayerRowState.addToQada,
+              isHighlighted: false,
+              isNow: false,
+            ));
+          },
+        );
       }
 
       test('before fajr every later prayer is later', () {
@@ -116,17 +135,30 @@ void main() {
   QadaEntry qada({DateTime? madeUpAt}) =>
       QadaEntry(id: 1, prayer: Prayer.dhuhr, missedOn: DateTime(2026, 10, 15), madeUpAt: madeUpAt);
 
-  test('logged beats every other state, and the open row stays open', () {
+  test('logged beats every other state, and the highlighted row stays highlighted', () {
     final asr = day.asr!.add(minute);
 
     expect(at(day, tomorrow, Prayer.asr, asr, logged: true), (
       state: PrayerRowState.prayed,
-      isOpen: true,
+      isHighlighted: true,
+      isNow: true,
     ));
     expect(at(day, tomorrow, Prayer.dhuhr, asr, logged: true, qada: qada()), (
       state: PrayerRowState.prayed,
-      isOpen: false,
+      isHighlighted: false,
+      isNow: false,
     ));
+  });
+
+  test('after asr\'s window the highlight is on maghrib, which is not now', () {
+    final now = day.asr!.add(DayTimes.nowWindow);
+
+    expect(at(day, tomorrow, Prayer.maghrib, now), (
+      state: PrayerRowState.next,
+      isHighlighted: true,
+      isNow: false,
+    ));
+    expect(at(day, tomorrow, Prayer.asr, now).isHighlighted, isFalse);
   });
 
   test('a passed prayer in qada is in qada, and made up once its entry is', () {
@@ -146,7 +178,11 @@ void main() {
       tz.TZDateTime(riyadh, 2026, 10, 15, 23, 59),
       tz.TZDateTime(riyadh, 2026, 10, 16, 0, 1),
     ]) {
-      expect(at(day, tomorrow, Prayer.isha, now), (state: PrayerRowState.mark, isOpen: true));
+      expect(at(day, tomorrow, Prayer.isha, now), (
+        state: PrayerRowState.mark,
+        isHighlighted: false,
+        isNow: false,
+      ));
     }
   });
 
@@ -187,7 +223,8 @@ void main() {
   test('a prayer with no time that day is unavailable', () {
     expect(rowState(prayer: Prayer.isha, time: null, end: null, now: day.asr!, logged: true), (
       state: PrayerRowState.unavailable,
-      isOpen: false,
+      isHighlighted: false,
+      isNow: false,
     ));
   });
 }
