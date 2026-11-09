@@ -81,6 +81,17 @@ const credits = [
     link: 'https://fonts.qurancomplex.gov.sa',
   ),
 
+  Credit(
+    source: 'QCF V1, V2 and V4 Tajweed page fonts, King Fahd Glorious Quran Printing Complex',
+    useKey: StringsManager.useFonts,
+    link: 'https://fonts.qurancomplex.gov.sa',
+  ),
+  Credit(
+    source: 'Quran.com · QCF glyph codes and the 1405H print lines',
+    useKey: StringsManager.useMushafText,
+    link: 'https://quran.com',
+  ),
+
   /// qul's own faq: licenses differ by resource, these two come from the complex's print
   Credit(
     source:
@@ -89,12 +100,12 @@ const credits = [
     link: 'https://qul.tarteel.ai',
   ),
   Credit(
-    source: 'Tanzil · Sahih International',
+    source: 'Tanzil · Sahih International · Pickthall · Yusuf Ali · Hilali & Khan',
     useKey: StringsManager.useTranslation,
     link: 'https://tanzil.net',
   ),
   Credit(
-    source: 'Tanzil · Tafsir al-Muyassar',
+    source: 'Tanzil · Tafsir al-Muyassar · Tafsir al-Jalalayn',
     useKey: StringsManager.useTafsir,
     link: 'https://tanzil.net',
   ),
@@ -154,5 +165,10 @@ const credits = [
     useKey: StringsManager.useTones,
     license: 'CC0',
     link: 'https://github.com/akx/Notifications',
+  ),
+  Credit(
+    source: 'Microsoft Azure AI Speech · Hamed (ar-SA)',
+    useKey: StringsManager.useAzkarVoice,
+    link: 'https://azure.microsoft.com/products/ai-services/text-to-speech',
   ),
 ];
