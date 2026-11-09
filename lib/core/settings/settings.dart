@@ -41,22 +41,13 @@ enum TextSize {
   final double scale;
 }
 
-/// how each prayer reaches the phone. silent still shows the notification, with no sound
+/// how each prayer's reminder and time reach the phone. silent still shows both, with no sound
 enum PrayerSound {
   adhan(StringsManager.soundAdhan),
   tone(StringsManager.soundTone),
   silent(StringsManager.soundSilent);
 
   const PrayerSound(this.nameKey);
-  final String nameKey;
-}
-
-/// takbir only plays the opening takbir as the notification's own sound, no adhan screen
-enum AdhanLength {
-  full(StringsManager.adhanFull),
-  takbir(StringsManager.adhanTakbir);
-
-  const AdhanLength(this.nameKey);
   final String nameKey;
 }
 
@@ -96,14 +87,6 @@ extension PrayerSoundOf on AppSettings {
     return AdhanFiles.isReady(recording) ? recording : AdhanRecording.alafasy;
   }
 
-  AdhanLength adhanLengthOf(Prayer prayer) => switch (prayer) {
-    Prayer.fajr => fajrAdhanLength,
-    Prayer.dhuhr => dhuhrAdhanLength,
-    Prayer.asr => asrAdhanLength,
-    Prayer.maghrib => maghribAdhanLength,
-    Prayer.isha => ishaAdhanLength,
-  };
-
   PrayerTone toneOf(Prayer prayer) => switch (prayer) {
     Prayer.fajr => fajrTone,
     Prayer.dhuhr => dhuhrTone,
@@ -121,23 +104,12 @@ SettingsCompanion soundChoice(Prayer prayer, PrayerSound sound) => switch (praye
   Prayer.isha => SettingsCompanion(ishaSound: Value(sound)),
 };
 
-/// one write, so the schedule is remade once for both
-SettingsCompanion recordingChoice(
-  Prayer prayer,
-  AdhanRecording recording,
-  AdhanLength length,
-) => switch (prayer) {
-  Prayer.fajr => SettingsCompanion(fajrRecording: Value(recording), fajrAdhanLength: Value(length)),
-  Prayer.dhuhr => SettingsCompanion(
-    dhuhrRecording: Value(recording),
-    dhuhrAdhanLength: Value(length),
-  ),
-  Prayer.asr => SettingsCompanion(asrRecording: Value(recording), asrAdhanLength: Value(length)),
-  Prayer.maghrib => SettingsCompanion(
-    maghribRecording: Value(recording),
-    maghribAdhanLength: Value(length),
-  ),
-  Prayer.isha => SettingsCompanion(ishaRecording: Value(recording), ishaAdhanLength: Value(length)),
+SettingsCompanion recordingChoice(Prayer prayer, AdhanRecording recording) => switch (prayer) {
+  Prayer.fajr => SettingsCompanion(fajrRecording: Value(recording)),
+  Prayer.dhuhr => SettingsCompanion(dhuhrRecording: Value(recording)),
+  Prayer.asr => SettingsCompanion(asrRecording: Value(recording)),
+  Prayer.maghrib => SettingsCompanion(maghribRecording: Value(recording)),
+  Prayer.isha => SettingsCompanion(ishaRecording: Value(recording)),
 };
 
 SettingsCompanion toneChoice(Prayer prayer, PrayerTone tone) => switch (prayer) {
