@@ -55,7 +55,9 @@ void main() {
     for (final value in ['Umm al-Qura', '10 min before', 'Makkah · auto', 'Moonlight']) {
       expect(find.text(value), findsOneWidget, reason: value);
     }
-    expect(find.text('Follow sky'), findsOneWidget);
+
+    /// language and light and dark both follow the phone
+    expect(find.text('Follow phone'), findsNWidgets(2));
     expect(await toggledOf(tester, 'Reduce motion'), isFalse);
     expect(await toggledOf(tester, 'Haptics'), isTrue);
     expect(await toggledOf(tester, 'UI sounds'), isFalse);
