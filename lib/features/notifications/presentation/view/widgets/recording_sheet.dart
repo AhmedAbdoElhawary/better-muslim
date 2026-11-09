@@ -11,12 +11,13 @@ import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
+import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/motion/star_loader.dart';
-import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
@@ -36,8 +37,7 @@ Future<void> showRecordingSheet(BuildContext context, Prayer prayer) => showBmSh
   builder: (_) => _RecordingSheet(prayer),
 );
 
-/// the components' "Adhan sound" sheet: full or takbir, a tap picks and plays, only save keeps it
-/// (FR-027)
+/// the components' "Adhan sound" sheet: a tap picks and plays, only save keeps it (FR-027)
 class _RecordingSheet extends ConsumerStatefulWidget {
   const _RecordingSheet(this.prayer);
   final Prayer prayer;
@@ -49,8 +49,6 @@ class _RecordingSheet extends ConsumerStatefulWidget {
 class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   late AdhanRecording _picked =
       ref.read(settingsProvider).value?.recordingOf(widget.prayer) ?? AdhanRecording.alafasy;
-  late AdhanLength _length =
-      ref.read(settingsProvider).value?.adhanLengthOf(widget.prayer) ?? AdhanLength.full;
   late final ClipPlayer _player;
   late final AudioUseNotifier _use;
   late final StreamSubscription<void> _ended;
@@ -91,10 +89,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
 
     /// fajr always previews and plays the recording's fajr variant
     try {
-      await _player.play(
-        recording.fullAsset(widget.prayer),
-        end: _length == AdhanLength.takbir ? recording.clipLengthOf(widget.prayer) : null,
-      );
+      await _player.play(recording.fullAsset(widget.prayer));
     } on PlayerException {
       if (mounted && _playing == recording) _setPlaying(null);
     }
@@ -133,31 +128,20 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SymmetricPadding(
-              horizontal: SpaceManager.s5,
-              vertical: SpaceManager.s2,
-              child: Segmented(
-                values: AdhanLength.values,
-                selected: _length,
-                labelOf: (length) => length.nameKey,
-                onChanged: (length) {
-                  if (_playing != null) _stop();
-                  setState(() => _length = length);
-                },
-              ),
-            ),
             for (final recording in AdhanRecording.values)
               _RecordingRow(
                 recording,
-                takbir: _length == AdhanLength.takbir,
-                length: _length == AdhanLength.takbir
-                    ? recording.clipLabelOf(widget.prayer)
-                    : recording.lengthOf(widget.prayer),
+                length: recording.lengthOf(widget.prayer),
                 picked: recording == _picked,
                 playing: recording == _playing,
                 onTap: () => _pick(recording),
                 onPlay: () => recording == _playing ? _stop() : _pick(recording),
               ),
+            const SymmetricPadding(
+              horizontal: SpaceManager.s6,
+              vertical: SpaceManager.s2,
+              child: RegularText(StringsManager.takbirWithReminder, color: ThemeEnum.text2),
+            ),
             OnlyPadding(
               start: SpaceManager.s5,
               end: SpaceManager.s5,
@@ -168,7 +152,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
                 onPressed: () {
                   ref
                       .read(databaseProvider)
-                      .updateSettings(recordingChoice(widget.prayer, _picked, _length));
+                      .updateSettings(recordingChoice(widget.prayer, _picked));
                   Navigator.pop(context);
                 },
               ),
@@ -183,7 +167,6 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
 class _RecordingRow extends ConsumerWidget {
   const _RecordingRow(
     this.recording, {
-    required this.takbir,
     required this.length,
     required this.picked,
     required this.playing,
@@ -192,7 +175,6 @@ class _RecordingRow extends ConsumerWidget {
   });
 
   final AdhanRecording recording;
-  final bool takbir;
   final String length;
   final bool picked;
   final bool playing;
@@ -206,7 +188,7 @@ class _RecordingRow extends ConsumerWidget {
     );
     return SoundRow(
       title: recording.nameKey,
-      subtitle: takbir ? StringsManager.takbirLength : StringsManager.fullAdhanLength,
+      subtitle: StringsManager.fullAdhanLength,
       subtitleArgs: {'length': context.formatDigits(length, digits)},
       picked: picked,
       onTap: onTap,
