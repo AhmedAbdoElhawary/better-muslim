@@ -3,6 +3,7 @@ import WidgetKit
 
 /// 5.6 medium: all five, the next highlighted, a tick under each one prayed
 struct MediumWidget: View {
+  @Environment(\.colorScheme) private var scheme
   let entry: SurfaceEntry
 
   var body: some View {
@@ -10,8 +11,8 @@ struct MediumWidget: View {
     case .ready(let data, let item):
       MediumContent(data: data, entry: item, date: entry.date)
         .widgetURL(SurfaceLinks.home)
-        .widgetBackground(data.palette(item).widgetSky)
-        .environment(\.palette, data.palette(item))
+        .widgetBackground(data.palette(item, scheme).widgetSky)
+        .environment(\.palette, data.palette(item, scheme))
     default:
       MessageView(entry: entry)
     }
