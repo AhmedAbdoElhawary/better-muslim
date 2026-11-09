@@ -4,11 +4,14 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
+import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,9 +37,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// a tap past the spine shows the controls, then the dock's Display
+  /// a tap on the page's header shows the controls, then the dock's Display
   Future<void> openDisplay(WidgetTester tester) async {
-    await tester.tapAt(const Offset(385, 400));
+    await tester.tapAt(const Offset(200, 40));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Display'));
     await tester.pumpAndSettle();
@@ -62,13 +65,14 @@ void main() {
       'Display',
       'Applies to every page',
       'PAGE',
+      'White',
       'Paper',
       'Cream',
       'Sepia',
       'Green',
       'Night',
       'Navy',
-      'Follow sky',
+      'Match app',
       'FONT',
       'Amiri Quran',
       'KFGQPC Hafs',
@@ -78,7 +82,7 @@ void main() {
       'Book',
       'Slide',
       'Keep screen on',
-      'Madinah · Hafs',
+      'Text',
       'Sahih International',
     ]) {
       expect(find.text(text), findsWidgets, reason: text);
@@ -135,6 +139,24 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('the font tiles show only with the text style', (tester) async {
+    await pumpReader(tester);
+    await containerOf(tester)
+        .read(databaseProvider)
+        .updateSettings(const SettingsCompanion(mushafStyle: Value(MushafStyle.qcfV2)));
+    await openDisplay(tester);
+    expect(find.text('FONT'), findsNothing);
+    expect(find.text('KFGQPC Hafs'), findsNothing);
+
+    await containerOf(tester)
+        .read(databaseProvider)
+        .updateSettings(const SettingsCompanion(mushafStyle: Value(MushafStyle.text)));
+    await tester.pumpAndSettle();
+    expect(find.text('FONT'), findsOneWidget);
+    expect(find.text('KFGQPC Hafs'), findsOneWidget);
+    await unmount(tester);
+  });
+
   testWidgets('the sizes step within -2 to 3 and show their point size', (tester) async {
     await pumpReader(tester);
     await openDisplay(tester);
@@ -182,6 +204,11 @@ void main() {
 
     await tester.tapAt(const Offset(200, 40));
     await tester.pumpAndSettle();
+
+    /// the dock lies over the page now, so it goes before the press at the bottom
+    await tester.tapAt(const Offset(200, 400));
+    await tester.pump(kDoubleTapTimeout);
+    await tester.pumpAndSettle();
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(const AyahKey(2, 16)) != null,
     );
@@ -193,7 +220,7 @@ void main() {
     final last = page.washBounds(const AyahKey(2, 16))!;
     page.showOnScreen(rect: last);
     await tester.pumpAndSettle();
-    await tester.tapAt(page.localToGlobal(last.center));
+    await tester.longPressAt(page.localToGlobal(last.center));
     await tester.pumpAndSettle();
     expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(2, 16));
     await unmount(tester);
@@ -224,8 +251,7 @@ void main() {
     containerOf(tester).read(routerProvider).push(Routes.quranPage(1));
     await tester.pumpAndSettle();
 
-    /// the margin past the spine is on the left in arabic too, the mushaf never mirrors
-    await tester.tapAt(const Offset(385, 400));
+    await tester.tapAt(const Offset(200, 40));
     await tester.pumpAndSettle();
     await tester.tap(find.text('العرض'));
     await tester.pumpAndSettle();
@@ -234,7 +260,29 @@ void main() {
       find.descendant(of: find.byType(GroupedSection), matching: find.text('الميسّر')),
       findsOneWidget,
     );
-    expect(find.text('المدينة · حفص'), findsOneWidget);
+    expect(find.widgetWithText(NavRow, 'نص'), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('the translation row opens every translation and keeps the pick', (tester) async {
+    await pumpReader(tester);
+    await openDisplay(tester);
+    expect(settingsOf(tester).translation, isNull);
+
+    await tapInSheet(tester, find.widgetWithText(NavRow, 'Translation'));
+    for (final text in [
+      'Sahih International',
+      'Pickthall',
+      'Yusuf Ali',
+      'Hilali & Khan',
+      'Al-Muyassar',
+      'Al-Jalalayn',
+    ]) {
+      expect(find.text(text), findsWidgets, reason: text);
+    }
+    await tapInSheet(tester, find.text('Al-Jalalayn'));
+    expect(settingsOf(tester).translation, Translation.jalalayn);
+    expect(find.widgetWithText(NavRow, 'Al-Jalalayn'), findsOneWidget);
     await unmount(tester);
   });
 
@@ -242,7 +290,7 @@ void main() {
     await pumpReader(tester, textScale: 2);
     await openDisplay(tester);
     await tapInSheet(tester, segment<QuranLayout>('Translation'));
-    await tester.ensureVisible(find.text('Madinah · Hafs'));
+    await tester.ensureVisible(find.text('Sahih International'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     await unmount(tester);
