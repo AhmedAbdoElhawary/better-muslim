@@ -165,4 +165,16 @@ class DayTimes {
     }
     return null;
   }
+
+  static const nowWindow = Duration(minutes: 20);
+
+  /// the prayer in its now window. a next prayer that comes sooner ends it
+  (Prayer, TZDateTime)? inWindow(DateTime now) {
+    final started = [
+      for (final prayer in Prayer.values)
+        if (timeOf(prayer) case final time? when !now.isBefore(time)) (prayer, time),
+    ].lastOrNull;
+    if (started == null || !now.isBefore(started.$2.add(nowWindow))) return null;
+    return started;
+  }
 }
