@@ -53,7 +53,7 @@ class _BookmarkMenuState extends ConsumerState<_BookmarkMenu> {
 
   Future<void> _moveHere() async {
     final ayah = ref.read(lastReadProvider).ayah;
-    final page = (await ref.read(quranAssetsProvider.future)).pageOf(ayah);
+    final page = (await ref.read(quranAssetsProvider.future)).stored.pageOf(ayah);
     await _store.move(widget.id, ayah, page);
     if (mounted) Navigator.of(context).pop();
   }
