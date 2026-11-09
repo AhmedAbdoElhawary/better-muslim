@@ -14,11 +14,12 @@ final themeIdProvider = Provider<BmThemeId>(
 
 final themeModeProvider = Provider<ThemeMode>(
   (ref) => switch (ref.watch(
-    settingsProvider.select((settings) => settings.value?.themeMode ?? BmThemeMode.followSky),
+    settingsProvider.select((settings) => settings.value?.themeMode ?? BmThemeMode.followPhone),
   )) {
     BmThemeMode.dark => ThemeMode.dark,
     BmThemeMode.light => ThemeMode.light,
     BmThemeMode.followSky => ref.watch(followSkyProvider),
+    BmThemeMode.followPhone => ThemeMode.system,
   },
 );
 
