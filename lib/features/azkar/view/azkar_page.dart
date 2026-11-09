@@ -10,6 +10,7 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/shortcut_row.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
@@ -47,7 +48,7 @@ class AzkarPage extends StatelessWidget {
                       ),
                     ),
                     RSizedBox.vertical(SpaceManager.s4),
-                    SurfaceCard(child: _NudgesRow()),
+                    GroupedSection(children: [_NudgesRow(), _VoiceRow()]),
                   ],
                 ),
               ),
@@ -144,6 +145,22 @@ class _NudgesRow extends ConsumerWidget {
       value: on,
       onChanged: (value) =>
           ref.read(databaseProvider).updateSettings(SettingsCompanion(azkarNudges: Value(value))),
+    );
+  }
+}
+
+class _VoiceRow extends ConsumerWidget {
+  const _VoiceRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(settingsProvider.select((settings) => settings.value?.azkarVoice ?? true));
+    return ToggleRow(
+      title: StringsManager.azkarVoice,
+      subtitle: StringsManager.azkarVoiceSub,
+      value: on,
+      onChanged: (value) =>
+          ref.read(databaseProvider).updateSettings(SettingsCompanion(azkarVoice: Value(value))),
     );
   }
 }
