@@ -78,6 +78,7 @@ class SearchField extends StatelessWidget {
                   onChanged: onChanged,
                   onSubmitted: onSubmitted,
                   style: style(ThemeEnum.text),
+                  cursorHeight: SizeManager.cursorHeight,
                   cursorColor: context.getColor(ThemeEnum.primary),
                   textInputAction: TextInputAction.search,
                   textAlignVertical: TextAlignVertical.top,
