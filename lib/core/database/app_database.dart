@@ -53,7 +53,7 @@ class Settings extends Table {
   /// literal names, so drift exports the schema without running flutter code (the theme enums)
   TextColumn get digits => textEnum<Digits>().withDefault(const Constant('eastern'))();
   TextColumn get theme => textEnum<BmThemeId>().withDefault(const Constant('moonlight'))();
-  TextColumn get themeMode => textEnum<BmThemeMode>().withDefault(const Constant('followSky'))();
+  TextColumn get themeMode => textEnum<BmThemeMode>().withDefault(const Constant('followPhone'))();
   BoolColumn get reduceMotion => boolean().withDefault(const Constant(false))();
   BoolColumn get haptics => boolean().withDefault(const Constant(true))();
   BoolColumn get uiSounds => boolean().withDefault(const Constant(false))();
@@ -78,12 +78,6 @@ class Settings extends Table {
       textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
   TextColumn get ishaRecording =>
       textEnum<AdhanRecording>().withDefault(const Constant('alafasy'))();
-  TextColumn get fajrAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
-  TextColumn get dhuhrAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
-  TextColumn get asrAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
-  TextColumn get maghribAdhanLength =>
-      textEnum<AdhanLength>().withDefault(const Constant('full'))();
-  TextColumn get ishaAdhanLength => textEnum<AdhanLength>().withDefault(const Constant('full'))();
 
   /// each prayer's own tone, android fixes a channel's sound like the recordings
   TextColumn get fajrTone => textEnum<PrayerTone>().withDefault(const Constant('phone'))();
@@ -123,6 +117,7 @@ class Settings extends Table {
   TextColumn get morningOpenedOn => text().map(const CivilDate()).nullable()();
   TextColumn get eveningOpenedOn => text().map(const CivilDate()).nullable()();
   BoolColumn get azkarNudges => boolean().withDefault(const Constant(true))();
+  BoolColumn get azkarVoice => boolean().withDefault(const Constant(true))();
 
   /// Countdown before each prayer
   BoolColumn get prayerCountdown => boolean().withDefault(const Constant(true))();
@@ -148,6 +143,10 @@ class Settings extends Table {
   TextColumn get pageTurn => textEnum<PageTurn>().withDefault(const Constant('book'))();
   BoolColumn get keepScreenOn => boolean().withDefault(const Constant(false))();
   TextColumn get quranFont => textEnum<QuranFont>().withDefault(const Constant('kfgqpc'))();
+  TextColumn get mushafStyle => textEnum<MushafStyle>().withDefault(const Constant('text'))();
+
+  /// null until picked, then Translation.of gives the app language's own
+  TextColumn get translation => textEnum<Translation>().nullable()();
 
   /// 10% steps around the printed page, above 0 the lines rewrap
   IntColumn get mushafSize => integer()
@@ -379,7 +378,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 25;
+  int get schemaVersion => 30;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -627,6 +626,23 @@ class AppDatabase extends _$AppDatabase {
       from24To25: (m, schema) async {
         /// only the column's default moves to moonlight, a saved theme stays
         await m.alterTable(TableMigration(schema.settings));
+      },
+      from25To26: (m, schema) async {
+        /// takbir only left, the takbir plays with the reminder now. the prayer stays on adhan
+        await m.alterTable(TableMigration(schema.settings));
+      },
+      from26To27: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.mushafStyle);
+      },
+      from27To28: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.azkarVoice);
+      },
+      from28To29: (m, schema) async {
+        /// sqlite can't change a column's default, the row keeps its saved mode
+        await m.alterTable(TableMigration(schema.settings));
+      },
+      from29To30: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.translation);
       },
     ),
   );
