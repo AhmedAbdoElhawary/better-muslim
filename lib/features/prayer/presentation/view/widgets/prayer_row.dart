@@ -22,7 +22,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:timezone/timezone.dart';
 
-/// one prayer of the shown day. a screen reader hears it as one node: prayer, time, state (R13)
+/// one prayer of the shown day, filled in its now window and outlined as the next prayer. a
+/// screen reader hears it as one node: prayer, time, state (R13)
 class PrayerRow extends ConsumerWidget {
   const PrayerRow(this.prayer, {super.key});
   final Prayer prayer;
@@ -30,18 +31,29 @@ class PrayerRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final day = ref.watch(shownDayProvider);
-    final (:state, :isOpen) = ref.watch(rowStateProvider((day, prayer)));
+    final (:state, :isHighlighted, :isNow) = ref.watch(rowStateProvider((day, prayer)));
     final time = ref.watch(dayTimesProvider(day).select((times) => times?.timeOf(prayer)));
-    final name = _Name(prayer: prayer, open: isOpen);
+    final name = _Name(prayer: prayer, highlighted: isHighlighted, now: isNow);
     final clock = _Time(time: time, minor: false);
     final trailing = RowTrailing(day: day, prayer: prayer, state: state);
-    final icon = isOpen ? ThemeEnum.onPrimaryContainer : ThemeEnum.text2;
+    final icon = isNow
+        ? ThemeEnum.onPrimaryContainer
+        : isHighlighted
+        ? ThemeEnum.primary
+        : ThemeEnum.text2;
     return MergeSemantics(
       child: AnimatedDecoratedBox(
         decoration: BoxDecoration(
-          color: isOpen ? context.getColor(ThemeEnum.primaryContainer) : null,
+          color: isNow ? context.getColor(ThemeEnum.primaryContainer) : null,
           borderRadius: BorderRadius.circular(RadiusManager.row.r),
-          border: isOpen ? Border.all(color: DayCell.shownBorder(context)) : null,
+          border: isNow
+              ? Border.all(color: DayCell.shownBorder(context))
+              : isHighlighted
+              ? Border.all(
+                  color: context.getColor(ThemeEnum.primary),
+                  width: SizeManager.nextRing.r,
+                )
+              : null,
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: SizeManager.prayerRow.r),
@@ -182,14 +194,19 @@ class _PrayerIcon extends StatelessWidget {
 }
 
 class _Name extends StatelessWidget {
-  const _Name({required this.prayer, required this.open});
+  const _Name({required this.prayer, required this.highlighted, required this.now});
   final Prayer prayer;
-  final bool open;
+  final bool highlighted;
+  final bool now;
 
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final color = open ? ThemeEnum.onPrimaryContainer : ThemeEnum.text;
+    final color = now
+        ? ThemeEnum.onPrimaryContainer
+        : highlighted
+        ? ThemeEnum.primary
+        : ThemeEnum.text;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       textBaseline: TextBaseline.alphabetic,
@@ -204,7 +221,7 @@ class _Name extends StatelessWidget {
           ),
         ),
         BmSwitcher(
-          child: open
+          child: now
               ? StartPadding(
                   padding: SpaceManager.nowTagGap,
                   child: RegularText(
