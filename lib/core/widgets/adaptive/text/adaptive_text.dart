@@ -20,6 +20,7 @@ class _AdaptiveText extends StatelessWidget {
     required this.fontSize,
     required this.color,
     this.font = FontEnum.body,
+    this.family,
     this.translate = true,
     this.args = const {},
     this.height,
@@ -39,6 +40,9 @@ class _AdaptiveText extends StatelessWidget {
   final double fontSize;
   final ThemeEnum? color;
   final FontEnum font;
+
+  /// a downloaded font in place of [font], like a qcf page's
+  final String? family;
   final bool translate;
   final Map<String, String> args;
   final double? height;
@@ -75,7 +79,7 @@ class _AdaptiveText extends StatelessWidget {
         letterSpacing: letterSpacing,
         shadows: shadows,
         fontFeatures: tabularFigures ? const [FontFeature.tabularFigures()] : null,
-        fontFamily: isArabic ? font.arabic : font.latin,
+        fontFamily: family ?? (isArabic ? font.arabic : font.latin),
 
         /// an arabic word inside english text (or the reverse) still gets the design font
         fontFamilyFallback: [if (isArabic) font.latin else font.arabic],
