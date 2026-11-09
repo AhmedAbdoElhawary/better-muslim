@@ -6,6 +6,8 @@ import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/display_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/services.dart';
@@ -80,10 +82,18 @@ void main() {
       expect(ayahNode('Al-Fatiha · Ayah $ayah', translation(ayah)), findsOne, reason: '$ayah');
     }
 
-    /// a screen reader's double tap selects it like a finger
+    /// a screen reader's double tap opens its sheet like a long press
     tester.semantics.tap(ayahNode('Al-Fatiha · Ayah 5', translation(5)));
     await tester.pumpAndSettle();
     expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
+
+    /// while choosing it checks the ayah instead
+    containerOf(tester).read(selectionProvider.notifier).startChoosing(const AyahKey(1, 5));
+    await tester.pumpAndSettle();
+    tester.semantics.tap(ayahNode('Al-Fatiha · Ayah 5', translation(5)));
+    await tester.pumpAndSettle();
+    expect(containerOf(tester).read(selectionProvider).chosen, isEmpty);
+    expect(containerOf(tester).read(selectionProvider).sheet, isNull);
     await unmount(tester);
     handle.dispose();
   });
@@ -101,6 +111,28 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('the layout switched under the display sheet reads the new page', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpReader(tester, layout: QuranLayout.translation);
+
+    final reader = tester.element(find.byType(ReaderPage));
+    showDisplaySheet(reader);
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () =>
+          containerOf(tester)
+              .read(databaseProvider)
+              .updateSettings(const SettingsCompanion(quranLayout: Value(QuranLayout.mushaf))),
+    );
+    await tester.pumpAndSettle();
+    Navigator.of(reader, rootNavigator: true).pop();
+    await tester.pumpAndSettle();
+
+    expect(ayahNode('Al-Fatiha · Ayah 1', translation(1)), findsOne);
+    await unmount(tester);
+    handle.dispose();
+  });
+
   testWidgets('in arabic the slot read is al-muyassar', (tester) async {
     final handle = tester.ensureSemantics();
     await pumpReader(tester, locale: const Locale('ar'));
@@ -114,7 +146,7 @@ void main() {
     final handle = tester.ensureSemantics();
     await pumpReader(tester);
 
-    /// a tap on the left edge turns to the next page
+    /// the left Turn strip opens the next page
     await tester.tapAt(const Offset(20, 400));
     await tester.pumpAndSettle();
     expect(announced, contains('Al-Baqarah · Page 2'));
@@ -149,7 +181,7 @@ void main() {
     await pumpReader(tester);
 
     /// the controls over the page
-    await tester.tapAt(const Offset(385, 400));
+    await tester.tapAt(const Offset(200, 40));
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
