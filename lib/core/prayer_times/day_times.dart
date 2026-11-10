@@ -168,6 +168,12 @@ class DayTimes {
 
   static const nowWindow = Duration(minutes: 20);
 
+  /// every time of the day what the app shows can change at: each start and each now window's end
+  List<TZDateTime> get boundaries => [
+    for (final period in Period.values) ?startOf(period),
+    for (final prayer in Prayer.values) ?timeOf(prayer)?.add(nowWindow),
+  ];
+
   /// the prayer in its now window. a next prayer that comes sooner ends it
   (Prayer, TZDateTime)? inWindow(DateTime now) {
     final started = [
