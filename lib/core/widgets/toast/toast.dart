@@ -174,7 +174,11 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
         ),
       ),
     );
-    final shown = Semantics(liveRegion: true, container: true, child: toast);
+    final shown = Semantics(
+      liveRegion: true,
+      container: true,
+      child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _leave, child: toast),
+    );
     if (MediaQuery.disableAnimationsOf(context)) {
       return Material(
         child: FadeTransition(opacity: _controller, child: shown),
