@@ -72,8 +72,10 @@ languages keep working.
   Qibla breathing) stand still, only a loader runs for as long as it loads. A screen at rest draws
   no frames, except a real change like the countdown's second and Home's sky events: one short
   event every 6 to 10 seconds and one a second after a tap on the sky, only while Home is on
-  screen with its sky showing, none in the background or with reduce motion. `architecture_test`
-  bans `.repeat(` outside the loaders.
+  screen with its sky showing, none in the background or with reduce motion. The clock ticks each
+  second only while a countdown with seconds is on screen, everything else waits for its next
+  boundary (`GLOSSARY.md`). `architecture_test` bans `.repeat(` outside the loaders and the second
+  ticker outside the countdown.
 - Quran text is never animated, recolored, overlapped, cropped or used as decoration. The page as
   a whole may turn, open from a card, recede behind a sheet and peek beside the controls as the
   handoff designs it, the glyphs never move on their own.
@@ -195,4 +197,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 5.2.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-11-07
+**Version**: 5.3.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-11-10
