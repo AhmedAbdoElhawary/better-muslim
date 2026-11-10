@@ -3,6 +3,7 @@ import 'package:better_muslim/core/app/launch.dart';
 import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_text.dart';
@@ -25,9 +26,14 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
+
+    /// a timer doesn't run while the phone sleeps, so the next boundary is worked out again
+    _lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(boundaryProvider));
 
     /// after the cold open, so the saved location's times show before any gps work (FR-007)
     ref.read(launchSettledProvider).then((_) {
@@ -43,6 +49,12 @@ class _AppState extends ConsumerState<App> {
       },
       fireImmediately: true,
     );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
   }
 
   @override
