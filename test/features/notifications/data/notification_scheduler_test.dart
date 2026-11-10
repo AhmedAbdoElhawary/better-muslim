@@ -113,6 +113,41 @@ void main() {
       expect(channel.calls, ['cancelAll', 'schedule']);
     });
 
+    test('the same alerts again schedule nothing, one that went off is no change', () async {
+      final android = useAndroid();
+      final scheduler = NotificationScheduler(channel);
+      final now = TZDateTime.now(getLocation('Asia/Riyadh'));
+      Alert at(Prayer prayer, Duration from) => Alert(
+        day: DateTime(now.year, now.month, now.day),
+        prayer: prayer,
+        kind: AlertKind.adhan,
+        at: now.add(from),
+        sound: sounds[prayer]!,
+      );
+      final past = at(Prayer.asr, const Duration(hours: -1));
+      final next = at(Prayer.maghrib, const Duration(hours: 1));
+      Future<void> apply(List<Alert> alerts) => scheduler.apply(
+        alerts: alerts,
+        sounds: sounds,
+        recordings: recordings,
+        tones: tones,
+        texts: texts,
+      );
+
+      await apply([past, next]);
+      await apply([past, next]);
+      await apply([next]);
+      expect(android.calls.where((call) => call == 'cancelAllPending'), hasLength(1));
+      expect(channel.calls, ['cancelAll', 'schedule']);
+
+      await apply([next, at(Prayer.isha, const Duration(hours: 2))]);
+      expect(channel.calls, ['cancelAll', 'schedule', 'cancelAll', 'schedule']);
+
+      await scheduler.cancelAll();
+      await apply([next, at(Prayer.isha, const Duration(hours: 2))]);
+      expect(channel.calls.where((call) => call == 'schedule'), hasLength(3));
+    });
+
     test(
       'uses adhan_<prayer>_<sound>, the adhan with its recording, and deletes the rest',
       () async {
