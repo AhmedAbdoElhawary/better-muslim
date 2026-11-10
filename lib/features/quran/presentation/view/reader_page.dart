@@ -46,10 +46,13 @@ import 'package:go_router/go_router.dart';
 /// 4.19 to 4.23 and 4.07, the page in its layout and the ayah to wash. the whole reader takes the page's palette, and
 /// follow sky crossfades it at isha and fajr
 class ReaderPage extends ConsumerStatefulWidget {
-  const ReaderPage({required this.page, this.ayah, super.key});
+  const ReaderPage({required this.page, this.ayah, this.recite = false, super.key});
 
   final int page;
   final AyahKey? ayah;
+
+  /// the Quran tab's Listen, the recitation sheet rises once the reader is open
+  final bool recite;
 
   @override
   ConsumerState<ReaderPage> createState() => _ReaderPageState();
@@ -76,6 +79,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
   /// 4.25 opened, its sheet is built right away
   bool _reciting = false;
+
+  /// in the translation, whether the recitation follows the cells or the mushaf page above them
+  final _followCells = ValueNotifier(false);
 
   /// the sheets' ayah, kept while they slide away
   AyahKey? _ayah;
@@ -119,14 +125,32 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
       if (status == RecitationStatus.playing) _announce(StringsManager.recitationPlaying);
       if (status == RecitationStatus.paused) _announce(StringsManager.recitationPaused);
     });
+    ref.listenManual(settingsProvider.select((settings) => settings.value?.mushafStyle), (old, _) {
+      if (old != null) _turner.currentState?.relayout();
+    });
     ref.listenManual(settingsProvider.select((settings) => settings.value?.quranLayout), (_, _) {
       setState(() => _hiding = false);
       WidgetsBinding.instance.addPostFrameCallback((_) => _entering = null);
     });
     _page.addListener(_turned);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.ayah case final ayah? when mounted) _select(ayah);
+      if (!mounted) return;
+      if (widget.ayah case final ayah?) _select(ayah);
+      if (widget.recite) _whenOpen(_openRecitation);
     });
+  }
+
+  /// the sheet rising with the route's own move dropped frames of both
+  void _whenOpen(VoidCallback then) {
+    final route = ModalRoute.of(context)?.animation;
+    if (route == null || route.isCompleted) return then();
+    void opened(AnimationStatus status) {
+      if (!status.isCompleted) return;
+      route.removeStatusListener(opened);
+      if (mounted) then();
+    }
+
+    route.addStatusListener(opened);
   }
 
   /// a turn away from the selected ayah closes its sheet. while it plays, following is on only on
@@ -161,6 +185,10 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   Future<void> _follow(AyahKey? ayah) async {
     _playing = ayah != null;
     if (ayah == null) return;
+
+    /// picked before a turn, the next page keeps the part that was being read
+    final translation = ref.read(settingsProvider).value?.quranLayout == QuranLayout.translation;
+    _followCells.value = translation && !_onPage();
     final assets = await _assets;
     if (!mounted) return;
     final page = assets.pageOf(readAyah(ayah));
@@ -168,19 +196,34 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
       if (!ref.read(followingProvider)) return;
       _page.value = page;
     }
-    if (_recite.value > .5) {
-      _liftOver(ayah, _reciteSheet);
+
+    /// a sheet still rising for a recitation that just started counts as up
+    if (_recite.value > .5 || _recite.velocity > 0) {
+      _liftOver(ayah, _reciteSheet, onPage: translation && !_followCells.value);
     } else {
-      _reveal(readAyah(ayah));
+      _reveal(readAyah(ayah), layout: translation ? QuranLayout.translation : QuranLayout.mushaf);
     }
   }
 
-  /// a page above 100% scrolls to the ayah being recited, the cells do it themselves
-  void _reveal(AyahKey ayah) {
+  /// only the mushaf page on screen in the translation, none of the cells under it
+  bool _onPage() {
+    final context = _pages[(_page.value, QuranLayout.translation)]?.currentContext;
+    final page = context?.findRenderObject();
+    final scroll = context == null ? null : Scrollable.maybeOf(context)?.position;
+    if (page is! RenderBox || !page.hasSize || scroll == null || !scroll.hasContentDimensions) {
+      return true;
+    }
+    return scroll.pixels + scroll.viewportDimension <= page.size.height + 1;
+  }
+
+  /// a page taller than the screen scrolls to the ayah being recited. in the translation only
+  /// while it follows the page, the cells do it themselves
+  void _reveal(AyahKey ayah, {required QuranLayout layout}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final page = _pages[(_page.value, QuranLayout.mushaf)]?.currentContext?.findRenderObject();
-      if (!mounted || page is! RenderMushafPage || !page.reflow) return;
-      if (ref.read(settingsProvider).value?.quranLayout != QuranLayout.mushaf) return;
+      final page = _pages[(_page.value, layout)]?.currentContext?.findRenderObject();
+      if (!mounted || page is! RenderMushafPage) return;
+      if (ref.read(settingsProvider).value?.quranLayout != layout) return;
+      if (layout == QuranLayout.mushaf ? !page.reflow : _followCells.value) return;
       if (page.washBounds(ayah) case final bounds?) {
         page.showOnScreen(
           rect: bounds,
@@ -216,14 +259,15 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     );
   }
 
+  /// a recitation starts with its sheet up
   void _play(AyahKey from) {
-    _close();
+    _openRecitation();
     playFrom(context, ref, from);
   }
 
   Future<void> _listen() async {
     final assets = await _assets;
-    if (mounted) playFrom(context, ref, assets.pageInfo(_page.value).start);
+    if (mounted) _play(assets.pageInfo(_page.value).start);
   }
 
   void _openRecitation() {
@@ -409,6 +453,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     _page
       ..removeListener(_turned)
       ..dispose();
+    _followCells.dispose();
     _card.dispose();
     _act.dispose();
     _study.dispose();
@@ -453,7 +498,6 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
                   key: _turner,
                   page: _page,
                   book: book == PageTurn.book,
-                  recede: _study,
                   lift: _lift,
                   onTap: _tap,
                   onEdge: _edge,
@@ -489,6 +533,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
                         if (n == _page.value) _layout(QuranLayout.mushaf);
                       },
                       entering: n == _entering,
+                      followCells: _followCells,
                     ),
                   },
                 ),
@@ -682,7 +727,7 @@ class _Reader extends StatelessWidget {
   }
 }
 
-/// the scrim over the receded page, a tap on it closes the large sheet
+/// the scrim over the page, a tap on it closes the large sheet
 class _Dim extends StatelessWidget {
   const _Dim({required this.study, required this.onTap});
 
