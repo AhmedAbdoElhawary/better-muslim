@@ -20,7 +20,7 @@ final notificationSchedulerProvider = Provider<NotificationScheduler>(
   (ref) => NotificationScheduler(ref.watch(adhanChannelProvider)),
 );
 
-/// every pending notification is replaced on each apply, so none is ever left from before
+/// every pending notification is replaced on each apply that changes one, so none is left from before
 class NotificationScheduler {
   NotificationScheduler(this._channel);
 
@@ -29,6 +29,9 @@ class NotificationScheduler {
 
   /// what kotlin was last given, the dev test adds to it instead of replacing it
   var _native = <Map<String, Object?>>[];
+
+  /// what the last apply scheduled, null at start so a cold open always applies
+  Map<String, DateTime>? _applied;
 
   static const _group = 'adhan';
 
@@ -115,6 +118,7 @@ class NotificationScheduler {
 
   /// no location, nothing can be right
   Future<void> cancelAll() async {
+    _applied = null;
     await _plugin.cancelAllPendingNotifications();
     await _channel.cancelAll();
   }
@@ -173,10 +177,40 @@ class NotificationScheduler {
     bool azkarVoice = true,
   }) async {
     try {
+      final exact = await _android?.canScheduleExactNotifications() ?? false;
+      final keys = {
+        for (final alert in alerts)
+          [
+            alert.id,
+            alert.at.millisecondsSinceEpoch,
+            alert.kind,
+            alert.sound,
+            alert.before,
+            alert.lasts,
+            recordings[alert.prayer],
+            tones[alert.prayer],
+            texts.titleOf(alert),
+            texts.bodyOf(alert),
+            exact,
+            azkarVoice,
+          ].join('|'): alert.at,
+      };
+
+      /// the plugin rewrites its whole saved list for each alert on the thread that draws, so a
+      /// resume with nothing new skips it. one that went off is gone from the phone already
+      final now = DateTime.now();
+      final applied = _applied;
+      if (applied != null &&
+          keys.keys.every(applied.containsKey) &&
+          applied.entries.every(
+            (entry) => keys.containsKey(entry.key) || !entry.value.isAfter(now),
+          )) {
+        return;
+      }
+      _applied = null;
       await _plugin.cancelAllPendingNotifications();
       await _channel.cancelAll();
       await _ensureChannels(sounds, recordings, tones, azkarVoice, texts);
-      final exact = await _android?.canScheduleExactNotifications() ?? false;
       final native = <Map<String, Object?>>[];
       for (final alert in alerts) {
         /// the countdown is android's reminder
@@ -222,6 +256,7 @@ class NotificationScheduler {
       }
       _native = native;
       if (native.isNotEmpty) await _channel.schedule(native);
+      _applied = keys;
     } catch (error, stack) {
       await CrashReporter.instance.recordError(error, stack, context: const {'step': 'schedule'});
     }
