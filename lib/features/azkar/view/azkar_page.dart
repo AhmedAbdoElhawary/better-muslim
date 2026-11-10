@@ -41,9 +41,9 @@ class AzkarPage extends StatelessWidget {
                     SurfaceCard(
                       child: Column(
                         children: [
+                          _TasbihRow(),
                           _SetRow(AzkarSet.morning, icon: BmIconName.sunrise),
                           _SetRow(AzkarSet.evening, icon: BmIconName.night),
-                          _TasbihRow(),
                         ],
                       ),
                     ),
