@@ -57,7 +57,7 @@ final arcPointsProvider = Provider<ArcPoints?>((ref) {
   final today = ref.watch(todayProvider);
   final times = ref.watch(dayTimesProvider(today));
   if (times == null) return null;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(boundaryProvider);
   return arcPoints(
     now,
     ref.watch(dayTimesProvider(DateTime(today.year, today.month, today.day - 1))),
@@ -70,7 +70,7 @@ final arcPointsProvider = Provider<ArcPoints?>((ref) {
 final markerShareProvider = Provider<double?>((ref) {
   final points = ref.watch(arcPointsProvider);
   if (points == null) return null;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(minuteProvider).value ?? ref.watch(clockProvider)();
   return arcShare(now, points.start, points.end);
 });
 
