@@ -20,8 +20,8 @@ import 'package:timezone/timezone.dart';
   past: time != null && highlighted != null && time.isBefore(highlighted.$2),
 );
 
-/// 0 at the arc's start, 1 at its end. rounded, so the marker moves about every 40 s instead of
-/// every second
+/// 0 at the arc's start, 1 at its end. rounded, so a minute that moves it less than a step
+/// rebuilds nothing
 double? arcShare(DateTime now, DateTime? start, DateTime? end) {
   if (start == null || end == null || now.isBefore(start) || now.isAfter(end)) return null;
   final share = now.difference(start).inSeconds / end.difference(start).inSeconds;
