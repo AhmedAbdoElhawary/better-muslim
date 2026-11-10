@@ -1,4 +1,3 @@
-import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/database/civil_date.dart';
 import 'package:better_muslim/core/prayer_log/prayer_row_state.dart';
@@ -48,7 +47,7 @@ final qadaWeekProvider = StreamProvider.autoDispose
       );
     });
 
-/// follows the ticker, but a row only rebuilds when its state changes
+/// a row only rebuilds when its state changes
 final rowStateProvider = Provider.autoDispose.family<RowState, (DateTime, Prayer)>((ref, key) {
   final (day, prayer) = key;
   final times = ref.watch(dayTimesProvider(day));
@@ -60,7 +59,7 @@ final rowStateProvider = Provider.autoDispose.family<RowState, (DateTime, Prayer
     prayer: prayer,
     time: times?.timeOf(prayer),
     end: times?.endOf(prayer, tomorrow),
-    now: ref.watch(tickerProvider).value ?? ref.watch(clockProvider)(),
+    now: ref.watch(boundaryProvider),
     logged: ref.watch(prayedProvider(day).select((prayed) => prayed.contains(prayer))),
     qada: qada,
     next: ref.watch(nextPrayerProvider),
