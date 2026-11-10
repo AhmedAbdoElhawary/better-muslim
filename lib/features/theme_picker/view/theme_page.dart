@@ -118,6 +118,7 @@ class _Preview extends ConsumerWidget {
         ThemeMode.dark => false,
         ThemeMode.system => MediaQuery.platformBrightnessOf(context) == Brightness.light,
       },
+      BmThemeMode.followPhone => MediaQuery.platformBrightnessOf(context) == Brightness.light,
     };
     final radius = BorderRadius.circular(RadiusManager.sheet.r);
     return RSizedBox(

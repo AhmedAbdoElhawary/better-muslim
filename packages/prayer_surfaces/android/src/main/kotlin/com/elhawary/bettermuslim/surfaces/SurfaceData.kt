@@ -24,8 +24,14 @@ class SurfaceData(private val json: JSONObject) {
 
     fun text(key: String): String = texts.optString(key)
 
-    // the entry's light or dark, follow sky already worked out per entry by the app
-    fun palette(entry: JSONObject): Palette = palette(entry.optBoolean("light"))
+    // light or dark as the app fixed it, follow sky worked out per entry. null is the phone's: follow
+    // phone, or a message while following a sky it hasn't got
+    fun light(entry: JSONObject?): Boolean? = when {
+        entry != null -> if (entry.isNull("light")) null else entry.getBoolean("light")
+        mode == "light" -> true
+        mode == "dark" -> false
+        else -> null
+    }
 
     fun palette(light: Boolean) = Palette(json.optJSONObject("colors")?.optJSONObject(if (light) "light" else "dark"))
 
@@ -152,7 +158,7 @@ sealed interface SurfaceState {
 class Palette(private val roles: JSONObject?) {
     fun color(context: Context, role: String): Int {
         if (roles != null && roles.has(role)) return roles.getLong(role).toInt()
-        val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val night = isNight(context)
         val surface = if (night) android.R.color.black else android.R.color.white
         val ink = if (night) android.R.color.white else android.R.color.black
         return context.getColor(if (role in SURFACES) surface else ink)
@@ -160,16 +166,8 @@ class Palette(private val roles: JSONObject?) {
 
     companion object {
         private val SURFACES = setOf("top", "middle", "bottom", "deep", "container", "outline")
-
-        // a message has no entry: the app's mode, or the phone's when following a sky it hasn't got
-        fun of(context: Context, data: SurfaceData?): Palette {
-            if (data == null) return Palette(null)
-            val light = when (data.mode) {
-                "light" -> true
-                "dark" -> false
-                else -> context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK != Configuration.UI_MODE_NIGHT_YES
-            }
-            return data.palette(light)
-        }
     }
 }
+
+fun isNight(context: Context) =
+    context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES

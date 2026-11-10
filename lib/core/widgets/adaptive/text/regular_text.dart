@@ -6,6 +6,7 @@ class RegularText extends _AdaptiveText {
     super.fontSize = FontSizeManager.caption,
     super.color = ThemeEnum.text,
     super.font,
+    super.family,
     super.translate,
     super.args,
     super.height,

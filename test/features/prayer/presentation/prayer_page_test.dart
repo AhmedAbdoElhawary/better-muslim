@@ -46,7 +46,9 @@ void main() {
     }
     expect(prayedIn(Prayer.fajr), findsOneWidget);
     expect(prayedIn(Prayer.dhuhr), findsOneWidget);
-    expect(inRow(Prayer.asr, find.text('NOW')), findsOneWidget);
+
+    /// an hour past asr's now window, still on time to mark
+    expect(find.text('NOW'), findsNothing);
     expect(mark(), findsOneWidget);
     expect(inRow(Prayer.maghrib, find.text('in 1:24')), findsOneWidget);
     expect(inRow(Prayer.isha, icon('ui/sound.svg')), findsOneWidget);

@@ -98,3 +98,15 @@ final nextPrayerProvider = Provider<(Prayer, TZDateTime)?>((ref) {
   final tomorrow = DateTime(today.year, today.month, today.day + 1);
   return ref.watch(todayTimesProvider)?.next(now, ref.watch(dayTimesProvider(tomorrow)));
 });
+
+/// the prayer day's, so last night's isha keeps its window past midnight
+final nowPrayerProvider = Provider<(Prayer, TZDateTime)?>((ref) {
+  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  return ref.watch(dayTimesProvider(ref.watch(prayerDayProvider)))?.inWindow(now);
+});
+
+/// what home and the prayer tab point at. after isha's window it is tomorrow's fajr, which no
+/// row of the prayer day has
+final highlightedPrayerProvider = Provider<(Prayer, TZDateTime)?>(
+  (ref) => ref.watch(nowPrayerProvider) ?? ref.watch(nextPrayerProvider),
+);

@@ -53,29 +53,22 @@ android {
         versionName = flutter.versionName
     }
 
-    buildFeatures {
-        // AGP 9 turns resValue off by default, the per-flavor app_name needs it
-        resValues = true
-    }
-
     flavorDimensions += "environment"
 
+    // app_name lives in res/values and values-ar of main, dev and staging, resValue can't be translated
     productFlavors {
         create("dev") {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Better Muslim Dev")
         }
         create("staging") {
             dimension = "environment"
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
-            resValue("string", "app_name", "Better Muslim Stag")
         }
         create("production") {
             dimension = "environment"
-            resValue("string", "app_name", "Better Muslim")
         }
     }
 

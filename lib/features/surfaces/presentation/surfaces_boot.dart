@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/app/launch.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
@@ -87,7 +88,7 @@ class _SurfacesBootState extends ConsumerState<SurfacesBoot> {
         .read(databaseProvider)
         .tableUpdates(const TableUpdateQuery.onTableName('prayer_log'))
         .listen((_) => _later());
-    _write();
+    ref.read(launchSettledProvider).then((_) => _write());
   }
 
   @override

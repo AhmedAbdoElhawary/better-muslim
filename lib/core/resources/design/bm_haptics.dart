@@ -20,7 +20,8 @@ abstract final class BmHaptics {
   static Future<void> selection() => _run(
     HapticFeedback.selectionClick,
   ); // toggles, segmented, sheet detents, page settle (off by default)
-  static Future<void> ayahSelect() => _run(HapticFeedback.lightImpact); // an ayah selected
+  static Future<void> ayahSelect() =>
+      _run(HapticFeedback.mediumImpact); // a long press or a double tap opens an ayah
   static Future<void> sunLetGo() =>
       _run(HapticFeedback.lightImpact); // the sun let go on the first screen, or sunk back on 4.10
   static Future<void> _run(Future<void> Function() f) async {

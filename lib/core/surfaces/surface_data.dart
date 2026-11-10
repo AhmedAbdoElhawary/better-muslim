@@ -61,7 +61,6 @@ Map<String, Object?> buildSurfaceData({
       'nextCityShort': tr(StringsManager.surfaceNextShort, {'city': city}),
       'liveNext': tr(StringsManager.liveNextPrayer, {'city': city}),
       'methodLine': '$city · ${tr(method.nameKey)}',
-      'channel': tr(StringsManager.countdownChannel),
     },
     'entries': const <Map<String, Object?>>[],
   };
@@ -102,6 +101,8 @@ Map<String, Object?> buildSurfaceData({
       for (final time in [
         TZDateTime(zone, first.year, first.month, first.day + i),
         ...Period.values.map(timesOn(plus(first, i)).startOf),
+        for (final prayer in Prayer.values)
+          timesOn(plus(first, i)).timeOf(prayer)?.add(DayTimes.nowWindow),
       ])
         ?time?.millisecondsSinceEpoch,
   }.toList()..sort();
@@ -122,8 +123,9 @@ Map<String, Object?> buildSurfaceData({
     final shown = timesOn(day);
     final marks = day == first ? prayed : const <Prayer>{};
 
-    /// after isha the next fajr is the next day's, nothing in this day is highlighted
-    final next = shown.timeOf(prayer)?.isAtSameMomentAs(at) ?? false ? prayer.index : null;
+    /// after isha's now window the next fajr is the next day's, nothing in this day is highlighted
+    final (lit, litAt) = shown.inWindow(moment) ?? (prayer, at);
+    final next = shown.timeOf(lit)?.isAtSameMomentAs(litAt) ?? false ? lit.index : null;
     final period = times.periodAt(moment);
     final barFrom = period == null
         ? null
@@ -136,7 +138,7 @@ Map<String, Object?> buildSurfaceData({
     final minutes = settings.reminderMinutes;
 
     /// entries change at sunrise and maghrib, so follow sky holds for a whole entry. no sunrise
-    /// or no maghrib as followSkyProvider has it
+    /// or no maghrib as followSkyProvider has it. follow phone has none, the widget asks the phone
     final light = switch (settings.themeMode) {
       BmThemeMode.dark => false,
       BmThemeMode.light => true,
@@ -145,6 +147,7 @@ Map<String, Object?> buildSurfaceData({
         (_, null) => true,
         (final sunrise?, final maghrib?) => !moment.isBefore(sunrise) && moment.isBefore(maghrib),
       },
+      BmThemeMode.followPhone => null,
     };
 
     /// home's night arc, before sunrise the night is yesterday's. null by day and without both ends
@@ -206,7 +209,7 @@ Map<String, Object?> buildSurfaceData({
               null => '—',
             },
             'logged': marks.contains(cell),
-            'past': next == null || cell.index < next,
+            'past': shown.timeOf(cell)?.isBefore(litAt) ?? false,
           },
       ],
     };

@@ -269,7 +269,7 @@ class _Arabic extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: RegularText(
-        text,
+        font.drawn(text),
         translate: false,
         font: font.font,
         fontSize: FontSizeManager.searchAyah,

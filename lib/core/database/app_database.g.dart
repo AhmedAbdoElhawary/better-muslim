@@ -154,7 +154,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         false,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-        defaultValue: const Constant('followSky'),
+        defaultValue: const Constant('followPhone'),
       ).withConverter<BmThemeMode>($SettingsTable.$converterthemeMode);
   static const VerificationMeta _reduceMotionMeta = const VerificationMeta('reduceMotion');
   @override
@@ -297,56 +297,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         requiredDuringInsert: false,
         defaultValue: const Constant('alafasy'),
       ).withConverter<AdhanRecording>($SettingsTable.$converterishaRecording);
-  @override
-  late final GeneratedColumnWithTypeConverter<AdhanLength, String> fajrAdhanLength =
-      GeneratedColumn<String>(
-        'fajr_adhan_length',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('full'),
-      ).withConverter<AdhanLength>($SettingsTable.$converterfajrAdhanLength);
-  @override
-  late final GeneratedColumnWithTypeConverter<AdhanLength, String> dhuhrAdhanLength =
-      GeneratedColumn<String>(
-        'dhuhr_adhan_length',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('full'),
-      ).withConverter<AdhanLength>($SettingsTable.$converterdhuhrAdhanLength);
-  @override
-  late final GeneratedColumnWithTypeConverter<AdhanLength, String> asrAdhanLength =
-      GeneratedColumn<String>(
-        'asr_adhan_length',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('full'),
-      ).withConverter<AdhanLength>($SettingsTable.$converterasrAdhanLength);
-  @override
-  late final GeneratedColumnWithTypeConverter<AdhanLength, String> maghribAdhanLength =
-      GeneratedColumn<String>(
-        'maghrib_adhan_length',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('full'),
-      ).withConverter<AdhanLength>($SettingsTable.$convertermaghribAdhanLength);
-  @override
-  late final GeneratedColumnWithTypeConverter<AdhanLength, String> ishaAdhanLength =
-      GeneratedColumn<String>(
-        'isha_adhan_length',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('full'),
-      ).withConverter<AdhanLength>($SettingsTable.$converterishaAdhanLength);
   @override
   late final GeneratedColumnWithTypeConverter<PrayerTone, String> fajrTone =
       GeneratedColumn<String>(
@@ -495,6 +445,17 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("azkar_nudges" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _azkarVoiceMeta = const VerificationMeta('azkarVoice');
+  @override
+  late final GeneratedColumn<bool> azkarVoice = GeneratedColumn<bool>(
+    'azkar_voice',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("azkar_voice" IN (0, 1))'),
     defaultValue: const Constant(true),
   );
   static const VerificationMeta _prayerCountdownMeta = const VerificationMeta('prayerCountdown');
@@ -648,6 +609,25 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         requiredDuringInsert: false,
         defaultValue: const Constant('kfgqpc'),
       ).withConverter<QuranFont>($SettingsTable.$converterquranFont);
+  @override
+  late final GeneratedColumnWithTypeConverter<MushafStyle, String> mushafStyle =
+      GeneratedColumn<String>(
+        'mushaf_style',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('text'),
+      ).withConverter<MushafStyle>($SettingsTable.$convertermushafStyle);
+  @override
+  late final GeneratedColumnWithTypeConverter<Translation?, String> translation =
+      GeneratedColumn<String>(
+        'translation',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Translation?>($SettingsTable.$convertertranslationn);
   static const VerificationMeta _mushafSizeMeta = const VerificationMeta('mushafSize');
   @override
   late final GeneratedColumn<int> mushafSize = GeneratedColumn<int>(
@@ -767,11 +747,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     asrRecording,
     maghribRecording,
     ishaRecording,
-    fajrAdhanLength,
-    dhuhrAdhanLength,
-    asrAdhanLength,
-    maghribAdhanLength,
-    ishaAdhanLength,
     fajrTone,
     dhuhrTone,
     asrTone,
@@ -786,6 +761,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    azkarVoice,
     prayerCountdown,
     calendarMode,
     topGlow,
@@ -801,6 +777,8 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     pageTurn,
     keepScreenOn,
     quranFont,
+    mushafStyle,
+    translation,
     mushafSize,
     quranArabicSize,
     quranTranslationSize,
@@ -940,6 +918,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _azkarNudgesMeta,
         azkarNudges.isAcceptableOrUnknown(data['azkar_nudges']!, _azkarNudgesMeta),
+      );
+    }
+    if (data.containsKey('azkar_voice')) {
+      context.handle(
+        _azkarVoiceMeta,
+        azkarVoice.isAcceptableOrUnknown(data['azkar_voice']!, _azkarVoiceMeta),
       );
     }
     if (data.containsKey('prayer_countdown')) {
@@ -1174,36 +1158,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
           data['${effectivePrefix}isha_recording'],
         )!,
       ),
-      fajrAdhanLength: $SettingsTable.$converterfajrAdhanLength.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}fajr_adhan_length'],
-        )!,
-      ),
-      dhuhrAdhanLength: $SettingsTable.$converterdhuhrAdhanLength.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}dhuhr_adhan_length'],
-        )!,
-      ),
-      asrAdhanLength: $SettingsTable.$converterasrAdhanLength.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}asr_adhan_length'],
-        )!,
-      ),
-      maghribAdhanLength: $SettingsTable.$convertermaghribAdhanLength.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}maghrib_adhan_length'],
-        )!,
-      ),
-      ishaAdhanLength: $SettingsTable.$converterishaAdhanLength.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}isha_adhan_length'],
-        )!,
-      ),
       fajrTone: $SettingsTable.$converterfajrTone.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -1270,6 +1224,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       azkarNudges: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}azkar_nudges'],
+      )!,
+      azkarVoice: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}azkar_voice'],
       )!,
       prayerCountdown: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
@@ -1341,6 +1299,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
           DriftSqlType.string,
           data['${effectivePrefix}quran_font'],
         )!,
+      ),
+      mushafStyle: $SettingsTable.$convertermushafStyle.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mushaf_style'],
+        )!,
+      ),
+      translation: $SettingsTable.$convertertranslationn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}translation'],
+        ),
       ),
       mushafSize: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -1425,16 +1395,6 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
   static JsonTypeConverter2<AdhanRecording, String, String> $converterishaRecording =
       const EnumNameConverter<AdhanRecording>(AdhanRecording.values);
-  static JsonTypeConverter2<AdhanLength, String, String> $converterfajrAdhanLength =
-      const EnumNameConverter<AdhanLength>(AdhanLength.values);
-  static JsonTypeConverter2<AdhanLength, String, String> $converterdhuhrAdhanLength =
-      const EnumNameConverter<AdhanLength>(AdhanLength.values);
-  static JsonTypeConverter2<AdhanLength, String, String> $converterasrAdhanLength =
-      const EnumNameConverter<AdhanLength>(AdhanLength.values);
-  static JsonTypeConverter2<AdhanLength, String, String> $convertermaghribAdhanLength =
-      const EnumNameConverter<AdhanLength>(AdhanLength.values);
-  static JsonTypeConverter2<AdhanLength, String, String> $converterishaAdhanLength =
-      const EnumNameConverter<AdhanLength>(AdhanLength.values);
   static JsonTypeConverter2<PrayerTone, String, String> $converterfajrTone =
       const EnumNameConverter<PrayerTone>(PrayerTone.values);
   static JsonTypeConverter2<PrayerTone, String, String> $converterdhuhrTone =
@@ -1467,6 +1427,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       const EnumNameConverter<PageTurn>(PageTurn.values);
   static JsonTypeConverter2<QuranFont, String, String> $converterquranFont =
       const EnumNameConverter<QuranFont>(QuranFont.values);
+  static JsonTypeConverter2<MushafStyle, String, String> $convertermushafStyle =
+      const EnumNameConverter<MushafStyle>(MushafStyle.values);
+  static JsonTypeConverter2<Translation, String, String> $convertertranslation =
+      const EnumNameConverter<Translation>(Translation.values);
+  static JsonTypeConverter2<Translation?, String?, String?> $convertertranslationn =
+      JsonTypeConverter2.asNullable($convertertranslation);
   static JsonTypeConverter2<Reciter, String, String> $converterreciter =
       const EnumNameConverter<Reciter>(Reciter.values);
   static JsonTypeConverter2<AzkarFont, String, String> $converterazkarFont =
@@ -1516,11 +1482,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final AdhanRecording asrRecording;
   final AdhanRecording maghribRecording;
   final AdhanRecording ishaRecording;
-  final AdhanLength fajrAdhanLength;
-  final AdhanLength dhuhrAdhanLength;
-  final AdhanLength asrAdhanLength;
-  final AdhanLength maghribAdhanLength;
-  final AdhanLength ishaAdhanLength;
 
   /// each prayer's own tone, android fixes a channel's sound like the recordings
   final PrayerTone fajrTone;
@@ -1545,6 +1506,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final DateTime? morningOpenedOn;
   final DateTime? eveningOpenedOn;
   final bool azkarNudges;
+  final bool azkarVoice;
 
   /// Countdown before each prayer
   final bool prayerCountdown;
@@ -1564,6 +1526,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final PageTurn pageTurn;
   final bool keepScreenOn;
   final QuranFont quranFont;
+  final MushafStyle mushafStyle;
+
+  /// null until picked, then Translation.of gives the app language's own
+  final Translation? translation;
 
   /// 10% steps around the printed page, above 0 the lines rewrap
   final int mushafSize;
@@ -1611,11 +1577,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.asrRecording,
     required this.maghribRecording,
     required this.ishaRecording,
-    required this.fajrAdhanLength,
-    required this.dhuhrAdhanLength,
-    required this.asrAdhanLength,
-    required this.maghribAdhanLength,
-    required this.ishaAdhanLength,
     required this.fajrTone,
     required this.dhuhrTone,
     required this.asrTone,
@@ -1630,6 +1591,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     this.morningOpenedOn,
     this.eveningOpenedOn,
     required this.azkarNudges,
+    required this.azkarVoice,
     required this.prayerCountdown,
     required this.calendarMode,
     required this.topGlow,
@@ -1645,6 +1607,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.pageTurn,
     required this.keepScreenOn,
     required this.quranFont,
+    required this.mushafStyle,
+    this.translation,
     required this.mushafSize,
     required this.quranArabicSize,
     required this.quranTranslationSize,
@@ -1752,31 +1716,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       );
     }
     {
-      map['fajr_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterfajrAdhanLength.toSql(fajrAdhanLength),
-      );
-    }
-    {
-      map['dhuhr_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterdhuhrAdhanLength.toSql(dhuhrAdhanLength),
-      );
-    }
-    {
-      map['asr_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterasrAdhanLength.toSql(asrAdhanLength),
-      );
-    }
-    {
-      map['maghrib_adhan_length'] = Variable<String>(
-        $SettingsTable.$convertermaghribAdhanLength.toSql(maghribAdhanLength),
-      );
-    }
-    {
-      map['isha_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterishaAdhanLength.toSql(ishaAdhanLength),
-      );
-    }
-    {
       map['fajr_tone'] = Variable<String>($SettingsTable.$converterfajrTone.toSql(fajrTone));
     }
     {
@@ -1810,6 +1749,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       );
     }
     map['azkar_nudges'] = Variable<bool>(azkarNudges);
+    map['azkar_voice'] = Variable<bool>(azkarVoice);
     map['prayer_countdown'] = Variable<bool>(prayerCountdown);
     {
       map['calendar_mode'] = Variable<String>(
@@ -1844,6 +1784,16 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     map['keep_screen_on'] = Variable<bool>(keepScreenOn);
     {
       map['quran_font'] = Variable<String>($SettingsTable.$converterquranFont.toSql(quranFont));
+    }
+    {
+      map['mushaf_style'] = Variable<String>(
+        $SettingsTable.$convertermushafStyle.toSql(mushafStyle),
+      );
+    }
+    if (!nullToAbsent || translation != null) {
+      map['translation'] = Variable<String>(
+        $SettingsTable.$convertertranslationn.toSql(translation),
+      );
     }
     map['mushaf_size'] = Variable<int>(mushafSize);
     map['quran_arabic_size'] = Variable<int>(quranArabicSize);
@@ -1896,11 +1846,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       asrRecording: Value(asrRecording),
       maghribRecording: Value(maghribRecording),
       ishaRecording: Value(ishaRecording),
-      fajrAdhanLength: Value(fajrAdhanLength),
-      dhuhrAdhanLength: Value(dhuhrAdhanLength),
-      asrAdhanLength: Value(asrAdhanLength),
-      maghribAdhanLength: Value(maghribAdhanLength),
-      ishaAdhanLength: Value(ishaAdhanLength),
       fajrTone: Value(fajrTone),
       dhuhrTone: Value(dhuhrTone),
       asrTone: Value(asrTone),
@@ -1919,6 +1864,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? const Value.absent()
           : Value(eveningOpenedOn),
       azkarNudges: Value(azkarNudges),
+      azkarVoice: Value(azkarVoice),
       prayerCountdown: Value(prayerCountdown),
       calendarMode: Value(calendarMode),
       topGlow: Value(topGlow),
@@ -1934,6 +1880,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       pageTurn: Value(pageTurn),
       keepScreenOn: Value(keepScreenOn),
       quranFont: Value(quranFont),
+      mushafStyle: Value(mushafStyle),
+      translation: translation == null && nullToAbsent ? const Value.absent() : Value(translation),
       mushafSize: Value(mushafSize),
       quranArabicSize: Value(quranArabicSize),
       quranTranslationSize: Value(quranTranslationSize),
@@ -2006,21 +1954,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       ishaRecording: $SettingsTable.$converterishaRecording.fromJson(
         serializer.fromJson<String>(json['ishaRecording']),
       ),
-      fajrAdhanLength: $SettingsTable.$converterfajrAdhanLength.fromJson(
-        serializer.fromJson<String>(json['fajrAdhanLength']),
-      ),
-      dhuhrAdhanLength: $SettingsTable.$converterdhuhrAdhanLength.fromJson(
-        serializer.fromJson<String>(json['dhuhrAdhanLength']),
-      ),
-      asrAdhanLength: $SettingsTable.$converterasrAdhanLength.fromJson(
-        serializer.fromJson<String>(json['asrAdhanLength']),
-      ),
-      maghribAdhanLength: $SettingsTable.$convertermaghribAdhanLength.fromJson(
-        serializer.fromJson<String>(json['maghribAdhanLength']),
-      ),
-      ishaAdhanLength: $SettingsTable.$converterishaAdhanLength.fromJson(
-        serializer.fromJson<String>(json['ishaAdhanLength']),
-      ),
       fajrTone: $SettingsTable.$converterfajrTone.fromJson(
         serializer.fromJson<String>(json['fajrTone']),
       ),
@@ -2045,6 +1978,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       morningOpenedOn: serializer.fromJson<DateTime?>(json['morningOpenedOn']),
       eveningOpenedOn: serializer.fromJson<DateTime?>(json['eveningOpenedOn']),
       azkarNudges: serializer.fromJson<bool>(json['azkarNudges']),
+      azkarVoice: serializer.fromJson<bool>(json['azkarVoice']),
       prayerCountdown: serializer.fromJson<bool>(json['prayerCountdown']),
       calendarMode: $SettingsTable.$convertercalendarMode.fromJson(
         serializer.fromJson<String>(json['calendarMode']),
@@ -2073,6 +2007,12 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       keepScreenOn: serializer.fromJson<bool>(json['keepScreenOn']),
       quranFont: $SettingsTable.$converterquranFont.fromJson(
         serializer.fromJson<String>(json['quranFont']),
+      ),
+      mushafStyle: $SettingsTable.$convertermushafStyle.fromJson(
+        serializer.fromJson<String>(json['mushafStyle']),
+      ),
+      translation: $SettingsTable.$convertertranslationn.fromJson(
+        serializer.fromJson<String?>(json['translation']),
       ),
       mushafSize: serializer.fromJson<int>(json['mushafSize']),
       quranArabicSize: serializer.fromJson<int>(json['quranArabicSize']),
@@ -2140,21 +2080,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'ishaRecording': serializer.toJson<String>(
         $SettingsTable.$converterishaRecording.toJson(ishaRecording),
       ),
-      'fajrAdhanLength': serializer.toJson<String>(
-        $SettingsTable.$converterfajrAdhanLength.toJson(fajrAdhanLength),
-      ),
-      'dhuhrAdhanLength': serializer.toJson<String>(
-        $SettingsTable.$converterdhuhrAdhanLength.toJson(dhuhrAdhanLength),
-      ),
-      'asrAdhanLength': serializer.toJson<String>(
-        $SettingsTable.$converterasrAdhanLength.toJson(asrAdhanLength),
-      ),
-      'maghribAdhanLength': serializer.toJson<String>(
-        $SettingsTable.$convertermaghribAdhanLength.toJson(maghribAdhanLength),
-      ),
-      'ishaAdhanLength': serializer.toJson<String>(
-        $SettingsTable.$converterishaAdhanLength.toJson(ishaAdhanLength),
-      ),
       'fajrTone': serializer.toJson<String>($SettingsTable.$converterfajrTone.toJson(fajrTone)),
       'dhuhrTone': serializer.toJson<String>($SettingsTable.$converterdhuhrTone.toJson(dhuhrTone)),
       'asrTone': serializer.toJson<String>($SettingsTable.$converterasrTone.toJson(asrTone)),
@@ -2171,6 +2096,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'morningOpenedOn': serializer.toJson<DateTime?>(morningOpenedOn),
       'eveningOpenedOn': serializer.toJson<DateTime?>(eveningOpenedOn),
       'azkarNudges': serializer.toJson<bool>(azkarNudges),
+      'azkarVoice': serializer.toJson<bool>(azkarVoice),
       'prayerCountdown': serializer.toJson<bool>(prayerCountdown),
       'calendarMode': serializer.toJson<String>(
         $SettingsTable.$convertercalendarMode.toJson(calendarMode),
@@ -2190,6 +2116,12 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'pageTurn': serializer.toJson<String>($SettingsTable.$converterpageTurn.toJson(pageTurn)),
       'keepScreenOn': serializer.toJson<bool>(keepScreenOn),
       'quranFont': serializer.toJson<String>($SettingsTable.$converterquranFont.toJson(quranFont)),
+      'mushafStyle': serializer.toJson<String>(
+        $SettingsTable.$convertermushafStyle.toJson(mushafStyle),
+      ),
+      'translation': serializer.toJson<String?>(
+        $SettingsTable.$convertertranslationn.toJson(translation),
+      ),
       'mushafSize': serializer.toJson<int>(mushafSize),
       'quranArabicSize': serializer.toJson<int>(quranArabicSize),
       'quranTranslationSize': serializer.toJson<int>(quranTranslationSize),
@@ -2232,11 +2164,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     AdhanRecording? asrRecording,
     AdhanRecording? maghribRecording,
     AdhanRecording? ishaRecording,
-    AdhanLength? fajrAdhanLength,
-    AdhanLength? dhuhrAdhanLength,
-    AdhanLength? asrAdhanLength,
-    AdhanLength? maghribAdhanLength,
-    AdhanLength? ishaAdhanLength,
     PrayerTone? fajrTone,
     PrayerTone? dhuhrTone,
     PrayerTone? asrTone,
@@ -2251,6 +2178,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     Value<DateTime?> morningOpenedOn = const Value.absent(),
     Value<DateTime?> eveningOpenedOn = const Value.absent(),
     bool? azkarNudges,
+    bool? azkarVoice,
     bool? prayerCountdown,
     CalendarMode? calendarMode,
     bool? topGlow,
@@ -2266,6 +2194,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     PageTurn? pageTurn,
     bool? keepScreenOn,
     QuranFont? quranFont,
+    MushafStyle? mushafStyle,
+    Value<Translation?> translation = const Value.absent(),
     int? mushafSize,
     int? quranArabicSize,
     int? quranTranslationSize,
@@ -2305,11 +2235,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     asrRecording: asrRecording ?? this.asrRecording,
     maghribRecording: maghribRecording ?? this.maghribRecording,
     ishaRecording: ishaRecording ?? this.ishaRecording,
-    fajrAdhanLength: fajrAdhanLength ?? this.fajrAdhanLength,
-    dhuhrAdhanLength: dhuhrAdhanLength ?? this.dhuhrAdhanLength,
-    asrAdhanLength: asrAdhanLength ?? this.asrAdhanLength,
-    maghribAdhanLength: maghribAdhanLength ?? this.maghribAdhanLength,
-    ishaAdhanLength: ishaAdhanLength ?? this.ishaAdhanLength,
     fajrTone: fajrTone ?? this.fajrTone,
     dhuhrTone: dhuhrTone ?? this.dhuhrTone,
     asrTone: asrTone ?? this.asrTone,
@@ -2324,6 +2249,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     morningOpenedOn: morningOpenedOn.present ? morningOpenedOn.value : this.morningOpenedOn,
     eveningOpenedOn: eveningOpenedOn.present ? eveningOpenedOn.value : this.eveningOpenedOn,
     azkarNudges: azkarNudges ?? this.azkarNudges,
+    azkarVoice: azkarVoice ?? this.azkarVoice,
     prayerCountdown: prayerCountdown ?? this.prayerCountdown,
     calendarMode: calendarMode ?? this.calendarMode,
     topGlow: topGlow ?? this.topGlow,
@@ -2339,6 +2265,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     pageTurn: pageTurn ?? this.pageTurn,
     keepScreenOn: keepScreenOn ?? this.keepScreenOn,
     quranFont: quranFont ?? this.quranFont,
+    mushafStyle: mushafStyle ?? this.mushafStyle,
+    translation: translation.present ? translation.value : this.translation,
     mushafSize: mushafSize ?? this.mushafSize,
     quranArabicSize: quranArabicSize ?? this.quranArabicSize,
     quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
@@ -2382,19 +2310,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.maghribRecording.value
           : this.maghribRecording,
       ishaRecording: data.ishaRecording.present ? data.ishaRecording.value : this.ishaRecording,
-      fajrAdhanLength: data.fajrAdhanLength.present
-          ? data.fajrAdhanLength.value
-          : this.fajrAdhanLength,
-      dhuhrAdhanLength: data.dhuhrAdhanLength.present
-          ? data.dhuhrAdhanLength.value
-          : this.dhuhrAdhanLength,
-      asrAdhanLength: data.asrAdhanLength.present ? data.asrAdhanLength.value : this.asrAdhanLength,
-      maghribAdhanLength: data.maghribAdhanLength.present
-          ? data.maghribAdhanLength.value
-          : this.maghribAdhanLength,
-      ishaAdhanLength: data.ishaAdhanLength.present
-          ? data.ishaAdhanLength.value
-          : this.ishaAdhanLength,
       fajrTone: data.fajrTone.present ? data.fajrTone.value : this.fajrTone,
       dhuhrTone: data.dhuhrTone.present ? data.dhuhrTone.value : this.dhuhrTone,
       asrTone: data.asrTone.present ? data.asrTone.value : this.asrTone,
@@ -2423,6 +2338,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ? data.eveningOpenedOn.value
           : this.eveningOpenedOn,
       azkarNudges: data.azkarNudges.present ? data.azkarNudges.value : this.azkarNudges,
+      azkarVoice: data.azkarVoice.present ? data.azkarVoice.value : this.azkarVoice,
       prayerCountdown: data.prayerCountdown.present
           ? data.prayerCountdown.value
           : this.prayerCountdown,
@@ -2440,6 +2356,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       pageTurn: data.pageTurn.present ? data.pageTurn.value : this.pageTurn,
       keepScreenOn: data.keepScreenOn.present ? data.keepScreenOn.value : this.keepScreenOn,
       quranFont: data.quranFont.present ? data.quranFont.value : this.quranFont,
+      mushafStyle: data.mushafStyle.present ? data.mushafStyle.value : this.mushafStyle,
+      translation: data.translation.present ? data.translation.value : this.translation,
       mushafSize: data.mushafSize.present ? data.mushafSize.value : this.mushafSize,
       quranArabicSize: data.quranArabicSize.present
           ? data.quranArabicSize.value
@@ -2488,11 +2406,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('asrRecording: $asrRecording, ')
           ..write('maghribRecording: $maghribRecording, ')
           ..write('ishaRecording: $ishaRecording, ')
-          ..write('fajrAdhanLength: $fajrAdhanLength, ')
-          ..write('dhuhrAdhanLength: $dhuhrAdhanLength, ')
-          ..write('asrAdhanLength: $asrAdhanLength, ')
-          ..write('maghribAdhanLength: $maghribAdhanLength, ')
-          ..write('ishaAdhanLength: $ishaAdhanLength, ')
           ..write('fajrTone: $fajrTone, ')
           ..write('dhuhrTone: $dhuhrTone, ')
           ..write('asrTone: $asrTone, ')
@@ -2507,6 +2420,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
           ..write('azkarNudges: $azkarNudges, ')
+          ..write('azkarVoice: $azkarVoice, ')
           ..write('prayerCountdown: $prayerCountdown, ')
           ..write('calendarMode: $calendarMode, ')
           ..write('topGlow: $topGlow, ')
@@ -2522,6 +2436,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('pageTurn: $pageTurn, ')
           ..write('keepScreenOn: $keepScreenOn, ')
           ..write('quranFont: $quranFont, ')
+          ..write('mushafStyle: $mushafStyle, ')
+          ..write('translation: $translation, ')
           ..write('mushafSize: $mushafSize, ')
           ..write('quranArabicSize: $quranArabicSize, ')
           ..write('quranTranslationSize: $quranTranslationSize, ')
@@ -2566,11 +2482,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     asrRecording,
     maghribRecording,
     ishaRecording,
-    fajrAdhanLength,
-    dhuhrAdhanLength,
-    asrAdhanLength,
-    maghribAdhanLength,
-    ishaAdhanLength,
     fajrTone,
     dhuhrTone,
     asrTone,
@@ -2585,6 +2496,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     morningOpenedOn,
     eveningOpenedOn,
     azkarNudges,
+    azkarVoice,
     prayerCountdown,
     calendarMode,
     topGlow,
@@ -2600,6 +2512,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     pageTurn,
     keepScreenOn,
     quranFont,
+    mushafStyle,
+    translation,
     mushafSize,
     quranArabicSize,
     quranTranslationSize,
@@ -2643,11 +2557,6 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.asrRecording == this.asrRecording &&
           other.maghribRecording == this.maghribRecording &&
           other.ishaRecording == this.ishaRecording &&
-          other.fajrAdhanLength == this.fajrAdhanLength &&
-          other.dhuhrAdhanLength == this.dhuhrAdhanLength &&
-          other.asrAdhanLength == this.asrAdhanLength &&
-          other.maghribAdhanLength == this.maghribAdhanLength &&
-          other.ishaAdhanLength == this.ishaAdhanLength &&
           other.fajrTone == this.fajrTone &&
           other.dhuhrTone == this.dhuhrTone &&
           other.asrTone == this.asrTone &&
@@ -2662,6 +2571,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.morningOpenedOn == this.morningOpenedOn &&
           other.eveningOpenedOn == this.eveningOpenedOn &&
           other.azkarNudges == this.azkarNudges &&
+          other.azkarVoice == this.azkarVoice &&
           other.prayerCountdown == this.prayerCountdown &&
           other.calendarMode == this.calendarMode &&
           other.topGlow == this.topGlow &&
@@ -2677,6 +2587,8 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.pageTurn == this.pageTurn &&
           other.keepScreenOn == this.keepScreenOn &&
           other.quranFont == this.quranFont &&
+          other.mushafStyle == this.mushafStyle &&
+          other.translation == this.translation &&
           other.mushafSize == this.mushafSize &&
           other.quranArabicSize == this.quranArabicSize &&
           other.quranTranslationSize == this.quranTranslationSize &&
@@ -2718,11 +2630,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<AdhanRecording> asrRecording;
   final Value<AdhanRecording> maghribRecording;
   final Value<AdhanRecording> ishaRecording;
-  final Value<AdhanLength> fajrAdhanLength;
-  final Value<AdhanLength> dhuhrAdhanLength;
-  final Value<AdhanLength> asrAdhanLength;
-  final Value<AdhanLength> maghribAdhanLength;
-  final Value<AdhanLength> ishaAdhanLength;
   final Value<PrayerTone> fajrTone;
   final Value<PrayerTone> dhuhrTone;
   final Value<PrayerTone> asrTone;
@@ -2737,6 +2644,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<DateTime?> morningOpenedOn;
   final Value<DateTime?> eveningOpenedOn;
   final Value<bool> azkarNudges;
+  final Value<bool> azkarVoice;
   final Value<bool> prayerCountdown;
   final Value<CalendarMode> calendarMode;
   final Value<bool> topGlow;
@@ -2752,6 +2660,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<PageTurn> pageTurn;
   final Value<bool> keepScreenOn;
   final Value<QuranFont> quranFont;
+  final Value<MushafStyle> mushafStyle;
+  final Value<Translation?> translation;
   final Value<int> mushafSize;
   final Value<int> quranArabicSize;
   final Value<int> quranTranslationSize;
@@ -2791,11 +2701,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.asrRecording = const Value.absent(),
     this.maghribRecording = const Value.absent(),
     this.ishaRecording = const Value.absent(),
-    this.fajrAdhanLength = const Value.absent(),
-    this.dhuhrAdhanLength = const Value.absent(),
-    this.asrAdhanLength = const Value.absent(),
-    this.maghribAdhanLength = const Value.absent(),
-    this.ishaAdhanLength = const Value.absent(),
     this.fajrTone = const Value.absent(),
     this.dhuhrTone = const Value.absent(),
     this.asrTone = const Value.absent(),
@@ -2810,6 +2715,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.azkarVoice = const Value.absent(),
     this.prayerCountdown = const Value.absent(),
     this.calendarMode = const Value.absent(),
     this.topGlow = const Value.absent(),
@@ -2825,6 +2731,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.pageTurn = const Value.absent(),
     this.keepScreenOn = const Value.absent(),
     this.quranFont = const Value.absent(),
+    this.mushafStyle = const Value.absent(),
+    this.translation = const Value.absent(),
     this.mushafSize = const Value.absent(),
     this.quranArabicSize = const Value.absent(),
     this.quranTranslationSize = const Value.absent(),
@@ -2865,11 +2773,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.asrRecording = const Value.absent(),
     this.maghribRecording = const Value.absent(),
     this.ishaRecording = const Value.absent(),
-    this.fajrAdhanLength = const Value.absent(),
-    this.dhuhrAdhanLength = const Value.absent(),
-    this.asrAdhanLength = const Value.absent(),
-    this.maghribAdhanLength = const Value.absent(),
-    this.ishaAdhanLength = const Value.absent(),
     this.fajrTone = const Value.absent(),
     this.dhuhrTone = const Value.absent(),
     this.asrTone = const Value.absent(),
@@ -2884,6 +2787,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.morningOpenedOn = const Value.absent(),
     this.eveningOpenedOn = const Value.absent(),
     this.azkarNudges = const Value.absent(),
+    this.azkarVoice = const Value.absent(),
     this.prayerCountdown = const Value.absent(),
     this.calendarMode = const Value.absent(),
     this.topGlow = const Value.absent(),
@@ -2899,6 +2803,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.pageTurn = const Value.absent(),
     this.keepScreenOn = const Value.absent(),
     this.quranFont = const Value.absent(),
+    this.mushafStyle = const Value.absent(),
+    this.translation = const Value.absent(),
     this.mushafSize = const Value.absent(),
     this.quranArabicSize = const Value.absent(),
     this.quranTranslationSize = const Value.absent(),
@@ -2939,11 +2845,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? asrRecording,
     Expression<String>? maghribRecording,
     Expression<String>? ishaRecording,
-    Expression<String>? fajrAdhanLength,
-    Expression<String>? dhuhrAdhanLength,
-    Expression<String>? asrAdhanLength,
-    Expression<String>? maghribAdhanLength,
-    Expression<String>? ishaAdhanLength,
     Expression<String>? fajrTone,
     Expression<String>? dhuhrTone,
     Expression<String>? asrTone,
@@ -2958,6 +2859,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? morningOpenedOn,
     Expression<String>? eveningOpenedOn,
     Expression<bool>? azkarNudges,
+    Expression<bool>? azkarVoice,
     Expression<bool>? prayerCountdown,
     Expression<String>? calendarMode,
     Expression<bool>? topGlow,
@@ -2973,6 +2875,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? pageTurn,
     Expression<bool>? keepScreenOn,
     Expression<String>? quranFont,
+    Expression<String>? mushafStyle,
+    Expression<String>? translation,
     Expression<int>? mushafSize,
     Expression<int>? quranArabicSize,
     Expression<int>? quranTranslationSize,
@@ -3013,11 +2917,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (asrRecording != null) 'asr_recording': asrRecording,
       if (maghribRecording != null) 'maghrib_recording': maghribRecording,
       if (ishaRecording != null) 'isha_recording': ishaRecording,
-      if (fajrAdhanLength != null) 'fajr_adhan_length': fajrAdhanLength,
-      if (dhuhrAdhanLength != null) 'dhuhr_adhan_length': dhuhrAdhanLength,
-      if (asrAdhanLength != null) 'asr_adhan_length': asrAdhanLength,
-      if (maghribAdhanLength != null) 'maghrib_adhan_length': maghribAdhanLength,
-      if (ishaAdhanLength != null) 'isha_adhan_length': ishaAdhanLength,
       if (fajrTone != null) 'fajr_tone': fajrTone,
       if (dhuhrTone != null) 'dhuhr_tone': dhuhrTone,
       if (asrTone != null) 'asr_tone': asrTone,
@@ -3032,6 +2931,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (morningOpenedOn != null) 'morning_opened_on': morningOpenedOn,
       if (eveningOpenedOn != null) 'evening_opened_on': eveningOpenedOn,
       if (azkarNudges != null) 'azkar_nudges': azkarNudges,
+      if (azkarVoice != null) 'azkar_voice': azkarVoice,
       if (prayerCountdown != null) 'prayer_countdown': prayerCountdown,
       if (calendarMode != null) 'calendar_mode': calendarMode,
       if (topGlow != null) 'top_glow': topGlow,
@@ -3047,6 +2947,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (pageTurn != null) 'page_turn': pageTurn,
       if (keepScreenOn != null) 'keep_screen_on': keepScreenOn,
       if (quranFont != null) 'quran_font': quranFont,
+      if (mushafStyle != null) 'mushaf_style': mushafStyle,
+      if (translation != null) 'translation': translation,
       if (mushafSize != null) 'mushaf_size': mushafSize,
       if (quranArabicSize != null) 'quran_arabic_size': quranArabicSize,
       if (quranTranslationSize != null) 'quran_translation_size': quranTranslationSize,
@@ -3089,11 +2991,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<AdhanRecording>? asrRecording,
     Value<AdhanRecording>? maghribRecording,
     Value<AdhanRecording>? ishaRecording,
-    Value<AdhanLength>? fajrAdhanLength,
-    Value<AdhanLength>? dhuhrAdhanLength,
-    Value<AdhanLength>? asrAdhanLength,
-    Value<AdhanLength>? maghribAdhanLength,
-    Value<AdhanLength>? ishaAdhanLength,
     Value<PrayerTone>? fajrTone,
     Value<PrayerTone>? dhuhrTone,
     Value<PrayerTone>? asrTone,
@@ -3108,6 +3005,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<DateTime?>? morningOpenedOn,
     Value<DateTime?>? eveningOpenedOn,
     Value<bool>? azkarNudges,
+    Value<bool>? azkarVoice,
     Value<bool>? prayerCountdown,
     Value<CalendarMode>? calendarMode,
     Value<bool>? topGlow,
@@ -3123,6 +3021,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<PageTurn>? pageTurn,
     Value<bool>? keepScreenOn,
     Value<QuranFont>? quranFont,
+    Value<MushafStyle>? mushafStyle,
+    Value<Translation?>? translation,
     Value<int>? mushafSize,
     Value<int>? quranArabicSize,
     Value<int>? quranTranslationSize,
@@ -3163,11 +3063,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       asrRecording: asrRecording ?? this.asrRecording,
       maghribRecording: maghribRecording ?? this.maghribRecording,
       ishaRecording: ishaRecording ?? this.ishaRecording,
-      fajrAdhanLength: fajrAdhanLength ?? this.fajrAdhanLength,
-      dhuhrAdhanLength: dhuhrAdhanLength ?? this.dhuhrAdhanLength,
-      asrAdhanLength: asrAdhanLength ?? this.asrAdhanLength,
-      maghribAdhanLength: maghribAdhanLength ?? this.maghribAdhanLength,
-      ishaAdhanLength: ishaAdhanLength ?? this.ishaAdhanLength,
       fajrTone: fajrTone ?? this.fajrTone,
       dhuhrTone: dhuhrTone ?? this.dhuhrTone,
       asrTone: asrTone ?? this.asrTone,
@@ -3182,6 +3077,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       morningOpenedOn: morningOpenedOn ?? this.morningOpenedOn,
       eveningOpenedOn: eveningOpenedOn ?? this.eveningOpenedOn,
       azkarNudges: azkarNudges ?? this.azkarNudges,
+      azkarVoice: azkarVoice ?? this.azkarVoice,
       prayerCountdown: prayerCountdown ?? this.prayerCountdown,
       calendarMode: calendarMode ?? this.calendarMode,
       topGlow: topGlow ?? this.topGlow,
@@ -3197,6 +3093,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       pageTurn: pageTurn ?? this.pageTurn,
       keepScreenOn: keepScreenOn ?? this.keepScreenOn,
       quranFont: quranFont ?? this.quranFont,
+      mushafStyle: mushafStyle ?? this.mushafStyle,
+      translation: translation ?? this.translation,
       mushafSize: mushafSize ?? this.mushafSize,
       quranArabicSize: quranArabicSize ?? this.quranArabicSize,
       quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
@@ -3325,31 +3223,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
         $SettingsTable.$converterishaRecording.toSql(ishaRecording.value),
       );
     }
-    if (fajrAdhanLength.present) {
-      map['fajr_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterfajrAdhanLength.toSql(fajrAdhanLength.value),
-      );
-    }
-    if (dhuhrAdhanLength.present) {
-      map['dhuhr_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterdhuhrAdhanLength.toSql(dhuhrAdhanLength.value),
-      );
-    }
-    if (asrAdhanLength.present) {
-      map['asr_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterasrAdhanLength.toSql(asrAdhanLength.value),
-      );
-    }
-    if (maghribAdhanLength.present) {
-      map['maghrib_adhan_length'] = Variable<String>(
-        $SettingsTable.$convertermaghribAdhanLength.toSql(maghribAdhanLength.value),
-      );
-    }
-    if (ishaAdhanLength.present) {
-      map['isha_adhan_length'] = Variable<String>(
-        $SettingsTable.$converterishaAdhanLength.toSql(ishaAdhanLength.value),
-      );
-    }
     if (fajrTone.present) {
       map['fajr_tone'] = Variable<String>($SettingsTable.$converterfajrTone.toSql(fajrTone.value));
     }
@@ -3399,6 +3272,9 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     }
     if (azkarNudges.present) {
       map['azkar_nudges'] = Variable<bool>(azkarNudges.value);
+    }
+    if (azkarVoice.present) {
+      map['azkar_voice'] = Variable<bool>(azkarVoice.value);
     }
     if (prayerCountdown.present) {
       map['prayer_countdown'] = Variable<bool>(prayerCountdown.value);
@@ -3451,6 +3327,16 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (quranFont.present) {
       map['quran_font'] = Variable<String>(
         $SettingsTable.$converterquranFont.toSql(quranFont.value),
+      );
+    }
+    if (mushafStyle.present) {
+      map['mushaf_style'] = Variable<String>(
+        $SettingsTable.$convertermushafStyle.toSql(mushafStyle.value),
+      );
+    }
+    if (translation.present) {
+      map['translation'] = Variable<String>(
+        $SettingsTable.$convertertranslationn.toSql(translation.value),
       );
     }
     if (mushafSize.present) {
@@ -3515,11 +3401,6 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('asrRecording: $asrRecording, ')
           ..write('maghribRecording: $maghribRecording, ')
           ..write('ishaRecording: $ishaRecording, ')
-          ..write('fajrAdhanLength: $fajrAdhanLength, ')
-          ..write('dhuhrAdhanLength: $dhuhrAdhanLength, ')
-          ..write('asrAdhanLength: $asrAdhanLength, ')
-          ..write('maghribAdhanLength: $maghribAdhanLength, ')
-          ..write('ishaAdhanLength: $ishaAdhanLength, ')
           ..write('fajrTone: $fajrTone, ')
           ..write('dhuhrTone: $dhuhrTone, ')
           ..write('asrTone: $asrTone, ')
@@ -3534,6 +3415,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('morningOpenedOn: $morningOpenedOn, ')
           ..write('eveningOpenedOn: $eveningOpenedOn, ')
           ..write('azkarNudges: $azkarNudges, ')
+          ..write('azkarVoice: $azkarVoice, ')
           ..write('prayerCountdown: $prayerCountdown, ')
           ..write('calendarMode: $calendarMode, ')
           ..write('topGlow: $topGlow, ')
@@ -3549,6 +3431,8 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('pageTurn: $pageTurn, ')
           ..write('keepScreenOn: $keepScreenOn, ')
           ..write('quranFont: $quranFont, ')
+          ..write('mushafStyle: $mushafStyle, ')
+          ..write('translation: $translation, ')
           ..write('mushafSize: $mushafSize, ')
           ..write('quranArabicSize: $quranArabicSize, ')
           ..write('quranTranslationSize: $quranTranslationSize, ')
@@ -5752,11 +5636,6 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<AdhanRecording> asrRecording,
   Value<AdhanRecording> maghribRecording,
   Value<AdhanRecording> ishaRecording,
-  Value<AdhanLength> fajrAdhanLength,
-  Value<AdhanLength> dhuhrAdhanLength,
-  Value<AdhanLength> asrAdhanLength,
-  Value<AdhanLength> maghribAdhanLength,
-  Value<AdhanLength> ishaAdhanLength,
   Value<PrayerTone> fajrTone,
   Value<PrayerTone> dhuhrTone,
   Value<PrayerTone> asrTone,
@@ -5771,6 +5650,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> azkarVoice,
   Value<bool> prayerCountdown,
   Value<CalendarMode> calendarMode,
   Value<bool> topGlow,
@@ -5786,6 +5666,8 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<PageTurn> pageTurn,
   Value<bool> keepScreenOn,
   Value<QuranFont> quranFont,
+  Value<MushafStyle> mushafStyle,
+  Value<Translation?> translation,
   Value<int> mushafSize,
   Value<int> quranArabicSize,
   Value<int> quranTranslationSize,
@@ -5826,11 +5708,6 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<AdhanRecording> asrRecording,
   Value<AdhanRecording> maghribRecording,
   Value<AdhanRecording> ishaRecording,
-  Value<AdhanLength> fajrAdhanLength,
-  Value<AdhanLength> dhuhrAdhanLength,
-  Value<AdhanLength> asrAdhanLength,
-  Value<AdhanLength> maghribAdhanLength,
-  Value<AdhanLength> ishaAdhanLength,
   Value<PrayerTone> fajrTone,
   Value<PrayerTone> dhuhrTone,
   Value<PrayerTone> asrTone,
@@ -5845,6 +5722,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<DateTime?> morningOpenedOn,
   Value<DateTime?> eveningOpenedOn,
   Value<bool> azkarNudges,
+  Value<bool> azkarVoice,
   Value<bool> prayerCountdown,
   Value<CalendarMode> calendarMode,
   Value<bool> topGlow,
@@ -5860,6 +5738,8 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<PageTurn> pageTurn,
   Value<bool> keepScreenOn,
   Value<QuranFont> quranFont,
+  Value<MushafStyle> mushafStyle,
+  Value<Translation?> translation,
   Value<int> mushafSize,
   Value<int> quranArabicSize,
   Value<int> quranTranslationSize,
@@ -6015,36 +5895,6 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnWithTypeConverterFilters<AdhanLength, AdhanLength, String> get fajrAdhanLength =>
-      $composableBuilder(
-        column: $table.fajrAdhanLength,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<AdhanLength, AdhanLength, String> get dhuhrAdhanLength =>
-      $composableBuilder(
-        column: $table.dhuhrAdhanLength,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<AdhanLength, AdhanLength, String> get asrAdhanLength =>
-      $composableBuilder(
-        column: $table.asrAdhanLength,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<AdhanLength, AdhanLength, String> get maghribAdhanLength =>
-      $composableBuilder(
-        column: $table.maghribAdhanLength,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<AdhanLength, AdhanLength, String> get ishaAdhanLength =>
-      $composableBuilder(
-        column: $table.ishaAdhanLength,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
   ColumnWithTypeConverterFilters<PrayerTone, PrayerTone, String> get fajrTone => $composableBuilder(
     column: $table.fajrTone,
     builder: (column) => ColumnWithTypeConverterFilters(column),
@@ -6115,6 +5965,9 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
   ColumnFilters<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get azkarVoice =>
+      $composableBuilder(column: $table.azkarVoice, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<bool> get prayerCountdown => $composableBuilder(
     column: $table.prayerCountdown,
     builder: (column) => ColumnFilters(column),
@@ -6177,6 +6030,18 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
     column: $table.quranFont,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<MushafStyle, MushafStyle, String> get mushafStyle =>
+      $composableBuilder(
+        column: $table.mushafStyle,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<Translation?, Translation, String> get translation =>
+      $composableBuilder(
+        column: $table.translation,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<int> get mushafSize =>
       $composableBuilder(column: $table.mushafSize, builder: (column) => ColumnFilters(column));
@@ -6317,31 +6182,6 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get fajrAdhanLength => $composableBuilder(
-    column: $table.fajrAdhanLength,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get dhuhrAdhanLength => $composableBuilder(
-    column: $table.dhuhrAdhanLength,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get asrAdhanLength => $composableBuilder(
-    column: $table.asrAdhanLength,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get maghribAdhanLength => $composableBuilder(
-    column: $table.maghribAdhanLength,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get ishaAdhanLength => $composableBuilder(
-    column: $table.ishaAdhanLength,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get fajrTone =>
       $composableBuilder(column: $table.fajrTone, builder: (column) => ColumnOrderings(column));
 
@@ -6398,6 +6238,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get azkarVoice =>
+      $composableBuilder(column: $table.azkarVoice, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get prayerCountdown => $composableBuilder(
     column: $table.prayerCountdown,
     builder: (column) => ColumnOrderings(column),
@@ -6446,6 +6289,12 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
 
   ColumnOrderings<String> get quranFont =>
       $composableBuilder(column: $table.quranFont, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mushafStyle =>
+      $composableBuilder(column: $table.mushafStyle, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get translation =>
+      $composableBuilder(column: $table.translation, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get mushafSize =>
       $composableBuilder(column: $table.mushafSize, builder: (column) => ColumnOrderings(column));
@@ -6573,21 +6422,6 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumnWithTypeConverter<AdhanRecording, String> get ishaRecording =>
       $composableBuilder(column: $table.ishaRecording, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<AdhanLength, String> get fajrAdhanLength =>
-      $composableBuilder(column: $table.fajrAdhanLength, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<AdhanLength, String> get dhuhrAdhanLength =>
-      $composableBuilder(column: $table.dhuhrAdhanLength, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<AdhanLength, String> get asrAdhanLength =>
-      $composableBuilder(column: $table.asrAdhanLength, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<AdhanLength, String> get maghribAdhanLength =>
-      $composableBuilder(column: $table.maghribAdhanLength, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<AdhanLength, String> get ishaAdhanLength =>
-      $composableBuilder(column: $table.ishaAdhanLength, builder: (column) => column);
-
   GeneratedColumnWithTypeConverter<PrayerTone, String> get fajrTone =>
       $composableBuilder(column: $table.fajrTone, builder: (column) => column);
 
@@ -6629,6 +6463,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumn<bool> get azkarNudges =>
       $composableBuilder(column: $table.azkarNudges, builder: (column) => column);
+
+  GeneratedColumn<bool> get azkarVoice =>
+      $composableBuilder(column: $table.azkarVoice, builder: (column) => column);
 
   GeneratedColumn<bool> get prayerCountdown =>
       $composableBuilder(column: $table.prayerCountdown, builder: (column) => column);
@@ -6674,6 +6511,12 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
 
   GeneratedColumnWithTypeConverter<QuranFont, String> get quranFont =>
       $composableBuilder(column: $table.quranFont, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MushafStyle, String> get mushafStyle =>
+      $composableBuilder(column: $table.mushafStyle, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Translation?, String> get translation =>
+      $composableBuilder(column: $table.translation, builder: (column) => column);
 
   GeneratedColumn<int> get mushafSize =>
       $composableBuilder(column: $table.mushafSize, builder: (column) => column);
@@ -6756,11 +6599,6 @@ class $$SettingsTableTableManager
                 Value<AdhanRecording> asrRecording = const Value.absent(),
                 Value<AdhanRecording> maghribRecording = const Value.absent(),
                 Value<AdhanRecording> ishaRecording = const Value.absent(),
-                Value<AdhanLength> fajrAdhanLength = const Value.absent(),
-                Value<AdhanLength> dhuhrAdhanLength = const Value.absent(),
-                Value<AdhanLength> asrAdhanLength = const Value.absent(),
-                Value<AdhanLength> maghribAdhanLength = const Value.absent(),
-                Value<AdhanLength> ishaAdhanLength = const Value.absent(),
                 Value<PrayerTone> fajrTone = const Value.absent(),
                 Value<PrayerTone> dhuhrTone = const Value.absent(),
                 Value<PrayerTone> asrTone = const Value.absent(),
@@ -6775,6 +6613,7 @@ class $$SettingsTableTableManager
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> azkarVoice = const Value.absent(),
                 Value<bool> prayerCountdown = const Value.absent(),
                 Value<CalendarMode> calendarMode = const Value.absent(),
                 Value<bool> topGlow = const Value.absent(),
@@ -6790,6 +6629,8 @@ class $$SettingsTableTableManager
                 Value<PageTurn> pageTurn = const Value.absent(),
                 Value<bool> keepScreenOn = const Value.absent(),
                 Value<QuranFont> quranFont = const Value.absent(),
+                Value<MushafStyle> mushafStyle = const Value.absent(),
+                Value<Translation?> translation = const Value.absent(),
                 Value<int> mushafSize = const Value.absent(),
                 Value<int> quranArabicSize = const Value.absent(),
                 Value<int> quranTranslationSize = const Value.absent(),
@@ -6829,11 +6670,6 @@ class $$SettingsTableTableManager
                 asrRecording: asrRecording,
                 maghribRecording: maghribRecording,
                 ishaRecording: ishaRecording,
-                fajrAdhanLength: fajrAdhanLength,
-                dhuhrAdhanLength: dhuhrAdhanLength,
-                asrAdhanLength: asrAdhanLength,
-                maghribAdhanLength: maghribAdhanLength,
-                ishaAdhanLength: ishaAdhanLength,
                 fajrTone: fajrTone,
                 dhuhrTone: dhuhrTone,
                 asrTone: asrTone,
@@ -6848,6 +6684,7 @@ class $$SettingsTableTableManager
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                azkarVoice: azkarVoice,
                 prayerCountdown: prayerCountdown,
                 calendarMode: calendarMode,
                 topGlow: topGlow,
@@ -6863,6 +6700,8 @@ class $$SettingsTableTableManager
                 pageTurn: pageTurn,
                 keepScreenOn: keepScreenOn,
                 quranFont: quranFont,
+                mushafStyle: mushafStyle,
+                translation: translation,
                 mushafSize: mushafSize,
                 quranArabicSize: quranArabicSize,
                 quranTranslationSize: quranTranslationSize,
@@ -6904,11 +6743,6 @@ class $$SettingsTableTableManager
                 Value<AdhanRecording> asrRecording = const Value.absent(),
                 Value<AdhanRecording> maghribRecording = const Value.absent(),
                 Value<AdhanRecording> ishaRecording = const Value.absent(),
-                Value<AdhanLength> fajrAdhanLength = const Value.absent(),
-                Value<AdhanLength> dhuhrAdhanLength = const Value.absent(),
-                Value<AdhanLength> asrAdhanLength = const Value.absent(),
-                Value<AdhanLength> maghribAdhanLength = const Value.absent(),
-                Value<AdhanLength> ishaAdhanLength = const Value.absent(),
                 Value<PrayerTone> fajrTone = const Value.absent(),
                 Value<PrayerTone> dhuhrTone = const Value.absent(),
                 Value<PrayerTone> asrTone = const Value.absent(),
@@ -6923,6 +6757,7 @@ class $$SettingsTableTableManager
                 Value<DateTime?> morningOpenedOn = const Value.absent(),
                 Value<DateTime?> eveningOpenedOn = const Value.absent(),
                 Value<bool> azkarNudges = const Value.absent(),
+                Value<bool> azkarVoice = const Value.absent(),
                 Value<bool> prayerCountdown = const Value.absent(),
                 Value<CalendarMode> calendarMode = const Value.absent(),
                 Value<bool> topGlow = const Value.absent(),
@@ -6938,6 +6773,8 @@ class $$SettingsTableTableManager
                 Value<PageTurn> pageTurn = const Value.absent(),
                 Value<bool> keepScreenOn = const Value.absent(),
                 Value<QuranFont> quranFont = const Value.absent(),
+                Value<MushafStyle> mushafStyle = const Value.absent(),
+                Value<Translation?> translation = const Value.absent(),
                 Value<int> mushafSize = const Value.absent(),
                 Value<int> quranArabicSize = const Value.absent(),
                 Value<int> quranTranslationSize = const Value.absent(),
@@ -6977,11 +6814,6 @@ class $$SettingsTableTableManager
                 asrRecording: asrRecording,
                 maghribRecording: maghribRecording,
                 ishaRecording: ishaRecording,
-                fajrAdhanLength: fajrAdhanLength,
-                dhuhrAdhanLength: dhuhrAdhanLength,
-                asrAdhanLength: asrAdhanLength,
-                maghribAdhanLength: maghribAdhanLength,
-                ishaAdhanLength: ishaAdhanLength,
                 fajrTone: fajrTone,
                 dhuhrTone: dhuhrTone,
                 asrTone: asrTone,
@@ -6996,6 +6828,7 @@ class $$SettingsTableTableManager
                 morningOpenedOn: morningOpenedOn,
                 eveningOpenedOn: eveningOpenedOn,
                 azkarNudges: azkarNudges,
+                azkarVoice: azkarVoice,
                 prayerCountdown: prayerCountdown,
                 calendarMode: calendarMode,
                 topGlow: topGlow,
@@ -7011,6 +6844,8 @@ class $$SettingsTableTableManager
                 pageTurn: pageTurn,
                 keepScreenOn: keepScreenOn,
                 quranFont: quranFont,
+                mushafStyle: mushafStyle,
+                translation: translation,
                 mushafSize: mushafSize,
                 quranArabicSize: quranArabicSize,
                 quranTranslationSize: quranTranslationSize,

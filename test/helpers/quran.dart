@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:better_muslim/core/app/app.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -134,4 +137,24 @@ Future<void> pumpReciting(
   await tester.pump();
   containerOf(tester).read(routerProvider).push(Routes.quranPage(page));
   await tester.pumpAndSettle();
+}
+
+/// the QCF fonts tool/quran/build_quran.dart downloads, missing until it has run once
+String qcfFonts(String version) => 'tool/quran/.cache/qcf_$version';
+
+/// a style's file with only these pages in it
+List<int> packStyle(String version, Set<int> pages) {
+  final fonts = [
+    for (var n = 1; n <= quranPageCount; n++)
+      gzip.encode(
+        pages.contains(n) ? File('${qcfFonts(version)}/p$n.ttf').readAsBytesSync() : const <int>[],
+      ),
+  ];
+  final offsets = ByteData(4 * (quranPageCount + 1));
+  var offset = offsets.lengthInBytes;
+  for (var n = 0; n <= quranPageCount; n++) {
+    offsets.setUint32(4 * n, offset, Endian.little);
+    if (n < quranPageCount) offset += fonts[n].length;
+  }
+  return [...offsets.buffer.asUint8List(), for (final font in fonts) ...font];
 }

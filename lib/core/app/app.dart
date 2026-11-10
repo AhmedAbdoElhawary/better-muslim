@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/app/launch.dart';
 import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/location/location_controller.dart';
@@ -28,10 +29,10 @@ class _AppState extends ConsumerState<App> {
   void initState() {
     super.initState();
 
-    /// after the first frame, so the saved location's times show before any gps work (FR-007)
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ref.read(locationControllerProvider).refresh(),
-    );
+    /// after the cold open, so the saved location's times show before any gps work (FR-007)
+    ref.read(launchSettledProvider).then((_) {
+      if (mounted) ref.read(locationControllerProvider).refresh();
+    });
     ref.listenManual(
       settingsProvider.select(
         (settings) => (haptics: settings.value?.haptics, uiSounds: settings.value?.uiSounds),

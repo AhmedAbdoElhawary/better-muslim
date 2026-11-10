@@ -18,6 +18,7 @@ class PickerRow extends StatelessWidget {
     this.args = const {},
     this.subtitle,
     this.value,
+    this.trailing,
     this.font = FontEnum.body,
     super.key,
   });
@@ -28,6 +29,9 @@ class PickerRow extends StatelessWidget {
   final String? subtitle;
   final String? value;
 
+  /// in place of the value, like a download's size or progress
+  final Widget? trailing;
+
   /// a font row writes its name in itself
   final FontEnum font;
   final bool selected;
@@ -37,6 +41,7 @@ class PickerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final subtitle = this.subtitle;
     final value = this.value;
+    final trailing = this.trailing;
     return Semantics(
       button: true,
       selected: selected,
@@ -75,15 +80,18 @@ class PickerRow extends StatelessWidget {
                   const RSizedBox.horizontal(SpaceManager.s2),
                   RegularText(value, fontSize: FontSizeManager.rowValue, color: ThemeEnum.text2),
                 ],
-                const RSizedBox.horizontal(SpaceManager.s3),
-                RSizedBox.square(
-                  dimension: SizeManager.pickerCheck,
-                  child: AnimatedOpacity(
-                    opacity: selected ? 1 : 0,
-                    duration: BmMotion.micro,
-                    child: const _Check(),
+                if (trailing != null) ...[const RSizedBox.horizontal(SpaceManager.s2), trailing],
+                if (selected) ...[
+                  const RSizedBox.horizontal(SpaceManager.s3),
+                  RSizedBox.square(
+                    dimension: SizeManager.pickerCheck,
+                    child: AnimatedOpacity(
+                      opacity: selected ? 1 : 0,
+                      duration: BmMotion.micro,
+                      child: const _Check(),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

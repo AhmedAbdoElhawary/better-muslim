@@ -170,6 +170,13 @@ void main() {
             [for (final cell in strip) cell.logged],
             reason: reason,
           );
+          final lit = strip.indexWhere((cell) => cell.current);
+          expect(entry['next'], lit < 0 ? null : lit, reason: reason);
+          expect(
+            [for (final cell in stripOf(entry)) cell['past']],
+            [for (final cell in strip) cell.past],
+            reason: reason,
+          );
 
           final today = home.read(todayProvider);
           final todayTimes = home.read(todayTimesProvider)!;
@@ -316,6 +323,20 @@ void main() {
       expect(entry['next'], 3);
       expect([for (final cell in stripOf(entry)) cell['past']], [true, true, true, false, false]);
     });
+
+    test('in asr\'s now window asr stays highlighted, and an entry starts at its end', () {
+      final now = at(makkah, 10, 15, 15, 40);
+      final data = build(makkah, now);
+      final entry = inForce(data, now.millisecondsSinceEpoch);
+      expect(entry['prayer'], 'maghrib');
+      expect(entry['next'], 2);
+      expect([for (final cell in stripOf(entry)) cell['past']], [true, true, false, false, false]);
+
+      final asr = timesOn(makkah, DateTime(2026, 10, 15)).asr!;
+      final end = asr.add(DayTimes.nowWindow).millisecondsSinceEpoch;
+      expect([for (final entry in entriesOf(data)) entry['from']], contains(end));
+      expect(inForce(data, end)['next'], 3);
+    });
   });
 
   group('the texts', () {
@@ -341,7 +362,6 @@ void main() {
         'nextCityShort': 'Next · Makkah',
         'liveNext': 'Next prayer · Makkah',
         'methodLine': 'Makkah · Umm al-Qura',
-        'channel': 'Prayer countdown',
       });
       expect(entry['name'], 'Maghrib');
       expect(entry['time'], '17:56');
@@ -473,7 +493,11 @@ void main() {
     });
 
     test('follow sky is light from sunrise until maghrib, each entry on its own', () {
-      final data = build(makkah, now);
+      final data = build(
+        makkah,
+        now,
+        settings: defaults.copyWith(themeMode: BmThemeMode.followSky),
+      );
       expect(data['mode'], 'followSky');
       final today = timesOn(makkah, DateTime(2026, 10, 15));
       final tomorrow = timesOn(makkah, DateTime(2026, 10, 16));
@@ -483,6 +507,12 @@ void main() {
       expect(lightAt(tomorrow.fajr!), false);
       expect(lightAt(tomorrow.sunrise!), true);
       expect(lightAt(tomorrow.maghrib!.subtract(const Duration(minutes: 1))), true);
+    });
+
+    test('follow phone fixes no entry, the widget asks the phone', () {
+      final data = build(makkah, now);
+      expect(data['mode'], 'followPhone');
+      expect(entriesOf(data).map((entry) => entry['light']).toSet(), {null});
     });
 
     test('dark and light hold all day', () {
@@ -526,7 +556,6 @@ void main() {
       'nextCityShort',
       'liveNext',
       'methodLine',
-      'channel',
     ];
     const entry = [
       'from',

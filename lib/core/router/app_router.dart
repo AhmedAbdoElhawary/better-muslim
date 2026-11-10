@@ -32,6 +32,7 @@ import 'package:better_muslim/features/onboarding/view/welcome_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/dev_tajweed_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/downloads_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
@@ -94,10 +95,12 @@ abstract final class Routes {
 
   static const String quranSaved = '$quran/saved';
   static const String quranSearch = '$quran/search';
+  static const String quranSearchFromReader = '$quranSearch?from=reader';
   static const String quranNotes = '$quranSaved?tab=notes';
 
   /// dev builds only
   static const String devNotifications = '/dev/notifications';
+  static const String devTajweed = '/dev/tajweed';
 
   /// the first launch, each step pushed on the one before so back goes to it (FR-018)
   static const String onboarding = '/onboarding';
@@ -276,7 +279,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: 'quran_search',
         path: Routes.quranSearch,
-        pageBuilder: (context, state) => _page(state, const SearchPage()),
+        pageBuilder: (context, state) =>
+            _page(state, SearchPage(fromReader: state.uri.queryParameters['from'] == 'reader')),
       ),
       GoRoute(
         name: 'theme',
@@ -310,6 +314,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           name: 'dev_notifications',
           path: Routes.devNotifications,
           pageBuilder: (context, state) => _page(state, const DevNotificationsPage()),
+        ),
+      if (ref.read(flavorProvider).flavor.isDev)
+        GoRoute(
+          name: 'dev_tajweed',
+          path: Routes.devTajweed,
+          pageBuilder: (context, state) => _page(state, const DevTajweedPage()),
         ),
 
       /// the first route on a new install, so it has no transition of its own. its scope gives the

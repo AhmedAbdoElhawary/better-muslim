@@ -13,25 +13,21 @@ import 'package:just_audio/just_audio.dart';
 /// the recitation on its own player, in the background and on the lock screen (research R10, R11).
 /// the playlist grows as the files come in, so repeats and ayah changes stay gapless
 class AudioServiceRecitation implements Recitation {
-  AudioServiceRecitation._(this._files);
-
-  /// once, from the app's own run, never a background engine
-  static Future<AudioServiceRecitation> init(
-    RecitationFiles files, {
-    required String channel,
-  }) async {
-    final recitation = AudioServiceRecitation._(files);
-    recitation._handler = await AudioService.init(
-      builder: () => _Handler(recitation),
-      config: AudioServiceConfig(
-        androidNotificationChannelId: 'com.elhawary.bettermuslim.recitation',
-        androidNotificationChannelName: channel,
-        androidNotificationIcon: 'drawable/ic_notification',
-      ),
-    );
-    recitation._listen();
-    return recitation;
+  AudioServiceRecitation(this._files) {
+    _handler = _Handler(this);
+    _listen();
   }
+
+  /// once, from the app's own run, never a background engine. after the cold open's first frame,
+  /// the handler keeps what was published before and hands it over
+  Future<void> start({required String channel}) => AudioService.init(
+    builder: () => _handler,
+    config: AudioServiceConfig(
+      androidNotificationChannelId: 'com.elhawary.bettermuslim.recitation',
+      androidNotificationChannelName: channel,
+      androidNotificationIcon: 'drawable/ic_notification',
+    ),
+  );
 
   final RecitationFiles _files;
   final _player = AudioPlayer();

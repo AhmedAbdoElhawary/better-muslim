@@ -3,19 +3,22 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:timezone/timezone.dart';
 
-/// duha has no prayer, so no cell is current then
+/// matched by time, so after isha's now window tomorrow's fajr lights no cell and the whole day
+/// is past
 ({bool current, bool logged, bool past}) stripCellState(
   Prayer prayer,
-  Period? period,
+  TZDateTime? time,
+  (Prayer, TZDateTime)? highlighted,
   Set<Prayer> prayed,
-) {
-  final own = Period.values.byName(prayer.name);
-  return (
-    current: own == period,
-    logged: prayed.contains(prayer),
-    past: period != null && own.index < period.index,
-  );
-}
+) => (
+  current:
+      time != null &&
+      highlighted != null &&
+      highlighted.$1 == prayer &&
+      highlighted.$2.isAtSameMomentAs(time),
+  logged: prayed.contains(prayer),
+  past: time != null && highlighted != null && time.isBefore(highlighted.$2),
+);
 
 /// 0 at the arc's start, 1 at its end. rounded, so the marker moves about every 40 s instead of
 /// every second

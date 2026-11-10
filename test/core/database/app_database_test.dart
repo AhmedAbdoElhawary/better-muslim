@@ -30,7 +30,7 @@ void main() {
     expect(settings.hijriAdjust, 0);
     expect(settings.digits, Digits.eastern);
     expect(settings.theme, BmThemeId.moonlight);
-    expect(settings.themeMode, BmThemeMode.followSky);
+    expect(settings.themeMode, BmThemeMode.followPhone);
     expect(settings.reduceMotion, isFalse);
     expect(settings.haptics, isTrue);
     expect(settings.uiSounds, isFalse);

@@ -285,9 +285,12 @@ abstract final class SpaceManager {
   static const double ayahWashV = 5;
   static const double ayahWashH = 2;
   static const double ayahMarkerGap = 2;
-  static const double ayahRibbonGap = 6;
   static const double cartoucheNameTop = 3;
   static const double mushafNumberTop = 2;
+
+  /// the tajweed key's gap from the page number, and from each color to its name
+  static const double tajweedKeyGap = 6;
+  static const double tajweedDotGap = 3;
 
   static const double mushafTextInset = 10;
   static const double foreEdgeStripe = 2.5;
@@ -296,9 +299,6 @@ abstract final class SpaceManager {
   static const double ayahLift = 24;
   static const double ribbonLeft = 44;
 
-  /// the page as a card under the controls (4.21), the next page peeks this far from it
-  static const double pageCardLift = 24;
-  static const double pagePeekGap = 14;
   static const double dockTop = 16;
   static const double dockSide = 22;
   static const double dockButtonsTop = 4;
@@ -497,6 +497,10 @@ abstract final class SizeManager {
   static const double arcStarSpread = 5;
   static const double stripMarkSlot = 12;
   static const double stripDot = 5;
+
+  /// the next prayer's outline on the strip, the prayer rows and the theme preview
+  static const double nextRing = 1.5;
+  static const double cursorHeight = 20;
   static const double shortcutIconBox = 40;
   static const double searchField = 46;
   static const double grabberW = 32;
@@ -670,6 +674,8 @@ abstract final class SizeManager {
   static const double mushafFrameStroke = 1.1;
   static const double mushafFrameInnerStroke = .6;
   static const double mushafNumber = 36;
+  static const double tajweedDot = 7;
+  static const double tajweedKeyRow = 16;
   static const double openingArchW = 319;
   static const double openingArchH = 612;
   static const double cartoucheW = 263;
@@ -686,9 +692,8 @@ abstract final class SizeManager {
   static const double ribbonShadowY = 2;
   static const double ribbonShadowBlur = 6;
 
-  /// a bookmarked ayah's ribbon in the line, between its last word and its marker
-  static const double ayahRibbonW = 7;
-  static const double ayahRibbonH = 14;
+  /// a bookmarked ayah's number filled behind its digit, the digit keeps its ink
+  static const double bookmarkedNumber = .4;
 
   /// K.STAR's stroke on the page number and the surah rows, the arch's two lines, the marker's
   static const double starStroke = .9;
@@ -713,10 +718,6 @@ abstract final class SizeManager {
   static const double scrubberThumb = 22;
   static const double scrubberThumbShadow = 4;
   static const double scrubberThumbShadowY = 1;
-  static const double pageCardScale = .84;
-
-  /// a tap on this share of the page's left side turns to the next page
-  static const double turnEdge = .12;
   static const double pageCardShadowBlur = 60;
   static const double pageCardShadowY = 30;
   static const double pageCardShadowSpread = -24;
@@ -731,6 +732,7 @@ abstract final class SizeManager {
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
   static const double sheetMax = 740;
+  static const double sheetMax2 = 550;
   static const double ayahSheet = 500;
   static const double studySheet = 500;
   static const double studySheetFull = 720;

@@ -79,7 +79,10 @@ class MorePage extends ConsumerWidget {
                     const RSizedBox.vertical(SpaceManager.sectionGap),
                     const ContactSection(),
                     const AboutSection(),
-                    if (isDev) const _DevRow(),
+                    if (isDev) ...const [
+                      _DevRow('Notifications (dev)', Routes.devNotifications),
+                      _DevRow('Tajweed (dev)', Routes.devTajweed),
+                    ],
                   ],
                 ),
               ),
@@ -207,7 +210,7 @@ class _AppearanceSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeIdProvider);
     final mode = ref.watch(
-      settingsProvider.select((settings) => settings.value?.themeMode ?? BmThemeMode.followSky),
+      settingsProvider.select((settings) => settings.value?.themeMode ?? BmThemeMode.followPhone),
     );
     final reduceMotion = ref.watch(
       settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
@@ -314,9 +317,10 @@ class _SoundSection extends ConsumerWidget {
 
 /// dev builds only, below everything else (FR-004)
 class _DevRow extends StatelessWidget {
-  const _DevRow();
+  const _DevRow(this.label, this.route);
 
-  static const _label = 'Notifications (dev)';
+  final String label;
+  final String route;
 
   @override
   Widget build(BuildContext context) {
@@ -324,15 +328,15 @@ class _DevRow extends StatelessWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.push(Routes.devNotifications),
+        onTap: () => context.push(route),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: SizeManager.listRow.r),
-          child: const HorizontalPadding(
+          child: HorizontalPadding(
             padding: SpaceManager.s4,
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: RegularText(
-                _label,
+                label,
                 translate: false,
                 fontSize: FontSizeManager.body,
                 color: ThemeEnum.accent,

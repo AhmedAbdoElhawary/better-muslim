@@ -15,13 +15,15 @@ void main() {
       .widget<PickerRow>(find.ancestor(of: find.text(title), matching: find.byType(PickerRow)))
       .selected;
 
-  testWidgets('three rows with follow sky picked, a pick saves and closes', (tester) async {
+  testWidgets('four rows with follow phone picked, a pick saves and closes', (tester) async {
     await pumpMore(tester, await designOverrides());
     await tapText(tester, 'Light and dark');
 
-    expect(find.byType(PickerRow), findsNWidgets(3));
+    expect(find.byType(PickerRow), findsNWidgets(4));
     expect(picked(tester, 'Dark'), isFalse);
     expect(picked(tester, 'Light'), isFalse);
+    expect(picked(tester, 'Follow sky'), isFalse);
+    expect(picked(tester, 'Follow phone'), isTrue);
     expect(
       find.text('Follow sky switches to light after sunrise and back to dark at Maghrib.'),
       findsOneWidget,
@@ -39,7 +41,8 @@ void main() {
   testWidgets('arabic', (tester) async {
     await pumpMore(tester, await designOverrides(), locale: const Locale('ar'));
     await tapText(tester, 'الفاتح والداكن');
-    expect(find.byType(PickerRow), findsNWidgets(3));
+    expect(find.byType(PickerRow), findsNWidgets(4));
+    expect(picked(tester, 'اتبع الهاتف'), isTrue);
     await unmount(tester);
   });
 }

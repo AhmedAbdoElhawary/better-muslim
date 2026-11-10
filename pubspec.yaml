@@ -104,7 +104,9 @@ flutter:
     - assets/duas/
     - assets/quran/
     - assets/quran/pages/
+    - assets/quran/pages_v1/
     - assets/quran/surahs/
+    - assets/quran/translations/
     - assets/audio/
     - shorebird.yaml
 

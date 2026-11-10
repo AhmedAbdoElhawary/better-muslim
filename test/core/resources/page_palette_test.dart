@@ -15,6 +15,7 @@ void main() {
   const unders = [ThemeEnum.page, ThemeEnum.surface, ThemeEnum.bg];
 
   for (final (name, palette) in [
+    ('white', BmPagePalette.white),
     ('paper', BmPagePalette.paper),
     ('cream', BmPagePalette.cream),
     ('sepia', BmPagePalette.sepia),
@@ -72,6 +73,7 @@ void main() {
   for (final id in BmThemeId.values) {
     test('${id.name} keeps the ayah ink AA on the highlight wash in every page palette', () {
       for (final (name, base) in [
+        ('white', BmPagePalette.white),
         ('paper', BmPagePalette.paper),
         ('cream', BmPagePalette.cream),
         ('sepia', BmPagePalette.sepia),

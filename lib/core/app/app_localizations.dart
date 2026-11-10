@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:better_muslim/core/settings/settings.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -44,6 +45,16 @@ class AppLocalizations {
 
   static AppLocalizations of(BuildContext context) =>
       Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+
+  static final _preloaded = <String, AppLocalizations>{};
+
+  /// both, while the store opens. a strings file in hand lets Localizations build the first frame
+  /// at once instead of holding it for an asset read
+  static Future<void> preload() async {
+    for (final strings in await Future.wait(supportedLocales.map(load))) {
+      _preloaded[strings._languageCode] = strings;
+    }
+  }
 
   /// also without a context, notifications are built in the background
   static Future<AppLocalizations> load(Locale locale) async {
@@ -96,7 +107,11 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   );
 
   @override
-  Future<AppLocalizations> load(Locale locale) => AppLocalizations.load(locale);
+  Future<AppLocalizations> load(Locale locale) =>
+      switch (AppLocalizations._preloaded.remove(locale.languageCode)) {
+        final strings? => SynchronousFuture(strings),
+        null => AppLocalizations.load(locale),
+      };
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

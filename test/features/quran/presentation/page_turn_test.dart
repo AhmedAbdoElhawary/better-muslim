@@ -78,14 +78,33 @@ void main() {
     expect(page.value, 6);
   });
 
-  testWidgets('a tap on the left edge opens the next page, elsewhere it does not', (tester) async {
-    final page = await pumpTurner(tester, start: 5);
+  testWidgets('the left strip opens the next page, the right one the previous, not between', (
+    tester,
+  ) async {
+    for (final book in [true, false]) {
+      final page = await pumpTurner(tester, start: 5, book: book);
+      await tester.tapAt(const Offset(20, 400));
+      await tester.pumpAndSettle();
+      expect(page.value, 6);
+      await tester.tapAt(const Offset(373, 400));
+      await tester.pumpAndSettle();
+      expect(page.value, 5);
+      await tester.tapAt(const Offset(60, 400));
+      await tester.pumpAndSettle();
+      expect(page.value, 5, reason: 'past the 44 pt strip');
+    }
+  });
+
+  testWidgets('the strips stay on the first and the last page', (tester) async {
+    final first = await pumpTurner(tester);
+    await tester.tapAt(const Offset(373, 400));
+    await tester.pumpAndSettle();
+    expect(first.value, 1);
+
+    final last = await pumpTurner(tester, start: quranPageCount);
     await tester.tapAt(const Offset(20, 400));
     await tester.pumpAndSettle();
-    expect(page.value, 6);
-    await tester.tapAt(const Offset(200, 400));
-    await tester.pumpAndSettle();
-    expect(page.value, 6);
+    expect(last.value, quranPageCount);
   });
 
   testWidgets('the first and the last page rubber band and stay', (tester) async {

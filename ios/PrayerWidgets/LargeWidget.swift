@@ -3,6 +3,7 @@ import WidgetKit
 
 /// 5.6 large: the day at a glance, with what was prayed
 struct LargeWidget: View {
+  @Environment(\.colorScheme) private var scheme
   let entry: SurfaceEntry
 
   var body: some View {
@@ -10,8 +11,8 @@ struct LargeWidget: View {
     case .ready(let data, let item):
       LargeContent(data: data, entry: item, date: entry.date)
         .widgetURL(SurfaceLinks.home)
-        .widgetBackground(data.palette(item).largeSky)
-        .environment(\.palette, data.palette(item))
+        .widgetBackground(data.palette(item, scheme).largeSky)
+        .environment(\.palette, data.palette(item, scheme))
     default:
       MessageView(entry: entry)
     }

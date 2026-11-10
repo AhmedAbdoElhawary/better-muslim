@@ -18,6 +18,9 @@ import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/step_button.dart';
+import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_style_sheet.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/translation_sheet.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +30,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 Future<void> showDisplaySheet(BuildContext context) => showBmSheet(
   context,
   applyBlur: false,
+  maxSheetHeight: SizeManager.sheetMax2,
   title: const SheetTitle(StringsManager.display, subtitle: StringsManager.appliesToEveryPage),
   builder: (_) => const _DisplaySheet(),
 );
@@ -43,7 +47,7 @@ class _DisplaySheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final db = ref.watch(databaseProvider);
-    final (color, font, layout, turn, keepOn) = ref.watch(
+    final (color, font, layout, turn, keepOn, style) = ref.watch(
       settingsProvider.select((settings) {
         final value = settings.value;
         return (
@@ -52,10 +56,10 @@ class _DisplaySheet extends ConsumerWidget {
           value?.quranLayout ?? QuranLayout.mushaf,
           value?.pageTurn ?? PageTurn.book,
           value?.keepScreenOn ?? false,
+          value?.mushafStyle ?? MushafStyle.text,
         );
       }),
     );
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
@@ -115,53 +119,57 @@ class _DisplaySheet extends ConsumerWidget {
                   ),
                 ),
               ),
-              const OnlyPadding(
-                top: SpaceManager.displayRowsTop,
-                start: SpaceManager.s4,
-                end: SpaceManager.s4,
-                child: RegularText(
-                  StringsManager.fontSection,
-                  fontSize: FontSizeManager.sectionLabel,
-                  letterSpacing: LetterSpacingManager.sectionLabel,
-                  color: ThemeEnum.text3,
+
+              /// a qcf style draws its own glyphs, the font has nothing to change on the page
+              if (style == MushafStyle.text) ...[
+                const OnlyPadding(
+                  top: SpaceManager.displayRowsTop,
+                  start: SpaceManager.s4,
+                  end: SpaceManager.s4,
+                  child: RegularText(
+                    StringsManager.fontSection,
+                    fontSize: FontSizeManager.sectionLabel,
+                    letterSpacing: LetterSpacingManager.sectionLabel,
+                    color: ThemeEnum.text3,
+                  ),
                 ),
-              ),
-              OnlyPadding(
-                top: SpaceManager.displaySwatchesTop,
-                start: SpaceManager.s4,
-                end: SpaceManager.s4,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final (i, choice) in QuranFont.values.indexed) ...[
-                      if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
-                      Expanded(
-                        child: _Swatch(
-                          label: choice.label,
-                          selected: choice == font,
-                          onTap: () =>
-                              db.updateSettings(SettingsCompanion(quranFont: Value(choice))),
-                          child: ColoredBox(
-                            color: context.getColor(ThemeEnum.variant),
-                            child: RSizedBox(
-                              height: SizeManager.displayFontSwatch,
-                              child: Center(
-                                child: RegularText(
-                                  _sample,
-                                  translate: false,
-                                  font: choice.font,
-                                  fontSize: FontSizeManager.fontSample,
-                                  maxLines: 1,
+                OnlyPadding(
+                  top: SpaceManager.displaySwatchesTop,
+                  start: SpaceManager.s4,
+                  end: SpaceManager.s4,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final (i, choice) in QuranFont.values.indexed) ...[
+                        if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
+                        Expanded(
+                          child: _Swatch(
+                            label: choice.label,
+                            selected: choice == font,
+                            onTap: () =>
+                                db.updateSettings(SettingsCompanion(quranFont: Value(choice))),
+                            child: ColoredBox(
+                              color: context.getColor(ThemeEnum.variant),
+                              child: RSizedBox(
+                                height: SizeManager.displayFontSwatch,
+                                child: Center(
+                                  child: RegularText(
+                                    _sample,
+                                    translate: false,
+                                    font: choice.font,
+                                    fontSize: FontSizeManager.fontSample,
+                                    maxLines: 1,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
+              ],
               OnlyPadding(
                 top: SpaceManager.displayRowsTop,
                 start: SpaceManager.s4,
@@ -216,14 +224,16 @@ class _DisplaySheet extends ConsumerWidget {
                       onTap: () =>
                           db.updateSettings(SettingsCompanion(keepScreenOn: Value(!keepOn))),
                     ),
-                    const NavRow(title: StringsManager.mushaf, value: StringsManager.madinahHafs),
+                    NavRow(
+                      title: StringsManager.mushaf,
+                      value: style.label,
+                      onTap: () => showMushafStyleSheet(context),
+                    ),
 
-                    /// in arabic the translation slot is al-muyassar (FR-020)
                     NavRow(
                       title: StringsManager.translation,
-                      value: isArabic
-                          ? StringsManager.alMuyassar
-                          : StringsManager.sahihInternational,
+                      value: shownTranslation(context, ref).label,
+                      onTap: () => showTranslationSheet(context),
                     ),
                   ],
                 ),
@@ -238,6 +248,7 @@ class _DisplaySheet extends ConsumerWidget {
 
 /// the design's order, follow sky last
 const _pageColors = [
+  PageColor.white,
   PageColor.paper,
   PageColor.cream,
   PageColor.sepia,

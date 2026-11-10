@@ -19,14 +19,14 @@ Future<void> showModeSheet(BuildContext context) => showBmSheet(
   builder: (_) => const _ModeSheet(),
 );
 
-/// dark, light or follow sky, applied the moment it's picked (FR-016)
+/// dark, light, follow sky or follow phone, applied the moment it's picked (FR-016)
 class _ModeSheet extends ConsumerWidget {
   const _ModeSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final saved = ref.watch(
-      settingsProvider.select((settings) => settings.value?.themeMode ?? BmThemeMode.followSky),
+      settingsProvider.select((settings) => settings.value?.themeMode ?? BmThemeMode.followPhone),
     );
     return SingleChildScrollView(
       child: SafeArea(

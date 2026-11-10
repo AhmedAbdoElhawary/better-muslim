@@ -33,6 +33,7 @@ void main() {
         final pages = [
           palette,
           for (final base in [
+            BmPagePalette.white,
             BmPagePalette.paper,
             BmPagePalette.cream,
             BmPagePalette.sepia,

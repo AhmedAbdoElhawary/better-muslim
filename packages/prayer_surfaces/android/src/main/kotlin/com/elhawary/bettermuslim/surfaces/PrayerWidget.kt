@@ -7,6 +7,8 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -67,50 +69,61 @@ open class PrayerWidget : AppWidgetProvider() {
             val data = SurfaceData.load(context)
             val state = SurfaceState.of(data, now)
             val kinds = placed(context).toMap()
+            val light = data?.light((state as? SurfaceState.Ready)?.entry)
+
+            // the phone picks: from android 12 a light and a dark picture, the launcher shows the one
+            // the phone is in. before, the phone's mode now until the next redraw
+            val dark = data?.takeIf { light == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }?.palette(false)
             for (id in ids) {
                 val kind = kinds[id]?.kind ?: continue
-                manager.updateAppWidget(id, sized(context, painter(context, manager, id, kind, data, state), state, now))
+                val day = painter(context, manager, id, kind, palette(context, data, if (dark != null) true else light))
+                val night = dark?.let { painter(context, manager, id, kind, it) }
+                manager.updateAppWidget(id, sized(context, day, night, state, now))
             }
-            if (drawn(state) != prefs(context).getLong(DRAWN, -1)) preview(context, manager, data, state, now)
+            if (drawn(state) != prefs(context).getLong(DRAWN, -1)) preview(context, manager, data, light, state, now)
             prefs(context).edit().putLong(DRAWN, drawn(state)).apply()
         }
 
         // android 15 shows this in the picker, before only the app icon. the launcher allows a few
         // an hour, so only a new entry sends them
-        private fun preview(context: Context, manager: AppWidgetManager, data: SurfaceData?, state: SurfaceState, now: Long) {
+        private fun preview(context: Context, manager: AppWidgetManager, data: SurfaceData?, light: Boolean?, state: SurfaceState, now: Long) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
             for (provider in PROVIDERS) {
                 manager.setWidgetPreview(
                     ComponentName(context, provider.type),
                     AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                    views(context, WidgetPainter(context, provider.kind, provider.width, provider.height, palette(context, data, state)), state, now),
+                    views(context, WidgetPainter(context, provider.kind, provider.width, provider.height, palette(context, data, light)), null, state, now),
                 )
             }
         }
 
         // only the host knows its real box, a launcher's numbers can be far from it, so from android
         // 12 it picks the medium's version itself
-        private fun sized(context: Context, painter: WidgetPainter, state: SurfaceState, now: Long): RemoteViews {
+        private fun sized(context: Context, painter: WidgetPainter, night: WidgetPainter?, state: SurfaceState, now: Long): RemoteViews {
             if (painter.kind != Kind.MEDIUM || state !is SurfaceState.Ready || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                return views(context, painter, state, now, painter.short)
+                return views(context, painter, night, state, now, painter.short)
             }
             return RemoteViews(
                 mapOf(
-                    SizeF(1f, 1f) to views(context, painter, state, now, short = true),
-                    SizeF(1f, WidgetPainter.MEDIUM_HEIGHT) to views(context, painter, state, now),
+                    SizeF(1f, 1f) to views(context, painter, night, state, now, short = true),
+                    SizeF(1f, WidgetPainter.MEDIUM_HEIGHT) to views(context, painter, night, state, now),
                 ),
             )
         }
 
-        private fun views(context: Context, painter: WidgetPainter, state: SurfaceState, now: Long, short: Boolean = false): RemoteViews {
+        private fun views(context: Context, painter: WidgetPainter, night: WidgetPainter?, state: SurfaceState, now: Long, short: Boolean = false): RemoteViews {
             val views = RemoteViews(context.packageName, layout(painter.kind))
-            views.setImageViewBitmap(R.id.surfaces_sky, painter.sky(state))
+            image(views, R.id.surfaces_sky, painter.sky(state), night?.sky(state))
             // the trees' inset 0.5 hairline at 10%
-            views.setInt(R.id.surfaces_hairline, "setColorFilter", painter.hairline)
+            if (night != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                views.setColorInt(R.id.surfaces_hairline, "setColorFilter", painter.hairline, night.hairline)
+            } else {
+                views.setInt(R.id.surfaces_hairline, "setColorFilter", painter.hairline)
+            }
             views.setInt(R.id.surfaces_hairline, "setImageAlpha", 26)
             views.setOnClickPendingIntent(R.id.surfaces_root, open(context, HOME))
             if (state !is SurfaceState.Ready) {
-                views.setImageViewBitmap(R.id.surfaces_center, painter.messagePicture(state))
+                image(views, R.id.surfaces_center, painter.messagePicture(state), night?.messagePicture(state))
                 views.setViewVisibility(R.id.surfaces_center, View.VISIBLE)
                 views.setViewVisibility(R.id.surfaces_top, View.GONE)
                 views.setViewVisibility(R.id.surfaces_bottom, View.GONE)
@@ -123,12 +136,12 @@ open class PrayerWidget : AppWidgetProvider() {
             views.setViewVisibility(R.id.surfaces_top, if (short) View.GONE else View.VISIBLE)
             views.setViewVisibility(R.id.surfaces_bottom, if (short || painter.kind == Kind.SMALL) View.GONE else View.VISIBLE)
             if (short) {
-                views.setImageViewBitmap(R.id.surfaces_center, painter.strip(state))
+                image(views, R.id.surfaces_center, painter.strip(state), night?.strip(state))
                 views.setViewVisibility(R.id.surfaces_countdown, View.GONE)
             } else {
-                views.setImageViewBitmap(R.id.surfaces_top, painter.top(state, now))
-                if (painter.kind != Kind.SMALL) views.setImageViewBitmap(R.id.surfaces_bottom, painter.bottom(state))
-                countdown(views, painter, state, now)
+                image(views, R.id.surfaces_top, painter.top(state, now), night?.top(state, now))
+                if (painter.kind != Kind.SMALL) image(views, R.id.surfaces_bottom, painter.bottom(state), night?.bottom(state))
+                countdown(views, painter, night, state, now)
             }
             views.setContentDescription(R.id.surfaces_root, state.data.spoken(state.entry, now))
             if (painter.kind == Kind.SMALL) {
@@ -147,33 +160,43 @@ open class PrayerWidget : AppWidgetProvider() {
             return views
         }
 
-        private fun countdown(views: RemoteViews, painter: WidgetPainter, state: SurfaceState.Ready, now: Long) {
+        private fun countdown(views: RemoteViews, painter: WidgetPainter, night: WidgetPainter?, state: SurfaceState.Ready, now: Long) {
             val countdown = painter.countdown(state.data, state.entry, now)
             if (countdown == null) {
                 views.setViewVisibility(R.id.surfaces_countdown, View.GONE)
                 return
             }
             views.setViewVisibility(R.id.surfaces_countdown, View.VISIBLE)
-            views.setImageViewBitmap(R.id.surfaces_countdown, countdown.bitmap)
+            image(views, R.id.surfaces_countdown, countdown.bitmap, night?.countdown(state.data, state.entry, now)?.bitmap)
             views.setViewPadding(R.id.surfaces_countdown_box, countdown.left, countdown.top, 0, 0)
+        }
+
+        // a night icon pair isn't counted in the widget's bitmap cap, only setImageViewBitmap's are
+        private fun image(views: RemoteViews, id: Int, bitmap: Bitmap, night: Bitmap?) {
+            if (night != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                views.setIcon(id, "setImageIcon", Icon.createWithBitmap(bitmap), Icon.createWithBitmap(night))
+            } else {
+                views.setImageViewBitmap(id, bitmap)
+            }
         }
 
         private fun layout(kind: Kind) = if (kind == Kind.LARGE) R.layout.prayer_widget_large else R.layout.prayer_widget
 
         // the portrait size: the launcher reports the narrowest width and the tallest height. the
         // width holds on every launcher seen, the height is only the sky's, see WidgetPainter
-        private fun painter(context: Context, manager: AppWidgetManager, id: Int, kind: Kind, data: SurfaceData?, state: SurfaceState): WidgetPainter {
+        private fun painter(context: Context, manager: AppWidgetManager, id: Int, kind: Kind, palette: Palette): WidgetPainter {
             val options = manager.getAppWidgetOptions(id)
             val provider = PROVIDERS.first { it.kind == kind }
             val reported = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 }?.toFloat() ?: provider.width
             // the small's arc and text keep the tree's proportions, a narrower box shrinks them evenly
             val width = if (kind == Kind.SMALL) max(reported, provider.width) else reported
             val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 }?.toFloat() ?: provider.height
-            return WidgetPainter(context, kind, width, height, palette(context, data, state))
+            return WidgetPainter(context, kind, width, height, palette)
         }
 
-        private fun palette(context: Context, data: SurfaceData?, state: SurfaceState): Palette =
-            if (state is SurfaceState.Ready) state.data.palette(state.entry) else Palette.of(context, data)
+        // no file yet, the phone's own colors until the app writes
+        private fun palette(context: Context, data: SurfaceData?, light: Boolean?): Palette =
+            data?.palette(light ?: !isNight(context)) ?: Palette(null)
 
         // the entry the picture shows, -1 for a message
         private fun drawn(state: SurfaceState) = (state as? SurfaceState.Ready)?.entry?.getLong("from") ?: -1

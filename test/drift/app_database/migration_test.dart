@@ -21,7 +21,12 @@ import 'generated/schema_v21.dart' as v21;
 import 'generated/schema_v22.dart' as v22;
 import 'generated/schema_v24.dart' as v24;
 import 'generated/schema_v25.dart' as v25;
+import 'generated/schema_v26.dart' as v26;
+import 'generated/schema_v27.dart' as v27;
+import 'generated/schema_v28.dart' as v28;
+import 'generated/schema_v29.dart' as v29;
 import 'generated/schema_v3.dart' as v3;
+import 'generated/schema_v30.dart' as v30;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
@@ -988,6 +993,91 @@ void main() {
           batch.insert(oldDb.settings, const v24.SettingsCompanion(theme: Value('iznik'))),
       validateItems: (newDb) async {
         expect((await newDb.select(newDb.settings).getSingle()).theme, 'iznik');
+      },
+    );
+  });
+
+  test('v25 to v26 keeps a takbir only prayer on adhan', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 25,
+      newVersion: 26,
+      createOld: v25.DatabaseAtV25.new,
+      createNew: v26.DatabaseAtV26.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(
+        oldDb.settings,
+        const v25.SettingsCompanion(
+          maghribSound: Value('adhan'),
+          maghribAdhanLength: Value('takbir'),
+        ),
+      ),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).maghribSound, 'adhan');
+      },
+    );
+  });
+
+  test('v26 to v27 keeps the font and reads text as the mushaf style', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 26,
+      newVersion: 27,
+      createOld: v26.DatabaseAtV26.new,
+      createNew: v27.DatabaseAtV27.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) =>
+          batch.insert(oldDb.settings, const v26.SettingsCompanion(quranFont: Value('amiri'))),
+      validateItems: (newDb) async {
+        final settings = await newDb.select(newDb.settings).getSingle();
+        expect(settings.quranFont, 'amiri');
+        expect(settings.mushafStyle, 'text');
+      },
+    );
+  });
+
+  test('v27 to v28 keeps the nudges off and says the azkar name', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 27,
+      newVersion: 28,
+      createOld: v27.DatabaseAtV27.new,
+      createNew: v28.DatabaseAtV28.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) =>
+          batch.insert(oldDb.settings, const v27.SettingsCompanion(azkarNudges: Value(0))),
+      validateItems: (newDb) async {
+        final settings = await newDb.select(newDb.settings).getSingle();
+        expect(settings.azkarNudges, 0);
+        expect(settings.azkarVoice, 1);
+      },
+    );
+  });
+
+  test('v28 to v29 keeps the saved mode, a new row follows the phone', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 28,
+      newVersion: 29,
+      createOld: v28.DatabaseAtV28.new,
+      createNew: v29.DatabaseAtV29.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(oldDb.settings, const v28.SettingsCompanion()),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).themeMode, 'followSky');
+        await newDb.delete(newDb.settings).go();
+        await newDb.into(newDb.settings).insert(const v29.SettingsCompanion());
+        expect((await newDb.select(newDb.settings).getSingle()).themeMode, 'followPhone');
+      },
+    );
+  });
+
+  test('v29 to v30 leaves the translation unpicked', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 29,
+      newVersion: 30,
+      createOld: v29.DatabaseAtV29.new,
+      createNew: v30.DatabaseAtV30.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(oldDb.settings, const v29.SettingsCompanion()),
+      validateItems: (newDb) async {
+        expect((await newDb.select(newDb.settings).getSingle()).translation, null);
       },
     );
   });

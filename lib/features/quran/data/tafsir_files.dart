@@ -46,12 +46,7 @@ enum TafsirSource {
   /// a release once uploaded is never changed, a new tafsir goes in a new one
   final String release;
 
-  /// a public repo of its own, this one is private and its releases need a token
-  static final base = Uri.parse(
-    'https://github.com/AhmedAbdoElhawary/better-muslim-content/releases/download/',
-  );
-
-  Uri get address => base.resolve('$release/$file');
+  Uri get address => contentReleases.resolve('$release/$file');
 }
 
 /// each tafsir is one file for the whole quran, kept only when its sha256 matches (research R15)

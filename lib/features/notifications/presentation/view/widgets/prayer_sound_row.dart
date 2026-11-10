@@ -1,5 +1,4 @@
 import 'package:better_muslim/core/database/app_database.dart';
-import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/extensions/window_size.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
@@ -99,17 +98,9 @@ class RecordingRow extends ConsumerWidget {
         (settings) => settings.value?.recordingOf(prayer) ?? AdhanRecording.alafasy,
       ),
     );
-    final length = ref.watch(
-      settingsProvider.select(
-        (settings) => settings.value?.adhanLengthOf(prayer) ?? AdhanLength.full,
-      ),
-    );
     return NavRow(
       title: StringsManager.adhanSound,
-      value: length == AdhanLength.takbir
-          ? StringsManager.recordingTakbir
-          : StringsManager.recordingFull,
-      args: {'recording': context.tr(recording.nameKey)},
+      value: recording.nameKey,
       onTap: () => showRecordingSheet(context, prayer),
     );
   }

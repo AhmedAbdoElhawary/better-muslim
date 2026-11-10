@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -230,13 +231,13 @@ void main() {
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(ayah) != null,
     );
-    await tester.tapAt(page.localToGlobal(page.washBounds(ayah)!.center));
+    await tester.longPressAt(page.localToGlobal(page.washBounds(ayah)!.center));
     await tester.pumpAndSettle();
   }
 
-  /// a tap past the spine shows the bars
+  /// a tap on the page's header shows the bars
   Future<void> showChrome(WidgetTester tester) async {
-    await tester.tapAt(const Offset(385, 400));
+    await tester.tapAt(const Offset(200, 40));
     await tester.pumpAndSettle();
   }
 
@@ -288,7 +289,7 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('a bookmarked ayah has its ribbon before its marker in its color, others have none', (
+  testWidgets('a bookmarked ayah fills its number in its color, its words stay unwashed', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -305,25 +306,41 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(page().ribbonRect(const AyahKey(1, 3)), isNull);
+    expect(page().bookmarkedNumber(const AyahKey(1, 3)), isNull);
     await bookmark(const AyahKey(1, 3), 'Bookmarks');
     await bookmark(const AyahKey(1, 4), 'Study');
 
-    final three = page().ribbonRect(const AyahKey(1, 3))!;
-    final four = page().ribbonRect(const AyahKey(1, 4))!;
-    expect(page().ribbonRect(const AyahKey(1, 5)), isNull);
-    expect(three.overlaps(four), isFalse, reason: 'never on top of each other');
-    for (final (key, rect) in [(const AyahKey(1, 3), three), (const AyahKey(1, 4), four)]) {
-      final wash = page().washBounds(key)!;
-      expect(wash.contains(rect.center), isTrue, reason: 'inside its own ayah, in the line');
-      expect(
-        page().washBounds(AyahKey(1, key.ayah + 1))!.contains(rect.center),
-        isFalse,
-        reason: 'before its marker, not past it into the next ayah',
-      );
-    }
+    expect(page().bookmarkedNumber(const AyahKey(1, 3)), isNotNull);
+    expect(page().bookmarkedNumber(const AyahKey(1, 5)), isNull);
+
+    /// ayah 4 ends on the left of its wash, the mark is its number there, not its words
+    final four = page().bookmarkedNumber(const AyahKey(1, 4))!.getBounds();
+    final wash = page().washBounds(const AyahKey(1, 4))!;
+    expect(four.width, lessThan(wash.width / 4));
+    expect(four.center.dx, lessThan(wash.center.dx));
+    expect(four.center.dy, moreOrLessEquals(wash.center.dy, epsilon: wash.height / 2));
+
     final context = tester.element(find.byType(MushafPageView).first);
-    expect(page().ribbons, {
+    final rose = context
+        .getColor(ThemeEnum.categoryRose)
+        .withValues(alpha: SizeManager.bookmarkedNumber);
+    expect(
+      page(),
+      paints..something(
+        (method, args) =>
+            method == #drawPath && (args[1] as Paint).color.toARGB32() == rose.toARGB32(),
+      ),
+    );
+
+    /// a highlight washes its ayah also when it's bookmarked
+    final highlight = context.getColor(ThemeEnum.highlightWash);
+    bool washed(Symbol method, List<dynamic> args) =>
+        method == #drawRRect && (args[1] as Paint).color.toARGB32() == highlight.toARGB32();
+    expect(page(), paints..everything((method, args) => !washed(method, args)));
+    page().highlighted = {const AyahKey(1, 4)};
+    expect(page(), paints..something(washed));
+    page().highlighted = {};
+    expect(page().bookmarked, {
       const AyahKey(1, 3): context.getColor(ThemeEnum.primary),
       const AyahKey(1, 4): context.getColor(ThemeEnum.categoryRose),
     });
@@ -331,8 +348,8 @@ void main() {
     await selectAyah(tester, const AyahKey(1, 4));
     await tapAndStore(tester, find.text('Bookmark'));
     await tapAndStore(tester, inPicker(find.text('Remove bookmark')));
-    expect(page().ribbonRect(const AyahKey(1, 4)), isNull);
-    expect(page().ribbonRect(const AyahKey(1, 3)), isNotNull);
+    expect(page().bookmarkedNumber(const AyahKey(1, 4)), isNull);
+    expect(page().bookmarkedNumber(const AyahKey(1, 3)), isNotNull);
     await unmount(tester);
   });
 

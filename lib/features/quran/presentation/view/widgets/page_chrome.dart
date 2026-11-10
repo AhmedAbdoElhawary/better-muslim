@@ -1,10 +1,8 @@
 import 'dart:ui';
 
-import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
-import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -22,27 +20,32 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/display_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/scrubber.dart';
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-/// the controls over the page (4.21): the glass top bar and dock slide in as the page springs to
-/// a card, so no control ever sits on the text. with reduce motion they fade
+/// the controls over the page (4.21): the glass top bar and dock slide in over the page at its
+/// full size. with reduce motion they fade
 class PageChrome extends StatelessWidget {
   const PageChrome({
     required this.page,
     required this.card,
     required this.shown,
     required this.onListen,
+    required this.hiding,
+    required this.onTranslation,
+    required this.onSearch,
     super.key,
   });
 
   final ValueNotifier<int> page;
+  final VoidCallback onSearch;
   final VoidCallback onListen;
+  final bool hiding;
+  final VoidCallback onTranslation;
 
-  /// the page's card spring, 0 hidden and 1 shown
+  /// the controls' spring, 0 hidden and 1 shown
   final Animation<double> card;
   final bool shown;
 
@@ -58,11 +61,21 @@ class PageChrome extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.topCenter,
-              child: _Arrive(card: card, from: -1, reduce: reduce, child: _TopBar(page)),
+              child: _Arrive(
+                card: card,
+                from: -1,
+                reduce: reduce,
+                child: _TopBar(page, onSearch: onSearch),
+              ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: _Arrive(card: card, from: 1, reduce: reduce, child: _Dock(page, onListen)),
+              child: _Arrive(
+                card: card,
+                from: 1,
+                reduce: reduce,
+                child: _Dock(page, onListen, hiding: hiding, onTranslation: onTranslation),
+              ),
             ),
           ],
         ),
@@ -164,9 +177,10 @@ class ReaderGlass extends StatelessWidget {
 }
 
 class _TopBar extends ConsumerWidget {
-  const _TopBar(this.page);
+  const _TopBar(this.page, {required this.onSearch});
 
   final ValueNotifier<int> page;
+  final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -219,12 +233,39 @@ class _TopBar extends ConsumerWidget {
                       ),
                     ),
 
-                    /// search waits for 7b
-                    const RSizedBox.square(dimension: SizeManager.hit),
+                    _Search(onSearch),
                     _PageBookmark(page),
                   ],
                 );
               },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Search extends StatelessWidget {
+  const _Search(this.onTap);
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: context.tr(StringsManager.searchQuran),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: RSizedBox.square(
+          dimension: SizeManager.hit,
+          child: Center(
+            child: BmIcon.ui(
+              BmUiIcon.search,
+              size: SizeManager.icon.r,
+              color: context.getColor(ThemeEnum.text),
             ),
           ),
         ),
@@ -266,10 +307,12 @@ class _PageBookmark extends ConsumerWidget {
 }
 
 class _Dock extends StatelessWidget {
-  const _Dock(this.page, this.onListen);
+  const _Dock(this.page, this.onListen, {required this.hiding, required this.onTranslation});
 
   final ValueNotifier<int> page;
   final VoidCallback onListen;
+  final bool hiding;
+  final VoidCallback onTranslation;
 
   @override
   Widget build(BuildContext context) {
@@ -312,7 +355,9 @@ class _Dock extends StatelessWidget {
                         onTap: onListen,
                       ),
                     ),
-                    const Expanded(child: _TranslationButton()),
+                    Expanded(
+                      child: _TranslationButton(hiding: hiding, onTap: onTranslation),
+                    ),
                     Expanded(
                       child: _DockButton(
                         icon: BmIcon.ui(BmUiIcon.text_size),
@@ -331,30 +376,23 @@ class _Dock extends StatelessWidget {
   }
 }
 
-/// Mushaf and Translation, Both goes back to the Mushaf. on while the translation shows
+/// on while the translation shows, off as soon as it starts hiding
 class _TranslationButton extends ConsumerWidget {
-  const _TranslationButton();
+  const _TranslationButton({required this.hiding, required this.onTap});
+
+  final bool hiding;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final layout = ref.watch(
       settingsProvider.select((settings) => settings.value?.quranLayout ?? QuranLayout.mushaf),
     );
-    final on = layout != QuranLayout.mushaf;
     return _DockButton(
       icon: BmIcon.ui(BmUiIcon.translate),
       label: StringsManager.translation,
-      on: on,
-      onTap: () {
-        BmHaptics.selection();
-        ref
-            .read(databaseProvider)
-            .updateSettings(
-              SettingsCompanion(
-                quranLayout: Value(on ? QuranLayout.mushaf : QuranLayout.translation),
-              ),
-            );
-      },
+      on: layout != QuranLayout.mushaf && !hiding,
+      onTap: onTap,
     );
   }
 }

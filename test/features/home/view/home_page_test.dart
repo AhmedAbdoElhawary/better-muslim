@@ -71,6 +71,14 @@ void main() {
   Finder stripTime(String time) =>
       find.descendant(of: find.byType(PrayerStrip), matching: find.text(time));
 
+  /// the strip's highlighted cell is a semibold maghrib too, so only the card and the bar count
+  Finder flyingName() => find.byElementPredicate(
+    (element) =>
+        element.widget is SemiBoldText &&
+        (element.widget as SemiBoldText).text == Prayer.maghrib.nameKey &&
+        element.findAncestorWidgetOfExactType<PrayerStrip>() == null,
+  );
+
   bool cut(WidgetTester tester, Finder text) =>
       tester.renderObject<RenderParagraph>(text).didExceedMaxLines;
 
@@ -92,15 +100,16 @@ void main() {
       await unmount(tester);
     });
 
-    testWidgets('english', (tester) async {
+    testWidgets('english, an hour after asr\'s now window', (tester) async {
       await pumpHome(tester, await designOverrides());
 
-      expect(find.text('NOW'), findsOneWidget);
-      expect(find.text('Asr'), findsNWidgets(2));
-      expect(find.text('العصر'), findsOneWidget);
-      expect(find.text('Until Maghrib at 17:56'), findsOneWidget);
+      expect(find.text('NOW'), findsNothing);
+      expect(find.text('NEXT'), findsOneWidget);
+      expect(find.text('Asr'), findsOneWidget);
+      expect(find.text('العصر'), findsNothing);
+      expect(find.text('At 17:56'), findsOneWidget);
       expect(find.text('Next prayer'), findsOneWidget);
-      expect(find.text('Maghrib'), findsNWidgets(2));
+      expect(find.text('Maghrib'), findsNWidgets(3));
       expect(countdown(tester), '1:24:00');
       expect(find.text('Adhan at 17:56 · reminder 10 min before'), findsOneWidget);
       for (final time in ['04:58', '12:05', '15:27', '17:56', '19:26']) {
@@ -115,7 +124,7 @@ void main() {
       for (final cell in [2, 3, 4]) {
         expect(checkIn(cell), findsNothing);
       }
-      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.asr.nameKey);
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.maghrib.nameKey);
       await unmount(tester);
     });
 
@@ -133,9 +142,7 @@ void main() {
       tester,
     ) async {
       await pumpHome(tester, await designOverrides());
-      final flying = find.byWidgetPredicate(
-        (widget) => widget is SemiBoldText && widget.text == Prayer.maghrib.nameKey,
-      );
+      final flying = flyingName();
       final cardRow = find.descendant(
         of: find.byType(NextPrayerCard),
         matching: find.byType(Visibility),
@@ -156,9 +163,7 @@ void main() {
     });
 
     group('the flight waits for the card', () {
-      final flying = find.byWidgetPredicate(
-        (widget) => widget is SemiBoldText && widget.text == Prayer.maghrib.nameKey,
-      );
+      final flying = flyingName();
       final cardRow = find.descendant(
         of: find.byType(NextPrayerCard),
         matching: find.byType(Visibility),
@@ -280,21 +285,16 @@ void main() {
         matching: find.byType(Visibility),
       );
       expect(tester.widget<Visibility>(cardRow).visible, isTrue);
-      expect(
-        find.byWidgetPredicate(
-          (widget) => widget is SemiBoldText && widget.text == Prayer.maghrib.nameKey,
-        ),
-        findsOneWidget,
-      );
+      expect(flyingName(), findsOneWidget);
       await unmount(tester);
     });
 
     testWidgets('arabic, with eastern digits and no second name', (tester) async {
       await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
 
-      expect(find.text('الآن'), findsOneWidget);
-      expect(find.text('العصر'), findsNWidgets(2));
-      expect(find.text('حتى المغرب الساعة ١٧:٥٦'), findsOneWidget);
+      expect(find.text('التالية'), findsOneWidget);
+      expect(find.text('العصر'), findsOneWidget);
+      expect(find.text('الساعة ١٧:٥٦'), findsOneWidget);
       expect(find.text('الصلاة القادمة'), findsOneWidget);
       expect(countdown(tester), '١:٢٤:٠٠');
       expect(find.text('الأذان ١٧:٥٦ · تذكير قبل ١٠ دقائق'), findsOneWidget);
@@ -322,7 +322,10 @@ void main() {
       tester,
     ) async {
       await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+      StripEntry cell(Prayer prayer) => containerOf(tester).read(stripProvider)[prayer.index];
       expect(countdown(tester), '1:24:00');
+      expect(cell(Prayer.maghrib).current, isTrue);
+      expect(cell(Prayer.maghrib).now, isFalse);
 
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
@@ -335,27 +338,45 @@ void main() {
         find.descendant(of: find.byType(NowBlock), matching: find.text('Maghrib')),
         findsOneWidget,
       );
+      expect(find.text('NOW'), findsOneWidget);
       expect(find.text('Until Isha at 19:26'), findsOneWidget);
       expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.maghrib.nameKey);
+      expect(cell(Prayer.maghrib).now, isTrue);
+
+      await tester.pump(DayTimes.nowWindow);
+      await tester.pumpAndSettle();
+
+      expect(find.text('NEXT'), findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(NowBlock), matching: find.text('Isha')),
+        findsOneWidget,
+      );
+      expect(find.text('At 19:26'), findsOneWidget);
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.isha.nameKey);
+      expect(cell(Prayer.isha).now, isFalse);
+      expect(cell(Prayer.maghrib).current, isFalse);
       await unmount(tester);
     });
 
-    testWidgets('during duha no cell is current', (tester) async {
+    testWidgets('duha is never now, after fajr\'s window dhuhr is next', (tester) async {
       await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 6)));
 
+      expect(find.text('Duha'), findsNothing);
       expect(
-        find.descendant(of: find.byType(NowBlock), matching: find.text('Duha')),
+        find.descendant(of: find.byType(NowBlock), matching: find.text('Dhuhr')),
         findsOneWidget,
       );
-      expect(find.text('Until Dhuhr at 12:06'), findsOneWidget);
-      expect(currentCell(), findsNothing);
+      expect(find.text('At 12:06'), findsOneWidget);
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.dhuhr.nameKey);
       await unmount(tester);
     });
 
     testWidgets('after isha the next prayer is tomorrow\'s fajr', (tester) async {
       await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 18)));
 
-      expect(find.text('Until Fajr at 05:00'), findsOneWidget);
+      expect(find.text('NEXT'), findsOneWidget);
+      expect(find.text('At 05:00'), findsOneWidget);
+      expect(currentCell(), findsNothing);
       expect(find.text('Isha 19:26'), findsOneWidget);
       expect(find.text('Fajr 05:00'), findsOneWidget);
       await unmount(tester);
@@ -636,7 +657,7 @@ void main() {
         expect(tester.getSemantics(maghrib).label, contains('5:56\u202fPM'));
 
         /// the rest of home keeps the period
-        expect(find.text('Until Maghrib at 5:56\u202fPM'), findsOneWidget);
+        expect(find.text('At 5:56\u202fPM'), findsOneWidget);
         semantics.dispose();
         await unmount(tester);
       });

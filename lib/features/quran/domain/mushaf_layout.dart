@@ -60,13 +60,15 @@ MushafLayout layoutMushaf({
 }
 
 /// the wash behind one ayah (research R4): per line it sits on, one rect from its first to its
-/// last word, height tall around the line's middle and wider by side on each end
+/// last word, height tall around the line's middle moved by shift onto the ink, and wider by side
+/// on each end
 List<Rect> washRects(
   MushafPage page,
   MushafLayout layout,
   AyahKey key, {
   required double height,
   required double side,
+  double shift = 0,
 }) {
   final rects = <Rect>[];
   for (var i = 0; i < page.lines.length; i++) {
@@ -77,7 +79,7 @@ List<Rect> washRects(
       part = part?.expandToInclude(word) ?? word;
     }
     if (part == null) continue;
-    final middle = layout.lines[i].center.dy;
+    final middle = layout.lines[i].center.dy + shift;
     rects.add(
       Rect.fromLTRB(part.left - side, middle - height / 2, part.right + side, middle + height / 2),
     );

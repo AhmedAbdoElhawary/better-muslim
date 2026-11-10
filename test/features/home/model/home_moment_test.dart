@@ -83,43 +83,40 @@ void main() {
   });
 
   group('strip cell state', () {
+    late final day = times(15);
+    late final maghrib = (Prayer.maghrib, day.maghrib!);
+    ({bool current, bool logged, bool past}) cell(
+      Prayer prayer,
+      (Prayer, TZDateTime)? highlighted, [
+      Set<Prayer> prayed = const {},
+    ]) => stripCellState(prayer, day.timeOf(prayer), highlighted, prayed);
+
     test('logged and past', () {
-      expect(stripCellState(Prayer.fajr, Period.asr, {Prayer.fajr}), (
-        current: false,
-        logged: true,
-        past: true,
-      ));
+      expect(cell(Prayer.fajr, maghrib, {Prayer.fajr}), (current: false, logged: true, past: true));
     });
 
-    test('current without a log gets the dot', () {
-      expect(stripCellState(Prayer.asr, Period.asr, {}), (
-        current: true,
-        logged: false,
-        past: false,
-      ));
+    test('highlighted without a log gets the dot', () {
+      expect(cell(Prayer.maghrib, maghrib), (current: true, logged: false, past: false));
     });
 
-    test('current and logged', () {
-      expect(stripCellState(Prayer.asr, Period.asr, {Prayer.asr}), (
-        current: true,
-        logged: true,
-        past: false,
-      ));
+    test('highlighted and logged', () {
+      final asr = (Prayer.asr, day.asr!);
+      expect(cell(Prayer.asr, asr, {Prayer.asr}), (current: true, logged: true, past: false));
     });
 
-    test('later is plain', () {
-      expect(stripCellState(Prayer.maghrib, Period.asr, {}), (
-        current: false,
-        logged: false,
-        past: false,
-      ));
+    test('after asr\'s now window asr is past and later is plain', () {
+      expect(cell(Prayer.asr, maghrib), (current: false, logged: false, past: true));
+      expect(cell(Prayer.isha, maghrib), (current: false, logged: false, past: false));
     });
 
-    test('no cell is current during duha', () {
-      expect(
-        Prayer.values.where((prayer) => stripCellState(prayer, Period.duha, {}).current),
-        isEmpty,
-      );
+    test('after isha\'s now window tomorrow\'s fajr lights no cell and all are past', () {
+      final fajr = (Prayer.fajr, times(16).fajr!);
+      expect(Prayer.values.where((prayer) => cell(prayer, fajr).current), isEmpty);
+      expect(Prayer.values.every((prayer) => cell(prayer, fajr).past), isTrue);
+    });
+
+    test('without a highlighted prayer nothing is current or past', () {
+      expect(cell(Prayer.fajr, null), (current: false, logged: false, past: false));
     });
   });
 

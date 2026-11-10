@@ -4,6 +4,7 @@ import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
@@ -63,10 +64,14 @@ class _AyahShareSheetState extends ConsumerState<_AyahShareSheet> {
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
     if (assets == null || arabic.values.contains(null)) return const SizedBox.shrink();
+
+    /// the card's translation is english, an arabic one picked has its own chip or none
+    final shown = shownTranslation(context, ref);
+    final english = shown.arabic ? Translation.sahih : shown;
     String? text(AyahKey key) => switch (source) {
       ShareTextSource.none => null,
       ShareTextSource.translation =>
-        ref.watch(surahTextProvider(key.surah)).value?.translation[key.ayah - 1],
+        ref.watch(translationProvider((english, key.surah))).value?.elementAtOrNull(key.ayah - 1),
       ShareTextSource.muyassar =>
         ref.watch(surahTextProvider(key.surah)).value?.tafsir[key.ayah - 1],
       ShareTextSource.ibnKathir ||

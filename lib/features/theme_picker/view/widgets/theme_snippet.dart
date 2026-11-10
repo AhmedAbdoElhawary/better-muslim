@@ -85,7 +85,8 @@ class _SkyText extends ConsumerWidget {
     );
     final today = ref.watch(todayProvider);
     final hijri = ref.watch(hijriDateProvider(today));
-    final period = ref.watch(periodProvider);
+    final now = ref.watch(nowPrayerProvider.select((now) => now?.$1));
+    final prayer = now ?? ref.watch(nextPrayerProvider.select((next) => next?.$1));
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
@@ -122,17 +123,19 @@ class _SkyText extends ConsumerWidget {
               ),
             ],
           ),
-          if (period != null) ...[
+          if (prayer != null) ...[
             const RSizedBox.vertical(SpaceManager.snippetNowTop),
             RegularText(
-              context.tr(StringsManager.now).toUpperCase(),
+              context
+                  .tr(now == null ? StringsManager.surfaceNext : StringsManager.now)
+                  .toUpperCase(),
               translate: false,
               fontSize: FontSizeManager.snippetNow,
               letterSpacing: LetterSpacingManager.snippetNow,
               color: ThemeEnum.onSkyMuted,
             ),
             RegularText(
-              period.nameKey,
+              prayer.nameKey,
               font: FontEnum.display,
               fontSize: FontSizeManager.largeTitle,
               height: LineHeightManager.largeTitle,
@@ -318,7 +321,8 @@ class _Strip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final times = ref.watch(todayTimesProvider);
-    final period = ref.watch(periodProvider);
+    final highlighted = ref.watch(highlightedPrayerProvider);
+    final inWindow = ref.watch(nowPrayerProvider.select((now) => now != null));
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
@@ -333,8 +337,12 @@ class _Strip extends ConsumerWidget {
               time: times.timeOf(prayer) == null
                   ? ''
                   : context.formatTime(times.timeOf(prayer)!, digits),
-              current: period?.name == prayer.name,
-              past: period != null && Period.values.byName(prayer.name).index < period.index,
+              current:
+                  highlighted?.$1 == prayer &&
+                  (times.timeOf(prayer)?.isAtSameMomentAs(highlighted!.$2) ?? false),
+              inWindow: inWindow,
+              past:
+                  highlighted != null && (times.timeOf(prayer)?.isBefore(highlighted.$2) ?? false),
             ),
           ),
         ],
@@ -348,22 +356,31 @@ class _Cell extends StatelessWidget {
     required this.prayer,
     required this.time,
     required this.current,
+    required this.inWindow,
     required this.past,
   });
 
   final Prayer prayer;
   final String time;
   final bool current;
+
+  /// the highlighted prayer is in its now window, so the current cell is filled, not outlined
+  final bool inWindow;
   final bool past;
 
   @override
   Widget build(BuildContext context) {
     final primary = context.getColor(ThemeEnum.primary);
+    final now = current && inWindow;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: current ? primary.withValues(alpha: _currentAlpha) : null,
+        color: now ? primary.withValues(alpha: _currentAlpha) : null,
         borderRadius: BorderRadius.circular(RadiusManager.tileIcon.r),
-        border: current ? Border.all(color: primary.withValues(alpha: _currentRingAlpha)) : null,
+        border: !current
+            ? null
+            : now
+            ? Border.all(color: primary.withValues(alpha: _currentRingAlpha))
+            : Border.all(color: primary, width: SizeManager.nextRing.r),
       ),
       child: VerticalPadding(
         padding: SpaceManager.snippetCellV,

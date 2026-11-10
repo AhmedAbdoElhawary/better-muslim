@@ -46,6 +46,7 @@ class FakeScheduler extends NotificationScheduler {
   int cancels = 0;
   final applied = <List<Alert>>[];
   final appliedRecordings = <Map<Prayer, AdhanRecording>>[];
+  final appliedVoices = <bool>[];
 
   int inits = 0;
   String? markPrayedLabel;
@@ -104,12 +105,13 @@ class FakeScheduler extends NotificationScheduler {
     required List<Alert> alerts,
     required Map<Prayer, PrayerSound> sounds,
     required Map<Prayer, AdhanRecording> recordings,
-    required Map<Prayer, AdhanLength> lengths,
     required Map<Prayer, PrayerTone> tones,
     required AlertTexts texts,
+    bool azkarVoice = true,
   }) async {
     applied.add(alerts);
     appliedRecordings.add(recordings);
+    appliedVoices.add(azkarVoice);
   }
 }
 

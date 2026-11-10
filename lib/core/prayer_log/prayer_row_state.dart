@@ -16,7 +16,7 @@ enum PrayerRowState {
   bool get done => this == prayed || this == madeUp;
 }
 
-typedef RowState = ({PrayerRowState state, bool isOpen});
+typedef RowState = ({PrayerRowState state, bool isHighlighted, bool isNow});
 
 /// first match wins (R4). a future day needs no case of its own, its times are all ahead
 RowState rowState({
@@ -27,20 +27,22 @@ RowState rowState({
   required bool logged,
   QadaEntry? qada,
   (Prayer, TZDateTime)? next,
+  (Prayer, TZDateTime)? highlighted,
 }) {
-  if (time == null) return (state: PrayerRowState.unavailable, isOpen: false);
+  if (time == null) return (state: PrayerRowState.unavailable, isHighlighted: false, isNow: false);
+  bool isAt((Prayer, TZDateTime)? pick) =>
+      pick != null && pick.$1 == prayer && pick.$2.isAtSameMomentAs(time);
   final started = !now.isBefore(time);
   final ended = end != null && !now.isBefore(end);
-  final isOpen = started && !ended;
-  if (logged) return (state: PrayerRowState.prayed, isOpen: isOpen);
-  if (!started) {
-    final isNext = next != null && next.$1 == prayer && next.$2.isAtSameMomentAs(time);
-    return (state: isNext ? PrayerRowState.next : PrayerRowState.later, isOpen: false);
-  }
-  if (!ended) return (state: PrayerRowState.mark, isOpen: true);
-  if (qada != null) {
-    final state = qada.madeUpAt == null ? PrayerRowState.inQada : PrayerRowState.madeUp;
-    return (state: state, isOpen: false);
-  }
-  return (state: PrayerRowState.addToQada, isOpen: false);
+  final state = switch ((logged, started, ended, qada)) {
+    (true, _, _, _) => PrayerRowState.prayed,
+    (_, false, _, _) => isAt(next) ? PrayerRowState.next : PrayerRowState.later,
+
+    /// still on time after its now window, only the highlight moves on
+    (_, _, false, _) => PrayerRowState.mark,
+    (_, _, _, final qada?) => qada.madeUpAt == null ? PrayerRowState.inQada : PrayerRowState.madeUp,
+    _ => PrayerRowState.addToQada,
+  };
+  final isHighlighted = isAt(highlighted);
+  return (state: state, isHighlighted: isHighlighted, isNow: isHighlighted && started);
 }

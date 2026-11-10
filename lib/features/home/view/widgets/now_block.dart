@@ -14,16 +14,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// NOW, the current period and when it ends. english adds the arabic name, arabic has no second
-/// name (4.16)
+/// NOW and the prayer in its now window, after it NEXT and the next prayer. english adds the
+/// arabic name, arabic has no second name (4.16)
 class NowBlock extends ConsumerWidget {
   const NowBlock({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final period = ref.watch(periodProvider);
+    final now = ref.watch(nowPrayerProvider.select((now) => now?.$1));
+    final next = ref.watch(nextPrayerProvider.select((next) => next?.$1));
     final bright = ref.watch(skyBrightProvider);
-    if (period == null) return const SizedBox.shrink();
+    final prayer = now ?? next;
+    if (prayer == null) return const SizedBox.shrink();
+    final label = now == null ? StringsManager.surfaceNext : StringsManager.now;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final color = bright ? ThemeEnum.onSkyBright : ThemeEnum.onSky;
 
@@ -33,15 +36,15 @@ class NowBlock extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RegularText(StringsManager.now, color: muted),
+          RegularText(label, color: muted),
           RegularText(
-            period.nameKey,
+            prayer.nameKey,
             font: FontEnum.display,
             fontSize: FontSizeManager.heroAr,
             height: LineHeightManager.heroAr,
             color: color,
           ),
-          _Until(color: muted),
+          _Until(now: now != null, color: muted),
         ],
       );
     }
@@ -49,14 +52,14 @@ class NowBlock extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         RegularText(
-          StringsManager.now,
+          label,
           fontSize: FontSizeManager.overline,
           letterSpacing: LetterSpacingManager.overline,
           color: muted,
         ),
-        _Names(period: period, color: color, muted: muted),
+        _Names(prayer: prayer, color: color, muted: muted),
         const RSizedBox.vertical(SpaceManager.nowUntilGap),
-        _Until(color: muted),
+        _Until(now: now != null, color: muted),
       ],
     );
   }
@@ -64,22 +67,22 @@ class NowBlock extends ConsumerWidget {
 
 /// the arabic name sits on the english name's baseline, and goes under it above text scale 1.4
 class _Names extends StatelessWidget {
-  const _Names({required this.period, required this.color, required this.muted});
-  final Period period;
+  const _Names({required this.prayer, required this.color, required this.muted});
+  final Prayer prayer;
   final ThemeEnum color;
   final ThemeEnum muted;
 
   @override
   Widget build(BuildContext context) {
     final name = RegularText(
-      period.nameKey,
+      prayer.nameKey,
       font: FontEnum.display,
       fontSize: FontSizeManager.hero,
       height: LineHeightManager.hero,
       color: color,
     );
     final nameAr = RegularText(
-      period.nameArKey,
+      prayer.nameArKey,
       font: FontEnum.display,
       fontSize: FontSizeManager.accentAr,
       height: LineHeightManager.accentAr,
@@ -92,16 +95,18 @@ class _Names extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        name,
+        Flexible(child: name),
         const RSizedBox.horizontal(SpaceManager.s1),
-        Flexible(child: nameAr),
+        nameAr,
       ],
     );
   }
 }
 
+/// until the next prayer while one is now, otherwise the time of the next prayer shown above
 class _Until extends ConsumerWidget {
-  const _Until({required this.color});
+  const _Until({required this.now, required this.color});
+  final bool now;
   final ThemeEnum color;
 
   @override
@@ -112,9 +117,11 @@ class _Until extends ConsumerWidget {
     );
     if (next == null) return const SizedBox.shrink();
     final (prayer, time) = next;
+    final at = context.formatTime(time, digits);
+    if (!now) return RegularText(StringsManager.nextAt, args: {'time': at}, color: color);
     return RegularText(
       StringsManager.untilPrayerAt,
-      args: {'prayer': context.tr(prayer.nameKey), 'time': context.formatTime(time, digits)},
+      args: {'prayer': context.tr(prayer.nameKey), 'time': at},
       color: color,
     );
   }

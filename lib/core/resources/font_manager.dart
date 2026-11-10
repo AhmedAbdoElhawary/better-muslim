@@ -135,6 +135,7 @@ abstract final class FontSizeManager {
   /// a mushaf above 100% at 100%, about where the printed pages end up
   static const double mushafReflow = 17;
   static const double mushafHeader = 15;
+  static const double tajweedKey = 9;
   static const double ayahMarker = 13;
   static const double quranTag = 11;
   static const double cartouche = 19;

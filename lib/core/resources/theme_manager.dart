@@ -198,6 +198,7 @@ extension BmThemeModeName on BmThemeMode {
     BmThemeMode.dark => StringsManager.dark,
     BmThemeMode.light => StringsManager.light,
     BmThemeMode.followSky => StringsManager.followSky,
+    BmThemeMode.followPhone => StringsManager.followPhoneMode,
   };
 }
 
@@ -215,6 +216,7 @@ abstract final class AppTheme {
   static ThemeData page(PageColor color, [BmThemeId id = BmThemeId.moonlight]) {
     final theme = bmThemes[id]!;
     final base = switch (color) {
+      PageColor.white => BmPagePalette.white,
       PageColor.paper || PageColor.followSky => BmPagePalette.paper,
       PageColor.cream => BmPagePalette.cream,
       PageColor.sepia => BmPagePalette.sepia,

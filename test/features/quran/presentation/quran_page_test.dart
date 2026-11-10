@@ -140,7 +140,7 @@ void main() {
     expect(find.byType(RecitationSheet), findsNothing);
 
     await tester.pump(BmMotion.containerOpen);
-    await tester.tapAt(const Offset(385, 400));
+    await tester.tapAt(const Offset(200, 40));
     await tester.pump();
     expect(find.byType(PageChrome), findsOneWidget);
     expect(find.byType(RecitationSheet), findsNothing);

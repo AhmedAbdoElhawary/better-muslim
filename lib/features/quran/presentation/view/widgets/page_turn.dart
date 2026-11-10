@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:better_muslim/core/quran/quran_assets.dart';
@@ -14,8 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// turns the mushaf like paper (research R7). a drag to the right or a tap on the left edge opens
-/// the next page, the way an arabic book reads, in both languages. Book curls the leaf from its
+/// turns the mushaf like paper (research R7). a drag to the right or a tap on the left Turn strip
+/// opens the next page, the way an arabic book reads, in both languages. Book curls the leaf from its
 /// corner over the spine and lets it go on a spring (R13), Slide a 300 ms slide, reduce motion a
 /// 150 ms crossfade
 class PageTurner extends StatefulWidget {
@@ -23,10 +22,11 @@ class PageTurner extends StatefulWidget {
     required this.page,
     required this.pageBuilder,
     this.book = true,
-    this.card = kAlwaysDismissedAnimation,
     this.recede = kAlwaysDismissedAnimation,
     this.lift = kAlwaysDismissedAnimation,
     this.onTap,
+    this.onEdge,
+    this.strip,
     super.key,
   });
 
@@ -35,23 +35,26 @@ class PageTurner extends StatefulWidget {
   final Widget Function(int page) pageBuilder;
   final bool book;
 
-  /// 0 full page, 1 the card under the controls with the next page peeking (4.21)
-  final Animation<double> card;
-
   /// 0 full page, 1 receded behind the large sheet (4.23)
   final Animation<double> recede;
 
   /// how far up the page goes for the ayah sheet, in pixels (4.22)
   final Animation<double> lift;
 
-  /// a tap anywhere but the left edge
+  /// a tap anywhere but the Turn strips
   final GestureTapUpCallback? onTap;
 
+  /// a tap on a Turn strip, 1 the left one and -1 the right one. the page turns when it's null
+  final ValueChanged<int>? onEdge;
+
+  /// each Turn strip's width and height from the top, 44 pt down the whole page when null
+  final Size? strip;
+
   @override
-  State<PageTurner> createState() => _PageTurnerState();
+  State<PageTurner> createState() => PageTurnerState();
 }
 
-class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMixin {
+class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMixin {
   /// -1 the previous page laid over, 0 at rest, 1 the page turned away to the next
   late final _turn = AnimationController.unbounded(vsync: this)..addListener(_snap);
   double _from = 0;
@@ -147,7 +150,7 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
 
       /// not while the reader opens or the page moves, a page's layout would drop one of their
       /// frames. a next door page missing mid turn comes anyway, a blank page is worse
-      final moving = [widget.card, widget.recede, widget.lift, _turn].any((a) => a.isAnimating);
+      final moving = [widget.recede, widget.lift, _turn].any((a) => a.isAnimating);
       final opening = ModalRoute.of(context)?.animation?.isCompleted == false;
       if (opening || (moving && far)) {
         _warm();
@@ -204,14 +207,15 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
     _go(_can(target) ? target : 0, velocity: velocity / _width);
   }
 
-  void _tap(TapUpDetails details) {
-    if (details.localPosition.dx < _width * SizeManager.turnEdge) {
-      final velocity = _turn.velocity;
-      _commit();
-      if (_can(1)) _go(1, velocity: velocity);
-      return;
-    }
-    widget.onTap?.call(details);
+  /// the same turn as a swipe, 1 the next page and -1 the previous
+  void turn(int direction) {
+    final velocity = _turn.velocity;
+    _commit();
+    if (!_can(direction.toDouble())) return;
+
+    /// the page laid back is pictured before it curls, as when a finger grabs it
+    if (direction < 0 && widget.book && !_reduce) _parked.value = true;
+    _go(direction.toDouble(), velocity: velocity);
   }
 
   /// every move starts from where the page is now, so a grab mid turn carries on from there
@@ -268,49 +272,86 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
     return LayoutBuilder(
       builder: (context, constraints) {
         _width = constraints.maxWidth;
+        final strip = widget.strip ?? Size(SizeManager.hit.r, constraints.maxHeight);
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onHorizontalDragStart: _start,
           onHorizontalDragUpdate: _update,
           onHorizontalDragEnd: _end,
-          onTapUp: _tap,
-          child: ValueListenableBuilder(
-            valueListenable: widget.page,
-            builder: (context, page, _) {
-              _keys.removeWhere((n, _) => (n - page).abs() > _around);
-              _built.removeWhere((n, _) => (n - page).abs() > _around);
-              _ready
-                ..removeWhere((n) => (n - page).abs() > _around)
-                ..add(page);
-              _warm();
-              return _Pages(
-                turn: _turn,
-                card: widget.card,
-                recede: widget.recede,
-                lift: widget.lift,
-                leaf: _leaf,
-                parked: _parked,
-                shader: _shader,
-                book: widget.book && !_reduce,
-                fade: _reduce,
-                width: _width,
-                pages: {
-                  for (var n = page - _around; n <= page + _around; n++)
-                    if (_ready.contains(n))
-                      n: _built.putIfAbsent(
-                        n,
-                        () => RepaintBoundary(
-                          key: _keys.putIfAbsent(n, GlobalKey.new),
-                          child: widget.pageBuilder(n),
-                        ),
-                      ),
+          onTapUp: widget.onTap,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: widget.page,
+                builder: (context, page, _) {
+                  _keys.removeWhere((n, _) => (n - page).abs() > _around);
+                  _built.removeWhere((n, _) => (n - page).abs() > _around);
+                  _ready
+                    ..removeWhere((n) => (n - page).abs() > _around)
+                    ..add(page);
+                  _warm();
+                  return _Pages(
+                    turn: _turn,
+                    recede: widget.recede,
+                    lift: widget.lift,
+                    leaf: _leaf,
+                    parked: _parked,
+                    shader: _shader,
+                    book: widget.book && !_reduce,
+                    fade: _reduce,
+                    width: _width,
+                    pages: {
+                      for (var n = page - _around; n <= page + _around; n++)
+                        if (_ready.contains(n))
+                          n: _built.putIfAbsent(
+                            n,
+                            () => RepaintBoundary(
+                              key: _keys.putIfAbsent(n, GlobalKey.new),
+                              child: widget.pageBuilder(n),
+                            ),
+                          ),
+                    },
+                    current: page,
+                  );
                 },
-                current: page,
-              );
-            },
+              ),
+
+              /// left and right on the screen in both languages, like the swipe
+              Positioned(
+                left: 0,
+                top: 0,
+                width: strip.width,
+                height: strip.height,
+                child: _Strip(onTap: () => (widget.onEdge ?? turn)(1)),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                width: strip.width,
+                height: strip.height,
+                child: _Strip(onTap: () => (widget.onEdge ?? turn)(-1)),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+/// over the words, so a tap here never waits for a double tap. a swipe from it still turns
+class _Strip extends StatelessWidget {
+  const _Strip({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: true,
+      onTap: onTap,
     );
   }
 }
@@ -320,7 +361,6 @@ class _PageTurnerState extends State<PageTurner> with SingleTickerProviderStateM
 class _Pages extends StatelessWidget {
   const _Pages({
     required this.turn,
-    required this.card,
     required this.recede,
     required this.lift,
     required this.leaf,
@@ -334,7 +374,6 @@ class _Pages extends StatelessWidget {
   });
 
   final Animation<double> turn;
-  final Animation<double> card;
   final Animation<double> recede;
   final Animation<double> lift;
   final ValueListenable<(int, ui.Image)?> leaf;
@@ -354,23 +393,19 @@ class _Pages extends StatelessWidget {
       offset: Offset(0, SizeManager.pageCardShadowY.r),
       spreadRadius: SizeManager.pageCardShadowSpread.r,
     );
-    final bg = context.getColor(ThemeEnum.bg);
     return AnimatedBuilder(
-      animation: Listenable.merge([turn, card, recede, lift, leaf, parked]),
+      animation: Listenable.merge([turn, recede, lift, leaf, parked]),
       builder: (context, _) {
         final t = turn.value.clamp(-1.0, 1.0);
-        final c = card.value;
 
         /// reduce motion only dims behind the large sheet, the page doesn't scale
         final s = fade ? 0.0 : recede.value;
-        final round = math.max(c, s);
-        final scale = 1 - (1 - SizeManager.pageCardScale) * c - (1 - SizeManager.pageRecede) * s;
-        final lift =
-            -SpaceManager.pageCardLift.r * c - this.lift.value - SpaceManager.pageRecedeLift.r * s;
+        final scale = 1 - (1 - SizeManager.pageRecede) * s;
+        final lift = -this.lift.value - SpaceManager.pageRecedeLift.r * s;
         final cardTransform = Matrix4.identity()
           ..translateByDouble(0, lift, 0, 1)
           ..scaleByDouble(scale, scale, 1, 1);
-        final radius = RadiusManager.pageCard.r * round / scale;
+        final radius = RadiusManager.pageCard.r * s / scale;
 
         /// the leaf on top: the current page turning away, or the previous one coming back
         final leaf = t < 0 ? current - 1 : current;
@@ -394,7 +429,7 @@ class _Pages extends StatelessWidget {
               if (pages[n] case final child?)
                 KeyedSubtree(
                   key: ValueKey(n),
-                  child: switch (_shown(n, t, c, away, under)) {
+                  child: switch (_shown(n, t, away, under)) {
                     /// painted out of sight, so the turn back can take its picture
                     false when book && parked.value && n == current - 1 => _Placed(
                       transform: Matrix4.translationValues(-2 * width, 0, 0),
@@ -402,9 +437,8 @@ class _Pages extends StatelessWidget {
                     ),
                     final shown => _Placed(
                       hidden: !shown,
-                      transform: _transform(n, t, c, cardTransform),
+                      transform: _transform(n, t, cardTransform),
                       opacity: _opacity(n, t),
-                      veil: n == current + 1 && t == 0 ? bg.withValues(alpha: 1 - .9 * c) : null,
                       radius: radius,
                       shadow: n == current && radius > 0 ? shadow : null,
                       child: child,
@@ -423,23 +457,10 @@ class _Pages extends StatelessWidget {
     );
   }
 
-  bool _shown(int n, double t, double c, int? away, int under) =>
-      n != away &&
-      (n == current ||
-          (n == current - 1 && t < 0) ||
-          (n == under && t > 0) ||
-          (n == current + 1 && t == 0 && c > 0));
+  bool _shown(int n, double t, int? away, int under) =>
+      n != away && (n == current || (n == current - 1 && t < 0) || (n == under && t > 0));
 
-  Matrix4 _transform(int n, double t, double c, Matrix4 card) {
-    final scale = card.entry(0, 0);
-    final lift = card.entry(1, 3);
-
-    /// the next page peeks on the left of the card (4.21)
-    if (n == current + 1 && t == 0) {
-      return Matrix4.identity()
-        ..translateByDouble(-(width * scale + SpaceManager.pagePeekGap.r), lift, 0, 1)
-        ..scaleByDouble(scale, scale, 1, 1);
-    }
+  Matrix4 _transform(int n, double t, Matrix4 card) {
     if (fade || book) return card;
     final x = switch (n - current) {
       0 => t * width,
@@ -466,7 +487,6 @@ class _Placed extends StatelessWidget {
     required this.child,
     this.hidden = false,
     this.opacity = 1,
-    this.veil,
     this.radius = 0,
     this.shadow,
   });
@@ -475,9 +495,6 @@ class _Placed extends StatelessWidget {
   final Matrix4 transform;
   final double opacity;
 
-  /// the next page peeks at 90% of the card's value through the bg laid over it. the same as an
-  /// Opacity, it only has the bg behind, without an offscreen layer on every frame of the card
-  final Color? veil;
   final double radius;
   final BoxShadow? shadow;
   final Widget child;
@@ -485,17 +502,6 @@ class _Placed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var page = child;
-    if (veil case final veil?) {
-      page = Stack(
-        fit: StackFit.passthrough,
-        children: [
-          page,
-          Positioned.fill(
-            child: IgnorePointer(child: ColoredBox(color: veil)),
-          ),
-        ],
-      );
-    }
     if (radius > 0 || shadow != null) {
       page = DecoratedBox(
         decoration: BoxDecoration(

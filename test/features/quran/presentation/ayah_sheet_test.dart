@@ -54,7 +54,7 @@ void main() {
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(AyahKey(1, ayah)) != null,
     );
-    await tester.tapAt(page.localToGlobal(page.washBounds(AyahKey(1, ayah))!.center));
+    await tester.longPressAt(page.localToGlobal(page.washBounds(AyahKey(1, ayah))!.center));
     await tester.pumpAndSettle();
   }
 

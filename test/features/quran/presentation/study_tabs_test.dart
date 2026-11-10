@@ -69,7 +69,7 @@ void main() {
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(const AyahKey(1, 5)) != null,
     );
-    await tester.tapAt(page.localToGlobal(page.washBounds(const AyahKey(1, 5))!.center));
+    await tester.longPressAt(page.localToGlobal(page.washBounds(const AyahKey(1, 5))!.center));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(of: find.byType(AyahSheet), matching: find.text('Tafsir')));
     await tester.pumpAndSettle();

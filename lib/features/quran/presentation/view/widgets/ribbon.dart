@@ -120,7 +120,7 @@ class _Ribbon extends CustomPainter {
       old.color != color || old.notch != notch || old.shadow != shadow;
 }
 
-/// the ribbon's outline in rect, also the mushaf's margin ribbons
+/// the ribbon's outline in rect
 Path ribbonPath(Rect rect, double notch) => Path()
   ..addPolygon([
     rect.topLeft,

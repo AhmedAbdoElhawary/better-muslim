@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/foundation.dart';
 
@@ -28,6 +29,28 @@ class Bookmark {
   /// its category's
   final CategoryColor color;
   final DateTime createdAt;
+
+  /// its page in the print shown, the database keeps the 1421H one
+  Bookmark shownIn(QuranAssets assets) => _onPage(switch (ayah) {
+    final ayah? => assets.pageOf(ayah),
+    null => assets.shownPage(page),
+  });
+
+  /// back on the 1421H page it's kept on
+  Bookmark storedIn(QuranAssets assets) => _onPage(switch (ayah) {
+    final ayah? => assets.stored.pageOf(ayah),
+    null => assets.storedPage(page),
+  });
+
+  Bookmark _onPage(int page) => Bookmark(
+    id: id,
+    page: page,
+    category: category,
+    color: color,
+    createdAt: createdAt,
+    ayah: ayah,
+    name: name,
+  );
 
   @override
   bool operator ==(Object other) =>

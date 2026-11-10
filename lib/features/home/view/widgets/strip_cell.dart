@@ -17,7 +17,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 /// one prayer of the strip: highlighted when current, checked when logged, a dot while the
-/// current one isn't logged
+/// prayer in its now window isn't logged
 class StripCell extends ConsumerWidget {
   const StripCell(this.index, {super.key});
   final int index;
@@ -33,11 +33,7 @@ class StripCell extends ConsumerWidget {
         behavior: HitTestBehavior.opaque,
         onTap: () => context.go(Routes.prayerAt(ref.read(prayerDayProvider), cell.prayer)),
         child: AnimatedDecoratedBox(
-          decoration: BoxDecoration(
-            color: cell.current ? context.getColor(ThemeEnum.primaryContainer) : null,
-            borderRadius: BorderRadius.circular(RadiusManager.md.r),
-            border: cell.current ? Border.all(color: currentBorder(context)) : null,
-          ),
+          decoration: decoration(context, cell),
           child: OnlyPadding(
             top: isArabic ? SpaceManager.stripCellTopAr : SpaceManager.stripCellTop,
             bottom: isArabic ? SpaceManager.stripCellBottomAr : SpaceManager.s2,
@@ -47,7 +43,7 @@ class StripCell extends ConsumerWidget {
                   SemiBoldText(
                     cell.prayer.nameKey,
                     fontSize: FontSizeManager.label,
-                    color: ThemeEnum.onPrimaryContainer,
+                    color: cell.now ? ThemeEnum.onPrimaryContainer : ThemeEnum.primary,
                     maxLines: 1,
                   )
                 else
@@ -72,9 +68,19 @@ class StripCell extends ConsumerWidget {
     );
   }
 
-  /// the current cell's inset ring, primary at 35%
-  static Color currentBorder(BuildContext context) =>
-      context.getColor(ThemeEnum.primary).withValues(alpha: .15);
+  /// filled in its now window, outlined when it is the next prayer
+  static BoxDecoration decoration(BuildContext context, StripEntry cell) {
+    final primary = context.getColor(ThemeEnum.primary);
+    return BoxDecoration(
+      color: cell.now ? context.getColor(ThemeEnum.primaryContainer) : null,
+      borderRadius: BorderRadius.circular(RadiusManager.md.r),
+      border: !cell.current
+          ? null
+          : cell.now
+          ? Border.all(color: primary.withValues(alpha: .15))
+          : Border.all(color: primary, width: SizeManager.nextRing.r),
+    );
+  }
 }
 
 /// the time, or a dash on a polar day that has none
@@ -117,7 +123,7 @@ class StripMark extends StatelessWidget {
       duration: BmMotion.micro,
       layoutBuilder: (current, previous) =>
           Stack(alignment: Alignment.topCenter, children: [...previous, ?current]),
-      child: _Mark(cell, key: ValueKey((cell.logged, cell.current))),
+      child: _Mark(cell, key: ValueKey((cell.logged, cell.now))),
     );
   }
 }
@@ -135,7 +141,7 @@ class _Mark extends StatelessWidget {
         color: context.getColor(ThemeEnum.success),
       );
     }
-    if (!cell.current) return const SizedBox.shrink();
+    if (!cell.now) return const SizedBox.shrink();
     return Align(
       alignment: Alignment.topCenter,
       widthFactor: 1,
