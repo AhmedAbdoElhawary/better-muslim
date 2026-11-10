@@ -17,8 +17,8 @@ class ModeControl extends ConsumerWidget {
       selected: mode,
       labelOf: (mode) => mode.nameKey,
 
-      /// 4.15 draws follow sky in text2 while it isn't picked, follow phone is the same kind
-      muted: const {BmThemeMode.followSky, BmThemeMode.followPhone},
+      /// 4.15 mutes only follow sky, all four look the same so none reads as lesser
+      muted: BmThemeMode.values.toSet(),
       onChanged: ref.read(themePreviewProvider.notifier).pickMode,
     );
   }
