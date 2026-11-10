@@ -154,7 +154,7 @@ class _Tools extends ConsumerWidget {
             onTap: () {
               final lastRead = ref.read(lastReadProvider);
               playFrom(context, ref, lastRead.ayah);
-              context.push(Routes.quranPage(lastRead.page));
+              context.push(Routes.quranPage(lastRead.page, recite: true));
             },
           ),
         ),
