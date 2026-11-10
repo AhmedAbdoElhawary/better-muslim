@@ -149,6 +149,13 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
     final info = assets?.pageInfo(number);
     final lines = page.value?.lines ?? const <MushafLine>[];
     final keys = {for (final line in lines) ...line.words.map((word) => word.key)};
+    final bookmarked = {
+      for (final bookmark
+          in ref.watch(bookmarksProvider.select((bookmarks) => bookmarks.value)) ??
+              const <Bookmark>[])
+        if (bookmark.ayah case final ayah? when keys.contains(ayah))
+          ayah: context.getColor(bookmark.color.theme),
+    };
     final shown = shownTranslation(context, ref);
     final texts = {
       for (final surah in keys.map((key) => key.surah).toSet())
@@ -175,13 +182,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
           },
         ),
       ),
-      bookmarked: {
-        for (final bookmark
-            in ref.watch(bookmarksProvider.select((bookmarks) => bookmarks.value)) ??
-                const <Bookmark>[])
-          if (bookmark.ayah case final ayah? when keys.contains(ayah))
-            ayah: context.getColor(bookmark.color.theme),
-      },
+      bookmarked: bookmarked,
 
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
@@ -203,6 +204,9 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
         settingsProvider.select((settings) => settings.value?.quranFont ?? QuranFont.kfgqpc),
       ),
       glyphs: family == null ? null : (family: family, ink: style.ink, colored: style.colored),
+      inks: style == MushafStyle.text || bookmarked.isEmpty
+          ? const {}
+          : ref.watch(glyphInksProvider((style, number))).value ?? const {},
       tajweed:
           palette == null || palette.length <= _tajweedKey.map((rule) => rule.$1).reduce(math.max)
           ? null
@@ -224,6 +228,19 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       ),
     );
   }
+}
+
+/// the bookmark icon's ribbon standing [height] tall around [center], its notch at the bottom
+Path bookmarkRibbon(Offset center, double height) {
+  final width = height / SizeManager.bookmarkRibbonTall;
+  final rect = Rect.fromCenter(center: center, width: width, height: height);
+  return Path()
+    ..moveTo(rect.left, rect.top)
+    ..lineTo(rect.right, rect.top)
+    ..lineTo(rect.right, rect.bottom)
+    ..lineTo(rect.center.dx, rect.bottom - width * SizeManager.bookmarkRibbonNotch)
+    ..lineTo(rect.left, rect.bottom)
+    ..close();
 }
 
 /// the printed key with each rule's entry in V4's palettes, the madd first for the right side
@@ -309,6 +326,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.direction,
     required this.font,
     required this.glyphs,
+    required this.inks,
     required this.tajweed,
     required this.step,
     required this.colors,
@@ -334,6 +352,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final TextDirection direction;
   final QuranFont font;
   final MushafGlyphs? glyphs;
+  final Map<int, Rect> inks;
   final List<TajweedRule>? tajweed;
   final int step;
   final MushafColors colors;
@@ -360,6 +379,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     direction: direction,
     font: font,
     glyphs: glyphs,
+    inks: inks,
     tajweed: tajweed,
     step: step,
     colors: colors,
@@ -388,6 +408,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..direction = direction
       ..font = font
       ..glyphs = glyphs
+      ..inks = inks
       ..tajweed = tajweed
       ..step = step
       ..colors = colors;
@@ -418,6 +439,7 @@ class RenderMushafPage extends RenderBox {
     required this._direction,
     required this._font,
     required this._glyphs,
+    required this._inks,
     required this._tajweed,
     required this._step,
     required this._colors,
@@ -568,6 +590,14 @@ class RenderMushafPage extends RenderBox {
     if (value == _glyphs) return;
     _glyphs = value;
     _relayout();
+  }
+
+  /// the page font's ink boxes, the markers' are where a bookmarked number centers
+  Map<int, Rect> _inks;
+  set inks(Map<int, Rect> value) {
+    if (identical(value, _inks)) return;
+    _inks = value;
+    markNeedsPaint();
   }
 
   /// Display's mushaf size, above 0 the page is as tall as its rewrapped lines
@@ -792,8 +822,8 @@ class RenderMushafPage extends RenderBox {
     _nodes.clear();
   }
 
-  /// a bookmarked ayah's number on this page, the text's star or the qcf font's circle. null on a
-  /// page the ayah doesn't end on
+  /// a bookmarked ayah's ribbon behind its number on this page, centered on the text's star or on
+  /// the qcf marker's ink. null on a page the ayah doesn't end on
   Path? bookmarkedNumber(AyahKey key) {
     final laid = _laid;
     if (laid == null || _page == null || !_bookmarked.containsKey(key)) return null;
@@ -803,14 +833,26 @@ class RenderMushafPage extends RenderBox {
         final word = lines[i].words[j];
         if (!word.end || word.key != key) continue;
         final rect = laid.layout.words[i][j];
-        if (_glyphs == null) return mushafStar(rect.center, laid.marker);
+        final glyph = laid.words[i][j];
+        final ink = word.glyph.isEmpty ? null : _inks[word.glyph.runes.first];
+        if (_glyphs == null || glyph == null || ink == null) {
+          return bookmarkRibbon(
+            _glyphs == null ? rect.center : rect.center.translate(0, laid.inkShift),
+            SizeManager.bookmarkRibbon * (_glyphs == null ? laid.marker : laid.fontSize),
+          );
+        }
 
-        /// the font's circle sits on the ink like the words, as wide as its glyph
-        return Path()..addOval(
-          Rect.fromCircle(
-            center: rect.center.translate(0, laid.inkShift),
-            radius: math.min(rect.width, laid.textHeight) / 2,
+        /// painted from the box's left on its line's middle, squeezed on a tight line
+        final baseline =
+            laid.layout.lines[i].center.dy -
+            glyph.height / 2 +
+            glyph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+        return bookmarkRibbon(
+          Offset(
+            rect.left + laid.layout.scales[i] * laid.fontSize * ink.center.dx,
+            baseline + laid.fontSize * ink.center.dy,
           ),
+          SizeManager.bookmarkRibbon * laid.fontSize * ink.height,
         );
       }
     }
@@ -1239,6 +1281,7 @@ class _Laid {
     required this.textHeight,
     required this.inkShift,
     required this.ink,
+    required this.fontSize,
   });
 
   factory _Laid.of(_LaidInput input) {
@@ -1521,6 +1564,7 @@ class _Laid {
           space.height / 2 -
           (glyphs?.ink ?? font.ink) * fontSize,
       ink: ink,
+      fontSize: fontSize,
     );
   }
 
@@ -1552,6 +1596,9 @@ class _Laid {
 
   /// the color the text was laid out in
   final Color ink;
+
+  /// the quran text's, a qcf marker's ink is in its ems
+  final double fontSize;
 
   final double unit;
 
