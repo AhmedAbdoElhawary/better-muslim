@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
@@ -14,7 +12,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// stays in place and fades for 150 ms. a release that snaps it back open gives the detent haptic
 Future<T?> showBmSheet<T>(
   BuildContext context, {
-  bool applyBlur = true,
   double? maxSheetHeight,
   Widget? title,
   required WidgetBuilder builder,
@@ -39,14 +36,8 @@ Future<T?> showBmSheet<T>(
 
   /// the sheet stays put while the barrier and the content fade
   const still = Threshold(0);
-  final route = _BlurredModalBottomSheetRoute<T>(
-    applyBlur: applyBlur,
-    builder: (context) => _Sheet(
-      fade: reduceMotion,
-      enableCustomCurve: maxSheetHeight != null,
-      title: title,
-      child: builder(context),
-    ),
+  final route = ModalBottomSheetRoute<T>(
+    builder: (context) => _Sheet(fade: reduceMotion, title: title, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
     isScrollControlled: true,
@@ -67,56 +58,10 @@ Future<T?> showBmSheet<T>(
   return navigator.push(route);
 }
 
-class _BlurredModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
-  _BlurredModalBottomSheetRoute({
-    required super.builder,
-    super.capturedThemes,
-    super.barrierLabel,
-    required super.isScrollControlled,
-    super.useSafeArea,
-    super.backgroundColor,
-    super.elevation,
-    super.constraints,
-    super.modalBarrierColor,
-    super.transitionAnimationController,
-    super.sheetAnimationStyle,
-    this.applyBlur = true,
-  });
-  final bool applyBlur;
-
-  @override
-  Widget buildModalBarrier() {
-    if (!applyBlur) return super.buildModalBarrier();
-
-    final routeAnimation = animation!;
-
-    return AnimatedBuilder(
-      animation: routeAnimation,
-      child: super.buildModalBarrier(),
-      builder: (context, barrier) {
-        final sigma = (SizeManager.backdropBlur * routeAnimation.value)
-            .clamp(0.0, SizeManager.backdropBlur)
-            .toDouble();
-
-        return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-          child: barrier,
-        );
-      },
-    );
-  }
-}
-
 class _Sheet extends StatelessWidget {
-  const _Sheet({
-    this.enableCustomCurve = true,
-    required this.fade,
-    required this.title,
-    required this.child,
-  });
+  const _Sheet({required this.fade, required this.title, required this.child});
   final bool fade;
   final Widget child;
-  final bool enableCustomCurve;
   final Widget? title;
   @override
   Widget build(BuildContext context) {
@@ -137,38 +82,8 @@ class _Sheet extends StatelessWidget {
         ),
       ),
     );
-    final animation = ModalRoute.of(context)!.animation!;
-
-    if (fade) {
-      return FadeTransition(opacity: animation, child: sheet);
-    }
-
-    final position = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: animation,
-        curve: enableCustomCurve ? const _OvershootCurve() : Curves.easeOutExpo,
-        reverseCurve: Curves.easeInCubic,
-      ),
-    );
-
-    return SlideTransition(position: position, child: sheet);
-  }
-}
-
-class _OvershootCurve extends Curve {
-  const _OvershootCurve();
-
-  @override
-  double transformInternal(double t) {
-    final value = t.clamp(0.0, 1.0).toDouble();
-
-    if (value < 0.7) {
-      return 1.08 * Curves.easeOutCubic.transform(value / 0.7);
-    }
-
-    final progress = Curves.easeInOut.transform((value - 0.7) / 0.3);
-
-    return 1.08 - (0.08 * progress);
+    if (!fade) return sheet;
+    return FadeTransition(opacity: ModalRoute.of(context)!.animation!, child: sheet);
   }
 }
 
