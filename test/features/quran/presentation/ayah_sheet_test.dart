@@ -119,7 +119,12 @@ void main() {
     await select(tester, 5);
     await tapIn(tester, AyahSheet, find.text('Tafsir'));
 
-    expect(tester.widget<PageTurner>(find.byType(PageTurner)).recede.value, closeTo(1, .01));
+    expect(tester.widget<StudySheet>(find.byType(StudySheet)).open.value, closeTo(1, .01));
+    expect(
+      tester.getRect(find.byType(MushafPageView).first).width,
+      tester.getSize(find.byType(PageTurner)).width,
+      reason: 'the page never scales behind the sheet',
+    );
     for (final text in ['Tafsir', 'Translation', 'Notes', 'Al-Muyassar', tafsir(5)]) {
       expect(inSheet(StudySheet, find.text(text)), findsWidgets, reason: text);
     }
@@ -151,7 +156,7 @@ void main() {
     await tester.tap(labelled(StudySheet, 'Close'));
     await tester.pumpAndSettle();
     expect(selected(tester), isNull);
-    expect(tester.widget<PageTurner>(find.byType(PageTurner)).recede.value, closeTo(0, .01));
+    expect(tester.widget<StudySheet>(find.byType(StudySheet)).open.value, closeTo(0, .01));
     await unmount(tester);
   });
 
@@ -210,7 +215,7 @@ void main() {
       await tester.tap(labelled(StudySheet, 'Close'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
-      final open = tester.widget<PageTurner>(find.byType(PageTurner)).recede.value;
+      final open = tester.widget<StudySheet>(find.byType(StudySheet)).open.value;
       expect(open, lessThan(.9));
       expect(shown(tester), closeTo(720 * open, 1), reason: 'the whole sheet slides down');
       await tester.pumpAndSettle();
