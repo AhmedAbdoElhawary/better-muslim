@@ -25,12 +25,12 @@ class DuasPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    return const Scaffold(
       body: TitleGlow(
         child: ClipGuard(
           child: Column(
             children: [
-              const CompactAppBar(StringsManager.duas, heroTag: Routes.duas),
+              CompactAppBar(StringsManager.duas, heroTag: Routes.duas),
               Expanded(
                 child: SingleChildScrollView(
                   child: SafeArea(
@@ -38,21 +38,15 @@ class DuasPage extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const RSizedBox.vertical(SpaceManager.s2),
-                        HorizontalPadding(
-                          padding: SpaceManager.screen,
-                          child: SearchField(
-                            hint: StringsManager.searchDuas,
-                            onChanged: ref.read(duaQueryProvider.notifier).change,
-                          ),
-                        ),
+                        RSizedBox.vertical(SpaceManager.s2),
+                        _BuildSearch(),
 
                         /// the tree's 12 and 16 around the chips, less their 44 pt hit box
-                        const RSizedBox.vertical(SpaceManager.s2),
-                        const DuaChips(),
-                        const RSizedBox.vertical(SpaceManager.s3),
-                        const _Content(),
-                        const RSizedBox.vertical(SpaceManager.screen),
+                        RSizedBox.vertical(SpaceManager.s2),
+                        DuaChips(),
+                        RSizedBox.vertical(SpaceManager.s3),
+                        _Content(),
+                        RSizedBox.vertical(SpaceManager.screen),
                       ],
                     ),
                   ),
@@ -61,6 +55,21 @@ class DuasPage extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BuildSearch extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return HorizontalPadding(
+      padding: SpaceManager.screen,
+      child: SearchField(
+        hint: StringsManager.searchDuas,
+        onChanged: ref.read(duaQueryProvider.notifier).change,
       ),
     );
   }
