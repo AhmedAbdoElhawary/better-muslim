@@ -37,6 +37,9 @@ const _loaders = [
   'lib/core/widgets/motion/star_loader.dart',
 ];
 
+/// the second ticker and the one countdown that shows seconds
+const _seconds = ['lib/core/clock/clock.dart', 'lib/core/prayer_times/next_prayer.dart'];
+
 /// a layer may not import the layers listed for it
 const _forbiddenLayers = {
   'domain': {'data', 'presentation'},
@@ -53,6 +56,11 @@ final _rules = [
     'nothing loops without a finger, only the loaders',
     RegExp(r'\.repeat\((?!count:)'),
     allowedIn: _loaders,
+  ),
+  _Rule(
+    'only the countdown follows the second, the rest waits for its boundary',
+    RegExp(r'\btickerProvider\b'),
+    allowedIn: _seconds,
   ),
   _Rule(
     'colors come from context.getColor(ThemeEnum.x)',
