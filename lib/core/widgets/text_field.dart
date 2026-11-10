@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/styles_manager.dart';
@@ -38,6 +39,8 @@ class BmTextField extends StatefulWidget {
 
   /// null grows with the text, a note
   final int? maxLines;
+
+  /// focused once its sheet has landed
   final bool autofocus;
 
   @override
@@ -52,6 +55,27 @@ class _BmTextFieldState extends State<BmTextField> {
   void initState() {
     super.initState();
     _focus.addListener(() => setState(() {}));
+    if (widget.autofocus) WidgetsBinding.instance.addPostFrameCallback((_) => _focusLater());
+  }
+
+  /// the keyboard rising with the sheet relaid the sheet every frame of both. a field switched
+  /// into a sheet already open waits for the switch
+  void _focusLater() {
+    if (!mounted) return;
+    final route = ModalRoute.of(context)?.animation;
+    if (route == null || route.isCompleted) {
+      Future.delayed(BmMotion.standard, () {
+        if (mounted) _focus.requestFocus();
+      });
+      return;
+    }
+    void landed(AnimationStatus status) {
+      if (!status.isCompleted) return;
+      route.removeStatusListener(landed);
+      if (mounted) _focus.requestFocus();
+    }
+
+    route.addStatusListener(landed);
   }
 
   @override
@@ -100,7 +124,6 @@ class _BmTextFieldState extends State<BmTextField> {
                 child: TextField(
                   controller: _controller,
                   focusNode: _focus,
-                  autofocus: widget.autofocus,
                   maxLines: widget.maxLines,
                   keyboardType: widget.maxLines == 1 ? null : TextInputType.multiline,
                   textCapitalization: TextCapitalization.sentences,
