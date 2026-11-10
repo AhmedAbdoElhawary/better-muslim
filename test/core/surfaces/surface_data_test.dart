@@ -110,7 +110,6 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         clockProvider.overrideWithValue(() => moment),
-        tickerProvider.overrideWithValue(const AsyncLoading()),
         locationProvider.overrideWithValue(location),
         settingsProvider.overrideWithValue(AsyncData(defaults)),
         prayedProvider.overrideWith((ref, day) => day == first ? prayed : const <Prayer>{}),
