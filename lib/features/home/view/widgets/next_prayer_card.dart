@@ -135,7 +135,7 @@ class _NameAndCountdown extends ConsumerWidget {
             fontSize: isArabic ? FontSizeManager.titleAr : FontSizeManager.cardTitle,
             height: isArabic ? LineHeightManager.cardTitleAr : LineHeightManager.cardTitle,
           );
-    final countdown = RepaintBoundary(child: Countdown(key: flight?.countdown));
+    final countdown = Countdown(key: flight?.countdown);
     final row = context.isLargeText
         ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [name, countdown])
         : Row(

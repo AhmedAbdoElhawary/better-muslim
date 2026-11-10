@@ -403,7 +403,7 @@ class _FlyingPrayer extends ConsumerWidget {
           from: from,
           pick: (from) => from.countdown,
           scale: FontSizeManager.countdown / FontSizeManager.title,
-          child: const RepaintBoundary(child: Countdown(fontSize: FontSizeManager.title)),
+          child: const Countdown(fontSize: FontSizeManager.title),
         ),
       ],
     );
