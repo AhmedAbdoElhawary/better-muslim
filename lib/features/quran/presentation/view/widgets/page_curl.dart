@@ -97,7 +97,11 @@ class _CurlPainter extends CustomPainter {
       ..setFloat(9, shadow.r)
       ..setFloat(10, shadow.g)
       ..setFloat(11, shadow.b)
-      ..setFloat(12, SizeManager.curlShadow)
+      /// the fold's shadow stays on the page after the leaf has left it, so it fades before landing
+      ..setFloat(
+        12,
+        SizeManager.curlShadow * ((1 - progress) / SizeManager.curlShadowFade).clamp(0, 1),
+      )
       ..setImageSampler(0, image, filterQuality: FilterQuality.low);
     canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
   }
