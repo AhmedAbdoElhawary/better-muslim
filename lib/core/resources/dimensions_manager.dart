@@ -158,6 +158,7 @@ abstract final class SpaceManager {
   /// the components' segmented control, 4.15's and 4.12's smaller one
   static const double segmentTrack = 3;
   static const double segmentGap = 2;
+  static const double segmentSide = 10;
   static const double segmentSmallSide = 10;
   static const double segmentIconGap = 4;
 
@@ -282,7 +283,7 @@ abstract final class SpaceManager {
   static const double cartoucheStar = 14;
   static const double cartoucheStarTop = 15;
   static const double secondTextTop = 250;
-  static const double ayahWashV = 5;
+  static const double ayahWashV = 0;
   static const double ayahWashH = 2;
   static const double ayahMarkerGap = 2;
   static const double cartoucheNameTop = 3;
@@ -321,6 +322,8 @@ abstract final class SpaceManager {
   static const double surahRowGap = 14;
   static const double surahRowLineGap = 2;
   static const double quranHeaderGap = 2;
+  static const double reciterChevronTop = 3;
+  static const double reciterChevronSide = 2;
   static const double quranCardGap = 14;
   static const double sheetHeadStart = 20;
   static const double sheetHeadEnd = 16;
@@ -360,9 +363,6 @@ abstract final class SpaceManager {
   static const double studyCardGap = 10;
   static const double studyCardV = 12;
   static const double studyCardLineGap = 4;
-
-  /// the page goes up this far as it recedes behind the large sheet
-  static const double pageRecedeLift = 16;
 
   /// 4.29, the saved rows and the note cards
   static const double savedGap = 10;
@@ -446,7 +446,6 @@ abstract final class RadiusManager {
   static const double stepDot = 3;
   static const double stepIconTile = 20;
   static const double ayahWash = 9;
-  static const double pageCard = 16;
   static const double mushafFrame = 2;
   static const double miniPlayer = 22;
   static const double recitationBar = 2;
@@ -695,6 +694,12 @@ abstract final class SizeManager {
   /// a bookmarked ayah's number filled behind its digit, the digit keeps its ink
   static const double bookmarkedNumber = .4;
 
+  /// the ribbon behind a bookmarked number to its marker's height, and the bookmark icon's height
+  /// and notch to its width
+  static const double bookmarkRibbon = 1.5;
+  static const double bookmarkRibbonTall = 1.7;
+  static const double bookmarkRibbonNotch = .38;
+
   /// K.STAR's stroke on the page number and the surah rows, the arch's two lines, the marker's
   static const double starStroke = .9;
   static const double archStroke = .9;
@@ -718,10 +723,6 @@ abstract final class SizeManager {
   static const double scrubberThumb = 22;
   static const double scrubberThumbShadow = 4;
   static const double scrubberThumbShadowY = 1;
-  static const double pageCardShadowBlur = 60;
-  static const double pageCardShadowY = 30;
-  static const double pageCardShadowSpread = -24;
-  static const double pageRecede = .92;
 
   /// the book turn's curl (research R13): fold radius, how much darker the back is, how high the
   /// corner lifts at mid turn, the shadow on the page underneath
@@ -729,6 +730,7 @@ abstract final class SizeManager {
   static const double curlBackShade = .06;
   static const double curlTilt = 72;
   static const double curlShadow = .35;
+  static const double curlShadowFade = .25;
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
   static const double sheetMax = 740;
@@ -762,7 +764,7 @@ abstract final class SizeManager {
   static const double sheetShadowY = -24;
   static const double sheetShadowSpread = -20;
 
-  /// the scrim over the receded page
+  /// the scrim over the page behind the large sheet
   static const double pageDim = .28;
 
   /// black54, the scrim behind a container transform
@@ -814,8 +816,8 @@ abstract final class SizeManager {
   static const double shareSwatchRow = 90;
   static const double shareSwatchRing = 2;
   static const double shareSwatchGapRing = 3;
-  static const double sharePreviewShadowY = 20;
-  static const double sharePreviewShadowBlur = 40;
+  static const double sharePreviewShadowY = 15;
+  static const double sharePreviewShadowBlur = 35;
   static const double sharePreviewShadowSpread = -20;
 
   /// the card's text shrinks in these steps, then story, then tafsir goes (FR-017)
