@@ -40,7 +40,7 @@ const reciteSpeeds = [.75, 1.0, 1.25, 1.5];
 /// in the repeat cycle after 10, each ayah once and the range again from its start
 const surahLoop = 0;
 const reciteRepeats = [1, 2, 3, 5, 10, surahLoop];
-const recitePauses = [0, 1, 2, 3, 5];
+const recitePauses = [0, 1, 2, 3, 5, 10];
 
 @immutable
 class RecitationState {

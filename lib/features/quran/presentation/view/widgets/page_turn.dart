@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
-import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_curl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,6 @@ class PageTurner extends StatefulWidget {
     required this.page,
     required this.pageBuilder,
     this.book = true,
-    this.recede = kAlwaysDismissedAnimation,
     this.lift = kAlwaysDismissedAnimation,
     this.onTap,
     this.onEdge,
@@ -34,9 +32,6 @@ class PageTurner extends StatefulWidget {
   final ValueNotifier<int> page;
   final Widget Function(int page) pageBuilder;
   final bool book;
-
-  /// 0 full page, 1 receded behind the large sheet (4.23)
-  final Animation<double> recede;
 
   /// how far up the page goes for the ayah sheet, in pixels (4.22)
   final Animation<double> lift;
@@ -90,6 +85,9 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
   /// how far a page follows the finger past the first or the last page
   static const _rubber = .15;
 
+  /// the leaf is off the page well before the spring is still, its tail only cost frames
+  static const _landed = Tolerance(distance: .005, velocity: .1);
+
   bool get _reduce => MediaQuery.disableAnimationsOf(context);
 
   @override
@@ -114,8 +112,9 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
       ? widget.page.value > 1
       : true;
 
-  /// one picture of the leaf per turn, taken once a frame has painted it. debugLayer and
-  /// debugNeedsPaint are always null and false in profile and release, they hid the curl there
+  /// one picture of the leaf per turn, taken once a frame has painted it. debugLayer is always
+  /// null in profile and release, it hid the curl there. debugNeedsPaint is false there, it only
+  /// keeps debug off toImageSync's assert, the next tick tries again
   void _snap() {
     if (!widget.book || _turn.value == 0 || _reduce) return;
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -124,9 +123,12 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
       final leaf = t < 0 ? widget.page.value - 1 : widget.page.value;
       if (_leaf.value?.$1 == leaf) return;
       final boundary = _keys[leaf]?.currentContext?.findRenderObject();
-      if (boundary is! RenderRepaintBoundary || !boundary.hasSize) return;
-      _leaf.value?.$2.dispose();
+      if (boundary is! RenderRepaintBoundary || !boundary.hasSize || boundary.debugNeedsPaint) {
+        return;
+      }
+      final old = _leaf.value?.$2;
       _leaf.value = (leaf, boundary.toImageSync(pixelRatio: _ratio));
+      old?.dispose();
     });
   }
 
@@ -150,7 +152,7 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
 
       /// not while the reader opens or the page moves, a page's layout would drop one of their
       /// frames. a next door page missing mid turn comes anyway, a blank page is worse
-      final moving = [widget.recede, widget.lift, _turn].any((a) => a.isAnimating);
+      final moving = widget.lift.isAnimating || _turn.isAnimating;
       final opening = ModalRoute.of(context)?.animation?.isCompleted == false;
       if (opening || (moving && far)) {
         _warm();
@@ -158,6 +160,15 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
         return;
       }
       setState(() => _ready.add(next));
+    });
+  }
+
+  /// a new mushaf style lays every page out again, the ones beside it come back one per frame
+  void relayout() {
+    final page = widget.page.value;
+    setState(() {
+      _ready.removeWhere((n) => n != page);
+      _built.removeWhere((n, _) => n != page);
     });
   }
 
@@ -233,7 +244,9 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
     } else if (!widget.book) {
       run = _turn.animateTo(target, duration: BmMotion.pageSlide, curve: BmMotion.standardCurve);
     } else {
-      run = _turn.animateWith(SpringSimulation(BmMotion.gentle, _turn.value, target, velocity));
+      run = _turn.animateWith(
+        SpringSimulation(BmMotion.gentle, _turn.value, target, velocity, tolerance: _landed),
+      );
     }
 
     /// only a run that ends, an interrupted one never resolves
@@ -272,7 +285,7 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
     return LayoutBuilder(
       builder: (context, constraints) {
         _width = constraints.maxWidth;
-        final strip = widget.strip ?? Size(SizeManager.hit.r, constraints.maxHeight);
+        final strip = widget.strip ?? Size((SizeManager.hit * 0.6).r, constraints.maxHeight);
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onHorizontalDragStart: _start,
@@ -293,7 +306,6 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
                   _warm();
                   return _Pages(
                     turn: _turn,
-                    recede: widget.recede,
                     lift: widget.lift,
                     leaf: _leaf,
                     parked: _parked,
@@ -361,7 +373,6 @@ class _Strip extends StatelessWidget {
 class _Pages extends StatelessWidget {
   const _Pages({
     required this.turn,
-    required this.recede,
     required this.lift,
     required this.leaf,
     required this.parked,
@@ -374,7 +385,6 @@ class _Pages extends StatelessWidget {
   });
 
   final Animation<double> turn;
-  final Animation<double> recede;
   final Animation<double> lift;
   final ValueListenable<(int, ui.Image)?> leaf;
   final ValueListenable<bool> parked;
@@ -387,25 +397,11 @@ class _Pages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shadow = BoxShadow(
-      color: context.getColor(ThemeEnum.gutter).withValues(alpha: .45),
-      blurRadius: SizeManager.pageCardShadowBlur.r,
-      offset: Offset(0, SizeManager.pageCardShadowY.r),
-      spreadRadius: SizeManager.pageCardShadowSpread.r,
-    );
     return AnimatedBuilder(
-      animation: Listenable.merge([turn, recede, lift, leaf, parked]),
+      animation: Listenable.merge([turn, lift, leaf, parked]),
       builder: (context, _) {
         final t = turn.value.clamp(-1.0, 1.0);
-
-        /// reduce motion only dims behind the large sheet, the page doesn't scale
-        final s = fade ? 0.0 : recede.value;
-        final scale = 1 - (1 - SizeManager.pageRecede) * s;
-        final lift = -this.lift.value - SpaceManager.pageRecedeLift.r * s;
-        final cardTransform = Matrix4.identity()
-          ..translateByDouble(0, lift, 0, 1)
-          ..scaleByDouble(scale, scale, 1, 1);
-        final radius = RadiusManager.pageCard.r * s / scale;
+        final cardTransform = Matrix4.translationValues(0, -lift.value, 0);
 
         /// the leaf on top: the current page turning away, or the previous one coming back
         final leaf = t < 0 ? current - 1 : current;
@@ -439,8 +435,6 @@ class _Pages extends StatelessWidget {
                       hidden: !shown,
                       transform: _transform(n, t, cardTransform),
                       opacity: _opacity(n, t),
-                      radius: radius,
-                      shadow: n == current && radius > 0 ? shadow : null,
                       child: child,
                     ),
                   },
@@ -448,7 +442,6 @@ class _Pages extends StatelessWidget {
             if (curl != null)
               _Placed(
                 transform: cardTransform,
-                radius: radius,
                 child: PageCurl(image: curl, progress: t < 0 ? 1 + t : t, shader: shader),
               ),
           ],
@@ -487,30 +480,16 @@ class _Placed extends StatelessWidget {
     required this.child,
     this.hidden = false,
     this.opacity = 1,
-    this.radius = 0,
-    this.shadow,
   });
 
   final bool hidden;
   final Matrix4 transform;
   final double opacity;
-
-  final double radius;
-  final BoxShadow? shadow;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     var page = child;
-    if (radius > 0 || shadow != null) {
-      page = DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          boxShadow: [?shadow],
-        ),
-        child: ClipRRect(borderRadius: BorderRadius.circular(radius), child: page),
-      );
-    }
     if (opacity < 1) {
       page = Opacity(opacity: opacity.clamp(0.0, 1.0), child: page);
     }

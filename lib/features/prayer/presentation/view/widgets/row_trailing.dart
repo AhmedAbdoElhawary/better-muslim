@@ -121,7 +121,7 @@ class _NextChip extends ConsumerWidget {
     final next = ref.watch(nextPrayerProvider.select((next) => next?.$2));
     final clock = ref.watch(clockProvider);
     final minutes = ref.watch(
-      tickerProvider.select(
+      minuteProvider.select(
         (now) => next == null ? 0 : next.difference(now.value ?? clock()).inMinutes,
       ),
     );

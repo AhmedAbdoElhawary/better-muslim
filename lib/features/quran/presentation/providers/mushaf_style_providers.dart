@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' show Color;
+import 'dart:ui' show Color, Rect;
 
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -124,4 +124,9 @@ final qcfFontProvider = FutureProvider.autoDispose.family<String?, (MushafStyle,
 final tajweedColorsProvider = FutureProvider.autoDispose.family<List<Color>, (int, int)>(
   (ref, args) =>
       ref.watch(mushafFilesProvider).colors(MushafStyle.qcfV4, args.$1, palette: args.$2),
+);
+
+/// a qcf page's glyphs' ink boxes, read only for a page with a bookmarked ayah on it
+final glyphInksProvider = FutureProvider.autoDispose.family<Map<int, Rect>, (MushafStyle, int)>(
+  (ref, args) => ref.watch(mushafFilesProvider).inks(args.$1, args.$2),
 );

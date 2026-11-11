@@ -1,4 +1,3 @@
-import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
@@ -23,8 +22,8 @@ final themeModeProvider = Provider<ThemeMode>(
   },
 );
 
-/// what follow sky gives now, also for the theme page's preview. follows the ticker, but only
-/// notifies at sunrise and maghrib, so MaterialApp rebuilds twice a day
+/// what follow sky gives now, also for the theme page's preview. only notifies at sunrise and
+/// maghrib, so MaterialApp rebuilds twice a day
 final followSkyProvider = Provider<ThemeMode>((ref) {
   final (:located, :sunrise, :maghrib) = ref.watch(
     todayTimesProvider.select(
@@ -38,7 +37,7 @@ final followSkyProvider = Provider<ThemeMode>((ref) {
   /// a polar day has no maghrib and a polar night no sunrise
   if (sunrise == null) return ThemeMode.dark;
   if (maghrib == null) return ThemeMode.light;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(boundaryProvider);
   final brightness = resolveBrightness(
     BmThemeMode.followSky,
     now: now,

@@ -86,11 +86,14 @@ abstract final class Routes {
   static const String adhanPath = '/adhan';
 
   /// the reader outside the shell, the ayah washed when given (contracts/reader-routes.md)
-  static String quranPage(int page, {AyahKey? ayah}) => Uri(
+  /// [recite] opens it with the recitation sheet up
+  static String quranPage(int page, {AyahKey? ayah, bool recite = false}) => Uri(
     path: '$quran/page/$page',
 
     /// null and not empty, an empty map leaves a trailing ?
-    queryParameters: ayah == null ? null : {'ayah': '$ayah'},
+    queryParameters: ayah == null && !recite
+        ? null
+        : {if (ayah != null) 'ayah': '$ayah', if (recite) 'recite': '1'},
   ).toString();
 
   static const String quranSaved = '$quran/saved';
@@ -266,6 +269,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ReaderPage(
             page: int.parse(state.pathParameters['page']!),
             ayah: AyahKey.tryParse(state.uri.queryParameters['ayah']),
+            recite: state.uri.queryParameters.containsKey('recite'),
           ),
         ),
       ),

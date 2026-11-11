@@ -58,11 +58,17 @@ class _StyleRow extends ConsumerWidget {
   final MushafStyle style;
   final bool selected;
 
-  /// one on the phone is picked and the sheet closes, the others stay to show their download
+  /// one on the phone is picked once the sheet has gone, the page's new layout dropped the sheet's
+  /// frames. the others stay to show their download
   Future<void> _pick(BuildContext context, WidgetRef ref) async {
-    final ready = ref.read(mushafStyleStatusProvider(style)).ready;
+    final pick = ref.read(mushafStylePickProvider.notifier);
     try {
-      await ref.read(mushafStylePickProvider.notifier).pick(style);
+      if (ref.read(mushafStyleStatusProvider(style)).ready) {
+        final route = ModalRoute.of(context);
+        Navigator.pop(context);
+        await route?.completed;
+      }
+      await pick.pick(style);
     } on DownloadException catch (error) {
       if (!context.mounted || error.failure == DownloadFailure.cancelled) return;
       showToast(
@@ -72,9 +78,7 @@ class _StyleRow extends ConsumerWidget {
             : StringsManager.downloadFailed,
         icon: BmIconName.quran,
       );
-      return;
     }
-    if (ready && context.mounted) Navigator.pop(context);
   }
 
   @override

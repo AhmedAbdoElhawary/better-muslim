@@ -65,6 +65,13 @@ void main() {
     return json == null ? null : MushafPage.fromJson(n, json);
   });
 
+  /// a new style lays the pages beside the shown one out again, one a frame, each slow page 50 ms
+  Future<void> settleNeighbours(WidgetTester tester) async {
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
   Future<RenderMushafPage> pumpPage(
     WidgetTester tester,
     int n, {
@@ -302,6 +309,7 @@ void main() {
         (await waitFor(tester, 'qcf_qcfV2_120_0')).washBounds(const AyahKey(5, 77)),
         isNotNull,
       );
+      await settleNeighbours(tester);
       await unmount(tester);
     },
     skip:
@@ -328,6 +336,7 @@ void main() {
     final shown = pages.where((page) => page.washBounds(const AyahKey(5, 71)) != null);
     expect(shown, isNotEmpty);
     expect(shown.every((page) => page.washBounds(const AyahKey(5, 77)) != null), isTrue);
+    await settleNeighbours(tester);
     await unmount(tester);
   }, skip: !File('${qcfFonts('v1')}/p120.ttf').existsSync());
 }

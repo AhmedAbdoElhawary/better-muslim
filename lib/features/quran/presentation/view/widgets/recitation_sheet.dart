@@ -89,10 +89,28 @@ class RecitationSheet extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SemiBoldText(
-                              reciter.label,
-                              fontSize: FontSizeManager.bodyLarge,
-                              maxLines: 2,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: SemiBoldText(
+                                    reciter.label,
+                                    fontSize: FontSizeManager.bodyLarge,
+                                    maxLines: 2,
+                                  ),
+                                ),
+                                OnlyPadding(
+                                  top: SpaceManager.reciterChevronTop,
+                                  start: SpaceManager.reciterChevronSide,
+                                  end: SpaceManager.reciterChevronSide,
+                                  child: BmIcon.ui(
+                                    BmUiIcon.chevron_down,
+                                    size: SizeManager.sheetIcon.r,
+                                    color: context.getColor(ThemeEnum.text3),
+                                  ),
+                                ),
+                              ],
                             ),
                             const RSizedBox.vertical(SpaceManager.quranHeaderGap),
                             RegularText(
@@ -111,7 +129,6 @@ class RecitationSheet extends ConsumerWidget {
               ),
             ),
             const _Download(),
-            RoundButton(icon: BmUiIcon.chevron_down, label: StringsManager.close, onTap: onClose),
           ],
         ),
       ),
@@ -546,11 +563,13 @@ class _RepeatIcon extends StatelessWidget {
               ),
               child: SymmetricPadding(
                 horizontal: SpaceManager.repeatBadgeH,
-                vertical: SpaceManager.repeatBadgeV,
+                vertical: repeat == surahLoop ? 0 : SpaceManager.repeatBadgeV,
                 child: SemiBoldText(
                   repeat == surahLoop ? '∞' : context.formatDigits('$repeat×', digits),
                   translate: false,
-                  fontSize: FontSizeManager.repeatBadge,
+                  fontSize: repeat == surahLoop
+                      ? FontSizeManager.repeatBadge * 1.5
+                      : FontSizeManager.repeatBadge * 1.2,
                   color: ThemeEnum.onPrimary,
                 ),
               ),

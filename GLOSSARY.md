@@ -24,6 +24,10 @@ The prayer Home and the Prayer tab point at: the prayer in its now window, other
 Shown as now in its now window, as next otherwise.
 _Avoid_: selected prayer, current prayer
 
+**Boundary**:
+A time when what the app shows changes on its own: a prayer time, the end of its now window, sunrise, maghrib, local midnight.
+_Avoid_: reminder, tick, timer
+
 ## Calendar
 
 **Selected day**:
@@ -50,8 +54,8 @@ A named, colored group of bookmarks. "Bookmarks" is the one that always exists.
 _Avoid_: ribbon color, folder, tag
 
 **Bookmarked number**:
-A bookmarked ayah's number circle, filled in its category's color.
-_Avoid_: ribbon, bookmark wash, highlight
+A bookmarked ayah's number, with a ribbon in its category's color behind it.
+_Avoid_: bookmark wash, highlight, page ribbon
 
 **Page ribbon**:
 The ribbon hanging from the mushaf page's top edge, in the color of the page's newest bookmark.

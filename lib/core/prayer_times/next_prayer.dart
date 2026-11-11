@@ -13,13 +13,13 @@ final timeLeftProvider = Provider<Duration?>((ref) {
   return next.difference(now);
 });
 
-/// rounded, so the bar rebuilds every few seconds instead of every second
+/// once a minute, rounded so a minute that moves it less than a step rebuilds nothing
 final barShareProvider = Provider<double?>((ref) {
   final period = ref.watch(periodProvider);
   final next = ref.watch(nextPrayerProvider.select((next) => next?.$2));
   final times = ref.watch(todayTimesProvider);
   if (period == null || next == null || times == null) return null;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(minuteProvider).value ?? ref.watch(clockProvider)();
   final today = ref.watch(todayProvider);
   final start = periodStart(
     period,

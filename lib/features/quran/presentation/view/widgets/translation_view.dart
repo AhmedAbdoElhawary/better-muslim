@@ -6,6 +6,7 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
@@ -21,6 +22,7 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,6 +44,7 @@ class TranslationView extends ConsumerStatefulWidget {
     required this.mushaf,
     required this.shown,
     required this.onHidden,
+    required this.followCells,
     this.entering = false,
     super.key,
   });
@@ -63,6 +66,9 @@ class TranslationView extends ConsumerStatefulWidget {
 
   /// the page the Translation button turned on, the only one that scrolls in
   final bool entering;
+
+  /// the reader's pick at each new ayah, true scrolls the playing ayah's cell into view
+  final ValueListenable<bool> followCells;
 
   @override
   ConsumerState<TranslationView> createState() => _TranslationViewState();
@@ -145,7 +151,12 @@ class _TranslationViewState extends ConsumerState<TranslationView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (key.ayah == 1) _SurahHeader(key.surah),
-                    _VerseCell(key, onAyah: widget.onAyah, onCheck: widget.onCheck),
+                    _VerseCell(
+                      key,
+                      onAyah: widget.onAyah,
+                      onCheck: widget.onCheck,
+                      followCells: widget.followCells,
+                    ),
                   ],
                 ),
               ),
@@ -278,13 +289,20 @@ class _OrnamentPainter extends CustomPainter {
 
 /// the selected and the playing ayah fill the cell behind the text, the glyphs keep their ink. it
 /// scrolls into view when it's pressed or starts playing, when the layout switches to it and when
-/// the text size changes under it. an ayah opened on the page leaves the cells where they are
+/// the text size changes under it. an ayah opened on the page leaves the cells where they are, and
+/// a playing one only scrolls while the reader follows the cells
 class _VerseCell extends ConsumerStatefulWidget {
-  const _VerseCell(this.ayah, {required this.onAyah, required this.onCheck});
+  const _VerseCell(
+    this.ayah, {
+    required this.onAyah,
+    required this.onCheck,
+    required this.followCells,
+  });
 
   final AyahKey ayah;
   final ValueChanged<AyahKey> onAyah;
   final ValueChanged<AyahKey>? onCheck;
+  final ValueListenable<bool> followCells;
 
   @override
   ConsumerState<_VerseCell> createState() => _VerseCellState();
@@ -298,19 +316,22 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
   @override
   void initState() {
     super.initState();
-    if (_marked()) _show();
+    _showMarked();
   }
 
-  bool _marked() {
+  void _showMarked() {
     final playing = ref.read(playingAyahProvider);
-    return ref.read(selectionProvider).sheet == widget.ayah ||
-        (playing != null && readAyah(playing) == widget.ayah);
+    if (ref.read(selectionProvider).sheet == widget.ayah) {
+      _show();
+    } else if (playing != null && readAyah(playing) == widget.ayah) {
+      _show(playing: true);
+    }
   }
 
-  /// after the frame, so the new size is laid out first
-  void _show() {
+  /// after the frame, so the new size is laid out first and the reader has picked what it follows
+  void _show({bool playing = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted || (playing && !widget.followCells.value)) return;
       final reduce = MediaQuery.disableAnimationsOf(context);
       Scrollable.ensureVisible(
         context,
@@ -343,23 +364,28 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
     );
     ref
       ..listen(playingAyahProvider.select((key) => key != null && readAyah(key) == ayah), (_, on) {
-        if (on) _show();
+        if (on) _show(playing: true);
       })
       ..listen(
         settingsProvider.select(
           (settings) => (settings.value?.quranArabicSize, settings.value?.quranTranslationSize),
         ),
-        (_, _) {
-          if (_marked()) _show();
-        },
+        (_, _) => _showMarked(),
       );
     final arabic = ref.watch(ayahTextProvider(ayah)).value ?? '';
     final style = ref.watch(
       settingsProvider.select((settings) => settings.value?.mushafStyle ?? MushafStyle.text),
     );
 
+    final bookmarked = ref.watch(
+      bookmarksProvider.select(
+        (bookmarks) =>
+            bookmarks.value?.where((bookmark) => bookmark.ayah == ayah).lastOrNull?.color,
+      ),
+    );
+
     /// under a qcf style the ayah is its pages' glyphs, the text waits in their place
-    var glyphs = const <({String family, String glyph, bool end})>[];
+    var glyphs = const <({String family, String glyph, bool end, Rect? ink})>[];
     if (style != MushafStyle.text) {
       final files = ref.watch(mushafFilesProvider);
       final palette = style.palette(
@@ -372,10 +398,22 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
               files.loaded(style, page, palette: palette) ??
               ref.watch(qcfFontProvider((style, page, palette))).value,
       };
+
+      /// a bookmarked number centers on its marker's ink
+      final inks = {
+        if (bookmarked != null)
+          for (final word in words)
+            if (word.end) word.page: ref.watch(glyphInksProvider((style, word.page))).value,
+      };
       if (families.values.every((family) => family != null)) {
         glyphs = [
           for (final word in words)
-            (family: families[word.page]!, glyph: word.glyph, end: word.end),
+            (
+              family: families[word.page]!,
+              glyph: word.glyph,
+              end: word.end,
+              ink: word.end ? (inks[word.page] ?? const {})[word.glyph.runes.first] : null,
+            ),
         ];
       }
     }
@@ -391,12 +429,6 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
         ? ThemeEnum.followWash
         : ThemeEnum.transparent;
     final surah = ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
-    final bookmarked = ref.watch(
-      bookmarksProvider.select(
-        (bookmarks) =>
-            bookmarks.value?.where((bookmark) => bookmark.ayah == ayah).lastOrNull?.color,
-      ),
-    );
     final onCheck = widget.onCheck;
     final check = onCheck == null ? null : () => onCheck(ayah);
     final open = onCheck == null
@@ -479,7 +511,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
 class _GlyphAyah extends StatelessWidget {
   const _GlyphAyah(this.words, {required this.fontSize, this.bookmarked});
 
-  final List<({String family, String glyph, bool end})> words;
+  final List<({String family, String glyph, bool end, Rect? ink})> words;
   final double fontSize;
   final ThemeEnum? bookmarked;
 
@@ -491,9 +523,10 @@ class _GlyphAyah extends StatelessWidget {
       children: [
         for (final word in words)
           if (word.end && bookmarked != null)
-            DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
+            CustomPaint(
+              painter: _GlyphRibbonPainter(
+                word,
+                fontSize: fontSize.sp,
                 color: context.getColor(bookmarked).withValues(alpha: SizeManager.bookmarkedNumber),
               ),
               child: _Glyph(word, fontSize: fontSize),
@@ -505,10 +538,54 @@ class _GlyphAyah extends StatelessWidget {
   }
 }
 
+/// the ribbon on the marker's ink, from its baseline laid out like the glyph's own text
+class _GlyphRibbonPainter extends CustomPainter {
+  const _GlyphRibbonPainter(this.word, {required this.fontSize, required this.color});
+
+  final ({String family, String glyph, bool end, Rect? ink}) word;
+  final double fontSize;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final ink = word.ink;
+    final Offset center;
+    final double height;
+    if (ink == null) {
+      center = size.center(Offset.zero);
+      height = fontSize;
+    } else {
+      final baseline = (TextPainter(
+        text: TextSpan(
+          text: word.glyph,
+          style: GetTextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeightManager.regular,
+            height: LineHeightManager.quranAr,
+            leadingDistribution: TextLeadingDistribution.even,
+            fontFamily: word.family,
+          ),
+        ),
+        textDirection: TextDirection.rtl,
+      )..layout()).computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      center = Offset(fontSize * ink.center.dx, baseline + fontSize * ink.center.dy);
+      height = fontSize * ink.height;
+    }
+    canvas.drawPath(
+      bookmarkRibbon(center, SizeManager.bookmarkRibbon * height),
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_GlyphRibbonPainter old) =>
+      old.word != word || old.fontSize != fontSize || old.color != color;
+}
+
 class _Glyph extends StatelessWidget {
   const _Glyph(this.word, {required this.fontSize});
 
-  final ({String family, String glyph, bool end}) word;
+  final ({String family, String glyph, bool end, Rect? ink}) word;
   final double fontSize;
 
   @override
@@ -528,7 +605,7 @@ class _VerseMarker extends StatelessWidget {
 
   final int number;
 
-  /// the category's color the star fills with
+  /// the category's color of the ribbon behind the star
   final ThemeEnum? bookmarked;
 
   @override
@@ -598,7 +675,12 @@ class _MarkerPainter extends CustomPainter {
         for (final (x, y) in _points)
           center + Offset((x - half) * star * unit, (y - half) * star * unit),
       ], true);
-    if (fill case final fill?) canvas.drawPath(path, Paint()..color = fill);
+    if (fill case final fill?) {
+      canvas.drawPath(
+        bookmarkRibbon(center, SizeManager.bookmarkRibbon * size.width * star),
+        Paint()..color = fill,
+      );
+    }
     canvas
       ..drawPath(path, paint)
       ..drawCircle(center, SizeManager.verseMarkerRing * unit, paint);

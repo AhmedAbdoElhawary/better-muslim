@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
@@ -42,23 +40,16 @@ const _london = SettingsCompanion(
 void main() {
   setUpAll(tz.initializeTimeZones);
 
-  late StreamController<DateTime> ticks;
+  late DateTime clock;
   late ProviderContainer container;
 
-  /// the clock gives the day, the ticks move the time inside it like the app's ticker
+  /// moving the clock and waking the boundary, like the app's boundary timer does
   Future<void> open(DateTime now, {SettingsCompanion? place, BmThemeMode? mode}) async {
-    ticks = StreamController<DateTime>.broadcast();
+    clock = now;
     container = ProviderContainer(
-      overrides: [
-        ...testOverrides(),
-        clockProvider.overrideWithValue(() => now),
-        tickerProvider.overrideWith((ref) => ticks.stream),
-      ],
+      overrides: [...testOverrides(), clockProvider.overrideWithValue(() => clock)],
     );
-    addTearDown(() async {
-      container.dispose();
-      await ticks.close();
-    });
+    addTearDown(container.dispose);
     container.listen(themeModeProvider, (_, _) {});
     await container.read(settingsProvider.future);
     final db = container.read(databaseProvider);
@@ -68,7 +59,8 @@ void main() {
   }
 
   Future<ThemeMode> at(DateTime now) async {
-    ticks.add(now);
+    clock = now;
+    container.invalidate(boundaryProvider);
     await pumpEventQueue();
     return container.read(themeModeProvider);
   }

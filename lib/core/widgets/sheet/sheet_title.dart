@@ -12,6 +12,7 @@ class SheetTitle extends StatelessWidget {
     this.title, {
     this.args = const {},
     this.subtitle,
+    this.header,
     this.subtitleArgs = const {},
     this.translate = true,
     super.key,
@@ -21,6 +22,7 @@ class SheetTitle extends StatelessWidget {
   final String title;
   final Map<String, String> args;
   final String? subtitle;
+  final Widget? header;
   final Map<String, String> subtitleArgs;
   final bool translate;
 
@@ -44,6 +46,7 @@ class SheetTitle extends StatelessWidget {
             RegularText(subtitle, args: subtitleArgs, translate: translate, color: ThemeEnum.text2),
           ],
           const RSizedBox.vertical(SpaceManager.s2),
+          ?header,
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/data/mushaf_files.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// a page's "font" is its number repeated, packed like the tool packs the real ones
@@ -116,5 +117,29 @@ void main() {
     expect(ink(font), [0, 0, 0, 255]);
     expect(ink(withPalette(font, 1)), [255, 255, 255, 255]);
     expect(ink(withPalette(font, 2)), [0, 0, 0, 255]);
+  });
+
+  test("an ayah's end marker has its own ink box, colr layers and all", () {
+    final fonts = File('tool/quran/.cache/qcf_v2/p151.ttf');
+    if (!fonts.existsSync()) return markTestSkipped('no QCF fonts in tool/quran/.cache');
+
+    /// 7:1's marker, measured over the glyph outlines with a script of their own
+    for (final (version, code, ink) in [
+      ('v2', 0xFC42, const Rect.fromLTRB(-.0844, -.6812, .7144, .3104)),
+      ('v4', 0xFC42, const Rect.fromLTRB(.1356, -.7676, 1.0012, .366)),
+      ('v1', 0xFB52, const Rect.fromLTRB(.00098, -.87158, 1.24316, .28027)),
+    ]) {
+      final box = glyphInks(
+        File('tool/quran/.cache/qcf_$version/p151.ttf').readAsBytesSync(),
+      )[code]!;
+      for (final (got, want) in [
+        (box.left, ink.left),
+        (box.top, ink.top),
+        (box.right, ink.right),
+        (box.bottom, ink.bottom),
+      ]) {
+        expect(got, closeTo(want, .0001), reason: version);
+      }
+    }
   });
 }

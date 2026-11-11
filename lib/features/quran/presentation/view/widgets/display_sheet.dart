@@ -29,7 +29,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// 4.31, every page choice in one sheet, kept in settings. tajweed colors wait for 7b
 Future<void> showDisplaySheet(BuildContext context) => showBmSheet(
   context,
-  applyBlur: false,
   maxSheetHeight: SizeManager.sheetMax2,
   title: const SheetTitle(StringsManager.display, subtitle: StringsManager.appliesToEveryPage),
   builder: (_) => const _DisplaySheet(),

@@ -79,7 +79,7 @@ class Segmented<T> extends StatelessWidget {
           ),
         ),
         HorizontalPadding(
-          padding: SpaceManager.previewChipBottom,
+          padding: SpaceManager.previewChipV,
           child: SlidingSelection(
             selected: values.indexOf(selected),
             highlight: VerticalPadding(
@@ -96,15 +96,36 @@ class Segmented<T> extends StatelessWidget {
                 ),
               ),
             ),
-            layout: (children) => Row(
-              mainAxisSize: small ? MainAxisSize.min : MainAxisSize.max,
-              children: [
-                for (final (index, child) in children.indexed) ...[
-                  if (index > 0) const RSizedBox.horizontal(SpaceManager.segmentGap),
-                  if (small) child else Expanded(child: child),
-                ],
-              ],
-            ),
+            layout: (children) => small
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final (index, child) in children.indexed) ...[
+                        if (index > 0) const RSizedBox.horizontal(SpaceManager.segmentGap),
+                        child,
+                      ],
+                    ],
+                  )
+                /// each label its own width and the spare shared equally, so every segment has the
+                /// same padding, a label that doesn't fit wraps
+                : Table(
+                    defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
+                    columnWidths: {
+                      for (var index = 1; index < 2 * children.length - 1; index += 2)
+                        index: FixedColumnWidth(SpaceManager.segmentGap.r),
+                    },
+                    defaultColumnWidth: const IntrinsicColumnWidth(flex: 1),
+                    children: [
+                      TableRow(
+                        children: [
+                          for (final (index, child) in children.indexed) ...[
+                            if (index > 0) const RSizedBox.horizontal(SpaceManager.segmentGap),
+                            child,
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
             children: [for (final value in values) segment(value)],
           ),
         ),
@@ -155,7 +176,7 @@ class _Segment extends StatelessWidget {
               minHeight: (small ? SizeManager.segmentSmall : SizeManager.segment).r,
             ),
             child: HorizontalPadding(
-              padding: small ? SpaceManager.segmentSmallSide : 0,
+              padding: small ? SpaceManager.segmentSmallSide : SpaceManager.segmentSide,
               child: Center(
                 widthFactor: small ? 1 : null,
                 child: AnimatedSwitcher(
@@ -174,10 +195,7 @@ class _Segment extends StatelessWidget {
                             ),
                           ],
                         )
-                      : KeyedSubtree(
-                          key: const ValueKey(false),
-                          child: FittedBox(child: text),
-                        ),
+                      : KeyedSubtree(key: const ValueKey(false), child: text),
                 ),
               ),
             ),

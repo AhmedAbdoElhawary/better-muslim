@@ -139,7 +139,35 @@ class _ShareSheetState extends ConsumerState<ShareSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
 
         children: [
-          SheetTitle(context.tr(content.title), subtitle: footer, translate: false),
+          SheetTitle(
+            context.tr(content.title),
+            subtitle: footer,
+            header: OnlyPadding(
+              top: SpaceManager.sharePreviewTop / 4,
+              bottom: SpaceManager.sharePreviewTop * 1.5,
+              child: Center(
+                child: RSizedBox.square(
+                  dimension: SizeManager.shareAyahCard,
+
+                  /// the story shows whole in the square's place
+                  child: FittedBox(
+                    child: _Preview(
+                      child: RepaintBoundary(
+                        key: _card,
+                        child: ShareFrame(
+                          options: options,
+                          size: layout.size,
+                          footer: footer,
+                          child: content.build(context, options, layout),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            translate: false,
+          ),
           Flexible(
             child: SingleChildScrollView(
               child: BottomPadding(
@@ -148,29 +176,6 @@ class _ShareSheetState extends ConsumerState<ShareSheet> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TopPadding(
-                      padding: SpaceManager.sharePreviewTop,
-                      child: Center(
-                        child: RSizedBox.square(
-                          dimension: SizeManager.shareAyahCard,
-
-                          /// the story shows whole in the square's place
-                          child: FittedBox(
-                            child: _Preview(
-                              child: RepaintBoundary(
-                                key: _card,
-                                child: ShareFrame(
-                                  options: options,
-                                  size: layout.size,
-                                  footer: footer,
-                                  child: content.build(context, options, layout),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                     if (note != null)
                       OnlyPadding(
                         top: SpaceManager.shareNoteTop,
@@ -185,7 +190,7 @@ class _ShareSheetState extends ConsumerState<ShareSheet> {
                         ),
                       ),
                     TopPadding(
-                      padding: SpaceManager.shareSwatchTop,
+                      padding: 0,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         padding: REdgeInsets.symmetric(horizontal: SpaceManager.shareSwatchGap),

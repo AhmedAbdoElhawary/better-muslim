@@ -9,17 +9,41 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' show TZDateTime;
 
-/// the location's local date. rebuilds itself at the next local midnight
-final todayProvider = Provider<DateTime>((ref) {
+/// the time of the last boundary, worked out again at the next one. what only changes at a
+/// boundary follows this instead of the ticker, so nothing wakes the app between them
+final boundaryProvider = Provider<DateTime>((ref) {
   final zone = ref.watch(locationProvider.select((location) => location?.zone));
   final clock = ref.watch(clockProvider);
-  final now = zone == null ? clock() : TZDateTime.from(clock(), zone);
+  final fast = ref.watch(fastDayProvider);
+  final now = clock();
+  final local = zone == null ? now : TZDateTime.from(now, zone);
   final midnight = zone == null
-      ? DateTime(now.year, now.month, now.day + 1)
-      : TZDateTime(zone, now.year, now.month, now.day + 1);
-  final timer = Timer(midnight.difference(now), ref.invalidateSelf);
+      ? DateTime(local.year, local.month, local.day + 1)
+      : TZDateTime(zone, local.year, local.month, local.day + 1);
+
+  /// yesterday too, last night's isha window can end after midnight
+  final times = [
+    midnight,
+    for (final day in [-1, 0, 1])
+      ...?ref
+          .watch(dayTimesProvider(DateTime(local.year, local.month, local.day + day)))
+          ?.boundaries,
+  ];
+  final wait = times
+      .map((time) => time.difference(now))
+      .where((left) => left > Duration.zero)
+      .reduce((a, b) => a < b ? a : b);
+  final timer = Timer(fast ? wait ~/ fastDaySpeed : wait, ref.invalidateSelf);
   ref.onDispose(timer.cancel);
-  return DateTime(now.year, now.month, now.day);
+  return now;
+});
+
+/// the location's local date
+final todayProvider = Provider<DateTime>((ref) {
+  final zone = ref.watch(locationProvider.select((location) => location?.zone));
+  final now = ref.watch(boundaryProvider);
+  final local = zone == null ? now : TZDateTime.from(now, zone);
+  return DateTime(local.year, local.month, local.day);
 });
 
 /// null without a location. reads no clock, so the same inputs give the same times
@@ -69,14 +93,14 @@ final todayTimesProvider = Provider<DayTimes?>(
 );
 
 /// fajr to the next fajr, so last night's isha and its log stay until fajr. a missing fajr
-/// counts as not yet. follows the ticker, but only notifies when the day changes
+/// counts as not yet
 final prayerDayProvider = Provider<DateTime>((ref) {
   final today = ref.watch(todayProvider);
   final times = ref.watch(
     todayTimesProvider.select((times) => (located: times != null, fajr: times?.fajr)),
   );
   if (!times.located) return today;
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(boundaryProvider);
   return prayerDayOf(now, today, times.fajr);
 });
 
@@ -86,14 +110,13 @@ DateTime prayerDayOf(DateTime now, DateTime today, DateTime? fajr) {
   return DateTime(today.year, today.month, today.day - 1);
 }
 
-/// follows the ticker, but only notifies when the period changes
 final periodProvider = Provider<Period?>((ref) {
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(boundaryProvider);
   return ref.watch(todayTimesProvider)?.periodAt(now);
 });
 
 final nextPrayerProvider = Provider<(Prayer, TZDateTime)?>((ref) {
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(boundaryProvider);
   final today = ref.watch(todayProvider);
   final tomorrow = DateTime(today.year, today.month, today.day + 1);
   return ref.watch(todayTimesProvider)?.next(now, ref.watch(dayTimesProvider(tomorrow)));
@@ -101,7 +124,7 @@ final nextPrayerProvider = Provider<(Prayer, TZDateTime)?>((ref) {
 
 /// the prayer day's, so last night's isha keeps its window past midnight
 final nowPrayerProvider = Provider<(Prayer, TZDateTime)?>((ref) {
-  final now = ref.watch(tickerProvider).value ?? ref.watch(clockProvider)();
+  final now = ref.watch(boundaryProvider);
   return ref.watch(dayTimesProvider(ref.watch(prayerDayProvider)))?.inWindow(now);
 });
 
