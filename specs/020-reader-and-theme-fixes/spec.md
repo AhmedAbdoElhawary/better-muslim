@@ -29,7 +29,10 @@
 ### Sheets
 
 - Every sheet opens on the handoff's MOTION 15 alone: spring.gentle in, 300 ms accelerate out,
-  one slide. No overshoot and no backdrop blur, the scrim only dims.
+  one slide. No overshoot.
+- Behind every sheet the screen blurs like the dialog's and dims, the blur follows the sheet open
+  and down. The Ayah sheet and the recitation sheet keep the page clear, the Study sheet and every
+  sheet opened from the reader blur it (2026-11-11).
 - A sheet with a name field shows the keyboard only once it has landed.
 
 ### Reader
@@ -37,7 +40,7 @@
 - A new Mushaf style shows on the page once its sheet has gone, in one step. The pages beside it
   follow one per frame.
 - The ayah wash is 3 pt above and below the line's text (`SpaceManager.ayahWashV`), was 5.
-- The page stays full size behind the tafsir and notes sheet, only the scrim dims it.
+- The page stays full size behind the tafsir and notes sheet, the scrim blurs and dims it.
 - Starting a recitation, from the reader's Listen, the Ayah sheet's Play or the Quran tab's
   Listen, opens the recitation sheet. Try again after a failure doesn't.
 - A Bookmarked number has a ribbon behind it in its category's color, centered on the marker's

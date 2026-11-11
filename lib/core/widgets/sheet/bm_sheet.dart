@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
@@ -36,7 +38,7 @@ Future<T?> showBmSheet<T>(
 
   /// the sheet stays put while the barrier and the content fade
   const still = Threshold(0);
-  final route = ModalBottomSheetRoute<T>(
+  final route = _BlurRoute<T>(
     builder: (context) => _Sheet(fade: reduceMotion, title: title, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
@@ -56,6 +58,36 @@ Future<T?> showBmSheet<T>(
   /// the route lets go of the controller only once its exit animation is over
   route.completed.whenComplete(controller.dispose);
   return navigator.push(route);
+}
+
+/// the dialog's blur behind the scrim, it grows with the sheet and clears as a drag lowers it
+class _BlurRoute<T> extends ModalBottomSheetRoute<T> {
+  _BlurRoute({
+    required super.builder,
+    super.capturedThemes,
+    super.barrierLabel,
+    required super.isScrollControlled,
+    super.useSafeArea,
+    super.backgroundColor,
+    super.elevation,
+    super.constraints,
+    super.modalBarrierColor,
+    super.transitionAnimationController,
+    super.sheetAnimationStyle,
+  });
+
+  @override
+  Widget buildModalBarrier() => AnimatedBuilder(
+    animation: animation!,
+    child: super.buildModalBarrier(),
+    builder: (context, barrier) {
+      final sigma = SizeManager.backdropBlur * animation!.value;
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+        child: barrier,
+      );
+    },
+  );
 }
 
 class _Sheet extends StatelessWidget {

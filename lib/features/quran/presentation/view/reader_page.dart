@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
@@ -739,16 +741,26 @@ class _Dim extends StatelessWidget {
     final scrim = context.getColor(ThemeEnum.scrim);
     return AnimatedBuilder(
       animation: study,
-      builder: (context, _) => IgnorePointer(
-        ignoring: study.value < .5,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: ColoredBox(
-            color: scrim.withValues(alpha: SizeManager.pageDim * study.value.clamp(0.0, 1.0)),
+      builder: (context, _) {
+        final value = study.value.clamp(0.0, 1.0);
+        final dim = ColoredBox(color: scrim.withValues(alpha: SizeManager.pageDim * value));
+        final sigma = SizeManager.backdropBlur * value;
+        return IgnorePointer(
+          ignoring: value < .5,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+
+            /// no filter while closed, the page turns under it
+            child: value == 0
+                ? dim
+                : BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+                    child: dim,
+                  ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -72,6 +72,10 @@ _Avoid_: tafsir (for the picked one)
 The sheet with one ayah's translation and what I can do with it: play, tafsir, bookmark, note, share, copy.
 _Avoid_: actions, ayah menu
 
+**Study sheet**:
+The large sheet with an ayah's tafsir and translation. It takes the Ayah sheet's place.
+_Avoid_: tafsir sheet, big sheet
+
 **Reader controls**:
 The top bar and the dock over the mushaf page.
 _Avoid_: app bar, navigation bar, chrome
