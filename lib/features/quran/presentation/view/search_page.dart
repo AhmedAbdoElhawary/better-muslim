@@ -23,6 +23,7 @@ import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/data/search_text.dart';
 import 'package:better_muslim/features/quran/domain/quran_search.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -302,6 +303,7 @@ class _JumpCard extends ConsumerWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => warmMushafPage(context, ref, jump.page),
         onTap: () => onOpen(jump.page, ayah),
         child: SurfaceCard(
           child: OnlyPadding(
@@ -441,6 +443,7 @@ class _HitCard extends ConsumerWidget {
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
+          onTapDown: (_) => warmMushafPage(context, ref, page),
           onTap: () => onOpen(page, key),
           child: SurfaceCard(
             child: OnlyPadding(
