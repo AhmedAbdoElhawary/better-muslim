@@ -1,6 +1,7 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/sheet/picker_row.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/recitation_sheet.dart';
 import 'package:flutter/widgets.dart';
@@ -101,20 +102,30 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the reciter opens a list of five, the pick is saved and plays on', (tester) async {
+  testWidgets('the reciter opens every reciter by name with mine in view, the pick plays on', (
+    tester,
+  ) async {
     final recitation = await opened(tester);
 
     await tester.tap(inSheet(find.text('Mishary Rashid Alafasy')));
     await tester.pumpAndSettle();
-    for (final name in [
-      'Mishary Rashid Alafasy',
-      'Mahmoud Khalil Al-Husary',
-      'Abdul Basit Abdul Samad (Murattal)',
-      'Mohamed Siddiq Al-Minshawi (Murattal)',
-      'Maher Al-Muaiqly',
-    ]) {
-      expect(find.text(name), findsWidgets, reason: name);
-    }
+    final rows = find.byType(PickerRow);
+    expect(tester.getRect(find.text('Mishary Rashid Alafasy').last).top, greaterThan(0));
+    expect(tester.widgetList(rows).length, lessThan(Reciter.values.length), reason: 'lazy');
+
+    final names = [
+      for (final text in tester.widgetList<RichText>(
+        find.descendant(of: rows, matching: find.byType(RichText)),
+      ))
+        text.text.toPlainText(),
+    ];
+    expect(names, [...names]..sort(), reason: 'by name');
+
+    await tester.scrollUntilVisible(
+      find.text('Mahmoud Khalil Al-Husary'),
+      -100,
+      scrollable: find.ancestor(of: rows.first, matching: find.byType(Scrollable)).first,
+    );
     await tester.tap(find.text('Mahmoud Khalil Al-Husary'));
     await tester.pumpAndSettle();
 
