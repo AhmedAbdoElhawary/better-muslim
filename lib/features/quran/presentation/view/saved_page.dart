@@ -1,6 +1,4 @@
-import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
-import 'package:better_muslim/core/quran/last_read.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
@@ -25,6 +23,7 @@ import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_menu.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
@@ -104,7 +103,7 @@ class _SavedPageState extends State<SavedPage> {
   }
 }
 
-/// last read first, then mine under their categories newest first, then the recent note
+/// the new category first, then mine under their categories
 class _Bookmarks extends ConsumerWidget {
   const _Bookmarks();
 
@@ -112,13 +111,11 @@ class _Bookmarks extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
     final categories = ref.watch(categoriesProvider).value ?? const [];
-    final note = ref.watch(writtenNotesProvider.select((notes) => notes.firstOrNull));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _LastReadRow(),
+        const _NewCategory(),
         for (final category in categories) ...[
-          const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
           _CategoryHeader(category, key: ObjectKey(category)),
           for (final bookmark in bookmarks.where(
             (bookmark) => bookmark.category == category.id,
@@ -131,28 +128,12 @@ class _Bookmarks extends ConsumerWidget {
           const RSizedBox.vertical(SpaceManager.savedGap),
           const EmptyState(title: StringsManager.noBookmarks, body: StringsManager.noBookmarksBody),
         ],
-        const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
-        const _NewCategory(),
-        if (note != null) ...[
-          const RSizedBox.vertical(SpaceManager.recentNoteTop),
-          const StartPadding(
-            padding: SpaceManager.s1,
-            child: RegularText(
-              StringsManager.recentNote,
-              fontSize: FontSizeManager.sectionLabel,
-              letterSpacing: LetterSpacingManager.sectionLabel,
-              color: ThemeEnum.text3,
-            ),
-          ),
-          const RSizedBox.vertical(SpaceManager.sectionLabelGap),
-          NoteCard(note, onTap: () => _open(context, ref, note.ayah)),
-        ],
       ],
     );
   }
 }
 
-/// the category's dot and name, like the recent note's label. a tap renames or recolors it
+/// the category's dot and name. a tap renames or recolors it
 class _CategoryHeader extends StatelessWidget {
   const _CategoryHeader(this.category, {super.key});
 
@@ -240,26 +221,6 @@ class _HeaderButton extends StatelessWidget {
   }
 }
 
-class _LastReadRow extends ConsumerWidget {
-  const _LastReadRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lastRead = ref.watch(lastReadProvider);
-    final assets = ref.watch(quranAssetsProvider).value;
-    if (assets == null) return const SizedBox.shrink();
-    final at = lastRead.at;
-    return _SavedRow(
-      ribbon: ThemeEnum.text2,
-      title: context.tr(StringsManager.lastRead),
-      auto: true,
-      reference: savedReference(context, ref, assets, ayah: lastRead.ayah, page: lastRead.page),
-      when: at == null ? null : savedWhen(context, ref, at),
-      onTap: () => context.push(Routes.quranPage(lastRead.page, ayah: lastRead.ayah)),
-    );
-  }
-}
-
 class _BookmarkRow extends ConsumerWidget {
   const _BookmarkRow(this.bookmark, {super.key});
 
@@ -276,6 +237,7 @@ class _BookmarkRow extends ConsumerWidget {
       reference: savedReference(context, ref, assets, ayah: ayah, page: page),
       when: savedWhen(context, ref, bookmark.createdAt),
       onTap: () => context.push(Routes.quranPage(page, ayah: ayah)),
+      onDown: () => warmMushafPage(context, ref, page),
       onLongPress: () => showBookmarkMenu(context, bookmark),
     );
   }
@@ -289,7 +251,7 @@ class _SavedRow extends StatelessWidget {
     required this.reference,
     required this.when,
     required this.onTap,
-    this.auto = false,
+    required this.onDown,
     this.onLongPress,
   });
 
@@ -299,18 +261,20 @@ class _SavedRow extends StatelessWidget {
   final String title;
   final String reference;
   final String? when;
-  final bool auto;
   final VoidCallback onTap;
+
+  /// the page starts loading while the finger is still down
+  final VoidCallback onDown;
   final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final when = this.when;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Semantics(
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => onDown(),
         onTap: onTap,
         onLongPress: onLongPress,
         child: SurfaceCard(
@@ -343,13 +307,6 @@ class _SavedRow extends StatelessWidget {
                               translate: false,
                               fontSize: FontSizeManager.surahName,
                             ),
-                            if (auto)
-                              RegularText(
-                                StringsManager.auto,
-                                fontSize: FontSizeManager.quranTag,
-                                letterSpacing: isArabic ? null : LetterSpacingManager.autoTag,
-                                color: ThemeEnum.text3,
-                              ),
                           ],
                         ),
                         const RSizedBox.vertical(SpaceManager.savedLineGap),
