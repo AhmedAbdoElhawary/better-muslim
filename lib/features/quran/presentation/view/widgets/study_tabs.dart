@@ -282,7 +282,7 @@ class _Downloading extends StatelessWidget {
   }
 }
 
-/// notesPane of _gen/quran.js, one note per ayah so Add note shows only without one
+/// notesPane of _gen/quran.js, the editor itself, one note per ayah
 class _NotesPane extends ConsumerWidget {
   const _NotesPane(this.ayah);
 
@@ -290,22 +290,10 @@ class _NotesPane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final note = ref.watch(noteProvider(ayah));
-    return OnlyPadding(
-      top: SpaceManager.s4,
-      start: SpaceManager.s4,
-      end: SpaceManager.s4,
-      child: note == null
-          ? BmButton.secondary(
-              StringsManager.addNote,
-              onPressed: () => showNoteEditor(context, ayah),
-            )
-          : NoteCard(
-              note,
-              showAyah: false,
-              radius: RadiusManager.row,
-              onTap: () => showNoteEditor(context, ayah),
-            ),
+    final updated = ref.watch(noteProvider(ayah).select((note) => note?.updatedAt));
+    return TopPadding(
+      padding: SpaceManager.s4,
+      child: NoteEditor(ayah, key: ValueKey((ayah, updated))),
     );
   }
 }
