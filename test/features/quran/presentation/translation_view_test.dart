@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,11 +10,13 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/translation_view.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/gestures.dart';
@@ -253,6 +256,49 @@ void main() {
     final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
     expect(cell.bottom, greaterThan(0));
     expect(cell.top, lessThan(screen.height));
+    await unmount(tester);
+  });
+
+  testWidgets('a highlighted cell opens its note, its bookmarked number the ayah sheet', (
+    tester,
+  ) async {
+    await pumpReader(tester);
+    final store = containerOf(tester).read(quranStoreProvider);
+    unawaited(store.saveNote(const AyahKey(1, 5), 'ask for help', highlight: true));
+    unawaited(store.addAyah(const AyahKey(1, 3), 1));
+    await tester.pump();
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+
+    StudySheet study() => tester.widget<StudySheet>(find.byType(StudySheet));
+    await scrollTo(tester, translation(5));
+    await tester.tap(cellText(translation(5)));
+    await tester.pump(kDoubleTapTimeout);
+    await tester.pumpAndSettle();
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 5));
+    expect(study().tab, StudyTab.notes);
+    expect(study().open.value, closeTo(1, .01));
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(containerOf(tester).read(selectionProvider).sheet, isNull);
+
+    /// the marker draws at 32, its 44 pt reaches past it
+    await scrollTo(tester, translation(3));
+    final marker = cellText('٣');
+    await tester.tapAt(tester.getCenter(marker) + Offset(tester.getSize(marker).width / 2 + 4, 0));
+    await tester.pump(kDoubleTapTimeout);
+    await tester.pumpAndSettle();
+    expect(containerOf(tester).read(selectionProvider).sheet, const AyahKey(1, 3));
+    expect(tester.widget<AyahSheet>(find.byType(AyahSheet)).open.value, closeTo(1, .01));
+    expect(study().open.value, closeTo(0, .01));
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await tester.tap(cellText(translation(4)));
+    await tester.pump(kDoubleTapTimeout);
+    await tester.pumpAndSettle();
+    expect(containerOf(tester).read(selectionProvider).sheet, isNull, reason: 'a plain cell');
     await unmount(tester);
   });
 
