@@ -7,6 +7,7 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
+import 'package:better_muslim/core/widgets/text_menu.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -21,6 +22,7 @@ class BmTextField extends StatefulWidget {
     this.onSubmitted,
     this.initial,
     this.maxLines = 1,
+    this.maxHeight,
     this.autofocus = false,
     super.key,
   });
@@ -39,6 +41,9 @@ class BmTextField extends StatefulWidget {
 
   /// null grows with the text, a note
   final int? maxLines;
+
+  /// a growing field stops here and scrolls inside
+  final double? maxHeight;
 
   /// focused once its sheet has landed
   final bool autofocus;
@@ -117,10 +122,16 @@ class _BmTextFieldState extends State<BmTextField> {
             ),
           ),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: SizeManager.textField.r),
+            constraints: BoxConstraints(
+              minHeight: SizeManager.textField.r,
+              maxHeight: widget.maxHeight?.r ?? double.infinity,
+            ),
             child: HorizontalPadding(
               padding: SpaceManager.textFieldSide,
+
+              /// a plain Center fills the max height, so a note opened at 300
               child: Center(
+                heightFactor: 1,
                 child: TextField(
                   controller: _controller,
                   focusNode: _focus,
@@ -132,6 +143,7 @@ class _BmTextFieldState extends State<BmTextField> {
                   textInputAction: widget.textInputAction,
                   style: style(ThemeEnum.text),
                   cursorColor: context.getColor(ThemeEnum.primary),
+                  contextMenuBuilder: (_, field) => TextMenu(field),
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
