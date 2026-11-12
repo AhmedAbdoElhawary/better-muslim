@@ -28,6 +28,12 @@ _Avoid_: selected prayer, current prayer
 A time when what the app shows changes on its own: a prayer time, the end of its now window, sunrise, maghrib, local midnight.
 _Avoid_: reminder, tick, timer
 
+## Qibla
+
+**Home qibla**:
+The small dial on Home's next prayer card that points to the Kaaba as the phone turns, from the saved place. A tap opens the Qibla page.
+_Avoid_: mini compass, qibla widget
+
 ## Calendar
 
 **Selected day**:
@@ -68,6 +74,10 @@ _Avoid_: theme, page theme
 The meaning under each ayah in the Translation layout and on its Ayah sheet, one picked from those in the app. Al-Muyassar and al-Jalalayn count as one for Arabic, though they are short tafsirs.
 _Avoid_: tafsir (for the picked one)
 
+**Share size**:
+The shape of a shared image: Square, Portrait (4:5) or Story.
+_Avoid_: ratio, format
+
 **Ayah sheet**:
 The sheet with one ayah's translation and what I can do with it: play, tafsir, bookmark, note, share, copy.
 _Avoid_: actions, ayah menu
@@ -81,7 +91,7 @@ The top bar and the dock over the mushaf page.
 _Avoid_: app bar, navigation bar, chrome
 
 **Turn strip**:
-The strip at each side of the mushaf page that turns it on a tap. The left one goes to the next page and the right one to the previous, in both languages.
+The narrow strip at each side of the mushaf page that turns it on a tap. The left one goes to the next page and the right one to the previous, in both languages.
 _Avoid_: tap zone, margin
 
 **Kashida**:
