@@ -7,8 +7,8 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.10's sky at the current hour, the horizon, the dotted sun arc and the mark (R7)
 class WelcomeSky extends ConsumerWidget {

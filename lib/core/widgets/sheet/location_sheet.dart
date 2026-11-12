@@ -10,12 +10,13 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the pill and the no-location card both open it, "use my location" can start right away.
 /// failed = location was just refused, the sheet opens saying so (milestone 10 FR-020). true when
@@ -128,20 +129,23 @@ class _UseMyLocationRow extends StatelessWidget {
             horizontal: SpaceManager.screen,
             child: Row(
               children: [
-                AnimatedOpacity(
-                  opacity: busy ? BmOpacity.disabled : 1,
-                  duration: const Duration(microseconds: 300),
-                  child: BmIcon(
-                    BmIconName.location,
-                    size: SizeManager.iconList.r,
-                    color: context.getColor(ThemeEnum.primary),
+                RSizedBox.square(
+                  dimension: SizeManager.iconList,
+                  child: BmSwitcher(
+                    child: busy
+                        ? const BmStarLoader(size: SizeManager.iconList)
+                        : BmIcon(
+                            BmIconName.location,
+                            size: SizeManager.iconList.r,
+                            color: context.getColor(ThemeEnum.primary),
+                          ),
                   ),
                 ),
                 const RSizedBox.horizontal(SpaceManager.s3),
                 Expanded(
                   child: AnimatedOpacity(
                     opacity: busy ? BmOpacity.disabled : 1,
-                    duration: const Duration(microseconds: 300),
+                    duration: BmMotion.micro,
                     child: const MediumText(StringsManager.useMyLocation),
                   ),
                 ),

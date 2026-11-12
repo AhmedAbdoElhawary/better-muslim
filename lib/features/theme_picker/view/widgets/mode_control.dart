@@ -2,8 +2,8 @@ import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/theme_picker/view_model/theme_preview.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// dark, light, follow sky and follow phone for the preview only, saved on apply
 class ModeControl extends ConsumerWidget {

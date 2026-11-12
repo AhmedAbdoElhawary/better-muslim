@@ -16,13 +16,14 @@ import 'package:better_muslim/core/widgets/sheet/picker_row.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/quran/presentation/providers/mushaf_style_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<void> showMushafStyleSheet(BuildContext context) => showBmSheet(
   context,
   title: const SheetTitle(StringsManager.mushaf, subtitle: StringsManager.madinahHafs),
+  blur: false,
   builder: (_) => const _MushafStyleSheet(),
 );
 
@@ -58,17 +59,9 @@ class _StyleRow extends ConsumerWidget {
   final MushafStyle style;
   final bool selected;
 
-  /// one on the phone is picked once the sheet has gone, the page's new layout dropped the sheet's
-  /// frames. the others stay to show their download
   Future<void> _pick(BuildContext context, WidgetRef ref) async {
-    final pick = ref.read(mushafStylePickProvider.notifier);
     try {
-      if (ref.read(mushafStyleStatusProvider(style)).ready) {
-        final route = ModalRoute.of(context);
-        Navigator.pop(context);
-        await route?.completed;
-      }
-      await pick.pick(style);
+      await ref.read(mushafStylePickProvider.notifier).pick(style);
     } on DownloadException catch (error) {
       if (!context.mounted || error.failure == DownloadFailure.cancelled) return;
       showToast(

@@ -5,9 +5,9 @@ import 'package:better_muslim/core/settings/azkar.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the text of a 4.14 dua card: title and source, the arabic, then in english the
 /// transliteration and the translation. arabic shows only the arabic and its source

@@ -5,8 +5,8 @@ import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_curl.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   /// the pages built so far, a turn must never build one again

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
@@ -23,16 +25,14 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
-/// the Turn strips beside the small page, the empty sides of the top half
-Size translationStrip(Size screen, {required double top}) {
-  final half = screen.height / 2;
-  final scale = (half - top) / screen.height;
-  return Size(screen.width * (1 - scale) / 2, half);
-}
+/// the Turn strips beside the small page, in the top half
+Size translationStrip(Size screen) => Size(SizeManager.turnStrip.r, screen.height / 2);
 
 /// 4.07, the mushaf page at the screen's size, taller above 100%, and the ayahs starting on it as
 /// verse cells under it, so the layouts share the page and its last read
@@ -40,6 +40,7 @@ class TranslationView extends ConsumerStatefulWidget {
   const TranslationView(
     this.page, {
     required this.onAyah,
+    required this.onNote,
     required this.onCheck,
     required this.mushaf,
     required this.shown,
@@ -51,8 +52,11 @@ class TranslationView extends ConsumerStatefulWidget {
 
   final int page;
 
-  /// a long press or a double tap on a cell
+  /// a long press or a double tap on a cell, or a tap on its bookmarked number
   final ValueChanged<AyahKey> onAyah;
+
+  /// a tap on a highlighted ayah's cell
+  final ValueChanged<AyahKey> onNote;
 
   /// a tap on a cell while choosing, null otherwise so the tap goes on to the controls
   final ValueChanged<AyahKey>? onCheck;
@@ -154,6 +158,7 @@ class _TranslationViewState extends ConsumerState<TranslationView> {
                     _VerseCell(
                       key,
                       onAyah: widget.onAyah,
+                      onNote: widget.onNote,
                       onCheck: widget.onCheck,
                       followCells: widget.followCells,
                     ),
@@ -295,12 +300,14 @@ class _VerseCell extends ConsumerStatefulWidget {
   const _VerseCell(
     this.ayah, {
     required this.onAyah,
+    required this.onNote,
     required this.onCheck,
     required this.followCells,
   });
 
   final AyahKey ayah;
   final ValueChanged<AyahKey> onAyah;
+  final ValueChanged<AyahKey> onNote;
   final ValueChanged<AyahKey>? onCheck;
   final ValueListenable<bool> followCells;
 
@@ -429,6 +436,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
         ? ThemeEnum.followWash
         : ThemeEnum.transparent;
     final surah = ref.watch(quranAssetsProvider).value?.surah(ayah.surah);
+    final highlighted = ref.watch(noteProvider(ayah).select((note) => note?.highlight ?? false));
     final onCheck = widget.onCheck;
     final check = onCheck == null ? null : () => onCheck(ayah);
     final open = onCheck == null
@@ -437,6 +445,13 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
             _show();
           }
         : null;
+    final note = open != null && highlighted
+        ? () {
+            widget.onNote(ayah);
+            _show();
+          }
+        : null;
+    final number = bookmarked == null ? null : open;
     return Semantics(
       container: true,
       button: true,
@@ -448,7 +463,7 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
       onTap: check ?? open,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: check,
+        onTap: check ?? note,
         onDoubleTap: open,
         onLongPress: open,
         child: AnimatedDecoratedBox(
@@ -467,7 +482,12 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
                 Directionality(
                   textDirection: TextDirection.rtl,
                   child: glyphs.isNotEmpty
-                      ? _GlyphAyah(glyphs, fontSize: arabicSize, bookmarked: bookmarked?.theme)
+                      ? _GlyphAyah(
+                          glyphs,
+                          fontSize: arabicSize,
+                          bookmarked: bookmarked?.theme,
+                          onNumber: number,
+                        )
                       : Wrap(
                           spacing: SpaceManager.verseMarkerGap.r,
                           crossAxisAlignment: WrapCrossAlignment.center,
@@ -480,7 +500,10 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
                               height: LineHeightManager.quranAr,
                               color: ThemeEnum.ink,
                             ),
-                            _VerseMarker(ayah.ayah, bookmarked: bookmarked?.theme),
+                            _NumberHit(
+                              onTap: number,
+                              child: _VerseMarker(ayah.ayah, bookmarked: bookmarked?.theme),
+                            ),
                           ],
                         ),
                 ),
@@ -509,11 +532,12 @@ class _VerseCellState extends ConsumerState<_VerseCell> {
 /// one glyph a word, so the ayah wraps between words like the text does. the end marker is the
 /// font's own
 class _GlyphAyah extends StatelessWidget {
-  const _GlyphAyah(this.words, {required this.fontSize, this.bookmarked});
+  const _GlyphAyah(this.words, {required this.fontSize, this.bookmarked, this.onNumber});
 
   final List<({String family, String glyph, bool end, Rect? ink})> words;
   final double fontSize;
   final ThemeEnum? bookmarked;
+  final VoidCallback? onNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -523,13 +547,18 @@ class _GlyphAyah extends StatelessWidget {
       children: [
         for (final word in words)
           if (word.end && bookmarked != null)
-            CustomPaint(
-              painter: _GlyphRibbonPainter(
-                word,
-                fontSize: fontSize.sp,
-                color: context.getColor(bookmarked).withValues(alpha: SizeManager.bookmarkedNumber),
+            _NumberHit(
+              onTap: onNumber,
+              child: CustomPaint(
+                painter: _GlyphRibbonPainter(
+                  word,
+                  fontSize: fontSize.sp,
+                  color: context
+                      .getColor(bookmarked)
+                      .withValues(alpha: SizeManager.bookmarkedNumber),
+                ),
+                child: _Glyph(word, fontSize: fontSize),
               ),
-              child: _Glyph(word, fontSize: fontSize),
             )
           else
             _Glyph(word, fontSize: fontSize),
@@ -597,6 +626,54 @@ class _Glyph extends StatelessWidget {
     height: LineHeightManager.quranAr,
     color: ThemeEnum.ink,
   );
+}
+
+/// a bookmarked number opens its ayah sheet with a single tap. it draws smaller than a finger,
+/// so it takes 44 pt from the words around it
+class _NumberHit extends SingleChildRenderObjectWidget {
+  const _NumberHit({required this.onTap, required super.child});
+
+  final VoidCallback? onTap;
+
+  @override
+  _RenderNumberHit createRenderObject(BuildContext context) => _RenderNumberHit(onTap);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderNumberHit renderObject) =>
+      renderObject.onTap = onTap;
+}
+
+class _RenderNumberHit extends RenderProxyBox {
+  _RenderNumberHit(this.onTap);
+
+  VoidCallback? onTap;
+  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = () => onTap?.call();
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final hit = SizeManager.hit.r;
+    final area = Rect.fromCenter(
+      center: size.center(Offset.zero),
+      width: math.max(size.width, hit),
+      height: math.max(size.height, hit),
+    );
+    if (onTap == null || !area.contains(position)) {
+      return super.hitTest(result, position: position);
+    }
+    result.add(BoxHitTestEntry(this, position));
+    return true;
+  }
+
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent) _tap.addPointer(event);
+  }
+
+  @override
+  void dispose() {
+    _tap.dispose();
+    super.dispose();
+  }
 }
 
 /// 4.07's ayah marker, eastern digits in both languages as the mushaf prints them

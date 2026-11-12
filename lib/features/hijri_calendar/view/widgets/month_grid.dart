@@ -17,10 +17,10 @@ import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/calendar_format.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:material_ui/material_ui.dart';
 
 /// any sunday, the week starts there like the prayer tab's strip
 final _sunday = DateTime(2026, 10, 11);

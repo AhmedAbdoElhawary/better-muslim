@@ -25,10 +25,10 @@ import 'package:better_muslim/features/azkar/view/widgets/dhikr_chips.dart';
 import 'package:better_muslim/features/azkar/view/widgets/dhikr_text.dart';
 import 'package:better_muslim/features/azkar/view/widgets/tasbih_counter.dart';
 import 'package:better_muslim/features/azkar/view_model/tasbih_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.08, inside the azkar tab. the lower area counts, the chips, the dhikr and the bar never do
 class TasbihPage extends ConsumerStatefulWidget {

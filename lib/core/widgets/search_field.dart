@@ -6,8 +6,9 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
-import 'package:flutter/material.dart';
+import 'package:better_muslim/core/widgets/text_menu.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.14's search field, the location sheet and duas use it. filled is 4.27's quran search
 class SearchField extends StatelessWidget {
@@ -81,6 +82,7 @@ class SearchField extends StatelessWidget {
                   cursorHeight: SizeManager.cursorHeight,
                   cursorColor: context.getColor(ThemeEnum.primary),
                   textInputAction: TextInputAction.search,
+                  contextMenuBuilder: (_, field) => TextMenu(field),
                   textAlignVertical: TextAlignVertical.top,
 
                   /// arabic sits on the right as 4.27 draws it, whatever the app's language

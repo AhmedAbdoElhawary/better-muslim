@@ -1,6 +1,11 @@
 import 'package:better_muslim/core/app/app.dart';
+import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/design/bm_theme.dart';
+import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
+import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
 import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
@@ -8,8 +13,10 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/mini_play
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/recitation_sheet.dart';
-import 'package:flutter/material.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/surah_index.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
@@ -123,6 +130,26 @@ void main() {
       Brightness.dark,
       reason: 'follow sky takes the dark app on night',
     );
+    await unmount(tester);
+  });
+
+  testWidgets("the reader's index sheet takes the page palette, not the app's", (tester) async {
+    await pumpQuran(tester);
+    await containerOf(tester)
+        .read(databaseProvider)
+        .updateSettings(const SettingsCompanion(pageColor: Value(PageColor.sepia)));
+    await tester.tap(find.text('CONTINUE READING'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(200, 40));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Index'));
+    await tester.pumpAndSettle();
+
+    final sheet = tester.element(
+      find.descendant(of: find.byType(BottomSheet), matching: find.byType(SurahIndex)),
+    );
+    final page = AppTheme.page(PageColor.sepia, containerOf(tester).read(themeIdProvider));
+    expect(Theme.of(sheet).extension<BmColors>(), same(page.extension<BmColors>()));
     await unmount(tester);
   });
 

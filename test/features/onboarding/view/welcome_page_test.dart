@@ -5,8 +5,8 @@ import 'package:better_muslim/features/onboarding/view/welcome_page.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/glass/liquid_glass.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_stars.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_sun.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

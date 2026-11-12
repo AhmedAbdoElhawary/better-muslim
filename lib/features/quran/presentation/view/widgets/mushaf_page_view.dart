@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/extensions/l10n.dart';
@@ -28,10 +29,10 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the colors a page paints with, from the page palette
 typedef MushafColors = ({
@@ -75,10 +76,13 @@ String ayahLabel(
 /// one page of the mushaf as printed (4.19), painted by one render object instead of a widget
 /// per word, so a turn only paints. a long press or a double tap on a word gives its ayah
 class MushafPageView extends ConsumerStatefulWidget {
-  const MushafPageView(this.number, {this.onAyah, this.onCheck, super.key});
+  const MushafPageView(this.number, {this.onAyah, this.onNote, this.onCheck, super.key});
 
   final int number;
   final ValueChanged<AyahKey>? onAyah;
+
+  /// a single tap on a highlighted ayah
+  final ValueChanged<AyahKey>? onNote;
   final ValueChanged<AyahKey>? onCheck;
 
   @override
@@ -156,10 +160,14 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
         if (bookmark.ayah case final ayah? when keys.contains(ayah))
           ayah: context.getColor(bookmark.color.theme),
     };
+
+    /// the labels only read a whole surah's translation for a screen reader, it held up every open
+    final reading = MediaQuery.accessibleNavigationOf(context);
     final shown = shownTranslation(context, ref);
     final texts = {
-      for (final surah in keys.map((key) => key.surah).toSet())
-        surah: ref.watch(translationProvider((shown, surah))).value,
+      if (reading)
+        for (final surah in keys.map((key) => key.surah).toSet())
+          surah: ref.watch(translationProvider((shown, surah))).value,
     };
     return _MushafPaper(
       /// a switch to or from V1 reloads the page, the old print's words never meet the new font
@@ -187,9 +195,10 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
       onAyah: widget.onAyah,
+      onNote: widget.onNote,
       onCheck: widget.onCheck,
       labels: {
-        if (assets != null)
+        if (assets != null && reading)
           for (final key in keys)
             key: ayahLabel(
               context,
@@ -273,10 +282,12 @@ Future<void> warmMushafPage(BuildContext context, WidgetRef ref, int number) asy
   final page = MushafPage.fromJson(number, json);
 
   /// decoded now, the reader's labels then find them in the assets' cache
-  for (final surah in {
-    for (final line in page.lines) ...line.words.map((word) => word.key.surah),
-  }) {
-    await assets.surahText(surah);
+  if (MediaQuery.accessibleNavigationOf(context)) {
+    for (final surah in {
+      for (final line in page.lines) ...line.words.map((word) => word.key.surah),
+    }) {
+      await assets.surahText(surah);
+    }
   }
   final settings = ref.read(settingsProvider).value;
   final style = settings?.mushafStyle ?? MushafStyle.text;
@@ -321,6 +332,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.bookmarked,
     required this.following,
     required this.onAyah,
+    required this.onNote,
     required this.onCheck,
     required this.labels,
     required this.direction,
@@ -347,6 +359,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final Map<AyahKey, Color> bookmarked;
   final AyahKey? following;
   final ValueChanged<AyahKey>? onAyah;
+  final ValueChanged<AyahKey>? onNote;
   final ValueChanged<AyahKey>? onCheck;
   final Map<AyahKey, String> labels;
   final TextDirection direction;
@@ -374,6 +387,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     bookmarked: bookmarked,
     following: following,
     onAyah: onAyah,
+    onNote: onNote,
     onCheck: onCheck,
     labels: labels,
     direction: direction,
@@ -403,6 +417,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..bookmarked = bookmarked
       ..following = following
       ..onAyah = onAyah
+      ..onNote = onNote
       ..onCheck = onCheck
       ..labels = labels
       ..direction = direction
@@ -434,6 +449,7 @@ class RenderMushafPage extends RenderBox {
     required this._bookmarked,
     required this._following,
     required this.onAyah,
+    required this.onNote,
     required this._onCheck,
     required this._labels,
     required this._direction,
@@ -550,8 +566,11 @@ class RenderMushafPage extends RenderBox {
     markNeedsPaint();
   }
 
-  /// a long press or a double tap on a word
+  /// a long press or a double tap on a word, or a single tap on a bookmarked number
   ValueChanged<AyahKey>? onAyah;
+
+  /// a single tap on a highlighted ayah's words
+  ValueChanged<AyahKey>? onNote;
 
   /// while choosing ayahs to share a tap checks or unchecks one at once, nothing waits for a
   /// double tap
@@ -690,7 +709,10 @@ class RenderMushafPage extends RenderBox {
 
   /// the ayah under the pointer when it went down
   AyahKey? _down;
-  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = () => _call(_onCheck);
+
+  /// what a single tap does where the pointer went down, null leaves it to the turner
+  VoidCallback? _single;
+  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = () => _single?.call();
   late final _double = DoubleTapGestureRecognizer(debugOwner: this)
     ..onDoubleTap = () => _call(onAyah);
   late final _long = LongPressGestureRecognizer(debugOwner: this)
@@ -709,22 +731,45 @@ class RenderMushafPage extends RenderBox {
     super.dispose();
   }
 
-  /// only the words are hit. a single tap on them waits out a double tap, then goes on to the
-  /// turner like a tap on the margin and toggles the controls
+  /// only the words and the bookmarked numbers are hit. a single tap on plain words waits out a
+  /// double tap, then goes on to the turner like a tap on the margin and toggles the controls
   @override
   bool hitTestSelf(Offset position) =>
-      (onAyah != null || _onCheck != null) && ayahAt(position) != null;
+      (onAyah != null || _onCheck != null) &&
+      (ayahAt(position) != null || _numberAt(position) != null);
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is! PointerDownEvent) return;
-    _down = ayahAt(entry.localPosition);
-    if (_onCheck != null) {
-      _tap.addPointer(event);
-      return;
-    }
+    final number = _numberAt(entry.localPosition);
+    final key = _down = number ?? ayahAt(entry.localPosition);
+    final check = _onCheck;
+    final open = onAyah;
+    final note = onNote;
+    _single = key == null
+        ? null
+        : check != null
+        ? () => check(key)
+        : number != null && open != null
+        ? () => open(key)
+        : _highlighted.contains(key) && note != null
+        ? () => note(key)
+        : null;
+    if (_single != null) _tap.addPointer(event);
+    if (check != null) return;
     _double.addPointer(event);
     _long.addPointer(event);
+  }
+
+  /// the number draws smaller than a finger, its 44 pt wins over the words beside it
+  AyahKey? _numberAt(Offset position) {
+    for (final key in _bookmarked.keys) {
+      if (bookmarkedNumber(key)?.getBounds().center case final center?) {
+        final hit = SizeManager.hit * _unit;
+        if (Rect.fromCenter(center: center, width: hit, height: hit).contains(position)) return key;
+      }
+    }
+    return null;
   }
 
   /// the line band under the position, then the nearest word on it (research R3)
@@ -1254,7 +1299,8 @@ _Laid _laidOf(_LaidInput input) {
     input.step,
     input.ink,
   );
-  final laid = _laids.remove(key) ?? _Laid.of(input);
+  final laid =
+      _laids.remove(key) ?? Timeline.timeSync<_Laid>('quran page layout', () => _Laid.of(input));
   _laids[key] = laid;
   if (_laids.length > 5) _laids.remove(_laids.keys.first);
   return laid;

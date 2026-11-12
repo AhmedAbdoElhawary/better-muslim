@@ -28,6 +28,12 @@ _Avoid_: selected prayer, current prayer
 A time when what the app shows changes on its own: a prayer time, the end of its now window, sunrise, maghrib, local midnight.
 _Avoid_: reminder, tick, timer
 
+## Qibla
+
+**Home qibla**:
+The small dial on Home's next prayer card that points to the Kaaba as the phone turns, from the saved place. A tap opens the Qibla page.
+_Avoid_: mini compass, qibla widget
+
 ## Calendar
 
 **Selected day**:
@@ -53,6 +59,10 @@ A saved ayah or page. It is in exactly one category and may have its own name.
 A named, colored group of bookmarks. "Bookmarks" is the one that always exists.
 _Avoid_: ribbon color, folder, tag
 
+**Category page**:
+One category's bookmarks, all of them, newest first. Saved shows only a category's three newest and opens this page for the rest.
+_Avoid_: category list, see all page
+
 **Bookmarked number**:
 A bookmarked ayah's number, with a ribbon in its category's color behind it.
 _Avoid_: bookmark wash, highlight, page ribbon
@@ -68,16 +78,32 @@ _Avoid_: theme, page theme
 The meaning under each ayah in the Translation layout and on its Ayah sheet, one picked from those in the app. Al-Muyassar and al-Jalalayn count as one for Arabic, though they are short tafsirs.
 _Avoid_: tafsir (for the picked one)
 
+**Share size**:
+The shape of a shared image: Square, Portrait (4:5) or Story.
+_Avoid_: ratio, format
+
 **Ayah sheet**:
 The sheet with one ayah's translation and what I can do with it: play, tafsir, bookmark, note, share, copy.
 _Avoid_: actions, ayah menu
+
+**Study sheet**:
+The large sheet with an ayah's tafsir and translation. It takes the Ayah sheet's place.
+_Avoid_: tafsir sheet, big sheet
+
+**Index sheet**:
+The sheet the reader's Index opens: every surah, juz or page, a tap turns the reader there.
+_Avoid_: index popup, contents
+
+**Exact**:
+The search that finds the typed words only as whole words, so الله never finds اللهم.
+_Avoid_: typical, strict, whole word
 
 **Reader controls**:
 The top bar and the dock over the mushaf page.
 _Avoid_: app bar, navigation bar, chrome
 
 **Turn strip**:
-The strip at each side of the mushaf page that turns it on a tap. The left one goes to the next page and the right one to the previous, in both languages.
+The narrow strip at each side of the mushaf page that turns it on a tap. The left one goes to the next page and the right one to the previous, in both languages.
 _Avoid_: tap zone, margin
 
 **Kashida**:

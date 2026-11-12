@@ -7,9 +7,9 @@ import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/step/step_dots.dart';
 import 'package:better_muslim/features/notifications/presentation/view/notifications_step_page.dart';
 import 'package:better_muslim/features/onboarding/view/location_step_page.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

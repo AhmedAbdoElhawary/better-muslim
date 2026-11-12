@@ -13,8 +13,8 @@ import 'package:better_muslim/features/notifications/data/dua_after_adhan.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_colors.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_tint.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/dua_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// "After the adhan", the dua's first line and its translation, read dua opens the rest
 class AdhanDuaCard extends StatelessWidget {

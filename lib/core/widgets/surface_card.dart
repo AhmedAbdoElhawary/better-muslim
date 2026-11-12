@@ -1,7 +1,7 @@
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// surface, radius 20 and the outline ring of the home cards and grouped lists
 class SurfaceCard extends StatelessWidget {

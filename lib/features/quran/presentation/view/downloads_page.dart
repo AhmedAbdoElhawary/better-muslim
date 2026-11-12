@@ -18,9 +18,9 @@ import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/quran/presentation/providers/mushaf_style_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/recitation_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// More › Downloads: the mushaf styles, then the surahs under each reciter, with their size and a
 /// delete

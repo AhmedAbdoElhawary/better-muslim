@@ -9,8 +9,8 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/ring_painter.dart';
 import 'package:better_muslim/core/widgets/rolling_digits.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.08's ring and count, the digits rolling. at the target the glow and MOTION 12's burst, the
 /// ring alone with reduce motion. never mirrored in arabic

@@ -15,9 +15,9 @@ import 'package:better_muslim/features/prayer/presentation/view/widgets/day_comp
 import 'package:better_muslim/features/prayer/presentation/view/widgets/mark_button.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/passed_sheet.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/state_chip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// what a row offers, from its state (FR-002)
 class RowTrailing extends ConsumerWidget {

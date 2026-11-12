@@ -1,3 +1,4 @@
+import 'package:better_muslim/core/location/place_list.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/quran/data/search_text.dart';
@@ -171,6 +172,24 @@ void main() {
     expect(found('merciful', scope: SearchScope.arabic), isEmpty);
     expect(found('الرحمن', scope: SearchScope.translation), isEmpty);
     expect(found('الرحمن', scope: SearchScope.arabic), found('الرحمن'));
+  });
+
+  test('exact finds the typed words only as whole words', () {
+    /// hamza folds away like in every search, so ءالله is الله
+    List<String> words(String query) => [
+      for (final hits in searchQuran(query, ayahs, assets, scope: SearchScope.exact).groups.values)
+        for (final hit in hits)
+          for (final i in hit.arabic) normalizeArabic(hit.ayah.words[i].replaceAll('ء', '')).trim(),
+    ];
+    expect(found('الله', scope: SearchScope.exact), contains(const AyahKey(112, 1)));
+    expect(found('اللهم', scope: SearchScope.exact), contains(const AyahKey(3, 26)));
+    expect(words('الله').toSet(), hasLength(1));
+    expect(words('اللهم').toSet(), hasLength(1));
+    expect(words('الله'), isNot(contains(normalizeArabic('اللَّهُمَّ'))));
+    expect(found('الله', scope: SearchScope.exact).length, lessThan(found('الله').length));
+    expect(found('بسم الله', scope: SearchScope.exact), contains(const AyahKey(1, 1)));
+    expect(found('merciful', scope: SearchScope.exact), contains(const AyahKey(1, 1)));
+    expect(found('mercifu', scope: SearchScope.exact), isEmpty);
   });
 
   test('all searches both, an ayah found in both is listed once', () {

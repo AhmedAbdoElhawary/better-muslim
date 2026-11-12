@@ -8,9 +8,9 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/shortcut_row.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// continue reading, and the morning or evening azkar in english. 4.16 has only the first
 class ShortcutsCard extends ConsumerWidget {

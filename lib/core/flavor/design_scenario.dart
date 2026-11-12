@@ -9,9 +9,9 @@ import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:material_ui/material_ui.dart' show ThemeMode;
 import 'package:timezone/timezone.dart' show TZDateTime, getLocation;
 
 /// the moment every PNG shows: thu 15 oct 2026, 16:32 in makkah (FR-026). dev builds only

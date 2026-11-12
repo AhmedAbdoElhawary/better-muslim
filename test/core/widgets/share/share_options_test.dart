@@ -38,4 +38,13 @@ void main() {
       isNull,
     );
   });
+
+  test('portrait is 4:5 between square and story, the fit grows from the default', () {
+    expect(ShareSize.values, [ShareSize.square, ShareSize.portrait, ShareSize.story]);
+    expect(ShareSize.portrait.height / ShareSize.square.height, 1350 / 1080);
+    expect(ShareSize.tried(const ShareOptions()), ShareSize.values);
+    expect(ShareSize.tried(const ShareOptions(size: ShareSize.portrait, sizeLocked: true)), [
+      ShareSize.portrait,
+    ]);
+  });
 }

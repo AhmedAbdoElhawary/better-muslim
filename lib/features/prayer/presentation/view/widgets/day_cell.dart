@@ -9,10 +9,10 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/core/widgets/day_dots.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// one day of the week strip: filled when it is the shown day, grey numbers in the future
 class DayCell extends ConsumerWidget {

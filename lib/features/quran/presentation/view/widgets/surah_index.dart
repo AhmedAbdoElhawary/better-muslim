@@ -15,15 +15,21 @@ import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum _Index { surah, juz, page }
 
 /// 4.18's index: 114 surahs, 30 juz or 604 pages, each row grows into its page
 class SurahIndex extends ConsumerStatefulWidget {
-  const SurahIndex({super.key});
+  const SurahIndex({this.current, this.onPick, super.key});
+
+  /// the Index sheet's: the reader's page, its surah, juz and page marked
+  final int? current;
+
+  /// the Index sheet turns the reader it's over instead of opening one
+  final ValueChanged<int>? onPick;
 
   @override
   ConsumerState<SurahIndex> createState() => _SurahIndexState();
@@ -34,12 +40,20 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
 
   static const _skeletonRows = 8;
 
+  void _pick(_Index index) => setState(() => _index = index);
+
   @override
   Widget build(BuildContext context) {
     final assetRaw = ref.watch(quranAssetsProvider);
     final digits = ref.watch(_digitsProvider);
     final assets = assetRaw.value;
     final surah = assetRaw.requireValue;
+
+    final current = switch (widget.current) {
+      final page? when assets != null => (page: page, info: assets.pageInfo(page)),
+      _ => null,
+    };
+    final onPick = widget.onPick;
 
     final count = switch (_index) {
       _ when assets == null => _skeletonRows,
@@ -50,24 +64,18 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
 
     return SliverMainAxisGroup(
       slivers: [
-        SliverToBoxAdapter(
-          child: OnlyPadding(
-            top: SpaceManager.quranIndexTop,
-            bottom: SpaceManager.s2,
-            start: SpaceManager.s4,
-            end: SpaceManager.s4,
-            child: Segmented(
-              values: _Index.values,
-              selected: _index,
-              labelOf: (index) => switch (index) {
-                _Index.surah => StringsManager.surah,
-                _Index.juz => StringsManager.juz,
-                _Index.page => StringsManager.page,
-              },
-              onChanged: (index) => setState(() => _index = index),
+        if (onPick == null)
+          SliverToBoxAdapter(
+            child: _IndexTabs(index: _index, onChanged: _pick),
+          )
+        else
+          /// the sheet opens at the reader's surah, the tabs stay in reach above it
+          PinnedHeaderSliver(
+            child: ColoredBox(
+              color: context.getColor(ThemeEnum.surface),
+              child: _IndexTabs(index: _index, onChanged: _pick),
             ),
           ),
-        ),
         SliverList.builder(
           itemCount: count,
           itemBuilder: (context, i) => BmStagger(
@@ -75,13 +83,26 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
             child: assets == null
                 ? const _SkeletonRow()
                 : switch (_index) {
-                    _Index.surah => _SurahRow(digits: digits, surah: assets.surahs[i]),
+                    _Index.surah => _SurahRow(
+                      digits: digits,
+                      surah: assets.surahs[i],
+                      marked: current?.info.start.surah == i + 1,
+                      onPick: onPick,
+                    ),
                     _Index.juz => _JuzRow(
                       surah: surah.surah(assets.juzs[i].start.surah),
                       digits: digits,
                       juz: assets.juzs[i],
+                      marked: current?.info.juz == i + 1,
+                      onPick: onPick,
                     ),
-                    _Index.page => _PageRow(digits: digits, assets: assets, page: i + 1),
+                    _Index.page => _PageRow(
+                      digits: digits,
+                      assets: assets,
+                      page: i + 1,
+                      marked: current?.page == i + 1,
+                      onPick: onPick,
+                    ),
                   },
           ),
         ),
@@ -90,11 +111,45 @@ class _SurahIndexState extends ConsumerState<SurahIndex> {
   }
 }
 
+class _IndexTabs extends StatelessWidget {
+  const _IndexTabs({required this.index, required this.onChanged});
+
+  final _Index index;
+  final ValueChanged<_Index> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return OnlyPadding(
+      top: SpaceManager.quranIndexTop,
+      bottom: SpaceManager.s2,
+      start: SpaceManager.s4,
+      end: SpaceManager.s4,
+      child: Segmented(
+        values: _Index.values,
+        selected: index,
+        labelOf: (index) => switch (index) {
+          _Index.surah => StringsManager.surah,
+          _Index.juz => StringsManager.juz,
+          _Index.page => StringsManager.page,
+        },
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
 class _SurahRow extends ConsumerWidget {
-  const _SurahRow({required this.surah, required this.digits});
+  const _SurahRow({
+    required this.surah,
+    required this.digits,
+    required this.marked,
+    required this.onPick,
+  });
 
   final QuranSurah surah;
   final Digits digits;
+  final bool marked;
+  final ValueChanged<int>? onPick;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -109,16 +164,26 @@ class _SurahRow extends ConsumerWidget {
         'page': context.formatDigits('${surah.page}', digits),
       },
       arabic: isArabic ? null : surah.ar,
+      marked: marked,
+      onPick: onPick,
     );
   }
 }
 
 class _JuzRow extends ConsumerWidget {
-  const _JuzRow({required this.juz, required this.digits, required this.surah});
+  const _JuzRow({
+    required this.juz,
+    required this.digits,
+    required this.surah,
+    required this.marked,
+    required this.onPick,
+  });
 
   final QuranJuz juz;
   final Digits digits;
   final QuranSurah surah;
+  final bool marked;
+  final ValueChanged<int>? onPick;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -134,16 +199,26 @@ class _JuzRow extends ConsumerWidget {
         'ayah': context.formatDigits('${juz.start.ayah}', digits),
         'page': context.formatDigits('${juz.page}', digits),
       },
+      marked: marked,
+      onPick: onPick,
     );
   }
 }
 
 class _PageRow extends ConsumerWidget {
-  const _PageRow({required this.page, required this.digits, required this.assets});
+  const _PageRow({
+    required this.page,
+    required this.digits,
+    required this.assets,
+    required this.marked,
+    required this.onPick,
+  });
 
   final int page;
   final Digits digits;
   final QuranAssets assets;
+  final bool marked;
+  final ValueChanged<int>? onPick;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final info = assets.pageInfo(page);
@@ -161,6 +236,8 @@ class _PageRow extends ConsumerWidget {
         'juz': context.formatDigits('${info.juz}', digits),
         'surah': isArabic ? surah.ar : surah.en,
       },
+      marked: marked,
+      onPick: onPick,
     );
   }
 }
@@ -178,6 +255,8 @@ class _Row extends ConsumerWidget {
     required this.title,
     required this.subtitle,
     required this.args,
+    required this.marked,
+    required this.onPick,
     this.titleArgs,
     this.arabic,
   });
@@ -197,79 +276,142 @@ class _Row extends ConsumerWidget {
 
   /// the arabic name at the end, in the english ui only
   final String? arabic;
+  final bool marked;
+  final ValueChanged<int>? onPick;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final onPick = this.onPick;
+    if (onPick != null) {
+      return _RowContent(
+        number: number,
+        page: page,
+        title: title,
+        titleArgs: titleArgs,
+        subtitle: subtitle,
+        args: args,
+        arabic: arabic,
+        marked: marked,
+        onTap: () => onPick(page),
+      );
+    }
+    return BmContainerTransform(
+      radius: 0,
+      closedColor: ThemeEnum.bg,
+      closedBuilder: (context, open) => _RowContent(
+        number: number,
+        page: page,
+        title: title,
+        titleArgs: titleArgs,
+        subtitle: subtitle,
+        args: args,
+        arabic: arabic,
+        marked: marked,
+        onTap: () async {
+          await warmMushafPage(context, ref, page);
+          if (context.mounted) open();
+        },
+      ),
+      openBuilder: (context) => ReaderPage(page: page),
+    );
+  }
+}
+
+class _RowContent extends ConsumerWidget {
+  const _RowContent({
+    required this.number,
+    required this.page,
+    required this.title,
+    required this.titleArgs,
+    required this.subtitle,
+    required this.args,
+    required this.arabic,
+    required this.marked,
+    required this.onTap,
+  });
+
+  final String number;
+  final int page;
+  final String title;
+  final Map<String, String>? titleArgs;
+  final String subtitle;
+  final Map<String, String> args;
+  final String? arabic;
+
+  /// the Index sheet's row of the page the reader is on
+  final bool marked;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final titleArgs = this.titleArgs;
     final arabic = this.arabic;
-    return BmContainerTransform(
-      radius: 0,
-      closedColor: ThemeEnum.bg,
-      closedBuilder: (context, open) => Semantics(
-        button: true,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () async {
-            await warmMushafPage(context, ref, page);
-            if (context.mounted) open();
-          },
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: context.getColor(ThemeEnum.outline))),
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: SizeManager.surahRow.r),
-              child: HorizontalPadding(
-                padding: SpaceManager.s4,
-                child: Row(
-                  children: [
-                    MushafStar(
-                      child: SemiBoldText(
-                        number,
-                        translate: false,
-                        fontSize: FontSizeManager.rowSubtitle,
-                        tabularFigures: true,
+    return Semantics(
+      button: true,
+      selected: marked,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+
+        /// the page starts loading while the finger is still down
+        onTapDown: (_) => warmMushafPage(context, ref, page),
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: context.getColor(ThemeEnum.outline))),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: SizeManager.surahRow.r),
+            child: HorizontalPadding(
+              padding: SpaceManager.s4,
+              child: Row(
+                children: [
+                  MushafStar(
+                    child: SemiBoldText(
+                      number,
+                      translate: false,
+                      fontSize: FontSizeManager.rowSubtitle,
+                      tabularFigures: true,
+                    ),
+                  ),
+                  const RSizedBox.horizontal(SpaceManager.surahRowGap),
+                  Expanded(
+                    child: VerticalPadding(
+                      padding: SpaceManager.s1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MediumText(
+                            title,
+                            translate: titleArgs != null,
+                            args: titleArgs ?? const {},
+                            fontSize: FontSizeManager.surahName,
+                            color: marked ? ThemeEnum.primary : null,
+                          ),
+                          const RSizedBox.vertical(SpaceManager.surahRowLineGap),
+                          RegularText(
+                            subtitle,
+                            args: args,
+                            fontSize: FontSizeManager.rowSubtitle,
+                            color: ThemeEnum.text2,
+                          ),
+                        ],
                       ),
                     ),
-                    const RSizedBox.horizontal(SpaceManager.surahRowGap),
-                    Expanded(
-                      child: VerticalPadding(
-                        padding: SpaceManager.s1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            MediumText(
-                              title,
-                              translate: titleArgs != null,
-                              args: titleArgs ?? const {},
-                              fontSize: FontSizeManager.surahName,
-                            ),
-                            const RSizedBox.vertical(SpaceManager.surahRowLineGap),
-                            RegularText(
-                              subtitle,
-                              args: args,
-                              fontSize: FontSizeManager.rowSubtitle,
-                              color: ThemeEnum.text2,
-                            ),
-                          ],
-                        ),
-                      ),
+                  ),
+                  if (arabic != null)
+                    RegularText(
+                      arabic,
+                      translate: false,
+                      font: FontEnum.dua,
+                      fontSize: FontSizeManager.surahNameAr,
+                      color: marked ? ThemeEnum.primary : null,
                     ),
-                    if (arabic != null)
-                      RegularText(
-                        arabic,
-                        translate: false,
-                        font: FontEnum.dua,
-                        fontSize: FontSizeManager.surahNameAr,
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
         ),
       ),
-      openBuilder: (context) => ReaderPage(page: page),
     );
   }
 }

@@ -1,8 +1,9 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/text_field.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../helpers/widgets.dart';
 
@@ -58,5 +59,34 @@ void main() {
     expect(find.text('ملاحظة'), findsOneWidget);
     expect(find.text('اكتب ملاحظة خاصة'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a parent scroll with the ios menu up does not assert', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    await pumpCoreWidget(
+      tester,
+      Column(
+        children: [
+          BmTextField(label: StringsManager.note, initial: 'a note', onChanged: (_) {}),
+          const SizedBox(height: 2000),
+        ],
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    tester.state<EditableTextState>(find.byType(EditableText)).showToolbar();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(SystemContextMenu), findsOneWidget);
+
+    /// a jump starts and ends the scroll before the next frame
+    tester.state<ScrollableState>(find.byType(Scrollable).first).position.jumpTo(10);
+    await tester.pump();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SystemContextMenu), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
   });
 }

@@ -1,8 +1,8 @@
 // enum names are the svg file names, so they keep the files' snake_case
 // ignore_for_file: constant_identifier_names
 
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// All icons are 24 × 24, stroke 1.25, round caps and joins. Tint with [color].
 /// Outline = default. Filled = selected tab and active states only.

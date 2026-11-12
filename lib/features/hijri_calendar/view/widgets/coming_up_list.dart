@@ -15,10 +15,10 @@ import 'package:better_muslim/features/hijri_calendar/model/calendar_month.dart'
 import 'package:better_muslim/features/hijri_calendar/model/coming_up.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/calendar_format.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:material_ui/material_ui.dart';
 
 /// above this the pill goes under the name, like the prayer rows stack
 const _stackAt = 1.4;

@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum SkyEventKind {
   /// a tiny star flares and throws its sparks

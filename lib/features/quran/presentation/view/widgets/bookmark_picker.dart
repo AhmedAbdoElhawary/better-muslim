@@ -27,9 +27,9 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/view/bookmark_actions.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the ayah sheet's Bookmark and the top bar's: pick a category, make one, or remove the
 /// bookmark. a long press on a category edits it
@@ -68,6 +68,7 @@ Future<bool> _delete(BuildContext context, WidgetRef ref, Category category) asy
   return true;
 }
 
+/// the color's name for a screen reader, the picker shows the circles alone
 extension on CategoryColor {
   String get label => switch (this) {
     CategoryColor.primary => StringsManager.colorPrimary,
@@ -149,13 +150,13 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
     final editing = _editing;
     return SafeArea(
       top: false,
-      child: SingleChildScrollView(
-        child: BottomPadding(
-          padding: SpaceManager.s6,
-          child: BmSwitcher(
-            child: _form
-                ? _CategoryForm(
-                    key: ValueKey(editing?.id),
+      child: BottomPadding(
+        padding: SpaceManager.s6,
+        child: BmSwitcher(
+          child: _form
+              ? SingleChildScrollView(
+                  key: ValueKey(editing?.id),
+                  child: _CategoryForm(
                     category: editing,
                     onSave: _save,
                     onDelete: editing == null || editing.id == AppDatabase.defaultCategory
@@ -163,13 +164,14 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
                         : () async {
                             if (await _delete(context, ref, editing)) _back();
                           },
-                  )
-                : Column(
-                    key: const ValueKey('list'),
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SheetTitle(
+                  ),
+                )
+              : CustomScrollView(
+                  key: const ValueKey('list'),
+                  shrinkWrap: true,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: SheetTitle(
                         savedReference(
                           context,
                           ref,
@@ -179,26 +181,28 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
                         ),
                         translate: false,
                       ),
-                      _Categories(
-                        ticked: bookmark?.category,
-                        onPick: _pick,
-                        onEdit: _open,
-                        onNew: () => _open(null),
-                      ),
-                      if (bookmark != null) ...[
-                        const RSizedBox.vertical(SpaceManager.s4),
-                        HorizontalPadding(
-                          padding: SpaceManager.s5,
+                    ),
+                    _Categories(
+                      ticked: bookmark?.category,
+                      onPick: _pick,
+                      onEdit: _open,
+                      onNew: () => _open(null),
+                    ),
+                    if (bookmark != null)
+                      SliverToBoxAdapter(
+                        child: OnlyPadding(
+                          top: SpaceManager.s4,
+                          start: SpaceManager.s5,
+                          end: SpaceManager.s5,
                           child: BmButton.text(
                             StringsManager.removeBookmark,
                             color: ThemeEnum.error,
                             onPressed: () => _remove(bookmark),
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-          ),
+                      ),
+                  ],
+                ),
         ),
       ),
     );
@@ -221,13 +225,12 @@ class _Categories extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categories = ref.watch(categoriesProvider).value ?? const [];
+    final categories = ref.watch(categoriesByCountProvider);
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SliverList.list(
       children: [
         for (final category in categories)
           _Row(
@@ -301,7 +304,12 @@ class _Row extends StatelessWidget {
                 ),
                 const RSizedBox.horizontal(SpaceManager.listRowGap),
                 Expanded(
-                  child: RegularText(title, translate: false, fontSize: FontSizeManager.body),
+                  child: RegularText(
+                    title,
+                    translate: false,
+                    fontSize: FontSizeManager.body,
+                    maxLines: 2,
+                  ),
                 ),
                 if (count != null) ...[
                   const RSizedBox.horizontal(SpaceManager.listRowGap),
@@ -374,7 +382,7 @@ class _CategorySheet extends ConsumerWidget {
 
 /// New category, or the same form filled in to rename, recolor or delete one
 class _CategoryForm extends StatefulWidget {
-  const _CategoryForm({required this.onSave, this.category, this.onDelete, super.key});
+  const _CategoryForm({required this.onSave, this.category, this.onDelete});
 
   final Category? category;
   final void Function(String name, CategoryColor color) onSave;
@@ -417,17 +425,21 @@ class _CategoryFormState extends State<_CategoryForm> {
               const RSizedBox.vertical(SpaceManager.s5),
               const RegularText(StringsManager.color, color: ThemeEnum.text2),
               const RSizedBox.vertical(SpaceManager.s3),
-              Wrap(
-                spacing: SpaceManager.shareSwatchGap.r,
-                runSpacing: SpaceManager.s4.r,
+              Row(
                 children: [
-                  for (final color in CategoryColor.values)
-                    Swatch(
-                      label: color.label,
-                      selected: color == _color,
-                      onTap: () => setState(() => _color = color),
-                      fill: ColoredBox(color: context.getColor(color.theme)),
+                  for (final color in CategoryColor.values) ...[
+                    Semantics(
+                      label: context.tr(color.label),
+                      child: Swatch(
+                        key: ValueKey(color),
+                        size: SizeManager.shareSwatch * 0.8,
+                        selected: color == _color,
+                        onTap: () => setState(() => _color = color),
+                        fill: ColoredBox(color: context.getColor(color.theme)),
+                      ),
                     ),
+                    if (color != CategoryColor.values.last) const Spacer(),
+                  ],
                 ],
               ),
               const RSizedBox.vertical(SpaceManager.s6),

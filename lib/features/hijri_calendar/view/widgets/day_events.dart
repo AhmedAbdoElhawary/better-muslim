@@ -5,8 +5,8 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// every event covering the day, a several day one on each of its days (FR-018)
 class DayEvents extends ConsumerWidget {

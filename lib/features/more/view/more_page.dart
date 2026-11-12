@@ -29,10 +29,10 @@ import 'package:better_muslim/features/more/view/widgets/more_tiles.dart';
 import 'package:better_muslim/features/more/view/widgets/reset_row.dart';
 import 'package:better_muslim/features/more/view/widgets/text_size_sheet.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// every setting, with no account (4.09). each section reads only what it shows
 class MorePage extends ConsumerWidget {

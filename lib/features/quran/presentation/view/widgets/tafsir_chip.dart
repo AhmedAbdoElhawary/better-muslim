@@ -8,8 +8,8 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// K.chip of _gen/kit.js, the study tabs' and the share sheet's text picks. a tafsir not on the
 /// phone yet carries a download mark, then its progress

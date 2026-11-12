@@ -17,9 +17,9 @@ import 'package:better_muslim/features/prayer/presentation/providers/selected_da
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/row_trailing.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/sound_button.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/timezone.dart';
 
 /// one prayer of the shown day, filled in its now window and outlined as the next prayer. a

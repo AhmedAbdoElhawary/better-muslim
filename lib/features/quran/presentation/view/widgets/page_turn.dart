@@ -6,11 +6,11 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_curl.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// turns the mushaf like paper (research R7). a drag to the right or a tap on the left Turn strip
 /// opens the next page, the way an arabic book reads, in both languages. Book curls the leaf from its
@@ -42,7 +42,7 @@ class PageTurner extends StatefulWidget {
   /// a tap on a Turn strip, 1 the left one and -1 the right one. the page turns when it's null
   final ValueChanged<int>? onEdge;
 
-  /// each Turn strip's width and height from the top, 44 pt down the whole page when null
+  /// each Turn strip's width and height from the top, down the whole page when null
   final Size? strip;
 
   @override
@@ -75,8 +75,12 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
   /// the next page's layout waits this long after a turn lands, it dropped the frames after it
   Timer? _rest;
 
-  /// the leaf's picture while it curls, and which page it is
-  final _leaf = ValueNotifier<(int, ui.Image)?>(null);
+  /// the pictures of the pages that may curl, by page. taken as the finger comes down, so a turn
+  /// never spends its first frames on them
+  final _leaves = ValueNotifier<Map<int, ui.Image>>(const {});
+
+  /// a finger on the page, the far pages wait for it like for a running turn
+  bool _held = false;
 
   /// while a finger is down the page before is painted out of sight, so it can be snapped
   final _parked = ValueNotifier(false);
@@ -120,15 +124,39 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
     SchedulerBinding.instance.addPostFrameCallback((_) {
       final t = _turn.value;
       if (!mounted || t == 0) return;
-      final leaf = t < 0 ? widget.page.value - 1 : widget.page.value;
-      if (_leaf.value?.$1 == leaf) return;
-      final boundary = _keys[leaf]?.currentContext?.findRenderObject();
-      if (boundary is! RenderRepaintBoundary || !boundary.hasSize || boundary.debugNeedsPaint) {
-        return;
-      }
-      final old = _leaf.value?.$2;
-      _leaf.value = (leaf, boundary.toImageSync(pixelRatio: _ratio));
-      old?.dispose();
+      _take(t < 0 ? widget.page.value - 1 : widget.page.value);
+    });
+  }
+
+  /// only a page painted in the last frame, the shown one or the parked one before it
+  void _take(int n) {
+    if (_leaves.value.containsKey(n)) return;
+    final boundary = _keys[n]?.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary || !boundary.hasSize || boundary.debugNeedsPaint) {
+      return;
+    }
+    _leaves.value = {..._leaves.value, n: boundary.toImageSync(pixelRatio: _ratio)};
+  }
+
+  /// the shown page is pictured now, the one before once a frame has painted it parked
+  void _down(DragDownDetails _) {
+    _held = true;
+    if (!widget.book || _reduce || _turn.isAnimating) return;
+    final page = widget.page.value;
+    _parked.value = true;
+    _take(page);
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) {
+        if (mounted && widget.page.value == page) _take(page - 1);
+      })
+      ..scheduleFrame();
+  }
+
+  /// a tap or a scroll, not a swipe. a Turn strip's tap turns after this, its pictures stay
+  void _cancel() {
+    _held = false;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _turn.value == 0 && !_turn.isAnimating) _settle();
     });
   }
 
@@ -152,7 +180,7 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
 
       /// not while the reader opens or the page moves, a page's layout would drop one of their
       /// frames. a next door page missing mid turn comes anyway, a blank page is worse
-      final moving = widget.lift.isAnimating || _turn.isAnimating;
+      final moving = widget.lift.isAnimating || _turn.isAnimating || _held;
       final opening = ModalRoute.of(context)?.animation?.isCompleted == false;
       if (opening || (moving && far)) {
         _warm();
@@ -175,8 +203,10 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
   /// the real page shows again, sharp in the next frame
   void _settle() {
     _parked.value = false;
-    _leaf.value?.$2.dispose();
-    _leaf.value = null;
+    for (final image in _leaves.value.values) {
+      image.dispose();
+    }
+    _leaves.value = const {};
   }
 
   /// a turn still settling looks done, so the page moves on now and the next turn never waits.
@@ -207,10 +237,13 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
   }
 
   void _end(DragEndDetails details) {
+    _held = false;
     final velocity = details.velocity.pixelsPerSecond.dx;
     final value = _reduce ? _drag / _width : _turn.value;
     var target = 0.0;
-    if (velocity.abs() > BmMotion.completeVelocity) {
+
+    /// a tap that slid a little is still a tap
+    if (velocity.abs() > BmMotion.completeVelocity && _drag.abs() >= SizeManager.turnSwipe.r) {
       target = velocity.sign;
     } else if (value.abs() > BmMotion.completeShare) {
       target = value.sign;
@@ -272,8 +305,10 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
   void dispose() {
     _rest?.cancel();
     _turn.dispose();
-    _leaf.value?.$2.dispose();
-    _leaf.dispose();
+    for (final image in _leaves.value.values) {
+      image.dispose();
+    }
+    _leaves.dispose();
     _parked.dispose();
     _shader?.dispose();
     super.dispose();
@@ -285,9 +320,11 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
     return LayoutBuilder(
       builder: (context, constraints) {
         _width = constraints.maxWidth;
-        final strip = widget.strip ?? Size((SizeManager.hit * 0.6).r, constraints.maxHeight);
+        final strip = widget.strip ?? Size(SizeManager.turnStrip.r, constraints.maxHeight);
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
+          onHorizontalDragDown: _down,
+          onHorizontalDragCancel: _cancel,
           onHorizontalDragStart: _start,
           onHorizontalDragUpdate: _update,
           onHorizontalDragEnd: _end,
@@ -307,7 +344,7 @@ class PageTurnerState extends State<PageTurner> with SingleTickerProviderStateMi
                   return _Pages(
                     turn: _turn,
                     lift: widget.lift,
-                    leaf: _leaf,
+                    leaves: _leaves,
                     parked: _parked,
                     shader: _shader,
                     book: widget.book && !_reduce,
@@ -374,7 +411,7 @@ class _Pages extends StatelessWidget {
   const _Pages({
     required this.turn,
     required this.lift,
-    required this.leaf,
+    required this.leaves,
     required this.parked,
     required this.shader,
     required this.book,
@@ -386,7 +423,7 @@ class _Pages extends StatelessWidget {
 
   final Animation<double> turn;
   final Animation<double> lift;
-  final ValueListenable<(int, ui.Image)?> leaf;
+  final ValueListenable<Map<int, ui.Image>> leaves;
   final ValueListenable<bool> parked;
   final ui.FragmentShader? shader;
   final bool book;
@@ -398,7 +435,7 @@ class _Pages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: Listenable.merge([turn, lift, leaf, parked]),
+      animation: Listenable.merge([turn, lift, leaves, parked]),
       builder: (context, _) {
         final t = turn.value.clamp(-1.0, 1.0);
         final cardTransform = Matrix4.translationValues(0, -lift.value, 0);
@@ -406,8 +443,7 @@ class _Pages extends StatelessWidget {
         /// the leaf on top: the current page turning away, or the previous one coming back
         final leaf = t < 0 ? current - 1 : current;
         final under = t > 0 ? current + 1 : current;
-        final snapshot = this.leaf.value;
-        final curl = book && t != 0 && snapshot?.$1 == leaf ? snapshot!.$2 : null;
+        final curl = book && t != 0 ? leaves.value[leaf] : null;
 
         /// the real leaf waits under its curl. the previous one has no picture the first frame,
         /// so it stays hidden rather than cover the page whole

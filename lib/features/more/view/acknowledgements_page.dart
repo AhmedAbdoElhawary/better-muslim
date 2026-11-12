@@ -8,8 +8,8 @@ import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/more/model/credits.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// each source with the credit its license asks for, then the packages' own licenses (FR-033)
 class AcknowledgementsPage extends StatelessWidget {

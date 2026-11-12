@@ -12,10 +12,10 @@ import 'package:better_muslim/features/prayer/presentation/view/widgets/day_comp
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_row.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/qada_row.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/summary_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 /// the main journey of milestone 4 on a real engine: the store's streams, the shell's toast and

@@ -11,8 +11,8 @@ import 'package:better_muslim/features/quran/presentation/view/reader_page.dart'
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_share.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -127,10 +127,10 @@ void main() {
     await unmount(tester);
   });
 
-  for (final (size, height) in [(ShareSize.square, 1080), (ShareSize.story, 1920)]) {
+  for (final (label, height) in [(null, 1080), ('Portrait', 1350), ('Story', 1920)]) {
     testWidgets('share sends a 1080 x $height png', (tester) async {
       await openShare(tester, const AyahKey(1, 5), 1);
-      if (size == ShareSize.story) await tapInSheet(tester, find.text('Story'));
+      if (label != null) await tapInSheet(tester, find.text(label));
 
       final button = find.text('Share').last;
       await tester.ensureVisible(button);

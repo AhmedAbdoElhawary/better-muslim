@@ -10,8 +10,8 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_pa
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
@@ -80,48 +80,92 @@ void main() {
 
   double topOf(WidgetTester tester, String text) => tester.getTopLeft(find.text(text).first).dy;
 
-  testWidgets('bookmarks: last read first marked auto, then mine under their categories', (
-    tester,
-  ) async {
+  /// the color rows show their circles alone, each keyed by its color
+  Finder swatch(CategoryColor color) => find.byKey(ValueKey(color));
+
+  testWidgets('bookmarks: a new category first, then mine under their categories', (tester) async {
     await pumpApp(tester);
     await seed(tester);
     await open(tester, Routes.quranSaved);
 
     for (final text in [
       'Saved',
-      'Last read',
-      'AUTO',
-      'Al-Fatiha 1:3 · Page 1',
-      'Today 14:10',
-      'Reflect',
-      'Al-Baqarah 2:255 · Page 42',
-      'Tue',
+      'New category',
       'Morning wird',
       "An-Naba' · Page 582",
       '1 Oct',
-      'RECENT NOTE',
-      'Ask for help in everything, then act.',
+      'Reflect',
+      'Al-Baqarah 2:255 · Page 42',
+      'Tue',
+      'Study',
+      'Empty',
     ]) {
       expect(find.text(text), findsOneWidget, reason: text);
     }
+    for (final text in [
+      'Last read',
+      'AUTO',
+      'RECENT NOTE',
+      'Ask for help in everything, then act.',
+    ]) {
+      expect(find.text(text), findsNothing, reason: text);
+    }
     expect(find.text('Highlights'), findsOneWidget, reason: 'the third tab');
-    expect(find.text('Study'), findsOneWidget);
     expect(find.text('Empty'), findsOneWidget, reason: 'its header shows with no bookmarks');
+    expect(find.text('No bookmarks yet'), findsNothing, reason: 'there are bookmarks');
 
     /// "Bookmarks" is the tab and the default's header
     final header = tester.getTopLeft(find.text('Bookmarks').last).dy;
-    expect(topOf(tester, 'Last read'), lessThan(header));
+    expect(topOf(tester, 'New category'), lessThan(header));
     expect(header, lessThan(topOf(tester, 'Morning wird')));
     expect(topOf(tester, 'Morning wird'), lessThan(topOf(tester, 'Study')));
     expect(topOf(tester, 'Study'), lessThan(topOf(tester, 'Reflect')));
     expect(topOf(tester, 'Reflect'), lessThan(topOf(tester, 'Empty')));
-    expect(topOf(tester, 'Empty'), lessThan(topOf(tester, 'New category')));
     final ribbons = tester.widgetList<RibbonShape>(find.byType(RibbonShape));
-    expect(ribbons.map((ribbon) => ribbon.color), [
-      ThemeEnum.text2,
-      ThemeEnum.primary,
-      ThemeEnum.categoryRose,
-    ]);
+    expect(ribbons.map((ribbon) => ribbon.color), [ThemeEnum.primary, ThemeEnum.categoryRose]);
+    await unmount(tester);
+  });
+
+  testWidgets('the fullest category comes first, 3 each, See all opens the rest', (tester) async {
+    await pumpApp(tester);
+    await seed(tester);
+    final db = dbOf(tester);
+    await tester.runAsync(() async {
+      final study = (await db.select(db.quranCategories).get())
+          .firstWhere((category) => category.name == 'Study')
+          .id;
+      for (var i = 0; i < 4; i++) {
+        await db
+            .into(db.quranBookmarks)
+            .insert(
+              QuranBookmarksCompanion.insert(
+                page: 100 + i,
+                name: Value('Study $i'),
+                category: study,
+                createdAt: DateTime.utc(2026, 10, 14, 8, i),
+              ),
+            );
+      }
+    });
+    await open(tester, Routes.quranSaved);
+
+    /// study has 5 now, bookmarks 1
+    final header = tester.getTopLeft(find.text('Bookmarks').last).dy;
+    expect(topOf(tester, 'Study'), lessThan(header));
+    expect(header, lessThan(topOf(tester, 'Empty')));
+    for (final name in ['Study 3', 'Study 2', 'Study 1']) {
+      expect(find.text(name), findsOneWidget, reason: name);
+    }
+    expect(find.text('Study 0'), findsNothing, reason: 'only the newest 3');
+    expect(find.text('Reflect'), findsNothing);
+    expect(find.text('See all · 5'), findsOneWidget);
+
+    await tester.tap(find.text('See all · 5'));
+    await tester.pumpAndSettle();
+    for (final name in ['Study 3', 'Study 2', 'Study 1', 'Study 0', 'Reflect']) {
+      expect(find.text(name), findsOneWidget, reason: name);
+    }
+    expect(topOf(tester, 'Study 0'), lessThan(topOf(tester, 'Reflect')), reason: 'newest first');
     await unmount(tester);
   });
 
@@ -170,7 +214,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kursi'), findsOneWidget);
-    expect(find.text('Al-Fatiha 1:3 · Page 1'), findsNWidgets(2), reason: 'moved to last read');
+    expect(find.text('Al-Fatiha 1:3 · Page 1'), findsOneWidget, reason: 'moved to last read');
     await unmount(tester);
   });
 
@@ -187,7 +231,7 @@ void main() {
     await tapAndStore(tester, find.text('New category'));
     expect(inSheet(find.text('Delete category')), findsNothing);
     await tester.enterText(inSheet(find.byType(TextField)), 'Night');
-    await tapAndStore(tester, inSheet(find.text('Violet')));
+    await tapAndStore(tester, inSheet(swatch(CategoryColor.violet)));
     await tapAndStore(tester, inSheet(find.text('Save')));
     expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('Night'), findsOneWidget, reason: 'shows before its first bookmark');
@@ -197,7 +241,7 @@ void main() {
     expect(inSheet(find.text('Edit category')), findsOneWidget);
     expect(inSheet(find.text('Delete category')), findsNothing);
     await tester.enterText(inSheet(find.byType(TextField)), 'Wird');
-    await tapAndStore(tester, inSheet(find.text('Blue')));
+    await tapAndStore(tester, inSheet(swatch(CategoryColor.blue)));
     await tapAndStore(tester, inSheet(find.text('Save')));
     expect(find.text('Wird'), findsOneWidget);
 
@@ -217,11 +261,11 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('nothing saved shows the empty state under last read', (tester) async {
+  testWidgets('nothing saved shows the empty state', (tester) async {
     await pumpApp(tester);
     await open(tester, Routes.quranSaved);
 
-    expect(find.text('Last read'), findsOneWidget);
+    expect(find.text('New category'), findsOneWidget);
     expect(find.text('No bookmarks yet'), findsOneWidget);
     expect(find.text('Tap Bookmark on any ayah to keep your place.'), findsOneWidget);
     await unmount(tester);
@@ -360,10 +404,10 @@ void main() {
     await tapAndStore(tester, find.text('Bookmark'));
 
     await tapAndStore(tester, inPicker(find.text('New category')));
-    expect(inPicker(find.text('Green')), findsOneWidget);
-    expect(inPicker(find.text('Slate')), findsOneWidget);
+    expect(inPicker(swatch(CategoryColor.green)), findsOneWidget);
+    expect(inPicker(swatch(CategoryColor.slate)), findsOneWidget);
     await tester.enterText(inPicker(find.byType(TextField)), 'Study');
-    await tapAndStore(tester, inPicker(find.text('Teal')));
+    await tapAndStore(tester, inPicker(swatch(CategoryColor.teal)));
     await tapAndStore(tester, inPicker(find.text('Save')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pumpAndSettle();
@@ -404,7 +448,7 @@ void main() {
     expect(inPicker(find.text('Edit category')), findsOneWidget);
     expect(inPicker(find.text('Delete category')), findsNothing);
     await tester.enterText(inPicker(find.byType(TextField)), 'Wird');
-    await tapAndStore(tester, inPicker(find.text('Blue')));
+    await tapAndStore(tester, inPicker(swatch(CategoryColor.blue)));
     await tapAndStore(tester, inPicker(find.text('Save')));
     expect(inPicker(find.text('Wird')), findsOneWidget, reason: 'back on the list');
 

@@ -5,8 +5,8 @@ import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 

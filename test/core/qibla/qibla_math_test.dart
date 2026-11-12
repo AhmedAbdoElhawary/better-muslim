@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/features/qibla/model/qibla_math.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

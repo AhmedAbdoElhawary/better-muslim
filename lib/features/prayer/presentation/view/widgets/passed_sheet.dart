@@ -10,8 +10,8 @@ import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/prayer/data/qada_repository.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/prayer_actions.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_complete.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a passed prayer with no log: prayed it and forgot to tap, or missed it (FR-008). the toast and
 /// Day complete go on the row's context, the sheet's is gone by then

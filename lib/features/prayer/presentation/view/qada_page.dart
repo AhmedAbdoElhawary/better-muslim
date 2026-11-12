@@ -11,9 +11,9 @@ import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/qada.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/qada_row.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// no PNG: only the components' compact bar and grouped rows (FR-022)
 class QadaPage extends ConsumerWidget {

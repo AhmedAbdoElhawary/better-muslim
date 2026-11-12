@@ -1,6 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a child with a new key fades and slides in twice BmMotion.shift from `from`, the box follows its size
 class BmSwitcher extends StatelessWidget {

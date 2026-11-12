@@ -6,9 +6,9 @@ import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/widgets/ellipse_transform.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_colors.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// maghrib is 4.03 exactly. the others get their own sky with the sun where it really is, and no
 /// sun at fajr and isha (FR-029)

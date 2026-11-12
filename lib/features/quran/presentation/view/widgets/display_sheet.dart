@@ -22,17 +22,30 @@ import 'package:better_muslim/features/quran/presentation/providers/page_provide
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_style_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/translation_sheet.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.31, every page choice in one sheet, kept in settings. tajweed colors wait for 7b
 Future<void> showDisplaySheet(BuildContext context) => showBmSheet(
   context,
   maxSheetHeight: SizeManager.sheetMax2,
+  blur: false,
   title: const SheetTitle(StringsManager.display, subtitle: StringsManager.appliesToEveryPage),
-  builder: (_) => const _DisplaySheet(),
+  builder: (_) => _DisplaySheet(reader: context),
 );
+
+/// display goes first, then the sheet opens on the reader, one sheet moving at a time
+Future<void> _openInstead(
+  BuildContext sheet,
+  BuildContext reader,
+  Future<void> Function(BuildContext) show,
+) async {
+  final route = ModalRoute.of(sheet);
+  Navigator.pop(sheet);
+  await route?.completed;
+  if (reader.mounted) await show(reader);
+}
 
 /// the translation layout's size steps around 4.07's sizes
 const quranSizeSteps = (min: -2, max: 3);
@@ -41,7 +54,10 @@ const quranSizeSteps = (min: -2, max: 3);
 const _stackAt = 1.4;
 
 class _DisplaySheet extends ConsumerWidget {
-  const _DisplaySheet();
+  const _DisplaySheet({required this.reader});
+
+  /// the sub sheets open on it once display is gone, under the page's theme
+  final BuildContext reader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,45 +95,7 @@ class _DisplaySheet extends ConsumerWidget {
                   color: ThemeEnum.text3,
                 ),
               ),
-              TopPadding(
-                padding: SpaceManager.displaySwatchesTop,
-
-                /// the rings reach past the swatches, nothing clips them
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  padding: REdgeInsets.symmetric(horizontal: SpaceManager.s4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final (i, page) in _pageColors.indexed) ...[
-                        if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
-                        RSizedBox(
-                          width: SizeManager.displaySlot,
-                          child: _Swatch(
-                            label: page.label,
-                            selected: page == color,
-                            onTap: () =>
-                                db.updateSettings(SettingsCompanion(pageColor: Value(page))),
-                            child: RSizedBox.square(
-                              dimension: SizeManager.displaySwatch,
-                              child: page == PageColor.followSky
-                                  ? const Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        Expanded(child: _PageFill(PageColor.paper)),
-                                        Expanded(child: _PageFill(PageColor.night)),
-                                      ],
-                                    )
-                                  : _PageFill(page),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
+              _PaperStyles(color: color, db: db),
 
               /// a qcf style draws its own glyphs, the font has nothing to change on the page
               if (style == MushafStyle.text) ...[
@@ -132,113 +110,211 @@ class _DisplaySheet extends ConsumerWidget {
                     color: ThemeEnum.text3,
                   ),
                 ),
-                OnlyPadding(
-                  top: SpaceManager.displaySwatchesTop,
-                  start: SpaceManager.s4,
-                  end: SpaceManager.s4,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final (i, choice) in QuranFont.values.indexed) ...[
-                        if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
-                        Expanded(
-                          child: _Swatch(
-                            label: choice.label,
-                            selected: choice == font,
-                            onTap: () =>
-                                db.updateSettings(SettingsCompanion(quranFont: Value(choice))),
-                            child: ColoredBox(
-                              color: context.getColor(ThemeEnum.variant),
-                              child: RSizedBox(
-                                height: SizeManager.displayFontSwatch,
-                                child: Center(
-                                  child: RegularText(
-                                    _sample,
-                                    translate: false,
-                                    font: choice.font,
-                                    fontSize: FontSizeManager.fontSample,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+                _Layout(font: font, db: db),
               ],
-              OnlyPadding(
-                top: SpaceManager.displayRowsTop,
-                start: SpaceManager.s4,
-                end: SpaceManager.s4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _ChoiceRow(
-                      label: StringsManager.layout,
-                      child: Segmented<QuranLayout>(
-                        values: QuranLayout.values,
-                        selected: layout,
-                        labelOf: (layout) => switch (layout) {
-                          QuranLayout.mushaf => StringsManager.mushaf,
-                          QuranLayout.translation => StringsManager.translation,
-                        },
-                        onChanged: (layout) =>
-                            db.updateSettings(SettingsCompanion(quranLayout: Value(layout))),
-                      ),
-                    ),
-                    const RSizedBox.vertical(SpaceManager.s3),
-                    _ChoiceRow(
-                      label: StringsManager.pageTurn,
-                      child: Segmented<PageTurn>(
-                        values: PageTurn.values,
-                        selected: turn,
-                        labelOf: (turn) => switch (turn) {
-                          PageTurn.book => StringsManager.book,
-                          PageTurn.slide => StringsManager.slide,
-                        },
-                        onChanged: (turn) =>
-                            db.updateSettings(SettingsCompanion(pageTurn: Value(turn))),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              OnlyPadding(
-                top: SpaceManager.s4,
-                start: SpaceManager.s4,
-                end: SpaceManager.s4,
-                child: GroupedSection(
-                  children: [
-                    const _MushafSizeRow(),
-                    if (layout != QuranLayout.mushaf) ...[
-                      const _SizeRow(arabic: true),
-                      const _SizeRow(arabic: false),
-                    ],
-                    NavRow(
-                      title: StringsManager.keepScreenOn,
-                      toggled: keepOn,
-                      onTap: () =>
-                          db.updateSettings(SettingsCompanion(keepScreenOn: Value(!keepOn))),
-                    ),
-                    NavRow(
-                      title: StringsManager.mushaf,
-                      value: style.label,
-                      onTap: () => showMushafStyleSheet(context),
-                    ),
-
-                    NavRow(
-                      title: StringsManager.translation,
-                      value: shownTranslation(context, ref).label,
-                      onTap: () => showTranslationSheet(context),
-                    ),
-                  ],
-                ),
+              _PageTurn(layout: layout, db: db, turn: turn),
+              _AdditionalSettings(
+                layout: layout,
+                keepOn: keepOn,
+                db: db,
+                style: style,
+                reader: reader,
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Layout extends StatelessWidget {
+  const new({required this.font, required this.db});
+
+  final QuranFont font;
+  final AppDatabase db;
+
+  @override
+  Widget build(BuildContext context) {
+    return OnlyPadding(
+      top: SpaceManager.displaySwatchesTop,
+      start: SpaceManager.s4,
+      end: SpaceManager.s4,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (i, choice) in QuranFont.values.indexed) ...[
+            if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
+            Expanded(
+              child: _Swatch(
+                label: choice.label,
+                selected: choice == font,
+                onTap: () => db.updateSettings(SettingsCompanion(quranFont: Value(choice))),
+                child: ColoredBox(
+                  color: context.getColor(ThemeEnum.variant),
+                  child: RSizedBox(
+                    height: SizeManager.displayFontSwatch,
+                    child: Center(
+                      child: RegularText(
+                        _sample,
+                        translate: false,
+                        font: choice.font,
+                        fontSize: FontSizeManager.fontSample,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PageTurn extends StatelessWidget {
+  const new({required this.layout, required this.db, required this.turn});
+
+  final QuranLayout layout;
+  final AppDatabase db;
+  final PageTurn turn;
+
+  @override
+  Widget build(BuildContext context) {
+    return OnlyPadding(
+      top: SpaceManager.displayRowsTop,
+      start: SpaceManager.s4,
+      end: SpaceManager.s4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ChoiceRow(
+            label: StringsManager.layout,
+            child: Segmented<QuranLayout>(
+              values: QuranLayout.values,
+              selected: layout,
+              labelOf: (layout) => switch (layout) {
+                QuranLayout.mushaf => StringsManager.mushaf,
+                QuranLayout.translation => StringsManager.translation,
+              },
+              onChanged: (layout) =>
+                  db.updateSettings(SettingsCompanion(quranLayout: Value(layout))),
+            ),
+          ),
+          const RSizedBox.vertical(SpaceManager.s3),
+          _ChoiceRow(
+            label: StringsManager.pageTurn,
+            child: Segmented<PageTurn>(
+              values: PageTurn.values,
+              selected: turn,
+              labelOf: (turn) => switch (turn) {
+                PageTurn.book => StringsManager.book,
+                PageTurn.slide => StringsManager.slide,
+              },
+              onChanged: (turn) => db.updateSettings(SettingsCompanion(pageTurn: Value(turn))),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdditionalSettings extends ConsumerWidget {
+  const new({
+    required this.layout,
+    required this.keepOn,
+    required this.db,
+    required this.style,
+    required this.reader,
+  });
+
+  final QuranLayout layout;
+  final bool keepOn;
+  final AppDatabase db;
+  final MushafStyle style;
+  final BuildContext reader;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return OnlyPadding(
+      top: SpaceManager.s4,
+      start: SpaceManager.s4,
+      end: SpaceManager.s4,
+      child: GroupedSection(
+        children: [
+          const _MushafSizeRow(),
+          if (layout != QuranLayout.mushaf) ...[
+            const _SizeRow(arabic: true),
+            const _SizeRow(arabic: false),
+          ],
+          NavRow(
+            title: StringsManager.keepScreenOn,
+            toggled: keepOn,
+            onTap: () => db.updateSettings(SettingsCompanion(keepScreenOn: Value(!keepOn))),
+          ),
+          NavRow(
+            title: StringsManager.mushaf,
+            value: style.label,
+            onTap: () => _openInstead(context, reader, showMushafStyleSheet),
+          ),
+
+          NavRow(
+            title: StringsManager.translation,
+            value: shownTranslation(context, ref).label,
+            onTap: () => _openInstead(context, reader, showTranslationSheet),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaperStyles extends StatelessWidget {
+  const new({required this.color, required this.db});
+
+  final PageColor color;
+  final AppDatabase db;
+
+  @override
+  Widget build(BuildContext context) {
+    return TopPadding(
+      padding: SpaceManager.displaySwatchesTop,
+
+      /// the rings reach past the swatches, nothing clips them
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        padding: REdgeInsets.symmetric(horizontal: SpaceManager.s4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final (i, page) in _pageColors.indexed) ...[
+              if (i > 0) const RSizedBox.horizontal(SpaceManager.s2),
+              RSizedBox(
+                width: SizeManager.displaySlot,
+                child: _Swatch(
+                  label: page.label,
+                  selected: page == color,
+                  onTap: () => db.updateSettings(SettingsCompanion(pageColor: Value(page))),
+                  child: RSizedBox.square(
+                    dimension: SizeManager.displaySwatch,
+                    child: page == PageColor.followSky
+                        ? const Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(child: _PageFill(PageColor.paper)),
+                              Expanded(child: _PageFill(PageColor.night)),
+                            ],
+                          )
+                        : _PageFill(page),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

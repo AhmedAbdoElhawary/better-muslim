@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
@@ -28,9 +30,9 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a StringsManager key and its args
 typedef _Label = (String, Map<String, String>);
@@ -55,6 +57,7 @@ class RecitationSheet extends ConsumerWidget {
             ref.watch(
               surahDownloadProvider((reciter, surah)).select((download) => download.ready),
             ));
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return ReaderSheet(
       open: open,
       onClose: onClose,
@@ -73,7 +76,8 @@ class RecitationSheet extends ConsumerWidget {
                   onTap: () => _Choices._pick(
                     context,
                     title: StringsManager.reciter,
-                    choices: Reciter.values,
+                    choices: [...Reciter.values]
+                      ..sort((a, b) => context.tr(a.label).compareTo(context.tr(b.label))),
                     selected: reciter,
                     label: (reciter) => (reciter.label, const {}),
                     digits: (args) => args,
@@ -101,7 +105,9 @@ class RecitationSheet extends ConsumerWidget {
                                   ),
                                 ),
                                 OnlyPadding(
-                                  top: SpaceManager.reciterChevronTop,
+                                  top: isArabic
+                                      ? SpaceManager.quranToolGap
+                                      : SpaceManager.reciterChevronTop,
                                   start: SpaceManager.reciterChevronSide,
                                   end: SpaceManager.reciterChevronSide,
                                   child: BmIcon.ui(
@@ -720,7 +726,8 @@ class _Choices extends ConsumerWidget {
   }
 }
 
-class _ChoiceSheet<T> extends StatelessWidget {
+/// a long list scrolls under its title with the picked one in view, rows built as they show
+class _ChoiceSheet<T> extends StatefulWidget {
   const _ChoiceSheet({
     required this.title,
     required this.choices,
@@ -738,29 +745,59 @@ class _ChoiceSheet<T> extends StatelessWidget {
   final ValueChanged<T> onPick;
 
   @override
+  State<_ChoiceSheet<T>> createState() => _ChoiceSheetState<T>();
+}
+
+class _ChoiceSheetState<T> extends State<_ChoiceSheet<T>> {
+  /// rows are their minimum height at text scale 1
+  late final _scroll = ScrollController(
+    initialScrollOffset:
+        math.max(0, widget.choices.indexOf(widget.selected)) * SizeManager.pickerRow.r,
+  );
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SafeArea(
-        top: false,
-        child: BottomPadding(
-          padding: SpaceManager.s6,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SheetTitle(title),
-              for (final choice in choices)
-                PickerRow(
-                  title: label(choice).$1,
-                  args: label(choice).$2,
-                  selected: choice == selected,
-                  onTap: () {
-                    onPick(choice);
-                    Navigator.pop(context);
-                  },
+    final choices = widget.choices;
+    return SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetTitle(widget.title),
+          Flexible(
+            child: CustomScrollView(
+              controller: _scroll,
+              shrinkWrap: true,
+              slivers: [
+                SliverPadding(
+                  padding: REdgeInsets.only(bottom: SpaceManager.s6),
+                  sliver: SliverList.builder(
+                    itemCount: choices.length,
+                    itemBuilder: (context, index) {
+                      final (title, args) = widget.label(choices[index]);
+                      return PickerRow(
+                        title: title,
+                        args: args,
+                        selected: choices[index] == widget.selected,
+                        onTap: () {
+                          widget.onPick(choices[index]);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
                 ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

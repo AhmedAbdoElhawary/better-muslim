@@ -16,12 +16,12 @@ import 'package:better_muslim/features/onboarding/view/widgets/welcome_sky.dart'
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_stars.dart';
 import 'package:better_muslim/features/onboarding/view/widgets/welcome_sun.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the first screen and 4.10 on one page, so the sun moves between them without a route change.
 /// the reference's page state on 4.10's geometry (R4): the sun follows the finger, springs to

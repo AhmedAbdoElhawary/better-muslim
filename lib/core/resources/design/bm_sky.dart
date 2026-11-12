@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The six anchor sky states (02 Tokens › Living Sky · BmSky). Three stops each, top to bottom.
 enum BmSkyState { fajr, sunrise, dhuhr, asr, maghrib, isha }

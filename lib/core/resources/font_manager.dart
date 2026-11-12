@@ -1,5 +1,5 @@
 import 'package:better_muslim/core/resources/design/bm_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class FontFamilyManager {
   static const String display = BmFont.display;

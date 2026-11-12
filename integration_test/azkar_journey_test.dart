@@ -8,10 +8,10 @@ import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/features/azkar/view/widgets/tasbih_counter.dart';
 import 'package:better_muslim/features/duas/view/duas_page.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 /// milestone 8 on a real engine and a real router: home's row, a set, tasbih, duas

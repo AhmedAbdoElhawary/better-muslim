@@ -1,8 +1,8 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/widgets/motion/skeleton.dart';
 import 'package:better_muslim/core/widgets/motion/stagger.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../helpers/widgets.dart';
 

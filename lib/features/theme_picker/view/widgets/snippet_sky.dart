@@ -5,8 +5,8 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/resources/theme_sky.dart';
 import 'package:better_muslim/features/theme_picker/view_model/theme_preview.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the snippet's svg and dots, in its 300 x 176 box. still: no drift, twinkle or particle loop (R4)
 const _stars = [

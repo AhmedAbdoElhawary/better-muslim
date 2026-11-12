@@ -11,10 +11,10 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_colors.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_progress.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_tint.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the star, "ADHAN · {city}", the prayer's names, its time and the progress (4.03)
 class AdhanHeader extends ConsumerWidget {

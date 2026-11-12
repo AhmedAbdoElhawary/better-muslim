@@ -1,17 +1,17 @@
-import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
-import 'package:better_muslim/core/quran/last_read.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/empty_state.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
@@ -25,13 +25,14 @@ import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_menu.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum _Tab {
   bookmarks(StringsManager.bookmarks),
@@ -54,8 +55,24 @@ class SavedPage extends StatefulWidget {
   State<SavedPage> createState() => _SavedPageState();
 }
 
-class _SavedPageState extends State<SavedPage> {
+class _SavedPageState extends State<SavedPage> with SingleTickerProviderStateMixin {
   late var _tab = widget.notes ? _Tab.notes : _Tab.bookmarks;
+
+  /// a sliver can't sit in a switcher, so the new tab fades in by itself
+  late final _fade = AnimationController(vsync: this, value: 1);
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    super.dispose();
+  }
+
+  void _pick(_Tab tab) {
+    setState(() => _tab = tab);
+    _fade
+      ..duration = MediaQuery.disableAnimationsOf(context) ? BmMotion.micro : BmMotion.standard
+      ..forward(from: 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,36 +82,39 @@ class _SavedPageState extends State<SavedPage> {
           children: [
             const CompactAppBar(StringsManager.savedTitle),
             Expanded(
-              child: SingleChildScrollView(
-                child: SafeArea(
-                  top: false,
-                  child: SymmetricPadding(
-                    horizontal: SpaceManager.s4,
-                    vertical: SpaceManager.savedGap,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Segmented(
-                          values: _Tab.values,
-                          selected: _tab,
-                          labelOf: (tab) => tab.label,
-                          onChanged: (tab) => setState(() => _tab = tab),
-                        ),
-                        const RSizedBox.vertical(SpaceManager.s3),
-                        BmSwitcher(
-                          child: KeyedSubtree(
-                            key: ValueKey(_tab),
-                            child: switch (_tab) {
+              child: CustomScrollView(
+                slivers: [
+                  SliverSafeArea(
+                    top: false,
+                    sliver: SliverPadding(
+                      padding: REdgeInsets.symmetric(
+                        horizontal: SpaceManager.s4,
+                        vertical: SpaceManager.savedGap,
+                      ),
+                      sliver: SliverMainAxisGroup(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Segmented(
+                              values: _Tab.values,
+                              selected: _tab,
+                              labelOf: (tab) => tab.label,
+                              onChanged: _pick,
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: RSizedBox.vertical(SpaceManager.s3)),
+                          SliverFadeTransition(
+                            opacity: CurvedAnimation(parent: _fade, curve: BmMotion.standardCurve),
+                            sliver: switch (_tab) {
                               _Tab.bookmarks => const _Bookmarks(),
                               _Tab.notes => const _Notes(),
                               _Tab.highlights => const _Highlights(),
                             },
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -104,55 +124,60 @@ class _SavedPageState extends State<SavedPage> {
   }
 }
 
-/// last read first, then mine under their categories newest first, then the recent note
+/// the new category first, then each category with its newest 3, most bookmarks first
 class _Bookmarks extends ConsumerWidget {
   const _Bookmarks();
+
+  static const _shown = 3;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
-    final categories = ref.watch(categoriesProvider).value ?? const [];
-    final note = ref.watch(writtenNotesProvider.select((notes) => notes.firstOrNull));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final categories = ref.watch(categoriesByCountProvider);
+    final digits = ref.watch(
+      settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
+    );
+    return SliverList.list(
       children: [
-        const _LastReadRow(),
+        const _NewCategory(),
         for (final category in categories) ...[
-          const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
           _CategoryHeader(category, key: ObjectKey(category)),
-          for (final bookmark in bookmarks.where(
-            (bookmark) => bookmark.category == category.id,
-          )) ...[
-            const RSizedBox.vertical(SpaceManager.savedGap),
-            _BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
-          ],
+          ...switch ([
+            for (final bookmark in bookmarks)
+              if (bookmark.category == category.id) bookmark,
+          ]) {
+            final mine => [
+              for (final bookmark in mine.take(_shown)) ...[
+                const RSizedBox.vertical(SpaceManager.savedGap),
+                BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
+              ],
+              if (mine.length > _shown)
+                _HeaderButton(
+                  key: ValueKey(('all', category.id)),
+                  onTap: () => context.push(Routes.quranCategory(category.id)),
+                  child: OnlyPadding(
+                    top: SpaceManager.s3,
+                    child: MediumText(
+                      StringsManager.seeAllCount,
+                      args: {'n': context.formatDigits('${mine.length}', digits)},
+                      fontSize: FontSizeManager.sectionLabel,
+                      color: ThemeEnum.primary,
+                    ),
+                  ),
+                ),
+            ],
+          },
         ],
         if (bookmarks.isEmpty) ...[
           const RSizedBox.vertical(SpaceManager.savedGap),
           const EmptyState(title: StringsManager.noBookmarks, body: StringsManager.noBookmarksBody),
-        ],
-        const RSizedBox.vertical(SpaceManager.categoryHeaderTop),
-        const _NewCategory(),
-        if (note != null) ...[
-          const RSizedBox.vertical(SpaceManager.recentNoteTop),
-          const StartPadding(
-            padding: SpaceManager.s1,
-            child: RegularText(
-              StringsManager.recentNote,
-              fontSize: FontSizeManager.sectionLabel,
-              letterSpacing: LetterSpacingManager.sectionLabel,
-              color: ThemeEnum.text3,
-            ),
-          ),
-          const RSizedBox.vertical(SpaceManager.sectionLabelGap),
-          NoteCard(note, onTap: () => _open(context, ref, note.ayah)),
         ],
       ],
     );
   }
 }
 
-/// the category's dot and name, like the recent note's label. a tap renames or recolors it
+/// the category's dot and name. a tap renames or recolors it
 class _CategoryHeader extends StatelessWidget {
   const _CategoryHeader(this.category, {super.key});
 
@@ -178,6 +203,7 @@ class _CategoryHeader extends StatelessWidget {
               translate: false,
               fontSize: FontSizeManager.sectionLabel,
               color: ThemeEnum.text2,
+              maxLines: 2,
             ),
           ),
           BmIcon.ui(BmUiIcon.note, size: SizeManager.iconInline.r),
@@ -218,7 +244,7 @@ class _NewCategory extends StatelessWidget {
 
 /// a header line with the 44 pt hit target
 class _HeaderButton extends StatelessWidget {
-  const _HeaderButton({required this.onTap, required this.child});
+  const _HeaderButton({required this.onTap, required this.child, super.key});
 
   final VoidCallback onTap;
   final Widget child;
@@ -240,28 +266,9 @@ class _HeaderButton extends StatelessWidget {
   }
 }
 
-class _LastReadRow extends ConsumerWidget {
-  const _LastReadRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lastRead = ref.watch(lastReadProvider);
-    final assets = ref.watch(quranAssetsProvider).value;
-    if (assets == null) return const SizedBox.shrink();
-    final at = lastRead.at;
-    return _SavedRow(
-      ribbon: ThemeEnum.text2,
-      title: context.tr(StringsManager.lastRead),
-      auto: true,
-      reference: savedReference(context, ref, assets, ayah: lastRead.ayah, page: lastRead.page),
-      when: at == null ? null : savedWhen(context, ref, at),
-      onTap: () => context.push(Routes.quranPage(lastRead.page, ayah: lastRead.ayah)),
-    );
-  }
-}
-
-class _BookmarkRow extends ConsumerWidget {
-  const _BookmarkRow(this.bookmark, {super.key});
+/// a bookmark's row on Saved and its Category page
+class BookmarkRow extends ConsumerWidget {
+  const BookmarkRow(this.bookmark, {super.key});
 
   final Bookmark bookmark;
 
@@ -276,6 +283,7 @@ class _BookmarkRow extends ConsumerWidget {
       reference: savedReference(context, ref, assets, ayah: ayah, page: page),
       when: savedWhen(context, ref, bookmark.createdAt),
       onTap: () => context.push(Routes.quranPage(page, ayah: ayah)),
+      onDown: () => warmMushafPage(context, ref, page),
       onLongPress: () => showBookmarkMenu(context, bookmark),
     );
   }
@@ -289,7 +297,7 @@ class _SavedRow extends StatelessWidget {
     required this.reference,
     required this.when,
     required this.onTap,
-    this.auto = false,
+    required this.onDown,
     this.onLongPress,
   });
 
@@ -299,18 +307,20 @@ class _SavedRow extends StatelessWidget {
   final String title;
   final String reference;
   final String? when;
-  final bool auto;
   final VoidCallback onTap;
+
+  /// the page starts loading while the finger is still down
+  final VoidCallback onDown;
   final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final when = this.when;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Semantics(
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => onDown(),
         onTap: onTap,
         onLongPress: onLongPress,
         child: SurfaceCard(
@@ -343,13 +353,6 @@ class _SavedRow extends StatelessWidget {
                               translate: false,
                               fontSize: FontSizeManager.surahName,
                             ),
-                            if (auto)
-                              RegularText(
-                                StringsManager.auto,
-                                fontSize: FontSizeManager.quranTag,
-                                letterSpacing: isArabic ? null : LetterSpacingManager.autoTag,
-                                color: ThemeEnum.text3,
-                              ),
                           ],
                         ),
                         const RSizedBox.vertical(SpaceManager.savedLineGap),
@@ -388,16 +391,18 @@ class _Notes extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notes = ref.watch(writtenNotesProvider);
     if (notes.isEmpty) {
-      return const EmptyState(title: StringsManager.noNotes, body: StringsManager.noNotesBody);
+      return const SliverToBoxAdapter(
+        child: EmptyState(title: StringsManager.noNotes, body: StringsManager.noNotesBody),
+      );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (i, note) in notes.indexed) ...[
-          if (i > 0) const RSizedBox.vertical(SpaceManager.savedGap),
-          NoteCard(note, key: ValueKey(note.ayah), onTap: () => _open(context, ref, note.ayah)),
-        ],
-      ],
+    return SliverList.separated(
+      itemCount: notes.length,
+      separatorBuilder: (_, _) => const RSizedBox.vertical(SpaceManager.savedGap),
+      itemBuilder: (context, i) => NoteCard(
+        notes[i],
+        key: ValueKey(notes[i].ayah),
+        onTap: () => _open(context, ref, notes[i].ayah),
+      ),
     );
   }
 }
@@ -410,25 +415,23 @@ class _Highlights extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final highlights = ref.watch(highlightsProvider);
     if (highlights.isEmpty) {
-      return const EmptyState(
-        title: StringsManager.noHighlights,
-        body: StringsManager.noHighlightsBody,
+      return const SliverToBoxAdapter(
+        child: EmptyState(
+          title: StringsManager.noHighlights,
+          body: StringsManager.noHighlightsBody,
+        ),
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (i, note) in highlights.indexed) ...[
-          if (i > 0) const RSizedBox.vertical(SpaceManager.savedGap),
-          NoteCard(
-            note,
-            key: ValueKey(note.ayah),
-            showArabic: true,
-            onTap: () => _open(context, ref, note.ayah),
-            onLongPress: () => _unhighlight(context, ref, note),
-          ),
-        ],
-      ],
+    return SliverList.separated(
+      itemCount: highlights.length,
+      separatorBuilder: (_, _) => const RSizedBox.vertical(SpaceManager.savedGap),
+      itemBuilder: (context, i) => NoteCard(
+        highlights[i],
+        key: ValueKey(highlights[i].ayah),
+        showArabic: true,
+        onTap: () => _open(context, ref, highlights[i].ayah),
+        onLongPress: () => _unhighlight(context, ref, highlights[i]),
+      ),
     );
   }
 }

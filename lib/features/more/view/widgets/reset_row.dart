@@ -5,9 +5,9 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// clears the prayer log and qada only, after the dialog asks (FR-032)
 class ResetRow extends ConsumerWidget {

@@ -17,9 +17,9 @@ import 'package:better_muslim/features/hijri_calendar/view/widgets/month_header.
 import 'package:better_muslim/features/hijri_calendar/view/widgets/picker_grid.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.13: one scroll view, so a six row month pushes the rest down instead of squeezing (FR-017)
 class HijriCalendarPage extends StatelessWidget {

@@ -32,6 +32,7 @@ import 'package:better_muslim/features/onboarding/view/welcome_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
+import 'package:better_muslim/features/quran/presentation/view/category_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/dev_tajweed_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/downloads_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/quran_page.dart';
@@ -39,9 +40,9 @@ import 'package:better_muslim/features/quran/presentation/view/reader_page.dart'
 import 'package:better_muslim/features/quran/presentation/view/saved_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/search_page.dart';
 import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class Routes {
   static const String home = '/';
@@ -100,6 +101,7 @@ abstract final class Routes {
   static const String quranSearch = '$quran/search';
   static const String quranSearchFromReader = '$quranSearch?from=reader';
   static const String quranNotes = '$quranSaved?tab=notes';
+  static String quranCategory(int id) => '$quranSaved/category/$id';
 
   /// dev builds only
   static const String devNotifications = '/dev/notifications';
@@ -280,6 +282,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             _page(state, SavedPage(notes: state.uri.queryParameters['tab'] == 'notes')),
       ),
 
+      GoRoute(
+        name: 'quran_category',
+        path: '${Routes.quranSaved}/category/:id',
+        pageBuilder: (context, state) =>
+            _page(state, CategoryPage(int.parse(state.pathParameters['id']!))),
+      ),
       GoRoute(
         name: 'quran_search',
         path: Routes.quranSearch,

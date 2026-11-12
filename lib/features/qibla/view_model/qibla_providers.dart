@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/location/position_source.dart';
+import 'package:better_muslim/core/qibla/compass.dart';
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/features/qibla/model/compass_source.dart';
-import 'package:better_muslim/features/qibla/model/declination.dart';
-import 'package:better_muslim/features/qibla/model/qibla_math.dart';
 import 'package:better_muslim/features/qibla/model/qibla_tracker.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,21 +18,6 @@ typedef QiblaPlace = ({double latitude, double longitude, String? name, String? 
 typedef QiblaTarget = ({double bearing, double distanceKm});
 
 enum QiblaState { noLocation, waiting, noCompass, ready }
-
-/// the qibla PNGs' two headings, a tap on the dial switches them (R12)
-final designHeadingProvider = NotifierProvider.autoDispose<DesignHeading, double>(
-  DesignHeading.new,
-);
-
-class DesignHeading extends Notifier<double> {
-  static const turning = 105.0;
-  static const aligned = 119.0;
-
-  @override
-  double build() => turning;
-
-  void toggle() => state = state == turning ? aligned : turning;
-}
 
 final _isDesignProvider = Provider.autoDispose<bool>(
   (ref) => ref.watch(flavorProvider.select((config) => config.isDesignScenario)),
@@ -92,74 +75,6 @@ final qiblaTargetProvider = Provider.autoDispose<QiblaTarget?>((ref) {
     bearing: qiblaBearing(place.latitude, place.longitude),
     distanceKm: kaabaDistanceKm(place.latitude, place.longitude),
   );
-});
-
-/// 0 with no place, the dial then shows magnetic north
-final _declinationProvider = Provider.autoDispose<double>((ref) {
-  final place = ref.watch(qiblaPlaceProvider.select((place) => place.value));
-  if (place == null) return 0;
-  final year = decimalYear(ref.watch(clockProvider)());
-  return declination(place.latitude, place.longitude, decimalYear: year);
-});
-
-/// how long the low pass takes to follow, the same feel at 15 and at 60 readings a second (R5)
-const _smoothing = Duration(milliseconds: 150);
-
-/// true north, smoothed on the unit circle so 359° and 1° never average to 180° (R3, R5).
-/// the sensor runs only while the page listens and the app is in front (R16)
-final compassProvider = StreamProvider.autoDispose<CompassReading?>((ref) {
-  if (ref.watch(_isDesignProvider)) {
-    return Stream.value((
-      heading: ref.watch(designHeadingProvider),
-      accuracy: CompassAccuracy.high,
-    ));
-  }
-  final source = ref.watch(compassSourceProvider);
-  final clock = ref.watch(clockProvider);
-  var offset = 0.0;
-  ref.listen(_declinationProvider, (_, next) => offset = next, fireImmediately: true);
-
-  final controller = StreamController<CompassReading?>();
-  StreamSubscription<RawHeading?>? subscription;
-  double? x;
-  double? y;
-  DateTime? last;
-
-  void onReading(RawHeading? raw) {
-    if (raw == null) {
-      controller.add(null);
-      return;
-    }
-    final now = clock();
-    final angle = (raw.magnetic + offset) * math.pi / 180;
-    final since = last;
-    final k = since == null
-        ? 1.0
-        : 1 - math.exp(-now.difference(since).inMicroseconds / _smoothing.inMicroseconds);
-    last = now;
-    final sx = x = (x ?? 0) + k * (math.sin(angle) - (x ?? 0));
-    final sy = y = (y ?? 0) + k * (math.cos(angle) - (y ?? 0));
-    final heading = (math.atan2(sx, sy) * 180 / math.pi + 360) % 360;
-    controller.add((heading: heading, accuracy: compassAccuracyOf(raw.accuracy)));
-  }
-
-  void start() => subscription ??= source.readings().listen(onReading);
-  void stop() {
-    subscription?.cancel();
-    subscription = null;
-    x = null;
-    y = null;
-    last = null;
-  }
-
-  start();
-  final lifecycle = AppLifecycleListener(onPause: stop, onResume: start);
-  ref.onDispose(() {
-    lifecycle.dispose();
-    stop();
-    controller.close();
-  });
-  return controller.stream;
 });
 
 final qiblaStateProvider = Provider.autoDispose<QiblaState>((ref) {

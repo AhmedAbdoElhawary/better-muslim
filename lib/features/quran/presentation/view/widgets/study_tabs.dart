@@ -21,9 +21,9 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the large sheet's panes (4.23), words waits for 7b
 enum StudyTab {
@@ -282,7 +282,7 @@ class _Downloading extends StatelessWidget {
   }
 }
 
-/// notesPane of _gen/quran.js, one note per ayah so Add note shows only without one
+/// notesPane of _gen/quran.js, the editor itself, one note per ayah
 class _NotesPane extends ConsumerWidget {
   const _NotesPane(this.ayah);
 
@@ -290,22 +290,10 @@ class _NotesPane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final note = ref.watch(noteProvider(ayah));
-    return OnlyPadding(
-      top: SpaceManager.s4,
-      start: SpaceManager.s4,
-      end: SpaceManager.s4,
-      child: note == null
-          ? BmButton.secondary(
-              StringsManager.addNote,
-              onPressed: () => showNoteEditor(context, ayah),
-            )
-          : NoteCard(
-              note,
-              showAyah: false,
-              radius: RadiusManager.row,
-              onTap: () => showNoteEditor(context, ayah),
-            ),
+    final updated = ref.watch(noteProvider(ayah).select((note) => note?.updatedAt));
+    return TopPadding(
+      padding: SpaceManager.s4,
+      child: NoteEditor(ayah, key: ValueKey((ayah, updated))),
     );
   }
 }

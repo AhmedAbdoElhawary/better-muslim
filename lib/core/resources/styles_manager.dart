@@ -1,5 +1,5 @@
 import 'package:better_muslim/core/resources/font_manager.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// for widgets that take a TextStyle (text fields, theme), pass fontSize already scaled with .sp
 class GetTextStyle extends TextStyle {

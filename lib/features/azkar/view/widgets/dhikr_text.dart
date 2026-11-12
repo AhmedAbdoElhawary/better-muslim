@@ -6,9 +6,9 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/features/azkar/model/tasbih_dhikr.dart';
 import 'package:better_muslim/features/azkar/view_model/tasbih_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the current dhikr in arabic, then in english its name and meaning, crossfading (FR-026)
 class DhikrText extends ConsumerWidget {

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -8,8 +10,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// null while the page isn't shipped yet, it shows its frame and placeholder lines
 final mushafPageProvider = FutureProvider.autoDispose.family<MushafPage?, int>((ref, n) async {
+  final task = TimelineTask()..start('quran page $n');
   final json = await (await ref.watch(quranAssetsProvider.future)).page(n);
-  return json == null ? null : MushafPage.fromJson(n, json);
+  final page = json == null ? null : MushafPage.fromJson(n, json);
+  task.finish();
+  return page;
 });
 
 /// the arabic of one ayah. pageOf gives the page an ayah ends on, it may start on the one before

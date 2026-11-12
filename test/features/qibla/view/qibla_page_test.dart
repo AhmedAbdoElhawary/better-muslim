@@ -4,6 +4,7 @@ import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/qibla/declination.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -11,8 +12,6 @@ import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/sheet/location_choices.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
-import 'package:better_muslim/features/qibla/model/compass_source.dart';
-import 'package:better_muslim/features/qibla/model/declination.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
 import 'package:better_muslim/features/qibla/view/widgets/aligned_pulse.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_cards.dart';
@@ -20,11 +19,11 @@ import 'package:better_muslim/features/qibla/view/widgets/qibla_dial.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dot.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_needle.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
@@ -68,11 +67,10 @@ void main() {
   List<Override> londonWith(WidgetTester tester, {bool location = true}) {
     final origin = tester.binding.clock.now();
     return [
-      ...testOverrides(),
+      ...testOverrides(compass: compass),
       clockProvider.overrideWithValue(
         () => start.add(tester.binding.clock.now().difference(origin)),
       ),
-      compassSourceProvider.overrideWithValue(compass),
       if (location)
         locationProvider.overrideWithValue(london())
       else
@@ -499,11 +497,10 @@ void main() {
     testWidgets('a location saved while the page is open shows at once', (tester) async {
       final origin = tester.binding.clock.now();
       await pumpQibla(tester, [
-        ...testOverrides(),
+        ...testOverrides(compass: compass),
         clockProvider.overrideWithValue(
           () => start.add(tester.binding.clock.now().difference(origin)),
         ),
-        compassSourceProvider.overrideWithValue(compass),
       ]);
       await face(tester, 105);
       expect(find.text('No location yet'), findsOneWidget);

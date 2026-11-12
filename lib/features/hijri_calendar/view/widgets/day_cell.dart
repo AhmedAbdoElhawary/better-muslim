@@ -6,8 +6,8 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the mode's day large, the other calendar's day small, one look (FR-002, FR-003, FR-019)
 class DayCell extends StatelessWidget {

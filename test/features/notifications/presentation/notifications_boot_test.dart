@@ -12,6 +12,7 @@ import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/settings/settings.dart';
@@ -32,6 +33,7 @@ import '../../../helpers/home.dart';
 import '../../../helpers/notifications.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
+import '../../../helpers/qibla.dart';
 
 void main() {
   setUpAll(() async {
@@ -113,6 +115,7 @@ void main() {
               : devConfig,
         ),
         positionSourceProvider.overrideWithValue(FakePositionSource()),
+        compassSourceProvider.overrideWithValue(FakeCompassSource()),
         clockProvider.overrideWithValue(
           () => start.add(tester.binding.clock.now().difference(origin)),
         ),

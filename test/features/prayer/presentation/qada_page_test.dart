@@ -5,8 +5,8 @@ import 'package:better_muslim/features/prayer/data/qada_repository.dart';
 import 'package:better_muslim/features/prayer/presentation/view/qada_page.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/qada_row.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/summary_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

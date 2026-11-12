@@ -13,9 +13,9 @@ import 'package:better_muslim/features/home/view/widgets/arc_turn.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/timezone.dart';
 
 /// the arc's points. the feet under the horizon, the others outside the arc, some inside it in

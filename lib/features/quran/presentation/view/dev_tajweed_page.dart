@@ -13,9 +13,9 @@ import 'package:better_muslim/features/quran/data/mushaf_files.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
 import 'package:better_muslim/features/quran/presentation/providers/mushaf_style_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the page's V4 font in one palette, loaded the way the reader will load it
 final _familyProvider = FutureProvider.autoDispose.family<String, int>(

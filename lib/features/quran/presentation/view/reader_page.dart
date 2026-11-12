@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' show ImageFilter;
+
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
@@ -35,13 +38,13 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/share_she
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/translation_view.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.19 to 4.23 and 4.07, the page in its layout and the ayah to wash. the whole reader takes the page's palette, and
 /// follow sky crossfades it at isha and fajr
@@ -85,6 +88,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
   /// the sheets' ayah, kept while they slide away
   AyahKey? _ayah;
+
+  /// the Ayah sheet of the ayah the reader opened at, until it rises
+  Timer? _waiting;
   StudyTab _tab = StudyTab.tafsir;
 
   /// the built pages, so the reader can ask one where an ayah sits. one per layout, a page moved
@@ -135,7 +141,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     _page.addListener(_turned);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.ayah case final ayah?) _select(ayah);
+      if (widget.ayah case final ayah?) _openAt(ayah);
       if (widget.recite) _whenOpen(_openRecitation);
     });
   }
@@ -321,7 +327,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
     /// once the page is built, the sheet lifts it from where the ayah sits
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _select(ayah);
+      if (mounted) _openAt(ayah);
     });
   }
 
@@ -334,8 +340,12 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     if (!_closeSheets()) _turner.currentState?.turn(direction);
   }
 
-  /// whether a sheet was open
+  /// whether a sheet was open. a tap before the opened at ayah's sheet rises only drops its wash
   bool _closeSheets() {
+    if (_waiting?.isActive ?? false) {
+      _close();
+      return false;
+    }
     if (ref.read(selectionProvider).sheet != null) {
       _close();
       return true;
@@ -353,6 +363,13 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     if (page != _page.value) return;
     BmHaptics.ayahSelect();
     _select(key, onPage: onPage);
+  }
+
+  /// a tap on a highlighted ayah goes straight to its note
+  void _openNote(int page, AyahKey key, {bool onPage = false}) {
+    if (page != _page.value) return;
+    _openAyah(page, key, onPage: onPage);
+    _openStudy(StudyTab.notes);
   }
 
   /// Share on the sheet starts choosing ayahs to share with this one checked (FR-015)
@@ -384,10 +401,26 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   void _shareChosen() {
     final keys = ref.read(selectionProvider).chosen.toList()..sort();
     ref.read(selectionProvider.notifier).clear();
-    showAyahShare(context, keys);
+
+    /// from under the page's theme, the sheet is drawn in the page color
+    showAyahShare(_turner.currentContext ?? context, keys);
+  }
+
+  /// the ayah washed with its page, its sheet rising on its own once the page has been seen
+  void _openAt(AyahKey key) {
+    ref.read(selectionProvider.notifier).select(key);
+    setState(() => _ayah = key);
+    _whenOpen(() => _waiting = Timer(BmMotion.ayahSheetWait, () => _select(key)));
+  }
+
+  /// a finger on the page drops the opened at ayah's wash before its sheet rises
+  void _down(PointerDownEvent _) {
+    if (_waiting?.isActive ?? false) _close();
   }
 
   void _select(AyahKey key, {bool onPage = false}) {
+    _waiting?.cancel();
+    if (!mounted) return;
     ref.read(selectionProvider.notifier).select(key);
     setState(() {
       _ayah = key;
@@ -438,6 +471,10 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   }
 
   void _close() {
+    _waiting?.cancel();
+
+    /// the closed sheet stays built, its note field would keep the keyboard up
+    FocusManager.instance.primaryFocus?.unfocus();
     ref.read(selectionProvider.notifier).clear();
     springTo(context, _act, 0);
     springTo(context, _study, 0);
@@ -447,6 +484,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   @override
   void dispose() {
     SystemChannel.keepScreenOn(false);
+    _waiting?.cancel();
     if (_loaded case final assets? when !_playing) {
       _saveLastRead(assets.pageInfo(_page.value).start, _page.value);
     }
@@ -494,48 +532,51 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
               /// the page's own tap shows the controls, its swipes and Turn strips turn it
               Semantics(
                 label: context.tr(StringsManager.mushaf),
-                child: PageTurner(
-                  key: _turner,
-                  page: _page,
-                  book: book == PageTurn.book,
-                  lift: _lift,
-                  onTap: _tap,
-                  onEdge: _edge,
-                  strip: layout == QuranLayout.translation
-                      ? translationStrip(
-                          MediaQuery.sizeOf(context),
-                          top: MediaQuery.paddingOf(context).top,
-                        )
-                      : null,
-                  pageBuilder: (n) => switch (layout) {
-                    QuranLayout.mushaf => _MushafPage(
-                      n,
-                      pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
-                      onAyah: (key) => _openAyah(n, key),
-                      onCheck: choosing ? _toggle : null,
-                    ),
-
-                    QuranLayout.translation => TranslationView(
-                      n,
-                      onAyah: (key) => _openAyah(n, key),
-                      onCheck: choosing ? _toggle : null,
-                      mushaf: _MushafPage(
+                child: Listener(
+                  onPointerDown: _down,
+                  child: PageTurner(
+                    key: _turner,
+                    page: _page,
+                    book: book == PageTurn.book,
+                    lift: _lift,
+                    onTap: _tap,
+                    onEdge: _edge,
+                    strip: layout == QuranLayout.translation
+                        ? translationStrip(MediaQuery.sizeOf(context))
+                        : null,
+                    pageBuilder: (n) => switch (layout) {
+                      QuranLayout.mushaf => _MushafPage(
                         n,
                         pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
-                        onAyah: (key) => _openAyah(n, key, onPage: true),
+                        onAyah: (key) => _openAyah(n, key),
+                        onNote: (key) => _openNote(n, key),
                         onCheck: choosing ? _toggle : null,
-                        scrolls: false,
                       ),
-                      shown: !_hiding,
 
-                      /// the pages beside it are already up, only the shown one's scroll counts
-                      onHidden: () {
-                        if (n == _page.value) _layout(QuranLayout.mushaf);
-                      },
-                      entering: n == _entering,
-                      followCells: _followCells,
-                    ),
-                  },
+                      QuranLayout.translation => TranslationView(
+                        n,
+                        onAyah: (key) => _openAyah(n, key),
+                        onNote: (key) => _openNote(n, key),
+                        onCheck: choosing ? _toggle : null,
+                        mushaf: _MushafPage(
+                          n,
+                          pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
+                          onAyah: (key) => _openAyah(n, key, onPage: true),
+                          onNote: (key) => _openNote(n, key, onPage: true),
+                          onCheck: choosing ? _toggle : null,
+                          scrolls: false,
+                        ),
+                        shown: !_hiding,
+
+                        /// the pages beside it are already up, only the shown one's scroll counts
+                        onHidden: () {
+                          if (n == _page.value) _layout(QuranLayout.mushaf);
+                        },
+                        entering: n == _entering,
+                        followCells: _followCells,
+                      ),
+                    },
+                  ),
                 ),
               ),
               _Later(
@@ -677,6 +718,7 @@ class _MushafPage extends ConsumerWidget {
     this.page, {
     required this.pageKey,
     required this.onAyah,
+    required this.onNote,
     required this.onCheck,
     this.scrolls = true,
   });
@@ -686,6 +728,7 @@ class _MushafPage extends ConsumerWidget {
   /// the reader asks the page where an ayah sits through it
   final GlobalKey pageKey;
   final ValueChanged<AyahKey> onAyah;
+  final ValueChanged<AyahKey> onNote;
   final ValueChanged<AyahKey>? onCheck;
 
   /// false for the translation's page, it scrolls with the cells under it
@@ -696,7 +739,13 @@ class _MushafPage extends ConsumerWidget {
     final reflow =
         scrolls &&
         ref.watch(settingsProvider.select((settings) => (settings.value?.mushafSize ?? 0) > 0));
-    Widget view = MushafPageView(page, key: pageKey, onAyah: onAyah, onCheck: onCheck);
+    Widget view = MushafPageView(
+      page,
+      key: pageKey,
+      onAyah: onAyah,
+      onNote: onNote,
+      onCheck: onCheck,
+    );
     if (reflow) {
       final child = view;
       view = LayoutBuilder(
@@ -722,6 +771,9 @@ class _Reader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.getColor(ThemeEnum.bg),
+
+      /// the note's keyboard would lay the page out again, the Study sheet rises over it instead
+      resizeToAvoidBottomInset: false,
       body: Stack(fit: StackFit.expand, children: children),
     );
   }
@@ -739,16 +791,26 @@ class _Dim extends StatelessWidget {
     final scrim = context.getColor(ThemeEnum.scrim);
     return AnimatedBuilder(
       animation: study,
-      builder: (context, _) => IgnorePointer(
-        ignoring: study.value < .5,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: ColoredBox(
-            color: scrim.withValues(alpha: SizeManager.pageDim * study.value.clamp(0.0, 1.0)),
+      builder: (context, _) {
+        final value = study.value.clamp(0.0, 1.0);
+        final dim = ColoredBox(color: scrim.withValues(alpha: SizeManager.pageDim * value));
+        final sigma = SizeManager.backdropBlur * value;
+        return IgnorePointer(
+          ignoring: value < .5,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+
+            /// no filter while closed, the page turns under it
+            child: value == 0
+                ? dim
+                : BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+                    child: dim,
+                  ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -14,9 +14,9 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});

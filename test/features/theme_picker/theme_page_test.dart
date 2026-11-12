@@ -5,8 +5,8 @@ import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_snippet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../helpers/fonts.dart';

@@ -16,10 +16,10 @@ import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// no png, built from 4.01's shortcut rows and the components' toggle row
 class AzkarPage extends StatelessWidget {

@@ -78,6 +78,9 @@ abstract final class BmMotion {
   /// a page swipe completes past this share of the width or above this speed in px/s
   static const completeShare = .35;
   static const completeVelocity = 700.0;
+
+  /// the reader opened at an ayah shows its page this long before the Ayah sheet rises
+  static const ayahSheetWait = Duration(milliseconds: 500);
 }
 
 /// Reduce motion = OS setting OR in-app switch (pass the in-app value in via BmPrefs).

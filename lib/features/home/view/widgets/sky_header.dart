@@ -9,9 +9,9 @@ import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/features/home/view/widgets/arc_turn.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the living sky, still until the sky changes at a prayer. its short events are SkyEvents
 class SkyHeader extends ConsumerStatefulWidget {

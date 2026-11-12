@@ -13,9 +13,9 @@ import 'package:better_muslim/features/notifications/data/notification_scheduler
 import 'package:better_muslim/features/notifications/presentation/view/widgets/notifications_off_line.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_row.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// every prayer's sound and recording, the reminder and the countdown, each kept at once. the
 /// boot remakes the schedule from the store (FR-026 to FR-030)

@@ -9,3 +9,5 @@
 - [x] `Dev · profile` is in `.vscode/launch.json`.
 - [ ] Idle, push, pop, tab switch, scroll, page turn, a settings change and a resume are written in
   `baseline.md`.
+- [ ] A sheet opening, dragged down and closing over Home, and the Study sheet over the page, with
+  their blur. A solid fallback on Android only if a frame goes over 16.6 ms.

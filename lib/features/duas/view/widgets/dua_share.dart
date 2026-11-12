@@ -7,8 +7,8 @@ import 'package:better_muslim/core/widgets/share/share_frame.dart';
 import 'package:better_muslim/core/widgets/share/share_options.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the dua on the share card: the arabic, then in english its transliteration and translation.
 /// the source is the footer (FR-014)
@@ -44,9 +44,7 @@ class DuaShare extends ShareContent {
       return height <= box.height;
     }
 
-    final sizes = options.sizeLocked || options.size == ShareSize.story
-        ? [options.size]
-        : ShareSize.values;
+    final sizes = ShareSize.tried(options);
     for (final size in sizes) {
       for (final scale in SizeManager.shareFit) {
         if (fits(size, scale)) return (size: size, scale: scale, fits: true, note: null);

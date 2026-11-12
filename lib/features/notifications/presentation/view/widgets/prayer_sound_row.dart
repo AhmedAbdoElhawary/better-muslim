@@ -15,9 +15,9 @@ import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/recording_sheet.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/tone_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.12's row: the prayer, today's time and adhan, tone or silent (FR-026)
 class PrayerSoundRow extends ConsumerWidget {

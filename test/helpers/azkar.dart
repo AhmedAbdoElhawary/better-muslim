@@ -4,10 +4,10 @@ import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/azkar/azkar_content.dart';
 import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/router/app_router.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'home.dart';
 import 'prayer.dart';

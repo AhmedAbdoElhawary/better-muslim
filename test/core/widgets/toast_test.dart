@@ -6,8 +6,8 @@ import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   /// the app's own builder: the outermost overlay over the navigator

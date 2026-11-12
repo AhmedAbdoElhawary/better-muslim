@@ -15,9 +15,9 @@ import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_colors.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_tint.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// mark prayed and stop adhan (4.03)
 class AdhanButtons extends StatelessWidget {

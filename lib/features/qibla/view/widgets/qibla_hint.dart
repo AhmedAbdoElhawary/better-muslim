@@ -1,12 +1,13 @@
+import 'package:better_muslim/core/qibla/compass.dart';
+import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/sheet/location_choices.dart';
-import 'package:better_muslim/features/qibla/model/compass_source.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the designed hint, the figure 8 at low accuracy, or the way to a location
 class QiblaHint extends ConsumerWidget {

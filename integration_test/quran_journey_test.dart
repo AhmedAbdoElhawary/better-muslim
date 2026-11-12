@@ -13,10 +13,10 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_shee
 import 'package:better_muslim/features/quran/presentation/view/widgets/continue_card.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 /// milestone 7a on a real engine: the tab, the reader, a bookmark and a note that outlive the app

@@ -13,10 +13,10 @@ import 'package:better_muslim/core/widgets/motion/skeleton.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/home/model/verse_of_day.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the verse of the day. quran text is never animated, overlapped or cropped
 class VerseCard extends ConsumerWidget {
