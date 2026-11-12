@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/features/qibla/model/compass_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
