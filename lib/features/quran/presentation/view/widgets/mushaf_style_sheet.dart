@@ -23,6 +23,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 Future<void> showMushafStyleSheet(BuildContext context) => showBmSheet(
   context,
   title: const SheetTitle(StringsManager.mushaf, subtitle: StringsManager.madinahHafs),
+  blur: false,
   builder: (_) => const _MushafStyleSheet(),
 );
 
