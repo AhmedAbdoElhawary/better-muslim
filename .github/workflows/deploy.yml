@@ -137,12 +137,27 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
           flutter-version: 3.50.0
           cache: true
+
+      # the private runner has less ram than the 8g in android/gradle.properties, the os killed the build
+      - name: Fit Gradle in the runner's memory
+        run: |
+          mkdir -p ~/.gradle
+          printf '%s\n' 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g' 'kotlin.daemon.jvmargs=-Xmx2g' 'org.gradle.workers.max=2' > ~/.gradle/gradle.properties
+
+      # the image has neither, downloading them took 5 min of every build. the ndk is flutter 3.50.0's
+      - uses: actions/cache@v6
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.2.13676358
+            /usr/local/lib/android/sdk/cmake/3.22.1
+          key: android-ndk-28.2.13676358-cmake-3.22.1
 
       # dev and staging ship often enough that a new tag is the simpler fix,
       # and keeping code push to one flavor saves the free patch-install allowance
