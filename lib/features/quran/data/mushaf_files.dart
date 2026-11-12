@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -84,12 +85,14 @@ class MushafFiles {
   /// loads the page's font as its own family, a V4 one in its palette
   Future<String> family(MushafStyle style, int page, {int palette = 0}) =>
       _loading[(style, page, palette)] ??= () async {
+        final task = TimelineTask()..start('quran page font $page');
         final family = 'qcf_${style.name}_${page}_$palette';
         final bytes = pageFont(
           style,
           page,
         ).then((font) => ByteData.sublistView(palette == 0 ? font : withPalette(font, palette)));
         await (FontLoader(family)..addFont(bytes)).load();
+        task.finish();
         return _loaded[(style, page, palette)] = family;
       }();
 
