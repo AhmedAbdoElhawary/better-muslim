@@ -242,12 +242,13 @@ void main() {
           tones: tones,
           texts: texts,
         );
-        final evening = voice.channels.firstWhere((channel) => channel.id == 'azkar_evening');
+        final evening = voice.channels.firstWhere((channel) => channel.id == 'azkar_evening_2');
         expect((evening.sound! as RawResourceAndroidNotificationSound).sound, 'azkar_evening');
+        expect(evening.importance, Importance.high);
         expect(evening.enableVibration, isFalse);
-        expect(voice.channels.map((channel) => channel.id), contains('azkar_morning'));
-        expect(voice.deleted, contains('azkar'));
-        expect(voice.scheduled.single.details!.channelId, 'azkar_evening');
+        expect(voice.channels.map((channel) => channel.id), contains('azkar_morning_2'));
+        expect(voice.deleted, containsAll(['azkar', 'azkar_morning', 'azkar_evening']));
+        expect(voice.scheduled.single.details!.channelId, 'azkar_evening_2');
 
         final quiet = useAndroid();
         await NotificationScheduler(channel).apply(
@@ -260,7 +261,7 @@ void main() {
         );
         final azkar = quiet.channels.firstWhere((channel) => channel.id == 'azkar');
         expect(azkar.playSound, isFalse);
-        expect(quiet.deleted, containsAll(['azkar_morning', 'azkar_evening']));
+        expect(quiet.deleted, containsAll(['azkar_morning_2', 'azkar_evening_2']));
         expect(quiet.scheduled.single.details!.channelId, 'azkar');
       },
     );
