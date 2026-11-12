@@ -55,6 +55,7 @@ class RecitationSheet extends ConsumerWidget {
             ref.watch(
               surahDownloadProvider((reciter, surah)).select((download) => download.ready),
             ));
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return ReaderSheet(
       open: open,
       onClose: onClose,
@@ -101,7 +102,9 @@ class RecitationSheet extends ConsumerWidget {
                                   ),
                                 ),
                                 OnlyPadding(
-                                  top: SpaceManager.reciterChevronTop,
+                                  top: isArabic
+                                      ? SpaceManager.quranToolGap
+                                      : SpaceManager.reciterChevronTop,
                                   start: SpaceManager.reciterChevronSide,
                                   end: SpaceManager.reciterChevronSide,
                                   child: BmIcon.ui(
