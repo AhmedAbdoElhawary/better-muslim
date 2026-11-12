@@ -135,9 +135,7 @@ class AyahShare extends ShareContent {
       );
     }
 
-    final sizes = options.sizeLocked || options.size == ShareSize.story
-        ? [options.size]
-        : ShareSize.values;
+    final sizes = ShareSize.tried(options);
     for (final size in sizes) {
       for (final scale in SizeManager.shareFit) {
         if (fits(size, scale, all)) return keep(size, scale, all);
