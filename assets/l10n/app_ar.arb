@@ -671,5 +671,6 @@
   "mushafStyleQcfV4Body": "الصفحة المطبوعة، ملوّنة بأحكام التجويد",
   "mushafStyleQcfV1": "الطبعة القديمة",
   "mushafStyleQcfV1Body": "مصحف المدينة، طبعة ١٤٠٥هـ",
-  "deleteMushafStyleBody": "يُنزَّل مرة أخرى عند اختياره."
+  "deleteMushafStyleBody": "يُنزَّل مرة أخرى عند اختياره.",
+  "sharePortrait": "عمودي"
 }
