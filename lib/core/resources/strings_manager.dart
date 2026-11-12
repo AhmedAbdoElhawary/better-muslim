@@ -520,6 +520,7 @@ abstract final class StringsManager {
   static const String colorAmber = 'colorAmber';
   static const String colorSlate = 'colorSlate';
   static const String shareSquare = 'shareSquare';
+  static const String sharePortrait = 'sharePortrait';
   static const String shareStory = 'shareStory';
   static const String arabicSize = 'arabicSize';
   static const String translationSize = 'translationSize';
