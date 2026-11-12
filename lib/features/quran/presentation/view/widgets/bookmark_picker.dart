@@ -150,13 +150,13 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
     final editing = _editing;
     return SafeArea(
       top: false,
-      child: SingleChildScrollView(
-        child: BottomPadding(
-          padding: SpaceManager.s6,
-          child: BmSwitcher(
-            child: _form
-                ? _CategoryForm(
-                    key: ValueKey(editing?.id),
+      child: BottomPadding(
+        padding: SpaceManager.s6,
+        child: BmSwitcher(
+          child: _form
+              ? SingleChildScrollView(
+                  key: ValueKey(editing?.id),
+                  child: _CategoryForm(
                     category: editing,
                     onSave: _save,
                     onDelete: editing == null || editing.id == AppDatabase.defaultCategory
@@ -164,13 +164,14 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
                         : () async {
                             if (await _delete(context, ref, editing)) _back();
                           },
-                  )
-                : Column(
-                    key: const ValueKey('list'),
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SheetTitle(
+                  ),
+                )
+              : CustomScrollView(
+                  key: const ValueKey('list'),
+                  shrinkWrap: true,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: SheetTitle(
                         savedReference(
                           context,
                           ref,
@@ -180,26 +181,28 @@ class _BookmarkPickerState extends ConsumerState<_BookmarkPicker> {
                         ),
                         translate: false,
                       ),
-                      _Categories(
-                        ticked: bookmark?.category,
-                        onPick: _pick,
-                        onEdit: _open,
-                        onNew: () => _open(null),
-                      ),
-                      if (bookmark != null) ...[
-                        const RSizedBox.vertical(SpaceManager.s4),
-                        HorizontalPadding(
-                          padding: SpaceManager.s5,
+                    ),
+                    _Categories(
+                      ticked: bookmark?.category,
+                      onPick: _pick,
+                      onEdit: _open,
+                      onNew: () => _open(null),
+                    ),
+                    if (bookmark != null)
+                      SliverToBoxAdapter(
+                        child: OnlyPadding(
+                          top: SpaceManager.s4,
+                          start: SpaceManager.s5,
+                          end: SpaceManager.s5,
                           child: BmButton.text(
                             StringsManager.removeBookmark,
                             color: ThemeEnum.error,
                             onPressed: () => _remove(bookmark),
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-          ),
+                      ),
+                  ],
+                ),
         ),
       ),
     );
@@ -222,13 +225,12 @@ class _Categories extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categories = ref.watch(categoriesProvider).value ?? const [];
+    final categories = ref.watch(categoriesByCountProvider);
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
     final digits = ref.watch(
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SliverList.list(
       children: [
         for (final category in categories)
           _Row(
@@ -302,7 +304,12 @@ class _Row extends StatelessWidget {
                 ),
                 const RSizedBox.horizontal(SpaceManager.listRowGap),
                 Expanded(
-                  child: RegularText(title, translate: false, fontSize: FontSizeManager.body),
+                  child: RegularText(
+                    title,
+                    translate: false,
+                    fontSize: FontSizeManager.body,
+                    maxLines: 2,
+                  ),
                 ),
                 if (count != null) ...[
                   const RSizedBox.horizontal(SpaceManager.listRowGap),
@@ -375,7 +382,7 @@ class _CategorySheet extends ConsumerWidget {
 
 /// New category, or the same form filled in to rename, recolor or delete one
 class _CategoryForm extends StatefulWidget {
-  const _CategoryForm({required this.onSave, this.category, this.onDelete, super.key});
+  const _CategoryForm({required this.onSave, this.category, this.onDelete});
 
   final Category? category;
   final void Function(String name, CategoryColor color) onSave;
