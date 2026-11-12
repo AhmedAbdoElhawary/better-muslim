@@ -16,7 +16,8 @@ val hasReleaseKeystore = keystorePropertiesFile.exists()
 
 android {
     namespace = "com.elhawary.bettermuslim"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications and androidx.core 1.19 need 37, flutter's default is 36
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
