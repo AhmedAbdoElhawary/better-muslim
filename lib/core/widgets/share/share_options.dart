@@ -129,18 +129,22 @@ enum ShareBackground {
 }
 
 enum ShareSize {
-  square(StringsManager.shareSquare),
-  story(StringsManager.shareStory);
+  square(StringsManager.shareSquare, SizeManager.shareSquare),
+  portrait(StringsManager.sharePortrait, SizeManager.sharePortrait),
+  story(StringsManager.shareStory, SizeManager.shareStory);
 
-  const ShareSize(this.label);
+  const ShareSize(this.label, this._pixels);
 
   final String label;
+  final double _pixels;
 
-  /// in design points, the image is SizeManager.shareSquare pixels wide
-  double get height =>
-      this == square ? SizeManager.shareAyahCard : SizeManager.shareAyahCard * _storyRatio;
+  /// in design points, the image is SizeManager.shareSquare pixels wide. the ratio first, the
+  /// other order lands a hair over 1920 and the story png gets a row more
+  double get height => SizeManager.shareAyahCard * (_pixels / SizeManager.shareSquare);
 
-  static const _storyRatio = SizeManager.shareStory / SizeManager.shareSquare;
+  /// the picked size, or the default and every larger one for the fit to try in turn
+  static List<ShareSize> tried(ShareOptions options) =>
+      options.sizeLocked ? [options.size] : values.sublist(options.size.index);
 }
 
 enum ShareOrnament {
