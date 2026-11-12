@@ -308,7 +308,7 @@ class _NotificationsBootState extends ConsumerState<NotificationsBoot> {
 
   /// a recording previewed in the adhan sound sheet gives way to the real adhan
   void _stopPreview() {
-    if (ref.exists(clipPlayerProvider)) ref.read(clipPlayerProvider).stop();
+    ref.read(clipPlayerProvider).stop();
   }
 
   Future<AlertTexts> _texts(Location location) => AlertTexts.load(
