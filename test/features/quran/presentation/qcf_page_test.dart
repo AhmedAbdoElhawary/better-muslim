@@ -58,6 +58,17 @@ void main() {
     return page()!;
   }
 
+  /// a neighbour's font still loading sends fontsChange after the test, and flutter_test checks
+  /// for its frame after the tear downs since 3.50
+  Future<void> end(WidgetTester tester) async {
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      if (!tester.binding.hasScheduledFrame) break;
+    }
+    await unmount(tester);
+  }
+
   /// a phone reads a page over a platform channel, frames after a font already loaded is there
   final slowPages = mushafPageProvider.overrideWith((ref, n) async {
     final json = await (await ref.watch(quranAssetsProvider.future)).page(n);
@@ -127,7 +138,7 @@ void main() {
         final rect = page.washBounds(first)!;
         expect(page.washBounds(last)!.left, lessThanOrEqualTo(rect.right));
       }
-      await unmount(tester);
+      await end(tester);
     },
 
     /// no QCF fonts in tool/quran/.cache without a run of tool/quran/build_quran.dart
@@ -159,7 +170,7 @@ void main() {
           .updateSettings(SettingsCompanion(pageColor: Value(color)));
       await waitFor(tester, 'qcf_qcfV4_3_$palette');
     }
-    await unmount(tester);
+    await end(tester);
   }, skip: !File('${qcfFonts('v4')}/p3.ttf').existsSync());
 
   testWidgets('the tajweed key grows with the mushaf size, its eight names in one size', (
@@ -189,7 +200,7 @@ void main() {
     expect(sizes[mushafSizeSteps.max], greaterThan(sizes[0]!));
     expect(sizes[mushafSizeSteps.min], lessThan(sizes[0]!));
     expect(sizes[mushafSizeSteps.max]! / sizes[0]!, lessThanOrEqualTo(1.25 + 1e-9));
-    await unmount(tester);
+    await end(tester);
   }, skip: !File('${qcfFonts('v4')}/p3.ttf').existsSync());
 
   testWidgets('a cell under QCF V2 draws its ayah in the page glyphs, the end marker last', (
@@ -242,7 +253,7 @@ void main() {
         .map((text) => text.text)
         .toList();
     expect(drawn.take(words.length), words.map((word) => word.glyph));
-    await unmount(tester);
+    await end(tester);
   }, skip: !File('${qcfFonts('v2')}/p3.ttf').existsSync());
 
   testWidgets('QCF V2 picked but not on the phone draws the page as text', (tester) async {
@@ -261,7 +272,7 @@ void main() {
     expect(pages, isNotEmpty);
     expect(pages.every((page) => page.glyphs == null), isTrue);
     expect(pages.any((page) => page.washBounds(const AyahKey(2, 6)) != null), isTrue);
-    await unmount(tester);
+    await end(tester);
   });
 
   testWidgets('switching to QCF V1 and back keeps the page\'s first ayah on screen', (
@@ -285,7 +296,7 @@ void main() {
     await tester.pumpAndSettle();
     expect((settings().lastReadSurah, settings().lastReadAyah), (80, 1));
     expect(containerOf(tester).read(quranAssetsProvider).value!.folder, 'pages');
-    await unmount(tester);
+    await end(tester);
   });
 
   /// 1421H 120 has 5:77, 1405H 120 doesn't. a frame comes while the new print's page loads
@@ -310,7 +321,7 @@ void main() {
         isNotNull,
       );
       await settleNeighbours(tester);
-      await unmount(tester);
+      await end(tester);
     },
     skip:
         !File('${qcfFonts('v2')}/p120.ttf').existsSync() ||
@@ -337,6 +348,6 @@ void main() {
     expect(shown, isNotEmpty);
     expect(shown.every((page) => page.washBounds(const AyahKey(5, 77)) != null), isTrue);
     await settleNeighbours(tester);
-    await unmount(tester);
+    await end(tester);
   }, skip: !File('${qcfFonts('v1')}/p120.ttf').existsSync());
 }
