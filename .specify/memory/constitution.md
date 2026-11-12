@@ -16,7 +16,7 @@ in `design_handoff_better_muslim/`.
   audio), home widgets and live activity. MVVM = home, qibla, azkar + tasbih, duas, more, theme
   picker, hijri calendar, onboarding.
 - Anything two features need lives in `core/`: prayer time calculation, location, hijri date,
-  settings and the database.
+  settings, the database, and the qibla math with the compass.
 - Imports go one way: no feature imports another feature, `core/` imports no feature except
   `core/router/`, `domain` imports no `data` or `presentation`, `data` imports no `presentation`,
   `model` imports no `view_model` or `view`, `view_model` imports no `view`.
@@ -74,7 +74,8 @@ languages keep working.
   event every 6 to 10 seconds and one a second after a tap on the sky, only while Home is on
   screen with its sky showing, none in the background or with reduce motion. The clock ticks each
   second only while a countdown with seconds is on screen, everything else waits for its next
-  boundary (`GLOSSARY.md`). `architecture_test` bans `.repeat(` outside the loaders and the second
+  boundary (`GLOSSARY.md`). Home's qibla dial turns with the phone: its compass
+  runs only while Home shows the card and the app is in front, and it redraws once a whole degree. `architecture_test` bans `.repeat(` outside the loaders and the second
   ticker outside the countdown.
 - Quran text is never animated, recolored, overlapped, cropped or used as decoration. The page as
   a whole may turn, open from a card, recede behind a sheet and peek beside the controls as the
@@ -197,4 +198,4 @@ Why: a prayer app has to work on a plane, abroad without data, and cost nothing 
 - Every milestone and every speckit plan is checked against these principles before it's called
   done. A break needs my approval and a line in the reply saying why.
 
-**Version**: 5.3.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-11-10
+**Version**: 5.4.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-11-11
