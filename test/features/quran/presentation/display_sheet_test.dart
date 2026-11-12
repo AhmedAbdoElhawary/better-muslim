@@ -6,6 +6,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
+import 'package:better_muslim/core/widgets/sheet/picker_row.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
@@ -264,12 +265,13 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('the translation row opens every translation and keeps the pick', (tester) async {
+  testWidgets('the translation row opens every translation in place of display', (tester) async {
     await pumpReader(tester);
     await openDisplay(tester);
     expect(settingsOf(tester).translation, isNull);
 
     await tapInSheet(tester, find.widgetWithText(NavRow, 'Translation'));
+    expect(find.text('Applies to every page'), findsNothing);
     for (final text in [
       'Sahih International',
       'Pickthall',
@@ -282,7 +284,24 @@ void main() {
     }
     await tapInSheet(tester, find.text('Al-Jalalayn'));
     expect(settingsOf(tester).translation, Translation.jalalayn);
-    expect(find.widgetWithText(NavRow, 'Al-Jalalayn'), findsOneWidget);
+    expect(tester.widget<PickerRow>(find.widgetWithText(PickerRow, 'Al-Jalalayn')).selected, true);
+    expect(find.text('Applies to every page'), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('the mushaf row opens the styles in place of display, a pick keeps them', (
+    tester,
+  ) async {
+    await pumpReader(tester);
+    await openDisplay(tester);
+
+    await tapInSheet(tester, find.widgetWithText(NavRow, 'Mushaf'));
+    expect(find.text('Applies to every page'), findsNothing);
+    expect(find.text('Madinah · Hafs'), findsOneWidget);
+
+    await tapInSheet(tester, find.text('Text'));
+    expect(settingsOf(tester).mushafStyle, MushafStyle.text);
+    expect(find.text('Madinah · Hafs'), findsOneWidget);
     await unmount(tester);
   });
 
