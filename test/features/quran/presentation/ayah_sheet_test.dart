@@ -12,7 +12,9 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart' show TextField;
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';
@@ -250,13 +252,22 @@ void main() {
     });
   });
 
-  testWidgets('a new note highlights the ayah with no text, unchecked it goes', (tester) async {
+  testWidgets('notes is the editor: a new note highlights the ayah, unchecked it goes', (
+    tester,
+  ) async {
     Set<AyahKey> highlighted() => tester.allRenderObjects
         .whereType<RenderMushafPage>()
         .expand((page) => page.highlighted)
         .toSet();
+
+    Future<void> tapScrolled(String text) async {
+      await tester.ensureVisible(inSheet(StudySheet, find.text(text)));
+      await tester.pumpAndSettle();
+      await tapIn(tester, StudySheet, find.text(text));
+    }
+
     Future<void> save() async {
-      await tester.tap(find.text('Save'));
+      await tapScrolled('Save');
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
       await tester.pumpAndSettle();
     }
@@ -264,17 +275,52 @@ void main() {
     await pumpReader(tester);
     await select(tester, 5);
     await tapIn(tester, AyahSheet, find.text('Note'));
+    expect(inSheet(StudySheet, find.text('Add note')), findsOneWidget);
+    expect(inSheet(StudySheet, find.byType(TextField)), findsNothing);
+    expect(inSheet(StudySheet, find.text('Save')), findsNothing);
+    expect(inSheet(StudySheet, find.text('Highlight in mushaf')), findsNothing);
+    expect(shown(tester), closeTo(720, 1), reason: 'notes open at full');
+    expect(FocusManager.instance.primaryFocus?.context?.widget, isNot(isA<EditableText>()));
+
     await tapIn(tester, StudySheet, find.text('Add note'));
+    expect(inSheet(StudySheet, find.byType(TextField)), findsOneWidget);
+    expect(inSheet(StudySheet, find.text('Delete note')), findsNothing);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.enterText(inSheet(StudySheet, find.byType(TextField)), 'Ask, then act.');
     await save();
     expect(highlighted(), {const AyahKey(1, 5)});
-    expect(inSheet(StudySheet, find.text('Highlighted in mushaf')), findsOneWidget);
+    expect(inSheet(StudySheet, find.text('Ask, then act.')), findsOneWidget);
+    expect(inSheet(StudySheet, find.text('Delete note')), findsOneWidget);
 
-    await tapIn(tester, StudySheet, find.text('Highlighted in mushaf'));
-    await tester.tap(find.text('Highlight in mushaf'));
-    await tester.pump();
-    await save();
+    await tester.enterText(inSheet(StudySheet, find.byType(TextField)), '');
+    await tapScrolled('Highlight in mushaf');
+    await tapScrolled('Save');
+    await tester.pumpAndSettle();
+    expect(find.text('Delete this note?'), findsOneWidget, reason: 'an empty save is a delete');
+    await tester.tap(find.text('Delete'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
     expect(highlighted(), isEmpty);
+    expect(inSheet(StudySheet, find.text('Delete note')), findsNothing, reason: 'deleted');
     expect(inSheet(StudySheet, find.text('Add note')), findsOneWidget);
+    await unmount(tester);
+  });
+
+  testWidgets('a long note stops the field at 300 and scrolls inside', (tester) async {
+    await pumpReader(tester);
+    await select(tester, 5);
+    await tapIn(tester, AyahSheet, find.text('Note'));
+    await tapIn(tester, StudySheet, find.text('Add note'));
+    await tester.enterText(
+      inSheet(StudySheet, find.byType(TextField)),
+      List.filled(80, 'line').join('\n'),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(inSheet(StudySheet, find.byType(TextField))).height,
+      lessThanOrEqualTo(SizeManager.noteMaxHeight.r),
+    );
     await unmount(tester);
   });
 
