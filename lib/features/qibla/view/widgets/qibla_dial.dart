@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
+import 'package:better_muslim/core/qibla/compass.dart';
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -9,7 +11,6 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/features/qibla/model/qibla_math.dart';
 import 'package:better_muslim/features/qibla/view/widgets/aligned_pulse.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dot.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_needle.dart';
