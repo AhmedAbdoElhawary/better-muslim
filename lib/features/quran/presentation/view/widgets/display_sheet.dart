@@ -32,8 +32,20 @@ Future<void> showDisplaySheet(BuildContext context) => showBmSheet(
   maxSheetHeight: SizeManager.sheetMax2,
   blur: false,
   title: const SheetTitle(StringsManager.display, subtitle: StringsManager.appliesToEveryPage),
-  builder: (_) => const _DisplaySheet(),
+  builder: (_) => _DisplaySheet(reader: context),
 );
+
+/// display goes first, then the sheet opens on the reader, one sheet moving at a time
+Future<void> _openInstead(
+  BuildContext sheet,
+  BuildContext reader,
+  Future<void> Function(BuildContext) show,
+) async {
+  final route = ModalRoute.of(sheet);
+  Navigator.pop(sheet);
+  await route?.completed;
+  if (reader.mounted) await show(reader);
+}
 
 /// the translation layout's size steps around 4.07's sizes
 const quranSizeSteps = (min: -2, max: 3);
@@ -42,7 +54,10 @@ const quranSizeSteps = (min: -2, max: 3);
 const _stackAt = 1.4;
 
 class _DisplaySheet extends ConsumerWidget {
-  const _DisplaySheet();
+  const _DisplaySheet({required this.reader});
+
+  /// the sub sheets open on it once display is gone, under the page's theme
+  final BuildContext reader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -98,7 +113,13 @@ class _DisplaySheet extends ConsumerWidget {
                 _Layout(font: font, db: db),
               ],
               _PageTurn(layout: layout, db: db, turn: turn),
-              _AdditionalSettings(layout: layout, keepOn: keepOn, db: db, style: style),
+              _AdditionalSettings(
+                layout: layout,
+                keepOn: keepOn,
+                db: db,
+                style: style,
+                reader: reader,
+              ),
             ],
           ),
         ),
@@ -202,12 +223,19 @@ class _PageTurn extends StatelessWidget {
 }
 
 class _AdditionalSettings extends ConsumerWidget {
-  const new({required this.layout, required this.keepOn, required this.db, required this.style});
+  const new({
+    required this.layout,
+    required this.keepOn,
+    required this.db,
+    required this.style,
+    required this.reader,
+  });
 
   final QuranLayout layout;
   final bool keepOn;
   final AppDatabase db;
   final MushafStyle style;
+  final BuildContext reader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -230,13 +258,13 @@ class _AdditionalSettings extends ConsumerWidget {
           NavRow(
             title: StringsManager.mushaf,
             value: style.label,
-            onTap: () => showMushafStyleSheet(context),
+            onTap: () => _openInstead(context, reader, showMushafStyleSheet),
           ),
 
           NavRow(
             title: StringsManager.translation,
             value: shownTranslation(context, ref).label,
-            onTap: () => showTranslationSheet(context),
+            onTap: () => _openInstead(context, reader, showTranslationSheet),
           ),
         ],
       ),
