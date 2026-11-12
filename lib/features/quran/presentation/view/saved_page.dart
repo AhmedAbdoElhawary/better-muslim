@@ -1,15 +1,17 @@
+import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
-import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/empty_state.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
@@ -53,8 +55,24 @@ class SavedPage extends StatefulWidget {
   State<SavedPage> createState() => _SavedPageState();
 }
 
-class _SavedPageState extends State<SavedPage> {
+class _SavedPageState extends State<SavedPage> with SingleTickerProviderStateMixin {
   late var _tab = widget.notes ? _Tab.notes : _Tab.bookmarks;
+
+  /// a sliver can't sit in a switcher, so the new tab fades in by itself
+  late final _fade = AnimationController(vsync: this, value: 1);
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    super.dispose();
+  }
+
+  void _pick(_Tab tab) {
+    setState(() => _tab = tab);
+    _fade
+      ..duration = MediaQuery.disableAnimationsOf(context) ? BmMotion.micro : BmMotion.standard
+      ..forward(from: 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,36 +82,39 @@ class _SavedPageState extends State<SavedPage> {
           children: [
             const CompactAppBar(StringsManager.savedTitle),
             Expanded(
-              child: SingleChildScrollView(
-                child: SafeArea(
-                  top: false,
-                  child: SymmetricPadding(
-                    horizontal: SpaceManager.s4,
-                    vertical: SpaceManager.savedGap,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Segmented(
-                          values: _Tab.values,
-                          selected: _tab,
-                          labelOf: (tab) => tab.label,
-                          onChanged: (tab) => setState(() => _tab = tab),
-                        ),
-                        const RSizedBox.vertical(SpaceManager.s3),
-                        BmSwitcher(
-                          child: KeyedSubtree(
-                            key: ValueKey(_tab),
-                            child: switch (_tab) {
+              child: CustomScrollView(
+                slivers: [
+                  SliverSafeArea(
+                    top: false,
+                    sliver: SliverPadding(
+                      padding: REdgeInsets.symmetric(
+                        horizontal: SpaceManager.s4,
+                        vertical: SpaceManager.savedGap,
+                      ),
+                      sliver: SliverMainAxisGroup(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Segmented(
+                              values: _Tab.values,
+                              selected: _tab,
+                              labelOf: (tab) => tab.label,
+                              onChanged: _pick,
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: RSizedBox.vertical(SpaceManager.s3)),
+                          SliverFadeTransition(
+                            opacity: CurvedAnimation(parent: _fade, curve: BmMotion.standardCurve),
+                            sliver: switch (_tab) {
                               _Tab.bookmarks => const _Bookmarks(),
                               _Tab.notes => const _Notes(),
                               _Tab.highlights => const _Highlights(),
                             },
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -103,26 +124,49 @@ class _SavedPageState extends State<SavedPage> {
   }
 }
 
-/// the new category first, then mine under their categories
+/// the new category first, then each category with its newest 3, most bookmarks first
 class _Bookmarks extends ConsumerWidget {
   const _Bookmarks();
+
+  static const _shown = 3;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarks = ref.watch(bookmarksProvider).value ?? const [];
-    final categories = ref.watch(categoriesProvider).value ?? const [];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final categories = ref.watch(categoriesByCountProvider);
+    final digits = ref.watch(
+      settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
+    );
+    return SliverList.list(
       children: [
         const _NewCategory(),
         for (final category in categories) ...[
           _CategoryHeader(category, key: ObjectKey(category)),
-          for (final bookmark in bookmarks.where(
-            (bookmark) => bookmark.category == category.id,
-          )) ...[
-            const RSizedBox.vertical(SpaceManager.savedGap),
-            _BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
-          ],
+          ...switch ([
+            for (final bookmark in bookmarks)
+              if (bookmark.category == category.id) bookmark,
+          ]) {
+            final mine => [
+              for (final bookmark in mine.take(_shown)) ...[
+                const RSizedBox.vertical(SpaceManager.savedGap),
+                BookmarkRow(bookmark, key: ValueKey(bookmark.id)),
+              ],
+              if (mine.length > _shown)
+                _HeaderButton(
+                  key: ValueKey(('all', category.id)),
+                  onTap: () => context.push(Routes.quranCategory(category.id)),
+                  child: OnlyPadding(
+                    top: SpaceManager.s3,
+                    child: MediumText(
+                      StringsManager.seeAllCount,
+                      args: {'n': context.formatDigits('${mine.length}', digits)},
+                      fontSize: FontSizeManager.sectionLabel,
+                      color: ThemeEnum.primary,
+                    ),
+                  ),
+                ),
+            ],
+          },
         ],
         if (bookmarks.isEmpty) ...[
           const RSizedBox.vertical(SpaceManager.savedGap),
@@ -159,6 +203,7 @@ class _CategoryHeader extends StatelessWidget {
               translate: false,
               fontSize: FontSizeManager.sectionLabel,
               color: ThemeEnum.text2,
+              maxLines: 2,
             ),
           ),
           BmIcon.ui(BmUiIcon.note, size: SizeManager.iconInline.r),
@@ -199,7 +244,7 @@ class _NewCategory extends StatelessWidget {
 
 /// a header line with the 44 pt hit target
 class _HeaderButton extends StatelessWidget {
-  const _HeaderButton({required this.onTap, required this.child});
+  const _HeaderButton({required this.onTap, required this.child, super.key});
 
   final VoidCallback onTap;
   final Widget child;
@@ -221,8 +266,9 @@ class _HeaderButton extends StatelessWidget {
   }
 }
 
-class _BookmarkRow extends ConsumerWidget {
-  const _BookmarkRow(this.bookmark, {super.key});
+/// a bookmark's row on Saved and its Category page
+class BookmarkRow extends ConsumerWidget {
+  const BookmarkRow(this.bookmark, {super.key});
 
   final Bookmark bookmark;
 
@@ -345,16 +391,18 @@ class _Notes extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notes = ref.watch(writtenNotesProvider);
     if (notes.isEmpty) {
-      return const EmptyState(title: StringsManager.noNotes, body: StringsManager.noNotesBody);
+      return const SliverToBoxAdapter(
+        child: EmptyState(title: StringsManager.noNotes, body: StringsManager.noNotesBody),
+      );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (i, note) in notes.indexed) ...[
-          if (i > 0) const RSizedBox.vertical(SpaceManager.savedGap),
-          NoteCard(note, key: ValueKey(note.ayah), onTap: () => _open(context, ref, note.ayah)),
-        ],
-      ],
+    return SliverList.separated(
+      itemCount: notes.length,
+      separatorBuilder: (_, _) => const RSizedBox.vertical(SpaceManager.savedGap),
+      itemBuilder: (context, i) => NoteCard(
+        notes[i],
+        key: ValueKey(notes[i].ayah),
+        onTap: () => _open(context, ref, notes[i].ayah),
+      ),
     );
   }
 }
@@ -367,25 +415,23 @@ class _Highlights extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final highlights = ref.watch(highlightsProvider);
     if (highlights.isEmpty) {
-      return const EmptyState(
-        title: StringsManager.noHighlights,
-        body: StringsManager.noHighlightsBody,
+      return const SliverToBoxAdapter(
+        child: EmptyState(
+          title: StringsManager.noHighlights,
+          body: StringsManager.noHighlightsBody,
+        ),
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (i, note) in highlights.indexed) ...[
-          if (i > 0) const RSizedBox.vertical(SpaceManager.savedGap),
-          NoteCard(
-            note,
-            key: ValueKey(note.ayah),
-            showArabic: true,
-            onTap: () => _open(context, ref, note.ayah),
-            onLongPress: () => _unhighlight(context, ref, note),
-          ),
-        ],
-      ],
+    return SliverList.separated(
+      itemCount: highlights.length,
+      separatorBuilder: (_, _) => const RSizedBox.vertical(SpaceManager.savedGap),
+      itemBuilder: (context, i) => NoteCard(
+        highlights[i],
+        key: ValueKey(highlights[i].ayah),
+        showArabic: true,
+        onTap: () => _open(context, ref, highlights[i].ayah),
+        onLongPress: () => _unhighlight(context, ref, highlights[i]),
+      ),
     );
   }
 }
