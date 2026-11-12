@@ -217,10 +217,7 @@ void main() {
     await pumpReader(tester);
     int shown() => tester.widget<PageTurner>(find.byType(PageTurner)).page.value;
     final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
-    final strip = translationStrip(
-      screen,
-      top: tester.view.padding.top / tester.view.devicePixelRatio,
-    );
+    final strip = translationStrip(screen);
 
     await tester.tapAt(Offset(strip.width / 2, strip.height / 2));
     await tester.pumpAndSettle();
