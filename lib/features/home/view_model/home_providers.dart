@@ -1,8 +1,11 @@
 import 'package:better_muslim/core/clock/clock.dart';
+import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/prayer_log/prayer_log.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
 import 'package:better_muslim/core/prayer_times/sky_state.dart';
+import 'package:better_muslim/core/qibla/compass.dart';
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
@@ -81,4 +84,17 @@ final verseOfDayProvider = FutureProvider<VerseOfDay>((ref) async {
   final text = await assets.ayahText(key);
   final translation = (await assets.surahText(key.surah)).translation[key.ayah - 1];
   return VerseOfDay(key: key, surah: assets.surah(key.surah), text: text, translation: translation);
+});
+
+/// the turn from the phone's heading to the qibla from the saved place, never a fix. whole
+/// degrees, so the dial redraws once a degree. null without a place or a compass
+final homeQiblaProvider = Provider.autoDispose<int?>((ref) {
+  final bearing = ref.watch(
+    locationProvider.select(
+      (location) => location == null ? null : qiblaBearing(location.latitude, location.longitude),
+    ),
+  );
+  final heading = ref.watch(compassProvider.select((reading) => reading.value?.heading));
+  if (bearing == null || heading == null) return null;
+  return qiblaDiff(bearing, heading).round();
 });
