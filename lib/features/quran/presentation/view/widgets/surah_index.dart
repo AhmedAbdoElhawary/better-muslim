@@ -209,6 +209,9 @@ class _Row extends ConsumerWidget {
         button: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
+
+          /// the page starts loading while the finger is still down
+          onTapDown: (_) => warmMushafPage(context, ref, page),
           onTap: () async {
             await warmMushafPage(context, ref, page);
             if (context.mounted) open();
