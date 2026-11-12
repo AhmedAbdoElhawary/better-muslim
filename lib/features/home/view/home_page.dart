@@ -46,6 +46,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderStateMixin {
   final _controller = ScrollController();
   final _view = GlobalKey();
+  final _page = GlobalKey();
   final _card = GlobalKey();
   final _events = GlobalKey<SkyEventsState>();
   final _flight = CardFlight();
@@ -82,20 +83,19 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
       });
       return false;
     }
-    final view = _view.currentContext?.findRenderObject();
+
+    /// measured in the page, not on screen, the stretch after an overscroll moves what's drawn
+    final page = _page.currentContext?.findRenderObject();
     final card = _card.currentContext?.findRenderObject() as RenderBox?;
     final name = _flight.name.currentContext?.findRenderObject() as RenderBox?;
-    if (view == null || card == null || !card.attached) return false;
+    if (page == null || card == null || !card.attached) return false;
     final ScrollMetrics(:pixels, :maxScrollExtent, :viewportDimension) = notification.metrics;
     final top = MediaQuery.paddingOf(context).top;
     final bar = SizeManager.appBar.r;
-    _start = pixels + card.localToGlobal(Offset.zero, ancestor: view).dy - top - bar;
+    _start = card.localToGlobal(Offset.zero, ancestor: page).dy - top - bar;
     final end = name == null
         ? _start
-        : pixels +
-              name.localToGlobal(name.size.center(Offset.zero), ancestor: view).dy -
-              top -
-              bar / 2;
+        : name.localToGlobal(name.size.center(Offset.zero), ancestor: page).dy - top - bar / 2;
     _end = math.min(end, maxScrollExtent);
 
     /// not exact from one scroll to the next, and a change lays the page out again
@@ -207,6 +207,7 @@ class _HomePageState extends ConsumerState<HomePage> with SingleTickerProviderSt
 
                     /// the tab bar's glass covers the bottom, the shortcuts end above it
                     child: SafeArea(
+                      key: _page,
                       top: false,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
