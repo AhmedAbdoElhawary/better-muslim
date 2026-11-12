@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
-import 'package:better_muslim/features/qibla/model/qibla_math.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dot.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
 import 'package:flutter/material.dart';
