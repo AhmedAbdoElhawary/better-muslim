@@ -126,6 +126,49 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('the fullest category comes first, 3 each, See all opens the rest', (tester) async {
+    await pumpApp(tester);
+    await seed(tester);
+    final db = dbOf(tester);
+    await tester.runAsync(() async {
+      final study = (await db.select(db.quranCategories).get())
+          .firstWhere((category) => category.name == 'Study')
+          .id;
+      for (var i = 0; i < 4; i++) {
+        await db
+            .into(db.quranBookmarks)
+            .insert(
+              QuranBookmarksCompanion.insert(
+                page: 100 + i,
+                name: Value('Study $i'),
+                category: study,
+                createdAt: DateTime.utc(2026, 10, 14, 8, i),
+              ),
+            );
+      }
+    });
+    await open(tester, Routes.quranSaved);
+
+    /// study has 5 now, bookmarks 1
+    final header = tester.getTopLeft(find.text('Bookmarks').last).dy;
+    expect(topOf(tester, 'Study'), lessThan(header));
+    expect(header, lessThan(topOf(tester, 'Empty')));
+    for (final name in ['Study 3', 'Study 2', 'Study 1']) {
+      expect(find.text(name), findsOneWidget, reason: name);
+    }
+    expect(find.text('Study 0'), findsNothing, reason: 'only the newest 3');
+    expect(find.text('Reflect'), findsNothing);
+    expect(find.text('See all · 5'), findsOneWidget);
+
+    await tester.tap(find.text('See all · 5'));
+    await tester.pumpAndSettle();
+    for (final name in ['Study 3', 'Study 2', 'Study 1', 'Study 0', 'Reflect']) {
+      expect(find.text(name), findsOneWidget, reason: name);
+    }
+    expect(topOf(tester, 'Study 0'), lessThan(topOf(tester, 'Reflect')), reason: 'newest first');
+    await unmount(tester);
+  });
+
   testWidgets('notes lists my notes and opens the ayah washed', (tester) async {
     await pumpApp(tester);
     await seed(tester);
