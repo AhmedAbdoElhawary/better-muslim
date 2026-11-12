@@ -79,9 +79,9 @@ class _Header extends StatelessWidget {
                     onTap: () => context.push(Routes.quranSearch),
                   ),
                   _HeaderButton(
-                    icon: BmIcon(BmIconName.bookmark, size: SizeManager.icon.r),
-                    label: StringsManager.bookmarks,
-                    onTap: () => context.push(Routes.quranSaved),
+                    icon: BmIcon.ui(BmUiIcon.download, size: SizeManager.icon.r),
+                    label: StringsManager.downloads,
+                    onTap: () => context.push(Routes.downloads),
                   ),
                 ],
               ),
