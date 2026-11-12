@@ -7,6 +7,7 @@ import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/onboarding.dart';
@@ -25,6 +26,7 @@ import '../../../helpers/home.dart';
 import '../../../helpers/notifications.dart';
 import '../../../helpers/prayer.dart';
 import '../../../helpers/providers.dart';
+import '../../../helpers/qibla.dart';
 import '../../../helpers/surfaces.dart';
 
 void main() {
@@ -93,6 +95,7 @@ void main() {
         }),
         flavorProvider.overrideWithValue(devConfig),
         positionSourceProvider.overrideWithValue(FakePositionSource()),
+        compassSourceProvider.overrideWithValue(FakeCompassSource()),
         onboardingProvider.overrideWith(() => OnboardingNotifier(done: true)),
         surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
         clockProvider.overrideWithValue(
