@@ -26,6 +26,9 @@ double kaabaDistanceKm(double latitude, double longitude) {
   return 2 * _earthRadiusKm * math.asin(math.sqrt(a));
 }
 
+/// within this many degrees the phone faces the qibla
+const qiblaAlignedWithin = 3.0;
+
 /// the shortest signed turn from the heading to the bearing, in (−180, 180], positive = right
 double qiblaDiff(double bearing, double heading) {
   final diff = (bearing - heading + 540) % 360 - 180;
