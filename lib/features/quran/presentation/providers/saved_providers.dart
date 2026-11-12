@@ -27,6 +27,29 @@ final categoriesProvider = StreamProvider<List<Category>>(
   (ref) => ref.watch(quranStoreProvider).watchCategories(),
 );
 
+/// most bookmarks first, a tie keeps the order they were made in. Saved and the picker
+final categoriesByCountProvider = Provider<List<Category>>((ref) {
+  final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
+  final bookmarks = ref.watch(bookmarksProvider).value ?? const <Bookmark>[];
+  final counts = <int, int>{};
+  for (final bookmark in bookmarks) {
+    counts.update(bookmark.category, (count) => count + 1, ifAbsent: () => 1);
+  }
+  final order = {for (final (i, category) in categories.indexed) category.id: i};
+  return [...categories]..sort((a, b) {
+    final more = (counts[b.id] ?? 0).compareTo(counts[a.id] ?? 0);
+    return more != 0 ? more : order[a.id]!.compareTo(order[b.id]!);
+  });
+});
+
+/// one category's bookmarks, newest first
+final categoryBookmarksProvider = Provider.family<List<Bookmark>, int>(
+  (ref, category) => [
+    for (final bookmark in ref.watch(bookmarksProvider).value ?? const <Bookmark>[])
+      if (bookmark.category == category) bookmark,
+  ],
+);
+
 /// newest first
 final notesProvider = StreamProvider<List<Note>>(
   (ref) => ref.watch(quranStoreProvider).watchNotes(),
