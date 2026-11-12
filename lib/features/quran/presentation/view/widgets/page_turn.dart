@@ -6,11 +6,11 @@ import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_curl.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// turns the mushaf like paper (research R7). a drag to the right or a tap on the left Turn strip
 /// opens the next page, the way an arabic book reads, in both languages. Book curls the leaf from its

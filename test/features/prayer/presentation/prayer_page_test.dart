@@ -10,9 +10,9 @@ import 'package:better_muslim/features/prayer/presentation/view/widgets/mark_but
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_header.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/progress_ring.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/summary_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

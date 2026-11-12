@@ -11,9 +11,9 @@ import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_share.dart';
 import 'package:better_muslim/features/duas/view_model/dua_player.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// listen, save and share under every dua card, listen only once the dua has its clip or ayahs
 class DuaActions extends ConsumerWidget {

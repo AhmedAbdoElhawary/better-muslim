@@ -29,10 +29,10 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the colors a page paints with, from the page palette
 typedef MushafColors = ({

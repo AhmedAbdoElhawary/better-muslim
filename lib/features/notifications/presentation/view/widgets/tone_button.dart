@@ -2,7 +2,7 @@ import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/system/system_channel.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the adhan sound sheet's round play button, for the tone of a notification channel
 class ToneButton extends StatelessWidget {

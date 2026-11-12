@@ -20,10 +20,10 @@ import 'package:better_muslim/core/widgets/share/swatch.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// the size and scale a content fits at. fits is false when it only fit under the last

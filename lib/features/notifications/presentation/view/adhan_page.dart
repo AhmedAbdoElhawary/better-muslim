@@ -12,9 +12,9 @@ import 'package:better_muslim/features/notifications/presentation/view/widgets/a
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_header.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_sky.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_tint.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.03, over any screen at prayer time or from a notification
 class AdhanPage extends ConsumerWidget {

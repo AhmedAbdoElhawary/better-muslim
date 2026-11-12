@@ -18,9 +18,9 @@ import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<void> showToneSheet(BuildContext context, Prayer prayer) => showBmSheet(
   context,

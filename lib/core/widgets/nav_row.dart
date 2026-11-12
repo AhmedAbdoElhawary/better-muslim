@@ -9,8 +9,8 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// above this the value goes under the title, like the prayer rows stack
 const _stackAt = 1.4;

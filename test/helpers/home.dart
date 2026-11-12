@@ -4,11 +4,11 @@ import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import 'providers.dart';

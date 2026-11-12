@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:better_muslim/core/settings/settings.dart';
-
+import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart' show GlobalWidgetsLocalizations;
 import 'package:intl/message_format.dart';
+import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;
 
 /// reads the arb files in assets/l10n/ at runtime, so a text takes a const StringsManager key
 class AppLocalizations {

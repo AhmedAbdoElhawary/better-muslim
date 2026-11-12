@@ -10,8 +10,8 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_pa
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

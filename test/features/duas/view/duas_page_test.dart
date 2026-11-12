@@ -18,8 +18,8 @@ import 'package:better_muslim/features/duas/model/dua_clips.dart';
 import 'package:better_muslim/features/duas/view/dua_category_page.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
 import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 

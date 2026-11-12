@@ -27,9 +27,9 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/view/bookmark_actions.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the ayah sheet's Bookmark and the top bar's: pick a category, make one, or remove the
 /// bookmark. a long press on a category edits it

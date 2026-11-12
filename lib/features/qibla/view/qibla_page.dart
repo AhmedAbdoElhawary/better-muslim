@@ -12,10 +12,10 @@ import 'package:better_muslim/features/qibla/view/widgets/qibla_dial.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_hint.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_title.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.05 turning and 4.06 aligned, pushed over the tab bar
 class QiblaPage extends ConsumerWidget {

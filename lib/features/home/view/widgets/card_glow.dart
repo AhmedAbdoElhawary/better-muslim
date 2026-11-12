@@ -4,8 +4,8 @@ import 'dart:ui';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/ellipse_transform.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the glow behind the next-prayer card, always there and still as in the PNG
 class CardGlow extends StatelessWidget {

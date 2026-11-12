@@ -21,9 +21,9 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the large sheet's panes (4.23), words waits for 7b
 enum StudyTab {

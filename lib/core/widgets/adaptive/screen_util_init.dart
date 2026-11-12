@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// scales sizes from the phone design, capped so tablets and foldables don't get giant ui
 class AppScreenUtilInit extends StatelessWidget {

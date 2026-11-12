@@ -13,9 +13,9 @@ import 'package:better_muslim/features/quran/domain/bookmark.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/bookmark_actions.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the long press on a bookmark: rename it or move it to where I am (FR-039)
 Future<void> showBookmarkMenu(BuildContext context, Bookmark bookmark) =>

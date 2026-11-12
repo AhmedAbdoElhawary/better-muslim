@@ -13,9 +13,9 @@ import 'package:better_muslim/features/quran/presentation/providers/page_provide
 import 'package:better_muslim/features/quran/presentation/providers/tafsir_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_share.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.30, the ayahs as a still image on a brand background (FR-041, FR-015)
 Future<void> showAyahShare(BuildContext context, List<AyahKey> keys) =>

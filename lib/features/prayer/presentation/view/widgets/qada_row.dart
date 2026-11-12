@@ -16,9 +16,9 @@ import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/prayer/data/qada_repository.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/qada.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/add_older_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// one prayer of the qada list: how many are left, "Made one up" and +
 class QadaRow extends ConsumerWidget {

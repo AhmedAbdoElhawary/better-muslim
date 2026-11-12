@@ -9,10 +9,10 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/state_chip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Motion 07: the "Mark" pill turns into the "Prayed" chip on a snappy spring and the check
 /// draws in, with the haptic once it is full. "Prayed" is a toggle, a tap undoes it

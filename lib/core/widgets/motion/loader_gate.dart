@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/motion/star_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a quick wait shows nothing, a slow one the loader, and a shown loader stays at least
 /// loaderMinimum so it never flashes. one loader on screen at a time

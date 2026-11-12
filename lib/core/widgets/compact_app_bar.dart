@@ -8,8 +8,8 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/core/widgets/glass.dart';
 import 'package:better_muslim/core/widgets/title_hero.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the components' 56 pt compact bar on a blurred surface, the back chevron only on pushed pages
 class CompactAppBar extends StatelessWidget {

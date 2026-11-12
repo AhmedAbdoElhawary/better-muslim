@@ -1,9 +1,9 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a card grows into the screen it opens and shrinks back on close (11 Motion v2), OpenContainer's
 /// fade through. reduce motion is a plain 150 ms crossfade

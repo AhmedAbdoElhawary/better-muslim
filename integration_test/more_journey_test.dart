@@ -9,10 +9,10 @@ import 'package:better_muslim/core/settings/onboarding.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/features/hijri_calendar/model/hijri_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_cell.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 /// milestone 9 on a real engine and a real router: theme, light and dark, the calendar, reset

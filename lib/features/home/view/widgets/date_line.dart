@@ -6,8 +6,8 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// english "Thu 15 Oct · 4 Jumada I 1448", arabic the full weekday and the hijri date (4.16)
 class DateLine extends ConsumerWidget {

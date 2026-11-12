@@ -6,8 +6,8 @@ import 'package:better_muslim/core/widgets/dua_text.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_actions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.14's dua card. a long dua makes it taller, the arabic is never cut
 class DuaCard extends StatelessWidget {

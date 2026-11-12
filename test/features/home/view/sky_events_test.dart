@@ -7,9 +7,9 @@ import 'package:better_muslim/features/home/view/widgets/location_pill.dart';
 import 'package:better_muslim/features/home/view/widgets/now_block.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_events.dart';
 import 'package:better_muslim/features/home/view/widgets/sky_events_painter.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

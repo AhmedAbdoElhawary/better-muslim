@@ -6,10 +6,10 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
 import 'package:better_muslim/features/home/view/widgets/location_pill.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

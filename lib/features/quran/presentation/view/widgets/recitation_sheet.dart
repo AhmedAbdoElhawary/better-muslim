@@ -28,9 +28,9 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a StringsManager key and its args
 typedef _Label = (String, Map<String, String>);

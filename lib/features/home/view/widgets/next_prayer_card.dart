@@ -15,10 +15,10 @@ import 'package:better_muslim/features/home/view/widgets/card_glow.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
 import 'package:better_muslim/features/home/view/widgets/home_qibla.dart';
 import 'package:better_muslim/features/home/view/widgets/prayer_bar.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the name and countdown home flies into its bar, the card hides its own while they fly
 class CardFlight {

@@ -7,9 +7,9 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/title_hero.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// qibla, the hijri calendar and duas, visited less often than the tabs (4.09)
 class MoreTiles extends StatelessWidget {

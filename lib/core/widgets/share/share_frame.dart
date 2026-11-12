@@ -5,10 +5,10 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/share/share_options.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the box a content lays its text out in, between the card's padding and the footer
 Size shareBox(ShareSize size) => Size(

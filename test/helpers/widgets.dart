@@ -2,9 +2,9 @@ import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// one core widget on a dark qiyam emerald page, in a language and text scale
 Future<void> pumpCoreWidget(

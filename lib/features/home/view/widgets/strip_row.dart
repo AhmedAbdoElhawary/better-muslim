@@ -8,10 +8,10 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/animated_decorated_box.dart';
 import 'package:better_muslim/features/home/view/widgets/strip_cell.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a strip cell laid out as a full width row, for text too large for five columns
 class StripRow extends ConsumerWidget {

@@ -7,8 +7,8 @@ import 'package:better_muslim/core/widgets/share/share_frame.dart';
 import 'package:better_muslim/core/widgets/share/share_options.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the dua on the share card: the arabic, then in english its transliteration and translation.
 /// the source is the footer (FR-014)

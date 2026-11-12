@@ -1,6 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// keeps every tab alive like an IndexedStack and plays motion 16: the old tab fades up and out,
 /// then the new one fades up and in

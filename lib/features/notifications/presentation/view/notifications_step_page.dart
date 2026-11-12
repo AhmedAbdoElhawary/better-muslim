@@ -17,10 +17,10 @@ import 'package:better_muslim/features/notifications/data/notification_scheduler
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_row.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.12: each prayer's sound before the phone's dialog, so the ask has a purpose (FR-022 to FR-025)
 class NotificationsStepPage extends ConsumerStatefulWidget {

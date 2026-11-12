@@ -15,9 +15,9 @@ import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/core/widgets/segmented.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum _Index { surah, juz, page }
 

@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// apple's push on both phones, with the edge swipe back. reduce motion fades the first 150 ms and
 /// leaves the page under where it is (FR-031)

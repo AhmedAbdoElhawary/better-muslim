@@ -20,10 +20,10 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/display_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/scrubber.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the controls over the page (4.21): the glass top bar and dock slide in over the page at its
 /// full size. with reduce motion they fade

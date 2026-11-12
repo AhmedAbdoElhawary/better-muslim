@@ -19,11 +19,11 @@ import 'package:better_muslim/features/qibla/view/widgets/qibla_dial.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dot.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_needle.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

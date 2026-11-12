@@ -27,10 +27,10 @@ import 'package:better_muslim/features/notifications/data/alert_texts.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
 import 'package:better_muslim/features/notifications/domain/alert.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// dev builds only (FR-041). its text is for me, so it is not in the arb files
 class DevNotificationsPage extends ConsumerWidget {

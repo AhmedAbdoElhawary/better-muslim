@@ -3,8 +3,8 @@ import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/features/home/view/widgets/strip_cell.dart';
 import 'package:better_muslim/features/home/view/widgets/strip_row.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the prayer day's five times, from fajr to the next fajr
 class PrayerStrip extends StatelessWidget {

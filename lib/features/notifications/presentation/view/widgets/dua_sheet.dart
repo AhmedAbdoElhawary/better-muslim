@@ -2,7 +2,7 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/dua_text.dart';
 import 'package:better_muslim/features/notifications/data/dua_after_adhan.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the full dua after the adhan, laid out like a 4.14 dua card. arabic shows only the arabic and
 /// its source (FR-032)

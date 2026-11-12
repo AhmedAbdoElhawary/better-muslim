@@ -4,7 +4,7 @@ import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/widgets/mushaf_star.dart';
 import 'package:better_muslim/features/home/model/home_moment.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a share of the day on the arc, 0 at the left foot and 1 at the right
 Offset arcPoint(Offset center, double radius, double share) {

@@ -23,9 +23,9 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the Turn strips beside the small page, in the top half
 Size translationStrip(Size screen) => Size(SizeManager.turnStrip.r, screen.height / 2);

@@ -16,9 +16,9 @@ import 'package:better_muslim/features/quran/presentation/providers/page_provide
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.18's continue reading: the last read page's thumbnail grows into the page
 class ContinueCard extends ConsumerStatefulWidget {

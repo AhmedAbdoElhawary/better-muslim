@@ -4,8 +4,8 @@ import 'package:better_muslim/features/notifications/data/dua_after_adhan.dart';
 import 'package:better_muslim/features/notifications/presentation/providers/adhan_providers.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/dua_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

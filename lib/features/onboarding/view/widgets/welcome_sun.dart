@@ -1,6 +1,6 @@
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.10's sun as designed, so the welcome at rest runs no shader (R6). it fades in as the glass
 /// fills

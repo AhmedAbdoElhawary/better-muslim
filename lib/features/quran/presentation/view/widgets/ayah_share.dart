@@ -14,9 +14,9 @@ import 'package:better_muslim/core/widgets/share/share_frame.dart';
 import 'package:better_muslim/core/widgets/share/share_options.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// what goes under each ayah, english is the translation and the rest arabic tafsir (FR-023)
 enum ShareTextSource {

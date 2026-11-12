@@ -4,7 +4,7 @@ import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/router/page_transitions.dart';
 import 'package:better_muslim/core/settings/quran.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// every color in the app goes through this, the active BmPalette fills it so all 8 themes work
 enum ThemeEnum {

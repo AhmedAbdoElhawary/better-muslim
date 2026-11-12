@@ -25,10 +25,10 @@ import 'package:better_muslim/features/quran/domain/quran_search.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/tafsir_chip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension on SearchScope {
   String get label => switch (this) {

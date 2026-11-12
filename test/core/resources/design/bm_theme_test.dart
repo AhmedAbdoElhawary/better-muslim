@@ -1,8 +1,8 @@
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   final dark = bmThemes[BmThemeId.qiyamEmerald]!.dark;

@@ -10,10 +10,10 @@ import 'package:better_muslim/features/notifications/presentation/providers/adha
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/sound_picker.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../../helpers/azkar.dart';

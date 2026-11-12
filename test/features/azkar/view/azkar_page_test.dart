@@ -12,8 +12,8 @@ import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
 import 'package:better_muslim/features/azkar/view/widgets/dhikr_text.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/azkar.dart';

@@ -16,9 +16,9 @@ import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/azkar/model/set_state.dart';
 import 'package:better_muslim/features/azkar/view/widgets/zikr_card.dart';
 import 'package:better_muslim/features/azkar/view_model/set_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a morning or evening set, one card at a time. no png, built from the components' azkar card
 class AzkarSetPage extends ConsumerWidget {

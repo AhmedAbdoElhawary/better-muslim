@@ -1,8 +1,8 @@
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// duas as cards one under the other, keyed by id so a removed one doesn't shift the others
 class DuaCards extends StatelessWidget {

@@ -18,10 +18,10 @@ import 'package:better_muslim/features/theme_picker/view/widgets/mode_control.da
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_snippet.dart';
 import 'package:better_muslim/features/theme_picker/view/widgets/theme_swatches.dart';
 import 'package:better_muslim/features/theme_picker/view_model/theme_preview.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.15: the preview restyles at once, only apply saves (FR-009 to FR-012). the last onboarding
 /// step too, without the back button, building on its route like the other steps

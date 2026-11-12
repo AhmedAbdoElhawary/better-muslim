@@ -5,9 +5,9 @@ import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the reminder's minutes, the reminder sheet on a tap. 4.12 shows it with the adhan icon
 class ReminderRow extends ConsumerWidget {

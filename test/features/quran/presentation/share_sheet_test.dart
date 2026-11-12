@@ -11,8 +11,8 @@ import 'package:better_muslim/features/quran/presentation/view/reader_page.dart'
 import 'package:better_muslim/features/quran/presentation/view/widgets/ayah_share.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/share_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 

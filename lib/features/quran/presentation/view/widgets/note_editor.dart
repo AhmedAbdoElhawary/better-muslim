@@ -21,9 +21,9 @@ import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// write, change or delete the one private note of an ayah (FR-040)
 Future<void> showNoteEditor(BuildContext context, AyahKey ayah) =>

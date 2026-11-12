@@ -7,10 +7,10 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dot.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// degrees from the top of the screen. without a compass the dial sits north up, so the needle
 /// points at the bearing itself. null = no needle

@@ -23,11 +23,11 @@ import 'package:better_muslim/features/quran/presentation/providers/saved_provid
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/quran_tile.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the gentle spring from where it is and how fast it moves, a 150 ms linear move with reduce
 /// motion. the reader's card, sheets and lift all move with it

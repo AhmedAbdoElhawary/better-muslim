@@ -4,8 +4,8 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/sheet/location_choices.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// in place of the next-prayer card while there is no location, with the sheet's two choices
 class NoLocationCard extends StatelessWidget {

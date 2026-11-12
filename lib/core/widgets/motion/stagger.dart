@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a list's rows rise in one after another the first time it shows on its screen. rows past the
 /// eighth come with it, and rows built later (a scroll, a return to the tab) just appear

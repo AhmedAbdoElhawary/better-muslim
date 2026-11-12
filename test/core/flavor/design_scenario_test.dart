@@ -14,10 +14,10 @@ import 'package:better_muslim/core/resources/design/bm_theme.dart';
 import 'package:better_muslim/core/settings/appearance.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
-import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart' show ThemeMode;
 import 'package:timezone/data/latest_all.dart' as tz;
 
 void main() {

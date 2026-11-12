@@ -27,10 +27,10 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_pa
 import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum _Tab {
   bookmarks(StringsManager.bookmarks),

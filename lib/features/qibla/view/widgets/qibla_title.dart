@@ -8,9 +8,9 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/features/qibla/model/qibla_tracker.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the instruction and the subtitle. aligned fades in over the turning text (MOTION d_align)
 class QiblaTitle extends ConsumerWidget {

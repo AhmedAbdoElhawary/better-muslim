@@ -8,9 +8,9 @@ import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/duas/view/widgets/clip_guard.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_cards.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a category's duas as cards. no png, built from the 4.14 card
 class DuaCategoryPage extends ConsumerWidget {

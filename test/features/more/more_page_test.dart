@@ -16,10 +16,10 @@ import 'package:better_muslim/features/more/view/more_page.dart';
 import 'package:better_muslim/features/more/view/widgets/contact_section.dart';
 import 'package:better_muslim/features/qibla/view/qibla_page.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 

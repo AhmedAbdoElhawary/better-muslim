@@ -13,9 +13,9 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the first screen's words: the headline, "let go to begin" and "swipe up to begin"
 class IntroLayer extends ConsumerWidget {

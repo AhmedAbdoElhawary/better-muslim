@@ -9,10 +9,10 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the small qibla dial above the countdown. the compass runs only while Home shows the card
 class HomeQibla extends StatelessWidget {

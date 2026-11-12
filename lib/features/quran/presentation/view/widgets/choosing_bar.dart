@@ -7,9 +7,9 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// in the dock's place while ayahs are chosen: Cancel and "Share (n)" (FR-015)
 class ChoosingBar extends ConsumerWidget {

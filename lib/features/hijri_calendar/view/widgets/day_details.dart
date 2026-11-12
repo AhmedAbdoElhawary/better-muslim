@@ -17,10 +17,10 @@ import 'package:better_muslim/features/hijri_calendar/view/widgets/coming_up_lis
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_events.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_times.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:material_ui/material_ui.dart';
 
 /// what the day sheet showed, under the grid: the dates, then the three tabs (FR-010)
 class DayDetails extends ConsumerWidget {

@@ -13,8 +13,8 @@ import 'package:better_muslim/features/hijri_calendar/view/widgets/day_cell.dart
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_times.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../../helpers/fonts.dart';

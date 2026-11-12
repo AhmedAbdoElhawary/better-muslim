@@ -18,10 +18,10 @@ import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/step/step_dots.dart';
 import 'package:better_muslim/core/widgets/step/step_reveal.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.11: why the app needs the location, then the phone's dialog or a city (FR-019 to FR-021)
 class LocationStepPage extends ConsumerStatefulWidget {

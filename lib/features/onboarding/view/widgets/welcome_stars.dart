@@ -3,8 +3,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:better_muslim/core/prayer_times/sky_state.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/features/onboarding/model/sun_choreography.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.10's ten stars: out of the sun to their places (R7)
 class WelcomeStars extends ConsumerWidget {

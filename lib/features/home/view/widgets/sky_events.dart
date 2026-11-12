@@ -8,9 +8,9 @@ import 'package:better_muslim/features/home/view/widgets/sky_events_painter.dart
 import 'package:better_muslim/features/home/view/widgets/sky_header.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the sky comes alive for under 2 s every 6 to 10 s and a second after a tap, between events it
 /// draws nothing. paused, not disposed: off the tab, under a page, scrolled away or in the

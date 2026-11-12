@@ -1,7 +1,7 @@
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// K.STAR of _gen/kit.js, its 16 points in a 22 wide box
 Path mushafStar(Offset center, double size) {

@@ -30,11 +30,11 @@ import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
 import 'package:better_muslim/features/home/view/widgets/verse_card.dart';
 import 'package:better_muslim/features/home/view_model/home_providers.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

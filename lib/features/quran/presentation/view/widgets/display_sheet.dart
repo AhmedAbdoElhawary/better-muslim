@@ -22,9 +22,9 @@ import 'package:better_muslim/features/quran/presentation/providers/page_provide
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_style_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/translation_sheet.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.31, every page choice in one sheet, kept in settings. tajweed colors wait for 7b
 Future<void> showDisplaySheet(BuildContext context) => showBmSheet(

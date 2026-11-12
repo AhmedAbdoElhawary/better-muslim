@@ -15,9 +15,9 @@ import 'package:better_muslim/features/qibla/view/widgets/aligned_pulse.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_dot.dart';
 import 'package:better_muslim/features/qibla/view/widgets/qibla_needle.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the ring stays put, the face (ticks, letters, kaaba marker) turns by minus the heading and the
 /// needle springs over it. never mirrored, north and east are the same in arabic (FR-012)

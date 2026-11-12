@@ -7,9 +7,9 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/features/prayer/domain/week.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/selected_day.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// sunday to saturday, one page per week back to the week of first use and never past this
 /// week (R9). pages follow the reading direction, so in arabic earlier weeks come from the right

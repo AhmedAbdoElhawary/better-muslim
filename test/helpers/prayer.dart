@@ -5,10 +5,10 @@ import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/day_dots.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_row.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'home.dart';
 

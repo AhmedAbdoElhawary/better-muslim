@@ -1,6 +1,6 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the highlight slides behind the picked child on the snappy spring, a new pick turns from where
 /// it is

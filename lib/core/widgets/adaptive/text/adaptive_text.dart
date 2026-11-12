@@ -2,8 +2,8 @@ import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/styles_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 part 'bold_text.dart';
 part 'light_text.dart';

@@ -15,9 +15,9 @@ import 'package:better_muslim/features/duas/view/widgets/dua_card.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_cards.dart';
 import 'package:better_muslim/features/duas/view/widgets/dua_chips.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.14, pushed from more with no tab bar. it scrolls, so large text never cuts it
 class DuasPage extends ConsumerWidget {

@@ -2,10 +2,10 @@ import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/widgets/share/share_frame.dart';
 import 'package:better_muslim/core/widgets/share/share_options.dart';
 import 'package:better_muslim/core/widgets/share/share_sheet.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../helpers/fonts.dart';
 import '../../../helpers/providers.dart';

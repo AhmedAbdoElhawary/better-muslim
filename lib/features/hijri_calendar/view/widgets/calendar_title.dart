@@ -12,9 +12,9 @@ import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// the bar's title switches hijri and gregorian, the chevron says it can be tapped (FR-001)
 class CalendarTitle extends ConsumerWidget {

@@ -14,10 +14,10 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/view/widgets/continue_card.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/quran_tile.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/surah_index.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.18 without the khatmah card and memorize, which wait for 7b
 class QuranPage extends StatelessWidget {

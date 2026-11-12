@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  material_ui: ^1.7.0
+  cupertino_ui: ^1.1.3
   adhan_alarms:
     path: packages/adhan_alarms
   prayer_surfaces:

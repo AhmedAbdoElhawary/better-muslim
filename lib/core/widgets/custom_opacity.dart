@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// no animation of its own, its callers change the value every frame
 class CustomOpacity extends StatelessWidget {

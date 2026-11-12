@@ -12,10 +12,10 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/features/prayer/presentation/providers/qada.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/progress_ring.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// always the prayer day, whatever day is shown (FR-014). it opens the qada list
 class SummaryCard extends ConsumerWidget {

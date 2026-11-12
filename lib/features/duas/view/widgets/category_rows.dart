@@ -12,10 +12,10 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/core/widgets/title_hero.dart';
 import 'package:better_muslim/features/duas/model/dua.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.14's grouped rows, each opens its category's page
 class CategoryRows extends ConsumerWidget {

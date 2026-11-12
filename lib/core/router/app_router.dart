@@ -39,9 +39,9 @@ import 'package:better_muslim/features/quran/presentation/view/reader_page.dart'
 import 'package:better_muslim/features/quran/presentation/view/saved_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/search_page.dart';
 import 'package:better_muslim/features/theme_picker/view/theme_page.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class Routes {
   static const String home = '/';

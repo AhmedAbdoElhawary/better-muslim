@@ -1,8 +1,8 @@
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/widgets/motion/loader_gate.dart';
 import 'package:better_muslim/core/widgets/motion/star_loader.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../helpers/widgets.dart';
 

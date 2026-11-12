@@ -38,13 +38,13 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/share_she
 import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/translation_view.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.19 to 4.23 and 4.07, the page in its layout and the ayah to wash. the whole reader takes the page's palette, and
 /// follow sky crossfades it at isha and fajr

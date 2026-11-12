@@ -1,6 +1,6 @@
 import 'package:better_muslim/features/duas/view_model/dua_player.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// a page pushed on top, the adhan screen too, stops the dua playing (R11)
 class ClipGuard extends ConsumerStatefulWidget {

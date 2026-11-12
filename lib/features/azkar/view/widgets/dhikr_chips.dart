@@ -8,9 +8,9 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/sliding_selection.dart';
 import 'package:better_muslim/features/azkar/model/tasbih_dhikr.dart';
 import 'package:better_muslim/features/azkar/view_model/tasbih_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.08's three chips, centered, scrolling sideways once large text no longer fits them. the
 /// fill slides to the shown dhikr

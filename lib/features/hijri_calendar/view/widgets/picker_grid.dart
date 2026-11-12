@@ -15,9 +15,9 @@ import 'package:better_muslim/features/hijri_calendar/model/calendar_month.dart'
 import 'package:better_muslim/features/hijri_calendar/view/widgets/calendar_format.dart';
 import 'package:better_muslim/features/hijri_calendar/view/widgets/day_cell.dart';
 import 'package:better_muslim/features/hijri_calendar/view_model/calendar_providers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
 
 const _columns = 4;
 

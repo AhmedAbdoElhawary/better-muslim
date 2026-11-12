@@ -14,10 +14,10 @@ import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_h
 import 'package:better_muslim/features/prayer/presentation/view/widgets/prayer_row.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/summary_card.dart';
 import 'package:better_muslim/features/prayer/presentation/view/widgets/week_strip.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 4.04 and 4.17. a link with a day and a prayer opens that day scrolled to the row
 class PrayerPage extends ConsumerStatefulWidget {

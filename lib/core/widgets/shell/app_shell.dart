@@ -1,10 +1,10 @@
 import 'package:better_muslim/core/azkar/azkar_progress.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/shell/nav_bar.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({required this.shell, super.key});

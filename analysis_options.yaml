@@ -7,6 +7,8 @@ analyzer:
     - test/coverage_helper_test.dart
     - android/**
     - ios/**
+    # the designer's copy of the handoff, git ignored and only there to read
+    - "Living Sky prayer app branding 2/**"
 
 linter:
   rules:
