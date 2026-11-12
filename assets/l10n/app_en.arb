@@ -1144,5 +1144,6 @@
   "mushafStyleQcfV4Body": "The printed page, color-coded by tajweed rule",
   "mushafStyleQcfV1": "Old print",
   "mushafStyleQcfV1Body": "Madinah Mushaf, 1405H print",
-  "deleteMushafStyleBody": "It downloads again when you pick it."
+  "deleteMushafStyleBody": "It downloads again when you pick it.",
+  "sharePortrait": "Portrait"
 }
