@@ -59,6 +59,10 @@ A saved ayah or page. It is in exactly one category and may have its own name.
 A named, colored group of bookmarks. "Bookmarks" is the one that always exists.
 _Avoid_: ribbon color, folder, tag
 
+**Category page**:
+One category's bookmarks, all of them, newest first. Saved shows only a category's three newest and opens this page for the rest.
+_Avoid_: category list, see all page
+
 **Bookmarked number**:
 A bookmarked ayah's number, with a ribbon in its category's color behind it.
 _Avoid_: bookmark wash, highlight, page ribbon
@@ -85,6 +89,14 @@ _Avoid_: actions, ayah menu
 **Study sheet**:
 The large sheet with an ayah's tafsir and translation. It takes the Ayah sheet's place.
 _Avoid_: tafsir sheet, big sheet
+
+**Index sheet**:
+The sheet the reader's Index opens: every surah, juz or page, a tap turns the reader there.
+_Avoid_: index popup, contents
+
+**Exact**:
+The search that finds the typed words only as whole words, so الله never finds اللهم.
+_Avoid_: typical, strict, whole word
 
 **Reader controls**:
 The top bar and the dock over the mushaf page.
