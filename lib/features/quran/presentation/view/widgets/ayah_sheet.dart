@@ -56,6 +56,7 @@ class ReaderSheet extends StatefulWidget {
     required this.head,
     required this.body,
     this.grows = false,
+    this.full = false,
     super.key,
   });
 
@@ -66,6 +67,9 @@ class ReaderSheet extends StatefulWidget {
 
   /// long tafsir needs 720 but the page should still show behind it at first
   final bool grows;
+
+  /// at 720 from the start, the note's field, save and keyboard need the room
+  final bool full;
 
   @override
   State<ReaderSheet> createState() => _ReaderSheetState();
@@ -84,6 +88,7 @@ class _ReaderSheetState extends State<ReaderSheet> with SingleTickerProviderStat
   @override
   void didUpdateWidget(ReaderSheet old) {
     super.didUpdateWidget(old);
+    if (widget.full && !old.full && widget.open.value > 0) springTo(context, _grow, 1);
     if (old.open == widget.open) return;
     old.open.removeListener(_reset);
     widget.open.addListener(_reset);
@@ -97,17 +102,27 @@ class _ReaderSheetState extends State<ReaderSheet> with SingleTickerProviderStat
     super.dispose();
   }
 
+  /// so an opening from closed can start at 720
+  var _closed = true;
+
   /// closed, so the next ayah opens at 400 again with its text at the top
   void _reset() {
-    if (widget.open.value > 0) return;
+    if (widget.open.value > 0) {
+      if (_closed && widget.full) _grow.value = 1;
+      _closed = false;
+      return;
+    }
+    _closed = true;
     _grow.value = 0;
     if (_scroll.hasClients) _scroll.jumpTo(0);
   }
 
-  /// 720 never passes the status bar on a short phone
+  /// 720 never passes the status bar on a short phone, nor a note's keyboard
   double get _full => math.min(
     SizeManager.studySheetFull.r,
-    MediaQuery.sizeOf(context).height - MediaQuery.paddingOf(context).top,
+    MediaQuery.sizeOf(context).height -
+        MediaQuery.paddingOf(context).top -
+        MediaQuery.viewInsetsOf(context).bottom,
   );
 
   double get _small => math.min(SizeManager.studySheet.r, _full);
@@ -204,7 +219,8 @@ class _ReaderSheetState extends State<ReaderSheet> with SingleTickerProviderStat
       ),
     );
     final open = widget.open;
-    return AnimatedBuilder(
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final moving = AnimatedBuilder(
       animation: grows ? Listenable.merge([open, _grow]) : open,
       builder: (context, child) {
         /// laid out at 720, the part above 400 waits under the screen until it grows. a close
@@ -236,6 +252,10 @@ class _ReaderSheetState extends State<ReaderSheet> with SingleTickerProviderStat
       /// so a slide only moves its layer, nothing in the sheet paints again
       child: RepaintBoundary(child: sheet),
     );
+
+    /// the reader doesn't resize for the keyboard, so the sheet rises over it. always there, a
+    /// new parent would rebuild the focused field and drop the keyboard
+    return Transform.translate(offset: Offset(0, -keyboard), child: moving);
   }
 }
 
@@ -625,6 +645,7 @@ class StudySheet extends ConsumerWidget {
       open: open,
       onClose: onClose,
       grows: true,
+      full: tab == StudyTab.notes,
       head: _SheetHead(
         title: _AyahTitle(ayah),
         subtitle: _AyahPlace(ayah),
