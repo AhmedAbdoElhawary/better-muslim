@@ -8,7 +8,6 @@ import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
-import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
@@ -19,10 +18,10 @@ import 'package:better_muslim/core/widgets/custom_opacity.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/bookmark_picker.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/display_sheet.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/index_sheet.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/scrubber.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// the controls over the page (4.21): the glass top bar and dock slide in over the page at its
@@ -314,6 +313,12 @@ class _Dock extends StatelessWidget {
   final bool hiding;
   final VoidCallback onTranslation;
 
+  /// from here so the sheet takes the page palette, closing it leaves the page as it was
+  Future<void> _index(BuildContext context) async {
+    final picked = await showIndexSheet(context, page.value);
+    if (picked != null && context.mounted) page.value = picked;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ReaderGlass(
@@ -341,11 +346,7 @@ class _Dock extends StatelessWidget {
                       child: _DockButton(
                         icon: BmIcon.ui(BmUiIcon.contents),
                         label: StringsManager.quranIndex,
-                        onTap: () {
-                          final router = GoRouter.of(context);
-                          Navigator.of(context).pop();
-                          router.go(Routes.quran);
-                        },
+                        onTap: () => _index(context),
                       ),
                     ),
                     Expanded(
