@@ -33,6 +33,7 @@ import 'package:material_ui/material_ui.dart';
 extension on SearchScope {
   String get label => switch (this) {
     SearchScope.all => StringsManager.catAll,
+    SearchScope.exact => StringsManager.exact,
     SearchScope.arabic => StringsManager.ayahText,
     SearchScope.translation => StringsManager.translation,
     SearchScope.root => StringsManager.root,
