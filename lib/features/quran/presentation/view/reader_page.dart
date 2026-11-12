@@ -365,6 +365,13 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     _select(key, onPage: onPage);
   }
 
+  /// a tap on a highlighted ayah goes straight to its note
+  void _openNote(int page, AyahKey key, {bool onPage = false}) {
+    if (page != _page.value) return;
+    _openAyah(page, key, onPage: onPage);
+    _openStudy(StudyTab.notes);
+  }
+
   /// Share on the sheet starts choosing ayahs to share with this one checked (FR-015)
   void _share(AyahKey key) {
     _close();
@@ -465,6 +472,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
   void _close() {
     _waiting?.cancel();
+
+    /// the closed sheet stays built, its note field would keep the keyboard up
+    FocusManager.instance.primaryFocus?.unfocus();
     ref.read(selectionProvider.notifier).clear();
     springTo(context, _act, 0);
     springTo(context, _study, 0);
@@ -539,17 +549,20 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
                         n,
                         pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
                         onAyah: (key) => _openAyah(n, key),
+                        onNote: (key) => _openNote(n, key),
                         onCheck: choosing ? _toggle : null,
                       ),
 
                       QuranLayout.translation => TranslationView(
                         n,
                         onAyah: (key) => _openAyah(n, key),
+                        onNote: (key) => _openNote(n, key),
                         onCheck: choosing ? _toggle : null,
                         mushaf: _MushafPage(
                           n,
                           pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
                           onAyah: (key) => _openAyah(n, key, onPage: true),
+                          onNote: (key) => _openNote(n, key, onPage: true),
                           onCheck: choosing ? _toggle : null,
                           scrolls: false,
                         ),
@@ -705,6 +718,7 @@ class _MushafPage extends ConsumerWidget {
     this.page, {
     required this.pageKey,
     required this.onAyah,
+    required this.onNote,
     required this.onCheck,
     this.scrolls = true,
   });
@@ -714,6 +728,7 @@ class _MushafPage extends ConsumerWidget {
   /// the reader asks the page where an ayah sits through it
   final GlobalKey pageKey;
   final ValueChanged<AyahKey> onAyah;
+  final ValueChanged<AyahKey> onNote;
   final ValueChanged<AyahKey>? onCheck;
 
   /// false for the translation's page, it scrolls with the cells under it
@@ -724,7 +739,13 @@ class _MushafPage extends ConsumerWidget {
     final reflow =
         scrolls &&
         ref.watch(settingsProvider.select((settings) => (settings.value?.mushafSize ?? 0) > 0));
-    Widget view = MushafPageView(page, key: pageKey, onAyah: onAyah, onCheck: onCheck);
+    Widget view = MushafPageView(
+      page,
+      key: pageKey,
+      onAyah: onAyah,
+      onNote: onNote,
+      onCheck: onCheck,
+    );
     if (reflow) {
       final child = view;
       view = LayoutBuilder(
@@ -750,6 +771,9 @@ class _Reader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.getColor(ThemeEnum.bg),
+
+      /// the note's keyboard would lay the page out again, the Study sheet rises over it instead
+      resizeToAvoidBottomInset: false,
       body: Stack(fit: StackFit.expand, children: children),
     );
   }
