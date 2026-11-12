@@ -412,7 +412,14 @@ class NotificationScheduler {
     enableVibration: sound != PrayerSound.silent,
   );
 
-  static final _azkarChannelIds = ['azkar', for (final set in AzkarSet.values) 'azkar_${set.name}'];
+  static final _azkarChannelIds = [
+    'azkar',
+    for (final set in AzkarSet.values) ...['azkar_${set.name}', _voiceChannelId(set)],
+  ];
+
+  /// android keeps a channel's first settings even after a delete, the first ids were silent on
+  /// the OPPO, so the voice moved to new ids
+  static String _voiceChannelId(AzkarSet set) => 'azkar_${set.name}_2';
 
   /// the nudges never buzz. with the voice each set needs its own channel, android fixes its sound
   static AndroidNotificationChannel _azkar(AlertTexts texts, [AzkarSet? voice]) => voice == null
@@ -423,8 +430,9 @@ class NotificationScheduler {
           enableVibration: false,
         )
       : AndroidNotificationChannel(
-          'azkar_${voice.name}',
+          _voiceChannelId(voice),
           texts.tr(voice.titleKey),
+          importance: Importance.high,
           sound: RawResourceAndroidNotificationSound('azkar_${voice.name}'),
           enableVibration: false,
         );
@@ -436,6 +444,8 @@ class NotificationScheduler {
       android: AndroidNotificationDetails(
         channel.id,
         channel.name,
+        importance: channel.importance,
+        priority: voice ? Priority.high : Priority.defaultPriority,
         playSound: channel.playSound,
         sound: channel.sound,
         enableVibration: false,
