@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:better_muslim/features/qibla/model/declination.dart';
+import 'package:better_muslim/core/qibla/declination.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
