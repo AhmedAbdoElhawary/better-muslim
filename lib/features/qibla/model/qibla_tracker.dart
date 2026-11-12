@@ -1,3 +1,5 @@
+import 'package:better_muslim/core/qibla/qibla_math.dart';
+
 enum QiblaPhase { turning, aligned }
 
 enum QiblaEvent { approach, aligned }
@@ -5,7 +7,7 @@ enum QiblaEvent { approach, aligned }
 /// turns each difference into the phase and the haptic events (R6). the gaps between 3 and 5 and
 /// between 10 and 15 keep ±1° jitter from repeating a haptic
 class QiblaTracker {
-  static const _alignIn = 3.0;
+  static const _alignIn = qiblaAlignedWithin;
   static const _alignOut = 5.0;
   static const _approachIn = 10.0;
   static const _rearm = 15.0;
