@@ -127,10 +127,10 @@ void main() {
     await unmount(tester);
   });
 
-  for (final (size, height) in [(ShareSize.square, 1080), (ShareSize.story, 1920)]) {
+  for (final (label, height) in [(null, 1080), ('Portrait', 1350), ('Story', 1920)]) {
     testWidgets('share sends a 1080 x $height png', (tester) async {
       await openShare(tester, const AyahKey(1, 5), 1);
-      if (size == ShareSize.story) await tapInSheet(tester, find.text('Story'));
+      if (label != null) await tapInSheet(tester, find.text(label));
 
       final button = find.text('Share').last;
       await tester.ensureVisible(button);
