@@ -21,11 +21,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// 4.18's continue reading: the last read page's thumbnail grows into the page
-class ContinueCard extends ConsumerWidget {
+class ContinueCard extends ConsumerStatefulWidget {
   const ContinueCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ContinueCard> createState() => _ContinueCardState();
+}
+
+class _ContinueCardState extends ConsumerState<ContinueCard> {
+  /// the last read page is laid out after the card shows, so continue opens with nothing to load.
+  /// not an idle task, that one re-posts a timer every turn while anything animates
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(
+      lastReadProvider.select((lastRead) => lastRead.page),
+      (_, page) => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) warmMushafPage(context, ref, page);
+      }),
+      fireImmediately: true,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final page = ref.watch(lastReadProvider.select((lastRead) => lastRead.page));
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -39,6 +58,9 @@ class ContinueCard extends ConsumerWidget {
           button: true,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
+
+            /// the page starts loading while the finger is still down
+            onTapDown: (_) => warmMushafPage(context, ref, page),
             onTap: () async {
               await warmMushafPage(context, ref, page);
               if (context.mounted) open();
