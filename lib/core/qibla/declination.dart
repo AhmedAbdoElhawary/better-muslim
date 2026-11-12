@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:better_muslim/features/qibla/model/wmm2025.dart';
+import 'package:better_muslim/core/qibla/wmm2025.dart';
 
 const _maxDegree = 12;
 const _wgs84A = 6378.137;
