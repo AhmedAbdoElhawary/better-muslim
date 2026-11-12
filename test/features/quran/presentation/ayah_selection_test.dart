@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_page.dart';
 import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
@@ -11,6 +14,7 @@ import 'package:better_muslim/features/quran/presentation/view/widgets/choosing_
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_turn.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/study_tabs.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -228,6 +232,42 @@ void main() {
       await tester.pump(kDoubleTapTimeout);
       await tester.pumpAndSettle();
       expect(chrome(tester), isFalse);
+      await unmount(tester);
+    });
+
+    testWidgets('a highlighted ayah opens its note, a bookmarked number its ayah sheet', (
+      tester,
+    ) async {
+      await pumpReader(tester);
+      final store = containerOf(tester).read(quranStoreProvider);
+      unawaited(store.saveNote(const AyahKey(1, 5), 'ask for help', highlight: true));
+      unawaited(store.addAyah(const AyahKey(1, 3), 1));
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+      await tester.pumpAndSettle();
+
+      StudySheet study() => tester.widget<StudySheet>(find.byType(StudySheet));
+      await tester.tapAt(ayahAt(tester, 5));
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pumpAndSettle();
+      expect(selected(tester), const AyahKey(1, 5));
+      expect(study().tab, StudyTab.notes);
+      expect(study().open.value, closeTo(1, .01));
+      expect(chrome(tester), isFalse);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(selected(tester), isNull);
+
+      /// beside the number, on the words next to it, still the number's 44 pt
+      final page = pageOne(tester);
+      final number = page.bookmarkedNumber(const AyahKey(1, 3))!.getBounds().center;
+      await tester.tapAt(page.localToGlobal(number + const Offset(16, 0)));
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pumpAndSettle();
+      expect(selected(tester), const AyahKey(1, 3));
+      expect(tester.widget<AyahSheet>(find.byType(AyahSheet)).open.value, closeTo(1, .01));
+      expect(study().open.value, closeTo(0, .01));
       await unmount(tester);
     });
 
