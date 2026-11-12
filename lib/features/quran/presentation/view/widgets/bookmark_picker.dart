@@ -68,6 +68,7 @@ Future<bool> _delete(BuildContext context, WidgetRef ref, Category category) asy
   return true;
 }
 
+/// the color's name for a screen reader, the picker shows the circles alone
 extension on CategoryColor {
   String get label => switch (this) {
     CategoryColor.primary => StringsManager.colorPrimary,
@@ -417,17 +418,21 @@ class _CategoryFormState extends State<_CategoryForm> {
               const RSizedBox.vertical(SpaceManager.s5),
               const RegularText(StringsManager.color, color: ThemeEnum.text2),
               const RSizedBox.vertical(SpaceManager.s3),
-              Wrap(
-                spacing: SpaceManager.shareSwatchGap.r,
-                runSpacing: SpaceManager.s4.r,
+              Row(
                 children: [
-                  for (final color in CategoryColor.values)
-                    Swatch(
-                      label: color.label,
-                      selected: color == _color,
-                      onTap: () => setState(() => _color = color),
-                      fill: ColoredBox(color: context.getColor(color.theme)),
+                  for (final color in CategoryColor.values) ...[
+                    Semantics(
+                      label: context.tr(color.label),
+                      child: Swatch(
+                        key: ValueKey(color),
+                        size: SizeManager.shareSwatch * 0.8,
+                        selected: color == _color,
+                        onTap: () => setState(() => _color = color),
+                        fill: ColoredBox(color: context.getColor(color.theme)),
+                      ),
                     ),
+                    if (color != CategoryColor.values.last) const Spacer(),
+                  ],
                 ],
               ),
               const RSizedBox.vertical(SpaceManager.s6),
