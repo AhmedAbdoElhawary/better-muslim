@@ -13,6 +13,7 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/surface_card.dart';
 import 'package:better_muslim/features/home/view/widgets/card_glow.dart';
 import 'package:better_muslim/features/home/view/widgets/countdown.dart';
+import 'package:better_muslim/features/home/view/widgets/home_qibla.dart';
 import 'package:better_muslim/features/home/view/widgets/prayer_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,9 +94,18 @@ class NextPrayerCard extends StatelessWidget {
             ),
           ),
         ),
+
+        /// over the card so its 44 pt never grows the first row, the icon on the content's edge
+        PositionedDirectional(
+          top: ((isArabic ? SpaceManager.nextCardTopAr : SpaceManager.card) - _qiblaInset).r,
+          end: (SpaceManager.homeCardSide - _qiblaInset).r,
+          child: HomeQibla(flying: flight?.flying),
+        ),
       ],
     );
   }
+
+  static const _qiblaInset = (SizeManager.hit - SizeManager.icon) / 2;
 }
 
 class _NameAr extends ConsumerWidget {
@@ -105,12 +115,17 @@ class _NameAr extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final prayer = ref.watch(nextPrayerProvider.select((next) => next?.$1));
     if (prayer == null) return const SizedBox.shrink();
-    return RegularText(
-      prayer.nameArKey,
-      font: FontEnum.display,
-      fontSize: FontSizeManager.nextPrayerAr,
-      height: LineHeightManager.nextPrayerAr,
-      color: ThemeEnum.text2,
+
+    /// the qibla dial sits after it
+    return EndPadding(
+      padding: SizeManager.icon + SpaceManager.s2,
+      child: RegularText(
+        prayer.nameArKey,
+        font: FontEnum.display,
+        fontSize: FontSizeManager.nextPrayerAr,
+        height: LineHeightManager.nextPrayerAr,
+        color: ThemeEnum.text2,
+      ),
     );
   }
 }
