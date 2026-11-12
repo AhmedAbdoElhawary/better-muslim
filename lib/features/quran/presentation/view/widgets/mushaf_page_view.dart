@@ -76,10 +76,13 @@ String ayahLabel(
 /// one page of the mushaf as printed (4.19), painted by one render object instead of a widget
 /// per word, so a turn only paints. a long press or a double tap on a word gives its ayah
 class MushafPageView extends ConsumerStatefulWidget {
-  const MushafPageView(this.number, {this.onAyah, this.onCheck, super.key});
+  const MushafPageView(this.number, {this.onAyah, this.onNote, this.onCheck, super.key});
 
   final int number;
   final ValueChanged<AyahKey>? onAyah;
+
+  /// a single tap on a highlighted ayah
+  final ValueChanged<AyahKey>? onNote;
   final ValueChanged<AyahKey>? onCheck;
 
   @override
@@ -192,6 +195,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       /// moves on the frame the next file starts, no fade (SC-003)
       following: ref.watch(playingAyahProvider),
       onAyah: widget.onAyah,
+      onNote: widget.onNote,
       onCheck: widget.onCheck,
       labels: {
         if (assets != null && reading)
@@ -328,6 +332,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     required this.bookmarked,
     required this.following,
     required this.onAyah,
+    required this.onNote,
     required this.onCheck,
     required this.labels,
     required this.direction,
@@ -354,6 +359,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
   final Map<AyahKey, Color> bookmarked;
   final AyahKey? following;
   final ValueChanged<AyahKey>? onAyah;
+  final ValueChanged<AyahKey>? onNote;
   final ValueChanged<AyahKey>? onCheck;
   final Map<AyahKey, String> labels;
   final TextDirection direction;
@@ -381,6 +387,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
     bookmarked: bookmarked,
     following: following,
     onAyah: onAyah,
+    onNote: onNote,
     onCheck: onCheck,
     labels: labels,
     direction: direction,
@@ -410,6 +417,7 @@ class _MushafPaper extends LeafRenderObjectWidget {
       ..bookmarked = bookmarked
       ..following = following
       ..onAyah = onAyah
+      ..onNote = onNote
       ..onCheck = onCheck
       ..labels = labels
       ..direction = direction
@@ -441,6 +449,7 @@ class RenderMushafPage extends RenderBox {
     required this._bookmarked,
     required this._following,
     required this.onAyah,
+    required this.onNote,
     required this._onCheck,
     required this._labels,
     required this._direction,
@@ -557,8 +566,11 @@ class RenderMushafPage extends RenderBox {
     markNeedsPaint();
   }
 
-  /// a long press or a double tap on a word
+  /// a long press or a double tap on a word, or a single tap on a bookmarked number
   ValueChanged<AyahKey>? onAyah;
+
+  /// a single tap on a highlighted ayah's words
+  ValueChanged<AyahKey>? onNote;
 
   /// while choosing ayahs to share a tap checks or unchecks one at once, nothing waits for a
   /// double tap
@@ -697,7 +709,10 @@ class RenderMushafPage extends RenderBox {
 
   /// the ayah under the pointer when it went down
   AyahKey? _down;
-  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = () => _call(_onCheck);
+
+  /// what a single tap does where the pointer went down, null leaves it to the turner
+  VoidCallback? _single;
+  late final _tap = TapGestureRecognizer(debugOwner: this)..onTap = () => _single?.call();
   late final _double = DoubleTapGestureRecognizer(debugOwner: this)
     ..onDoubleTap = () => _call(onAyah);
   late final _long = LongPressGestureRecognizer(debugOwner: this)
@@ -716,22 +731,45 @@ class RenderMushafPage extends RenderBox {
     super.dispose();
   }
 
-  /// only the words are hit. a single tap on them waits out a double tap, then goes on to the
-  /// turner like a tap on the margin and toggles the controls
+  /// only the words and the bookmarked numbers are hit. a single tap on plain words waits out a
+  /// double tap, then goes on to the turner like a tap on the margin and toggles the controls
   @override
   bool hitTestSelf(Offset position) =>
-      (onAyah != null || _onCheck != null) && ayahAt(position) != null;
+      (onAyah != null || _onCheck != null) &&
+      (ayahAt(position) != null || _numberAt(position) != null);
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is! PointerDownEvent) return;
-    _down = ayahAt(entry.localPosition);
-    if (_onCheck != null) {
-      _tap.addPointer(event);
-      return;
-    }
+    final number = _numberAt(entry.localPosition);
+    final key = _down = number ?? ayahAt(entry.localPosition);
+    final check = _onCheck;
+    final open = onAyah;
+    final note = onNote;
+    _single = key == null
+        ? null
+        : check != null
+        ? () => check(key)
+        : number != null && open != null
+        ? () => open(key)
+        : _highlighted.contains(key) && note != null
+        ? () => note(key)
+        : null;
+    if (_single != null) _tap.addPointer(event);
+    if (check != null) return;
     _double.addPointer(event);
     _long.addPointer(event);
+  }
+
+  /// the number draws smaller than a finger, its 44 pt wins over the words beside it
+  AyahKey? _numberAt(Offset position) {
+    for (final key in _bookmarked.keys) {
+      if (bookmarkedNumber(key)?.getBounds().center case final center?) {
+        final hit = SizeManager.hit * _unit;
+        if (Rect.fromCenter(center: center, width: hit, height: hit).contains(position)) return key;
+      }
+    }
+    return null;
   }
 
   /// the line band under the position, then the nearest word on it (research R3)
