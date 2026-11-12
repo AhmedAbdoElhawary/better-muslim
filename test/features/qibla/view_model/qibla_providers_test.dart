@@ -3,10 +3,11 @@ import 'dart:math' as math;
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/qibla/compass.dart';
+import 'package:better_muslim/core/qibla/compass_source.dart';
+import 'package:better_muslim/core/qibla/declination.dart';
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/settings/settings.dart';
-import 'package:better_muslim/features/qibla/model/compass_source.dart';
-import 'package:better_muslim/features/qibla/model/declination.dart';
-import 'package:better_muslim/features/qibla/model/qibla_math.dart';
 import 'package:better_muslim/features/qibla/model/qibla_tracker.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,9 +29,8 @@ void main() {
   ProviderContainer containerWith({Location? location, bool noLocation = false}) {
     final container = ProviderContainer(
       overrides: [
-        ...testOverrides(positionSource: position),
+        ...testOverrides(positionSource: position, compass: compass),
         clockProvider.overrideWithValue(() => now),
-        compassSourceProvider.overrideWithValue(compass),
         if (location != null || noLocation) locationProvider.overrideWithValue(location),
       ],
     );
