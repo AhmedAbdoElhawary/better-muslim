@@ -666,6 +666,9 @@ abstract final class SizeManager {
   static const double textField = 52;
   static const double textFieldFocus = 2;
 
+  /// a note's field and its card on Saved grow to this, then scroll inside
+  static const double noteMaxHeight = 300;
+
   /// the mushaf page (4.19), in the 393 x 852 frame of _gen/quran.js
   static const double mushafDesignHeight = 852;
   static const double mushafCorner = 16;
@@ -738,6 +741,9 @@ abstract final class SizeManager {
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
   static const double sheetMax = 740;
+
+  /// the Study sheet's note field grows to here, then scrolls
+  static const double noteFieldMax = 500;
   static const double sheetMax2 = 550;
   static const double ayahSheet = 500;
   static const double studySheet = 500;
