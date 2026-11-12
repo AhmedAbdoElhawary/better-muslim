@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Future<void> showTranslationSheet(BuildContext context) => showBmSheet(
   context,
   title: const SheetTitle(StringsManager.translation),
+  blur: false,
   builder: (_) => const _TranslationSheet(),
 );
 
