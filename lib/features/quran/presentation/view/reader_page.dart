@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:better_muslim/core/database/app_database.dart';
@@ -87,6 +88,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
   /// the sheets' ayah, kept while they slide away
   AyahKey? _ayah;
+
+  /// the Ayah sheet of the ayah the reader opened at, until it rises
+  Timer? _waiting;
   StudyTab _tab = StudyTab.tafsir;
 
   /// the built pages, so the reader can ask one where an ayah sits. one per layout, a page moved
@@ -137,7 +141,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     _page.addListener(_turned);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.ayah case final ayah?) _select(ayah);
+      if (widget.ayah case final ayah?) _openAt(ayah);
       if (widget.recite) _whenOpen(_openRecitation);
     });
   }
@@ -323,7 +327,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
 
     /// once the page is built, the sheet lifts it from where the ayah sits
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _select(ayah);
+      if (mounted) _openAt(ayah);
     });
   }
 
@@ -336,8 +340,12 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     if (!_closeSheets()) _turner.currentState?.turn(direction);
   }
 
-  /// whether a sheet was open
+  /// whether a sheet was open. a tap before the opened at ayah's sheet rises only drops its wash
   bool _closeSheets() {
+    if (_waiting?.isActive ?? false) {
+      _close();
+      return false;
+    }
     if (ref.read(selectionProvider).sheet != null) {
       _close();
       return true;
@@ -386,10 +394,26 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   void _shareChosen() {
     final keys = ref.read(selectionProvider).chosen.toList()..sort();
     ref.read(selectionProvider.notifier).clear();
-    showAyahShare(context, keys);
+
+    /// from under the page's theme, the sheet is drawn in the page color
+    showAyahShare(_turner.currentContext ?? context, keys);
+  }
+
+  /// the ayah washed with its page, its sheet rising on its own once the page has been seen
+  void _openAt(AyahKey key) {
+    ref.read(selectionProvider.notifier).select(key);
+    setState(() => _ayah = key);
+    _whenOpen(() => _waiting = Timer(BmMotion.ayahSheetWait, () => _select(key)));
+  }
+
+  /// a finger on the page drops the opened at ayah's wash before its sheet rises
+  void _down(PointerDownEvent _) {
+    if (_waiting?.isActive ?? false) _close();
   }
 
   void _select(AyahKey key, {bool onPage = false}) {
+    _waiting?.cancel();
+    if (!mounted) return;
     ref.read(selectionProvider.notifier).select(key);
     setState(() {
       _ayah = key;
@@ -440,6 +464,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   }
 
   void _close() {
+    _waiting?.cancel();
     ref.read(selectionProvider.notifier).clear();
     springTo(context, _act, 0);
     springTo(context, _study, 0);
@@ -449,6 +474,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   @override
   void dispose() {
     SystemChannel.keepScreenOn(false);
+    _waiting?.cancel();
     if (_loaded case final assets? when !_playing) {
       _saveLastRead(assets.pageInfo(_page.value).start, _page.value);
     }
@@ -496,48 +522,48 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
               /// the page's own tap shows the controls, its swipes and Turn strips turn it
               Semantics(
                 label: context.tr(StringsManager.mushaf),
-                child: PageTurner(
-                  key: _turner,
-                  page: _page,
-                  book: book == PageTurn.book,
-                  lift: _lift,
-                  onTap: _tap,
-                  onEdge: _edge,
-                  strip: layout == QuranLayout.translation
-                      ? translationStrip(
-                          MediaQuery.sizeOf(context),
-                          top: MediaQuery.paddingOf(context).top,
-                        )
-                      : null,
-                  pageBuilder: (n) => switch (layout) {
-                    QuranLayout.mushaf => _MushafPage(
-                      n,
-                      pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
-                      onAyah: (key) => _openAyah(n, key),
-                      onCheck: choosing ? _toggle : null,
-                    ),
-
-                    QuranLayout.translation => TranslationView(
-                      n,
-                      onAyah: (key) => _openAyah(n, key),
-                      onCheck: choosing ? _toggle : null,
-                      mushaf: _MushafPage(
+                child: Listener(
+                  onPointerDown: _down,
+                  child: PageTurner(
+                    key: _turner,
+                    page: _page,
+                    book: book == PageTurn.book,
+                    lift: _lift,
+                    onTap: _tap,
+                    onEdge: _edge,
+                    strip: layout == QuranLayout.translation
+                        ? translationStrip(MediaQuery.sizeOf(context))
+                        : null,
+                    pageBuilder: (n) => switch (layout) {
+                      QuranLayout.mushaf => _MushafPage(
                         n,
                         pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
-                        onAyah: (key) => _openAyah(n, key, onPage: true),
+                        onAyah: (key) => _openAyah(n, key),
                         onCheck: choosing ? _toggle : null,
-                        scrolls: false,
                       ),
-                      shown: !_hiding,
 
-                      /// the pages beside it are already up, only the shown one's scroll counts
-                      onHidden: () {
-                        if (n == _page.value) _layout(QuranLayout.mushaf);
-                      },
-                      entering: n == _entering,
-                      followCells: _followCells,
-                    ),
-                  },
+                      QuranLayout.translation => TranslationView(
+                        n,
+                        onAyah: (key) => _openAyah(n, key),
+                        onCheck: choosing ? _toggle : null,
+                        mushaf: _MushafPage(
+                          n,
+                          pageKey: _pages.putIfAbsent((n, layout), GlobalKey.new),
+                          onAyah: (key) => _openAyah(n, key, onPage: true),
+                          onCheck: choosing ? _toggle : null,
+                          scrolls: false,
+                        ),
+                        shown: !_hiding,
+
+                        /// the pages beside it are already up, only the shown one's scroll counts
+                        onHidden: () {
+                          if (n == _page.value) _layout(QuranLayout.mushaf);
+                        },
+                        entering: n == _entering,
+                        followCells: _followCells,
+                      ),
+                    },
+                  ),
                 ),
               ),
               _Later(
