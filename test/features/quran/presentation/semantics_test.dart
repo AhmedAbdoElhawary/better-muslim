@@ -29,6 +29,13 @@ void main() {
   late List<String> announced;
   setUp(() {
     mockSystemChannel();
+
+    /// a screen reader is on, the page builds its ayah labels only then
+    final dispatcher = TestWidgetsFlutterBinding.instance.platformDispatcher;
+    dispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+      accessibleNavigation: true,
+    );
+    addTearDown(dispatcher.clearAccessibilityFeaturesTestValue);
     announced = [];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler(
       SystemChannels.accessibility,
