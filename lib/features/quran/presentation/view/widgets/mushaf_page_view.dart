@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 
 import 'package:better_muslim/core/extensions/l10n.dart';
@@ -156,10 +157,14 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
         if (bookmark.ayah case final ayah? when keys.contains(ayah))
           ayah: context.getColor(bookmark.color.theme),
     };
+
+    /// the labels only read a whole surah's translation for a screen reader, it held up every open
+    final reading = MediaQuery.accessibleNavigationOf(context);
     final shown = shownTranslation(context, ref);
     final texts = {
-      for (final surah in keys.map((key) => key.surah).toSet())
-        surah: ref.watch(translationProvider((shown, surah))).value,
+      if (reading)
+        for (final surah in keys.map((key) => key.surah).toSet())
+          surah: ref.watch(translationProvider((shown, surah))).value,
     };
     return _MushafPaper(
       /// a switch to or from V1 reloads the page, the old print's words never meet the new font
@@ -189,7 +194,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView>
       onAyah: widget.onAyah,
       onCheck: widget.onCheck,
       labels: {
-        if (assets != null)
+        if (assets != null && reading)
           for (final key in keys)
             key: ayahLabel(
               context,
@@ -273,10 +278,12 @@ Future<void> warmMushafPage(BuildContext context, WidgetRef ref, int number) asy
   final page = MushafPage.fromJson(number, json);
 
   /// decoded now, the reader's labels then find them in the assets' cache
-  for (final surah in {
-    for (final line in page.lines) ...line.words.map((word) => word.key.surah),
-  }) {
-    await assets.surahText(surah);
+  if (MediaQuery.accessibleNavigationOf(context)) {
+    for (final surah in {
+      for (final line in page.lines) ...line.words.map((word) => word.key.surah),
+    }) {
+      await assets.surahText(surah);
+    }
   }
   final settings = ref.read(settingsProvider).value;
   final style = settings?.mushafStyle ?? MushafStyle.text;
@@ -1254,7 +1261,8 @@ _Laid _laidOf(_LaidInput input) {
     input.step,
     input.ink,
   );
-  final laid = _laids.remove(key) ?? _Laid.of(input);
+  final laid =
+      _laids.remove(key) ?? Timeline.timeSync<_Laid>('quran page layout', () => _Laid.of(input));
   _laids[key] = laid;
   if (_laids.length > 5) _laids.remove(_laids.keys.first);
   return laid;
