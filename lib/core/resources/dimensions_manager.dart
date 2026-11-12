@@ -731,6 +731,10 @@ abstract final class SizeManager {
   static const double curlTilt = 72;
   static const double curlShadow = .35;
   static const double curlShadowFade = .25;
+
+  /// a Turn strip's width from the screen's edge, and how far a swipe goes before its speed turns
+  static const double turnStrip = 40;
+  static const double turnSwipe = 40;
   static const double glassBlur = 24;
   static const double glassSaturation = 1.5;
   static const double sheetMax = 740;
@@ -786,8 +790,9 @@ abstract final class SizeManager {
   static const double surahStar = 36;
   static const double surahStarGlyph = 34;
 
-  /// the shared ayah image, square and story
+  /// the shared ayah image, square, portrait (4:5) and story
   static const double shareSquare = 1080;
+  static const double sharePortrait = 1350;
   static const double shareStory = 1920;
 
   /// the star loader (Brand's Noor) and its line, the same at every size
