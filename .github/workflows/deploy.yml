@@ -107,7 +107,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
-          flutter-version: 3.47.5
+          flutter-version: 3.50.0
           cache: true
 
       - run: flutter pub get
@@ -141,7 +141,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable
-          flutter-version: 3.47.5
+          flutter-version: 3.50.0
           cache: true
 
       # dev and staging ship often enough that a new tag is the simpler fix,
@@ -208,7 +208,7 @@ jobs:
           shorebird release android \
             --artifact aab \
             --flavor "$FLAVOR" \
-            --flutter-version 3.47.5 \
+            --flutter-version 3.50.0 \
             -t "$TARGET" \
             --build-name "$VERSION" \
             --build-number "${{ github.run_number }}" \
