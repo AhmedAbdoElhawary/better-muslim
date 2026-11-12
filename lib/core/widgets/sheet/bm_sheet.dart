@@ -16,6 +16,9 @@ Future<T?> showBmSheet<T>(
   BuildContext context, {
   double? maxSheetHeight,
   Widget? title,
+
+  /// false for a sheet that changes the page under it, the page has to stay readable
+  bool blur = true,
   required WidgetBuilder builder,
 }) {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -39,6 +42,7 @@ Future<T?> showBmSheet<T>(
   /// the sheet stays put while the barrier and the content fade
   const still = Threshold(0);
   final route = _BlurRoute<T>(
+    blur: blur,
     builder: (context) => _Sheet(fade: reduceMotion, title: title, child: builder(context)),
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     barrierLabel: MaterialLocalizations.of(context).scrimLabel,
@@ -63,6 +67,7 @@ Future<T?> showBmSheet<T>(
 /// the dialog's blur behind the scrim, it grows with the sheet and clears as a drag lowers it
 class _BlurRoute<T> extends ModalBottomSheetRoute<T> {
   _BlurRoute({
+    required this.blur,
     required super.builder,
     super.capturedThemes,
     super.barrierLabel,
@@ -76,18 +81,22 @@ class _BlurRoute<T> extends ModalBottomSheetRoute<T> {
     super.sheetAnimationStyle,
   });
 
+  final bool blur;
+
   @override
-  Widget buildModalBarrier() => AnimatedBuilder(
-    animation: animation!,
-    child: super.buildModalBarrier(),
-    builder: (context, barrier) {
-      final sigma = SizeManager.backdropBlur * animation!.value;
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-        child: barrier,
-      );
-    },
-  );
+  Widget buildModalBarrier() => !blur
+      ? super.buildModalBarrier()
+      : AnimatedBuilder(
+          animation: animation!,
+          child: super.buildModalBarrier(),
+          builder: (context, barrier) {
+            final sigma = SizeManager.backdropBlur * animation!.value;
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+              child: barrier,
+            );
+          },
+        );
 }
 
 class _Sheet extends StatelessWidget {
