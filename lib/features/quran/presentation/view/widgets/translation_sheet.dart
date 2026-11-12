@@ -40,12 +40,9 @@ class _TranslationSheet extends ConsumerWidget {
                       ? StringsManager.arabicShortTafsir
                       : StringsManager.englishTranslation,
                   selected: translation == shown,
-                  onTap: () {
-                    ref
-                        .read(databaseProvider)
-                        .updateSettings(SettingsCompanion(translation: Value(translation)));
-                    Navigator.pop(context);
-                  },
+                  onTap: () => ref
+                      .read(databaseProvider)
+                      .updateSettings(SettingsCompanion(translation: Value(translation))),
                 ),
             ],
           ),
