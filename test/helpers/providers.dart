@@ -5,6 +5,7 @@ import 'package:better_muslim/core/flavor/design_scenario.dart';
 import 'package:better_muslim/core/flavor/flavor.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
 import 'package:better_muslim/core/location/position_source.dart';
+import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/resources/design/bm_colors.dart';
@@ -19,14 +20,16 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 
+import 'qibla.dart';
 import 'surfaces.dart';
 
 const devConfig = FlavorConfig(flavor: Flavor.dev, appName: 'Better Muslim', sentryDsn: '');
 
-/// an in-memory store, the dev flavor, no gps, no surfaces plugin and no app folder, so a widget
-/// test never reaches the phone. onboarded, so the app opens on home unless a test says otherwise
+/// an in-memory store, the dev flavor, no gps, no compass, no surfaces plugin and no app folder, so
+/// a widget test never reaches the phone. onboarded, so the app opens on home unless a test says otherwise
 List<Override> testOverrides({
   PositionSource? positionSource,
+  CompassSource? compass,
   FlavorConfig flavor = devConfig,
   bool onboarded = true,
   BmThemeId? theme,
@@ -34,6 +37,7 @@ List<Override> testOverrides({
   _memoryDatabase(theme),
   flavorProvider.overrideWithValue(flavor),
   positionSourceProvider.overrideWithValue(positionSource ?? FakePositionSource()),
+  compassSourceProvider.overrideWithValue(compass ?? FakeCompassSource()),
   onboardingProvider.overrideWith(() => OnboardingNotifier(done: onboarded)),
   surfacesChannelProvider.overrideWithValue(FakeSurfacesChannel()),
   _tafsirFiles,
