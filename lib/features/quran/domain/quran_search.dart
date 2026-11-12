@@ -3,7 +3,7 @@ import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 
 /// 4.27's chips
-enum SearchScope { all, arabic, translation, root }
+enum SearchScope { all, exact, arabic, translation, root }
 
 enum JumpKind { surah, page, ayah }
 
@@ -54,9 +54,15 @@ class SearchAyah {
   }
 }
 
+/// a comma or a bracket ends a word as a space does, "Merciful," is a whole Merciful
+bool _letter(String text, int at) => at >= 0 && at < text.length && _letters.hasMatch(text[at]);
+
+final _letters = RegExp(r'[\p{L}\p{M}\p{N}]', unicode: true);
+
 /// the words a match touches, a match inside a word washes the whole word. a word counts one
 /// match however many it holds, so العالمين is one ال
-({Set<int> words, int count}) _matched(List<_Form> forms, String query) {
+/// [whole] keeps only a match that starts and ends on a word's edge, Exact's
+({Set<int> words, int count}) _matched(List<_Form> forms, String query, {bool whole = false}) {
   final words = <int>{};
   final starts = <int>{};
   for (final form in forms) {
@@ -64,6 +70,9 @@ class SearchAyah {
     for (var at = form.text.indexOf(query); at != -1; at = form.text.indexOf(query, at + 1)) {
       while (word + 1 < form.starts.length && form.starts[word + 1] <= at) {
         word++;
+      }
+      if (whole && (_letter(form.text, at - 1) || _letter(form.text, at + query.length))) {
+        continue;
       }
       starts.add(word);
       for (var i = word; i < form.starts.length && form.starts[i] < at + query.length; i++) {
@@ -121,12 +130,13 @@ const _none = (words: <int>{}, count: 0);
     return (jump: null, groups: groups);
   }
   for (final ayah in ayahs) {
+    final whole = scope == SearchScope.exact;
     final words = scope == SearchScope.translation
         ? _none
-        : _matched(hamza ? ayah._hamza : ayah._arabic, arabic);
+        : _matched(hamza ? ayah._hamza : ayah._arabic, arabic, whole: whole);
     final translation = scope == SearchScope.arabic
         ? _none
-        : _matched([ayah._translation], english);
+        : _matched([ayah._translation], english, whole: whole);
     if (words.words.isEmpty && translation.words.isEmpty) continue;
     (groups[ayah.key.surah] ??= []).add(
       SearchHit(
