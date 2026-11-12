@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/features/quran/domain/mushaf_layout.dart';
@@ -174,6 +175,42 @@ void main() {
       await tester.pumpAndSettle();
       expect(selected(tester), const AyahKey(1, 5));
       expect(haptics, isEmpty);
+      await unmount(tester);
+    });
+
+    testWidgets('opening at an ayah washes it at once, its sheet rises 500 ms after the open', (
+      tester,
+    ) async {
+      await pumpHome(tester, await designOverrides(), settle: false);
+      await tester.pump();
+      containerOf(tester).read(routerProvider).push(Routes.quranPage(1, ayah: const AyahKey(1, 5)));
+      await tester.pumpAndSettle();
+      double sheet() => tester.widget<AyahSheet>(find.byType(AyahSheet)).open.value;
+      expect(selected(tester), const AyahKey(1, 5));
+      expect(sheet(), 0);
+
+      await tester.pump(BmMotion.ayahSheetWait);
+      await tester.pumpAndSettle();
+      expect(sheet(), closeTo(1, .01));
+      await unmount(tester);
+    });
+
+    testWidgets('a tap before the sheet rises drops the wash and shows the controls', (
+      tester,
+    ) async {
+      await pumpHome(tester, await designOverrides(), settle: false);
+      await tester.pump();
+      containerOf(tester).read(routerProvider).push(Routes.quranPage(1, ayah: const AyahKey(1, 5)));
+      await tester.pumpAndSettle();
+      await tester.tapAt(tester.getCenter(find.byType(PageTurner)));
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pumpAndSettle();
+      expect(selected(tester), isNull);
+      expect(chrome(tester), isTrue);
+
+      await tester.pump(BmMotion.ayahSheetWait);
+      await tester.pumpAndSettle();
+      expect(tester.widget<AyahSheet>(find.byType(AyahSheet)).open.value, 0);
       await unmount(tester);
     });
 
