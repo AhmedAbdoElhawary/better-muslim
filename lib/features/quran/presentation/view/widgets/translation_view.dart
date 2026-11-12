@@ -27,12 +27,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// the Turn strips beside the small page, the empty sides of the top half
-Size translationStrip(Size screen, {required double top}) {
-  final half = screen.height / 2;
-  final scale = (half - top) / screen.height;
-  return Size(screen.width * (1 - scale) / 2, half);
-}
+/// the Turn strips beside the small page, in the top half
+Size translationStrip(Size screen) => Size(SizeManager.turnStrip.r, screen.height / 2);
 
 /// 4.07, the mushaf page at the screen's size, taller above 100%, and the ayahs starting on it as
 /// verse cells under it, so the layouts share the page and its last read
