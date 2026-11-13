@@ -67,6 +67,11 @@ int azkarAlertId(DateTime day, AzkarSet set) {
 
 const _firstAzkarId = 2000000;
 
+/// the do not disturb after an adhan, past the nudges
+int silenceId(int adhanId) => _firstSilenceId + adhanId;
+
+const _firstSilenceId = 3000000;
+
 /// ios can't take a delivered notification away at a prayer time, so this runs when it can: all
 /// but the newest prayer one and the newest nudge
 List<int> staleDelivered(List<int> ids) {

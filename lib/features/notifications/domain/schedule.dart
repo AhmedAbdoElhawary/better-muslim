@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/settings.dart';
@@ -12,6 +14,14 @@ TZDateTime? quietNoticeAt(List<Alert> alerts) => alerts.isEmpty
     : alerts.map((alert) => alert.at).reduce((a, b) => a.isAfter(b) ? a : b).add(quietNoticeDelay);
 
 const quietNoticeDelay = Duration(minutes: 30);
+
+/// friday's dhuhr has the khutbah before it
+int silentMinutesOf(Alert alert, int minutes) =>
+    alert.prayer == Prayer.dhuhr && alert.day.weekday == DateTime.friday
+    ? max(minutes, fridaySilentMinutes)
+    : minutes;
+
+const fridaySilentMinutes = 60;
 
 /// calendar prayer days, not 144 hours: fajr gets earlier each day, so 144 hours can hold 7 fajrs.
 /// days are the prayer day of now and the ones after it, null where there is no location.
