@@ -203,7 +203,7 @@ class _Player extends ConsumerWidget {
   }
 }
 
-/// the primary circle, play or pause, the 16 pt star in it while a file loads
+/// the primary circle stays, inside it play, pause, or the 16 pt star while a file loads
 class PlayButton extends ConsumerWidget {
   const PlayButton({
     this.size = SizeManager.hit,
@@ -216,12 +216,18 @@ class PlayButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(
-      recitationStateProvider.select((state) => state.value?.status ?? RecitationStatus.idle),
+    final (status, first) = ref.watch(
+      recitationStateProvider.select(
+        (state) =>
+            (state.value?.status ?? RecitationStatus.idle, state.value?.duration == Duration.zero),
+      ),
     );
     final recitation = ref.watch(recitationProvider);
     final playing = status == RecitationStatus.playing;
-    final color = context.getColor(ThemeEnum.onPrimary);
+    final loading = status == RecitationStatus.loading;
+
+    /// a short wait in the middle of playing keeps pause, it goes on by itself
+    final pause = playing || loading;
     return Semantics(
       button: true,
       label: context.tr(playing ? StringsManager.pause : StringsManager.play),
@@ -230,14 +236,24 @@ class PlayButton extends ConsumerWidget {
         onTap: playing ? recitation.pause : recitation.resume,
         child: RSizedBox.square(
           dimension: size,
-          child: BmLoaderGate(
-            loading: status == RecitationStatus.loading,
-            loader: const Center(child: BmStarLoader(size: SizeManager.loaderSmall)),
-            child: Center(
-              child: BmIcon.ui(
-                playing ? BmUiIcon.pause : BmUiIcon.play,
-                size: icon.r,
-                color: color,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.getColor(ThemeEnum.primary),
+              shape: BoxShape.circle,
+            ),
+            child: BmLoaderGate(
+              loading: loading,
+              instant: first,
+              loader: const Center(
+                child: BmStarLoader(size: SizeManager.loaderSmall, color: ThemeEnum.onPrimary),
+              ),
+              child: Center(
+                key: ValueKey(pause),
+                child: BmIcon.ui(
+                  pause ? BmUiIcon.pause : BmUiIcon.play,
+                  size: icon.r,
+                  color: context.getColor(ThemeEnum.onPrimary),
+                ),
               ),
             ),
           ),
