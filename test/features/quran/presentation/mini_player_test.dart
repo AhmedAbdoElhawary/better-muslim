@@ -1,6 +1,9 @@
 import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/features/quran/domain/recitation.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mini_player.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
@@ -58,6 +61,62 @@ void main() {
     await tester.tap(labelled('Stop'));
     await tester.pumpAndSettle();
     expect(recitation.calls.last, 'stop');
+    await unmount(tester);
+  });
+
+  testWidgets('the circle stays, only the icon in it changes', (tester) async {
+    final recitation = await playing(tester);
+    Finder star() => inPlayer(find.byType(BmStarLoader));
+    Finder icon(BmUiIcon name) => inPlayer(
+      find.byWidgetPredicate((w) => w is BmIcon && w.asset.endsWith('/${name.name}.svg')),
+    );
+    Finder circle() => find.descendant(
+      of: inPlayer(find.byType(PlayButton)),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is DecoratedBox &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).shape == BoxShape.circle,
+      ),
+    );
+    expect(icon(BmUiIcon.pause), findsOneWidget);
+
+    /// nothing has loaded yet in a new play
+    recitation.emit(
+      recitation.current.copyWith(status: RecitationStatus.loading, duration: Duration.zero),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(star(), findsOneWidget);
+    expect(circle(), findsOneWidget);
+    await tester.pump(BmMotion.loaderMinimum);
+
+    recitation.emit(
+      recitation.current.copyWith(
+        status: RecitationStatus.playing,
+        duration: const Duration(seconds: 8),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(star(), findsNothing);
+    expect(icon(BmUiIcon.pause), findsOneWidget);
+
+    /// a short wait in the middle keeps pause
+    recitation.emit(recitation.current.copyWith(status: RecitationStatus.loading));
+    await tester.pump(BmMotion.loaderDelay - const Duration(milliseconds: 1));
+    expect(star(), findsNothing);
+    expect(icon(BmUiIcon.pause), findsOneWidget);
+
+    /// a failure stays up paused, a tap tries again
+    recitation.emit(
+      recitation.current.copyWith(
+        status: RecitationStatus.paused,
+        failure: RecitationFailure.failed,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(icon(BmUiIcon.play), findsOneWidget);
+    expect(circle(), findsOneWidget);
     await unmount(tester);
   });
 
