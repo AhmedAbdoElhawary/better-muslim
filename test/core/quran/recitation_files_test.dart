@@ -27,7 +27,7 @@ void main() {
 
   RecitationFiles files(Future<Fetched> Function(Uri uri) fetch) => RecitationFiles(
     root: () async => root,
-    fetch: (uri) {
+    fetch: (uri, {from = 0}) {
       asked.add(uri);
       return fetch(uri);
     },
