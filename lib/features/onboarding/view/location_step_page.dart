@@ -1,10 +1,6 @@
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
-import 'package:better_muslim/core/location/location_controller.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
-import 'package:better_muslim/core/resources/design/bm_motion.dart';
-import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -14,7 +10,6 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
-import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/step/step_dots.dart';
 import 'package:better_muslim/core/widgets/step/step_reveal.dart';
@@ -32,22 +27,13 @@ class LocationStepPage extends ConsumerStatefulWidget {
 }
 
 class _LocationStepPageState extends ConsumerState<LocationStepPage> {
-  var _busy = false;
-
+  /// refused, now or before, or no fix: the city search at once (FR-020)
   Future<void> _useMyLocation() async {
-    setState(() => _busy = true);
-    final found = await ref.read(locationControllerProvider).useAuto();
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (found) return _next();
-
-    /// refused, now or before, or no fix: the city search at once (FR-020)
-    await _chooseCity(failed: true);
+    if (await useMyLocation(context, ref) && mounted) _next();
   }
 
-  Future<void> _chooseCity({bool failed = false}) async {
-    final chosen = await showLocationSheet(context, failed: failed);
-    if (chosen && mounted) _next();
+  Future<void> _chooseCity() async {
+    if (await showLocationSheet(context) && mounted) _next();
   }
 
   void _next() => context.push(Routes.onboardingNotifications);
@@ -61,161 +47,116 @@ class _LocationStepPageState extends ConsumerState<LocationStepPage> {
     );
     return StepReveal(
       slot: StepSlot.background,
-      child: PopScope(
-        canPop: !_busy,
-        child: Scaffold(
-          body: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const RSizedBox.vertical(SpaceManager.stepDotsTop),
+                    const StepDots(step: 1),
+                    const RSizedBox.vertical(
+                      SpaceManager.stepContentTop - SpaceManager.stepDotsTop - SizeManager.stepDot,
+                    ),
+                    HorizontalPadding(
+                      padding: SpaceManager.stepContentSide,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const RSizedBox.vertical(SpaceManager.stepDotsTop),
-                          const StepDots(step: 1),
-                          const RSizedBox.vertical(
-                            SpaceManager.stepContentTop -
-                                SpaceManager.stepDotsTop -
-                                SizeManager.stepDot,
-                          ),
-                          HorizontalPadding(
-                            padding: SpaceManager.stepContentSide,
+                          StepReveal(
+                            slot: StepSlot.title,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                StepReveal(
-                                  slot: StepSlot.title,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const _IconTile(),
-                                      const RSizedBox.vertical(
-                                        SpaceManager.stepTitleGap + SpaceManager.stepIconTitleGap,
-                                      ),
-                                      Semantics(
-                                        header: true,
-                                        child: const RegularText(
-                                          StringsManager.locTitle,
-                                          font: FontEnum.display,
-                                          fontSize: FontSizeManager.onboardingTitle,
-                                          height: LineHeightManager.onboardingTitle,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                const _IconTile(),
+                                const RSizedBox.vertical(
+                                  SpaceManager.stepTitleGap + SpaceManager.stepIconTitleGap,
                                 ),
-                                const RSizedBox.vertical(SpaceManager.stepTitleGap),
-                                const StepReveal(
-                                  slot: StepSlot.body,
-                                  child: RegularText(
-                                    StringsManager.locBody,
-                                    fontSize: FontSizeManager.body,
-                                    height: LineHeightManager.stepBody,
-                                    color: ThemeEnum.text2,
+                                Semantics(
+                                  header: true,
+                                  child: const RegularText(
+                                    StringsManager.locTitle,
+                                    font: FontEnum.display,
+                                    fontSize: FontSizeManager.onboardingTitle,
+                                    height: LineHeightManager.onboardingTitle,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const RSizedBox.vertical(SpaceManager.stepBodyCardGap),
-                          const HorizontalPadding(
-                            padding: SpaceManager.stepCardSide,
-                            child: StepReveal(
-                              slot: StepSlot.cards,
-                              child: GroupedSection(
-                                children: [
-                                  _Benefit(
-                                    icon: BmUiIcon.sun,
-                                    title: StringsManager.locB1,
-                                    subtitle: StringsManager.locB1s,
-                                  ),
-                                  _Benefit(
-                                    icon: BmUiIcon.compass,
-                                    title: StringsManager.locB2,
-                                    subtitle: StringsManager.locB2s,
-                                  ),
-                                  _Benefit(
-                                    icon: BmUiIcon.lock,
-                                    title: StringsManager.locB3,
-                                    subtitle: StringsManager.locB3s,
-                                  ),
-                                ],
-                              ),
+                          const RSizedBox.vertical(SpaceManager.stepTitleGap),
+                          const StepReveal(
+                            slot: StepSlot.body,
+                            child: RegularText(
+                              StringsManager.locBody,
+                              fontSize: FontSizeManager.body,
+                              height: LineHeightManager.stepBody,
+                              color: ThemeEnum.text2,
                             ),
                           ),
-                          const RSizedBox.vertical(SpaceManager.s4),
                         ],
                       ),
                     ),
-                  ),
-                  StepReveal(
-                    slot: StepSlot.buttons,
-                    child: OnlyPadding(
-                      start: SpaceManager.stepButtonsSide,
-                      end: SpaceManager.stepButtonsSide,
-                      bottom: bottom,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          BmButton.primary(
-                            StringsManager.useMyLocation,
-                            busy: _busy,
-                            onPressed: _useMyLocation,
-                          ),
-                          const RSizedBox.vertical(SpaceManager.locationButtonGap),
-                          BmButton.secondary(
-                            StringsManager.chooseCity,
-                            busy: _busy,
-                            onPressed: _chooseCity,
-                          ),
-                          const RSizedBox.vertical(
-                            SpaceManager.locationButtonGap + SpaceManager.locationFootnoteTop,
-                          ),
-                          const RegularText(
-                            StringsManager.changeLocationLater,
-                            fontSize: FontSizeManager.cardNote,
-                            color: ThemeEnum.text2,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                    const RSizedBox.vertical(SpaceManager.stepBodyCardGap),
+                    const HorizontalPadding(
+                      padding: SpaceManager.stepCardSide,
+                      child: StepReveal(
+                        slot: StepSlot.cards,
+                        child: GroupedSection(
+                          children: [
+                            _Benefit(
+                              icon: BmUiIcon.sun,
+                              title: StringsManager.locB1,
+                              subtitle: StringsManager.locB1s,
+                            ),
+                            _Benefit(
+                              icon: BmUiIcon.compass,
+                              title: StringsManager.locB2,
+                              subtitle: StringsManager.locB2s,
+                            ),
+                            _Benefit(
+                              icon: BmUiIcon.lock,
+                              title: StringsManager.locB3,
+                              subtitle: StringsManager.locB3s,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Positioned.fill(
-                child: AnimatedSwitcher(
-                  duration: MediaQuery.disableAnimationsOf(context)
-                      ? Duration.zero
-                      : BmMotion.micro,
-                  child: _busy ? const _Blocker() : const SizedBox.shrink(),
+                    const RSizedBox.vertical(SpaceManager.s4),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// the phone's dialog and the fix can take seconds, nothing on the step is tappable meanwhile
-class _Blocker extends StatelessWidget {
-  const _Blocker();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlockSemantics(
-      child: AbsorbPointer(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: BmGlass.blurSigma, sigmaY: BmGlass.blurSigma),
-          child: ColoredBox(
-            color: context.getColor(ThemeEnum.scrim).withValues(alpha: BmOpacity.pressed),
-            child: const Center(child: BmStarLoader()),
-          ),
+            ),
+            StepReveal(
+              slot: StepSlot.buttons,
+              child: OnlyPadding(
+                start: SpaceManager.stepButtonsSide,
+                end: SpaceManager.stepButtonsSide,
+                bottom: bottom,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    BmButton.primary(StringsManager.useMyLocation, onPressed: _useMyLocation),
+                    const RSizedBox.vertical(SpaceManager.locationButtonGap),
+                    BmButton.secondary(StringsManager.chooseCity, onPressed: _chooseCity),
+                    const RSizedBox.vertical(
+                      SpaceManager.locationButtonGap + SpaceManager.locationFootnoteTop,
+                    ),
+                    const RegularText(
+                      StringsManager.changeLocationLater,
+                      fontSize: FontSizeManager.cardNote,
+                      color: ThemeEnum.text2,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
