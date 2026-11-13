@@ -18,4 +18,4 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Place list
 
-`assets/places/places.tsv.gz` comes from GeoNames. To refresh it, run `dart run tool/places/build_places.dart`.
+`assets/places/places.tsv.gzip` comes from GeoNames. To refresh it, run `dart run tool/places/build_places.dart`.
