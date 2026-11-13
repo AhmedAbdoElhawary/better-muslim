@@ -97,7 +97,7 @@ class NextPrayerCard extends StatelessWidget {
 
         /// over the card so its 44 pt never grows the first row, the icon on the content's edge
         PositionedDirectional(
-          top: ((isArabic ? SpaceManager.nextCardTopAr : SpaceManager.card) - _qiblaInset).r,
+          top: 0,
           end: (SpaceManager.homeCardSide - _qiblaInset).r,
           child: HomeQibla(flying: flight?.flying),
         ),
@@ -105,7 +105,7 @@ class NextPrayerCard extends StatelessWidget {
     );
   }
 
-  static const _qiblaInset = (SizeManager.hit - SizeManager.icon) / 2;
+  static const _qiblaInset = (SizeManager.hit - SizeManager.homeQibla) / 2;
 }
 
 class _NameAr extends ConsumerWidget {
