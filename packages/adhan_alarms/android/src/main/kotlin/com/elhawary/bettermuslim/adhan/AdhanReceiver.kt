@@ -12,16 +12,28 @@ import androidx.core.content.ContextCompat
 import org.json.JSONObject
 
 // a prayer's, a reminder's or a nudge's alarm went off, a prayer's notification was swiped, or the
-// phone restarted or the app was updated
+// phone restarted, the app was updated or the clock or zone was changed by hand
 class AdhanReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED -> AdhanAlarms.restore(context)
+            Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED, Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED -> {
+                AdhanAlarms.restore(context)
+                Silence.restore(context)
+            }
+            Silence.ACTION_END -> Silence.end(context)
             AdhanAlarms.ACTION_FIRE -> {
                 val entry = AdhanAlarms.entry(context, intent.getIntExtra(AdhanAlarms.EXTRA_ID, -1)) ?: return
+                // a clock moved forward by hand fires every alarm it passed at once
+                if (System.currentTimeMillis() - entry.getLong("atMillis") > LATE_MILLIS) return
                 when (entry.optString("kind")) {
                     // prayer_surfaces posts the countdown, this is only its sound
                     "reminder" -> {}
+                    // after the adhan, it never plays on do not disturb
+                    "silence" -> {
+                        val until = entry.getLong("untilMillis")
+                        if (AdhanService.current?.silenceAfter(until) != true) Silence.start(context, until)
+                    }
                     "azkar" -> postAzkar(context, entry)
                     else -> {
                         clearPrayer(context)
@@ -73,6 +85,9 @@ class AdhanReceiver : BroadcastReceiver() {
         private const val ACTION_SWIPED = "com.elhawary.bettermuslim.adhan.SWIPED"
         private const val EXTRA_ENTRY = "entry"
         private const val CHANNELS = "adhan_"
+
+        // the now window
+        private const val LATE_MILLIS = 20 * 60 * 1000L
 
         // one prayer notification at a time, whichever prayer it was
         fun clearPrayer(context: Context) {
