@@ -27,6 +27,7 @@ import 'generated/schema_v28.dart' as v28;
 import 'generated/schema_v29.dart' as v29;
 import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v30.dart' as v30;
+import 'generated/schema_v31.dart' as v31;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
@@ -1078,6 +1079,24 @@ void main() {
       createItems: (batch, oldDb) => batch.insert(oldDb.settings, const v29.SettingsCompanion()),
       validateItems: (newDb) async {
         expect((await newDb.select(newDb.settings).getSingle()).translation, null);
+      },
+    );
+  });
+
+  test('v30 to v31 turns flip and buttons on, silent off for 20 minutes', () async {
+    await verifier.testWithDataIntegrity(
+      oldVersion: 30,
+      newVersion: 31,
+      createOld: v30.DatabaseAtV30.new,
+      createNew: v31.DatabaseAtV31.new,
+      openTestedDatabase: AppDatabase.forTesting,
+      createItems: (batch, oldDb) => batch.insert(oldDb.settings, const v30.SettingsCompanion()),
+      validateItems: (newDb) async {
+        final settings = await newDb.select(newDb.settings).getSingle();
+        expect(settings.adhanFlipStops, 1);
+        expect(settings.adhanButtonsStop, 1);
+        expect(settings.prayerSilent, 0);
+        expect(settings.prayerSilentMinutes, 20);
       },
     );
   });
