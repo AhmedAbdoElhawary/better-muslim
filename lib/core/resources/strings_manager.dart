@@ -767,4 +767,17 @@ abstract final class StringsManager {
   static const String deleteNoteTitle = 'deleteNoteTitle';
   static const String deleteNoteBody = 'deleteNoteBody';
   static const String seeNote = 'seeNote';
+  static const String whileAdhanPlays = 'whileAdhanPlays';
+  static const String flipStopsAdhan = 'flipStopsAdhan';
+  static const String flipStopsAdhanSub = 'flipStopsAdhanSub';
+  static const String buttonsStopAdhan = 'buttonsStopAdhan';
+  static const String buttonsStopAdhanSub = 'buttonsStopAdhanSub';
+  static const String silentDuringPrayer = 'silentDuringPrayer';
+  static const String silentDuringPrayerSub = 'silentDuringPrayerSub';
+  static const String silentFor = 'silentFor';
+  static const String resume = 'resume';
+  static const String downloadPaused = 'downloadPaused';
+  static const String downloadSize = 'downloadSize';
+  static const String downloadCouldNot = 'downloadCouldNot';
+  static const String surahByReciter = 'surahByReciter';
 }
