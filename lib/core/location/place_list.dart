@@ -11,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// loaded only to name a new position or to search, dropped again when nothing listens
 final placeListProvider = FutureProvider.autoDispose<PlaceList>((ref) => PlaceList.load());
 
-/// the GeoNames list from assets/places/places.tsv.gz, biggest place first.
+/// the GeoNames list from assets/places/places.tsv.gzip, biggest place first.
 /// columns instead of 171k Place objects, a Place is made only for a result
 class PlaceList {
   PlaceList._(
@@ -33,7 +33,8 @@ class PlaceList {
   );
 
   static Future<PlaceList> load() async {
-    final data = await rootBundle.load('assets/places/places.tsv.gz');
+    /// not .gz, agp 9 unzips .gz assets and drops the extension, so android can't find it
+    final data = await rootBundle.load('assets/places/places.tsv.gzip');
     final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     return Isolate.run(() => _parse(bytes));
   }
