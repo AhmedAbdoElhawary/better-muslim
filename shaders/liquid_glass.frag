@@ -39,40 +39,8 @@ vec4 sampleScreen(vec2 logical) {
   return texture(uTexture, uv);
 }
 
-void main() {
-  vec2 p = FlutterFragCoord().xy / uSize * uScreen;
-  vec4 base = sampleScreen(p);
-
-  float R = uRadius;
-  vec2 d = p - uCenter;
-  float reach = R * 1.25 + 24.0;
-  if (uOpacity <= 0.001 || R < 0.5 || dot(d, d) > reach * reach || p.y > uClipY) {
-    fragColor = base;
-    return;
-  }
-
-  // squash and stretch along the motion, the liquid feel
-  float speed = length(uVelocity);
-  if (speed > 1.0) {
-    vec2 v = uVelocity / speed;
-    float a = clamp(speed / 6000.0, 0.0, 0.14);
-    float along = dot(d, v);
-    vec2 perp = d - along * v;
-    d = v * (along / (1.0 + a)) + perp / (1.0 - 0.5 * a);
-  }
-  float r = length(d);
-
-  // soft drop shadow under the lens
-  vec2 ds = p - uCenter - vec2(0.0, 3.0 + R * 0.06);
-  float sh = 1.0 - smoothstep(R * 0.80, R * 1.10 + 14.0, length(ds));
-  vec3 outside = base.rgb * (1.0 - 0.11 * sh * uShadow * uOpacity);
-
-  float mask = 1.0 - smoothstep(R - 0.9, R + 0.6, r);
-  if (mask <= 0.0) {
-    fragColor = vec4(outside, base.a);
-    return;
-  }
-
+// the glass at d from the lens center, r = length(d)
+vec3 lens(vec2 d, float r, float R) {
   // the lens as a dome: magnified middle, the rim bends and flips what is behind it
   float nr = clamp(r / R, 0.0, 1.0);
   float z = sqrt(max(1.0 - nr * nr, 0.0));
@@ -114,6 +82,39 @@ void main() {
     float halo = smoothstep(0.82, 0.93, nr) * (1.0 - smoothstep(0.95, 1.0, nr));
     col = mix(col, light, halo * bottom * uGlow * 0.4);
   }
+  return clamp(col, 0.0, 1.0);
+}
 
-  fragColor = vec4(mix(outside, clamp(col, 0.0, 1.0), mask * uOpacity), base.a);
+void main() {
+  vec2 p = FlutterFragCoord().xy / uSize * uScreen;
+  vec4 base = sampleScreen(p);
+  fragColor = base;
+
+  float R = uRadius;
+  vec2 d = p - uCenter;
+  float reach = R * 1.25 + 24.0;
+  // one exit only, several returns next to a sampler can fail to compile on windows (flutter#190809)
+  if (uOpacity > 0.001 && R >= 0.5 && dot(d, d) <= reach * reach && p.y <= uClipY) {
+    // squash and stretch along the motion, the liquid feel
+    float speed = length(uVelocity);
+    if (speed > 1.0) {
+      vec2 v = uVelocity / speed;
+      float a = clamp(speed / 6000.0, 0.0, 0.14);
+      float along = dot(d, v);
+      vec2 perp = d - along * v;
+      d = v * (along / (1.0 + a)) + perp / (1.0 - 0.5 * a);
+    }
+    float r = length(d);
+
+    // soft drop shadow under the lens
+    vec2 ds = p - uCenter - vec2(0.0, 3.0 + R * 0.06);
+    float sh = 1.0 - smoothstep(R * 0.80, R * 1.10 + 14.0, length(ds));
+    vec3 outside = base.rgb * (1.0 - 0.11 * sh * uShadow * uOpacity);
+
+    float mask = 1.0 - smoothstep(R - 0.9, R + 0.6, r);
+    fragColor = vec4(outside, base.a);
+    if (mask > 0.0) {
+      fragColor = vec4(mix(outside, lens(d, r, R), mask * uOpacity), base.a);
+    }
+  }
 }
