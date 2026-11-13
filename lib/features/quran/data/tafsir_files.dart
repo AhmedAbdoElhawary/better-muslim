@@ -4,8 +4,10 @@ import 'dart:isolate';
 
 import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -47,6 +49,15 @@ enum TafsirSource {
   final String release;
 
   Uri get address => contentReleases.resolve('$release/$file');
+
+  /// a StringsManager key
+  String get label => switch (this) {
+    TafsirSource.muyassar => StringsManager.alMuyassar,
+    TafsirSource.ibnKathir => StringsManager.ibnKathir,
+    TafsirSource.saadi => StringsManager.asSadi,
+    TafsirSource.tabari => StringsManager.atTabari,
+    TafsirSource.qurtubi => StringsManager.alQurtubi,
+  };
 }
 
 /// each tafsir is one file for the whole quran, kept only when its sha256 matches (research R15)
@@ -54,7 +65,7 @@ class TafsirFiles {
   TafsirFiles({
     required this._assets,
     Future<Directory> Function()? root,
-    Future<Fetched> Function(Uri uri)? fetch,
+    Fetch? fetch,
     Future<void> Function(String path)? exclude,
     Uri Function(TafsirSource source)? address,
     String Function(TafsirSource source)? sha256,
@@ -66,7 +77,7 @@ class TafsirFiles {
 
   final Future<QuranAssets> Function() _assets;
   final Future<Directory> Function() _root;
-  final Future<Fetched> Function(Uri uri) _fetch;
+  final Fetch _fetch;
   final Future<void> Function(String path) _exclude;
   final Uri Function(TafsirSource source) _address;
   final String Function(TafsirSource source) _sha256;
@@ -92,7 +103,11 @@ class TafsirFiles {
       source == TafsirSource.muyassar || (await _file(source)).existsSync();
 
   /// progress is 0 to 1, or null when the server sends no size
-  Future<void> download(TafsirSource source, {void Function(double? progress)? onProgress}) async {
+  Future<void> download(
+    TafsirSource source, {
+    void Function(double? progress)? onProgress,
+    DownloadNotice? notice,
+  }) async {
     _cancelled.remove(source);
     await saveVerified(
       _address(source),
@@ -101,6 +116,7 @@ class TafsirFiles {
       fetch: _fetch,
       cancelled: () => _cancelled.contains(source),
       onProgress: onProgress,
+      notice: notice,
     );
   }
 
