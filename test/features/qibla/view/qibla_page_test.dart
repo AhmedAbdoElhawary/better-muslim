@@ -484,13 +484,13 @@ void main() {
 
       await tester.tap(find.text('Use my location'));
       await tester.pumpAndSettle();
-      expect(tester.widget<LocationSheet>(find.byType(LocationSheet)).useMyLocation, isTrue);
+      expect(tester.widget<LocationSheet>(find.byType(LocationSheet)).failed, isTrue);
       await tester.tapAt(const Offset(200, 40));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Choose a city instead'));
       await tester.pumpAndSettle();
-      expect(tester.widget<LocationSheet>(find.byType(LocationSheet)).useMyLocation, isFalse);
+      expect(tester.widget<LocationSheet>(find.byType(LocationSheet)).failed, isFalse);
       await unmount(tester);
     });
 
