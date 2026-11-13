@@ -263,4 +263,20 @@ void main() {
     expect(quietNoticeAt(alerts)!.day, 20);
     expect(quietNoticeAt([]), isNull);
   });
+
+  group('silent minutes', () {
+    Alert dhuhrOn(DateTime day) => Alert(
+      day: day,
+      prayer: Prayer.dhuhr,
+      kind: AlertKind.adhan,
+      at: TZDateTime(getLocation('Asia/Riyadh'), day.year, day.month, day.day, 12),
+      sound: PrayerSound.adhan,
+    );
+
+    test('friday dhuhr gets at least an hour for the khutbah', () {
+      final friday = DateTime(2026, 10, 16);
+      expect(silentMinutesOf(dhuhrOn(friday), 20), fridaySilentMinutes);
+      expect(silentMinutesOf(dhuhrOn(DateTime(2026, 10, 15)), 20), 20);
+    });
+  });
 }
