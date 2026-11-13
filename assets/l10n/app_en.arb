@@ -1280,5 +1280,18 @@
   "noteSaved": "Note saved",
   "deleteNoteTitle": "Delete this note?",
   "deleteNoteBody": "It can't be undone.",
-  "seeNote": "See the note"
+  "seeNote": "See the note",
+  "whileAdhanPlays": "While the adhan plays",
+  "flipStopsAdhan": "Flip to stop",
+  "flipStopsAdhanSub": "Turn the phone face down to stop the adhan",
+  "buttonsStopAdhan": "Buttons stop it",
+  "buttonsStopAdhanSub": "The volume or power button stops the adhan",
+  "silentDuringPrayer": "Silent during prayer",
+  "silentDuringPrayerSub": "Do not disturb after the adhan, Friday's dhuhr at least an hour",
+  "silentFor": "Silent for",
+  "resume": "Resume",
+  "downloadPaused": "Paused",
+  "downloadSize": "{done} / {total} MB",
+  "downloadCouldNot": "Couldn't download {name}",
+  "surahByReciter": "{surah} by {reciter}"
 }
