@@ -159,9 +159,6 @@ List<AyahKey> recitationQueue(AyahKey from, AyahKey to, {int repeat = 1}) => [
 /// surah loop plays the range again when it ends, end of surah still stops it there
 bool startsAgain(int repeat, SleepTimer sleep) => repeat == surahLoop && !sleep.endOfSurah;
 
-/// the bismillah is al-fatiha's first ayah
-AyahKey recitationFile(AyahKey item) => item.ayah == 0 ? const AyahKey(1, 1) : item;
-
 /// every file a downloaded surah needs, its bismillah first
 List<AyahKey> surahFiles(int surah, int ayahs) => [
   if (surah != 1 && surah != 9) const AyahKey(1, 1),
