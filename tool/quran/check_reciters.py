@@ -24,7 +24,9 @@ def fetch(url):
 def folders():
     source = open(SETTINGS, encoding="utf-8").read()
     reciters = source[source.index("enum Reciter {") :]
-    return re.findall(r"^  \w+\(\n    '([^']+)',", reciters, re.MULTILINE)
+    entries = re.findall(r"^  \w+\(\n    '([^']+)',\n((?:    .*\n)*?)  \)", reciters, re.MULTILINE)
+    # the ones with a read are on mp3quran, check_surah_reciters.py checks them
+    return [folder for folder, rest in entries if "read:" not in rest]
 
 
 def ayahs():
