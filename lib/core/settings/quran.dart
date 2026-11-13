@@ -173,8 +173,8 @@ enum QuranFont {
             .replaceAll('\u0656', '\u08F2');
 }
 
-/// a voice for the recitation, one everyayah folder each. label, short and initials are
-/// StringsManager keys
+/// a voice for the recitation, an everyayah folder or an mp3quran one. label, short and initials
+/// are StringsManager keys
 enum Reciter {
   alafasy(
     'Alafasy_128kbps',
@@ -433,12 +433,49 @@ enum Reciter {
     StringsManager.reciterAymanSuwayd,
     StringsManager.reciterAymanSuwaydShort,
     StringsManager.reciterAymanSuwaydInitials,
+  ),
+  nufais(
+    'ahmad-nufais/r1',
+    StringsManager.reciterNufais,
+    StringsManager.reciterNufaisShort,
+    StringsManager.reciterNufaisInitials,
+    read: 259,
+    missing: {1, 2, 17, 20, 53, 68, 70, 71, 73, 92},
+  ),
+  hassanSaleh(
+    'hassan-saleh/r1',
+    StringsManager.reciterHassanSaleh,
+    StringsManager.reciterHassanSalehShort,
+    StringsManager.reciterHassanSalehInitials,
+    read: 299,
+    missing: {23, 24, 25, 42, 43, 44, 45, 46, 47, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66},
+  ),
+  dukhain(
+    'haitham-dukhain/r1',
+    StringsManager.reciterDukhain,
+    StringsManager.reciterDukhainShort,
+    StringsManager.reciterDukhainInitials,
+    read: 273,
+    missing: {40, 41, 65, 71, 72, 73, 76},
   );
 
-  const Reciter(this.folder, this.label, this.short, this.initials);
+  const Reciter(
+    this.folder,
+    this.label,
+    this.short,
+    this.initials, {
+    this.read,
+    this.missing = const {},
+  });
 
   final String folder;
   final String label;
   final String short;
   final String initials;
+
+  /// mp3quran's read, one file per surah cut into ayahs by its timings (ADR 0005). null on everyayah
+  final int? read;
+
+  /// surahs whose file or timings don't match, from tool/quran/check_surah_reciters.py
+  final Set<int> missing;
 }
