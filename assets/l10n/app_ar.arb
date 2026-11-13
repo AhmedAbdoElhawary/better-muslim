@@ -802,5 +802,18 @@
   "noteSaved": "حُفظت الملاحظة",
   "deleteNoteTitle": "حذف هذه الملاحظة؟",
   "deleteNoteBody": "لا يمكن التراجع عن ذلك.",
-  "seeNote": "عرض الملاحظة"
+  "seeNote": "عرض الملاحظة",
+  "whileAdhanPlays": "أثناء الأذان",
+  "flipStopsAdhan": "اقلب الهاتف للإيقاف",
+  "flipStopsAdhanSub": "ضع الهاتف على وجهه لإيقاف الأذان",
+  "buttonsStopAdhan": "الأزرار توقفه",
+  "buttonsStopAdhanSub": "زر الصوت أو التشغيل يوقف الأذان",
+  "silentDuringPrayer": "صامت أثناء الصلاة",
+  "silentDuringPrayerSub": "عدم الإزعاج بعد الأذان، وظهر الجمعة ساعة على الأقل",
+  "silentFor": "مدة الصمت",
+  "resume": "استئناف",
+  "downloadPaused": "متوقف مؤقتًا",
+  "downloadSize": "{done} / {total} م.ب",
+  "downloadCouldNot": "تعذّر تنزيل {name}",
+  "surahByReciter": "{surah} بصوت {reciter}"
 }
