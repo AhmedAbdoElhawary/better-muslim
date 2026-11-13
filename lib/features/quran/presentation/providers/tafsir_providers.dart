@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,18 +33,26 @@ class TafsirStatusNotifier extends Notifier<TafsirStatus> {
     return _idle;
   }
 
-  /// throws a DownloadException, cancelled included
+  /// throws a DownloadException, cancelled included. a pause from the notification leaves it idle
   Future<void> download() async {
     if (state.ready || state.downloading) return;
     state = (ready: false, downloading: true, progress: null);
     try {
-      await ref
-          .read(tafsirFilesProvider)
-          .download(
-            source,
-            onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
-          );
-      state = _ready;
+      final done = await DownloadNotice.run(
+        key: 'tafsir ${source.name}',
+        title: (l10n, _) => l10n.tr(source.label, const {}),
+        settings: ref.read(settingsProvider).value,
+        resume: download,
+        job: (notice) => ref
+            .read(tafsirFilesProvider)
+            .download(
+              source,
+              onProgress: (progress) =>
+                  state = (ready: false, downloading: true, progress: progress),
+              notice: notice,
+            ),
+      );
+      state = done ? _ready : _idle;
     } on Object {
       state = _idle;
       rethrow;
