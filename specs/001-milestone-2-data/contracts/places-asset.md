@@ -1,4 +1,4 @@
-# Contract: `assets/places/places.tsv.gz`
+# Contract: `assets/places/places.tsv.gzip`
 
 Written by `tool/places/build_places.dart`, read by `PlaceList` in core. UTF-8, gzip, tab
 separated, `\n` line ends. A line starting with `#` opens a section. Sections come in this order.
