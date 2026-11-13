@@ -4,7 +4,6 @@ import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/resources/design/bm_sky.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
-import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -18,8 +17,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:timezone/timezone.dart';
 
-/// the arc's points. the feet under the horizon, the others outside the arc, some inside it in
-/// arabic. the arc is never mirrored, so they are placed left to right
+/// the arc's points. the feet under the horizon, the others inside the arc. the arc is never
+/// mirrored, so they are placed left to right
 class SkyLabels extends ConsumerWidget {
   const SkyLabels({super.key});
 
@@ -71,8 +70,8 @@ class SkyLabels extends ConsumerWidget {
 
             /// 4.16's arabic labels start on the horizon, 4.01's 6 below it
             gap: rtl ? 0 : (SpaceManager.skyLabelTop - BmSunArc.horizonY).r,
+            insideGap: SpaceManager.arcLabelInsideGap.r,
             arcGap: SpaceManager.arcLabelGap.r,
-            insideGap: rtl ? SpaceManager.arcLabelInsideGap.r : null,
             shortOnly: scale > _shortScale,
           ),
           children: children,
@@ -86,9 +85,9 @@ class SkyLabels extends ConsumerWidget {
 typedef SkyLabelSlot = ({int arc, int index, bool short});
 
 /// the feet keep the mockups' offsets, grown with the text so larger labels stay under their
-/// foot. a middle label sits outside the arc along its point's normal, and shows only its time
-/// when it would touch another. all kept [edge] inside the screen, a null offset sits on the edge.
-/// with an [insideGap], asr and a label the edge pushes onto the arc sit inside the arc instead
+/// foot. a middle label sits inside the arc along its point's normal, and shows only its time
+/// when it would touch another, outside the arc when even that touches. all kept [edge] inside
+/// the screen, a null offset sits on the edge
 class SkyLabelsFlow extends FlowDelegate {
   SkyLabelsFlow({
     required this.arcs,
@@ -101,8 +100,8 @@ class SkyLabelsFlow extends FlowDelegate {
     required this.scale,
     required this.horizonAboveBottom,
     required this.gap,
-    required this.arcGap,
     required this.insideGap,
+    required this.arcGap,
     required this.shortOnly,
   });
 
@@ -116,8 +115,8 @@ class SkyLabelsFlow extends FlowDelegate {
   final double scale;
   final double horizonAboveBottom;
   final double gap;
+  final double insideGap;
   final double arcGap;
-  final double? insideGap;
   final bool shortOnly;
 
   @override
@@ -135,6 +134,7 @@ class SkyLabelsFlow extends FlowDelegate {
     );
 
     final rects = <Rect>[];
+    final outside = <int, Rect>{};
     for (var i = 0; i < slots.length; i++) {
       final (:arc, :index, short: _) = slots[i];
       final points = arcs[arc].points.points;
@@ -156,15 +156,8 @@ class SkyLabelsFlow extends FlowDelegate {
         final reach = normal.dx.abs() * label.width / 2 + normal.dy.abs() * label.height / 2;
         Offset at(double distance) =>
             Offset(center, horizon) + normal * distance - Offset(label.width / 2, label.height / 2);
-        final outside = at(radius + arcGap + reach);
-        final rect = inside(outside, label);
-        final gap = insideGap;
-
-        /// outside, arabic's asr sits against the big prayer name
-        final goesIn =
-            gap != null &&
-            (points[index].name == StringsManager.asrLabel || rect.left != outside.dx);
-        rects.add(goesIn ? inside(at(radius - gap - reach), label) : rect);
+        rects.add(inside(at(radius - insideGap - reach), label));
+        outside[i] = inside(at(radius + arcGap + reach), label);
       }
     }
 
@@ -181,13 +174,19 @@ class SkyLabelsFlow extends FlowDelegate {
       for (var i = 0; i < slots.length; i++)
         i + 1 < slots.length && slots[i + 1].short && (shortOnly || touches(i)),
     ];
-    return [
-      for (var i = 0; i < slots.length; i++)
-        if (slots[i].short)
-          timeOnly[i - 1] ? rects[i].topLeft : null
-        else
-          timeOnly[i] ? null : rects[i].topLeft,
-    ];
+
+    bool shown(int i) => slots[i].short ? timeOnly[i - 1] : !timeOnly[i];
+
+    /// a night of a few hours far north, inside is too tight for two times at 2x text
+    for (var i = 0; i < slots.length; i++) {
+      if (!slots[i].short || !shown(i)) continue;
+      final crowded = Iterable.generate(i).any(
+        (other) =>
+            slots[other].arc == slots[i].arc && shown(other) && rects[other].overlaps(rects[i]),
+      );
+      if (crowded) rects[i] = outside[i]!;
+    }
+    return [for (var i = 0; i < slots.length; i++) shown(i) ? rects[i].topLeft : null];
   }
 
   @override
@@ -218,8 +217,8 @@ class SkyLabelsFlow extends FlowDelegate {
       old.scale != scale ||
       old.horizonAboveBottom != horizonAboveBottom ||
       old.gap != gap ||
-      old.arcGap != arcGap ||
       old.insideGap != insideGap ||
+      old.arcGap != arcGap ||
       old.shortOnly != shortOnly;
 }
 
