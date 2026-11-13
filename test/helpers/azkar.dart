@@ -74,13 +74,15 @@ Future<void> pumpDuas(
 /// plays nothing, remembers what it was asked
 class FakeClipPlayer implements ClipPlayer {
   final played = <String>[];
+  final starts = <Duration?>[];
   final ends = <Duration?>[];
   int stops = 0;
   final _ended = StreamController<void>.broadcast();
 
   @override
-  Future<void> play(String asset, {Duration? end}) async {
+  Future<void> play(String asset, {Duration? start, Duration? end}) async {
     played.add(asset);
+    starts.add(start);
     ends.add(end);
   }
 

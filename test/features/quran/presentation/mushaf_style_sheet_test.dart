@@ -42,7 +42,7 @@ void main() {
     mushafFiles: mushafFilesProvider.overrideWith(
       (ref) => MushafFiles(
         root: () async => root,
-        fetch: (_) async => (length: _body.length, bytes: chunks.stream),
+        fetch: (_, {from = 0}) async => (length: _body.length, bytes: chunks.stream),
         exclude: (_) async {},
         sha256: (_) => '${sha256.convert(_body)}',
       ),

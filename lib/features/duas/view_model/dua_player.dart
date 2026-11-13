@@ -18,7 +18,7 @@ class DuaPlayer extends Notifier<String?> {
   StreamSubscription<void>? _ended;
 
   /// a quranic dua's ayahs still to recite
-  final _next = <String>[];
+  final _next = <AyahAudio>[];
 
   @override
   String? build() {
@@ -54,13 +54,13 @@ class DuaPlayer extends Notifier<String?> {
       if (_next.isEmpty) {
         state = null;
       } else {
-        player.play(_next.removeAt(0));
+        _play(player, _next.removeAt(0));
       }
     });
     _next.clear();
     if (state != null) await player.stop();
     state = dua.id;
-    final List<String> clips;
+    final List<AyahAudio> clips;
     try {
       clips = await _clips(dua);
     } on Exception catch (error) {
@@ -72,16 +72,21 @@ class DuaPlayer extends Notifier<String?> {
     /// stopped or another dua tapped while the ayahs downloaded
     if (!ref.mounted || state != dua.id) return true;
     _next.addAll(clips.skip(1));
-    await player.play(clips.first);
+    await _play(player, clips.first);
     return true;
   }
 
+  Future<void> _play(ClipPlayer player, AyahAudio clip) =>
+      player.play(clip.path, start: clip.start, end: clip.end);
+
   /// the dua's clip or the ayahs in the reciter picked for the quran, from the phone when already there
-  Future<List<String>> _clips(Dua dua) async {
-    if (dua.audio != null) return [await ref.read(duaClipsProvider).path(dua)];
+  Future<List<AyahAudio>> _clips(Dua dua) async {
+    if (dua.audio != null) {
+      return [(path: await ref.read(duaClipsProvider).path(dua), start: null, end: null)];
+    }
     final files = ref.read(recitationFilesProvider);
     final reciter = ref.read(settingsProvider).value?.reciter ?? Reciter.alafasy;
-    return [for (final key in dua.ayahs) (await files.file(reciter, key)).path];
+    return [for (final key in dua.ayahs) await files.audio(reciter, key)];
   }
 
   Future<void> stop() async {

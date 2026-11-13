@@ -87,7 +87,7 @@ final _tafsirFiles = tafsirFilesProvider.overrideWith(
       Directory('${Directory.systemTemp.path}/tafsir').createSync();
       return Directory.systemTemp;
     },
-    fetch: (_) async => throw const SocketException('offline'),
+    fetch: (_, {from = 0}) async => throw const SocketException('offline'),
     exclude: (_) async {},
   ),
 );
@@ -96,7 +96,7 @@ final _tafsirFiles = tafsirFilesProvider.overrideWith(
 final _recitationFiles = recitationFilesProvider.overrideWith(
   (ref) => RecitationFiles(
     root: () async => Directory.systemTemp.createTempSync('recitations'),
-    fetch: (_) async => throw const SocketException('offline'),
+    fetch: (_, {from = 0}) async => throw const SocketException('offline'),
     exclude: (_) async {},
   ),
 );
@@ -111,7 +111,7 @@ final _mushafFiles = mushafFilesProvider.overrideWith(
       Directory('${root.path}/mushaf').createSync();
       return root;
     },
-    fetch: (_) async => throw const SocketException('offline'),
+    fetch: (_, {from = 0}) async => throw const SocketException('offline'),
     exclude: (_) async {},
   ),
 );

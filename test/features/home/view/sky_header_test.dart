@@ -181,39 +181,37 @@ void main() {
       ].every((corner) => (corner - center).distance < delegate.radius);
     }
 
-    for (final scale in [1.0, 2.0]) {
-      testWidgets('arabic at $scale keeps asr inside the arc', (tester) async {
-        await pumpHome(
+    for (final locale in [const Locale('en'), const Locale('ar')]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets('${locale.languageCode} at $scale keeps dhuhr and asr inside the arc', (
           tester,
-          makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)),
-          locale: const Locale('ar'),
-          textScale: scale,
-        );
+        ) async {
+          await pumpHome(
+            tester,
+            makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)),
+            locale: locale,
+            textScale: scale,
+          );
+          final labels = skyLabels(tester);
 
-        expect(insideArc(tester, skyLabels(tester)[2].rect), isTrue);
+          expect(insideArc(tester, labels[1].rect), isTrue);
+          expect(insideArc(tester, labels[2].rect), isTrue);
+          await unmount(tester);
+        });
+      }
+
+      testWidgets('${locale.languageCode} keeps isha, last third and fajr inside at night', (
+        tester,
+      ) async {
+        await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 20)), locale: locale);
+        final labels = skyLabels(tester);
+
+        for (final index in [1, 2, 3]) {
+          expect(insideArc(tester, labels[index].rect), isTrue);
+        }
         await unmount(tester);
       });
     }
-
-    testWidgets('arabic moves isha inside at night, fajr stays outside', (tester) async {
-      await pumpHome(
-        tester,
-        makkahAt(tester, DateTime.utc(2026, 10, 15, 20)),
-        locale: const Locale('ar'),
-      );
-      final labels = skyLabels(tester);
-
-      expect(insideArc(tester, labels[1].rect), isTrue);
-      expect(insideArc(tester, labels[3].rect), isFalse);
-      await unmount(tester);
-    });
-
-    testWidgets('english keeps asr outside the arc', (tester) async {
-      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
-
-      expect(insideArc(tester, skyLabels(tester)[2].rect), isFalse);
-      await unmount(tester);
-    });
   });
 
   group('day turns into night (US10)', () {

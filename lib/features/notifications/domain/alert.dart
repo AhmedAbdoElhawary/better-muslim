@@ -47,6 +47,9 @@ const testAlertId = 1000000;
 /// ios's "open the app" after the last alert
 const quietAlertId = testAlertId + 1;
 
+/// the dev page rehearsal's reminder sound on android
+const testReminderId = testAlertId + 2;
+
 final _firstDay = DateTime.utc(2020);
 
 /// an id gives back its day and prayer, so cleaning up a delivered one needs no payload
@@ -63,6 +66,11 @@ int azkarAlertId(DateTime day, AzkarSet set) {
 }
 
 const _firstAzkarId = 2000000;
+
+/// the do not disturb after an adhan, past the nudges
+int silenceId(int adhanId) => _firstSilenceId + adhanId;
+
+const _firstSilenceId = 3000000;
 
 /// ios can't take a delivered notification away at a prayer time, so this runs when it can: all
 /// but the newest prayer one and the newest nudge

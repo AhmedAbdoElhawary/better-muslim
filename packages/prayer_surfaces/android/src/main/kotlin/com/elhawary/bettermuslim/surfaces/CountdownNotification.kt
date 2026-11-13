@@ -11,7 +11,7 @@ import org.json.JSONObject
 
 // the reminder before a prayer: an ongoing countdown, counted by the system to the second (research
 // R9). it shows with the app open too, and the system takes it away at the prayer time. it posts on
-// its prayer's channel, so it plays the takbir, the tone or nothing like the prayer
+// its prayer's silent channel, adhan_alarms plays its takbir or tone at the same moment
 object CountdownNotification {
     private const val PRAYER_CHANNELS = "adhan_"
     private const val ID = 7300

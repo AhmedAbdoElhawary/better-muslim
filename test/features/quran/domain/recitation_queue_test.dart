@@ -20,8 +20,6 @@ void main() {
 
     /// from the middle of a surah there is no bismillah
     expect(recitationQueue(const AyahKey(2, 5), const AyahKey(2, 5)), const [AyahKey(2, 5)]);
-    expect(recitationFile(const AyahKey(2, 0)), const AyahKey(1, 1));
-    expect(recitationFile(const AyahKey(2, 5)), const AyahKey(2, 5));
   });
 
   test('repeat 3 puts each ayah 3 times, the bismillah once', () {

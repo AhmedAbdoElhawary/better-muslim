@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,7 @@ final mushafFilesProvider = Provider<MushafFiles>((ref) => MushafFiles());
 class MushafFiles {
   MushafFiles({
     Future<Directory> Function()? root,
-    Future<Fetched> Function(Uri uri)? fetch,
+    Fetch? fetch,
     Future<void> Function(String path)? exclude,
     String Function(MushafStyle style)? sha256,
   }) : _root = root ?? getApplicationSupportDirectory,
@@ -25,7 +26,7 @@ class MushafFiles {
        _sha256 = sha256 ?? ((style) => style.sha256);
 
   final Future<Directory> Function() _root;
-  final Future<Fetched> Function(Uri uri) _fetch;
+  final Fetch _fetch;
   final Future<void> Function(String path) _exclude;
   final String Function(MushafStyle style) _sha256;
 
@@ -59,7 +60,11 @@ class MushafFiles {
   ];
 
   /// progress is 0 to 1, or null when the server sends no size
-  Future<void> download(MushafStyle style, {void Function(double? progress)? onProgress}) async {
+  Future<void> download(
+    MushafStyle style, {
+    void Function(double? progress)? onProgress,
+    DownloadNotice? notice,
+  }) async {
     _cancelled.remove(style);
     await saveVerified(
       style.address,
@@ -68,6 +73,7 @@ class MushafFiles {
       fetch: _fetch,
       cancelled: () => _cancelled.contains(style),
       onProgress: onProgress,
+      notice: notice,
     );
   }
 

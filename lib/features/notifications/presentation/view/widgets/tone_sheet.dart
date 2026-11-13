@@ -9,7 +9,6 @@ import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
-import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/system/system_channel.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
@@ -83,9 +82,9 @@ class _ToneSheetState extends ConsumerState<_ToneSheet> {
     if (file == null) {
       if (_playing != null) await _stop();
 
-      /// the phone's own sound, or the one I set for this prayer in android's settings
+      /// the phone's own sound, the channel has none
       return SystemChannel.playTone(
-        NotificationScheduler.channelId(widget.prayer, PrayerSound.tone, AdhanRecording.alafasy),
+        NotificationScheduler.channelId(widget.prayer, PrayerSound.tone),
       );
     }
     _setPlaying(tone);

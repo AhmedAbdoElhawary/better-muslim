@@ -49,6 +49,18 @@ class AdhanChannel {
 
   Future<void> dismiss(int id) => _call('dismiss', id);
 
+  /// read by kotlin when an adhan starts
+  Future<void> stops({required bool flip, required bool buttons}) =>
+      _call('stops', {'flip': flip, 'buttons': buttons});
+
+  /// do not disturb access, false off android
+  Future<bool> canSilence() async {
+    if (!_isAndroid) return false;
+    return await _methods.invokeMethod<bool>('canSilence') ?? false;
+  }
+
+  Future<void> openSilenceAccess() => _call('openSilenceAccess');
+
   /// the payload of the notification that started the app, given once
   Future<String?> launchPayload() async {
     if (!_isAndroid) return null;

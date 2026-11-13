@@ -69,6 +69,10 @@ final _scheduleInputsProvider = Provider((ref) {
         row?.ishaTone,
         row?.azkarNudges,
         row?.azkarVoice,
+        row?.adhanFlipStops,
+        row?.adhanButtonsStop,
+        row?.prayerSilent,
+        row?.prayerSilentMinutes,
         row?.language,
 
         /// written after 4.12's answer, so a grant there schedules at once (R10)

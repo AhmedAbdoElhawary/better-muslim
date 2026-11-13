@@ -484,6 +484,7 @@ abstract final class SizeManager {
   static const double iconInline = 16;
   static const double iconChip = 14;
   static const double iconChipSmall = 12;
+  static const double homeQibla = 30;
   static const double locationPill = 32;
   static const double locationPillIcon = 18;
   static const double prayerBar = 3;

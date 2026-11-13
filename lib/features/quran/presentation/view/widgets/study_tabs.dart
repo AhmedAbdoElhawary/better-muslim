@@ -36,16 +36,6 @@ enum StudyTab {
   final String label;
 }
 
-extension on TafsirSource {
-  String get label => switch (this) {
-    TafsirSource.muyassar => StringsManager.alMuyassar,
-    TafsirSource.ibnKathir => StringsManager.ibnKathir,
-    TafsirSource.saadi => StringsManager.asSadi,
-    TafsirSource.tabari => StringsManager.atTabari,
-    TafsirSource.qurtubi => StringsManager.alQurtubi,
-  };
-}
-
 /// 4.23 under its header: the ayah on its page color, then Tafsir, Translation and Notes
 class StudyTabs extends ConsumerStatefulWidget {
   const StudyTabs({required this.ayah, required this.tab, required this.onTab, super.key});

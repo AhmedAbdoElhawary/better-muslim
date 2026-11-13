@@ -10,13 +10,15 @@ import android.os.Build
 import org.json.JSONArray
 import org.json.JSONObject
 
-// the adhan alarms dart hands over, kept in private preferences so a restart can set them again
+// the adhan, reminder and nudge alarms dart hands over, kept in private preferences so a restart can set them again
 object AdhanAlarms {
     const val ACTION_FIRE = "com.elhawary.bettermuslim.adhan.FIRE"
     const val EXTRA_ID = "id"
 
     private const val PREFS = "adhan_alarms"
     private const val KEY = "entries"
+    private const val KEY_FLIP = "flipStops"
+    private const val KEY_BUTTONS = "buttonsStop"
 
     fun schedule(context: Context, entries: List<Map<String, Any?>>) {
         cancelAll(context)
@@ -37,6 +39,14 @@ object AdhanAlarms {
         for (entry in load(context)) if (entry.getLong("atMillis") > now) set(context, entry)
     }
 
+    // read when an adhan starts, so the app's own adhan and the alarm's follow the same switches
+    fun setStops(context: Context, flip: Boolean, buttons: Boolean) =
+        prefs(context).edit().putBoolean(KEY_FLIP, flip).putBoolean(KEY_BUTTONS, buttons).apply()
+
+    fun flipStops(context: Context) = prefs(context).getBoolean(KEY_FLIP, true)
+
+    fun buttonsStop(context: Context) = prefs(context).getBoolean(KEY_BUTTONS, true)
+
     fun entry(context: Context, id: Int): JSONObject? = load(context).firstOrNull { it.getInt("id") == id }
 
     // silent, vibrate and do not disturb keep the adhan quiet, as ios does by itself (FR-022)
@@ -53,6 +63,11 @@ object AdhanAlarms {
         val fire = fireIntent(context, entry.getInt("id"))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarms.canScheduleExactAlarms()) {
             alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, fire)
+            return
+        }
+        // a nudge or a silence can come a little late, it isn't worth the alarm icon in the status bar
+        if (entry.optString("kind") == "azkar" || entry.optString("kind") == "silence") {
+            alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, fire)
             return
         }
         // oppo gives exact alarms a window of up to an hour, an alarm clock is never moved

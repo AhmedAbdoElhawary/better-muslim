@@ -103,6 +103,21 @@ class MainActivity : AudioServiceActivity() {
                 }
             }
 
+        // audio_service keeps this engine after the activity is gone, a download goes on in it
+        DownloadService.channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "better_muslim/downloads")
+            .apply {
+                setMethodCallHandler { call, result ->
+                    @Suppress("UNCHECKED_CAST")
+                    val arguments = call.arguments as Map<String, Any?>
+                    when (call.method) {
+                        "show" -> DownloadService.show(applicationContext, arguments)
+                        "end" -> DownloadService.end(applicationContext, arguments["id"] as Int, arguments["failed"] as String?)
+                        else -> return@setMethodCallHandler result.notImplemented()
+                    }
+                    result.success(null)
+                }
+            }
+
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, "better_muslim/compass")
             .setStreamHandler(CompassStreamHandler(this))
     }

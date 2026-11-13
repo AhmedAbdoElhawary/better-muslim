@@ -628,6 +628,54 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       ).withConverter<Translation?>($SettingsTable.$convertertranslationn);
+  static const VerificationMeta _adhanFlipStopsMeta = const VerificationMeta('adhanFlipStops');
+  @override
+  late final GeneratedColumn<bool> adhanFlipStops = GeneratedColumn<bool>(
+    'adhan_flip_stops',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("adhan_flip_stops" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _adhanButtonsStopMeta = const VerificationMeta('adhanButtonsStop');
+  @override
+  late final GeneratedColumn<bool> adhanButtonsStop = GeneratedColumn<bool>(
+    'adhan_buttons_stop',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("adhan_buttons_stop" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _prayerSilentMeta = const VerificationMeta('prayerSilent');
+  @override
+  late final GeneratedColumn<bool> prayerSilent = GeneratedColumn<bool>(
+    'prayer_silent',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("prayer_silent" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _prayerSilentMinutesMeta = const VerificationMeta(
+    'prayerSilentMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> prayerSilentMinutes = GeneratedColumn<int>(
+    'prayer_silent_minutes',
+    aliasedName,
+    false,
+    check: () => prayerSilentMinutes.isIn(const [10, 15, 20, 30, 45, 60]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(20),
+  );
   static const VerificationMeta _mushafSizeMeta = const VerificationMeta('mushafSize');
   @override
   late final GeneratedColumn<int> mushafSize = GeneratedColumn<int>(
@@ -779,6 +827,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     quranFont,
     mushafStyle,
     translation,
+    adhanFlipStops,
+    adhanButtonsStop,
+    prayerSilent,
+    prayerSilentMinutes,
     mushafSize,
     quranArabicSize,
     quranTranslationSize,
@@ -969,6 +1021,33 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _keepScreenOnMeta,
         keepScreenOn.isAcceptableOrUnknown(data['keep_screen_on']!, _keepScreenOnMeta),
+      );
+    }
+    if (data.containsKey('adhan_flip_stops')) {
+      context.handle(
+        _adhanFlipStopsMeta,
+        adhanFlipStops.isAcceptableOrUnknown(data['adhan_flip_stops']!, _adhanFlipStopsMeta),
+      );
+    }
+    if (data.containsKey('adhan_buttons_stop')) {
+      context.handle(
+        _adhanButtonsStopMeta,
+        adhanButtonsStop.isAcceptableOrUnknown(data['adhan_buttons_stop']!, _adhanButtonsStopMeta),
+      );
+    }
+    if (data.containsKey('prayer_silent')) {
+      context.handle(
+        _prayerSilentMeta,
+        prayerSilent.isAcceptableOrUnknown(data['prayer_silent']!, _prayerSilentMeta),
+      );
+    }
+    if (data.containsKey('prayer_silent_minutes')) {
+      context.handle(
+        _prayerSilentMinutesMeta,
+        prayerSilentMinutes.isAcceptableOrUnknown(
+          data['prayer_silent_minutes']!,
+          _prayerSilentMinutesMeta,
+        ),
       );
     }
     if (data.containsKey('mushaf_size')) {
@@ -1312,6 +1391,22 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
           data['${effectivePrefix}translation'],
         ),
       ),
+      adhanFlipStops: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}adhan_flip_stops'],
+      )!,
+      adhanButtonsStop: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}adhan_buttons_stop'],
+      )!,
+      prayerSilent: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}prayer_silent'],
+      )!,
+      prayerSilentMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prayer_silent_minutes'],
+      )!,
       mushafSize: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}mushaf_size'],
@@ -1531,6 +1626,14 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   /// null until picked, then Translation.of gives the app language's own
   final Translation? translation;
 
+  /// android only, the full adhan is kotlin's and ios can't touch a posted sound
+  final bool adhanFlipStops;
+  final bool adhanButtonsStop;
+
+  /// do not disturb after each prayer's sound, for this many minutes from its time
+  final bool prayerSilent;
+  final int prayerSilentMinutes;
+
   /// 10% steps around the printed page, above 0 the lines rewrap
   final int mushafSize;
 
@@ -1609,6 +1712,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.quranFont,
     required this.mushafStyle,
     this.translation,
+    required this.adhanFlipStops,
+    required this.adhanButtonsStop,
+    required this.prayerSilent,
+    required this.prayerSilentMinutes,
     required this.mushafSize,
     required this.quranArabicSize,
     required this.quranTranslationSize,
@@ -1795,6 +1902,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
         $SettingsTable.$convertertranslationn.toSql(translation),
       );
     }
+    map['adhan_flip_stops'] = Variable<bool>(adhanFlipStops);
+    map['adhan_buttons_stop'] = Variable<bool>(adhanButtonsStop);
+    map['prayer_silent'] = Variable<bool>(prayerSilent);
+    map['prayer_silent_minutes'] = Variable<int>(prayerSilentMinutes);
     map['mushaf_size'] = Variable<int>(mushafSize);
     map['quran_arabic_size'] = Variable<int>(quranArabicSize);
     map['quran_translation_size'] = Variable<int>(quranTranslationSize);
@@ -1882,6 +1993,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranFont: Value(quranFont),
       mushafStyle: Value(mushafStyle),
       translation: translation == null && nullToAbsent ? const Value.absent() : Value(translation),
+      adhanFlipStops: Value(adhanFlipStops),
+      adhanButtonsStop: Value(adhanButtonsStop),
+      prayerSilent: Value(prayerSilent),
+      prayerSilentMinutes: Value(prayerSilentMinutes),
       mushafSize: Value(mushafSize),
       quranArabicSize: Value(quranArabicSize),
       quranTranslationSize: Value(quranTranslationSize),
@@ -2014,6 +2129,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       translation: $SettingsTable.$convertertranslationn.fromJson(
         serializer.fromJson<String?>(json['translation']),
       ),
+      adhanFlipStops: serializer.fromJson<bool>(json['adhanFlipStops']),
+      adhanButtonsStop: serializer.fromJson<bool>(json['adhanButtonsStop']),
+      prayerSilent: serializer.fromJson<bool>(json['prayerSilent']),
+      prayerSilentMinutes: serializer.fromJson<int>(json['prayerSilentMinutes']),
       mushafSize: serializer.fromJson<int>(json['mushafSize']),
       quranArabicSize: serializer.fromJson<int>(json['quranArabicSize']),
       quranTranslationSize: serializer.fromJson<int>(json['quranTranslationSize']),
@@ -2122,6 +2241,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'translation': serializer.toJson<String?>(
         $SettingsTable.$convertertranslationn.toJson(translation),
       ),
+      'adhanFlipStops': serializer.toJson<bool>(adhanFlipStops),
+      'adhanButtonsStop': serializer.toJson<bool>(adhanButtonsStop),
+      'prayerSilent': serializer.toJson<bool>(prayerSilent),
+      'prayerSilentMinutes': serializer.toJson<int>(prayerSilentMinutes),
       'mushafSize': serializer.toJson<int>(mushafSize),
       'quranArabicSize': serializer.toJson<int>(quranArabicSize),
       'quranTranslationSize': serializer.toJson<int>(quranTranslationSize),
@@ -2196,6 +2319,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     QuranFont? quranFont,
     MushafStyle? mushafStyle,
     Value<Translation?> translation = const Value.absent(),
+    bool? adhanFlipStops,
+    bool? adhanButtonsStop,
+    bool? prayerSilent,
+    int? prayerSilentMinutes,
     int? mushafSize,
     int? quranArabicSize,
     int? quranTranslationSize,
@@ -2267,6 +2394,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranFont: quranFont ?? this.quranFont,
     mushafStyle: mushafStyle ?? this.mushafStyle,
     translation: translation.present ? translation.value : this.translation,
+    adhanFlipStops: adhanFlipStops ?? this.adhanFlipStops,
+    adhanButtonsStop: adhanButtonsStop ?? this.adhanButtonsStop,
+    prayerSilent: prayerSilent ?? this.prayerSilent,
+    prayerSilentMinutes: prayerSilentMinutes ?? this.prayerSilentMinutes,
     mushafSize: mushafSize ?? this.mushafSize,
     quranArabicSize: quranArabicSize ?? this.quranArabicSize,
     quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
@@ -2358,6 +2489,14 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       quranFont: data.quranFont.present ? data.quranFont.value : this.quranFont,
       mushafStyle: data.mushafStyle.present ? data.mushafStyle.value : this.mushafStyle,
       translation: data.translation.present ? data.translation.value : this.translation,
+      adhanFlipStops: data.adhanFlipStops.present ? data.adhanFlipStops.value : this.adhanFlipStops,
+      adhanButtonsStop: data.adhanButtonsStop.present
+          ? data.adhanButtonsStop.value
+          : this.adhanButtonsStop,
+      prayerSilent: data.prayerSilent.present ? data.prayerSilent.value : this.prayerSilent,
+      prayerSilentMinutes: data.prayerSilentMinutes.present
+          ? data.prayerSilentMinutes.value
+          : this.prayerSilentMinutes,
       mushafSize: data.mushafSize.present ? data.mushafSize.value : this.mushafSize,
       quranArabicSize: data.quranArabicSize.present
           ? data.quranArabicSize.value
@@ -2438,6 +2577,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('quranFont: $quranFont, ')
           ..write('mushafStyle: $mushafStyle, ')
           ..write('translation: $translation, ')
+          ..write('adhanFlipStops: $adhanFlipStops, ')
+          ..write('adhanButtonsStop: $adhanButtonsStop, ')
+          ..write('prayerSilent: $prayerSilent, ')
+          ..write('prayerSilentMinutes: $prayerSilentMinutes, ')
           ..write('mushafSize: $mushafSize, ')
           ..write('quranArabicSize: $quranArabicSize, ')
           ..write('quranTranslationSize: $quranTranslationSize, ')
@@ -2514,6 +2657,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     quranFont,
     mushafStyle,
     translation,
+    adhanFlipStops,
+    adhanButtonsStop,
+    prayerSilent,
+    prayerSilentMinutes,
     mushafSize,
     quranArabicSize,
     quranTranslationSize,
@@ -2589,6 +2736,10 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.quranFont == this.quranFont &&
           other.mushafStyle == this.mushafStyle &&
           other.translation == this.translation &&
+          other.adhanFlipStops == this.adhanFlipStops &&
+          other.adhanButtonsStop == this.adhanButtonsStop &&
+          other.prayerSilent == this.prayerSilent &&
+          other.prayerSilentMinutes == this.prayerSilentMinutes &&
           other.mushafSize == this.mushafSize &&
           other.quranArabicSize == this.quranArabicSize &&
           other.quranTranslationSize == this.quranTranslationSize &&
@@ -2662,6 +2813,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<QuranFont> quranFont;
   final Value<MushafStyle> mushafStyle;
   final Value<Translation?> translation;
+  final Value<bool> adhanFlipStops;
+  final Value<bool> adhanButtonsStop;
+  final Value<bool> prayerSilent;
+  final Value<int> prayerSilentMinutes;
   final Value<int> mushafSize;
   final Value<int> quranArabicSize;
   final Value<int> quranTranslationSize;
@@ -2733,6 +2888,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranFont = const Value.absent(),
     this.mushafStyle = const Value.absent(),
     this.translation = const Value.absent(),
+    this.adhanFlipStops = const Value.absent(),
+    this.adhanButtonsStop = const Value.absent(),
+    this.prayerSilent = const Value.absent(),
+    this.prayerSilentMinutes = const Value.absent(),
     this.mushafSize = const Value.absent(),
     this.quranArabicSize = const Value.absent(),
     this.quranTranslationSize = const Value.absent(),
@@ -2805,6 +2964,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.quranFont = const Value.absent(),
     this.mushafStyle = const Value.absent(),
     this.translation = const Value.absent(),
+    this.adhanFlipStops = const Value.absent(),
+    this.adhanButtonsStop = const Value.absent(),
+    this.prayerSilent = const Value.absent(),
+    this.prayerSilentMinutes = const Value.absent(),
     this.mushafSize = const Value.absent(),
     this.quranArabicSize = const Value.absent(),
     this.quranTranslationSize = const Value.absent(),
@@ -2877,6 +3040,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? quranFont,
     Expression<String>? mushafStyle,
     Expression<String>? translation,
+    Expression<bool>? adhanFlipStops,
+    Expression<bool>? adhanButtonsStop,
+    Expression<bool>? prayerSilent,
+    Expression<int>? prayerSilentMinutes,
     Expression<int>? mushafSize,
     Expression<int>? quranArabicSize,
     Expression<int>? quranTranslationSize,
@@ -2949,6 +3116,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (quranFont != null) 'quran_font': quranFont,
       if (mushafStyle != null) 'mushaf_style': mushafStyle,
       if (translation != null) 'translation': translation,
+      if (adhanFlipStops != null) 'adhan_flip_stops': adhanFlipStops,
+      if (adhanButtonsStop != null) 'adhan_buttons_stop': adhanButtonsStop,
+      if (prayerSilent != null) 'prayer_silent': prayerSilent,
+      if (prayerSilentMinutes != null) 'prayer_silent_minutes': prayerSilentMinutes,
       if (mushafSize != null) 'mushaf_size': mushafSize,
       if (quranArabicSize != null) 'quran_arabic_size': quranArabicSize,
       if (quranTranslationSize != null) 'quran_translation_size': quranTranslationSize,
@@ -3023,6 +3194,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<QuranFont>? quranFont,
     Value<MushafStyle>? mushafStyle,
     Value<Translation?>? translation,
+    Value<bool>? adhanFlipStops,
+    Value<bool>? adhanButtonsStop,
+    Value<bool>? prayerSilent,
+    Value<int>? prayerSilentMinutes,
     Value<int>? mushafSize,
     Value<int>? quranArabicSize,
     Value<int>? quranTranslationSize,
@@ -3095,6 +3270,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       quranFont: quranFont ?? this.quranFont,
       mushafStyle: mushafStyle ?? this.mushafStyle,
       translation: translation ?? this.translation,
+      adhanFlipStops: adhanFlipStops ?? this.adhanFlipStops,
+      adhanButtonsStop: adhanButtonsStop ?? this.adhanButtonsStop,
+      prayerSilent: prayerSilent ?? this.prayerSilent,
+      prayerSilentMinutes: prayerSilentMinutes ?? this.prayerSilentMinutes,
       mushafSize: mushafSize ?? this.mushafSize,
       quranArabicSize: quranArabicSize ?? this.quranArabicSize,
       quranTranslationSize: quranTranslationSize ?? this.quranTranslationSize,
@@ -3339,6 +3518,18 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
         $SettingsTable.$convertertranslationn.toSql(translation.value),
       );
     }
+    if (adhanFlipStops.present) {
+      map['adhan_flip_stops'] = Variable<bool>(adhanFlipStops.value);
+    }
+    if (adhanButtonsStop.present) {
+      map['adhan_buttons_stop'] = Variable<bool>(adhanButtonsStop.value);
+    }
+    if (prayerSilent.present) {
+      map['prayer_silent'] = Variable<bool>(prayerSilent.value);
+    }
+    if (prayerSilentMinutes.present) {
+      map['prayer_silent_minutes'] = Variable<int>(prayerSilentMinutes.value);
+    }
     if (mushafSize.present) {
       map['mushaf_size'] = Variable<int>(mushafSize.value);
     }
@@ -3433,6 +3624,10 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('quranFont: $quranFont, ')
           ..write('mushafStyle: $mushafStyle, ')
           ..write('translation: $translation, ')
+          ..write('adhanFlipStops: $adhanFlipStops, ')
+          ..write('adhanButtonsStop: $adhanButtonsStop, ')
+          ..write('prayerSilent: $prayerSilent, ')
+          ..write('prayerSilentMinutes: $prayerSilentMinutes, ')
           ..write('mushafSize: $mushafSize, ')
           ..write('quranArabicSize: $quranArabicSize, ')
           ..write('quranTranslationSize: $quranTranslationSize, ')
@@ -5668,6 +5863,10 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<QuranFont> quranFont,
   Value<MushafStyle> mushafStyle,
   Value<Translation?> translation,
+  Value<bool> adhanFlipStops,
+  Value<bool> adhanButtonsStop,
+  Value<bool> prayerSilent,
+  Value<int> prayerSilentMinutes,
   Value<int> mushafSize,
   Value<int> quranArabicSize,
   Value<int> quranTranslationSize,
@@ -5740,6 +5939,10 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<QuranFont> quranFont,
   Value<MushafStyle> mushafStyle,
   Value<Translation?> translation,
+  Value<bool> adhanFlipStops,
+  Value<bool> adhanButtonsStop,
+  Value<bool> prayerSilent,
+  Value<int> prayerSilentMinutes,
   Value<int> mushafSize,
   Value<int> quranArabicSize,
   Value<int> quranTranslationSize,
@@ -6043,6 +6246,22 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
+  ColumnFilters<bool> get adhanFlipStops =>
+      $composableBuilder(column: $table.adhanFlipStops, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get adhanButtonsStop => $composableBuilder(
+    column: $table.adhanButtonsStop,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get prayerSilent =>
+      $composableBuilder(column: $table.prayerSilent, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get prayerSilentMinutes => $composableBuilder(
+    column: $table.prayerSilentMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get mushafSize =>
       $composableBuilder(column: $table.mushafSize, builder: (column) => ColumnFilters(column));
 
@@ -6296,6 +6515,24 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<String> get translation =>
       $composableBuilder(column: $table.translation, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get adhanFlipStops => $composableBuilder(
+    column: $table.adhanFlipStops,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get adhanButtonsStop => $composableBuilder(
+    column: $table.adhanButtonsStop,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get prayerSilent =>
+      $composableBuilder(column: $table.prayerSilent, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get prayerSilentMinutes => $composableBuilder(
+    column: $table.prayerSilentMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get mushafSize =>
       $composableBuilder(column: $table.mushafSize, builder: (column) => ColumnOrderings(column));
 
@@ -6518,6 +6755,18 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumnWithTypeConverter<Translation?, String> get translation =>
       $composableBuilder(column: $table.translation, builder: (column) => column);
 
+  GeneratedColumn<bool> get adhanFlipStops =>
+      $composableBuilder(column: $table.adhanFlipStops, builder: (column) => column);
+
+  GeneratedColumn<bool> get adhanButtonsStop =>
+      $composableBuilder(column: $table.adhanButtonsStop, builder: (column) => column);
+
+  GeneratedColumn<bool> get prayerSilent =>
+      $composableBuilder(column: $table.prayerSilent, builder: (column) => column);
+
+  GeneratedColumn<int> get prayerSilentMinutes =>
+      $composableBuilder(column: $table.prayerSilentMinutes, builder: (column) => column);
+
   GeneratedColumn<int> get mushafSize =>
       $composableBuilder(column: $table.mushafSize, builder: (column) => column);
 
@@ -6631,6 +6880,10 @@ class $$SettingsTableTableManager
                 Value<QuranFont> quranFont = const Value.absent(),
                 Value<MushafStyle> mushafStyle = const Value.absent(),
                 Value<Translation?> translation = const Value.absent(),
+                Value<bool> adhanFlipStops = const Value.absent(),
+                Value<bool> adhanButtonsStop = const Value.absent(),
+                Value<bool> prayerSilent = const Value.absent(),
+                Value<int> prayerSilentMinutes = const Value.absent(),
                 Value<int> mushafSize = const Value.absent(),
                 Value<int> quranArabicSize = const Value.absent(),
                 Value<int> quranTranslationSize = const Value.absent(),
@@ -6702,6 +6955,10 @@ class $$SettingsTableTableManager
                 quranFont: quranFont,
                 mushafStyle: mushafStyle,
                 translation: translation,
+                adhanFlipStops: adhanFlipStops,
+                adhanButtonsStop: adhanButtonsStop,
+                prayerSilent: prayerSilent,
+                prayerSilentMinutes: prayerSilentMinutes,
                 mushafSize: mushafSize,
                 quranArabicSize: quranArabicSize,
                 quranTranslationSize: quranTranslationSize,
@@ -6775,6 +7032,10 @@ class $$SettingsTableTableManager
                 Value<QuranFont> quranFont = const Value.absent(),
                 Value<MushafStyle> mushafStyle = const Value.absent(),
                 Value<Translation?> translation = const Value.absent(),
+                Value<bool> adhanFlipStops = const Value.absent(),
+                Value<bool> adhanButtonsStop = const Value.absent(),
+                Value<bool> prayerSilent = const Value.absent(),
+                Value<int> prayerSilentMinutes = const Value.absent(),
                 Value<int> mushafSize = const Value.absent(),
                 Value<int> quranArabicSize = const Value.absent(),
                 Value<int> quranTranslationSize = const Value.absent(),
@@ -6846,6 +7107,10 @@ class $$SettingsTableTableManager
                 quranFont: quranFont,
                 mushafStyle: mushafStyle,
                 translation: translation,
+                adhanFlipStops: adhanFlipStops,
+                adhanButtonsStop: adhanButtonsStop,
+                prayerSilent: prayerSilent,
+                prayerSilentMinutes: prayerSilentMinutes,
                 mushafSize: mushafSize,
                 quranArabicSize: quranArabicSize,
                 quranTranslationSize: quranTranslationSize,

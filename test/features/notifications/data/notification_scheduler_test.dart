@@ -148,55 +148,74 @@ void main() {
       expect(channel.calls.where((call) => call == 'schedule'), hasLength(3));
     });
 
+    test('one silent channel per prayer that still buzzes, every older id is deleted', () async {
+      final android = useAndroid(exact: false);
+
+      await NotificationScheduler(
+        channel,
+      ).apply(alerts: alerts, sounds: sounds, recordings: recordings, tones: tones, texts: texts);
+
+      final adhan = android.channels.where((channel) => channel.id.startsWith('adhan_')).toList();
+      expect(adhan.map((channel) => channel.id), [
+        'adhan_fajr_alert',
+        'adhan_dhuhr_alert',
+        'adhan_asr_alert',
+        'adhan_maghrib_alert',
+        'adhan_isha_silent',
+      ]);
+      expect(adhan.map((channel) => channel.playSound), everyElement(isFalse));
+      expect(adhan.map((channel) => channel.enableVibration), [true, true, true, true, false]);
+      expect(adhan.map((channel) => channel.importance), everyElement(Importance.high));
+
+      /// the ids that carried a sound go, so the phone lists one per prayer
+      expect(
+        android.deleted,
+        containsAll([
+          'adhan_maghrib_tone',
+          'adhan_maghrib_silent',
+          'adhan_maghrib_adhan',
+          'adhan_maghrib_adhan_alafasy',
+          'adhan_maghrib_adhan_aaqibAzeez',
+          'adhan_maghrib_adhan_madinah',
+          'adhan_asr_tone_glass',
+        ]),
+      );
+      expect(android.deleted, isNot(contains('adhan_maghrib_alert')));
+      expect(channel.entries.map((entry) => entry['channel']), [
+        'adhan_asr_alert',
+        'adhan_maghrib_alert',
+        'adhan_isha_silent',
+      ]);
+    });
+
     test(
-      'uses adhan_<prayer>_<sound>, the adhan with its recording, and deletes the rest',
+      'a nudge goes to kotlin, it says its set\'s name and goes when the next one comes',
       () async {
-        final android = useAndroid(exact: false);
+        final android = useAndroid();
 
-        await NotificationScheduler(
-          channel,
-        ).apply(alerts: alerts, sounds: sounds, recordings: recordings, tones: tones, texts: texts);
-
-        final adhan = android.channels.where((channel) => channel.id.startsWith('adhan_')).toList();
-        expect(adhan.map((channel) => channel.id), [
-          'adhan_fajr_adhan_alafasy',
-          'adhan_dhuhr_tone',
-          'adhan_asr_tone',
-          'adhan_maghrib_adhan_alafasy',
-          'adhan_isha_silent',
-        ]);
-
-        /// milestone 5's id and the removed recordings go too, so the phone lists one per prayer
-        expect(
-          android.deleted,
-          containsAll([
-            'adhan_maghrib_tone',
-            'adhan_maghrib_silent',
-            'adhan_maghrib_adhan',
-            'adhan_maghrib_adhan_aaqibAzeez',
-            'adhan_maghrib_adhan_madinah',
-          ]),
+        await NotificationScheduler(channel).apply(
+          alerts: [nudgeOf(lasts: const Duration(hours: 12))],
+          sounds: sounds,
+          recordings: recordings,
+          tones: tones,
+          texts: texts,
         );
-        expect(android.deleted, isNot(contains('adhan_maghrib_adhan_alafasy')));
-        final isha = adhan.last;
-        expect([isha.playSound, isha.enableVibration], [false, false]);
-        final maghrib = adhan[3];
-        expect((maghrib.sound! as RawResourceAndroidNotificationSound).sound, 'adhan_alafasy_clip');
-        final fajr = adhan.first;
-        expect(
-          (fajr.sound! as RawResourceAndroidNotificationSound).sound,
-          'adhan_alafasy_fajr_clip',
-        );
-        expect(channel.entries.map((entry) => entry['channel']), [
-          'adhan_asr_tone',
-          'adhan_maghrib_adhan_alafasy',
-          'adhan_isha_silent',
-        ]);
+
+        expect(android.scheduled, isEmpty);
+        final entry = channel.entries.single;
+        expect(entry['id'], nudgeOf().id);
+        expect(entry['kind'], 'azkar');
+        expect(entry['full'], isFalse);
+        expect(entry['clip'], 'azkar_evening');
+        expect(entry['channel'], 'azkar_voice');
+        expect(entry['lasts'], 43200000);
+        expect(entry['payload'], payloadOf(nudgeOf()));
+        expect(entry['title'], texts.titleOf(nudgeOf()));
       },
     );
 
-    test('a nudge is exact while idle when exact alarms are allowed, inexact otherwise', () async {
-      final exact = useAndroid();
+    test('the voice channel only drops the banner, without the voice the nudge is quiet', () async {
+      final voice = useAndroid();
       await NotificationScheduler(channel).apply(
         alerts: [nudgeOf()],
         sounds: sounds,
@@ -204,67 +223,34 @@ void main() {
         tones: tones,
         texts: texts,
       );
-      expect(exact.scheduled.single.mode, AndroidScheduleMode.exactAllowWhileIdle);
+      final azkar = voice.channels.firstWhere((channel) => channel.id == 'azkar_voice');
+      expect([azkar.playSound, azkar.enableVibration], [false, false]);
+      expect(azkar.importance, Importance.high);
+      expect(
+        voice.deleted,
+        containsAll([
+          'azkar',
+          'azkar_morning',
+          'azkar_evening',
+          'azkar_morning_2',
+          'azkar_evening_2',
+        ]),
+      );
 
-      final inexact = useAndroid(exact: false);
+      final quiet = useAndroid();
       await NotificationScheduler(channel).apply(
         alerts: [nudgeOf()],
         sounds: sounds,
         recordings: recordings,
         tones: tones,
         texts: texts,
+        azkarVoice: false,
       );
-      expect(inexact.scheduled.single.mode, AndroidScheduleMode.inexactAllowWhileIdle);
+      expect(quiet.channels.firstWhere((channel) => channel.id == 'azkar').playSound, isFalse);
+      expect(quiet.deleted, contains('azkar_voice'));
+      expect(channel.entries.single['channel'], 'azkar');
+      expect(channel.entries.single.containsKey('clip'), isFalse);
     });
-
-    test('a nudge goes when the next one comes', () async {
-      final android = useAndroid();
-
-      await NotificationScheduler(channel).apply(
-        alerts: [nudgeOf(lasts: const Duration(hours: 12))],
-        sounds: sounds,
-        recordings: recordings,
-        tones: tones,
-        texts: texts,
-      );
-
-      expect(android.scheduled.single.details!.timeoutAfter, 43200000);
-    });
-
-    test(
-      'a nudge says its set\'s name on its own channel, without the voice it is quiet',
-      () async {
-        final voice = useAndroid();
-        await NotificationScheduler(channel).apply(
-          alerts: [nudgeOf()],
-          sounds: sounds,
-          recordings: recordings,
-          tones: tones,
-          texts: texts,
-        );
-        final evening = voice.channels.firstWhere((channel) => channel.id == 'azkar_evening_2');
-        expect((evening.sound! as RawResourceAndroidNotificationSound).sound, 'azkar_evening');
-        expect(evening.importance, Importance.high);
-        expect(evening.enableVibration, isFalse);
-        expect(voice.channels.map((channel) => channel.id), contains('azkar_morning_2'));
-        expect(voice.deleted, containsAll(['azkar', 'azkar_morning', 'azkar_evening']));
-        expect(voice.scheduled.single.details!.channelId, 'azkar_evening_2');
-
-        final quiet = useAndroid();
-        await NotificationScheduler(channel).apply(
-          alerts: [nudgeOf()],
-          sounds: sounds,
-          recordings: recordings,
-          tones: tones,
-          texts: texts,
-          azkarVoice: false,
-        );
-        final azkar = quiet.channels.firstWhere((channel) => channel.id == 'azkar');
-        expect(azkar.playSound, isFalse);
-        expect(quiet.deleted, containsAll(['azkar_morning_2', 'azkar_evening_2']));
-        expect(quiet.scheduled.single.details!.channelId, 'azkar');
-      },
-    );
 
     test('with exact alarms every prayer goes to kotlin, only the adhan plays in full', () async {
       final android = useAndroid();
@@ -278,12 +264,16 @@ void main() {
       expect(channel.entries.map((entry) => entry['id']), alerts.map((alert) => alert.id));
       expect(channel.entries.map((entry) => entry['full']), [false, true, false]);
       expect(channel.entries.map((entry) => entry['adhan']), [false, true, false]);
+      expect(channel.entries.map((entry) => entry['kind']), everyElement('adhan'));
+
+      /// the full adhan is the service's, only the tone is a clip, the phone's own here
+      expect(channel.entries.map((entry) => entry['clip']), ['phone', null, null]);
       final entry = channel.entries[1];
       expect(entry['atMillis'], alerts[1].at.millisecondsSinceEpoch);
       expect(entry['payload'], payloadOf(alerts[1]));
       expect(alertFromPayload(entry['quietPayload']! as String)?.sound, PrayerSound.silent);
       expect(entry['asset'], 'assets/audio/adhan_alafasy.m4a');
-      expect(entry['channel'], 'adhan_maghrib_adhan_alafasy');
+      expect(entry['channel'], 'adhan_maghrib_alert');
       expect(entry['title'], 'Maghrib time in Makkah');
       expect(entry['mediaSubtitle'], 'Mishary Alafasy');
       expect(entry['subText'], 'Adhan');
@@ -294,6 +284,43 @@ void main() {
         'pause': 'Pause',
         'play': 'Play',
       });
+    });
+
+    test('the adhan switches go to kotlin, silent adds do not disturb a minute after', () async {
+      useAndroid();
+
+      await NotificationScheduler(channel).apply(
+        alerts: alerts,
+        sounds: sounds,
+        recordings: recordings,
+        tones: tones,
+        texts: texts,
+        flipStops: false,
+        silentMinutes: 15,
+      );
+
+      expect(channel.stopped, (flip: false, buttons: true));
+      final silence = channel.entries.where((entry) => entry['kind'] == 'silence').toList();
+      expect(silence.map((entry) => entry['id']), alerts.map((alert) => silenceId(alert.id)));
+      final first = alerts.first.at;
+      expect(
+        silence.first['atMillis'],
+        first.add(const Duration(minutes: 1)).millisecondsSinceEpoch,
+      );
+      expect(
+        silence.first['untilMillis'],
+        first.add(const Duration(minutes: 15)).millisecondsSinceEpoch,
+      );
+    });
+
+    test('silent off adds nothing', () async {
+      useAndroid();
+
+      await NotificationScheduler(
+        channel,
+      ).apply(alerts: alerts, sounds: sounds, recordings: recordings, tones: tones, texts: texts);
+
+      expect(channel.entries.where((entry) => entry['kind'] == 'silence'), isEmpty);
     });
 
     test('without exact alarms no adhan plays in full, kotlin posts it quiet', () async {
@@ -308,42 +335,48 @@ void main() {
       expect(channel.entries.map((entry) => entry['adhan']), [false, true, false]);
     });
 
-    test('a tone from the app gets its own channel and sound, the phone one is deleted', () async {
-      final android = useAndroid();
+    test('a tone from the app is its clip', () async {
+      useAndroid();
 
       await NotificationScheduler(
         channel,
       ).apply(alerts: alerts, sounds: sounds, recordings: recordings, tones: glass, texts: texts);
 
-      final asr = android.channels.firstWhere((channel) => channel.id == 'adhan_asr_tone_glass');
-      expect((asr.sound! as RawResourceAndroidNotificationSound).sound, 'tone_glass');
-      expect(android.deleted, containsAll(['adhan_asr_tone', 'adhan_asr_tone_calm']));
-      expect(channel.entries.first['channel'], 'adhan_asr_tone_glass');
+      expect(channel.entries.first['clip'], 'tone_glass');
     });
 
-    test('the countdown is the reminder on its prayer\'s channel, no reminder channel', () async {
+    test('the countdown is the reminder, kotlin plays its takbir or tone', () async {
       final android = useAndroid();
 
       await NotificationScheduler(channel).apply(
-        alerts: [reminderOf(Prayer.maghrib)],
+        alerts: [reminderOf(Prayer.maghrib), reminderOf(Prayer.asr), reminderOf(Prayer.isha)],
         sounds: sounds,
         recordings: recordings,
-        tones: tones,
+        tones: glass,
         texts: texts,
       );
 
       expect(android.channels.map((channel) => channel.id), isNot(contains('prayer_reminders')));
       expect(android.deleted, containsAll(['reminders', 'prayer_countdown', 'prayer_reminders']));
-      final maghrib = android.channels.firstWhere(
-        (channel) => channel.id == 'adhan_maghrib_adhan_alafasy',
-      );
-      expect(maghrib.importance, Importance.high);
       expect(android.scheduled, isEmpty);
-      expect(channel.entries, isEmpty);
+
+      /// isha is silent, nothing to play
+      expect(channel.entries.map((entry) => entry['id']), [
+        reminderOf(Prayer.maghrib).id,
+        reminderOf(Prayer.asr).id,
+      ]);
+      expect(channel.entries.map((entry) => entry['kind']), everyElement('reminder'));
+      expect(channel.entries.map((entry) => entry['full']), everyElement(isFalse));
+      expect(channel.entries.map((entry) => entry['clip']), [
+        AdhanRecording.alafasy.androidClipOf(Prayer.maghrib),
+        'tone_glass',
+      ]);
+      expect(channel.entries.first['channel'], 'adhan_maghrib_alert');
     });
 
     test('a plugin call that throws reports only the step', () async {
-      useAndroid().throwOnSchedule = true;
+      useAndroid();
+      channel.throwOnSchedule = true;
       final reporter = _RecordingReporter();
       CrashReporter.instance = reporter;
       addTearDown(() => CrashReporter.instance = const DebugCrashReporter());
@@ -491,7 +524,6 @@ class _FakeAndroid extends AndroidFlutterLocalNotificationsPlugin {
   _FakeAndroid({required this.exact});
 
   final bool exact;
-  bool throwOnSchedule = false;
   final calls = <String>[];
   final scheduled = <_Scheduled<AndroidNotificationDetails>>[];
   final channels = <AndroidNotificationChannel>[];
@@ -525,7 +557,6 @@ class _FakeAndroid extends AndroidFlutterLocalNotificationsPlugin {
     AndroidNotificationDetails? notificationDetails,
     AndroidScheduleMode scheduleMode = AndroidScheduleMode.exact,
   }) async {
-    if (throwOnSchedule) throw PlatformException(code: 'boom', message: 'Makkah 17:56');
     calls.add('schedule');
     scheduled.add((
       id: id,
@@ -570,12 +601,20 @@ class _FakeIos extends IOSFlutterLocalNotificationsPlugin {
 class _FakeChannel extends AdhanChannel {
   final calls = <String>[];
   List<Map<String, Object?>> entries = [];
+  bool throwOnSchedule = false;
 
   @override
   Future<void> cancelAll() async => calls.add('cancelAll');
 
+  ({bool flip, bool buttons})? stopped;
+
+  @override
+  Future<void> stops({required bool flip, required bool buttons}) async =>
+      stopped = (flip: flip, buttons: buttons);
+
   @override
   Future<void> schedule(List<Map<String, Object?>> entries) async {
+    if (throwOnSchedule) throw PlatformException(code: 'boom', message: 'Makkah 17:56');
     calls.add('schedule');
     this.entries = entries;
   }

@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
+import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/text_field.dart';
 import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
@@ -73,6 +74,40 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('Save stays off until the text or the highlight differs from the saved note', (
+    tester,
+  ) async {
+    bool off() => tester.widget<BmButton>(find.widgetWithText(BmButton, 'Save')).busy;
+    await pump(tester, const NoteEditor(ayah), notes: [note('kept')]);
+    expect(off(), isTrue);
+
+    await tester.enterText(find.byType(TextField), 'kept more');
+    await tester.pump();
+    expect(off(), isFalse);
+
+    await tester.enterText(find.byType(TextField), 'kept ');
+    await tester.pump();
+    expect(off(), isTrue);
+
+    await tester.tap(find.text('Highlight in mushaf'));
+    await tester.pump();
+    expect(off(), isFalse);
+    await unmount(tester);
+  });
+
+  testWidgets('a new note can be saved as a highlight alone', (tester) async {
+    bool off() => tester.widget<BmButton>(find.widgetWithText(BmButton, 'Save')).busy;
+    await pump(tester, const NoteEditor(ayah));
+    await tester.tap(find.text('Add note'));
+    await tester.pumpAndSettle();
+    expect(off(), isFalse);
+
+    await tester.tap(find.text('Highlight in mushaf'));
+    await tester.pump();
+    expect(off(), isTrue);
+    await unmount(tester);
+  });
+
   testWidgets('Delete note asks first, Cancel keeps the note', (tester) async {
     await pump(tester, const NoteEditor(ayah), notes: [note('kept')]);
     await tester.tap(find.text('Delete note'));
@@ -96,6 +131,22 @@ void main() {
     );
     final text = tester.widget<Text>(find.textContaining('line 0'));
     expect(text.maxLines, 6);
+    await unmount(tester);
+  });
+
+  testWidgets("Saved's Notes says See the note only on a note cut at 6 lines", (tester) async {
+    await pump(tester, NoteCard(note(long), seeNote: true, onTap: () {}), notes: [note(long)]);
+    await tester.pump();
+    expect(find.text('See the note'), findsOneWidget);
+    await unmount(tester);
+
+    await pump(
+      tester,
+      NoteCard(note('short'), seeNote: true, onTap: () {}),
+      notes: [note('short')],
+    );
+    await tester.pump();
+    expect(find.text('See the note'), findsNothing);
     await unmount(tester);
   });
 }

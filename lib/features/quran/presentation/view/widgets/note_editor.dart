@@ -12,6 +12,7 @@ import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_button.dart';
 import 'package:better_muslim/core/widgets/bm_dialog.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
+import 'package:better_muslim/core/widgets/glass.dart';
 import 'package:better_muslim/core/widgets/text_field.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/core/widgets/toggle_row.dart';
@@ -20,6 +21,7 @@ import 'package:better_muslim/features/quran/domain/note.dart';
 import 'package:better_muslim/features/quran/presentation/providers/page_providers.dart';
 import 'package:better_muslim/features/quran/presentation/providers/saved_providers.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/saved_text.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
@@ -101,7 +103,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       /// an existing note saved empty and unchecked is deleted, after the dialog
                       BmButton.primary(
                         StringsManager.save,
-                        busy: note == null && _text.trim().isEmpty && !_highlight,
+                        busy: note == null
+                            ? _text.trim().isEmpty && !_highlight
+                            : _text.trim() == note.text && _highlight == note.highlight,
                         onPressed: _save,
                       ),
                       if (note != null) ...[
@@ -180,6 +184,7 @@ class NoteCard extends ConsumerWidget {
     this.showAyah = true,
     this.showArabic = false,
     this.radius = RadiusManager.lg,
+    this.seeNote = false,
     super.key,
   });
 
@@ -191,6 +196,9 @@ class NoteCard extends ConsumerWidget {
   /// Highlights shows the ayah itself, its note under it only when there is one
   final bool showArabic;
   final double radius;
+
+  /// Saved's Notes, a note cut at 6 lines says there is more
+  final bool seeNote;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -261,15 +269,7 @@ class NoteCard extends ConsumerWidget {
                 if (note.text.isNotEmpty) ...[
                   const RSizedBox.vertical(SpaceManager.noteLineGap),
 
-                  /// a scroll inside took every drag from the list, the whole note is in the Study sheet
-                  RegularText(
-                    note.text,
-                    translate: false,
-                    fontSize: FontSizeManager.body,
-                    height: LineHeightManager.body,
-                    color: ThemeEnum.text,
-                    maxLines: 6,
-                  ),
+                  _NoteText(note.text, seeNote: seeNote, radius: radius),
                 ] else if (!showArabic) ...[
                   const RSizedBox.vertical(SpaceManager.noteLineGap),
                   const RegularText(
@@ -281,6 +281,84 @@ class NoteCard extends ConsumerWidget {
                 ],
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// a scroll inside took every drag from the list, the whole note is in the Study sheet
+class _NoteText extends StatefulWidget {
+  const _NoteText(this.text, {required this.seeNote, required this.radius});
+
+  final String text;
+  final bool seeNote;
+  final double radius;
+
+  @override
+  State<_NoteText> createState() => _NoteTextState();
+}
+
+class _NoteTextState extends State<_NoteText> {
+  final _text = GlobalKey();
+  var _cut = false;
+
+  /// the text knows it was cut only after its layout
+  void _measure(Duration _) {
+    if (!mounted) return;
+    final paragraph = _text.currentContext?.findRenderObject();
+    final cut = paragraph is RenderParagraph && paragraph.didExceedMaxLines;
+    if (cut != _cut) setState(() => _cut = cut);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.seeNote) WidgetsBinding.instance.addPostFrameCallback(_measure);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        RegularText(
+          widget.text,
+          key: _text,
+          translate: false,
+          fontSize: FontSizeManager.body,
+          height: LineHeightManager.body,
+          color: ThemeEnum.text,
+          maxLines: 6,
+        ),
+
+        /// out over the card's padding, so the glass runs edge to edge along its bottom
+        if (_cut)
+          PositionedDirectional(
+            start: -SpaceManager.noteCardSide.r,
+            end: -SpaceManager.noteCardSide.r,
+            bottom: -SpaceManager.noteCardV.r,
+            child: _SeeNote(widget.radius),
+          ),
+      ],
+    );
+  }
+}
+
+/// over the last line, which shows blurred under it
+class _SeeNote extends StatelessWidget {
+  const _SeeNote(this.radius);
+
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(bottom: Radius.circular(radius.r)),
+      child: const Glass(
+        child: VerticalPadding(
+          padding: SpaceManager.noteCardV,
+          child: SemiBoldText(
+            StringsManager.seeNote,
+            fontSize: FontSizeManager.label,
+            color: ThemeEnum.primary,
+            textAlign: TextAlign.center,
           ),
         ),
       ),

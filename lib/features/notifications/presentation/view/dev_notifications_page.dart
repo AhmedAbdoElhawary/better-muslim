@@ -74,13 +74,14 @@ class DevNotificationsPage extends ConsumerWidget {
       force: true,
       rehearsal: true,
     );
-    await _test(ref, nextAlert(ref), after: rehearsalPrayer);
+    await _test(ref, nextAlert(ref), after: rehearsalPrayer, reminder: rehearsalReminder);
   }
 
   static Future<void> _test(
     WidgetRef ref,
     Alert? alert, {
     Duration after = const Duration(minutes: 1),
+    Duration? reminder,
   }) async {
     final location = ref.read(locationProvider);
     if (alert == null || location == null) return;
@@ -98,6 +99,7 @@ class DevNotificationsPage extends ConsumerWidget {
           ref.read(settingsProvider).value?.recordingOf(alert.prayer) ?? AdhanRecording.alafasy,
           ref.read(settingsProvider).value?.toneOf(alert.prayer) ?? PrayerTone.phone,
           after: after,
+          reminder: reminder,
         );
   }
 

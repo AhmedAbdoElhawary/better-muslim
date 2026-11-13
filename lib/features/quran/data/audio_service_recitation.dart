@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -45,6 +46,10 @@ class AudioServiceRecitation implements Recitation {
   /// how much of the queue is in the player's playlist
   var _added = 0;
 
+  /// the item the shown time belongs to, a late tick of the one before showed it jump back
+  var _timed = 0;
+  var _timedAt = Duration.zero;
+
   /// bumped by every play and stop, so a late download never lands in a newer queue
   var _session = 0;
 
@@ -53,12 +58,20 @@ class AudioServiceRecitation implements Recitation {
 
   /// next and previous never wait the pause between ayahs
   var _jumped = false;
+
+  /// the last play failed, so play starts it again instead of resuming
+  var _failed = false;
+
+  /// why the feed stopped before the queue's end, the player fails there
+  RecitationFailure? _cut;
   Timer? _gap;
   Timer? _sleep;
   Timer? _fade;
+  Timer? _stall;
 
   static const _fadeTime = Duration(seconds: 3);
   static const _fadeStep = Duration(milliseconds: 100);
+  static const _stallTime = Duration(seconds: 15);
 
   @override
   RecitationState get current => _state;
@@ -75,15 +88,41 @@ class AudioServiceRecitation implements Recitation {
   void _listen() {
     _player.currentIndexStream.listen(_moved);
     _player.playerStateStream.listen(_changed);
-    _player.positionStream.listen((position) {
-      if (_state.active) {
-        if ((_index, _player.duration) case (final index?, final duration?)
-            when index < _queue.length) {
-          _lengths[(_state.reciter, recitationFile(_queue[index]))] = duration;
-        }
-        _emit(_state.copyWith(position: position, duration: _player.duration ?? Duration.zero));
-      }
+    _player.playbackEventStream.listen((_) {}, onError: (_) => _fail(RecitationFailure.failed));
+
+    /// a stream still coming in is not stuck
+    _player.bufferedPositionStream.listen((_) {
+      if (_stall?.isActive ?? false) _watchStall();
     });
+    _player.positionStream.listen((position) {
+      /// the index and length from the same event as the position, so the pair always matches
+      final event = _player.playbackEvent;
+      final duration = event.duration;
+      if (!_state.active || event.currentIndex != _timed || duration == null) return;
+      if (_timed < _queue.length) _lengths[(_state.reciter, _queue[_timed])] = duration;
+
+      /// the player guesses between its real updates, the real one can land a little behind
+      final back = _timedAt - position;
+      if (back > Duration.zero && back < const Duration(seconds: 1)) return;
+      _timedAt = position;
+      _emit(_state.copyWith(position: position, duration: duration));
+    });
+  }
+
+  void _watchStall() {
+    _stall?.cancel();
+    _stall = Timer(_stallTime, () => _fail(RecitationFailure.offline));
+  }
+
+  /// stays up paused with the failure, so a tap on play tries again from this ayah
+  Future<void> _fail(RecitationFailure failure, {AyahKey? at}) async {
+    if (!_state.active) return;
+    _session++;
+    _cancelTimers();
+    _waiting = false;
+    _failed = true;
+    _emit(_state.copyWith(status: RecitationStatus.paused, ayah: at, failure: failure));
+    await _player.stop();
   }
 
   void _moved(int? index) {
@@ -92,7 +131,11 @@ class AudioServiceRecitation implements Recitation {
       stop();
       return;
     }
-    _emit(_state.copyWith(ayah: _queue[index], position: Duration.zero));
+
+    /// the time keeps the last ayah's until the new one's first tick brings its length
+    _timed = index;
+    _timedAt = Duration.zero;
+    _emit(_state.copyWith(ayah: _queue[index]));
     if (!_jumped && _state.pause > Duration.zero && pausesBefore(_queue, index)) {
       _player.pause();
       _gap = Timer(_state.pause, _player.play);
@@ -101,9 +144,12 @@ class AudioServiceRecitation implements Recitation {
   }
 
   void _changed(PlayerState player) {
-    if (!_state.active) return;
+    if (!_state.active || _failed) return;
     if (player.processingState == ProcessingState.completed) {
-      if (_added < _queue.length) {
+      _stall?.cancel();
+      if (_cut case final cut? when _added < _queue.length) {
+        _fail(cut, at: _queue[_added]);
+      } else if (_added < _queue.length) {
         _waiting = true;
         _emit(_state.copyWith(status: RecitationStatus.loading));
       } else {
@@ -112,7 +158,16 @@ class AudioServiceRecitation implements Recitation {
       return;
     }
     if (_waiting) return;
-    final status = player.processingState == ProcessingState.loading
+    final processing = player.processingState;
+    final loading =
+        processing == ProcessingState.loading ||
+        (processing == ProcessingState.buffering && player.playing);
+    if (!loading) {
+      _stall?.cancel();
+    } else if (!(_stall?.isActive ?? false)) {
+      _watchStall();
+    }
+    final status = loading
         ? RecitationStatus.loading
         : player.playing || (_gap?.isActive ?? false)
         ? RecitationStatus.playing
@@ -134,9 +189,13 @@ class AudioServiceRecitation implements Recitation {
     final session = ++_session;
     _cancelTimers();
     _waiting = false;
+    _failed = false;
+    _cut = null;
     _media = media ?? _media;
     _queue = recitationQueue(from, to, repeat: _state.repeat);
     _added = 0;
+    _timed = 0;
+    _timedAt = Duration.zero;
     _emit(
       _state.copyWith(
         status: RecitationStatus.loading,
@@ -152,28 +211,23 @@ class AudioServiceRecitation implements Recitation {
     await _player.clearAudioSources();
     await _configure();
 
-    final File first;
+    final AyahAudio first;
     try {
-      first = await _files.file(_state.reciter, recitationFile(_queue.first));
+      first = await _files.audio(_state.reciter, _queue.first);
     } on RecitationException catch (error) {
-      if (session == _session) {
-        _emit(_state.copyWith(status: RecitationStatus.idle, failure: error.failure));
-      }
+      if (session == _session) await _fail(error.failure);
       return;
     }
     if (session != _session) return;
     try {
-      await _player.setAudioSources([AudioSource.file(first.path)]);
+      await _player.setAudioSources([_source(first)]);
     } on PlayerException {
-      /// the system can't open it, so it is deleted and the next play downloads it again
-      if (first.existsSync()) first.deleteSync();
-      if (session == _session) {
-        _emit(_state.copyWith(status: RecitationStatus.idle, failure: RecitationFailure.failed));
-      }
+      _forget(first);
+      if (session == _session) await _fail(RecitationFailure.failed);
       return;
     }
     _added = 1;
-    _files.ahead(_state.reciter, {for (final item in _queue.skip(1)) recitationFile(item)});
+    _files.ahead(_state.reciter, _queue.skip(1));
     unawaited(_feed(session));
     await _player.setSpeed(_state.speed);
     await _player.setVolume(1);
@@ -188,22 +242,23 @@ class AudioServiceRecitation implements Recitation {
   /// the rest of the queue into the playlist as each file is checked
   Future<void> _feed(int session) async {
     while (_added < _queue.length) {
-      final File file;
+      final AyahAudio audio;
       try {
-        file = await _files.file(_state.reciter, recitationFile(_queue[_added]));
+        audio = await _files.audio(_state.reciter, _queue[_added]);
       } on RecitationException catch (error) {
         /// what is in the playlist still plays, it stops where the files end
-        if (session == _session && _waiting) {
-          _emit(_state.copyWith(status: RecitationStatus.idle, failure: error.failure));
-          await _player.stop();
-        }
+        if (session != _session) return;
+        _cut = error.failure;
+        if (_waiting) await _fail(error.failure, at: _queue[_added]);
         return;
       }
       if (session != _session) return;
       try {
-        await _player.addAudioSource(AudioSource.file(file.path));
+        await _player.addAudioSource(_source(audio));
       } on PlayerException {
-        if (file.existsSync()) file.deleteSync();
+        _forget(audio);
+        _cut = RecitationFailure.failed;
+        if (_waiting) await _fail(RecitationFailure.failed, at: _queue[_added]);
         return;
       }
       _added++;
@@ -214,10 +269,19 @@ class AudioServiceRecitation implements Recitation {
       }
     }
     final ready = await _files.isSurahReady(_state.reciter, [
-      for (var ayah = 1; ayah <= _queue.last.ayah; ayah++) AyahKey(_queue.last.surah, ayah),
       if (_queue.first.ayah == 0) const AyahKey(1, 1),
+      for (var ayah = 1; ayah <= _queue.last.ayah; ayah++) AyahKey(_queue.last.surah, ayah),
     ]);
     if (session == _session) _emit(_state.copyWith(surahReady: ready));
+  }
+
+  IndexedAudioSource _source(AyahAudio audio) =>
+      clipOf(audio.path, start: audio.start, end: audio.end);
+
+  /// the system can't open the file, so it is deleted and the next play downloads it again
+  void _forget(AyahAudio audio) {
+    final file = File(audio.path);
+    if (audio.path.startsWith('/') && file.existsSync()) file.deleteSync();
   }
 
   /// music like the clip and adhan players, so the shared session never flips (research R12)
@@ -247,6 +311,7 @@ class AudioServiceRecitation implements Recitation {
   @override
   Future<void> resume() async {
     if (!_state.active) return;
+    if (_failed) return _replay();
     await (await AudioSession.instance).setActive(true);
     unawaited(_player.play());
   }
@@ -296,10 +361,13 @@ class AudioServiceRecitation implements Recitation {
   /// past what's in the playlist it stops the walk there, that file may not be on the phone yet
   Future<Duration> _length(int index) async {
     if (index >= _added) return const Duration(days: 1);
-    final key = (_state.reciter, recitationFile(_queue[index]));
+    final key = (_state.reciter, _queue[index]);
     if (_lengths[key] case final length?) return length;
-    final file = await _files.file(key.$1, key.$2);
-    return _lengths[key] = await _probe.setFilePath(file.path) ?? Duration.zero;
+    final audio = await _files.audio(key.$1, key.$2);
+    if ((audio.start, audio.end) case (final start?, final end?)) {
+      return _lengths[key] = end - start;
+    }
+    return _lengths[key] = await _probe.setFilePath(audio.path) ?? Duration.zero;
   }
 
   @override
@@ -373,6 +441,7 @@ class AudioServiceRecitation implements Recitation {
   void _cancelTimers() {
     _gap?.cancel();
     _fade?.cancel();
+    _stall?.cancel();
   }
 
   @override
@@ -381,6 +450,7 @@ class AudioServiceRecitation implements Recitation {
     _cancelTimers();
     _sleep?.cancel();
     _waiting = false;
+    _failed = false;
     _emit(_state.copyWith(status: RecitationStatus.idle));
     await _player.stop();
     await (await AudioSession.instance).setActive(false);

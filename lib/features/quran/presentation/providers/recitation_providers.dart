@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
@@ -94,7 +95,8 @@ class SurahDownloadNotifier extends Notifier<SurahDownload> {
     return _idle;
   }
 
-  /// throws a RecitationException, offline included, what came in stays for the next tap
+  /// throws a RecitationException, offline included, what came in stays for the next tap. a
+  /// pause from the notification leaves it idle
   Future<void> download() async {
     if (state.ready || state.downloading) return;
     state = (ready: false, downloading: true, progress: null);
@@ -102,14 +104,27 @@ class SurahDownloadNotifier extends Notifier<SurahDownload> {
     /// the sheet may close, the download and its progress go on
     final link = ref.keepAlive();
     try {
-      await ref
-          .read(recitationFilesProvider)
-          .downloadSurah(
-            surah.$1,
-            await _files,
-            onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
-          );
-      state = _ready;
+      final (reciter, number) = surah;
+      final info = (await ref.read(quranAssetsProvider.future)).surah(number);
+      final done = await DownloadNotice.run(
+        key: 'surah ${reciter.name} $number',
+        title: (l10n, arabic) => l10n.tr(StringsManager.surahByReciter, {
+          'surah': arabic ? info.ar : info.en,
+          'reciter': l10n.tr(reciter.short, const {}),
+        }),
+        settings: ref.read(settingsProvider).value,
+        resume: download,
+        job: (notice) async => ref
+            .read(recitationFilesProvider)
+            .downloadSurah(
+              reciter,
+              await _files,
+              onProgress: (progress) =>
+                  state = (ready: false, downloading: true, progress: progress),
+              notice: notice,
+            ),
+      );
+      state = done ? _ready : _idle;
     } on Object {
       state = _idle;
       rethrow;

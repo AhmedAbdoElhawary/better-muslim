@@ -53,7 +53,7 @@ void main() {
           (ref) => TafsirFiles(
             assets: () => ref.read(quranAssetsProvider.future),
             root: () async => root,
-            fetch: (_) async => online
+            fetch: (_, {from = 0}) async => online
                 ? (length: _body.length, bytes: chunks.stream)
                 : throw const SocketException('offline'),
             exclude: (_) async {},

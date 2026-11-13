@@ -83,6 +83,9 @@ Future<void> topUp(
     recordings: recordings,
     tones: tones,
     azkarVoice: settings.azkarVoice,
+    flipStops: settings.adhanFlipStops,
+    buttonsStop: settings.adhanButtonsStop,
+    silentMinutes: settings.prayerSilent ? settings.prayerSilentMinutes : 0,
     texts: texts,
   );
 }

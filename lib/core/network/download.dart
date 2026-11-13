@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:crypto/crypto.dart';
 
 /// the tafsirs and mushaf styles. a public repo of its own, this one is private and its releases
@@ -11,7 +12,11 @@ final contentReleases = Uri.parse(
 /// a download's length from its header and its body
 typedef Fetched = ({int? length, Stream<List<int>> bytes});
 
-enum DownloadFailure { offline, failed, cancelled }
+/// from is where a paused download goes on, the length is then what is left
+typedef Fetch = Future<Fetched> Function(Uri uri, {int from});
+
+/// paused from the notification keeps its .part for the resume
+enum DownloadFailure { offline, failed, cancelled, paused }
 
 class DownloadException implements Exception {
   const DownloadException(this.failure);
@@ -22,12 +27,21 @@ class DownloadException implements Exception {
   String toString() => 'DownloadException($failure)';
 }
 
-/// https only and no headers beyond the defaults (FR-034)
-Future<Fetched> fetchUri(Uri uri) async {
-  final client = HttpClient()..userAgent = null;
+/// https only and no headers beyond the defaults and the range (FR-034). a server that ignores
+/// the range throws, the download then starts again from the beginning
+Future<Fetched> fetchUri(Uri uri, {int from = 0}) async {
+  final client = HttpClient()
+    ..userAgent = null
+    ..connectionTimeout = const Duration(seconds: 15);
   try {
-    final response = await (await client.getUrl(uri)).close();
-    if (response.statusCode != HttpStatus.ok) throw HttpException('${response.statusCode}');
+    final request = await client.getUrl(uri);
+    if (from > 0) request.headers.set(HttpHeaders.rangeHeader, 'bytes=$from-');
+    final response = await request.close();
+    final expected = from > 0 ? HttpStatus.partialContent : HttpStatus.ok;
+    if (response.statusCode != expected) {
+      client.close(force: true);
+      throw HttpException('${response.statusCode}');
+    }
     final length = response.contentLength;
     return (length: length < 0 ? null : length, bytes: response);
   } finally {
@@ -36,21 +50,35 @@ Future<Fetched> fetchUri(Uri uri) async {
   }
 }
 
+/// what is in a .part from a paused download, so the next fetch asks only for the rest
+int partLength(File part) => part.existsSync() ? part.lengthSync() : 0;
+
 /// written to a .part and renamed only when its sha256 matches, so a half or wrong file never
-/// stays. progress is 0 to 1, or null when the server sends no size
+/// stays. progress is 0 to 1, or null when the server sends no size. a .part left by a pause is
+/// kept and goes on
 Future<void> saveVerified(
   Uri uri,
   File file, {
   required String sha256Hex,
-  Future<Fetched> Function(Uri uri) fetch = fetchUri,
+  Fetch fetch = fetchUri,
   bool Function()? cancelled,
   void Function(double? progress)? onProgress,
+  DownloadNotice? notice,
 }) async {
   if (uri.scheme != 'https') throw const DownloadException(DownloadFailure.failed);
   final part = File('${file.path}.part');
-  final Fetched fetched;
+  notice?.part = part.path;
+  var from = partLength(part);
+  Fetched fetched;
   try {
-    fetched = await fetch(uri);
+    try {
+      fetched = await fetch(uri, from: from);
+    } on HttpException {
+      if (from == 0) rethrow;
+      part.deleteSync();
+      from = 0;
+      fetched = await fetch(uri);
+    }
   } on SocketException {
     throw const DownloadException(DownloadFailure.offline);
   } on IOException {
@@ -58,22 +86,25 @@ Future<void> saveVerified(
   }
   final digest = _Digest();
   final hash = sha256.startChunkedConversion(digest);
-  final sink = part.openWrite();
-  var written = 0;
+  if (from > 0) await part.openRead().forEach(hash.add);
+  final sink = part.openWrite(mode: from > 0 ? FileMode.append : FileMode.write);
+  final total = fetched.length == null ? null : from + fetched.length!;
+  var written = from;
   try {
     await for (final chunk in fetched.bytes) {
       if (cancelled?.call() ?? false) throw const DownloadException(DownloadFailure.cancelled);
+      notice?.progress(written, total);
       hash.add(chunk);
       sink.add(chunk);
       written += chunk.length;
-      final length = fetched.length;
-      onProgress?.call(length == null ? null : written / length);
+      onProgress?.call(total == null ? null : written / total);
     }
     hash.close();
     await sink.close();
   } on Object catch (error) {
     await sink.close().catchError((_) {});
-    if (part.existsSync()) part.deleteSync();
+    final paused = error is DownloadException && error.failure == DownloadFailure.paused;
+    if (!paused && part.existsSync()) part.deleteSync();
     if (error is DownloadException) rethrow;
     throw DownloadException(
       error is SocketException ? DownloadFailure.offline : DownloadFailure.failed,

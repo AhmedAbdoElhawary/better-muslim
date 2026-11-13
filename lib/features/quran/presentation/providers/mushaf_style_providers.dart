@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' show Color, Rect;
 
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/quran/data/mushaf_files.dart';
@@ -38,7 +39,7 @@ class MushafStyleStatusNotifier extends Notifier<MushafStyleStatus> {
     return _idle;
   }
 
-  /// throws a DownloadException, cancelled included
+  /// throws a DownloadException, cancelled included. a pause from the notification leaves it idle
   Future<void> download() => _running ??= _download().whenComplete(() => _running = null);
 
   Future<void> _download() async {
@@ -51,12 +52,19 @@ class MushafStyleStatusNotifier extends Notifier<MushafStyleStatus> {
     }
     state = (ready: false, downloading: true, progress: null);
     try {
-      await files.download(
-        style,
-        onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
+      final done = await DownloadNotice.run(
+        key: 'mushaf ${style.name}',
+        title: (l10n, _) => l10n.tr(style.label, const {}),
+        settings: ref.read(settingsProvider).value,
+        resume: download,
+        job: (notice) => files.download(
+          style,
+          onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
+          notice: notice,
+        ),
       );
-      state = _ready;
-      ref.invalidate(mushafDownloadsProvider);
+      state = done ? _ready : _idle;
+      if (done) ref.invalidate(mushafDownloadsProvider);
     } on Object {
       state = _idle;
       rethrow;
@@ -99,6 +107,9 @@ class MushafStylePick extends Notifier<MushafStyle?> {
     }
     if (state != style) return;
     state = null;
+
+    /// paused from the notification
+    if (!ref.read(mushafStyleStatusProvider(style)).ready) return;
     await ref.read(databaseProvider).updateSettings(SettingsCompanion(mushafStyle: Value(style)));
   }
 }

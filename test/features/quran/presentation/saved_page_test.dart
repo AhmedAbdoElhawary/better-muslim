@@ -7,6 +7,7 @@ import 'package:better_muslim/core/settings/quran.dart';
 import 'package:better_muslim/features/quran/data/quran_store.dart';
 import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/mushaf_page_view.dart';
+import 'package:better_muslim/features/quran/presentation/view/widgets/note_editor.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/page_chrome.dart';
 import 'package:better_muslim/features/quran/presentation/view/widgets/ribbon.dart';
 import 'package:drift/drift.dart' show Value;
@@ -169,18 +170,21 @@ void main() {
     await unmount(tester);
   });
 
-  testWidgets('notes lists my notes and opens the ayah washed', (tester) async {
+  testWidgets('notes lists my notes and opens the ayah with its note', (tester) async {
     await pumpApp(tester);
     await seed(tester);
     await open(tester, Routes.quranNotes);
 
     expect(find.text('1:5'), findsOneWidget);
     expect(find.text('Ask for help in everything, then act.'), findsOneWidget);
+    expect(find.text('See the note'), findsNothing, reason: 'a short note is all there');
 
     await tester.tap(find.text('Ask for help in everything, then act.'));
     await tester.pumpAndSettle();
     final reader = tester.widget<ReaderPage>(find.byType(ReaderPage));
-    expect((reader.page, reader.ayah), (1, const AyahKey(1, 5)));
+    expect((reader.page, reader.ayah, reader.note), (1, const AyahKey(1, 5), true));
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('Delete note'), findsOneWidget);
     await unmount(tester);
   });
 
@@ -528,7 +532,7 @@ void main() {
     await tester.tap(find.text('1:2'));
     await tester.pumpAndSettle();
     final reader = tester.widget<ReaderPage>(find.byType(ReaderPage));
-    expect((reader.page, reader.ayah), (1, const AyahKey(1, 2)));
+    expect((reader.page, reader.ayah, reader.note), (1, const AyahKey(1, 2), true));
     await unmount(tester);
   });
 

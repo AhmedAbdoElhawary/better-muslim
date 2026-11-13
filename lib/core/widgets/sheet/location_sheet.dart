@@ -3,14 +3,13 @@ import 'package:better_muslim/core/location/place.dart';
 import 'package:better_muslim/core/location/place_list.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
-import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/blocker.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
-import 'package:better_muslim/core/widgets/motion/star_loader.dart';
 import 'package:better_muslim/core/widgets/search_field.dart';
 import 'package:better_muslim/core/widgets/sheet/bm_sheet.dart';
 import 'package:better_muslim/core/widgets/sheet/sheet_title.dart';
@@ -18,25 +17,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// the pill and the no-location card both open it, "use my location" can start right away.
 /// failed = location was just refused, the sheet opens saying so (milestone 10 FR-020). true when
 /// a place was saved, so 4.11 goes on only then
-Future<bool> showLocationSheet(
-  BuildContext context, {
-  bool useMyLocation = false,
-  bool failed = false,
-}) async =>
+Future<bool> showLocationSheet(BuildContext context, {bool failed = false}) async =>
     await showBmSheet<bool>(
       context,
       title: const SheetTitle(StringsManager.location),
-      builder: (_) => LocationSheet(useMyLocation: useMyLocation, failed: failed),
+      builder: (_) => LocationSheet(failed: failed),
     ) ??
     false;
 
+/// "use my location" outside the sheet: the sheet opens only when no place was found
+Future<bool> useMyLocation(BuildContext context, WidgetRef ref) async {
+  final found = await whileBlocked(context, ref.read(locationControllerProvider).useAuto);
+  if (found || !context.mounted) return found;
+  return showLocationSheet(context, failed: true);
+}
+
 /// use my location, or the offline city search over the GeoNames list (R12)
 class LocationSheet extends ConsumerStatefulWidget {
-  const LocationSheet({this.useMyLocation = false, this.failed = false, super.key});
-  final bool useMyLocation;
+  const LocationSheet({this.failed = false, super.key});
   final bool failed;
 
   @override
@@ -45,29 +45,16 @@ class LocationSheet extends ConsumerStatefulWidget {
 
 class _LocationSheetState extends ConsumerState<LocationSheet> {
   var _query = '';
-  var _busy = false;
   late var _failed = widget.failed;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.useMyLocation) _useMyLocation();
-  }
-
   Future<void> _useMyLocation() async {
-    setState(() {
-      _busy = true;
-      _failed = false;
-    });
-    final done = await ref.read(locationControllerProvider).useAuto();
+    setState(() => _failed = false);
+    final done = await whileBlocked(context, ref.read(locationControllerProvider).useAuto);
     if (!mounted) return;
     if (done) {
       Navigator.of(context).pop(true);
     } else {
-      setState(() {
-        _busy = false;
-        _failed = true;
-      });
+      setState(() => _failed = true);
     }
   }
 
@@ -83,7 +70,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _UseMyLocationRow(busy: _busy, onTap: _useMyLocation),
+          _UseMyLocationRow(onTap: _useMyLocation),
           BmSwitcher(
             child: _failed
                 ? const SymmetricPadding(
@@ -111,44 +98,29 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
 }
 
 class _UseMyLocationRow extends StatelessWidget {
-  const _UseMyLocationRow({required this.busy, required this.onTap});
-  final bool busy;
+  const _UseMyLocationRow({required this.onTap});
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      enabled: !busy,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: busy ? null : onTap,
+        onTap: onTap,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: SizeManager.listRow.r),
           child: SymmetricPadding(
             horizontal: SpaceManager.screen,
             child: Row(
               children: [
-                RSizedBox.square(
-                  dimension: SizeManager.iconList,
-                  child: BmSwitcher(
-                    child: busy
-                        ? const BmStarLoader(size: SizeManager.iconList)
-                        : BmIcon(
-                            BmIconName.location,
-                            size: SizeManager.iconList.r,
-                            color: context.getColor(ThemeEnum.primary),
-                          ),
-                  ),
+                BmIcon(
+                  BmIconName.location,
+                  size: SizeManager.iconList.r,
+                  color: context.getColor(ThemeEnum.primary),
                 ),
                 const RSizedBox.horizontal(SpaceManager.s3),
-                Expanded(
-                  child: AnimatedOpacity(
-                    opacity: busy ? BmOpacity.disabled : 1,
-                    duration: BmMotion.micro,
-                    child: const MediumText(StringsManager.useMyLocation),
-                  ),
-                ),
+                const Expanded(child: MediumText(StringsManager.useMyLocation)),
               ],
             ),
           ),

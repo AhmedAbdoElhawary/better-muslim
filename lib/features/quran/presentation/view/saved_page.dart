@@ -401,6 +401,7 @@ class _Notes extends ConsumerWidget {
       itemBuilder: (context, i) => NoteCard(
         notes[i],
         key: ValueKey(notes[i].ayah),
+        seeNote: true,
         onTap: () => _open(context, ref, notes[i].ayah),
       ),
     );
@@ -456,8 +457,10 @@ Future<void> _unhighlight(BuildContext context, WidgetRef ref, Note note) async 
   );
 }
 
-/// a note opens its ayah washed on its page
+/// a note opens on its page with the Study sheet on it
 void _open(BuildContext context, WidgetRef ref, AyahKey ayah) {
   final assets = ref.read(quranAssetsProvider).value;
-  if (assets != null) context.push(Routes.quranPage(assets.pageOf(ayah), ayah: ayah));
+  if (assets != null) {
+    context.push(Routes.quranPage(assets.pageOf(ayah), ayah: ayah, note: true));
+  }
 }

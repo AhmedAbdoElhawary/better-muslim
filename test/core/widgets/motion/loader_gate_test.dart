@@ -8,17 +8,18 @@ import '../../../helpers/widgets.dart';
 
 const _ms = Duration(milliseconds: 1);
 
-Future<void> _gate(WidgetTester tester, {required bool loading, bool second = false}) =>
+Future<void> _gate(WidgetTester tester, {required bool loading, bool instant = false}) =>
     pumpCoreWidget(
       tester,
-      Column(
-        children: [
-          BmLoaderGate(loading: loading, child: const Text('ready')),
-          if (second) BmLoaderGate(loading: loading, child: const Text('second')),
-        ],
-      ),
+      BmLoaderGate(loading: loading, instant: instant, child: const Text('ready')),
       settle: false,
     );
+
+/// the switcher's fade starts on the frame after the change, the old child leaves a frame after it
+Future<void> _crossfade(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(BmMotion.micro * 2);
+}
 
 BmStarPainter _painter(WidgetTester tester) =>
     tester
@@ -30,11 +31,10 @@ BmStarPainter _painter(WidgetTester tester) =>
 
 void main() {
   group('the gate', () {
-    tearDown(() => expect(BmLoaderGate.showing, 0));
-
-    testWidgets('a wait under 400 ms shows no loader', (tester) async {
+    testWidgets('a wait under 400 ms keeps the child and shows no loader', (tester) async {
       await _gate(tester, loading: true);
       await tester.pump(BmMotion.loaderDelay - _ms);
+      expect(find.text('ready'), findsOneWidget);
       await _gate(tester, loading: false);
       await tester.pump(BmMotion.loaderDelay);
 
@@ -53,6 +53,7 @@ void main() {
       expect(find.byType(BmStarLoader), findsOneWidget, reason: 'no sooner than 600 ms');
 
       await tester.pump(const Duration(milliseconds: 2));
+      await _crossfade(tester);
       expect(find.byType(BmStarLoader), findsNothing);
       expect(find.text('ready'), findsOneWidget);
     });
@@ -63,18 +64,22 @@ void main() {
       expect(find.byType(BmStarLoader), findsOneWidget);
 
       await _gate(tester, loading: false);
+      await _crossfade(tester);
       expect(find.byType(BmStarLoader), findsNothing);
       expect(find.text('ready'), findsOneWidget);
     });
 
-    testWidgets('a second gate never shows its own loader', (tester) async {
-      await _gate(tester, loading: true, second: true);
-      await tester.pump(BmMotion.loaderDelay);
+    testWidgets('a first load shows the star at once', (tester) async {
+      await _gate(tester, loading: false, instant: true);
+      await _gate(tester, loading: true, instant: true);
+      await _crossfade(tester);
       expect(find.byType(BmStarLoader), findsOneWidget);
+      expect(find.text('ready'), findsNothing);
 
-      await _gate(tester, loading: false, second: true);
       await tester.pump(BmMotion.loaderMinimum);
-      expect(find.text('second'), findsOneWidget);
+      await _gate(tester, loading: false);
+      await _crossfade(tester);
+      expect(find.text('ready'), findsOneWidget);
     });
   });
 

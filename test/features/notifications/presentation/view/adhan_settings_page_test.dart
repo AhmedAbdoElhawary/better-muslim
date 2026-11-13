@@ -114,7 +114,7 @@ void main() {
     await tester.tap(find.text('Phone default').last);
     await tester.pumpAndSettle();
     expect(system.last.method, 'playTone');
-    expect(system.last.arguments, {'channel': 'adhan_asr_tone'});
+    expect(system.last.arguments, {'channel': 'adhan_asr_alert'});
 
     await tester.tap(find.text('Glass'));
     await tester.pumpAndSettle();

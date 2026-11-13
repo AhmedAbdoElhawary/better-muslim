@@ -40,14 +40,14 @@ void main() {
         recitationFilesProvider.overrideWithValue(
           RecitationFiles(
             root: () async => root,
-            fetch: (_) async => throw const SocketException('offline'),
+            fetch: (_, {from = 0}) async => throw const SocketException('offline'),
             exclude: (_) async {},
           ),
         ),
         duaClipsProvider.overrideWithValue(
           DuaClips(
             root: () async => root,
-            fetch: (_) async => throw const SocketException('offline'),
+            fetch: (_, {from = 0}) async => throw const SocketException('offline'),
             exclude: (_) async {},
           ),
         ),

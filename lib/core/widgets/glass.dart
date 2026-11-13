@@ -13,6 +13,7 @@ const _plainOpacity = .8;
 class Glass extends ConsumerWidget {
   const Glass({this.border, this.child, super.key});
   final Border? border;
+
   final Widget? child;
 
   @override

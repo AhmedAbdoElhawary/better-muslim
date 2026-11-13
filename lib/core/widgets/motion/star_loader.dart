@@ -13,10 +13,16 @@ import 'package:material_ui/material_ui.dart';
 /// the self-drawing star of Brand's Noor motif. progress null draws, rests and fades in a loop,
 /// 0 to 1 draws the line up to it
 class BmStarLoader extends StatefulWidget {
-  const BmStarLoader({this.size = SizeManager.loader, this.progress, super.key});
+  const BmStarLoader({
+    this.size = SizeManager.loader,
+    this.progress,
+    this.color = ThemeEnum.primary,
+    super.key,
+  });
 
   final double size;
   final double? progress;
+  final ThemeEnum color;
 
   @override
   State<BmStarLoader> createState() => _BmStarLoaderState();
@@ -80,7 +86,7 @@ class _BmStarLoaderState extends State<BmStarLoader> with TickerProviderStateMix
             level: progress == null ? null : _level,
             reduce: MediaQuery.disableAnimationsOf(context),
             line: SizeManager.loaderLine.r,
-            color: context.getColor(ThemeEnum.primary),
+            color: context.getColor(widget.color),
           ),
         ),
       ),

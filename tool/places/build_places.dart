@@ -1,4 +1,4 @@
-// Builds assets/places/places.tsv.gz from GeoNames, see specs/001-milestone-2-data/contracts/places-asset.md.
+// Builds assets/places/places.tsv.gzip from GeoNames, see specs/001-milestone-2-data/contracts/places-asset.md.
 //
 //   dart run tool/places/build_places.dart
 //
@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 const _source = 'https://download.geonames.org/export/dump/';
 const _cache = 'tool/places/.cache';
-const _out = 'assets/places/places.tsv.gz';
+const _out = 'assets/places/places.tsv.gzip';
 const _maxBytes = 8 * 1024 * 1024;
 
 Future<void> main() async {

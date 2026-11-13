@@ -96,6 +96,15 @@ class AdhanAlarmsPlugin :
             }
             "length" -> result.success(AdhanService.length(context, call.arguments as String))
             "canSound" -> result.success(AdhanAlarms.canSound(context))
+            "stops" -> {
+                AdhanAlarms.setStops(context, call.argument<Boolean>("flip")!!, call.argument<Boolean>("buttons")!!)
+                result.success(null)
+            }
+            "canSilence" -> result.success(Silence.canSilence(context))
+            "openSilenceAccess" -> {
+                Silence.openAccess(context)
+                result.success(null)
+            }
             "dismiss" -> {
                 NotificationManagerCompat.from(context).cancel(call.arguments as Int)
                 result.success(null)

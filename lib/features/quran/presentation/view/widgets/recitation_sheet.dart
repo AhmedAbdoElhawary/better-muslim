@@ -194,13 +194,13 @@ class _Download extends ConsumerWidget {
           await ref.read(surahDownloadProvider((reciter, surah)).notifier).download();
         } on Object catch (error) {
           if (!context.mounted) return;
-          showToast(
-            context,
-            error is RecitationException && error.failure == RecitationFailure.offline
-                ? StringsManager.recitationOffline
-                : StringsManager.downloadFailed,
-            icon: BmIconName.listen,
-          );
+          showToast(context, switch (error) {
+            RecitationException(failure: RecitationFailure.offline) =>
+              StringsManager.recitationOffline,
+            RecitationException(failure: RecitationFailure.missing) =>
+              StringsManager.recitationMissing,
+            _ => StringsManager.downloadFailed,
+          }, icon: BmIconName.listen);
         }
       },
     );
