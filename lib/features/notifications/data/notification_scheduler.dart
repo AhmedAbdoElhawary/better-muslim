@@ -1,9 +1,7 @@
 import 'package:better_muslim/core/azkar/azkar_window.dart';
 import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
-import 'package:better_muslim/core/resources/design/bm_colors.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
-import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
@@ -37,9 +35,6 @@ class NotificationScheduler {
 
   /// the countdown posts on its prayer's channel now, so the reminder sounds like the prayer
   static const _oldReminderChannels = ['reminders', 'prayer_countdown', 'prayer_reminders'];
-
-  /// system surfaces use the dark qiyam emerald, whatever the app's theme
-  static final _accent = ThemeEnum.primary.resolve(bmThemes[BmThemeId.qiyamEmerald]!.dark);
 
   AndroidFlutterLocalNotificationsPlugin? get _android =>
       _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -123,17 +118,22 @@ class NotificationScheduler {
     await _channel.cancelAll();
   }
 
-  /// what kotlin needs to fire and play an adhan on its own (data-model.md, alarm entry)
+  /// what kotlin needs to fire and play an adhan, a reminder's sound or a nudge on its own
+  /// (data-model.md, alarm entry)
   static Map<String, Object?> entryOf(
     Alert alert,
     AlertTexts texts,
     AdhanRecording recording, {
     PrayerTone tone = PrayerTone.phone,
     bool full = true,
+    bool voice = true,
   }) => {
     'id': alert.id,
     'atMillis': alert.at.millisecondsSinceEpoch,
+    'kind': alert.kind.name,
     'full': full,
+    'clip': ?_clipOf(alert, recording, tone, voice: voice),
+    'lasts': ?alert.lasts?.inMilliseconds,
 
     /// an adhan that can't play comes quiet, the channel's sound is the reminder's takbir
     'adhan': alert.sound == PrayerSound.adhan,
@@ -150,7 +150,9 @@ class NotificationScheduler {
       ),
     ),
     'asset': recording.fullAsset(alert.prayer),
-    'channel': channelId(alert.prayer, alert.sound, recording, tone: tone),
+    'channel': alert.kind == AlertKind.azkar
+        ? _azkarChannelOf(voice: voice)
+        : channelId(alert.prayer, alert.sound),
     'title': texts.titleOf(alert),
     'body': texts.bodyOf(alert),
     'mediaTitle': texts.titleOf(alert),
@@ -210,27 +212,27 @@ class NotificationScheduler {
       _applied = null;
       await _plugin.cancelAllPendingNotifications();
       await _channel.cancelAll();
-      await _ensureChannels(sounds, recordings, tones, azkarVoice, texts);
+      await _ensureChannels(sounds, azkarVoice, texts);
       final native = <Map<String, Object?>>[];
       for (final alert in alerts) {
-        /// the countdown is android's reminder
-        if (_android != null && alert.kind == AlertKind.reminder) continue;
-
-        /// every prayer time needs code on android: it removes the last prayer's notification and
-        /// posts one that stays. without exact alarms the full adhan can't start, it comes quiet
-        /// (FR-023)
         final recording = recordings[alert.prayer] ?? AdhanRecording.alafasy;
         final tone = tones[alert.prayer] ?? PrayerTone.phone;
-        if (_android != null && alert.kind == AlertKind.adhan) {
-          final full = exact && alert.sound == PrayerSound.adhan;
-          native.add(entryOf(alert, texts, recording, tone: tone, full: full));
+
+        /// everything is kotlin's on android: a prayer time removes the last prayer's notification
+        /// and posts one that stays, and it plays every sound itself (ADR 0006). without exact
+        /// alarms the full adhan can't start, it comes quiet (FR-023)
+        if (_android != null) {
+          /// the countdown is android's reminder, a silent one leaves kotlin nothing to play
+          if (alert.kind == AlertKind.reminder && alert.sound == PrayerSound.silent) continue;
+          final full = exact && alert.kind == AlertKind.adhan && alert.sound == PrayerSound.adhan;
+          native.add(entryOf(alert, texts, recording, tone: tone, full: full, voice: azkarVoice));
           continue;
         }
         await _plugin.zonedSchedule(
           id: alert.id,
           scheduledDate: alert.at,
           notificationDetails: alert.kind == AlertKind.azkar
-              ? _azkarDetails(alert, texts, voice: azkarVoice)
+              ? _azkarDetails(alert, voice: azkarVoice)
               : _details(alert, texts, recording, tone),
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
@@ -262,15 +264,18 @@ class NotificationScheduler {
     }
   }
 
-  /// the dev page's check: the next prayer's notification with its sound, a minute from now
+  /// the dev page's check: the next prayer's notification with its sound, a minute from now. the
+  /// rehearsal adds its reminder's sound with the countdown
   Future<void> testIn1Minute(
     Alert next,
     AlertTexts texts,
     AdhanRecording recording,
     PrayerTone tone, {
     Duration after = const Duration(minutes: 1),
+    Duration? reminder,
   }) async {
-    final at = TZDateTime.now(next.at.location).add(after);
+    final now = TZDateTime.now(next.at.location);
+    final at = now.add(after);
     final alert = Alert(
       day: next.day,
       prayer: next.prayer,
@@ -284,6 +289,23 @@ class NotificationScheduler {
       await _channel.schedule([
         ..._native,
         {...entryOf(alert, texts, recording, tone: tone, full: full), 'id': testAlertId},
+        if (reminder != null)
+          {
+            ...entryOf(
+              Alert(
+                day: next.day,
+                prayer: next.prayer,
+                kind: AlertKind.reminder,
+                at: now.add(reminder),
+                sound: next.sound,
+              ),
+              texts,
+              recording,
+              tone: tone,
+              full: false,
+            ),
+            'id': testReminderId,
+          },
       ]);
       return;
     }
@@ -314,13 +336,20 @@ class NotificationScheduler {
       at: TZDateTime.now(texts.location.zone).add(const Duration(minutes: 1)),
       sound: PrayerSound.silent,
     );
+    if (_android != null) {
+      return _channel.schedule([
+        ..._native,
+        {
+          ...entryOf(alert, texts, AdhanRecording.alafasy, full: false, voice: voice),
+          'id': testAlertId,
+        },
+      ]);
+    }
     await _plugin.zonedSchedule(
       id: testAlertId,
       scheduledDate: alert.at,
-      notificationDetails: _azkarDetails(alert, texts, voice: voice),
-      androidScheduleMode: await _android?.canScheduleExactNotifications() ?? false
-          ? AndroidScheduleMode.exactAllowWhileIdle
-          : AndroidScheduleMode.inexactAllowWhileIdle,
+      notificationDetails: _azkarDetails(alert, voice: voice),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       title: texts.titleOf(alert),
       body: texts.bodyOf(alert),
       payload: payloadOf(alert),
@@ -331,8 +360,6 @@ class NotificationScheduler {
   /// milestone 5's adhan_{prayer}_adhan too
   Future<void> _ensureChannels(
     Map<Prayer, PrayerSound> sounds,
-    Map<Prayer, AdhanRecording> recordings,
-    Map<Prayer, PrayerTone> tones,
     bool azkarVoice,
     AlertTexts texts,
   ) async {
@@ -341,119 +368,99 @@ class NotificationScheduler {
     for (final old in _oldReminderChannels) {
       await android.deleteNotificationChannel(channelId: old);
     }
-    final azkar = azkarVoice
-        ? [for (final set in AzkarSet.values) _azkar(texts, set)]
-        : [_azkar(texts)];
-    for (final channel in azkar) {
-      await android.createNotificationChannel(channel);
-    }
-    for (final id in _azkarChannelIds.where((id) => azkar.every((channel) => channel.id != id))) {
+    final azkar = _azkar(texts, voice: azkarVoice);
+    await android.createNotificationChannel(azkar);
+    for (final id in _azkarChannelIds.where((id) => id != azkar.id)) {
       await android.deleteNotificationChannel(channelId: id);
     }
     await android.createNotificationChannelGroup(
       AndroidNotificationChannelGroup(_group, texts.tr(StringsManager.soundAdhan)),
     );
     for (final MapEntry(key: prayer, value: sound) in sounds.entries) {
-      final recording = recordings[prayer] ?? AdhanRecording.alafasy;
-      final tone = tones[prayer] ?? PrayerTone.phone;
-      final kept = channelId(prayer, sound, recording, tone: tone);
-      await android.createNotificationChannel(_channelOf(prayer, sound, recording, tone, texts));
+      final kept = channelId(prayer, sound);
+      await android.createNotificationChannel(_channelOf(prayer, sound, texts));
       for (final other in channelIdsOf(prayer).where((id) => id != kept)) {
         await android.deleteNotificationChannel(channelId: other);
       }
     }
   }
 
-  /// android fixes a channel's sound when it is made, so each recording and tone needs its own id.
-  /// the phone's tone keeps the old id, a sound changed in the phone's settings stays
-  static String channelId(
-    Prayer prayer,
-    PrayerSound sound,
-    AdhanRecording recording, {
-    PrayerTone tone = PrayerTone.phone,
-  }) => switch (sound) {
-    PrayerSound.adhan => 'adhan_${prayer.name}_adhan_${recording.name}',
-    PrayerSound.tone when tone != PrayerTone.phone => 'adhan_${prayer.name}_tone_${tone.name}',
-    _ => 'adhan_${prayer.name}_${sound.name}',
-  };
+  /// the channels make no sound, kotlin plays it (ADR 0006). they still buzz, a silent prayer
+  /// doesn't
+  static String channelId(Prayer prayer, PrayerSound sound) =>
+      'adhan_${prayer.name}_${sound == PrayerSound.silent ? 'silent' : 'alert'}';
 
   /// every id the prayer has ever had, so an apply can leave exactly one
-  static List<String> channelIdsOf(Prayer prayer) => [
-    'adhan_${prayer.name}_adhan',
-    for (final sound in PrayerSound.values)
-      if (sound != PrayerSound.adhan) channelId(prayer, sound, AdhanRecording.alafasy),
-    for (final recording in AdhanRecording.values) channelId(prayer, PrayerSound.adhan, recording),
-    for (final tone in PrayerTone.values)
-      if (tone != PrayerTone.phone)
-        channelId(prayer, PrayerSound.tone, AdhanRecording.alafasy, tone: tone),
-    for (final name in _removedRecordings) 'adhan_${prayer.name}_adhan_$name',
-  ];
+  static List<String> channelIdsOf(Prayer prayer) {
+    final id = 'adhan_${prayer.name}';
+    return [
+      '${id}_alert',
+      '${id}_silent',
+      '${id}_adhan',
+      '${id}_tone',
+      for (final tone in PrayerTone.values)
+        if (tone != PrayerTone.phone) '${id}_tone_${tone.name}',
+      for (final recording in AdhanRecording.values) '${id}_adhan_${recording.name}',
+      for (final name in _removedRecordings) '${id}_adhan_$name',
+    ];
+  }
 
   /// taken out of the app, a phone that picked one still has its channel
   static const _removedRecordings = ['aaqibAzeez', 'andrewler', 'synagda', 'madinah'];
 
-  AndroidNotificationChannel _channelOf(
+  static AndroidNotificationChannel _channelOf(
     Prayer prayer,
     PrayerSound sound,
-    AdhanRecording recording,
-    PrayerTone tone,
     AlertTexts texts,
   ) => AndroidNotificationChannel(
-    channelId(prayer, sound, recording, tone: tone),
+    channelId(prayer, sound),
     texts.tr(prayer.nameKey),
     groupId: _group,
     importance: Importance.high,
-    playSound: sound != PrayerSound.silent,
-    sound: switch (sound) {
-      PrayerSound.adhan => RawResourceAndroidNotificationSound(recording.androidClipOf(prayer)),
-      PrayerSound.tone when tone.file != null => RawResourceAndroidNotificationSound(tone.file),
-      _ => null,
-    },
+    playSound: false,
     enableVibration: sound != PrayerSound.silent,
   );
 
+  /// the raw clip kotlin plays with the alert. the takbir is the reminder's, the prayer time's
+  /// adhan is the full one
+  static String? _clipOf(
+    Alert alert,
+    AdhanRecording recording,
+    PrayerTone tone, {
+    required bool voice,
+  }) => switch ((alert.kind, alert.sound)) {
+    (AlertKind.azkar, _) => voice ? 'azkar_${azkarSetOf(alert.prayer).name}' : null,
+    (AlertKind.reminder, PrayerSound.adhan) => recording.androidClipOf(alert.prayer),
+    (_, PrayerSound.tone) => tone.file ?? _phoneClip,
+    _ => null,
+  };
+
+  /// kotlin's ClipPlayer.PHONE
+  static const _phoneClip = 'phone';
+
+  /// the earlier per set ids carried the voice as the channel's sound
   static final _azkarChannelIds = [
     'azkar',
-    for (final set in AzkarSet.values) ...['azkar_${set.name}', _voiceChannelId(set)],
+    'azkar_voice',
+    for (final set in AzkarSet.values) ...['azkar_${set.name}', 'azkar_${set.name}_2'],
   ];
 
-  /// android keeps a channel's first settings even after a delete, the first ids were silent on
-  /// the OPPO, so the voice moved to new ids
-  static String _voiceChannelId(AzkarSet set) => 'azkar_${set.name}_2';
+  static String _azkarChannelOf({required bool voice}) => voice ? 'azkar_voice' : 'azkar';
 
-  /// the nudges never buzz. with the voice each set needs its own channel, android fixes its sound
-  static AndroidNotificationChannel _azkar(AlertTexts texts, [AzkarSet? voice]) => voice == null
-      ? AndroidNotificationChannel(
-          'azkar',
-          texts.tr(StringsManager.tabAzkar),
-          playSound: false,
-          enableVibration: false,
-        )
-      : AndroidNotificationChannel(
-          _voiceChannelId(voice),
-          texts.tr(voice.titleKey),
-          importance: Importance.high,
-          sound: RawResourceAndroidNotificationSound('azkar_${voice.name}'),
-          enableVibration: false,
-        );
-
-  NotificationDetails _azkarDetails(Alert alert, AlertTexts texts, {required bool voice}) {
-    final set = azkarSetOf(alert.prayer);
-    final channel = _azkar(texts, voice ? set : null);
-    return NotificationDetails(
-      android: AndroidNotificationDetails(
-        channel.id,
-        channel.name,
-        importance: channel.importance,
-        priority: voice ? Priority.high : Priority.defaultPriority,
-        playSound: channel.playSound,
-        sound: channel.sound,
+  /// the nudges never buzz. with the voice the banner drops down while kotlin says the set's name
+  static AndroidNotificationChannel _azkar(AlertTexts texts, {required bool voice}) =>
+      AndroidNotificationChannel(
+        _azkarChannelOf(voice: voice),
+        texts.tr(StringsManager.tabAzkar),
+        importance: voice ? Importance.high : Importance.defaultImportance,
+        playSound: false,
         enableVibration: false,
-        color: _accent,
-        category: AndroidNotificationCategory.reminder,
-        timeoutAfter: alert.lasts?.inMilliseconds,
-      ),
+      );
 
+  /// ios only, android's nudge is kotlin's
+  static NotificationDetails _azkarDetails(Alert alert, {required bool voice}) {
+    final set = azkarSetOf(alert.prayer);
+    return NotificationDetails(
       /// passive can't make a sound, the voice needs active
       iOS: DarwinNotificationDetails(
         sound: voice ? 'azkar_${set.name}.caf' : null,
