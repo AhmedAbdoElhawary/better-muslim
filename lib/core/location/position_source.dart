@@ -26,7 +26,7 @@ class PositionSource {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
           accuracy: accuracy,
-          timeLimit: const Duration(seconds: 15),
+          timeLimit: const Duration(seconds: 10),
         ),
       );
       return (latitude: position.latitude, longitude: position.longitude);
