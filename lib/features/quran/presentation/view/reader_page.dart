@@ -49,13 +49,22 @@ import 'package:material_ui/material_ui.dart';
 /// 4.19 to 4.23 and 4.07, the page in its layout and the ayah to wash. the whole reader takes the page's palette, and
 /// follow sky crossfades it at isha and fajr
 class ReaderPage extends ConsumerStatefulWidget {
-  const ReaderPage({required this.page, this.ayah, this.recite = false, super.key});
+  const ReaderPage({
+    required this.page,
+    this.ayah,
+    this.recite = false,
+    this.note = false,
+    super.key,
+  });
 
   final int page;
   final AyahKey? ayah;
 
   /// the Quran tab's Listen, the recitation sheet rises once the reader is open
   final bool recite;
+
+  /// Saved's notes, the Study sheet opens on the ayah's note
+  final bool note;
 
   @override
   ConsumerState<ReaderPage> createState() => _ReaderPageState();
@@ -141,7 +150,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
     _page.addListener(_turned);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.ayah case final ayah?) _openAt(ayah);
+      if (widget.ayah case final ayah?) {
+        widget.note ? _whenOpen(() => _openNote(widget.page, ayah)) : _openAt(ayah);
+      }
       if (widget.recite) _whenOpen(_openRecitation);
     });
   }
@@ -252,6 +263,10 @@ class _ReaderPageState extends ConsumerState<ReaderPage> with TickerProviderStat
   void _failed(RecitationFailure failure) {
     final state = ref.read(recitationStateProvider).value;
     final (ayah, to) = (state?.ayah, state?.to);
+    if (failure == RecitationFailure.missing) {
+      showToast(context, StringsManager.recitationMissing, icon: BmIconName.listen);
+      return;
+    }
     if (failure == RecitationFailure.offline || ayah == null) {
       showToast(context, StringsManager.recitationOffline, icon: BmIconName.listen);
       return;
