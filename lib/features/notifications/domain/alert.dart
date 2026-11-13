@@ -47,6 +47,9 @@ const testAlertId = 1000000;
 /// ios's "open the app" after the last alert
 const quietAlertId = testAlertId + 1;
 
+/// the dev page rehearsal's reminder sound on android
+const testReminderId = testAlertId + 2;
+
 final _firstDay = DateTime.utc(2020);
 
 /// an id gives back its day and prayer, so cleaning up a delivered one needs no payload
