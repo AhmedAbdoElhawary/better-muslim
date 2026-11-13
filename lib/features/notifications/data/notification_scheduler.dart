@@ -30,6 +30,7 @@ class NotificationScheduler {
 
   /// what the last apply scheduled, null at start so a cold open always applies
   Map<String, DateTime>? _applied;
+  DateTime _appliedAt = DateTime.now();
 
   static const _group = 'adhan';
 
@@ -169,6 +170,16 @@ class NotificationScheduler {
     },
   };
 
+  /// do not disturb a minute after the prayer, kotlin waits for its adhan to end
+  static Map<String, Object?> silenceEntryOf(Alert alert, int minutes) => {
+    'id': silenceId(alert.id),
+    'atMillis': alert.at.add(const Duration(minutes: 1)).millisecondsSinceEpoch,
+    'kind': 'silence',
+    'untilMillis': alert.at
+        .add(Duration(minutes: silentMinutesOf(alert, minutes)))
+        .millisecondsSinceEpoch,
+  };
+
   /// errors carry only the step, never a payload, a place or a time (FR-040)
   Future<void> apply({
     required List<Alert> alerts,
@@ -177,8 +188,14 @@ class NotificationScheduler {
     required Map<Prayer, PrayerTone> tones,
     required AlertTexts texts,
     bool azkarVoice = true,
+    bool flipStops = true,
+    bool buttonsStop = true,
+
+    /// 0 is off
+    int silentMinutes = 0,
   }) async {
     try {
+      await _channel.stops(flip: flipStops, buttons: buttonsStop);
       final exact = await _android?.canScheduleExactNotifications() ?? false;
       final keys = {
         for (final alert in alerts)
@@ -195,6 +212,7 @@ class NotificationScheduler {
             texts.bodyOf(alert),
             exact,
             azkarVoice,
+            silentMinutes,
           ].join('|'): alert.at,
       };
 
@@ -202,7 +220,10 @@ class NotificationScheduler {
       /// resume with nothing new skips it. one that went off is gone from the phone already
       final now = DateTime.now();
       final applied = _applied;
+
+      /// a clock moved back by hand brings the ones that went off back, they are set again
       if (applied != null &&
+          !now.isBefore(_appliedAt) &&
           keys.keys.every(applied.containsKey) &&
           applied.entries.every(
             (entry) => keys.containsKey(entry.key) || !entry.value.isAfter(now),
@@ -226,6 +247,9 @@ class NotificationScheduler {
           if (alert.kind == AlertKind.reminder && alert.sound == PrayerSound.silent) continue;
           final full = exact && alert.kind == AlertKind.adhan && alert.sound == PrayerSound.adhan;
           native.add(entryOf(alert, texts, recording, tone: tone, full: full, voice: azkarVoice));
+          if (silentMinutes > 0 && alert.kind == AlertKind.adhan) {
+            native.add(silenceEntryOf(alert, silentMinutes));
+          }
           continue;
         }
         await _plugin.zonedSchedule(
@@ -259,6 +283,7 @@ class NotificationScheduler {
       _native = native;
       if (native.isNotEmpty) await _channel.schedule(native);
       _applied = keys;
+      _appliedAt = now;
     } catch (error, stack) {
       await CrashReporter.instance.recordError(error, stack, context: const {'step': 'schedule'});
     }
