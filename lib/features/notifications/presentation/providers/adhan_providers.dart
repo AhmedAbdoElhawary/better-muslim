@@ -1,7 +1,9 @@
 import 'package:better_muslim/core/audio/adhan_files.dart';
 import 'package:better_muslim/core/audio/audio_use.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/features/notifications/data/adhan_channel.dart';
 import 'package:better_muslim/features/notifications/data/adhan_player.dart';
 import 'package:flutter/foundation.dart';
@@ -51,16 +53,23 @@ class AdhanDownloadNotifier extends Notifier<AdhanDownload> {
   AdhanDownload build() =>
       (ready: AdhanFiles.isReady(recording), downloading: false, progress: null);
 
-  /// throws a DownloadException, cancelled included
+  /// throws a DownloadException, cancelled included. a pause from the notification leaves it idle
   Future<void> download() async {
     if (state.ready || state.downloading) return;
     state = (ready: false, downloading: true, progress: null);
     try {
-      await AdhanFiles.download(
-        recording,
-        onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
+      final done = await DownloadNotice.run(
+        key: 'adhan ${recording.file}',
+        title: (l10n, _) => l10n.tr(recording.nameKey, const {}),
+        settings: ref.read(settingsProvider).value,
+        resume: download,
+        job: (notice) => AdhanFiles.download(
+          recording,
+          onProgress: (progress) => state = (ready: false, downloading: true, progress: progress),
+          notice: notice,
+        ),
       );
-      state = (ready: true, downloading: false, progress: null);
+      state = (ready: done, downloading: false, progress: null);
     } on Object {
       state = (ready: false, downloading: false, progress: null);
       rethrow;
