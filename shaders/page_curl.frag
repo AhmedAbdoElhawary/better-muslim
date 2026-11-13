@@ -35,43 +35,38 @@ void main() {
   vec2 origin = vec2(0.0, uSize.y);
   vec2 back = origin - uCorner;
   float len = length(back);
+  // one exit only, several returns next to a sampler can fail to compile on windows (flutter#190809)
   if (len < 0.5) {
     fragColor = texture(uPage, p / uSize);
-    return;
-  }
-  vec2 dir = back / len;
+  } else {
+    vec2 dir = back / len;
 
-  // a short pull can't wrap a full cylinder, so the fold tightens with it
-  float r = min(uRadius, len / PI);
+    // a short pull can't wrap a full cylinder, so the fold tightens with it
+    float r = min(uRadius, len / PI);
 
-  // the corner travels half around the cylinder then flat on top, so the axis sits this far in
-  vec2 axis = origin - dir * (len + PI * r) * 0.5;
-  float d = dot(p - axis, dir);
-  vec2 line = p - dir * d;
-  vec3 paper = uPaper * (1.0 - uShade);
+    // the corner travels half around the cylinder then flat on top, so the axis sits this far in
+    vec2 axis = origin - dir * (len + PI * r) * 0.5;
+    float d = dot(p - axis, dir);
+    vec2 line = p - dir * d;
+    vec3 paper = uPaper * (1.0 - uShade);
 
-  if (d > r) {
-    fragColor = shadow(d - r);
-    return;
-  }
-  if (d > 0.0) {
-    float theta = asin(d / r);
-    if (inside(line + dir * (PI - theta) * r)) {
+    if (d > r) {
+      fragColor = shadow(d - r);
+    } else if (d > 0.0) {
+      float theta = asin(d / r);
+      vec2 front = line + dir * theta * r;
+      if (inside(line + dir * (PI - theta) * r)) {
+        fragColor = vec4(paper, 1.0);
+      } else if (inside(front)) {
+        vec4 color = texture(uPage, front / uSize);
+        fragColor = vec4(color.rgb * (1.0 - uShade * d / r), color.a);
+      } else {
+        fragColor = shadow(0.0);
+      }
+    } else if (inside(line + dir * (PI * r - d))) {
       fragColor = vec4(paper, 1.0);
-      return;
+    } else {
+      fragColor = texture(uPage, p / uSize);
     }
-    vec2 front = line + dir * theta * r;
-    if (inside(front)) {
-      vec4 color = texture(uPage, front / uSize);
-      fragColor = vec4(color.rgb * (1.0 - uShade * d / r), color.a);
-      return;
-    }
-    fragColor = shadow(0.0);
-    return;
   }
-  if (inside(line + dir * (PI * r - d))) {
-    fragColor = vec4(paper, 1.0);
-    return;
-  }
-  fragColor = texture(uPage, p / uSize);
 }
