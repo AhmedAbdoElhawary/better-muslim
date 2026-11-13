@@ -449,6 +449,9 @@ abstract final class StringsManager {
   static const String reciterAliJaber = 'reciterAliJaber';
   static const String reciterFaresAbbad = 'reciterFaresAbbad';
   static const String reciterAymanSuwayd = 'reciterAymanSuwayd';
+  static const String reciterNufais = 'reciterNufais';
+  static const String reciterHassanSaleh = 'reciterHassanSaleh';
+  static const String reciterDukhain = 'reciterDukhain';
   static const String reciterAlafasyShort = 'reciterAlafasyShort';
   static const String reciterHusaryShort = 'reciterHusaryShort';
   static const String reciterAbdulBasitShort = 'reciterAbdulBasitShort';
@@ -492,6 +495,9 @@ abstract final class StringsManager {
   static const String reciterAliJaberShort = 'reciterAliJaberShort';
   static const String reciterFaresAbbadShort = 'reciterFaresAbbadShort';
   static const String reciterAymanSuwaydShort = 'reciterAymanSuwaydShort';
+  static const String reciterNufaisShort = 'reciterNufaisShort';
+  static const String reciterHassanSalehShort = 'reciterHassanSalehShort';
+  static const String reciterDukhainShort = 'reciterDukhainShort';
   static const String reciterAlafasyInitials = 'reciterAlafasyInitials';
   static const String reciterHusaryInitials = 'reciterHusaryInitials';
   static const String reciterAbdulBasitInitials = 'reciterAbdulBasitInitials';
@@ -535,6 +541,9 @@ abstract final class StringsManager {
   static const String reciterAliJaberInitials = 'reciterAliJaberInitials';
   static const String reciterFaresAbbadInitials = 'reciterFaresAbbadInitials';
   static const String reciterAymanSuwaydInitials = 'reciterAymanSuwaydInitials';
+  static const String reciterNufaisInitials = 'reciterNufaisInitials';
+  static const String reciterHassanSalehInitials = 'reciterHassanSalehInitials';
+  static const String reciterDukhainInitials = 'reciterDukhainInitials';
   static const String reciterRate = 'reciterRate';
   static const String murattalHafs = 'murattalHafs';
   static const String off = 'off';
@@ -584,6 +593,7 @@ abstract final class StringsManager {
   static const String madinahHafs = 'madinahHafs';
   static const String recitationOffline = 'recitationOffline';
   static const String recitationFailed = 'recitationFailed';
+  static const String recitationMissing = 'recitationMissing';
   static const String duaFailed = 'duaFailed';
   static const String tryAgain = 'tryAgain';
   static const String loading = 'loading';
@@ -756,4 +766,5 @@ abstract final class StringsManager {
   static const String noteSaved = 'noteSaved';
   static const String deleteNoteTitle = 'deleteNoteTitle';
   static const String deleteNoteBody = 'deleteNoteBody';
+  static const String seeNote = 'seeNote';
 }
