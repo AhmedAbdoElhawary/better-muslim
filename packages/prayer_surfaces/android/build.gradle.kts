@@ -2,14 +2,14 @@ group = "com.elhawary.bettermuslim.surfaces"
 version = "1.0"
 
 buildscript {
-    val kotlinVersion = "2.4.0"
+    val kotlinVersion = "2.4.20"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:9.1.1")
+        classpath("com.android.tools.build:gradle:9.3.3")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
