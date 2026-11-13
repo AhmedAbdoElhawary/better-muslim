@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:better_muslim/core/audio/clip_player.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
 import 'package:better_muslim/core/settings/quran.dart';
@@ -79,7 +80,7 @@ class AudioServiceRecitation implements Recitation {
       if (_state.active) {
         if ((_index, _player.duration) case (final index?, final duration?)
             when index < _queue.length) {
-          _lengths[(_state.reciter, recitationFile(_queue[index]))] = duration;
+          _lengths[(_state.reciter, _queue[index])] = duration;
         }
         _emit(_state.copyWith(position: position, duration: _player.duration ?? Duration.zero));
       }
@@ -152,9 +153,9 @@ class AudioServiceRecitation implements Recitation {
     await _player.clearAudioSources();
     await _configure();
 
-    final File first;
+    final AyahAudio first;
     try {
-      first = await _files.file(_state.reciter, recitationFile(_queue.first));
+      first = await _files.audio(_state.reciter, _queue.first);
     } on RecitationException catch (error) {
       if (session == _session) {
         _emit(_state.copyWith(status: RecitationStatus.idle, failure: error.failure));
@@ -163,17 +164,16 @@ class AudioServiceRecitation implements Recitation {
     }
     if (session != _session) return;
     try {
-      await _player.setAudioSources([AudioSource.file(first.path)]);
+      await _player.setAudioSources([_source(first)]);
     } on PlayerException {
-      /// the system can't open it, so it is deleted and the next play downloads it again
-      if (first.existsSync()) first.deleteSync();
+      _forget(first);
       if (session == _session) {
         _emit(_state.copyWith(status: RecitationStatus.idle, failure: RecitationFailure.failed));
       }
       return;
     }
     _added = 1;
-    _files.ahead(_state.reciter, {for (final item in _queue.skip(1)) recitationFile(item)});
+    _files.ahead(_state.reciter, _queue.skip(1));
     unawaited(_feed(session));
     await _player.setSpeed(_state.speed);
     await _player.setVolume(1);
@@ -188,9 +188,9 @@ class AudioServiceRecitation implements Recitation {
   /// the rest of the queue into the playlist as each file is checked
   Future<void> _feed(int session) async {
     while (_added < _queue.length) {
-      final File file;
+      final AyahAudio audio;
       try {
-        file = await _files.file(_state.reciter, recitationFile(_queue[_added]));
+        audio = await _files.audio(_state.reciter, _queue[_added]);
       } on RecitationException catch (error) {
         /// what is in the playlist still plays, it stops where the files end
         if (session == _session && _waiting) {
@@ -201,9 +201,9 @@ class AudioServiceRecitation implements Recitation {
       }
       if (session != _session) return;
       try {
-        await _player.addAudioSource(AudioSource.file(file.path));
+        await _player.addAudioSource(_source(audio));
       } on PlayerException {
-        if (file.existsSync()) file.deleteSync();
+        _forget(audio);
         return;
       }
       _added++;
@@ -214,10 +214,19 @@ class AudioServiceRecitation implements Recitation {
       }
     }
     final ready = await _files.isSurahReady(_state.reciter, [
-      for (var ayah = 1; ayah <= _queue.last.ayah; ayah++) AyahKey(_queue.last.surah, ayah),
       if (_queue.first.ayah == 0) const AyahKey(1, 1),
+      for (var ayah = 1; ayah <= _queue.last.ayah; ayah++) AyahKey(_queue.last.surah, ayah),
     ]);
     if (session == _session) _emit(_state.copyWith(surahReady: ready));
+  }
+
+  IndexedAudioSource _source(AyahAudio audio) =>
+      clipOf(audio.path, start: audio.start, end: audio.end);
+
+  /// the system can't open the file, so it is deleted and the next play downloads it again
+  void _forget(AyahAudio audio) {
+    final file = File(audio.path);
+    if (audio.path.startsWith('/') && file.existsSync()) file.deleteSync();
   }
 
   /// music like the clip and adhan players, so the shared session never flips (research R12)
@@ -296,10 +305,13 @@ class AudioServiceRecitation implements Recitation {
   /// past what's in the playlist it stops the walk there, that file may not be on the phone yet
   Future<Duration> _length(int index) async {
     if (index >= _added) return const Duration(days: 1);
-    final key = (_state.reciter, recitationFile(_queue[index]));
+    final key = (_state.reciter, _queue[index]);
     if (_lengths[key] case final length?) return length;
-    final file = await _files.file(key.$1, key.$2);
-    return _lengths[key] = await _probe.setFilePath(file.path) ?? Duration.zero;
+    final audio = await _files.audio(key.$1, key.$2);
+    if ((audio.start, audio.end) case (final start?, final end?)) {
+      return _lengths[key] = end - start;
+    }
+    return _lengths[key] = await _probe.setFilePath(audio.path) ?? Duration.zero;
   }
 
   @override
