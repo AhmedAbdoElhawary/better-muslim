@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/settings/quran.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +35,7 @@ typedef AyahTiming = ({Duration start, Duration end});
 class RecitationFiles {
   RecitationFiles({
     Future<Directory> Function()? root,
-    Future<Fetched> Function(Uri uri)? fetch,
+    Fetch? fetch,
     Future<void> Function(String path)? exclude,
   }) : _root = root ?? getApplicationSupportDirectory,
        _fetch = fetch ?? fetchUri,
@@ -45,7 +46,7 @@ class RecitationFiles {
   static final timingsBase = Uri.parse('https://www.mp3quran.net/api/v3/ayat_timing');
 
   final Future<Directory> Function() _root;
-  final Future<Fetched> Function(Uri uri) _fetch;
+  final Fetch _fetch;
   final Future<void> Function(String path) _exclude;
 
   final _folders = <Reciter, Future<Directory>>{};
@@ -56,6 +57,9 @@ class RecitationFiles {
   final _ahead = <AyahKey>[];
   Reciter _aheadReciter = Reciter.alafasy;
   bool _running = false;
+
+  /// nothing coming in for this long is a lost connection, so the next tap isn't stuck behind it
+  static const stall = Duration(seconds: 15);
 
   static String name(AyahKey key) =>
       '${'${key.surah}'.padLeft(3, '0')}${'${key.ayah}'.padLeft(3, '0')}.mp3';
@@ -103,10 +107,14 @@ class RecitationFiles {
     final timings = await _timingsOf(reciter, key.surah);
     if (key.ayah > timings.length) throw const RecitationException(RecitationFailure.failed);
     final file = await _surahFile(reciter, key.surah, 'mp3');
+
+    /// an end past the next ayah's start plays that bit twice, the echo
+    final next = key.ayah < timings.length ? timings[key.ayah].start : null;
+    final end = key.ayah == 0 ? timings.first.start : timings[key.ayah - 1].end;
     return (
       path: file.existsSync() ? file.path : '${surahAddress(reciter, key.surah)}',
       start: key.ayah == 0 ? Duration.zero : timings[key.ayah - 1].start,
-      end: key.ayah == 0 ? timings.first.start : timings[key.ayah - 1].end,
+      end: next != null && next < end ? next : end,
     );
   }
 
@@ -121,7 +129,7 @@ class RecitationFiles {
         final fetched = await _get(timingsAddress(reciter, surah));
         final List<int> body;
         try {
-          body = await fetched.bytes.expand((chunk) => chunk).toList();
+          body = await fetched.bytes.timeout(stall).expand((chunk) => chunk).toList();
         } on Object {
           throw const RecitationException(RecitationFailure.failed);
         }
@@ -225,6 +233,7 @@ class RecitationFiles {
     Reciter reciter,
     List<AyahKey> keys, {
     void Function(double progress)? onProgress,
+    DownloadNotice? notice,
   }) async {
     if (reciter.read != null) {
       final surah = keys.last;
@@ -238,13 +247,19 @@ class RecitationFiles {
 
       /// not one at a time with the ayah files, a whole surah would hold them back for minutes
       if (!file.existsSync()) {
-        await _download(surahAddress(reciter, surah.surah), file, onProgress: onProgress);
+        await _download(
+          surahAddress(reciter, surah.surah),
+          file,
+          onProgress: onProgress,
+          notice: notice,
+        );
       }
       onProgress?.call(1);
       return;
     }
     for (final (i, key) in keys.indexed) {
       await file(reciter, key);
+      notice?.share((i + 1) / keys.length);
       onProgress?.call((i + 1) / keys.length);
     }
   }
@@ -303,9 +318,9 @@ class RecitationFiles {
     return done;
   }
 
-  Future<Fetched> _get(Uri address) async {
+  Future<Fetched> _get(Uri address, {int from = 0}) async {
     try {
-      return await _fetch(address);
+      return await _fetch(address, from: from);
     } on SocketException {
       throw const RecitationException(RecitationFailure.offline);
     } on IOException {
@@ -313,34 +328,51 @@ class RecitationFiles {
     }
   }
 
-  /// to .part first, renamed only when complete and an mp3, anything else deleted
+  /// to .part first, renamed only when complete and an mp3, anything else deleted. a paused
+  /// one is kept and goes on from where it stopped
   Future<void> _download(
     Uri address,
     File file, {
     void Function(double progress)? onProgress,
+    DownloadNotice? notice,
   }) async {
     final part = File('${file.path}.part');
-    final fetched = await _get(address);
-    final sink = part.openWrite();
-    var written = 0;
-    final head = <int>[];
+    notice?.part = part.path;
+    var from = partLength(part);
+    Fetched fetched;
     try {
-      await for (final chunk in fetched.bytes) {
+      fetched = await _get(address, from: from);
+    } on RecitationException {
+      if (from == 0) rethrow;
+      part.deleteSync();
+      from = 0;
+      fetched = await _get(address);
+    }
+    final sink = part.openWrite(mode: from > 0 ? FileMode.append : FileMode.write);
+    final total = fetched.length == null ? null : from + fetched.length!;
+    var written = from;
+    final head = from > 0 ? await part.openRead(0, 3).expand((bytes) => bytes).toList() : <int>[];
+    try {
+      await for (final chunk in fetched.bytes.timeout(stall)) {
+        notice?.progress(written, total);
         if (head.length < 3) head.addAll(chunk.take(3 - head.length));
         written += chunk.length;
         sink.add(chunk);
-        if (fetched.length case final length?) onProgress?.call(written / length);
+        if (total != null) onProgress?.call(written / total);
       }
       await sink.close();
-    } on Object {
+    } on Object catch (error) {
       await sink.close().catchError((_) {});
-      if (part.existsSync()) part.deleteSync();
-      throw const RecitationException(RecitationFailure.failed);
+      final paused = error is DownloadException && error.failure == DownloadFailure.paused;
+      if (!paused && part.existsSync()) part.deleteSync();
+      if (error is DownloadException) rethrow;
+      throw RecitationException(
+        error is TimeoutException ? RecitationFailure.offline : RecitationFailure.failed,
+      );
     }
 
     /// no length header, the mp3 check alone decides
-    final length = fetched.length;
-    if ((length != null && written != length) || !isMp3(head)) {
+    if ((total != null && written != total) || !isMp3(head)) {
       part.deleteSync();
       throw const RecitationException(RecitationFailure.failed);
     }
