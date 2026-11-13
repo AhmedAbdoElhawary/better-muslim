@@ -10,9 +10,11 @@ import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/grouped_section.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
 import 'package:better_muslim/features/notifications/data/notification_scheduler.dart';
+import 'package:better_muslim/features/notifications/presentation/view/widgets/adhan_stops_section.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/notifications_off_line.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/prayer_sound_row.dart';
 import 'package:better_muslim/features/notifications/presentation/view/widgets/reminder_row.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
@@ -122,6 +124,10 @@ class _AdhanSettingsPageState extends ConsumerState<AdhanSettingsPage> {
                   ),
                   const RSizedBox.vertical(SpaceManager.s3),
                   const GroupedSection(children: [ReminderRow()]),
+                  if (defaultTargetPlatform == TargetPlatform.android) ...[
+                    const RSizedBox.vertical(SpaceManager.s3),
+                    const AdhanStopsSection(),
+                  ],
                 ],
               ),
             ),
