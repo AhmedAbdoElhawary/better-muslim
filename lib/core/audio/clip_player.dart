@@ -5,14 +5,24 @@ import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
-/// a downloaded adhan is a path on the phone, everything else a flutter asset
-UriAudioSource sourceOf(String asset) =>
-    asset.startsWith('/') ? AudioSource.file(asset) : AudioSource.asset(asset);
+/// a downloaded adhan or recitation is a path on the phone, a streamed surah an https address,
+/// everything else a flutter asset
+UriAudioSource sourceOf(String asset) => asset.startsWith('/')
+    ? AudioSource.file(asset)
+    : asset.startsWith('https:')
+    ? AudioSource.uri(Uri.parse(asset))
+    : AudioSource.asset(asset);
+
+/// start and end cut an ayah out of a surah file
+IndexedAudioSource clipOf(String asset, {Duration? start, Duration? end}) =>
+    start == null && end == null
+    ? sourceOf(asset)
+    : ClippingAudioSource(child: sourceOf(asset), start: start, end: end);
 
 /// the one thing the tests replace, so no test reaches the phone's audio
 abstract class ClipPlayer {
   /// end stops it early, the takbir preview is the full adhan's start
-  Future<void> play(String asset, {Duration? end});
+  Future<void> play(String asset, {Duration? start, Duration? end});
   Future<void> stop();
 
   /// a clip played to its end
@@ -25,7 +35,7 @@ class JustAudioClipPlayer implements ClipPlayer {
   StreamSubscription<PlayerState>? _busy;
 
   @override
-  Future<void> play(String asset, {Duration? end}) async {
+  Future<void> play(String asset, {Duration? start, Duration? end}) async {
     /// music like the adhan, so a preview is heard with the silent switch on
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
@@ -33,10 +43,7 @@ class JustAudioClipPlayer implements ClipPlayer {
       (state) =>
           BmSounds.busy = state.playing && state.processingState != ProcessingState.completed,
     );
-    final source = sourceOf(asset);
-    await _player.setAudioSource(
-      end == null ? source : ClippingAudioSource(child: source, end: end),
-    );
+    await _player.setAudioSource(clipOf(asset, start: start, end: end));
     unawaited(_player.play());
   }
 
