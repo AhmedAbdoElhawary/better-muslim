@@ -286,6 +286,43 @@ void main() {
       });
     });
 
+    test('the adhan switches go to kotlin, silent adds do not disturb a minute after', () async {
+      useAndroid();
+
+      await NotificationScheduler(channel).apply(
+        alerts: alerts,
+        sounds: sounds,
+        recordings: recordings,
+        tones: tones,
+        texts: texts,
+        flipStops: false,
+        silentMinutes: 15,
+      );
+
+      expect(channel.stopped, (flip: false, buttons: true));
+      final silence = channel.entries.where((entry) => entry['kind'] == 'silence').toList();
+      expect(silence.map((entry) => entry['id']), alerts.map((alert) => silenceId(alert.id)));
+      final first = alerts.first.at;
+      expect(
+        silence.first['atMillis'],
+        first.add(const Duration(minutes: 1)).millisecondsSinceEpoch,
+      );
+      expect(
+        silence.first['untilMillis'],
+        first.add(const Duration(minutes: 15)).millisecondsSinceEpoch,
+      );
+    });
+
+    test('silent off adds nothing', () async {
+      useAndroid();
+
+      await NotificationScheduler(
+        channel,
+      ).apply(alerts: alerts, sounds: sounds, recordings: recordings, tones: tones, texts: texts);
+
+      expect(channel.entries.where((entry) => entry['kind'] == 'silence'), isEmpty);
+    });
+
     test('without exact alarms no adhan plays in full, kotlin posts it quiet', () async {
       final android = useAndroid(exact: false);
 
@@ -568,6 +605,12 @@ class _FakeChannel extends AdhanChannel {
 
   @override
   Future<void> cancelAll() async => calls.add('cancelAll');
+
+  ({bool flip, bool buttons})? stopped;
+
+  @override
+  Future<void> stops({required bool flip, required bool buttons}) async =>
+      stopped = (flip: flip, buttons: buttons);
 
   @override
   Future<void> schedule(List<Map<String, Object?>> entries) async {
