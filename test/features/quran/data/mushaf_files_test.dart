@@ -32,7 +32,7 @@ void main() {
 
   MushafFiles files({String? hash}) => MushafFiles(
     root: () async => root,
-    fetch: (_) async => (
+    fetch: (_, {from = 0}) async => (
       length: _body.length,
       bytes: Stream.fromIterable([_body.sublist(0, 10), _body.sublist(10)]),
     ),
