@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:better_muslim/core/database/backup_exclusion.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/settings/adhan_recording.dart';
 import 'package:path_provider/path_provider.dart';
@@ -57,6 +58,7 @@ class AdhanFiles {
   static Future<void> download(
     AdhanRecording recording, {
     void Function(double? progress)? onProgress,
+    DownloadNotice? notice,
   }) async {
     await init();
     final folder = Directory(_folder!);
@@ -73,6 +75,9 @@ class AdhanFiles {
       await Directory(sounds).create(recursive: true);
       for (final file in files) {
         final clip = '${file}_clip.caf';
+
+        /// a resume after a pause keeps what is done
+        if (File('$sounds/$clip').existsSync()) continue;
         await saveVerified(
           base.resolve(clip),
           File('$sounds/$clip'),
@@ -82,14 +87,18 @@ class AdhanFiles {
       }
     }
     for (final (index, file) in files.indexed) {
+      if (File(pathOf(file)).existsSync()) continue;
+      notice?.part = '${pathOf(file)}.part';
       await saveVerified(
         base.resolve('$file.m4a'),
         File(pathOf(file)),
         sha256Hex: recording.sha256!['$file.m4a']!,
         cancelled: cancelled,
-        onProgress: onProgress == null
-            ? null
-            : (progress) => onProgress(progress == null ? null : (index + progress) / files.length),
+        onProgress: (progress) {
+          final all = progress == null ? null : (index + progress) / files.length;
+          if (all != null) notice?.share(all);
+          onProgress?.call(all);
+        },
       );
     }
   }
