@@ -148,6 +148,17 @@ class Settings extends Table {
   /// null until picked, then Translation.of gives the app language's own
   TextColumn get translation => textEnum<Translation>().nullable()();
 
+  /// android only, the full adhan is kotlin's and ios can't touch a posted sound
+  BoolColumn get adhanFlipStops => boolean().withDefault(const Constant(true))();
+  BoolColumn get adhanButtonsStop => boolean().withDefault(const Constant(true))();
+
+  /// do not disturb after each prayer's sound, for this many minutes from its time
+  BoolColumn get prayerSilent => boolean().withDefault(const Constant(false))();
+  IntColumn get prayerSilentMinutes => integer()
+      .withDefault(const Constant(20))
+      // ignore: recursive_getters, drift reads the column inside its own check
+      .check(prayerSilentMinutes.isIn(const [10, 15, 20, 30, 45, 60]))();
+
   /// 10% steps around the printed page, above 0 the lines rewrap
   IntColumn get mushafSize => integer()
       .withDefault(const Constant(0))
@@ -378,7 +389,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 30;
+  int get schemaVersion => 31;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -643,6 +654,12 @@ class AppDatabase extends _$AppDatabase {
       },
       from29To30: (m, schema) async {
         await m.addColumn(schema.settings, schema.settings.translation);
+      },
+      from30To31: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.adhanFlipStops);
+        await m.addColumn(schema.settings, schema.settings.adhanButtonsStop);
+        await m.addColumn(schema.settings, schema.settings.prayerSilent);
+        await m.addColumn(schema.settings, schema.settings.prayerSilentMinutes);
       },
     ),
   );
