@@ -10,7 +10,7 @@ import android.os.Build
 import org.json.JSONArray
 import org.json.JSONObject
 
-// the adhan alarms dart hands over, kept in private preferences so a restart can set them again
+// the adhan, reminder and nudge alarms dart hands over, kept in private preferences so a restart can set them again
 object AdhanAlarms {
     const val ACTION_FIRE = "com.elhawary.bettermuslim.adhan.FIRE"
     const val EXTRA_ID = "id"
@@ -53,6 +53,11 @@ object AdhanAlarms {
         val fire = fireIntent(context, entry.getInt("id"))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarms.canScheduleExactAlarms()) {
             alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, fire)
+            return
+        }
+        // a nudge can come a little late, it isn't worth the alarm icon in the status bar
+        if (entry.optString("kind") == "azkar") {
+            alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, fire)
             return
         }
         // oppo gives exact alarms a window of up to an hour, an alarm clock is never moved
