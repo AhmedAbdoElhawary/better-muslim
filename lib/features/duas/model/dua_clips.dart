@@ -12,7 +12,7 @@ final duaClipsProvider = Provider<DuaClips>((ref) => DuaClips());
 class DuaClips {
   DuaClips({
     Future<Directory> Function()? root,
-    Future<Fetched> Function(Uri uri)? fetch,
+    Fetch? fetch,
     Future<void> Function(String path)? exclude,
   }) : _root = root ?? getApplicationSupportDirectory,
        _fetch = fetch ?? fetchUri,
@@ -21,7 +21,7 @@ class DuaClips {
   static final base = Uri.parse('https://www.hisnmuslim.com/audio/ar/');
 
   final Future<Directory> Function() _root;
-  final Future<Fetched> Function(Uri uri) _fetch;
+  final Fetch _fetch;
   final Future<void> Function(String path) _exclude;
 
   Future<Directory>? _folder;
