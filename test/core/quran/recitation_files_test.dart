@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/network/download.dart';
@@ -247,5 +248,137 @@ void main() {
         ]);
       },
     );
+  });
+
+  test("on everyayah the bismillah is al-fatiha's first file", () async {
+    final recitations = files((_) => serve(_mp3));
+    final audio = await recitations.audio(Reciter.alafasy, const AyahKey(112, 0));
+    expect(audio, (path: stored('001001.mp3').path, start: null, end: null));
+  });
+
+  group('an mp3quran reciter', () {
+    const reciter = Reciter.nufais;
+    const ikhlas = 112;
+    final timings = jsonEncode([
+      for (var ayah = 1; ayah <= 4; ayah++)
+        {'ayah': ayah, 'start_time': ayah * 1000, 'end_time': ayah * 1000 + 900, 'page': 'x'},
+    ]);
+    const surahUri = 'https://cdn.mp3quran.net/audio/ahmad-nufais/r1/112.mp3';
+    const timingsUri = 'https://www.mp3quran.net/api/v3/ayat_timing?surah=112&read=259';
+
+    Future<Fetched> mp3quran(Uri uri) =>
+        uri.host == 'www.mp3quran.net' ? serve(utf8.encode(timings)) : serve(_mp3);
+
+    File kept(String name) => File('${root.path}/recitations/nufais/$name');
+
+    test('the surah file and its timings are on mp3quran over https', () {
+      expect(RecitationFiles.surahAddress(reciter, ikhlas).toString(), surahUri);
+      expect(RecitationFiles.timingsAddress(reciter, ikhlas).toString(), timingsUri);
+    });
+
+    test('a surah not downloaded streams, each ayah its part of the file', () async {
+      final recitations = files(mp3quran);
+      expect(await recitations.audio(reciter, const AyahKey(ikhlas, 2)), (
+        path: surahUri,
+        start: const Duration(seconds: 2),
+        end: const Duration(milliseconds: 2900),
+      ));
+      expect(await recitations.audio(reciter, const AyahKey(ikhlas, 0)), (
+        path: surahUri,
+        start: Duration.zero,
+        end: const Duration(seconds: 1),
+      ));
+      recitations.ahead(reciter, const [AyahKey(ikhlas, 3), AyahKey(ikhlas, 4)]);
+      await Future<void>.delayed(Duration.zero);
+
+      /// the timings once, kept, and no audio fetched
+      expect(asked.map((uri) => '$uri'), [timingsUri]);
+      expect(kept('112.json').existsSync(), isTrue);
+      expect(kept('112.mp3').existsSync(), isFalse);
+    });
+
+    test('kept timings play with no network', () async {
+      await files(mp3quran).audio(reciter, const AyahKey(ikhlas, 1));
+      asked.clear();
+      final offline = files((_) => throw const SocketException('offline'));
+      expect(
+        (await offline.audio(reciter, const AyahKey(ikhlas, 4))).end,
+        const Duration(seconds: 4, milliseconds: 900),
+      );
+      expect(asked, isEmpty);
+    });
+
+    test('timings out of order or not json leave nothing and are asked again', () async {
+      for (final body in [
+        '<html>not found</html>',
+        jsonEncode([
+          {'ayah': 2, 'start_time': 0, 'end_time': 900},
+        ]),
+        jsonEncode([
+          {'ayah': 1, 'start_time': 900, 'end_time': 100},
+        ]),
+      ]) {
+        final recitations = files((_) => serve(utf8.encode(body)));
+        expect(
+          await failure(recitations.audio(reciter, const AyahKey(ikhlas, 1))),
+          RecitationFailure.failed,
+        );
+        expect(kept('112.json').existsSync(), isFalse);
+        asked.clear();
+        await failure(recitations.audio(reciter, const AyahKey(ikhlas, 1)));
+        expect(asked, hasLength(1));
+      }
+    });
+
+    test('offline with no timings reports offline', () async {
+      final recitations = files((_) => throw const SocketException('offline'));
+      expect(
+        await failure(recitations.audio(reciter, const AyahKey(ikhlas, 1))),
+        RecitationFailure.offline,
+      );
+    });
+
+    test('a download keeps the file and the timings, then plays from the phone', () async {
+      final recitations = files(mp3quran);
+      final progress = <double>[];
+      await recitations.downloadSurah(reciter, surahFiles(ikhlas, 4), onProgress: progress.add);
+
+      expect(asked.map((uri) => '$uri'), [timingsUri, surahUri]);
+      expect(progress.last, 1);
+      expect(await recitations.isSurahReady(reciter, surahFiles(ikhlas, 4)), isTrue);
+      expect(await recitations.downloaded(reciter, (_) => 4), [
+        (surah: ikhlas, bytes: _mp3.length),
+      ]);
+      expect(
+        (await recitations.audio(reciter, const AyahKey(ikhlas, 1))).path,
+        kept('112.mp3').path,
+      );
+
+      await recitations.deleteSurah(reciter, ikhlas);
+      expect(kept('112.mp3').existsSync(), isFalse);
+      expect(kept('112.json').existsSync(), isFalse);
+      expect(await recitations.isSurahReady(reciter, surahFiles(ikhlas, 4)), isFalse);
+    });
+
+    test('timings that miss an ayah fail the download before the file', () async {
+      final recitations = files(mp3quran);
+      expect(
+        await failure(recitations.downloadSurah(reciter, surahFiles(ikhlas, 5))),
+        RecitationFailure.failed,
+      );
+      expect(asked.map((uri) => '$uri'), [timingsUri]);
+    });
+
+    test('a surah the check found wrong is missing and asks nothing', () async {
+      final wrong = Reciter.values.firstWhere((reciter) => reciter.missing.isNotEmpty);
+      final surah = wrong.missing.first;
+      final recitations = files(mp3quran);
+      expect(await failure(recitations.audio(wrong, AyahKey(surah, 1))), RecitationFailure.missing);
+      expect(
+        await failure(recitations.downloadSurah(wrong, surahFiles(surah, 1))),
+        RecitationFailure.missing,
+      );
+      expect(asked, isEmpty);
+    });
   });
 }
