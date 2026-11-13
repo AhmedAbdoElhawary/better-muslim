@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -55,10 +56,17 @@ class _Dial extends ConsumerWidget {
           child: Center(
             child: Transform.rotate(
               angle: (turn - _needle) * math.pi / 180,
-              child: BmIcon(
-                BmIconName.qibla,
-                size: SizeManager.icon.r,
-                color: context.getColor(aligned ? ThemeEnum.primary : ThemeEnum.text2),
+              child: AnimatedSwitcher(
+                duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : BmMotion.micro,
+                child: KeyedSubtree(
+                  key: ValueKey(aligned),
+                  child: BmIcon(
+                    BmIconName.qibla,
+                    filled: aligned,
+                    size: SizeManager.homeQibla.r,
+                    color: context.getColor(aligned ? ThemeEnum.accent : ThemeEnum.text2),
+                  ),
+                ),
               ),
             ),
           ),
