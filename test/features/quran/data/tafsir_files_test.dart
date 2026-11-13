@@ -37,7 +37,7 @@ void main() {
   }) => TafsirFiles(
     assets: () async => throw UnimplementedError(),
     root: () async => root,
-    fetch: fetch,
+    fetch: (uri, {from = 0}) => fetch(uri),
     exclude: (_) async {},
     address: (_) => Uri.parse(address),
     sha256: (_) => hash ?? '${sha256.convert(_body)}',
