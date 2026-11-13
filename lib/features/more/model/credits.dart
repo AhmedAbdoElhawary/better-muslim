@@ -147,6 +147,21 @@ const credits = [
     link: 'https://everyayah.com',
   ),
   Credit(
+    source: 'mp3quran.net · Ahmad Al-Nufais',
+    useKey: StringsManager.useRecitation,
+    link: 'https://mp3quran.net',
+  ),
+  Credit(
+    source: 'mp3quran.net · Hassan Mohamed Saleh',
+    useKey: StringsManager.useRecitation,
+    link: 'https://mp3quran.net',
+  ),
+  Credit(
+    source: 'mp3quran.net · Haitham Al-Dukhain',
+    useKey: StringsManager.useRecitation,
+    link: 'https://mp3quran.net',
+  ),
+  Credit(
     source: "Hisn al-Muslim · Sa'id al-Qahtani",
     useKey: StringsManager.useAzkarDuas,
     link: 'https://www.hisnmuslim.com',
