@@ -238,17 +238,6 @@ class _TafsirPane extends ConsumerWidget {
                   ),
                 ),
         ),
-        if (tafsir == TafsirSource.muyassar)
-          const OnlyPadding(
-            top: SpaceManager.tafsirCreditTop,
-            start: SpaceManager.tafsirTextSide,
-            end: SpaceManager.tafsirTextSide,
-            child: RegularText(
-              StringsManager.muyassarCredit,
-              fontSize: FontSizeManager.label,
-              color: ThemeEnum.text3,
-            ),
-          ),
       ],
     );
   }
