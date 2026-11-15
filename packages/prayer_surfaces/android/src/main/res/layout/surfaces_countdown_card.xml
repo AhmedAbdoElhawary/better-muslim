@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- expanded: 5.3's card, the countdown over the top end on its 28 x 1.1 line -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="ltr">
+
+    <ImageView
+        android:id="@+id/surfaces_countdown_picture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter" />
+
+    <Chronometer
+        android:id="@+id/surfaces_timer_left"
+        style="@style/SurfacesTimer"
+        android:layout_height="31dp"
+        android:layout_gravity="top|left"
+        android:textSize="28dp" />
+
+    <Chronometer
+        android:id="@+id/surfaces_timer_right"
+        style="@style/SurfacesTimer"
+        android:layout_height="31dp"
+        android:layout_gravity="top|right"
+        android:textSize="28dp" />
+</FrameLayout>
