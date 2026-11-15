@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- the recitation keeps playing with the phone locked -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- TODO(ahmed): declare the mediaPlayback foreground service in Play Console (App content), with a short video of a recitation and the full adhan playing with their notification, or the release is rejected -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <!-- a download goes on with the app in the background -->
     <!-- TODO(ahmed): declare the dataSync foreground service in Play Console (App content), with a short video of a download's notification, or the release is rejected -->
