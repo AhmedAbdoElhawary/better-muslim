@@ -15,7 +15,8 @@ ANDROID_RES = Path("android/app/src/main/res")
 IOS_ICONS = Path("ios/Runner/Assets.xcassets/AppIcon.appiconset")
 
 # a round launcher mask keeps only the circle inside the foreground, a corner would be cut off
-ANDROID_BADGE = (0.74, 0.26, 0.12)
+# moved in for the 8% inset in ic_launcher.xml, same spot on screen as with 16%
+ANDROID_BADGE = (0.694, 0.306, 0.097)
 # clears ios's rounded corner
 IOS_BADGE = (0.82, 0.18, 0.12)
 
