@@ -1,11 +1,16 @@
 import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/widgets/toast/toast.dart';
+import 'package:better_muslim/features/more/view/credits_page.dart';
+import 'package:better_muslim/features/more/view/feedback_page.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
+import '../../helpers/crash_reporter.dart';
 import '../../helpers/more.dart';
 import '../../helpers/prayer.dart';
 import '../../helpers/providers.dart';
@@ -78,26 +83,75 @@ void main() {
   });
 
   group('about', () {
-    testWidgets('acknowledgements lists every credit, a tap opens its link, then the licenses', (
-      tester,
-    ) async {
-      final system = mockSystemChannel();
+    testWidgets('the version, and credits with the four sources as text', (tester) async {
+      mockSystemChannel();
       await pumpMore(tester, await designOverrides());
-      await tapText(tester, 'Acknowledgements');
+      await scrollTo(tester, 'Version');
+      expect(find.text('1.0.0 (12)'), findsOneWidget);
+      await tapText(tester, 'Credits');
+      expect(find.byType(CreditsPage), findsOneWidget);
       expect(find.text('GeoNames'), findsOneWidget);
       expect(find.text('Place names · CC BY 4.0'), findsOneWidget);
+      expect(find.text('King Fahd Glorious Quran Printing Complex'), findsOneWidget);
+      expect(find.text('Tanzil'), findsOneWidget);
+      expect(find.text('Quranic Arabic Corpus'), findsOneWidget);
+      expect(find.text('Word roots · GNU GPL'), findsOneWidget);
+      expect(find.text('Open source licenses'), findsNothing);
+      await unmount(tester);
+    });
+  });
 
-      await tester.tap(find.text('GeoNames'));
+  group('feedback', () {
+    late FakeCrashReporter reporter;
+    setUp(() => CrashReporter.instance = reporter = FakeCrashReporter());
+    tearDown(() => CrashReporter.instance = const DebugCrashReporter());
+
+    testWidgets('send waits for text, a wrong email stops it, then it goes with the details', (
+      tester,
+    ) async {
+      mockSystemChannel();
+      await pumpMore(tester, await designOverrides());
+      await tapText(tester, 'Send feedback');
+      expect(find.byType(FeedbackPage), findsOneWidget);
+
+      await tester.tap(find.text('Send'));
       await tester.pumpAndSettle();
-      expect(system.where((call) => call.method == 'openUrl').single.arguments, {
-        'url': 'https://www.geonames.org',
-      });
+      expect(reporter.feedback, isEmpty);
 
-      await scrollTo(tester, 'Mishary Rashid Alafasy · Adhan and Fajr');
-      expect(find.text('Adam Synagda'), findsNothing);
-      expect(find.text('Adhan recordings'), findsOneWidget);
-      await tapText(tester, 'Open source licenses');
-      expect(find.byType(LicensePage), findsOneWidget);
+      final fields = find.byType(TextField);
+      await tester.enterText(fields.first, '  The qibla is great  ');
+      await tester.enterText(fields.last, 'me@example');
+      await tester.pump();
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+      expect(find.text("This email doesn't look right"), findsOneWidget);
+      expect(reporter.feedback, isEmpty);
+
+      await tester.enterText(fields.last, ' me@example.com ');
+      await tester.pump();
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+      expect(reporter.feedback.single, (
+        message: 'The qibla is great\n\nVersion 1.0.0 (12) · Google Pixel 8 · Android 16',
+        email: 'me@example.com',
+      ));
+      expect(find.text('Sent, thank you'), findsOneWidget);
+      expect(find.byType(FeedbackPage), findsNothing);
+      hideToast();
+      await unmount(tester);
+    });
+
+    testWidgets('the message stops at 1,000 and the email is left out when empty', (tester) async {
+      mockSystemChannel();
+      await pumpMore(tester, await designOverrides(), push: Routes.feedback);
+      await tester.enterText(find.byType(TextField).first, 'a' * 1200);
+      await tester.pump();
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+      final sent = reporter.feedback.single;
+      expect(sent.message.split('\n').first.length, 1000);
+      expect(sent.email, isNull);
+      hideToast();
       await unmount(tester);
     });
   });
