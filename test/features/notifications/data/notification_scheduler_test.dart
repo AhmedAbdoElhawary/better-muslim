@@ -633,4 +633,7 @@ class _RecordingReporter implements CrashReporter {
 
   @override
   void addBreadcrumb(String message, {String? category}) {}
+
+  @override
+  Future<void> sendFeedback(String message, {String? email}) async {}
 }

@@ -5,6 +5,7 @@ import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/qibla/declination.dart';
+import 'package:better_muslim/core/qibla/qibla_math.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
@@ -33,6 +34,8 @@ import '../../../helpers/qibla.dart';
 import '../../../helpers/sounds.dart';
 
 void main() {
+  /// on the WGS84 ellipsoid, the design's 119° rounded
+  final londonBearing = qiblaBearing(51.5074, -0.1278);
   setUpAll(tz.initializeTimeZones);
 
   /// the real fonts, the square test font is far wider and would overflow where the app doesn't
@@ -194,7 +197,7 @@ void main() {
       expect(dotColor(tester), ThemeEnum.success);
 
       expect(dialAngle(tester), closeTo(-105, 1e-6));
-      expect(needleAngle(tester), closeTo(14, .05));
+      expect(needleAngle(tester), closeTo(londonBearing - 105, .05));
       await unmount(tester);
     });
 
@@ -211,7 +214,7 @@ void main() {
         expect(find.text(letter), findsOneWidget);
       }
       expect(dialAngle(tester), closeTo(-105, 1e-6));
-      expect(needleAngle(tester), closeTo(14, .05));
+      expect(needleAngle(tester), closeTo(londonBearing - 105, .05));
       final dial = find.byType(QiblaDial);
       expect(
         tester
@@ -253,7 +256,7 @@ void main() {
       await face(tester, 350);
       await tester.pumpAndSettle();
       final from = needleAngle(tester);
-      expect(from, closeTo(129, .1));
+      expect(from, closeTo(londonBearing + 10, .1));
       expect(dialAngle(tester), closeTo(10, .1));
 
       compass.send(10 - offset);
@@ -271,7 +274,7 @@ void main() {
       await pumpQibla(tester, londonWith(tester), reduceMotion: true);
       await face(tester, 105);
       await tester.pumpAndSettle();
-      expect(needleAngle(tester), closeTo(14, .1));
+      expect(needleAngle(tester), closeTo(londonBearing - 105, .1));
 
       compass.send(139 - offset);
       await tester.pump();
@@ -389,11 +392,11 @@ void main() {
 
     testWidgets('inside 5° stays aligned, past it turns back', (tester) async {
       await pumpQibla(tester, londonWith(tester));
-      await face(tester, 119);
+      await face(tester, londonBearing);
       expect(find.text('Facing the Qibla'), findsOneWidget);
-      await face(tester, 123.9);
+      await face(tester, londonBearing + 4.9);
       expect(find.text('Facing the Qibla'), findsOneWidget);
-      await face(tester, 124.1);
+      await face(tester, londonBearing + 5.1);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('Turn 5° left'), findsOneWidget);
       expect(haptics, [aligned]);
@@ -458,8 +461,8 @@ void main() {
       expect(accuracyDot(), findsNothing);
       expect(find.text('Turn the N on the dial to north to see the Qibla.'), findsOneWidget);
       expect(dialAngle(tester), 0);
-      expect(needleAngle(tester), closeTo(118.99, .05));
-      expect(painter(tester).bearing, closeTo(118.99, .05));
+      expect(needleAngle(tester), closeTo(londonBearing, .05));
+      expect(painter(tester).bearing, closeTo(londonBearing, .05));
 
       await tester.pump(const Duration(seconds: 2));
       expect(dialAngle(tester), 0);
@@ -522,7 +525,7 @@ void main() {
       expect(find.text('London · Qibla at 119° from north'), findsOneWidget);
       expect(find.text('4,790 km'), findsOneWidget);
       expect(needleTurn(), findsWidgets);
-      expect(painter(tester).bearing, closeTo(118.99, .05));
+      expect(painter(tester).bearing, closeTo(londonBearing, .05));
       await unmount(tester);
     });
   });

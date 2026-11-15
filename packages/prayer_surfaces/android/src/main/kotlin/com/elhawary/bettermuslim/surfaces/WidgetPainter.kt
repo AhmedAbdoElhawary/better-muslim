@@ -400,35 +400,7 @@ class WidgetPainter(
         )
     }
 
-    private fun starPath(centerX: Float, centerY: Float, size: Float): Path {
-        val scale = size / 22f
-        val path = Path()
-        STAR.forEachIndexed { index, (x, y) ->
-            val px = centerX + x * scale
-            val py = centerY + y * scale
-            if (index == 0) path.moveTo(px, py) else path.lineTo(px, py)
-        }
-        path.close()
-        return path
-    }
-
-    // css's line box: the text centred in it, as the trees lay their spans out
-    private fun drawLine(canvas: Canvas, text: String, paint: TextPaint, x: Float, top: Float, lineHeight: Float, align: Paint.Align) {
-        paint.textAlign = align
-        val metrics = paint.fontMetrics
-        val baseline = top + (lineHeight - (metrics.descent - metrics.ascent)) / 2 - metrics.ascent
-        canvas.drawText(text, x, baseline, paint)
-    }
-
-    private fun ellipsize(text: String, paint: TextPaint, width: Float): String =
-        TextUtils.ellipsize(text, paint, width.coerceAtLeast(0f), TextUtils.TruncateAt.END).toString()
-
-    private fun text(sizeDp: Float, face: Typeface, color: Int, tabular: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = face
-        textSize = dp(sizeDp)
-        this.color = color
-        if (tabular) fontFeatureSettings = "'tnum'"
-    }
+    private fun text(sizeDp: Float, face: Typeface, color: Int, tabular: Boolean = false) = textPaint(dp(sizeDp), face, color, tabular)
 
     private fun body(data: SurfaceData, weight: Int) = Fonts.body(context, data.isArabic, weight)
 
@@ -436,15 +408,12 @@ class WidgetPainter(
 
     private fun color(role: String) = palette.color(context, role)
 
-    private fun alpha(color: Int, share: Float) =
-        Color.argb((Color.alpha(color) * share).toInt(), Color.red(color), Color.green(color), Color.blue(color))
-
     private fun dp(value: Float) = value * density
 
     companion object {
         // css's normal line height, and the trees' 1.15 for marcellus
-        private const val NORMAL = 1.2f
-        private const val MARCELLUS = 1.15f
+        const val NORMAL = 1.2f
+        const val MARCELLUS = 1.15f
 
         // a medium cell: 8, the name, 3, the time, 3, the 10 mark, 7. the tree's height, only the
         // text went smaller to fit the width
@@ -464,17 +433,51 @@ class WidgetPainter(
         // a large row with its 2 gap, under the header and the 10 gap
         private const val ROW = 42f
         private const val LARGE_ROWS_TOP = 16f + 11f * NORMAL + 28f * MARCELLUS + 10f - 1f
-
-        private val STAR = listOf(
-            0f to -10f, 2.93f to -7.07f, 7.07f to -7.07f, 7.07f to -2.93f, 10f to 0f, 7.07f to 2.93f,
-            7.07f to 7.07f, 2.93f to 7.07f, 0f to 10f, -2.93f to 7.07f, -7.07f to 7.07f, -7.07f to 2.93f,
-            -10f to 0f, -7.07f to -2.93f, -7.07f to -7.07f, -2.93f to -7.07f,
-        )
     }
 }
 
+private val STAR = listOf(
+    0f to -10f, 2.93f to -7.07f, 7.07f to -7.07f, 7.07f to -2.93f, 10f to 0f, 7.07f to 2.93f,
+    7.07f to 7.07f, 2.93f to 7.07f, 0f to 10f, -2.93f to 7.07f, -7.07f to 7.07f, -7.07f to 2.93f,
+    -10f to 0f, -7.07f to -2.93f, -7.07f to -7.07f, -2.93f to -7.07f,
+)
+
+// the trees' 8 point star, viewBox -11 -11 22 22
+fun starPath(centerX: Float, centerY: Float, size: Float): Path {
+    val scale = size / 22f
+    val path = Path()
+    STAR.forEachIndexed { index, (x, y) ->
+        val px = centerX + x * scale
+        val py = centerY + y * scale
+        if (index == 0) path.moveTo(px, py) else path.lineTo(px, py)
+    }
+    path.close()
+    return path
+}
+
+// css's line box: the text centred in it, as the trees lay their spans out
+fun drawLine(canvas: Canvas, text: String, paint: TextPaint, x: Float, top: Float, lineHeight: Float, align: Paint.Align) {
+    paint.textAlign = align
+    val metrics = paint.fontMetrics
+    val baseline = top + (lineHeight - (metrics.descent - metrics.ascent)) / 2 - metrics.ascent
+    canvas.drawText(text, x, baseline, paint)
+}
+
+fun ellipsize(text: String, paint: TextPaint, width: Float): String =
+    TextUtils.ellipsize(text, paint, width.coerceAtLeast(0f), TextUtils.TruncateAt.END).toString()
+
+fun textPaint(size: Float, face: Typeface, color: Int, tabular: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+    typeface = face
+    textSize = size
+    this.color = color
+    if (tabular) fontFeatureSettings = "'tnum'"
+}
+
+fun alpha(color: Int, share: Float) =
+    Color.argb((Color.alpha(color) * share).toInt(), Color.red(color), Color.green(color), Color.blue(color))
+
 // the flutter font assets inside the apk, loaded once. the variable ones take their weight on wght
-private object Fonts {
+object Fonts {
     private val cache = mutableMapOf<String, Typeface>()
 
     fun body(context: Context, arabic: Boolean, weight: Int): Typeface =

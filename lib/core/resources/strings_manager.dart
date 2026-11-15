@@ -285,15 +285,6 @@ abstract final class StringsManager {
   static const String cancel = 'cancel';
   static const String reset = 'reset';
   static const String sectionAbout = 'sectionAbout';
-  static const String acknowledgements = 'acknowledgements';
-  static const String openSourceLicenses = 'openSourceLicenses';
-  static const String usePlaceNames = 'usePlaceNames';
-  static const String useFonts = 'useFonts';
-  static const String useAzkarDuas = 'useAzkarDuas';
-  static const String useAdhanRecordings = 'useAdhanRecordings';
-  static const String useTones = 'useTones';
-  static const String useAzkarVoice = 'useAzkarVoice';
-  static const String creditLine = 'creditLine';
   static const String version = 'version';
   static const String easternDigits = 'easternDigits';
   static const String themeQiyamEmerald = 'themeQiyamEmerald';
@@ -352,10 +343,8 @@ abstract final class StringsManager {
   static const String rateApp = 'rateApp';
   static const String shareApp = 'shareApp';
   static const String developer = 'developer';
-  static const String feedbackSubject = 'feedbackSubject';
   static const String feedbackBody = 'feedbackBody';
   static const String shareLine = 'shareLine';
-  static const String noMailApp = 'noMailApp';
   static const String language = 'language';
   static const String followPhone = 'followPhone';
   static const String english = 'english';
@@ -557,7 +546,6 @@ abstract final class StringsManager {
   static const String noBookmarksBody = 'noBookmarksBody';
   static const String recentNote = 'recentNote';
   static const String shareAyah = 'shareAyah';
-  static const String showAppName = 'showAppName';
   static const String showSurahName = 'showSurahName';
   static const String matchApp = 'matchApp';
   static const String paper = 'paper';
@@ -607,7 +595,6 @@ abstract final class StringsManager {
   static const String atTabari = 'atTabari';
   static const String alQurtubi = 'alQurtubi';
   static const String muyassarSummary = 'muyassarSummary';
-  static const String muyassarCredit = 'muyassarCredit';
   static const String previousAyah = 'previousAyah';
   static const String nextAyah = 'nextAyah';
   static const String close = 'close';
@@ -650,11 +637,6 @@ abstract final class StringsManager {
   static const String translationSize = 'translationSize';
   static const String smaller = 'smaller';
   static const String larger = 'larger';
-  static const String useMushafText = 'useMushafText';
-  static const String useTranslation = 'useTranslation';
-  static const String useTafsir = 'useTafsir';
-  static const String useRecitation = 'useRecitation';
-  static const String useWordRoots = 'useWordRoots';
   static const String recitationPlaying = 'recitationPlaying';
   static const String recitationPaused = 'recitationPaused'; // Share backgrounds
   static const String midnight = 'midnight';
@@ -782,4 +764,19 @@ abstract final class StringsManager {
   static const String surahByReciter = 'surahByReciter';
   static const String downloadWaiting = 'downloadWaiting';
   static const String downloadKeepOpen = 'downloadKeepOpen';
+  static const String feedbackMessage = 'feedbackMessage';
+  static const String feedbackMessageHint = 'feedbackMessageHint';
+  static const String feedbackEmail = 'feedbackEmail';
+  static const String feedbackEmailHint = 'feedbackEmailHint';
+  static const String feedbackEmailWrong = 'feedbackEmailWrong';
+  static const String feedbackAttached = 'feedbackAttached';
+  static const String send = 'send';
+  static const String feedbackSent = 'feedbackSent';
+  static const String rateUnavailable = 'rateUnavailable';
+  static const String credits = 'credits';
+  static const String usePlaceNames = 'usePlaceNames';
+  static const String useMushafFonts = 'useMushafFonts';
+  static const String useTranslationsTafsir = 'useTranslationsTafsir';
+  static const String useWordRoots = 'useWordRoots';
+  static const String creditLine = 'creditLine';
 }

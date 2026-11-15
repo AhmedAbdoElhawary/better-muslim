@@ -291,9 +291,9 @@ class _SoundSection extends ConsumerWidget {
     final haptics = ref.watch(
       settingsProvider.select((settings) => settings.value?.haptics ?? true),
     );
-    final uiSounds = ref.watch(
-      settingsProvider.select((settings) => settings.value?.uiSounds ?? false),
-    );
+    // final uiSounds = ref.watch(
+    //   settingsProvider.select((settings) => settings.value?.uiSounds ?? false),
+    // );
     final db = ref.read(databaseProvider);
     return GroupedSection(
       label: StringsManager.sectionSoundTouch,
@@ -304,12 +304,12 @@ class _SoundSection extends ConsumerWidget {
           toggled: haptics,
           onTap: () => db.updateSettings(SettingsCompanion(haptics: Value(!haptics))),
         ),
-        NavRow(
-          icon: BmIcon.ui(BmUiIcon.sound, size: SizeManager.iconList.r),
-          title: StringsManager.uiSounds,
-          toggled: uiSounds,
-          onTap: () => db.updateSettings(SettingsCompanion(uiSounds: Value(!uiSounds))),
-        ),
+        // NavRow(
+        //   icon: BmIcon.ui(BmUiIcon.sound, size: SizeManager.iconList.r),
+        //   title: StringsManager.uiSounds,
+        //   toggled: uiSounds,
+        //   onTap: () => db.updateSettings(SettingsCompanion(uiSounds: Value(!uiSounds))),
+        // ),
       ],
     );
   }

@@ -247,11 +247,6 @@ class _ShareSheetState extends ConsumerState<ShareSheet> {
                                   ),
                                 ),
                               ),
-                              ToggleRow(
-                                title: StringsManager.showAppName,
-                                value: options.appName,
-                                onChanged: (appName) => _set(options.copyWith(appName: appName)),
-                              ),
                             ],
                           ),
                           if (ornament != null) ...[

@@ -359,7 +359,6 @@ abstract final class SpaceManager {
   static const double studyTabsTop = 16;
   static const double tafsirTextTop = 14;
   static const double tafsirTextSide = 22;
-  static const double tafsirCreditTop = 10;
   static const double studyCardGap = 10;
   static const double studyCardV = 12;
   static const double studyCardLineGap = 4;

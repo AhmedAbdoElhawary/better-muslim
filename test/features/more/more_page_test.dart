@@ -4,11 +4,13 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/resources/design/bm_tokens.dart';
 import 'package:better_muslim/core/router/app_router.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/system/review.dart';
 import 'package:better_muslim/core/system/share.dart';
 import 'package:better_muslim/core/widgets/compact_app_bar.dart';
 import 'package:better_muslim/core/widgets/nav_row.dart';
 import 'package:better_muslim/core/widgets/sheet/location_sheet.dart';
 import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:better_muslim/features/duas/view/duas_page.dart';
 import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
 import 'package:better_muslim/features/more/model/contact.dart';
@@ -60,7 +62,6 @@ void main() {
     expect(find.text('Follow phone'), findsNWidgets(2));
     expect(await toggledOf(tester, 'Reduce motion'), isFalse);
     expect(await toggledOf(tester, 'Haptics'), isTrue);
-    expect(await toggledOf(tester, 'UI sounds'), isFalse);
     expect(find.text('Eastern Arabic digits ١٢٣'), findsNothing);
     await unmount(tester);
   });
@@ -83,13 +84,12 @@ void main() {
 
   testWidgets('each toggle writes the store and stays', (tester) async {
     await pumpMore(tester, await designOverrides());
-    for (final title in ['Reduce motion', 'Haptics', 'UI sounds']) {
+    for (final title in ['Reduce motion', 'Haptics']) {
       await tapText(tester, title);
     }
     final settings = await settingsOf(tester);
     expect(settings.reduceMotion, isTrue);
     expect(settings.haptics, isFalse);
-    expect(settings.uiSounds, isTrue);
     expect(await toggledOf(tester, 'Haptics'), isFalse);
     await unmount(tester);
   });
@@ -214,75 +214,49 @@ void main() {
 
   group('contact', () {
     const contact = Contact(
-      email: 'me@example.com',
       developerName: 'Ahmed',
       website: 'https://example.com',
       appStoreUrl: 'https://apps.apple.com/app/id1',
       playStoreUrl: 'https://play.google.com/store/apps/details?id=x',
     );
     final shared = <ShareParams>[];
+    var reviews = 0;
 
     Future<List<MethodCall>> pumpContact(
       WidgetTester tester,
       Contact contact, {
-      bool mailed = true,
+      bool store = true,
     }) async {
-      final calls = mockSystemChannel(mailed: mailed);
+      final calls = mockSystemChannel();
       shared.clear();
+      reviews = 0;
       await pumpCoreWidget(
         tester,
         ProviderScope(
-          overrides: [shareProvider.overrideWithValue((params) async => shared.add(params))],
+          overrides: [
+            shareProvider.overrideWithValue((params) async => shared.add(params)),
+            reviewProvider.overrideWithValue(() async {
+              reviews++;
+              return store;
+            }),
+          ],
           child: ContactSection(contact: contact),
         ),
       );
       return calls;
     }
-    //
-    // testWidgets('each row shows only once its value is set', (tester) async {
-    //   await pumpContact(tester, const Contact(email: 'me@example.com'));
-    //   expect(find.text('CONTACT'), findsOneWidget);
-    //   expect(find.text('Send feedback'), findsOneWidget);
-    //   for (final title in ['Rate Better Muslim', 'Share Better Muslim', 'Developer']) {
-    //     expect(find.text(title), findsNothing, reason: title);
-    //   }
-    //
-    //   await pumpContact(tester, contact);
-    //   for (final title in [
-    //     'Send feedback',
-    //     'Rate Better Muslim',
-    //     'Share Better Muslim',
-    //     'Developer',
-    //     'Ahmed',
-    //   ]) {
-    //     expect(find.text(title), findsOneWidget, reason: title);
-    //   }
-    //
-    //   await pumpContact(tester, Contact.mine);
-    //   expect(find.text('CONTACT'), findsNothing);
-    // });
 
-    testWidgets('send feedback opens a draft with the version and the phone', (tester) async {
-      final calls = await pumpContact(tester, contact);
-      await tester.tap(find.text('Send feedback'));
-      await tester.pumpAndSettle();
-      final mail = calls.singleWhere((call) => call.method == 'mail');
-      expect(mail.arguments, {
-        'to': 'me@example.com',
-        'subject': 'Better Muslim feedback',
-        'body': 'Version 1.0.0 (12) · Google Pixel 8 · Android 16',
-      });
-      expect(find.text('No mail app. Write to me@example.com'), findsNothing);
+    testWidgets('feedback and rate always, share and developer once their value is set', (
+      tester,
+    ) async {
+      await pumpContact(tester, const Contact());
+      expect(find.text('Send feedback'), findsOneWidget);
+      expect(find.text('Rate Better Muslim'), findsOneWidget);
+      expect(find.text('Share Better Muslim'), findsNothing);
+      expect(find.text('Developer'), findsNothing);
     });
 
-    testWidgets('no mail app shows the address in a toast', (tester) async {
-      await pumpContact(tester, contact, mailed: false);
-      await tester.tap(find.text('Send feedback'));
-      await tester.pumpAndSettle();
-      expect(find.text('No mail app. Write to me@example.com'), findsOneWidget);
-    });
-
-    testWidgets('rate and developer open their links, share the line with the link', (
+    testWidgets('rate opens the store sheet, developer its link, share the line with the link', (
       tester,
     ) async {
       final calls = await pumpContact(tester, contact);
@@ -290,11 +264,22 @@ void main() {
       await tester.tap(find.text('Developer'));
       await tester.tap(find.text('Share Better Muslim'));
       await tester.pumpAndSettle();
+      expect(reviews, 1);
       expect(calls.where((call) => call.method == 'openUrl').map((call) => call.arguments), [
-        {'url': contact.playStoreUrl},
         {'url': contact.website},
       ]);
       expect(shared.single.text, contains(contact.playStoreUrl));
+      expect(find.text('Rating needs the store app on this phone'), findsNothing);
+    });
+
+    testWidgets('rate on a phone without the store says so and opens nothing', (tester) async {
+      final calls = await pumpContact(tester, contact, store: false);
+      await tester.tap(find.text('Rate Better Muslim'));
+      await tester.pumpAndSettle();
+      expect(find.text('Rating needs the store app on this phone'), findsOneWidget);
+      expect(calls.where((call) => call.method == 'openUrl'), isEmpty);
+      hideToast();
+      await tester.pumpAndSettle();
     });
   });
 }

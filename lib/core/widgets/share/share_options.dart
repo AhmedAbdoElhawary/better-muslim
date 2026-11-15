@@ -172,7 +172,6 @@ class ShareOptions {
     this.solid = false,
     this.ornament,
     this.font = QuranFont.kfgqpc,
-    this.appName = true,
   });
 
   final ShareBackground background;
@@ -185,7 +184,6 @@ class ShareOptions {
   /// null is off
   final ShareOrnament? ornament;
   final QuranFont font;
-  final bool appName;
 
   ShareOptions copyWith({
     ShareBackground? background,
@@ -194,7 +192,6 @@ class ShareOptions {
     bool? solid,
     ShareOrnament? Function()? ornament,
     QuranFont? font,
-    bool? appName,
   }) => ShareOptions(
     background: background ?? this.background,
     size: size ?? this.size,
@@ -202,6 +199,5 @@ class ShareOptions {
     solid: solid ?? this.solid,
     ornament: ornament == null ? this.ornament : ornament(),
     font: font ?? this.font,
-    appName: appName ?? this.appName,
   );
 }

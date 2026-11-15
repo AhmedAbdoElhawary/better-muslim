@@ -22,13 +22,12 @@ void main() {
     expect(ShareBackground.deepSea.solidOf(), ShareBackground.deepSea.colors.single);
   });
 
-  test('the options start on paper, square, amiri, no ornament, with the app name', () {
+  test('the options start on paper, square, amiri, no ornament', () {
     const options = ShareOptions();
     expect(
       (options.background, options.size, options.sizeLocked, options.solid, options.ornament),
       (ShareBackground.paper, ShareSize.square, false, false, null),
     );
-    expect(options.appName, isTrue);
     expect(options.copyWith(ornament: () => ShareOrnament.khatam).ornament, ShareOrnament.khatam);
     expect(
       options

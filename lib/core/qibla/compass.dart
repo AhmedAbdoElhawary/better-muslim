@@ -3,9 +3,9 @@ import 'dart:math' as math;
 
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/flavor/flavor_config.dart';
-import 'package:better_muslim/core/location/location.dart';
 import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/qibla/declination.dart';
+import 'package:better_muslim/core/qibla/qibla_place.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,12 +24,11 @@ class DesignHeading extends Notifier<double> {
   void toggle() => state = state == turning ? aligned : turning;
 }
 
-/// the saved place's, close enough for a fix the qibla page takes. 0 with no place, magnetic north
+/// at the qibla's own place, a city picked far away would turn north by degrees. 0 with no place,
+/// magnetic north
 final _declinationProvider = Provider.autoDispose<double>((ref) {
   final place = ref.watch(
-    locationProvider.select(
-      (location) => location == null ? null : (location.latitude, location.longitude),
-    ),
+    qiblaPlaceProvider.select((place) => place == null ? null : (place.latitude, place.longitude)),
   );
   if (place == null) return 0;
   final year = decimalYear(ref.watch(clockProvider)());

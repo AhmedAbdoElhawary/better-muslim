@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/qibla/qibla_place.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -92,7 +93,7 @@ class _PlaceLine extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noLocation = ref.watch(qiblaStateProvider) == QiblaState.noLocation;
     final place = ref.watch(
-      qiblaPlaceProvider.select((place) => (name: place.value?.name, nameAr: place.value?.nameAr)),
+      qiblaPlaceProvider.select((place) => (name: place?.name, nameAr: place?.nameAr)),
     );
     final bearing = ref.watch(qiblaTargetProvider.select((target) => target?.bearing.round()));
     final digits = ref.watch(

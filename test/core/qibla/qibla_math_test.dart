@@ -6,7 +6,7 @@ import 'package:better_muslim/core/settings/settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('20 places within 0.5° and 0.5% of the WGS84 reference (SC-002)', () {
+  test('20 places within 0.01° and 0.5% of the WGS84 reference (SC-002)', () {
     final rows = File('test/fixtures/qibla_places.csv').readAsLinesSync().skip(1);
     expect(rows, hasLength(20));
     for (final row in rows) {
@@ -14,9 +14,14 @@ void main() {
       final lat = double.parse(latitude);
       final lon = double.parse(longitude);
       final expectedKm = double.parse(km);
-      expect(qiblaBearing(lat, lon), closeTo(double.parse(bearing), .5), reason: name);
+      expect(qiblaBearing(lat, lon), closeTo(double.parse(bearing), .01), reason: name);
       expect(kaabaDistanceKm(lat, lon), closeTo(expectedKm, expectedKm * .005), reason: name);
     }
+  });
+
+  test("near the kaaba's antipode a bearing still comes", () {
+    final bearing = qiblaBearing(-21.4225, -140.1738);
+    expect(bearing.isFinite && bearing >= 0 && bearing < 360, isTrue);
   });
 
   test('london shows 119° and 4,790 km', () {

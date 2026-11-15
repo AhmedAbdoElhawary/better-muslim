@@ -9,9 +9,50 @@ import 'package:intl/intl.dart';
 /// the mean radius, the equatorial one makes london 4,800 km instead of the design's 4,790 (R4)
 const _earthRadiusKm = 6371.0088;
 
-/// degrees from true north, great circle
-double qiblaBearing(double latitude, double longitude) =>
-    Qibla.qibla(Coordinates(latitude, longitude));
+const _wgs84F = 1 / 298.257223563;
+
+/// degrees from true north on the WGS84 ellipsoid (vincenty), the sphere was up to 0.25° off.
+/// near the kaaba's antipode it may not converge, the great circle is used there
+double qiblaBearing(double latitude, double longitude) {
+  double rad(double degrees) => degrees * math.pi / 180;
+  final u1 = math.atan((1 - _wgs84F) * math.tan(rad(latitude)));
+  final u2 = math.atan((1 - _wgs84F) * math.tan(rad(Qibla.makkah.latitude)));
+  final (sinU1, cosU1, sinU2, cosU2) = (math.sin(u1), math.cos(u1), math.sin(u2), math.cos(u2));
+  final l = rad(Qibla.makkah.longitude - longitude);
+  var lambda = l;
+  for (var i = 0; i < 200; i++) {
+    final sinLambda = math.sin(lambda);
+    final cosLambda = math.cos(lambda);
+    final sinSigma = math.sqrt(
+      math.pow(cosU2 * sinLambda, 2) + math.pow(cosU1 * sinU2 - sinU1 * cosU2 * cosLambda, 2),
+    );
+    if (sinSigma == 0) return 0;
+    final cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+    final sigma = math.atan2(sinSigma, cosSigma);
+    final sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+    final cos2Alpha = 1 - sinAlpha * sinAlpha;
+
+    /// on the equator cos2Alpha is 0 and the line runs along it
+    final cos2SigmaM = cos2Alpha == 0 ? 0.0 : cosSigma - 2 * sinU1 * sinU2 / cos2Alpha;
+    final c = _wgs84F / 16 * cos2Alpha * (4 + _wgs84F * (4 - 3 * cos2Alpha));
+    final previous = lambda;
+    lambda =
+        l +
+        (1 - c) *
+            _wgs84F *
+            sinAlpha *
+            (sigma +
+                c * sinSigma * (cos2SigmaM + c * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+    if ((lambda - previous).abs() < 1e-12) {
+      final azimuth = math.atan2(
+        cosU2 * math.sin(lambda),
+        cosU1 * sinU2 - sinU1 * cosU2 * math.cos(lambda),
+      );
+      return (azimuth * 180 / math.pi + 360) % 360;
+    }
+  }
+  return Qibla.qibla(Coordinates(latitude, longitude));
+}
 
 /// haversine to the kaaba
 double kaabaDistanceKm(double latitude, double longitude) {

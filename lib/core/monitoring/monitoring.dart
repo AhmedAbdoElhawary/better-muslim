@@ -81,6 +81,9 @@ abstract final class Monitoring {
     options.enablePrintBreadcrumbs = false;
     final cap = SentryEventCap();
     options.beforeSend = (event, hint) => cap(scrubbed(event), hint);
+
+    /// without it feedback goes through beforeSend, and the cap drops the fourth
+    options.beforeSendFeedback = (event, hint) => event;
   }
 
   @visibleForTesting

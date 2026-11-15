@@ -3,11 +3,12 @@ import 'dart:math' as math;
 import 'package:better_muslim/core/clock/clock.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/location/location.dart';
+import 'package:better_muslim/core/location/place_list.dart';
 import 'package:better_muslim/core/qibla/compass.dart';
 import 'package:better_muslim/core/qibla/compass_source.dart';
 import 'package:better_muslim/core/qibla/declination.dart';
 import 'package:better_muslim/core/qibla/qibla_math.dart';
-import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/qibla/qibla_place.dart';
 import 'package:better_muslim/features/qibla/model/qibla_tracker.dart';
 import 'package:better_muslim/features/qibla/view_model/qibla_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,52 +86,98 @@ void main() {
     expect(container.read(compassProvider).value?.accuracy, CompassAccuracy.medium);
   });
 
-  group('place', () {
-    Future<List<QiblaPlace?>> places(ProviderContainer container) async {
-      final values = <QiblaPlace?>[];
-      container.listen(
-        qiblaPlaceProvider,
-        (_, next) => next.whenData(values.add),
-        fireImmediately: true,
+  group('place, where the phone is (spec 027)', () {
+    late PlaceList list;
+    setUpAll(() async => list = await PlaceList.load());
+
+    ProviderContainer following(Location? location) {
+      final container = ProviderContainer(
+        overrides: [
+          ...testOverrides(positionSource: position, compass: compass),
+          clockProvider.overrideWithValue(() => now),
+          locationProvider.overrideWithValue(location),
+          placeListProvider.overrideWith((ref) => list),
+        ],
       );
-      await pumpEventQueue();
-      return values;
+      addTearDown(container.dispose);
+      container.listen(qiblaFollowProvider, (_, _) {});
+      container.listen(qiblaPlaceProvider, (_, _) {});
+      return container;
     }
 
-    const saved = (latitude: 51.5074, longitude: -0.1278, name: 'London', nameAr: 'لندن');
+    const riyadh = (latitude: 24.7136, longitude: 46.6753);
 
-    test('a city picked by hand is used as it is, with no fix', () async {
+    test(
+      'a city picked by hand until the fix comes, then the fix and its city, saved nowhere',
+      () async {
+        position = FakePositionSource(granted: LocationPermission.whileInUse);
+        final container = following(london());
+        await pumpEventQueue();
+        expect(container.read(qiblaPlaceProvider)?.name, 'London');
+
+        position.followed.add(riyadh);
+        await pumpEventQueue();
+        expect(container.read(qiblaPlaceProvider), (
+          latitude: riyadh.latitude,
+          longitude: riyadh.longitude,
+          name: 'Riyadh',
+          nameAr: container.read(qiblaPlaceProvider)?.nameAr,
+        ));
+        expect(container.read(qiblaPlaceProvider)?.nameAr, isNotNull);
+
+        /// a few hundred metres on, the same city without a new search
+        position.followed.add((latitude: 24.7156, longitude: 46.6753));
+        await pumpEventQueue();
+        expect(container.read(qiblaPlaceProvider)?.latitude, 24.7156);
+        expect(container.read(qiblaPlaceProvider)?.name, 'Riyadh');
+
+        final settings = await container.read(databaseProvider).watchSettings().first;
+        expect(settings.latitude, isNull);
+      },
+    );
+
+    test('north comes from the fix, not the saved place', () async {
       position = FakePositionSource(granted: LocationPermission.whileInUse);
-      final container = containerWith(location: london());
-      expect(await places(container), [saved]);
-      expect(position.fixes, 0);
+      final container = following(london());
+      container.listen(compassProvider, (_, _) {});
+      await pumpEventQueue();
+      position.followed.add(riyadh);
+      await pumpEventQueue();
+      compass.send(100);
+      await pumpEventQueue();
+      final expected =
+          100 + declination(riyadh.latitude, riyadh.longitude, decimalYear: decimalYear(now));
+      expect(heading(container), closeTo(expected, 1e-9));
     });
 
-    test('auto mode with permission takes a precise fix, keeps the name, saves nothing', () async {
-      position = FakePositionSource(
-        granted: LocationPermission.whileInUse,
-        position: (latitude: 51.5, longitude: -.12),
-      );
-      final container = containerWith(location: london(mode: LocationMode.auto));
-      expect(await places(container), [
-        saved,
-        (latitude: 51.5, longitude: -.12, name: 'London', nameAr: 'لندن'),
-      ]);
-      expect(position.accuracy, LocationAccuracy.high);
-      final settings = await container.read(databaseProvider).watchSettings().first;
-      expect(settings.latitude, isNull);
+    test('asks once without permission, the saved place stays', () async {
+      position = FakePositionSource(answer: LocationPermission.denied);
+      final container = following(london());
+      await pumpEventQueue();
+      toBackground(binding);
+      toFront(binding);
+      await pumpEventQueue();
+      expect(position.requests, 1);
+      expect(position.followed.hasListener, isFalse);
+      expect(container.read(qiblaPlaceProvider)?.name, 'London');
     });
 
-    test('auto mode without permission keeps the saved place', () async {
-      position = FakePositionSource(position: (latitude: 51.5, longitude: -.12));
-      final container = containerWith(location: london(mode: LocationMode.auto));
-      expect(await places(container), [saved]);
-      expect(position.fixes, 0);
+    test('follows only while in front', () async {
+      position = FakePositionSource(granted: LocationPermission.whileInUse);
+      following(london());
+      await pumpEventQueue();
+      expect(position.followed.hasListener, isTrue);
+      toBackground(binding);
+      expect(position.followed.hasListener, isFalse);
+      toFront(binding);
+      await pumpEventQueue();
+      expect(position.followed.hasListener, isTrue);
     });
 
-    test('no location gives null', () async {
+    test('no location and no fix gives null', () async {
       final container = containerWith(noLocation: true);
-      expect(await places(container), [null]);
+      container.listen(qiblaStateProvider, (_, _) {});
+      expect(container.read(qiblaPlaceProvider), isNull);
       expect(container.read(qiblaStateProvider), QiblaState.noLocation);
     });
   });
@@ -141,7 +188,7 @@ void main() {
     container.listen(compassProvider, (_, _) {});
     container.listen(qiblaPlaceProvider, (_, _) {});
     await pumpEventQueue();
-    expect(container.read(qiblaPlaceProvider).value?.name, 'London');
+    expect(container.read(qiblaPlaceProvider)?.name, 'London');
     expect(container.read(compassProvider).value, (heading: 105.0, accuracy: CompassAccuracy.high));
     expect(container.read(turnDegreesProvider), 14);
 

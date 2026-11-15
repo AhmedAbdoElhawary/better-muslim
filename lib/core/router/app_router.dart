@@ -21,7 +21,8 @@ import 'package:better_muslim/features/duas/view/duas_page.dart';
 import 'package:better_muslim/features/duas/view_model/duas_providers.dart';
 import 'package:better_muslim/features/hijri_calendar/view/hijri_calendar_page.dart';
 import 'package:better_muslim/features/home/view/home_page.dart';
-import 'package:better_muslim/features/more/view/acknowledgements_page.dart';
+import 'package:better_muslim/features/more/view/credits_page.dart';
+import 'package:better_muslim/features/more/view/feedback_page.dart';
 import 'package:better_muslim/features/more/view/more_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_page.dart';
 import 'package:better_muslim/features/notifications/presentation/view/adhan_settings_page.dart';
@@ -59,7 +60,8 @@ abstract final class Routes {
   static const String theme = '/theme';
   static const String hijriCalendar = '/hijri-calendar';
   static const String adhanSettings = '/adhan-settings';
-  static const String acknowledgements = '/acknowledgements';
+  static const String feedback = '/feedback';
+  static const String credits = '/credits';
   static const String downloads = '/downloads';
 
   /// inside the azkar tab, so the tab bar stays
@@ -315,9 +317,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _page(state, const DownloadsPage()),
       ),
       GoRoute(
-        name: 'acknowledgements',
-        path: Routes.acknowledgements,
-        pageBuilder: (context, state) => _page(state, const AcknowledgementsPage()),
+        name: 'feedback',
+        path: Routes.feedback,
+        pageBuilder: (context, state) => _page(state, const FeedbackPage()),
+      ),
+      GoRoute(
+        name: 'credits',
+        path: Routes.credits,
+        pageBuilder: (context, state) => _page(state, const CreditsPage()),
       ),
       GoRoute(
         name: 'hijri_calendar',

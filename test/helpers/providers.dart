@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:better_muslim/core/database/app_database.dart';
@@ -163,4 +164,9 @@ class FakePositionSource implements PositionSource {
     this.accuracy = accuracy;
     return position;
   }
+
+  final followed = StreamController<LatLng>.broadcast();
+
+  @override
+  Stream<LatLng> positions() => followed.stream;
 }

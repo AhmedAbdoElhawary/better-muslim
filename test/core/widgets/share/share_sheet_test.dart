@@ -102,7 +102,7 @@ void main() {
     expect(find.byKey(const Key('row')), findsOneWidget);
     expect(
       tester.getTopLeft(find.byKey(const Key('row'))).dy,
-      greaterThan(tester.getTopLeft(find.text('Show app name')).dy),
+      greaterThan(tester.getTopLeft(find.text('Ornament')).dy),
     );
     await unmount(tester);
   });

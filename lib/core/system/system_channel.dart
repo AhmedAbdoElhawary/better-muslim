@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 
-/// the phone's notification settings, links, mail, the version and the device, without five
+/// the phone's notification settings, links, the version and the device, without four
 /// packages (R10)
 abstract final class SystemChannel {
   static const _channel = MethodChannel('better_muslim/system');
@@ -17,16 +17,7 @@ abstract final class SystemChannel {
   /// "1.0.0 (12)"
   static Future<String> version() async => await _channel.invokeMethod<String>('version') ?? '';
 
-  /// a draft in the mail app, I send it or not. the only way to a mailto
-  static Future<bool> mail({
-    required String to,
-    required String subject,
-    required String body,
-  }) async =>
-      await _channel.invokeMethod<bool>('mail', {'to': to, 'subject': subject, 'body': body}) ??
-      false;
-
-  /// "iPhone15,2" and "iOS 26.1", for the feedback mail
+  /// "iPhone15,2" and "iOS 26.1", for the feedback
   static Future<({String model, String os})> device() async {
     final info = await _channel.invokeMapMethod<String, String>('device');
     return (model: info?['model'] ?? '', os: info?['os'] ?? '');

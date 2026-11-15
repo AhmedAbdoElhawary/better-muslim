@@ -265,6 +265,32 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('silent during prayer turned on scrolls silent for into view', (tester) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('better_muslim/adhan'),
+      (call) async => call.method == 'canSilence' ? true : null,
+    );
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(const MethodChannel('better_muslim/adhan'), null),
+    );
+    await open(tester);
+    final toggle = find.text('Silent during prayer');
+    await Scrollable.ensureVisible(tester.element(toggle), alignment: 1);
+    await tester.pumpAndSettle();
+    final scrolled = tester.state<ScrollableState>(find.byType(Scrollable).last).position.pixels;
+
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    final viewport = tester.getRect(find.byType(Scrollable).last);
+    expect(tester.getRect(find.text('Silent for')).bottom, lessThanOrEqualTo(viewport.bottom));
+    expect(
+      tester.state<ScrollableState>(find.byType(Scrollable).last).position.pixels,
+      greaterThan(scrolled),
+    );
+    await unmount(tester);
+  });
+
   for (final (name, locale) in [('english', const Locale('en')), ('arabic', const Locale('ar'))]) {
     testWidgets('$name at text scale 2.0, nothing cut', (tester) async {
       await open(tester, locale: locale, textScale: 2, allowed: false);
