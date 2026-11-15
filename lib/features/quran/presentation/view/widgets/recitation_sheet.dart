@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/quran/recitation_files.dart';
@@ -190,8 +191,10 @@ class _Download extends ConsumerWidget {
       icon: BmUiIcon.download,
       label: StringsManager.downloadSurah,
       onTap: () async {
+        final provider = surahDownloadProvider((reciter, surah));
+        showKeepOpen(context, ref, provider, icon: BmIconName.listen);
         try {
-          await ref.read(surahDownloadProvider((reciter, surah)).notifier).download();
+          await ref.read(provider.notifier).download();
         } on Object catch (error) {
           if (!context.mounted) return;
           showToast(context, switch (error) {
@@ -246,6 +249,9 @@ class _Progress extends ConsumerStatefulWidget {
 class _ProgressState extends ConsumerState<_Progress> {
   /// the ayah under the finger while dragging
   int? _drag;
+
+  /// the released ayah, held until the player gets there so the bar never goes back first
+  int? _target;
   double _width = 1;
 
   static String _time(Duration time) =>
@@ -263,7 +269,11 @@ class _ProgressState extends ConsumerState<_Progress> {
 
   void _release(AyahKey? from) {
     final ayah = _drag;
-    setState(() => _drag = null);
+    final playing = ref.read(playingAyahProvider);
+    setState(() {
+      _drag = null;
+      if (playing == null || readAyah(playing).ayah != ayah) _target = ayah;
+    });
     if (ayah == null || from == null) return;
     ref.read(followingProvider.notifier).set(true);
     ref.read(recitationProvider).seekToAyah(AyahKey(from.surah, ayah));
@@ -271,6 +281,18 @@ class _ProgressState extends ConsumerState<_Progress> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      recitationStateProvider.select(
+        (state) => (state.value?.ayah, state.value?.failure, state.value?.active ?? false),
+      ),
+      (_, next) {
+        final (ayah, failure, active) = next;
+        final reached = ayah != null && readAyah(ayah).ayah == _target;
+        if (_target != null && (reached || failure != null || !active)) {
+          setState(() => _target = null);
+        }
+      },
+    );
     final ayah = ref.watch(playingAyahProvider);
     final (position, duration, from, to) = ref.watch(
       recitationStateProvider.select(
@@ -287,13 +309,14 @@ class _ProgressState extends ConsumerState<_Progress> {
       settingsProvider.select((settings) => settings.value?.digits ?? Digits.eastern),
     );
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final n = ayah == null ? 0 : readAyah(ayah).ayah;
+    final drag = _drag;
+    final held = drag ?? _target;
+    final shown = held == null || from == null ? ayah : AyahKey(from.surah, held);
+    final n = shown == null ? 0 : readAyah(shown).ayah;
     final total = surah?.ayahs ?? 1;
     final where = surah == null
         ? ''
         : '${isArabic ? surah.ar : surah.en} · ${context.tr(StringsManager.ayahOf, {'n': '$n', 'total': '$total'})}';
-    final drag = _drag;
-    final shown = drag == null || from == null ? ayah : AyahKey(from.surah, drag);
     final fraction = shown == null || from == null || to == null
         ? 0.0
         : rangeProgress(shown, from: from, to: to);
