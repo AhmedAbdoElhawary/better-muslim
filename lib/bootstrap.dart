@@ -22,6 +22,7 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
 import 'package:better_muslim/features/surfaces/presentation/surfaces_boot.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -34,8 +35,10 @@ Future<void> bootstrap(FlavorConfig config) {
 Future<void> _boot(FlavorConfig config) async {
   final launch = Stopwatch()..start();
   WidgetsFlutterBinding.ensureInitialized();
+
+  /// the design has no landscape, android 16 still turns tablets and foldables
+  unawaited(SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]));
   Monitoring.installErrorHandlers();
-  Monitoring.activate(config: config);
 
   /// all at once, the store opens in drift's isolate and the rest waits on the phone while the
   /// time zones decode here
@@ -57,6 +60,7 @@ Future<void> _boot(FlavorConfig config) async {
   /// before the first frame, so a new install never flashes home and a set up one never the
   /// welcome (R2)
   final settings = await db.watchSettings().first;
+  await Monitoring.follow(config: config, on: settings.crashReports);
 
   /// here and not in a provider, audio_service starts once and only in the app's own engine
   final recitationFiles = RecitationFiles();
@@ -80,6 +84,10 @@ Future<void> _boot(FlavorConfig config) async {
       launchSettledProvider.overrideWithValue(settled),
     ],
   );
+
+  container.listen(settingsProvider.select((settings) => settings.value?.crashReports), (_, on) {
+    if (on != null) Monitoring.follow(config: config, on: on);
+  });
 
   /// the verse card is on the first screen, so it never pops in after it. a slow or failed read
   /// leaves the card to show it when it comes

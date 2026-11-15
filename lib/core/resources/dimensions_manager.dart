@@ -805,7 +805,7 @@ abstract final class SizeManager {
   static const double loader = 48;
   static const double loaderInline = 24;
   static const double loaderSmall = 16;
-  static const double loaderLine = .5;
+  static const double loaderLine = 1;
 
   /// tablets and foldables get the phone layout stretched to this, until they have their own design
   static const double maxContentWidth = 480;

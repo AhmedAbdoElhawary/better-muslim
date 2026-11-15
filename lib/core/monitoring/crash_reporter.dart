@@ -73,6 +73,34 @@ class SentryEventCap {
   }
 }
 
+/// errors before the crash reports switch is read wait here, then go to sentry or nowhere
+class PendingCrashReporter implements CrashReporter {
+  final errors = <({Object error, StackTrace? stackTrace, Map<String, Object?>? context})>[];
+
+  @override
+  Future<void> recordError(
+    Object error,
+    StackTrace? stackTrace, {
+    bool fatal = false,
+    Map<String, Object?>? context,
+  }) async {
+    errors.add((error: error, stackTrace: stackTrace, context: context));
+  }
+
+  @override
+  void addBreadcrumb(String message, {String? category}) {}
+
+  @override
+  Future<void> sendFeedback(String message, {String? email}) async {}
+
+  Future<void> flushTo(CrashReporter reporter) async {
+    for (final entry in errors) {
+      await reporter.recordError(entry.error, entry.stackTrace, context: entry.context);
+    }
+    errors.clear();
+  }
+}
+
 class DebugCrashReporter implements CrashReporter {
   const DebugCrashReporter();
 

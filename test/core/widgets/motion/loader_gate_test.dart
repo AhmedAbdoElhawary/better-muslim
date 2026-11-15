@@ -100,6 +100,12 @@ void main() {
       expect(BmStarPainter.fade(BmMotion.starCycle), 0);
     });
 
+    test('its line takes whole device pixels, at least one', () {
+      expect(BmStarPainter.snap(1, 3), 1);
+      expect(BmStarPainter.snap(1, 2.75), 3 / 2.75);
+      expect(BmStarPainter.snap(.1, 2), .5);
+    });
+
     testWidgets('it loops the cycle', (tester) async {
       await pumpCoreWidget(tester, const BmStarLoader(), settle: false);
       final painter = _painter(tester);

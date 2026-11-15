@@ -519,6 +519,17 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("onboarded" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _crashReportsMeta = const VerificationMeta('crashReports');
+  @override
+  late final GeneratedColumn<bool> crashReports = GeneratedColumn<bool>(
+    'crash_reports',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("crash_reports" IN (0, 1))'),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _lastReadSurahMeta = const VerificationMeta('lastReadSurah');
   @override
   late final GeneratedColumn<int> lastReadSurah = GeneratedColumn<int>(
@@ -816,6 +827,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
     language,
     textSize,
     onboarded,
+    crashReports,
     lastReadSurah,
     lastReadAyah,
     lastReadPage,
@@ -991,6 +1003,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
       context.handle(
         _onboardedMeta,
         onboarded.isAcceptableOrUnknown(data['onboarded']!, _onboardedMeta),
+      );
+    }
+    if (data.containsKey('crash_reports')) {
+      context.handle(
+        _crashReportsMeta,
+        crashReports.isAcceptableOrUnknown(data['crash_reports']!, _crashReportsMeta),
       );
     }
     if (data.containsKey('last_read_surah')) {
@@ -1335,6 +1353,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}onboarded'],
       )!,
+      crashReports: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}crash_reports'],
+      )!,
       lastReadSurah: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_read_surah'],
@@ -1610,6 +1632,9 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
   final Language language;
   final TextSize textSize;
   final bool onboarded;
+
+  /// YOUR DATA's switch, off and sentry never starts, in the app or in the background
+  final bool crashReports;
   final int lastReadSurah;
   final int lastReadAyah;
   final int lastReadPage;
@@ -1701,6 +1726,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     required this.language,
     required this.textSize,
     required this.onboarded,
+    required this.crashReports,
     required this.lastReadSurah,
     required this.lastReadAyah,
     required this.lastReadPage,
@@ -1871,6 +1897,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       map['text_size'] = Variable<String>($SettingsTable.$convertertextSize.toSql(textSize));
     }
     map['onboarded'] = Variable<bool>(onboarded);
+    map['crash_reports'] = Variable<bool>(crashReports);
     map['last_read_surah'] = Variable<int>(lastReadSurah);
     map['last_read_ayah'] = Variable<int>(lastReadAyah);
     map['last_read_page'] = Variable<int>(lastReadPage);
@@ -1982,6 +2009,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       language: Value(language),
       textSize: Value(textSize),
       onboarded: Value(onboarded),
+      crashReports: Value(crashReports),
       lastReadSurah: Value(lastReadSurah),
       lastReadAyah: Value(lastReadAyah),
       lastReadPage: Value(lastReadPage),
@@ -2106,6 +2134,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
         serializer.fromJson<String>(json['textSize']),
       ),
       onboarded: serializer.fromJson<bool>(json['onboarded']),
+      crashReports: serializer.fromJson<bool>(json['crashReports']),
       lastReadSurah: serializer.fromJson<int>(json['lastReadSurah']),
       lastReadAyah: serializer.fromJson<int>(json['lastReadAyah']),
       lastReadPage: serializer.fromJson<int>(json['lastReadPage']),
@@ -2224,6 +2253,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       'language': serializer.toJson<String>($SettingsTable.$converterlanguage.toJson(language)),
       'textSize': serializer.toJson<String>($SettingsTable.$convertertextSize.toJson(textSize)),
       'onboarded': serializer.toJson<bool>(onboarded),
+      'crashReports': serializer.toJson<bool>(crashReports),
       'lastReadSurah': serializer.toJson<int>(lastReadSurah),
       'lastReadAyah': serializer.toJson<int>(lastReadAyah),
       'lastReadPage': serializer.toJson<int>(lastReadPage),
@@ -2308,6 +2338,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     Language? language,
     TextSize? textSize,
     bool? onboarded,
+    bool? crashReports,
     int? lastReadSurah,
     int? lastReadAyah,
     int? lastReadPage,
@@ -2383,6 +2414,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     language: language ?? this.language,
     textSize: textSize ?? this.textSize,
     onboarded: onboarded ?? this.onboarded,
+    crashReports: crashReports ?? this.crashReports,
     lastReadSurah: lastReadSurah ?? this.lastReadSurah,
     lastReadAyah: lastReadAyah ?? this.lastReadAyah,
     lastReadPage: lastReadPage ?? this.lastReadPage,
@@ -2478,6 +2510,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
       language: data.language.present ? data.language.value : this.language,
       textSize: data.textSize.present ? data.textSize.value : this.textSize,
       onboarded: data.onboarded.present ? data.onboarded.value : this.onboarded,
+      crashReports: data.crashReports.present ? data.crashReports.value : this.crashReports,
       lastReadSurah: data.lastReadSurah.present ? data.lastReadSurah.value : this.lastReadSurah,
       lastReadAyah: data.lastReadAyah.present ? data.lastReadAyah.value : this.lastReadAyah,
       lastReadPage: data.lastReadPage.present ? data.lastReadPage.value : this.lastReadPage,
@@ -2566,6 +2599,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           ..write('language: $language, ')
           ..write('textSize: $textSize, ')
           ..write('onboarded: $onboarded, ')
+          ..write('crashReports: $crashReports, ')
           ..write('lastReadSurah: $lastReadSurah, ')
           ..write('lastReadAyah: $lastReadAyah, ')
           ..write('lastReadPage: $lastReadPage, ')
@@ -2646,6 +2680,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
     language,
     textSize,
     onboarded,
+    crashReports,
     lastReadSurah,
     lastReadAyah,
     lastReadPage,
@@ -2725,6 +2760,7 @@ class AppSettings extends DataClass implements Insertable<AppSettings> {
           other.language == this.language &&
           other.textSize == this.textSize &&
           other.onboarded == this.onboarded &&
+          other.crashReports == this.crashReports &&
           other.lastReadSurah == this.lastReadSurah &&
           other.lastReadAyah == this.lastReadAyah &&
           other.lastReadPage == this.lastReadPage &&
@@ -2802,6 +2838,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
   final Value<Language> language;
   final Value<TextSize> textSize;
   final Value<bool> onboarded;
+  final Value<bool> crashReports;
   final Value<int> lastReadSurah;
   final Value<int> lastReadAyah;
   final Value<int> lastReadPage;
@@ -2877,6 +2914,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.language = const Value.absent(),
     this.textSize = const Value.absent(),
     this.onboarded = const Value.absent(),
+    this.crashReports = const Value.absent(),
     this.lastReadSurah = const Value.absent(),
     this.lastReadAyah = const Value.absent(),
     this.lastReadPage = const Value.absent(),
@@ -2953,6 +2991,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     this.language = const Value.absent(),
     this.textSize = const Value.absent(),
     this.onboarded = const Value.absent(),
+    this.crashReports = const Value.absent(),
     this.lastReadSurah = const Value.absent(),
     this.lastReadAyah = const Value.absent(),
     this.lastReadPage = const Value.absent(),
@@ -3029,6 +3068,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Expression<String>? language,
     Expression<String>? textSize,
     Expression<bool>? onboarded,
+    Expression<bool>? crashReports,
     Expression<int>? lastReadSurah,
     Expression<int>? lastReadAyah,
     Expression<int>? lastReadPage,
@@ -3105,6 +3145,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       if (language != null) 'language': language,
       if (textSize != null) 'text_size': textSize,
       if (onboarded != null) 'onboarded': onboarded,
+      if (crashReports != null) 'crash_reports': crashReports,
       if (lastReadSurah != null) 'last_read_surah': lastReadSurah,
       if (lastReadAyah != null) 'last_read_ayah': lastReadAyah,
       if (lastReadPage != null) 'last_read_page': lastReadPage,
@@ -3183,6 +3224,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     Value<Language>? language,
     Value<TextSize>? textSize,
     Value<bool>? onboarded,
+    Value<bool>? crashReports,
     Value<int>? lastReadSurah,
     Value<int>? lastReadAyah,
     Value<int>? lastReadPage,
@@ -3259,6 +3301,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
       language: language ?? this.language,
       textSize: textSize ?? this.textSize,
       onboarded: onboarded ?? this.onboarded,
+      crashReports: crashReports ?? this.crashReports,
       lastReadSurah: lastReadSurah ?? this.lastReadSurah,
       lastReadAyah: lastReadAyah ?? this.lastReadAyah,
       lastReadPage: lastReadPage ?? this.lastReadPage,
@@ -3475,6 +3518,9 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
     if (onboarded.present) {
       map['onboarded'] = Variable<bool>(onboarded.value);
     }
+    if (crashReports.present) {
+      map['crash_reports'] = Variable<bool>(crashReports.value);
+    }
     if (lastReadSurah.present) {
       map['last_read_surah'] = Variable<int>(lastReadSurah.value);
     }
@@ -3613,6 +3659,7 @@ class SettingsCompanion extends UpdateCompanion<AppSettings> {
           ..write('language: $language, ')
           ..write('textSize: $textSize, ')
           ..write('onboarded: $onboarded, ')
+          ..write('crashReports: $crashReports, ')
           ..write('lastReadSurah: $lastReadSurah, ')
           ..write('lastReadAyah: $lastReadAyah, ')
           ..write('lastReadPage: $lastReadPage, ')
@@ -5852,6 +5899,7 @@ typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<Language> language,
   Value<TextSize> textSize,
   Value<bool> onboarded,
+  Value<bool> crashReports,
   Value<int> lastReadSurah,
   Value<int> lastReadAyah,
   Value<int> lastReadPage,
@@ -5928,6 +5976,7 @@ typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
   Value<Language> language,
   Value<TextSize> textSize,
   Value<bool> onboarded,
+  Value<bool> crashReports,
   Value<int> lastReadSurah,
   Value<int> lastReadAyah,
   Value<int> lastReadPage,
@@ -6197,6 +6246,9 @@ class $$SettingsTableFilterComposer extends Composer<_$AppDatabase, $SettingsTab
 
   ColumnFilters<bool> get onboarded =>
       $composableBuilder(column: $table.onboarded, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get crashReports =>
+      $composableBuilder(column: $table.crashReports, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get lastReadSurah =>
       $composableBuilder(column: $table.lastReadSurah, builder: (column) => ColumnFilters(column));
@@ -6480,6 +6532,9 @@ class $$SettingsTableOrderingComposer extends Composer<_$AppDatabase, $SettingsT
   ColumnOrderings<bool> get onboarded =>
       $composableBuilder(column: $table.onboarded, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get crashReports =>
+      $composableBuilder(column: $table.crashReports, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get lastReadSurah => $composableBuilder(
     column: $table.lastReadSurah,
     builder: (column) => ColumnOrderings(column),
@@ -6722,6 +6777,9 @@ class $$SettingsTableAnnotationComposer extends Composer<_$AppDatabase, $Setting
   GeneratedColumn<bool> get onboarded =>
       $composableBuilder(column: $table.onboarded, builder: (column) => column);
 
+  GeneratedColumn<bool> get crashReports =>
+      $composableBuilder(column: $table.crashReports, builder: (column) => column);
+
   GeneratedColumn<int> get lastReadSurah =>
       $composableBuilder(column: $table.lastReadSurah, builder: (column) => column);
 
@@ -6869,6 +6927,7 @@ class $$SettingsTableTableManager
                 Value<Language> language = const Value.absent(),
                 Value<TextSize> textSize = const Value.absent(),
                 Value<bool> onboarded = const Value.absent(),
+                Value<bool> crashReports = const Value.absent(),
                 Value<int> lastReadSurah = const Value.absent(),
                 Value<int> lastReadAyah = const Value.absent(),
                 Value<int> lastReadPage = const Value.absent(),
@@ -6944,6 +7003,7 @@ class $$SettingsTableTableManager
                 language: language,
                 textSize: textSize,
                 onboarded: onboarded,
+                crashReports: crashReports,
                 lastReadSurah: lastReadSurah,
                 lastReadAyah: lastReadAyah,
                 lastReadPage: lastReadPage,
@@ -7021,6 +7081,7 @@ class $$SettingsTableTableManager
                 Value<Language> language = const Value.absent(),
                 Value<TextSize> textSize = const Value.absent(),
                 Value<bool> onboarded = const Value.absent(),
+                Value<bool> crashReports = const Value.absent(),
                 Value<int> lastReadSurah = const Value.absent(),
                 Value<int> lastReadAyah = const Value.absent(),
                 Value<int> lastReadPage = const Value.absent(),
@@ -7096,6 +7157,7 @@ class $$SettingsTableTableManager
                 language: language,
                 textSize: textSize,
                 onboarded: onboarded,
+                crashReports: crashReports,
                 lastReadSurah: lastReadSurah,
                 lastReadAyah: lastReadAyah,
                 lastReadPage: lastReadPage,

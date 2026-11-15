@@ -360,6 +360,7 @@ void main() {
         'nextCity': 'NEXT · MAKKAH',
         'nextCityShort': 'Next · Makkah',
         'liveNext': 'Next prayer · Makkah',
+        'city': 'Makkah',
         'methodLine': 'Makkah · Umm al-Qura',
       });
       expect(entry['name'], 'Maghrib');
@@ -554,6 +555,7 @@ void main() {
       'nextCity',
       'nextCityShort',
       'liveNext',
+      'city',
       'methodLine',
     ];
     const entry = [

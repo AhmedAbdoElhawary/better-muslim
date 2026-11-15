@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** open, approving it is mine
+**Status:** draft rewritten for 1.0.0 in specs/029, approving it is mine
 
 - [x] It covers no account, location on the phone, Sentry, opt-in analytics, the country from Google, Shorebird's update check, and downloads from EveryAyah, Hisn al-Muslim and GitHub. The draft is `specs/012-shipping/privacy-policy.md`.
 - [ ] I approved the text.

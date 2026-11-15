@@ -57,15 +57,6 @@ class SurfaceData(private val json: JSONObject) {
 
     fun inDuration(entry: JSONObject, now: Long): String = text("inDuration").replace("{duration}", hm(entry, now))
 
-    // home's bar share, null without the period's start
-    fun barShare(entry: JSONObject, now: Long): Float? {
-        if (entry.isNull("barFrom")) return null
-        val from = entry.getLong("barFrom")
-        val at = entry.getLong("at")
-        if (at <= from) return null
-        return ((now - from).toFloat() / (at - from)).coerceIn(0f, 1f)
-    }
-
     // home's sun share, only between sunrise and maghrib
     fun sunShare(entry: JSONObject, now: Long): Float? {
         if (entry.isNull("sunrise") || entry.isNull("maghrib")) return null

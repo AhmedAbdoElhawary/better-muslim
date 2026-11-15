@@ -36,33 +36,26 @@ Notifications are scheduled on your phone. No server sends them.
 
 When the app crashes or hits an error, it sends a report to Sentry, in the EU, so I can fix it. A
 report has the technical error, the phone model, the system version, the app version, the names of
-the last screens opened, like `quran_reader`, and a random id that isn't linked to you. Page
-numbers, ayahs and dua ids are not in it, and text from your notes is removed from the error before
-it is sent. Storing IP addresses is turned off.
+the last screens opened, like `quran_reader`, and a random id that isn't linked to you. The app
+also tells Sentry when it was opened and whether it closed normally or crashed. Page numbers, ayahs
+and dua ids are not in it, and text from your notes is removed from the error before it is sent.
+Storing IP addresses is turned off.
 
-You can turn this off in More, under YOUR DATA.
+You can turn this off in More, under YOUR DATA. When it's off, the app sends no crash reports, in
+the app or in the background.
 
-### Usage numbers (off unless you say yes)
+### Feedback you send
 
-The app asks you once. If you say yes, it sends these to Google Analytics for Firebase:
-
-- Which tab or feature you opened
-- Which onboarding step you reached
-- Whether you allowed a permission
-- The app language
-
-Using a prayer app can say something about someone's religion, so this is off until you agree. You
-can change your answer any time in More, under YOUR DATA.
-
-If you say yes, Google also works out your country from your IP address. It gets no finer location.
-Advertising id, Google signals and ad personalization are off, and the data is kept for 2 months.
+When you write to me from Send feedback in More, your message goes to me through Sentry, with the
+app version, your phone model and its system. If you write your email, it goes too, so I can reply.
+This is sent only when you tap Send, even with crash reports off.
 
 ### App fixes
 
-The app checks Shorebird for small fixes each time it opens. The check sends the app's
-version, the phone's platform and processor type, and a random id made for this install. It sends
-no location, no advertising id and nothing about what you do in the app. Shorebird's servers can log
-the IP address for a short time to manage traffic. This check isn't tied to the switches above.
+The app checks Shorebird for small fixes each time it opens. The check sends the app's version, the
+phone's platform and processor type, and a random id made for this install. It sends no location,
+no advertising id and nothing about what you do in the app. Shorebird's servers can log the IP
+address for a short time to manage traffic. This check isn't tied to the crash reports switch.
 
 ### Downloads
 
@@ -71,12 +64,17 @@ ask for it, and is then kept on your phone:
 
 | Content | Downloaded from |
 | --- | --- |
-| Quran recitation | EveryAyah (everyayah.com) |
+| Quran recitation | EveryAyah (everyayah.com) and mp3quran (mp3quran.net) |
 | Dua audio | Hisn al-Muslim (hisnmuslim.com) |
-| Extra tafsirs and adhan sounds | GitHub (github.com) |
+| Extra tafsirs and Mushaf styles | GitHub (github.com) |
 
 Those sites see your IP address and which file was asked for, like any website does. Nothing else is
 sent to them.
+
+### Rating the app
+
+Rate Better Muslim opens Google Play's or the App Store's own review sheet. What you write there goes to
+Google or Apple under their terms, the app doesn't see it.
 
 ### What you share
 
@@ -85,20 +83,20 @@ When you share an ayah or a dua, it goes where you send it. The app doesn't see 
 ## What I don't do
 
 - No account, no name, no email, unless you write to me
-- No ads
-- I don't sell or share data with anyone for advertising
+- No ads, no advertising id and no analytics
+- I don't sell or share data with anyone
 
 ## Your rights
 
-Depending on where you live, you can ask to see or delete data about you. Crash reports and usage
-numbers aren't linked to your name, so I usually can't find one person's data, but you can turn both
-off at any time and write to me with any question.
+Depending on where you live, you can ask to see or delete data about you. Crash reports aren't
+linked to your name, so I usually can't find one person's data, but you can turn them off at any
+time and write to me with any question. If you sent feedback with your email, I can delete it when
+you ask.
 
-I rely on your consent for usage numbers, and on my legitimate interest in fixing a broken app for
-crash reports.
+I rely on my legitimate interest in fixing a broken app for crash reports and app fixes, and on your
+choice to write to me for feedback.
 
-Sentry, Google and Shorebird handle this data for me. Some of them can process it outside your
-country.
+Sentry and Shorebird handle this data for me. They can process it outside your country.
 
 ## Children
 
@@ -140,26 +138,17 @@ If this policy changes, I will update this page and the date at the top.
 
 ### تقارير الأعطال (مفعّلة افتراضيًا، ويمكنك إيقافها)
 
-عندما يتعطل التطبيق أو يحدث خطأ، يرسل تقريرًا إلى Sentry داخل الاتحاد الأوروبي لأتمكن من إصلاحه. يتضمن التقرير الخطأ التقني، وطراز الهاتف، وإصدار النظام، وإصدار التطبيق، وأسماء آخر الشاشات المفتوحة مثل `quran_reader`، ومعرّفًا عشوائيًا غير مرتبط بك. لا يتضمن أرقام الصفحات أو الآيات أو معرّفات الأدعية، ويُحذف نص ملاحظاتك من الخطأ قبل إرساله. وتخزين عناوين IP متوقف.
+عندما يتعطل التطبيق أو يحدث خطأ، يرسل تقريرًا إلى Sentry داخل الاتحاد الأوروبي لأتمكن من إصلاحه. يتضمن التقرير الخطأ التقني، وطراز الهاتف، وإصدار النظام، وإصدار التطبيق، وأسماء آخر الشاشات المفتوحة مثل `quran_reader`، ومعرّفًا عشوائيًا غير مرتبط بك. ويُخبر التطبيق Sentry أيضًا متى فُتح، وهل أُغلق بشكل عادي أم بسبب عطل. لا يتضمن التقرير أرقام الصفحات أو الآيات أو معرّفات الأدعية، ويُحذف نص ملاحظاتك من الخطأ قبل إرساله. وتخزين عناوين IP متوقف.
 
-يمكنك إيقاف ذلك من «المزيد» ضمن «بياناتك».
+يمكنك إيقاف ذلك من «المزيد» ضمن «بياناتك». وعند إيقافه لا يرسل التطبيق أي تقرير، لا وهو مفتوح ولا في الخلفية.
 
-### أرقام الاستخدام (متوقفة ما لم توافق)
+### الملاحظات التي ترسلها
 
-يسألك التطبيق مرة واحدة. إن وافقت، يرسل ما يلي إلى Google Analytics for Firebase:
-
-- التبويب أو الميزة التي فتحتها
-- الخطوة التي وصلت إليها في بداية التطبيق
-- هل سمحت بإذن معيّن أم لا
-- لغة التطبيق
-
-قد يدل استخدام تطبيق للصلاة على شيء من دين الشخص، لذلك تبقى هذه الأرقام متوقفة حتى توافق. ويمكنك تغيير إجابتك في أي وقت من «المزيد» ضمن «بياناتك».
-
-إن وافقت، تستنتج Google أيضًا بلدك من عنوان IP، ولا تحصل على موقع أدق من ذلك. والمعرّف الإعلاني وGoogle signals وتخصيص الإعلانات كلها متوقفة، وتُحفظ البيانات شهرين.
+عندما تراسلني من «أرسل ملاحظاتك» في «المزيد»، تصلني رسالتك عبر Sentry مع إصدار التطبيق وطراز هاتفك ونظامه. وإن كتبت بريدك الإلكتروني يُرسل معها لأتمكن من الرد عليك. ولا يُرسل شيء من ذلك إلا عندما تضغط «إرسال»، حتى لو كانت تقارير الأعطال متوقفة.
 
 ### إصلاحات التطبيق
 
-يتحقق التطبيق من وجود إصلاحات صغيرة عبر Shorebird في كل مرة يُفتح فيها. يرسل هذا التحقق إصدار التطبيق، ونوع النظام والمعالج، ومعرّفًا عشوائيًا خاصًا بهذا التثبيت. ولا يرسل موقعًا ولا معرّفًا إعلانيًا ولا أي شيء عمّا تفعله في التطبيق. وقد تسجّل خوادم Shorebird عنوان IP لفترة قصيرة لإدارة حركة البيانات. ولا يرتبط هذا التحقق بالخيارين السابقين.
+يتحقق التطبيق من وجود إصلاحات صغيرة عبر Shorebird في كل مرة يُفتح فيها. يرسل هذا التحقق إصدار التطبيق، ونوع النظام والمعالج، ومعرّفًا عشوائيًا خاصًا بهذا التثبيت. ولا يرسل موقعًا ولا معرّفًا إعلانيًا ولا أي شيء عمّا تفعله في التطبيق. وقد تسجّل خوادم Shorebird عنوان IP لفترة قصيرة لإدارة حركة البيانات. ولا يرتبط هذا التحقق بخيار تقارير الأعطال.
 
 ### التنزيلات
 
@@ -167,11 +156,15 @@ If this policy changes, I will update this page and the date at the top.
 
 | المحتوى | مصدر التنزيل |
 | --- | --- |
-| تلاوة القرآن | EveryAyah (everyayah.com) |
+| تلاوة القرآن | EveryAyah (everyayah.com) وmp3quran (mp3quran.net) |
 | صوت الأدعية | حصن المسلم (hisnmuslim.com) |
-| تفاسير إضافية وأصوات الأذان | GitHub (github.com) |
+| تفاسير إضافية وأنماط المصحف | GitHub (github.com) |
 
 ترى هذه المواقع عنوان IP والملف المطلوب، كأي موقع آخر، ولا يُرسل إليها شيء غير ذلك.
+
+### تقييم التطبيق
+
+«قيّم مسلم أفضل» يفتح نافذة التقييم الخاصة بـ Google Play أو App Store، وما تكتبه فيها يذهب إلى Google أو Apple وفق شروطهما، ولا يراه التطبيق.
 
 ### ما تشاركه
 
@@ -180,16 +173,16 @@ If this policy changes, I will update this page and the date at the top.
 ## ما لا أفعله
 
 - لا حساب ولا اسم ولا بريد إلكتروني، إلا إذا راسلتني
-- لا إعلانات
-- لا أبيع البيانات ولا أشاركها مع أحد لأغراض إعلانية
+- لا إعلانات ولا معرّف إعلاني ولا أدوات تحليل استخدام
+- لا أبيع البيانات ولا أشاركها مع أحد
 
 ## حقوقك
 
-بحسب مكان إقامتك، يمكنك طلب الاطلاع على بياناتك أو حذفها. تقارير الأعطال وأرقام الاستخدام غير مرتبطة باسمك، لذلك لا أستطيع عادةً تحديد بيانات شخص بعينه، لكن يمكنك إيقاف الاثنين في أي وقت ومراسلتي بأي سؤال.
+بحسب مكان إقامتك، يمكنك طلب الاطلاع على بياناتك أو حذفها. تقارير الأعطال غير مرتبطة باسمك، لذلك لا أستطيع عادةً تحديد بيانات شخص بعينه، لكن يمكنك إيقافها في أي وقت ومراسلتي بأي سؤال. وإن أرسلت ملاحظات مع بريدك الإلكتروني، أحذفها متى طلبت ذلك.
 
-أعتمد على موافقتك في أرقام الاستخدام، وعلى مصلحتي المشروعة في إصلاح الأعطال في تقارير الأعطال.
+أعتمد على مصلحتي المشروعة في إصلاح الأعطال في تقارير الأعطال وإصلاحات التطبيق، وعلى اختيارك مراسلتي في الملاحظات.
 
-تتولى Sentry وGoogle وShorebird معالجة هذه البيانات نيابةً عني، وقد يعالجها بعضها خارج بلدك.
+تتولى Sentry وShorebird معالجة هذه البيانات نيابةً عني، وقد تعالجانها خارج بلدك.
 
 ## الأطفال
 

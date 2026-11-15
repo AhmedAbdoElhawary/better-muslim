@@ -1,6 +1,7 @@
 # Left before release
 
 Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahmed)"` finds them all.
+The Play Console answers and the release steps are in `.github/LAUNCH.md`.
 
 ## Apple developer account
 
@@ -20,16 +21,17 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
       `android/key.properties`. Both stay out of git.
 - [ ] Back up both somewhere safe. Play App Signing can reset a lost upload key, but only after a
       support request.
-- [ ] Put the keystore in the repo secrets so CI signs with it (`ANDROID_KEYSTORE_BASE64`,
-      `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`).
+- [ ] Declare the media playback and data sync foreground services in Play Console, each with a
+      video. (`android/app/src/main/AndroidManifest.xml`)
 
-## Content
+## Privacy policy
 
-- [ ] Upload `build/tafsir/tabari.json.gz` and `qurtubi.json.gz` to the `tafsir-v2` release of
-      `better-muslim-content`. Their download fails until then.
-      (`lib/features/quran/data/tafsir_files.dart`)
+- [ ] Read and approve both languages, set the date and check my legal name.
+      (`specs/012-shipping/privacy-policy.md`)
 
 ## Store listings
+
+- [ ] Put the day the production PR merges in the 1.0.0 heading. (`CHANGELOG.md`)
 
 - [ ] Once the app is on the App Store, put its link in `appStoreUrl`. Rate and Share on iOS stay
       hidden until then. (`lib/features/more/model/contact.dart`)
@@ -42,7 +44,5 @@ Each item below also has a `TODO(ahmed)` where it lives, so `grep -rn "TODO(ahme
       "Test adhan in 1 min" and listen to Alafasy's full adhan with the screen off.
 - [ ] A phone that ran the app at `572b14b` has a v15 database that never had the highlight,
       categories or reciter steps, reinstall the app on it.
-- [ ] Turn on UI sounds in More and listen to the toggle, tasbih bead, tasbih complete, qibla
-      aligned and Mark prayed. Swap any I don't like in `assets/audio/ui_*.m4a`, same names.
 - [ ] Listen on a few Hisn al-Muslim duas, each downloads from hisnmuslim.com once and then plays
       offline.

@@ -133,6 +133,10 @@ jobs:
           ref: ${{ needs.resolve.outputs.tag }}
           fetch-depth: 0 # the auto release notes need the full tag history
 
+      # the runner disk filled up while saving the cache. these are big and the build never uses them
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+
       - uses: actions/setup-java@v6
         with:
           distribution: temurin

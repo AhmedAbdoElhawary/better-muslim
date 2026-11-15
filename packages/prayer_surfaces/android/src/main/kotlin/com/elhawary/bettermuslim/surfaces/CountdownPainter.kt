@@ -2,9 +2,7 @@ package com.elhawary.bettermuslim.surfaces
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
-import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.RectF
@@ -36,42 +34,44 @@ class CountdownPainter(
         ((min(widthPixels, heightPixels) / density - side) * density).toInt().coerceAtLeast(1)
     }
 
-    // the top row, the bar with its sun, and the two ends under it. no period start, no bar
-    fun card(now: Long): Bitmap {
-        val share = data.barShare(entry, now)
-        val height = TOP_ROW + if (share == null) 0f else GAP + BAR + GAP + 12f * NORMAL
-        return layer(height) { canvas ->
-            val at = text(12.5f, body(400), color("label"), tabular = true)
-            val atTime = entry.getString("atTime")
-            val endColumn = max(timer(COUNTDOWN).measureText(WIDEST), at.measureText(atTime))
-            drawTile(canvas, TILE, 11f, 23f, 1.1f, (TOP_ROW - TILE) / 2)
+    // beside the tile "next prayer" over the name, the countdown over the city at the end, then the
+    // period's start and the next prayer's time. no bar
+    fun card(): Bitmap = layer(TOP_ROW + GAP + 12f * NORMAL) { canvas ->
+        drawTile(canvas, TILE, 11f, 23f, 1.1f, (TOP_ROW - TILE) / 2)
+        val label = text(12.5f, body(400), color("label"))
+        val city = ellipsize(data.text("city"), label, width / 2f)
+        drawLine(canvas, city, label, end(), dp(COUNTDOWN_LINE), dp(12.5f * NORMAL), endAlign)
 
-            val inner = width - dp(TILE + 12f + 12f) - endColumn
-            var top = dp((TOP_ROW - 12.5f * NORMAL - 24f * MARCELLUS) / 2)
-            val label = text(12.5f, body(400), color("label"))
-            drawLine(canvas, ellipsize(data.text("liveNext"), label, inner), label, start(TILE + 12f), top, dp(12.5f * NORMAL), startAlign)
-            top += dp(12.5f * NORMAL)
-            val name = text(24f, display(), color("text"))
-            drawLine(canvas, ellipsize(entry.getString("name"), name, inner), name, start(TILE + 12f), top, dp(24f * MARCELLUS), startAlign)
-            drawLine(canvas, atTime, at, end(), dp(COUNTDOWN_LINE), dp(12.5f * NORMAL), endAlign)
+        // the name's line runs under the countdown's too
+        val inner = width - dp(TILE + 12f + 8f) - max(timer(COUNTDOWN).measureText(WIDEST), label.measureText(city))
+        var top = dp((TOP_ROW - 12.5f * NORMAL - NAME_LINE) / 2)
+        drawLine(canvas, ellipsize(data.text("nextPrayer"), label, inner), label, start(TILE + 12f), top, dp(12.5f * NORMAL), startAlign)
+        top += dp(12.5f * NORMAL)
+        drawName(canvas, 24f, inner, start(TILE + 12f), top, dp(NAME_LINE))
 
-            if (share == null) return@layer
-            drawBar(canvas, share, dp(TOP_ROW + GAP + BAR / 2))
-            val ends = text(12f, body(400), color("label"), tabular = true)
-            val endsTop = dp(TOP_ROW + GAP + BAR + GAP)
-            val nameTime = entry.getString("nameTime")
-            val fromWidth = width - dp(8f) - ends.measureText(nameTime)
-            drawLine(canvas, ellipsize(entry.optString("barFromLabel"), ends, fromWidth), ends, start(0f), endsTop, dp(12f * NORMAL), startAlign)
-            drawLine(canvas, nameTime, ends, end(), endsTop, dp(12f * NORMAL), endAlign)
-        }
+        val ends = text(12f, body(400), color("label"), tabular = true)
+        val endsTop = dp(TOP_ROW + GAP)
+        val nameTime = entry.getString("nameTime")
+        drawLine(canvas, nameTime, ends, end(), endsTop, dp(12f * NORMAL), endAlign)
+        if (entry.isNull("barFromLabel")) return@layer
+        val fromWidth = width - dp(8f) - ends.measureText(nameTime)
+        drawLine(canvas, ellipsize(entry.getString("barFromLabel"), ends, fromWidth), ends, start(0f), endsTop, dp(12f * NORMAL), startAlign)
     }
 
     // collapsed: the small tile and the name, the countdown at the end
     fun row(): Bitmap = layer(ROW) { canvas ->
         drawTile(canvas, ROW, 9f, 18f, 1.3f, 0f)
-        val name = text(22f, display(), color("text"))
         val inner = width - dp(ROW + 12f + 8f) - timer(ROW_COUNTDOWN).measureText(WIDEST)
-        drawLine(canvas, ellipsize(entry.getString("name"), name, inner), name, start(ROW + 12f), 0f, dp(ROW), startAlign)
+        drawName(canvas, 22f, inner, start(ROW + 12f), 0f, dp(ROW))
+    }
+
+    // smaller until the whole name fits, the ellipsis only past the smallest
+    private fun drawName(canvas: Canvas, size: Float, inner: Float, x: Float, top: Float, lineHeight: Float) {
+        val text = entry.getString("name")
+        var fit = size
+        while (fit > MIN_NAME && text(fit, display(), 0).measureText(text) > inner) fit -= 1f
+        val name = text(fit, display(), color("text"))
+        drawLine(canvas, ellipsize(text, name, inner), name, x, top, lineHeight, startAlign)
     }
 
     // the trees' radial sky from the bottom, a 0.5 hairline at 18% and the star
@@ -100,24 +100,6 @@ class CountdownPainter(
                 color = color("primary")
             },
         )
-    }
-
-    // 4 high at 20%, primary to gold up to the sun, never mirrored
-    private fun drawBar(canvas: Canvas, share: Float, centerY: Float) {
-        val track = RectF(0f, centerY - dp(2f), width.toFloat(), centerY + dp(2f))
-        canvas.drawRoundRect(track, dp(2f), dp(2f), Paint(Paint.ANTI_ALIAS_FLAG).apply { color = alpha(color("text"), 0.2f) })
-        val sunX = (width * share).coerceIn(dp(SUN), width - dp(SUN))
-        val fill = RectF(0f, track.top, sunX, track.bottom)
-        canvas.drawRoundRect(fill, dp(2f), dp(2f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = LinearGradient(0f, 0f, sunX, 0f, color("primary"), color("gold"), Shader.TileMode.CLAMP)
-        })
-        // 14 with its glow, 0 0 10px 3px at 45%
-        val sun = color("sun")
-        canvas.drawCircle(sunX, centerY, dp(SUN + 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = alpha(sun, 0.45f)
-            maskFilter = BlurMaskFilter(dp(5f), BlurMaskFilter.Blur.NORMAL)
-        })
-        canvas.drawCircle(sunX, centerY, dp(SUN), Paint(Paint.ANTI_ALIAS_FLAG).apply { color = sun })
     }
 
     private fun layer(height: Float, draw: (Canvas) -> Unit): Bitmap {
@@ -152,11 +134,13 @@ class CountdownPainter(
         private const val COUNTDOWN = 28f
         private const val COUNTDOWN_LINE = COUNTDOWN * 1.1f
         private const val TOP_ROW = COUNTDOWN_LINE + 12.5f * NORMAL
+        private const val NAME_LINE = 24f * MARCELLUS
         private const val GAP = 12f
-        private const val BAR = 16f
-        private const val SUN = 7f
         private const val ROW = 32f
         private const val ROW_COUNTDOWN = 22f
-        private const val WIDEST = "0:00:00"
+        private const val MIN_NAME = 18f
+
+        // the reminder is 30 minutes at most, the countdown never shows hours
+        private const val WIDEST = "00:00"
     }
 }

@@ -2,6 +2,8 @@ import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+import '../../helpers/crash_reporter.dart';
+
 void main() {
   test('the cap drops an error type after three events, other types still pass', () {
     final cap = SentryEventCap();
@@ -47,5 +49,19 @@ void main() {
 
     expect(scrubbed(event).exceptions!.single.value, isNull);
     expect(scrubbed(SentryEvent()).exceptions, isNull);
+  });
+
+  test('errors before the switch is read wait, then go out in order once', () async {
+    final pending = PendingCrashReporter();
+    final reporter = FakeCrashReporter();
+    final first = StateError('a');
+    final second = ArgumentError('b');
+
+    await pending.recordError(first, null);
+    await pending.recordError(second, null);
+    await pending.flushTo(reporter);
+    await pending.flushTo(reporter);
+
+    expect(reporter.errors, [first, second]);
   });
 }
