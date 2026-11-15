@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/audio/ui_sounds.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/qibla/qibla_place.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -23,6 +24,7 @@ class QiblaPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(qiblaFollowProvider);
     ref.listen(qiblaTrackerProvider, (previous, next) {
       if (previous == null) return;
       if (next.approaches > previous.approaches) BmHaptics.qiblaApproach();
