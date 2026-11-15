@@ -780,4 +780,6 @@ abstract final class StringsManager {
   static const String downloadSize = 'downloadSize';
   static const String downloadCouldNot = 'downloadCouldNot';
   static const String surahByReciter = 'surahByReciter';
+  static const String downloadWaiting = 'downloadWaiting';
+  static const String downloadKeepOpen = 'downloadKeepOpen';
 }
