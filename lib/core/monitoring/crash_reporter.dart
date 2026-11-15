@@ -14,6 +14,9 @@ abstract class CrashReporter {
   });
 
   void addBreadcrumb(String message, {String? category});
+
+  /// what someone writes on the feedback page, reaches my mail through sentry's user feedback
+  Future<void> sendFeedback(String message, {String? email});
 }
 
 class SentryCrashReporter implements CrashReporter {
@@ -36,6 +39,11 @@ class SentryCrashReporter implements CrashReporter {
   @override
   void addBreadcrumb(String message, {String? category}) {
     Sentry.addBreadcrumb(Breadcrumb(message: message, category: category));
+  }
+
+  @override
+  Future<void> sendFeedback(String message, {String? email}) async {
+    await Sentry.captureFeedback(SentryFeedback(message: message, contactEmail: email));
   }
 }
 
@@ -85,5 +93,11 @@ class DebugCrashReporter implements CrashReporter {
   void addBreadcrumb(String message, {String? category}) {
     if (!kCustomDebugMode) return;
     debugPrint('[Crash][breadcrumb]${category != null ? '[$category]' : ''} $message');
+  }
+
+  @override
+  Future<void> sendFeedback(String message, {String? email}) async {
+    if (!kCustomDebugMode) return;
+    debugPrint('[Feedback]${email != null ? '[$email]' : ''} $message');
   }
 }
