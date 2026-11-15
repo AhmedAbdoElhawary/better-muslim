@@ -779,4 +779,6 @@ abstract final class StringsManager {
   static const String useTranslationsTafsir = 'useTranslationsTafsir';
   static const String useWordRoots = 'useWordRoots';
   static const String creditLine = 'creditLine';
+  static const String crashReports = 'crashReports';
+  static const String privacyPolicy = 'privacyPolicy';
 }
