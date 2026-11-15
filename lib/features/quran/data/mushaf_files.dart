@@ -66,14 +66,20 @@ class MushafFiles {
     DownloadNotice? notice,
   }) async {
     _cancelled.remove(style);
-    await saveVerified(
-      style.address,
-      await _file(style),
-      sha256Hex: _sha256(style),
-      fetch: _fetch,
-      cancelled: () => _cancelled.contains(style),
-      onProgress: onProgress,
+    bool cancelled() => _cancelled.contains(style);
+    final file = await _file(style);
+    await untilOnline(
+      () => saveVerified(
+        style.address,
+        file,
+        sha256Hex: _sha256(style),
+        fetch: _fetch,
+        cancelled: cancelled,
+        onProgress: onProgress,
+        notice: notice,
+      ),
       notice: notice,
+      cancelled: cancelled,
     );
   }
 
