@@ -6,6 +6,7 @@ import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/l10n.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/prayer_times/day_times.dart';
 import 'package:better_muslim/core/resources/design/bm_haptics.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart';
@@ -99,6 +100,7 @@ class _RecordingSheetState extends ConsumerState<_RecordingSheet> {
   Future<void> _pick(AdhanRecording recording) async {
     if (ref.read(adhanDownloadProvider(recording)).ready) return _play(recording);
     BmHaptics.selection();
+    showKeepOpen(context, ref, adhanDownloadProvider(recording), icon: BmIconName.adhan);
     try {
       await ref.read(adhanDownloadProvider(recording).notifier).download();
     } on DownloadException catch (error) {
