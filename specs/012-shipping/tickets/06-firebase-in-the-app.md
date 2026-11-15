@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** open
+**Status:** after launch, 1.0.0 ships without Firebase Analytics (specs/029)
 
 - [ ] `firebase_core` and `firebase_analytics` are added, and iOS builds with them.
 - [ ] Config files stay out of git, CI writes them for every job that builds.
