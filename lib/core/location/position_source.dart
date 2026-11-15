@@ -37,6 +37,17 @@ class PositionSource {
     }
   }
 
+  /// the qibla page's, every 10 m while it listens. nothing with location off, errors end it quietly
+  Stream<LatLng> positions() async* {
+    if (!await Geolocator.isLocationServiceEnabled()) return;
+    final positions = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 10),
+    ).handleError((Object _) {});
+    await for (final position in positions) {
+      yield (latitude: position.latitude, longitude: position.longitude);
+    }
+  }
+
   Future<LatLng?> _lastKnown() async {
     final position = await Geolocator.getLastKnownPosition();
     return position == null ? null : (latitude: position.latitude, longitude: position.longitude);
