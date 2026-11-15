@@ -1,8 +1,8 @@
 import 'package:better_muslim/core/resources/strings_manager.dart';
 
-/// a source the app uses, with the credit its license asks for (FR-033)
+/// a source whose license or terms ask for credit (FR-033)
 class Credit {
-  const Credit({required this.source, required this.useKey, this.license, this.link});
+  const Credit({required this.source, required this.useKey, this.license});
 
   /// as written by its owner, never translated
   final String source;
@@ -10,180 +10,14 @@ class Credit {
   /// what the app uses it for, a StringsManager key
   final String useKey;
   final String? license;
-
-  /// https only, the system channel refuses anything else
-  final String? link;
 }
 
-const _ofl = 'SIL OFL 1.1';
-
 const credits = [
+  Credit(source: 'GeoNames', useKey: StringsManager.usePlaceNames, license: 'CC BY 4.0'),
   Credit(
-    source: 'GeoNames',
-    useKey: StringsManager.usePlaceNames,
-    license: 'CC BY 4.0',
-    link: 'https://www.geonames.org',
+    source: 'King Fahd Glorious Quran Printing Complex',
+    useKey: StringsManager.useMushafFonts,
   ),
-  Credit(
-    source: 'Marcellus',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/specimen/Marcellus',
-  ),
-  Credit(
-    source: 'Schibsted Grotesk',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/specimen/Schibsted+Grotesk',
-  ),
-  Credit(
-    source: 'Reem Kufi',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/specimen/Reem+Kufi',
-  ),
-  Credit(
-    source: 'Noto Sans Arabic',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/noto/specimen/Noto+Sans+Arabic',
-  ),
-  Credit(
-    source: 'Amiri',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/specimen/Amiri',
-  ),
-  Credit(
-    source: 'Amiri Quran',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/specimen/Amiri+Quran',
-  ),
-  Credit(
-    source: 'Scheherazade New',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://software.sil.org/scheherazade',
-  ),
-  Credit(
-    source: 'Noto Naskh Arabic',
-    useKey: StringsManager.useFonts,
-    license: _ofl,
-    link: 'https://fonts.google.com/noto/specimen/Noto+Naskh+Arabic',
-  ),
-
-  /// its license lets it be used and shipped for free, never sold or modified
-  Credit(
-    source: 'KFGQPC HAFS Uthmanic Script, King Fahd Glorious Quran Printing Complex',
-    useKey: StringsManager.useFonts,
-    license: 'KFGQPC EULA',
-    link: 'https://fonts.qurancomplex.gov.sa',
-  ),
-
-  Credit(
-    source: 'QCF V1, V2 and V4 Tajweed page fonts, King Fahd Glorious Quran Printing Complex',
-    useKey: StringsManager.useFonts,
-    link: 'https://fonts.qurancomplex.gov.sa',
-  ),
-  Credit(
-    source: 'Quran.com · QCF glyph codes and the 1405H print lines',
-    useKey: StringsManager.useMushafText,
-    link: 'https://quran.com',
-  ),
-
-  /// qul's own faq: licenses differ by resource, these two come from the complex's print
-  Credit(
-    source:
-        'Quranic Universal Library (QUL) · Tarteel, from King Fahd Glorious Quran Printing Complex',
-    useKey: StringsManager.useMushafText,
-    link: 'https://qul.tarteel.ai',
-  ),
-  Credit(
-    source: 'Tanzil · Sahih International · Pickthall · Yusuf Ali · Hilali & Khan',
-    useKey: StringsManager.useTranslation,
-    link: 'https://tanzil.net',
-  ),
-  Credit(
-    source: 'Tanzil · Tafsir al-Muyassar · Tafsir al-Jalalayn',
-    useKey: StringsManager.useTafsir,
-    link: 'https://tanzil.net',
-  ),
-  Credit(
-    source:
-        "Quran.com · Tafsir Ibn Kathir · Tafsir as-Sa'di · Tafsir al-Tabari · Tafsir al-Qurtubi",
-    useKey: StringsManager.useTafsir,
-    link: 'https://quran.com',
-  ),
-  Credit(
-    source: 'Quranic Arabic Corpus · Kais Dukes',
-    useKey: StringsManager.useWordRoots,
-    license: 'GNU GPL',
-    link: 'https://corpus.quran.com',
-  ),
-  Credit(
-    source: 'EveryAyah · Mishary Rashid Alafasy',
-    useKey: StringsManager.useRecitation,
-    link: 'https://everyayah.com',
-  ),
-  Credit(
-    source: 'EveryAyah · Mahmoud Khalil Al-Husary',
-    useKey: StringsManager.useRecitation,
-    link: 'https://everyayah.com',
-  ),
-  Credit(
-    source: 'EveryAyah · Abdul Basit Abdul Samad',
-    useKey: StringsManager.useRecitation,
-    link: 'https://everyayah.com',
-  ),
-  Credit(
-    source: 'EveryAyah · Mohamed Siddiq Al-Minshawi',
-    useKey: StringsManager.useRecitation,
-    link: 'https://everyayah.com',
-  ),
-  Credit(
-    source: 'EveryAyah · Maher Al-Muaiqly',
-    useKey: StringsManager.useRecitation,
-    link: 'https://everyayah.com',
-  ),
-  Credit(
-    source: 'mp3quran.net · Ahmad Al-Nufais',
-    useKey: StringsManager.useRecitation,
-    link: 'https://mp3quran.net',
-  ),
-  Credit(
-    source: 'mp3quran.net · Hassan Mohamed Saleh',
-    useKey: StringsManager.useRecitation,
-    link: 'https://mp3quran.net',
-  ),
-  Credit(
-    source: 'mp3quran.net · Haitham Al-Dukhain',
-    useKey: StringsManager.useRecitation,
-    link: 'https://mp3quran.net',
-  ),
-  Credit(
-    source: "Hisn al-Muslim · Sa'id al-Qahtani",
-    useKey: StringsManager.useAzkarDuas,
-    link: 'https://www.hisnmuslim.com',
-  ),
-  Credit(
-    source: 'Sunnah.com · Hisn al-Muslim references',
-    useKey: StringsManager.useAzkarDuas,
-    link: 'https://sunnah.com/hisn',
-  ),
-  Credit(
-    source: 'Mishary Rashid Alafasy · Adhan and Fajr',
-    useKey: StringsManager.useAdhanRecordings,
-  ),
-  Credit(
-    source: 'Aarni Koskela · Notifications',
-    useKey: StringsManager.useTones,
-    license: 'CC0',
-    link: 'https://github.com/akx/Notifications',
-  ),
-  Credit(
-    source: 'Microsoft Azure AI Speech · Hamed (ar-SA)',
-    useKey: StringsManager.useAzkarVoice,
-    link: 'https://azure.microsoft.com/products/ai-services/text-to-speech',
-  ),
+  Credit(source: 'Tanzil', useKey: StringsManager.useTranslationsTafsir),
+  Credit(source: 'Quranic Arabic Corpus', useKey: StringsManager.useWordRoots, license: 'GNU GPL'),
 ];
