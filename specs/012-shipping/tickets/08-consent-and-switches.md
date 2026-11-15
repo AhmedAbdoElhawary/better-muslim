@@ -4,10 +4,10 @@
 
 **Blocked by:** 05, 07
 
-**Status:** open
+**Status:** the crash reports switch is built in specs/029, the ask sheet and the analytics switch wait for 06
 
 - [ ] The sheet shows once, with two equal buttons, in English and Arabic.
 - [ ] Analytics stays off unless the answer is yes.
-- [ ] The crash reports switch stops Sentry in the app and in background tasks.
+- [x] The crash reports switch stops Sentry in the app and in background tasks.
 - [ ] Both choices live in drift with a migration.
 - [ ] It works in all themes, both languages, text scale 2.0 and reduce motion.
