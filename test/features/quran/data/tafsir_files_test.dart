@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/features/quran/data/tafsir_files.dart';
@@ -41,6 +42,28 @@ void main() {
     exclude: (_) async {},
     address: (_) => Uri.parse(address),
     sha256: (_) => hash ?? '${sha256.convert(_body)}',
+  );
+
+  /// 10 bytes, then the connection drops, the next fetch serves the rest
+  TafsirFiles dropsOnce(List<int> asked) => TafsirFiles(
+    assets: () async => throw UnimplementedError(),
+    root: () async => root,
+    fetch: (uri, {from = 0}) async {
+      asked.add(from);
+      if (asked.length > 1) {
+        return (length: _body.length - from, bytes: Stream.value(_body.sublist(from)));
+      }
+      return (
+        length: _body.length,
+        bytes: Stream.fromFutures([
+          Future.value(_body.sublist(0, 10)),
+          Future<List<int>>.error(const SocketException('gone')),
+        ]),
+      );
+    },
+    exclude: (_) async {},
+    address: (_) => Uri.parse('https://example.com/ibn_kathir.json.gz'),
+    sha256: (_) => '${sha256.convert(_body)}',
   );
 
   Future<Fetched> serve(List<int> body, {int? length}) async =>
@@ -89,6 +112,32 @@ void main() {
   test('offline throws offline', () async {
     final tafsir = files((_) => throw const SocketException('offline'));
     expect(await failure(download(tafsir)), DownloadFailure.offline);
+  });
+
+  test('a lost connection keeps the .part and the next download goes on from it', () async {
+    final asked = <int>[];
+    final tafsir = dropsOnce(asked);
+    expect(await failure(download(tafsir)), DownloadFailure.offline);
+    expect(left(), ['ibn_kathir.json.gz.part']);
+    await download(tafsir);
+    expect(asked, [0, 10]);
+    expect(left(), ['ibn_kathir.json.gz']);
+  });
+
+  test('with a notice, a lost connection waits and goes on by itself', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final asked = <int>[];
+    final tafsir = dropsOnce(asked);
+    final done = await DownloadNotice.run(
+      key: 'tafsir test',
+      title: (l10n, _) => 'Ibn Kathir',
+      settings: null,
+      resume: () async {},
+      job: (notice) => tafsir.download(TafsirSource.ibnKathir, notice: notice),
+    );
+    expect(done, isTrue);
+    expect(asked, [0, 10]);
+    expect(left(), ['ibn_kathir.json.gz']);
   });
 
   test('a plain http address is refused before anything is fetched', () async {
