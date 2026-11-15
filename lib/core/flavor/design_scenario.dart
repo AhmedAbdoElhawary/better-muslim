@@ -110,4 +110,7 @@ class _NoPosition implements PositionSource {
 
   @override
   Future<LatLng?> fix({LocationAccuracy accuracy = LocationAccuracy.low}) async => null;
+
+  @override
+  Stream<LatLng> positions() => const Stream.empty();
 }
