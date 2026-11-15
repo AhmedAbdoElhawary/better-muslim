@@ -613,21 +613,6 @@
   "cancel": "Cancel",
   "reset": "Reset",
   "sectionAbout": "ABOUT",
-  "acknowledgements": "Acknowledgements",
-  "openSourceLicenses": "Open source licenses",
-  "usePlaceNames": "Place names",
-  "useFonts": "Fonts",
-  "useAzkarDuas": "Azkar and duas",
-  "useAdhanRecordings": "Adhan recordings",
-  "useTones": "Notification tones",
-  "useAzkarVoice": "The azkar reminder's voice",
-  "creditLine": "{use} · {license}",
-  "@creditLine": {
-    "placeholders": {
-      "license": {},
-      "use": {}
-    }
-  },
   "version": "Version",
   "easternDigits": "Eastern Arabic digits ١٢٣",
   "themeQiyamEmerald": "Qiyam Emerald",
@@ -740,7 +725,6 @@
   "rateApp": "Rate Better Muslim",
   "shareApp": "Share Better Muslim",
   "developer": "Developer",
-  "feedbackSubject": "Better Muslim feedback",
   "feedbackBody": "Version {version} · {device} · {os}",
   "@feedbackBody": {
     "placeholders": {
@@ -753,12 +737,6 @@
   "@shareLine": {
     "placeholders": {
       "link": {}
-    }
-  },
-  "noMailApp": "No mail app. Write to {email}",
-  "@noMailApp": {
-    "placeholders": {
-      "email": {}
     }
   },
   "language": "Language",
@@ -1048,7 +1026,6 @@
   "noBookmarksBody": "Tap Bookmark on any ayah to keep your place.",
   "recentNote": "RECENT NOTE",
   "shareAyah": "Share ayah",
-  "showAppName": "Show app name",
   "matchApp": "Match app",
   "paper": "Paper",
   "night": "Night",
@@ -1095,7 +1072,6 @@
   "atTabari": "At-Tabari",
   "alQurtubi": "Al-Qurtubi",
   "muyassarSummary": "Arabic · Al-Muyassar summary",
-  "muyassarCredit": "At-Tafsir al-Muyassar · King Fahd Complex",
   "previousAyah": "Previous ayah",
   "nextAyah": "Next ayah",
   "close": "Close",
@@ -1142,11 +1118,6 @@
   "translationSize": "Translation size",
   "smaller": "Smaller",
   "larger": "Larger",
-  "useMushafText": "Mushaf text and layout",
-  "useTranslation": "Translation",
-  "useTafsir": "Tafsir",
-  "useRecitation": "Recitation",
-  "useWordRoots": "Word roots",
   "showSurahName": "Show surah name",
   "recitationPlaying": "Playing",
   "recitationPaused": "Paused",
@@ -1295,5 +1266,26 @@
   "downloadCouldNot": "Couldn't download {name}",
   "surahByReciter": "{surah} by {reciter}",
   "downloadWaiting": "Waiting for internet",
-  "downloadKeepOpen": "Keep the app open until the download finishes"
+  "downloadKeepOpen": "Keep the app open until the download finishes",
+  "feedbackMessage": "Your message",
+  "feedbackMessageHint": "What works, what doesn't, what you'd like to see",
+  "feedbackEmail": "Your email, for a reply",
+  "feedbackEmailHint": "Optional",
+  "feedbackEmailWrong": "This email doesn't look right",
+  "feedbackAttached": "The app's version, your phone and its system go with it.",
+  "send": "Send",
+  "feedbackSent": "Sent, thank you",
+  "rateUnavailable": "Rating needs the store app on this phone",
+  "credits": "Credits",
+  "usePlaceNames": "Place names",
+  "useMushafFonts": "Mushaf fonts and Tafsir al-Muyassar",
+  "useTranslationsTafsir": "Translations and tafsir",
+  "useWordRoots": "Word roots",
+  "creditLine": "{use} · {license}",
+  "@creditLine": {
+    "placeholders": {
+      "license": {},
+      "use": {}
+    }
+  }
 }
