@@ -62,6 +62,9 @@ class AudioServiceRecitation implements Recitation {
   /// the last play failed, so play starts it again instead of resuming
   var _failed = false;
 
+  /// a new queue is loading, the player's own stop and reload would flip it to paused and back
+  var _starting = false;
+
   /// why the feed stopped before the queue's end, the player fails there
   RecitationFailure? _cut;
   Timer? _gap;
@@ -120,6 +123,7 @@ class AudioServiceRecitation implements Recitation {
     _session++;
     _cancelTimers();
     _waiting = false;
+    _starting = false;
     _failed = true;
     _emit(_state.copyWith(status: RecitationStatus.paused, ayah: at, failure: failure));
     await _player.stop();
@@ -158,6 +162,10 @@ class AudioServiceRecitation implements Recitation {
       return;
     }
     if (_waiting) return;
+    if (_starting) {
+      if (!player.playing) return;
+      _starting = false;
+    }
     final processing = player.processingState;
     final loading =
         processing == ProcessingState.loading ||
@@ -179,10 +187,12 @@ class AudioServiceRecitation implements Recitation {
   Future<void> play(AyahKey from, {required AyahKey to, MediaText? media}) =>
       _play(from, to: to, media: media);
 
-  /// paused loads the first file and waits there, for a new reciter picked while paused
+  /// paused loads the first file and waits there, for a new reciter picked while paused. start is
+  /// where the queue begins, the range keeps its own from
   Future<void> _play(
     AyahKey from, {
     required AyahKey to,
+    AyahKey? start,
     MediaText? media,
     bool paused = false,
   }) async {
@@ -190,9 +200,10 @@ class AudioServiceRecitation implements Recitation {
     _cancelTimers();
     _waiting = false;
     _failed = false;
+    _starting = true;
     _cut = null;
     _media = media ?? _media;
-    _queue = recitationQueue(from, to, repeat: _state.repeat);
+    _queue = recitationQueue(start ?? from, to, repeat: _state.repeat);
     _added = 0;
     _timed = 0;
     _timedAt = Duration.zero;
@@ -232,6 +243,7 @@ class AudioServiceRecitation implements Recitation {
     await _player.setSpeed(_state.speed);
     await _player.setVolume(1);
     if (paused) {
+      _starting = false;
       _emit(_state.copyWith(status: RecitationStatus.paused));
       return;
     }
@@ -412,8 +424,7 @@ class AudioServiceRecitation implements Recitation {
   Future<void> _replay([AyahKey? start, bool paused = false]) async {
     final (ayah, from, to) = (start ?? _state.ayah, _state.from, _state.to);
     if (ayah == null || to == null) return;
-    await _play(ayah, to: to, paused: paused);
-    _emit(_state.copyWith(from: from));
+    await _play(from ?? ayah, to: to, start: ayah, paused: paused);
   }
 
   @override
@@ -451,6 +462,7 @@ class AudioServiceRecitation implements Recitation {
     _sleep?.cancel();
     _waiting = false;
     _failed = false;
+    _starting = false;
     _emit(_state.copyWith(status: RecitationStatus.idle));
     await _player.stop();
     await (await AudioSession.instance).setActive(false);
