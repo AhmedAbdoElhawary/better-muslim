@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/resources/theme_manager.dart';
@@ -79,10 +80,20 @@ class _SilentRowState extends ConsumerState<_SilentRow> {
   late final AppLifecycleListener _lifecycle;
   var _asked = false;
 
+  /// only turning it on scrolls, not opening the page with it on
+  var _reveal = false;
+
   @override
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(onResume: _check);
+    ref.listenManual(settingsProvider.select((settings) => settings.value?.prayerSilent ?? false), (
+      _,
+      on,
+    ) {
+      if (on && _reveal) _scroll();
+      _reveal = false;
+    });
     _check();
   }
 
@@ -101,8 +112,25 @@ class _SilentRowState extends ConsumerState<_SilentRow> {
     _asked = false;
   }
 
-  void _save(bool on) =>
-      ref.read(databaseProvider).updateSettings(SettingsCompanion(prayerSilent: Value(on)));
+  void _save(bool on) {
+    _reveal = on;
+    ref.read(databaseProvider).updateSettings(SettingsCompanion(prayerSilent: Value(on)));
+  }
+
+  /// after silent for has grown in, before that the row's bottom isn't known
+  Future<void> _scroll() async {
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    if (!reduce) await Future<void>.delayed(BmMotion.standard);
+    if (!mounted) return;
+    await Scrollable.ensureVisible(
+      context,
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      duration: reduce ? Duration.zero : BmMotion.standard,
+      curve: BmMotion.standardCurve,
+    );
+  }
 
   Future<void> _turn(bool on) async {
     final channel = ref.read(adhanChannelProvider);
