@@ -5,10 +5,37 @@ import 'package:better_muslim/core/app/app_localizations.dart';
 import 'package:better_muslim/core/database/app_database.dart';
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
 import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/toast/toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
+
+/// a surah, tafsir, mushaf style or adhan, the same shape everywhere
+typedef DownloadStatus = ({bool ready, bool downloading, double? progress});
+
+/// ios has no download notification and stops a download soon after the app is closed. said once
+/// the first bytes are in, so an offline start shows only its own toast
+void showKeepOpen(
+  BuildContext context,
+  WidgetRef ref,
+  ProviderListenable<DownloadStatus> status, {
+  required BmIconName icon,
+}) {
+  final now = ref.read(status);
+  if (defaultTargetPlatform != TargetPlatform.iOS || now.ready || now.downloading) return;
+  late final ProviderSubscription<DownloadStatus> subscription;
+  subscription = ref.listenManual(status, (before, now) {
+    if (!now.downloading) return subscription.close();
+    if (now.progress == null || before?.progress != null) return;
+    subscription.close();
+    if (context.mounted) showToast(context, StringsManager.downloadKeepOpen, icon: icon);
+  });
+}
 
 /// android's notification for a download I started: its bar, pause, resume and cancel, from a
 /// foreground service so it goes on in the background (spec 026). ios has none
@@ -60,6 +87,7 @@ class DownloadNotice {
         'resume': l10n.tr(StringsManager.resume, const {}),
         'cancel': l10n.tr(StringsManager.cancel, const {}),
         'paused': l10n.tr(StringsManager.downloadPaused, const {}),
+        'waiting': l10n.tr(StringsManager.downloadWaiting, const {}),
         'size': l10n.tr(StringsManager.downloadSize, const {}),
         'failed': l10n.tr(StringsManager.downloadCouldNot, {'name': name}),
       },
@@ -103,9 +131,36 @@ class DownloadNotice {
   int? _total;
   var _sized = false;
 
+  /// some of it came in, so a lost connection waits instead of failing
+  bool get started => _done != null;
+
+  static const _firstWait = Duration(seconds: 3);
+  static const _longestWait = Duration(seconds: 30);
+  var _wait = _firstWait;
+
+  /// no internet after the first bytes: it shows waiting until the next try, sooner at first. a
+  /// pause or a cancel throws like progress does, a cancel deletes the .part
+  Future<void> waitOnline({bool Function()? cancelled}) async {
+    _show(_done, _total, waiting: true);
+    final until = DateTime.now().add(_wait);
+    _wait = _wait * 2 > _longestWait ? _longestWait : _wait * 2;
+    bool stopped() => _pausing || _cancelling || (cancelled?.call() ?? false);
+
+    /// each second, so a pause or cancel doesn't wait for the next try
+    while (DateTime.now().isBefore(until) && !stopped()) {
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    if (_cancelling || (cancelled?.call() ?? false)) {
+      if (part case final path? when File(path).existsSync()) File(path).deleteSync();
+      throw const DownloadException(DownloadFailure.cancelled);
+    }
+    if (_pausing) throw const DownloadException(DownloadFailure.paused);
+  }
+
   void _report(int done, int? total, {required bool sized}) {
     if (_cancelling) throw const DownloadException(DownloadFailure.cancelled);
     if (_pausing) throw const DownloadException(DownloadFailure.paused);
+    _wait = _firstWait;
     _done = done;
     _total = total;
     _sized = sized;
@@ -116,7 +171,7 @@ class DownloadNotice {
   }
 
   /// the bar in thousandths, null while the size is unknown
-  void _show(int? done, int? total, {bool paused = false}) {
+  void _show(int? done, int? total, {bool paused = false, bool waiting = false}) {
     final known = done != null && total != null && total > 0;
     String megabytes(int bytes) => '${(bytes / 1000000).round()}';
     _call('show', {
@@ -127,6 +182,8 @@ class DownloadNotice {
       'percent': known ? _digits('${done * 100 ~/ total}%') : null,
       'text': paused
           ? _texts['paused']
+          : waiting
+          ? _texts['waiting']
           : known && _sized
           ? _digits(
               _texts['size']!
