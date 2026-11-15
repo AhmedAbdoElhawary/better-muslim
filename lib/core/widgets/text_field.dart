@@ -8,6 +8,7 @@ import 'package:better_muslim/core/widgets/adaptive/padding/adaptive_padding.dar
 import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
 import 'package:better_muslim/core/widgets/bm_switcher.dart';
 import 'package:better_muslim/core/widgets/text_menu.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -23,6 +24,8 @@ class BmTextField extends StatefulWidget {
     this.initial,
     this.maxLines = 1,
     this.maxHeight,
+    this.maxLength,
+    this.keyboardType,
     this.autofocus = false,
     super.key,
   });
@@ -44,6 +47,10 @@ class BmTextField extends StatefulWidget {
 
   /// a growing field stops here and scrolls inside
   final double? maxHeight;
+
+  /// typing stops here, with no counter
+  final int? maxLength;
+  final TextInputType? keyboardType;
 
   /// focused once its sheet has landed
   final bool autofocus;
@@ -136,8 +143,16 @@ class _BmTextFieldState extends State<BmTextField> {
                   controller: _controller,
                   focusNode: _focus,
                   maxLines: widget.maxLines,
-                  keyboardType: widget.maxLines == 1 ? null : TextInputType.multiline,
-                  textCapitalization: TextCapitalization.sentences,
+                  keyboardType:
+                      widget.keyboardType ??
+                      (widget.maxLines == 1 ? null : TextInputType.multiline),
+                  textCapitalization: widget.keyboardType == TextInputType.emailAddress
+                      ? TextCapitalization.none
+                      : TextCapitalization.sentences,
+                  autocorrect: widget.keyboardType != TextInputType.emailAddress,
+                  inputFormatters: [
+                    if (widget.maxLength case final max?) LengthLimitingTextInputFormatter(max),
+                  ],
                   onChanged: widget.onChanged,
                   onSubmitted: widget.onSubmitted,
                   textInputAction: widget.textInputAction,
