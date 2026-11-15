@@ -60,6 +60,7 @@ Map<String, Object?> buildSurfaceData({
       }),
       'nextCityShort': tr(StringsManager.surfaceNextShort, {'city': city}),
       'liveNext': tr(StringsManager.liveNextPrayer, {'city': city}),
+      'city': city,
       'methodLine': '$city · ${tr(method.nameKey)}',
     },
     'entries': const <Map<String, Object?>>[],

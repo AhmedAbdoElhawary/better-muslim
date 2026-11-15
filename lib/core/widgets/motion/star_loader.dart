@@ -85,7 +85,10 @@ class _BmStarLoaderState extends State<BmStarLoader> with TickerProviderStateMix
             loop: _loop,
             level: progress == null ? null : _level,
             reduce: MediaQuery.disableAnimationsOf(context),
-            line: SizeManager.loaderLine.r,
+            line: BmStarPainter.snap(
+              SizeManager.loaderLine.r,
+              MediaQuery.devicePixelRatioOf(context),
+            ),
             color: context.getColor(widget.color),
           ),
         ),
@@ -140,6 +143,9 @@ class BmStarPainter extends CustomPainter {
     Path()..addOval(Rect.fromCircle(center: _center, radius: _inner)),
   ];
 
+  /// a line on a half pixel breaks into dots, so it takes whole device pixels
+  static double snap(double line, double ratio) => math.max(1, (line * ratio).round()) / ratio;
+
   static Path _path(List<(double, double)> points) {
     final path = Path()..moveTo(points.first.$1, points.first.$2);
     for (final (x, y) in points.skip(1)) {
@@ -177,6 +183,7 @@ class BmStarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = line / unit / scale
       ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round
       ..color = color.withValues(alpha: color.a * opacity);
     canvas
       ..save()
