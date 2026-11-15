@@ -26,7 +26,7 @@ void main() {
     'theme': Routes.theme,
     'the hijri calendar': Routes.hijriCalendar,
     'adhan and reminders': Routes.adhanSettings,
-    'acknowledgements': Routes.acknowledgements,
+    'feedback': Routes.feedback,
     'downloads': Routes.downloads,
   };
 
