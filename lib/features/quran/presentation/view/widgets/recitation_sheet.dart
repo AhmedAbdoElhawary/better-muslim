@@ -476,7 +476,7 @@ class _Controls extends ConsumerWidget {
             ),
             _Control(
               label: StringsManager.previousAyah,
-              onTap: () => move(recitation.previous),
+              onTap: () => move(context.isRtl ? recitation.next : recitation.previous),
               child: BmIcon.ui(
                 BmUiIcon.prev,
                 size: SizeManager.recitationIcon.r,
@@ -506,7 +506,7 @@ class _Controls extends ConsumerWidget {
             ),
             _Control(
               label: StringsManager.nextAyah,
-              onTap: () => move(recitation.next),
+              onTap: () => move(context.isRtl ? recitation.previous : recitation.next),
               child: BmIcon.ui(
                 BmUiIcon.next,
                 size: SizeManager.recitationIcon.r,
