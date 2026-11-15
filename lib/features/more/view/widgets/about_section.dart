@@ -9,7 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// acknowledgements, and the version that does nothing on tap (FR-033, FR-034)
+/// credits, and the version that does nothing on tap (FR-033, FR-034)
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
@@ -20,9 +20,9 @@ class AboutSection extends StatelessWidget {
       children: [
         NavRow(
           icon: BmIcon.ui(BmUiIcon.note, size: SizeManager.iconList.r),
-          title: StringsManager.acknowledgements,
-          heroTag: Routes.acknowledgements,
-          onTap: () => context.push(Routes.acknowledgements),
+          title: StringsManager.credits,
+          heroTag: Routes.credits,
+          onTap: () => context.push(Routes.credits),
         ),
         const _VersionRow(),
       ],
