@@ -129,6 +129,9 @@ class Settings extends Table {
 
   BoolColumn get onboarded => boolean().withDefault(const Constant(false))();
 
+  /// YOUR DATA's switch, off and sentry never starts, in the app or in the background
+  BoolColumn get crashReports => boolean().withDefault(const Constant(true))();
+
   IntColumn get lastReadSurah => integer().withDefault(const Constant(1))();
   IntColumn get lastReadAyah => integer().withDefault(const Constant(1))();
   IntColumn get lastReadPage => integer()
@@ -389,7 +392,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 31;
+  int get schemaVersion => 32;
 
   /// the category every bookmark lands in until I pick another
   static const defaultCategory = 1;
@@ -660,6 +663,9 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(schema.settings, schema.settings.adhanButtonsStop);
         await m.addColumn(schema.settings, schema.settings.prayerSilent);
         await m.addColumn(schema.settings, schema.settings.prayerSilentMinutes);
+      },
+      from31To32: (m, schema) async {
+        await m.addColumn(schema.settings, schema.settings.crashReports);
       },
     ),
   );
