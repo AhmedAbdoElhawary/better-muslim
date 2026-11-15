@@ -4,9 +4,8 @@
 
 **Status:** done
 
-- [x] The tile and "Next prayer" at the start, the countdown at the end of the same line.
-- [x] The name under the tile, the city at the end of its line, the name smaller down to 18 until
-  it fits.
+- [x] Beside the tile "Next prayer" over the name, the countdown over the city at the end.
+- [x] The name smaller down to 18 until it fits.
 - [x] The period's start at the start of the last line, the next prayer's time at its end.
 - [x] No bar, no sun and no "at 11:45" under the countdown.
 - [x] Room for "00:00" only, the reminder is 30 minutes at most.

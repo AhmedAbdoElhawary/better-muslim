@@ -94,6 +94,7 @@ flutter:
   shaders:
     - shaders/liquid_glass.frag
     - shaders/page_curl.frag
+    - shaders/star_loader.frag
 
   assets:
     - assets/icons/outline/

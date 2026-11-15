@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/monitoring/crash_reporter.dart';
 import 'package:better_muslim/core/resources/design/bm_motion.dart';
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/strings_manager.dart';
@@ -9,6 +10,22 @@ import 'package:better_muslim/core/resources/theme_manager.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
+
+/// the star shader, loaded once. null where the load failed (tests), the paths draw it then
+abstract final class StarProgram {
+  static Future<FragmentProgram?>? _program;
+
+  static Future<FragmentProgram?> load() => _program ??= _load();
+
+  static Future<FragmentProgram?> _load() async {
+    try {
+      return await FragmentProgram.fromAsset('shaders/star_loader.frag');
+    } catch (error, stack) {
+      await CrashReporter.instance.recordError(error, stack, context: {'reason': 'star shader'});
+      return null;
+    }
+  }
+}
 
 /// the self-drawing star of Brand's Noor motif. progress null draws, rests and fades in a loop,
 /// 0 to 1 draws the line up to it
@@ -31,6 +48,15 @@ class BmStarLoader extends StatefulWidget {
 class _BmStarLoaderState extends State<BmStarLoader> with TickerProviderStateMixin {
   late final _loop = AnimationController(vsync: this);
   late final _level = AnimationController.unbounded(vsync: this, value: widget.progress ?? 0);
+  FragmentShader? _shader;
+
+  @override
+  void initState() {
+    super.initState();
+    StarProgram.load().then((program) {
+      if (mounted && program != null) setState(() => _shader = program.fragmentShader());
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -69,12 +95,14 @@ class _BmStarLoaderState extends State<BmStarLoader> with TickerProviderStateMix
   void dispose() {
     _loop.dispose();
     _level.dispose();
+    _shader?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final progress = widget.progress;
+    final ratio = MediaQuery.devicePixelRatioOf(context);
     return Semantics(
       label: context.tr(StringsManager.loading),
       value: progress == null ? null : '${(progress * 100).round()}%',
@@ -85,11 +113,10 @@ class _BmStarLoaderState extends State<BmStarLoader> with TickerProviderStateMix
             loop: _loop,
             level: progress == null ? null : _level,
             reduce: MediaQuery.disableAnimationsOf(context),
-            line: BmStarPainter.snap(
-              SizeManager.loaderLine.r,
-              MediaQuery.devicePixelRatioOf(context),
-            ),
+            line: BmStarPainter.snap(SizeManager.loaderLine.r, ratio),
+            ratio: ratio,
             color: context.getColor(widget.color),
+            shader: _shader,
           ),
         ),
       ),
@@ -105,7 +132,9 @@ class BmStarPainter extends CustomPainter {
     required this.level,
     required this.reduce,
     required this.line,
+    required this.ratio,
     required this.color,
+    required this.shader,
   }) : super(repaint: Listenable.merge([loop, level]));
 
   final Animation<double> loop;
@@ -116,7 +145,11 @@ class BmStarPainter extends CustomPainter {
 
   /// the stroke in logical px, whatever the size
   final double line;
+  final double ratio;
   final Color color;
+
+  /// null draws the paths instead
+  final FragmentShader? shader;
 
   static const _center = Offset(50, 50);
   static const _dot = 2.0;
@@ -179,6 +212,34 @@ class BmStarPainter extends CustomPainter {
       _ => (1.0, 1.0),
     };
     if (opacity <= 0) return;
+    final shares = [
+      for (var index = 0; index < _strokes.length; index++)
+        switch ((level, reduce)) {
+          (final level?, _) => (level * _strokes.length - index).clamp(0.0, 1.0),
+          (null, true) => 1.0,
+          (null, false) => drawn(index, elapsed),
+        },
+    ];
+    final dot = level == null || level >= 1;
+    final shader = this.shader;
+    if (shader != null) {
+      shader
+        ..setFloat(0, box.width)
+        ..setFloat(1, box.height)
+        ..setFloat(2, color.r)
+        ..setFloat(3, color.g)
+        ..setFloat(4, color.b)
+        ..setFloat(5, color.a * opacity)
+        ..setFloat(6, line / unit)
+        ..setFloat(7, 1 / ratio / unit)
+        ..setFloat(8, scale)
+        ..setFloat(13, dot ? 1 : 0);
+      for (final (index, share) in shares.indexed) {
+        shader.setFloat(9 + index, share);
+      }
+      canvas.drawRect(Offset.zero & box, Paint()..shader = shader);
+      return;
+    }
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = line / unit / scale
@@ -192,11 +253,7 @@ class BmStarPainter extends CustomPainter {
       ..scale(scale)
       ..translate(-_center.dx, -_center.dy);
     for (final (index, stroke) in _strokes.indexed) {
-      final share = switch ((level, reduce)) {
-        (final level?, _) => (level * _strokes.length - index).clamp(0.0, 1.0),
-        (null, true) => 1.0,
-        (null, false) => drawn(index, elapsed),
-      };
+      final share = shares[index];
       if (share <= 0) continue;
       if (share >= 1) {
         canvas.drawPath(stroke, paint);
@@ -206,7 +263,7 @@ class BmStarPainter extends CustomPainter {
         canvas.drawPath(metric.extractPath(0, metric.length * share), paint);
       }
     }
-    if (level == null || level >= 1) {
+    if (dot) {
       canvas.drawCircle(_center, _dot, Paint()..color = paint.color);
     }
     canvas.restore();
@@ -214,5 +271,10 @@ class BmStarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BmStarPainter old) =>
-      old.reduce != reduce || old.line != line || old.color != color || old.level != level;
+      old.reduce != reduce ||
+      old.line != line ||
+      old.ratio != ratio ||
+      old.color != color ||
+      old.level != level ||
+      old.shader != shader;
 }

@@ -34,21 +34,23 @@ class CountdownPainter(
         ((min(widthPixels, heightPixels) / density - side) * density).toInt().coerceAtLeast(1)
     }
 
-    // the tile and "next prayer" beside the countdown, the name and the city under them, then the
+    // beside the tile "next prayer" over the name, the countdown over the city at the end, then the
     // period's start and the next prayer's time. no bar
-    fun card(): Bitmap = layer(TILE + GAP + NAME_LINE + GAP + 12f * NORMAL) { canvas ->
-        drawTile(canvas, TILE, 11f, 23f, 1.1f, 0f)
+    fun card(): Bitmap = layer(TOP_ROW + GAP + 12f * NORMAL) { canvas ->
+        drawTile(canvas, TILE, 11f, 23f, 1.1f, (TOP_ROW - TILE) / 2)
         val label = text(12.5f, body(400), color("label"))
-        val labelWidth = width - dp(TILE + 12f + 8f) - timer(COUNTDOWN).measureText(WIDEST)
-        drawLine(canvas, ellipsize(data.text("nextPrayer"), label, labelWidth), label, start(TILE + 12f), 0f, dp(TILE), startAlign)
-
-        val nameTop = dp(TILE + GAP)
         val city = ellipsize(data.text("city"), label, width / 2f)
-        drawLine(canvas, city, label, end(), nameTop, dp(NAME_LINE), endAlign)
-        drawName(canvas, 24f, width - dp(8f) - label.measureText(city), start(0f), nameTop, dp(NAME_LINE))
+        drawLine(canvas, city, label, end(), dp(COUNTDOWN_LINE), dp(12.5f * NORMAL), endAlign)
+
+        // the name's line runs under the countdown's too
+        val inner = width - dp(TILE + 12f + 8f) - max(timer(COUNTDOWN).measureText(WIDEST), label.measureText(city))
+        var top = dp((TOP_ROW - 12.5f * NORMAL - NAME_LINE) / 2)
+        drawLine(canvas, ellipsize(data.text("nextPrayer"), label, inner), label, start(TILE + 12f), top, dp(12.5f * NORMAL), startAlign)
+        top += dp(12.5f * NORMAL)
+        drawName(canvas, 24f, inner, start(TILE + 12f), top, dp(NAME_LINE))
 
         val ends = text(12f, body(400), color("label"), tabular = true)
-        val endsTop = dp(TILE + GAP + NAME_LINE + GAP)
+        val endsTop = dp(TOP_ROW + GAP)
         val nameTime = entry.getString("nameTime")
         drawLine(canvas, nameTime, ends, end(), endsTop, dp(12f * NORMAL), endAlign)
         if (entry.isNull("barFromLabel")) return@layer
@@ -130,6 +132,8 @@ class CountdownPainter(
     companion object {
         private const val TILE = 40f
         private const val COUNTDOWN = 28f
+        private const val COUNTDOWN_LINE = COUNTDOWN * 1.1f
+        private const val TOP_ROW = COUNTDOWN_LINE + 12.5f * NORMAL
         private const val NAME_LINE = 24f * MARCELLUS
         private const val GAP = 12f
         private const val ROW = 32f
