@@ -22,7 +22,6 @@ import 'package:better_muslim/features/quran/presentation/providers/recitation_p
 import 'package:better_muslim/features/quran/presentation/recitation_boot.dart';
 import 'package:better_muslim/features/surfaces/presentation/surfaces_boot.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -37,9 +36,6 @@ Future<void> _boot(FlavorConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
   Monitoring.installErrorHandlers();
   Monitoring.activate(config: config);
-
-  /// GeoNames is CC BY 4.0, the credit line in More comes in milestone 9
-  LicenseRegistry.addLicense(_placesLicense);
 
   /// all at once, the store opens in drift's isolate and the rest waits on the phone while the
   /// time zones decode here
@@ -120,9 +116,4 @@ Future<void> _later(AppSettings settings, AudioServiceRecitation? recitation) as
     existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
   );
   await AdhanFiles.deleteRemoved();
-}
-
-Stream<LicenseEntry> _placesLicense() async* {
-  final license = await rootBundle.loadString('assets/places/LICENSE.txt');
-  yield LicenseEntryWithLineBreaks(['GeoNames'], license);
 }
