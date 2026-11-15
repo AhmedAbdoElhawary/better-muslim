@@ -93,21 +93,6 @@ import workmanager_apple
         let name = info?["CFBundleShortVersionString"] as? String ?? ""
         let build = info?["CFBundleVersion"] as? String ?? ""
         result("\(name) (\(build))")
-      case "mail":
-        let args = call.arguments as? [String: Any]
-        // query items encode the spaces and the arabic, a hand built string wouldn't
-        var mail = URLComponents()
-        mail.scheme = "mailto"
-        mail.path = args?["to"] as? String ?? ""
-        mail.queryItems = [
-          URLQueryItem(name: "subject", value: args?["subject"] as? String ?? ""),
-          URLQueryItem(name: "body", value: args?["body"] as? String ?? ""),
-        ]
-        guard let url = mail.url else {
-          result(false)
-          return
-        }
-        UIApplication.shared.open(url) { opened in result(opened) }
       case "device":
         var info = utsname()
         uname(&info)
