@@ -62,7 +62,7 @@ class ShareFrame extends ConsumerWidget {
                 start: SpaceManager.shareFooterSide.r,
                 end: SpaceManager.shareFooterSide.r,
                 bottom: SpaceManager.shareFooterBottom.r,
-                child: _Footer(footer, appName: options.appName, background: background),
+                child: _Footer(footer, background: background),
               ),
             ],
           ),
@@ -144,12 +144,11 @@ class _Ornament extends StatelessWidget {
   }
 }
 
-/// the content's line and, when it's on, the symbol with the app's name
+/// the content's line, the symbol and the app's name
 class _Footer extends StatelessWidget {
-  const _Footer(this.footer, {required this.appName, required this.background});
+  const _Footer(this.footer, {required this.background});
 
   final String footer;
-  final bool appName;
   final ShareBackground background;
 
   @override
@@ -166,15 +165,13 @@ class _Footer extends StatelessWidget {
             maxLines: 2,
           ),
         ),
-        if (appName) ...[
-          SvgPicture.asset(
-            'assets/brand/symbol_mono.svg',
-            height: SizeManager.shareLogo.r,
-            colorFilter: ColorFilter.mode(context.getColor(gold), BlendMode.srcIn),
-          ),
-          const RSizedBox.horizontal(SpaceManager.shareLogoGap),
-          RegularText(StringsManager.appName, fontSize: FontSizeManager.shareFooter, color: gold),
-        ],
+        SvgPicture.asset(
+          'assets/brand/symbol_mono.svg',
+          height: SizeManager.shareLogo.r,
+          colorFilter: ColorFilter.mode(context.getColor(gold), BlendMode.srcIn),
+        ),
+        const RSizedBox.horizontal(SpaceManager.shareLogoGap),
+        RegularText(StringsManager.appName, fontSize: FontSizeManager.shareFooter, color: gold),
       ],
     );
   }
