@@ -1287,5 +1287,7 @@
       "license": {},
       "use": {}
     }
-  }
+  },
+  "crashReports": "Send crash reports",
+  "privacyPolicy": "Privacy policy"
 }
