@@ -57,18 +57,6 @@ class MainActivity : AudioServiceActivity() {
                         }
                         result.success("${info.versionName} ($build)")
                     }
-                    "mail" -> {
-                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
-                            .putExtra(Intent.EXTRA_EMAIL, arrayOf(call.argument<String>("to") ?: ""))
-                            .putExtra(Intent.EXTRA_SUBJECT, call.argument<String>("subject") ?: "")
-                            .putExtra(Intent.EXTRA_TEXT, call.argument<String>("body") ?: "")
-                        try {
-                            startActivity(intent)
-                            result.success(true)
-                        } catch (_: ActivityNotFoundException) {
-                            result.success(false)
-                        }
-                    }
                     "device" -> {
                         val model = if (Build.MODEL.startsWith(Build.MANUFACTURER, ignoreCase = true)) {
                             Build.MODEL
