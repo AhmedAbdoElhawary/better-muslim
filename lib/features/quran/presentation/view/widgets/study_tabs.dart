@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
@@ -56,6 +57,7 @@ class _StudyTabsState extends ConsumerState<StudyTabs> {
   /// downloaded on the first pick, offline or failed goes back to al-muyassar (FR-022)
   Future<void> _pickTafsir(TafsirSource tafsir) async {
     setState(() => _tafsir = tafsir);
+    showKeepOpen(context, ref, tafsirStatusProvider(tafsir), icon: BmIconName.quran);
     try {
       await ref.read(tafsirStatusProvider(tafsir).notifier).download();
     } on DownloadException catch (error) {
