@@ -73,6 +73,7 @@ class MorePage extends ConsumerWidget {
                           heroTag: Routes.downloads,
                           onTap: () => context.push(Routes.downloads),
                         ),
+                        const _CrashReportsRow(),
                         const ResetRow(),
                       ],
                     ),
@@ -311,6 +312,24 @@ class _SoundSection extends ConsumerWidget {
         //   onTap: () => db.updateSettings(SettingsCompanion(uiSounds: Value(!uiSounds))),
         // ),
       ],
+    );
+  }
+}
+
+class _CrashReportsRow extends ConsumerWidget {
+  const _CrashReportsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(
+      settingsProvider.select((settings) => settings.value?.crashReports ?? true),
+    );
+    return NavRow(
+      icon: BmIcon.ui(BmUiIcon.lock, size: SizeManager.iconList.r),
+      title: StringsManager.crashReports,
+      toggled: on,
+      onTap: () =>
+          ref.read(databaseProvider).updateSettings(SettingsCompanion(crashReports: Value(!on))),
     );
   }
 }
