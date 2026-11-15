@@ -814,5 +814,7 @@
   "useMushafFonts": "خطوط المصحف والتفسير الميسّر",
   "useTranslationsTafsir": "الترجمات والتفسير",
   "useWordRoots": "جذور الكلمات",
-  "creditLine": "{use} · {license}"
+  "creditLine": "{use} · {license}",
+  "crashReports": "إرسال تقارير الأعطال",
+  "privacyPolicy": "سياسة الخصوصية"
 }
