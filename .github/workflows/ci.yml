@@ -160,6 +160,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # the runner disk filled up while saving the cache. these are big and the build never uses them
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
