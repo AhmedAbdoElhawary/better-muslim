@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- collapsed: the row's picture, the countdown over its end. left or right shows by the language -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="ltr">
+
+    <ImageView
+        android:id="@+id/surfaces_countdown_picture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter" />
+
+    <Chronometer
+        android:id="@+id/surfaces_timer_left"
+        style="@style/SurfacesTimer"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:textSize="22dp" />
+
+    <Chronometer
+        android:id="@+id/surfaces_timer_right"
+        style="@style/SurfacesTimer"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:textSize="22dp" />
+</FrameLayout>
