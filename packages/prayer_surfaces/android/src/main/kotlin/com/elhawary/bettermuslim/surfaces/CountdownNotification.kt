@@ -77,7 +77,7 @@ object CountdownNotification {
             .setShowWhen(false)
             .setStyle(Notification.DecoratedCustomViewStyle())
             .setCustomContentView(views(context, R.layout.surfaces_countdown_row, painter.row(), data, entry, palette, now))
-            .setCustomBigContentView(views(context, R.layout.surfaces_countdown_card, painter.card(now), data, entry, palette, now))
+            .setCustomBigContentView(views(context, R.layout.surfaces_countdown_card, painter.card(), data, entry, palette, now))
             .setTimeoutAfter(at - now)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
