@@ -94,6 +94,17 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('crash reports: on by default, a tap turns them off and it stays', (tester) async {
+    await pumpMore(tester, await designOverrides());
+    expect(await toggledOf(tester, 'Send crash reports'), isTrue);
+
+    await tapText(tester, 'Send crash reports');
+
+    expect((await settingsOf(tester)).crashReports, isFalse);
+    expect(await toggledOf(tester, 'Send crash reports'), isFalse);
+    await unmount(tester);
+  });
+
   testWidgets('top glow: on by default, off fades every glow out and the bar goes plain', (
     tester,
   ) async {
