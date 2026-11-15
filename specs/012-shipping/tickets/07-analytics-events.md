@@ -4,7 +4,7 @@
 
 **Blocked by:** 06
 
-**Status:** open
+**Status:** after launch, with 06
 
 - [ ] App code only calls `AnalyticsService.instance`, debug runs and tests send nothing.
 - [ ] The events take enums, so free text can't be sent.
