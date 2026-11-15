@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:better_muslim/core/network/download_notice.dart';
@@ -53,9 +54,37 @@ Future<Fetched> fetchUri(Uri uri, {int from = 0}) async {
 /// what is in a .part from a paused download, so the next fetch asks only for the rest
 int partLength(File part) => part.existsSync() ? part.lengthSync() : 0;
 
+/// nothing coming in for this long is a lost connection, the phone doesn't always say so
+const downloadStall = Duration(seconds: 15);
+
+/// a lost connection, not a bad file or a full disk
+bool isOffline(Object error) =>
+    error is SocketException || error is HttpException || error is TimeoutException;
+
+bool _offline(Object error) =>
+    error is DownloadException && error.failure == DownloadFailure.offline;
+
+/// a lost connection after the first bytes waits for it to come back and runs the job again, the
+/// .part goes on from there. offline before any byte, or with no notice, still throws
+Future<void> untilOnline(
+  Future<void> Function() job, {
+  DownloadNotice? notice,
+  bool Function()? cancelled,
+  bool Function(Object error) offline = _offline,
+}) async {
+  while (true) {
+    try {
+      return await job();
+    } on Object catch (error) {
+      if (!offline(error) || !(notice?.started ?? false)) rethrow;
+    }
+    await notice!.waitOnline(cancelled: cancelled);
+  }
+}
+
 /// written to a .part and renamed only when its sha256 matches, so a half or wrong file never
-/// stays. progress is 0 to 1, or null when the server sends no size. a .part left by a pause is
-/// kept and goes on
+/// stays. progress is 0 to 1, or null when the server sends no size. a .part left by a pause or a
+/// lost connection is kept and goes on
 Future<void> saveVerified(
   Uri uri,
   File file, {
@@ -91,7 +120,7 @@ Future<void> saveVerified(
   final total = fetched.length == null ? null : from + fetched.length!;
   var written = from;
   try {
-    await for (final chunk in fetched.bytes) {
+    await for (final chunk in fetched.bytes.timeout(downloadStall)) {
       if (cancelled?.call() ?? false) throw const DownloadException(DownloadFailure.cancelled);
       notice?.progress(written, total);
       hash.add(chunk);
@@ -104,11 +133,9 @@ Future<void> saveVerified(
   } on Object catch (error) {
     await sink.close().catchError((_) {});
     final paused = error is DownloadException && error.failure == DownloadFailure.paused;
-    if (!paused && part.existsSync()) part.deleteSync();
+    if (!paused && !isOffline(error) && part.existsSync()) part.deleteSync();
     if (error is DownloadException) rethrow;
-    throw DownloadException(
-      error is SocketException ? DownloadFailure.offline : DownloadFailure.failed,
-    );
+    throw DownloadException(isOffline(error) ? DownloadFailure.offline : DownloadFailure.failed);
   }
   if ('${digest.value}' != sha256Hex) {
     part.deleteSync();
