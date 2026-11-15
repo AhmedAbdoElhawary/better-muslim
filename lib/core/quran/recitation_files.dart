@@ -247,18 +247,22 @@ class RecitationFiles {
 
       /// not one at a time with the ayah files, a whole surah would hold them back for minutes
       if (!file.existsSync()) {
-        await _download(
-          surahAddress(reciter, surah.surah),
-          file,
-          onProgress: onProgress,
+        await untilOnline(
+          () => _download(
+            surahAddress(reciter, surah.surah),
+            file,
+            onProgress: onProgress,
+            notice: notice,
+          ),
           notice: notice,
+          offline: _offline,
         );
       }
       onProgress?.call(1);
       return;
     }
     for (final (i, key) in keys.indexed) {
-      await file(reciter, key);
+      await untilOnline(() => file(reciter, key), notice: notice, offline: _offline);
       notice?.share((i + 1) / keys.length);
       onProgress?.call((i + 1) / keys.length);
     }
@@ -318,6 +322,9 @@ class RecitationFiles {
     return done;
   }
 
+  static bool _offline(Object error) =>
+      error is RecitationException && error.failure == RecitationFailure.offline;
+
   Future<Fetched> _get(Uri address, {int from = 0}) async {
     try {
       return await _fetch(address, from: from);
@@ -342,8 +349,9 @@ class RecitationFiles {
     Fetched fetched;
     try {
       fetched = await _get(address, from: from);
-    } on RecitationException {
-      if (from == 0) rethrow;
+    } on RecitationException catch (error) {
+      /// offline keeps the .part, only a server that ignores the range starts it again
+      if (from == 0 || _offline(error)) rethrow;
       part.deleteSync();
       from = 0;
       fetched = await _get(address);
@@ -364,10 +372,10 @@ class RecitationFiles {
     } on Object catch (error) {
       await sink.close().catchError((_) {});
       final paused = error is DownloadException && error.failure == DownloadFailure.paused;
-      if (!paused && part.existsSync()) part.deleteSync();
+      if (!paused && !isOffline(error) && part.existsSync()) part.deleteSync();
       if (error is DownloadException) rethrow;
       throw RecitationException(
-        error is TimeoutException ? RecitationFailure.offline : RecitationFailure.failed,
+        isOffline(error) ? RecitationFailure.offline : RecitationFailure.failed,
       );
     }
 

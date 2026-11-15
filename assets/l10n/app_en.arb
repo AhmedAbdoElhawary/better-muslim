@@ -1293,5 +1293,7 @@
   "downloadPaused": "Paused",
   "downloadSize": "{done} / {total} MB",
   "downloadCouldNot": "Couldn't download {name}",
-  "surahByReciter": "{surah} by {reciter}"
+  "surahByReciter": "{surah} by {reciter}",
+  "downloadWaiting": "Waiting for internet",
+  "downloadKeepOpen": "Keep the app open until the download finishes"
 }

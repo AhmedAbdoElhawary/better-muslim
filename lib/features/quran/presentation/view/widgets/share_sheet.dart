@@ -1,4 +1,5 @@
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/quran/ayah_key.dart';
 import 'package:better_muslim/core/quran/quran_assets.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
@@ -37,6 +38,7 @@ class _AyahShareSheetState extends ConsumerState<_AyahShareSheet> {
   /// a tafsir not on the phone downloads first, the card keeps the old text until then
   Future<void> _pick(ShareTextSource source) async {
     if (source.tafsir case final tafsir?) {
+      showKeepOpen(context, ref, tafsirStatusProvider(tafsir), icon: BmIconName.quran);
       try {
         await ref.read(tafsirStatusProvider(tafsir).notifier).download();
       } on DownloadException catch (error) {

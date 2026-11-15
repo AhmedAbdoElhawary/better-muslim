@@ -89,16 +89,20 @@ class AdhanFiles {
     for (final (index, file) in files.indexed) {
       if (File(pathOf(file)).existsSync()) continue;
       notice?.part = '${pathOf(file)}.part';
-      await saveVerified(
-        base.resolve('$file.m4a'),
-        File(pathOf(file)),
-        sha256Hex: recording.sha256!['$file.m4a']!,
+      await untilOnline(
+        () => saveVerified(
+          base.resolve('$file.m4a'),
+          File(pathOf(file)),
+          sha256Hex: recording.sha256!['$file.m4a']!,
+          cancelled: cancelled,
+          onProgress: (progress) {
+            final all = progress == null ? null : (index + progress) / files.length;
+            if (all != null) notice?.share(all);
+            onProgress?.call(all);
+          },
+        ),
+        notice: notice,
         cancelled: cancelled,
-        onProgress: (progress) {
-          final all = progress == null ? null : (index + progress) / files.length;
-          if (all != null) notice?.share(all);
-          onProgress?.call(all);
-        },
       );
     }
   }

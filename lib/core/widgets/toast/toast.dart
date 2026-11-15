@@ -181,11 +181,14 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
     );
     if (MediaQuery.disableAnimationsOf(context)) {
       return Material(
+        color: context.getColor(ThemeEnum.transparent),
         child: FadeTransition(opacity: _controller, child: shown),
       );
     }
     final rise = CurvedAnimation(parent: _controller, curve: BmMotion.decelerate);
     return Material(
+      color: context.getColor(ThemeEnum.transparent),
+
       child: FadeTransition(
         opacity: _controller,
         child: AnimatedBuilder(

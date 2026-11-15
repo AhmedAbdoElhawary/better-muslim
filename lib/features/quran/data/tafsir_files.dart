@@ -109,14 +109,20 @@ class TafsirFiles {
     DownloadNotice? notice,
   }) async {
     _cancelled.remove(source);
-    await saveVerified(
-      _address(source),
-      await _file(source),
-      sha256Hex: _sha256(source),
-      fetch: _fetch,
-      cancelled: () => _cancelled.contains(source),
-      onProgress: onProgress,
+    bool cancelled() => _cancelled.contains(source);
+    final file = await _file(source);
+    await untilOnline(
+      () => saveVerified(
+        _address(source),
+        file,
+        sha256Hex: _sha256(source),
+        fetch: _fetch,
+        cancelled: cancelled,
+        onProgress: onProgress,
+        notice: notice,
+      ),
       notice: notice,
+      cancelled: cancelled,
     );
   }
 

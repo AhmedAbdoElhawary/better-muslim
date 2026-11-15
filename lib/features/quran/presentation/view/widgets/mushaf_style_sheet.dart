@@ -1,5 +1,6 @@
 import 'package:better_muslim/core/extensions/time_format.dart';
 import 'package:better_muslim/core/network/download.dart';
+import 'package:better_muslim/core/network/download_notice.dart';
 import 'package:better_muslim/core/resources/design/bm_icons.dart' show BmIconName;
 import 'package:better_muslim/core/resources/dimensions_manager.dart';
 import 'package:better_muslim/core/resources/font_manager.dart';
@@ -60,6 +61,7 @@ class _StyleRow extends ConsumerWidget {
   final bool selected;
 
   Future<void> _pick(BuildContext context, WidgetRef ref) async {
+    showKeepOpen(context, ref, mushafStyleStatusProvider(style), icon: BmIconName.quran);
     try {
       await ref.read(mushafStylePickProvider.notifier).pick(style);
     } on DownloadException catch (error) {

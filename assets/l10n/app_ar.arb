@@ -815,5 +815,7 @@
   "downloadPaused": "متوقف مؤقتًا",
   "downloadSize": "{done} / {total} م.ب",
   "downloadCouldNot": "تعذّر تنزيل {name}",
-  "surahByReciter": "{surah} بصوت {reciter}"
+  "surahByReciter": "{surah} بصوت {reciter}",
+  "downloadWaiting": "بانتظار الإنترنت",
+  "downloadKeepOpen": "أبقِ التطبيق مفتوحًا حتى يكتمل التنزيل"
 }
