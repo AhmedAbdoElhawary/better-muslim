@@ -29,6 +29,11 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # the emulator image, ndk and build together fill the runner disk
+      - name: Free disk space
+        if: steps.find.outputs.found == 'true'
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+
       - uses: actions/setup-java@v6
         if: steps.find.outputs.found == 'true'
         with:
