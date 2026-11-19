@@ -8,8 +8,8 @@ My account is personal and newer than 13 Nov 2023, so production waits for a clo
 
 ## 1. Before the first upload
 
-- [ ] The keystore (`~/.android-keys/better-muslim-upload.jks`) and `android/key.properties` are
-      backed up off this Mac.
+- [x] The keystore (`~/.android-keys/better-muslim-upload.jks`) and `android/key.properties` are
+      backed up off this Mac, in iCloud Drive as `better-muslim-keys.dmg` (encrypted).
 - [x] The privacy policy is approved and live at
       `https://ahmedabdoelhawary.github.io/better-muslim-content/privacy/`, and the row in More ›
       About opens it.

@@ -19,7 +19,7 @@ The Play Console answers and the release steps are in `.github/LAUNCH.md`.
 
 - [x] The upload keystore is `~/.android-keys/better-muslim-upload.jks`, its passwords are in
       `android/key.properties`. Both stay out of git.
-- [ ] Back up both somewhere safe. Play App Signing can reset a lost upload key, but only after a
+- [x] Back up both somewhere safe, done in iCloud Drive as `better-muslim-keys.dmg` (encrypted). Play App Signing can reset a lost upload key, but only after a
       support request.
 - [ ] Declare the media playback and data sync foreground services in Play Console, each with a
       video. (`android/app/src/main/AndroidManifest.xml`)
