@@ -10,7 +10,7 @@ My account is personal and newer than 13 Nov 2023, so production waits for a clo
 
 - [ ] The keystore (`~/.android-keys/better-muslim-upload.jks`) and `android/key.properties` are
       backed up off this Mac.
-- [ ] The privacy policy is approved and live at
+- [x] The privacy policy is approved and live at
       `https://ahmedabdoelhawary.github.io/better-muslim-content/privacy/`, and the row in More ›
       About opens it.
 - [ ] Sentry project: Settings › Security & Privacy › "Prevent Storing of IP Addresses" is on, and an
@@ -22,7 +22,7 @@ My account is personal and newer than 13 Nov 2023, so production waits for a clo
 
 1. `feature/enhance1`, then `feature/release-prep`, merge into `develop`.
 2. PR `develop` → `staging`. The integration journeys run there.
-3. Fill the date in `CHANGELOG.md`, then PR `staging` → `production`. CI tags `v1.0.0`, builds it
+3. PR `staging` → `production`. CI tags `v1.0.0`, builds it
    through Shorebird, uploads the symbols to Sentry and puts the `.aab` on the GitHub release.
 4. Download that `.aab`. Play only ever gets this file, never a local build.
 

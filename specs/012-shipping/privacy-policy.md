@@ -1,10 +1,6 @@
-<!-- TODO(ahmed): read both languages and approve them, nothing goes live before that. -->
-<!-- TODO(ahmed): set the date on both versions the day it goes live, a wrong date misleads people about which terms applied. -->
-<!-- TODO(ahmed): check my legal name below is the one on the Play and App Store accounts, the stores compare them. -->
-
 # Better Muslim privacy policy
 
-Last updated: DATE
+Last updated: 19 November 2026
 
 Better Muslim is made by me, Ahmed Abdo Elhawary. You can reach me at elhawarydev@gmail.com.
 
@@ -112,7 +108,7 @@ If this policy changes, I will update this page and the date at the top.
 
 # سياسة الخصوصية لتطبيق Better Muslim
 
-آخر تحديث: DATE
+آخر تحديث: ١٩ نوفمبر ٢٠٢٦
 
 تطبيق Better Muslim من تطويري أنا، أحمد عبده الهواري. يمكنك التواصل معي على elhawarydev@gmail.com.
 

@@ -24,14 +24,7 @@ The Play Console answers and the release steps are in `.github/LAUNCH.md`.
 - [ ] Declare the media playback and data sync foreground services in Play Console, each with a
       video. (`android/app/src/main/AndroidManifest.xml`)
 
-## Privacy policy
-
-- [ ] Read and approve both languages, set the date and check my legal name.
-      (`specs/012-shipping/privacy-policy.md`)
-
 ## Store listings
-
-- [ ] Put the day the production PR merges in the 1.0.0 heading. (`CHANGELOG.md`)
 
 - [ ] Once the app is on the App Store, put its link in `appStoreUrl`. Rate and Share on iOS stay
       hidden until then. (`lib/features/more/model/contact.dart`)

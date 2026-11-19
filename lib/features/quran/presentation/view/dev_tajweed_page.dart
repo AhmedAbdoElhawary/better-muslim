@@ -24,9 +24,6 @@ final _familyProvider = FutureProvider.autoDispose.family<String, int>(
       .family(MushafStyle.qcfV4, DevTajweedPage.page, palette: palette),
 );
 
-// TODO(ahmed): open this on the iPhone and the Android phone and put what shows in ticket 05, a phone with no colors gets V4 hidden in 06.
-/// dev builds only, to see if the phone draws the V4 colors (specs/016 ticket 05). its text is for
-/// me, so it is not in the arb files
 class DevTajweedPage extends ConsumerWidget {
   const DevTajweedPage({super.key});
 
