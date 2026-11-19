@@ -13,6 +13,8 @@ jobs:
   journeys:
     name: Integration Journeys
     runs-on: ubuntu-latest
+    # a hung journey once held the runner for 4 hours, a full run takes about 45 minutes
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
