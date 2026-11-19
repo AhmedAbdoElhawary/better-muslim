@@ -28,7 +28,7 @@ journey() {
 
   # that quit also loses the run's summary and exit code, so a journey counts by its own line.
   # flutter also lists desktop and web targets, so name the adb device
-  ${CI:+timeout 15m} flutter test "$1" \
+  ${CI:+timeout 6m} flutter test "$1" \
     -r github \
     -d "$(adb get-serialno)" \
     --flavor dev \
