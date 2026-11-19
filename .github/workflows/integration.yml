@@ -71,6 +71,11 @@ jobs:
           sudo swapon /mnt/swapfile2
           free -h && df -h / /mnt
 
+      # the first build fetches the ndk for 11 minutes, more than a journey's 6 minute cap
+      - name: Build once
+        if: steps.find.outputs.found == 'true'
+        run: flutter build apk --debug --flavor dev -t lib/main_dev.dart --dart-define-from-file=dart_define/dev.json
+
       # without this the emulator falls back to software and is too slow to boot
       - name: Enable KVM
         if: steps.find.outputs.found == 'true'
