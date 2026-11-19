@@ -52,15 +52,21 @@ jobs:
         if: steps.find.outputs.found == 'true'
         run: flutter pub get
 
-      # the project's 8G gradle heap, the kotlin daemon and the emulator ran the runner out of memory
-      - name: Smaller Gradle heap
+      # a private repo runner has ~7G, an idle gradle daemon next to the emulator got it killed
+      - name: Smaller Gradle heap and swap
         if: steps.find.outputs.found == 'true'
         run: |
           mkdir -p ~/.gradle
           {
-            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+            echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m"
+            echo "org.gradle.daemon=false"
             echo "kotlin.compiler.execution.strategy=in-process"
           } >> ~/.gradle/gradle.properties
+          sudo fallocate -l 8G /swapfile2
+          sudo chmod 600 /swapfile2
+          sudo mkswap /swapfile2
+          sudo swapon /swapfile2
+          free -h
 
       # without this the emulator falls back to software and is too slow to boot
       - name: Enable KVM
