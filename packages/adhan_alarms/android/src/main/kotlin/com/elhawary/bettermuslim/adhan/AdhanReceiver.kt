@@ -55,8 +55,9 @@ class AdhanReceiver : BroadcastReceiver() {
     private fun playClip(context: Context, entry: JSONObject) {
         val clip = entry.optString("clip")
         val manager = context.getSystemService(NotificationManager::class.java)
-        val channel = manager.getNotificationChannel(entry.getString("channel"))
+        // a silence entry has no clip and no channel
         if (clip.isEmpty() || !AdhanAlarms.canSound(context) || !manager.areNotificationsEnabled()) return
+        val channel = manager.getNotificationChannel(entry.getString("channel"))
         if (channel == null || channel.importance == NotificationManager.IMPORTANCE_NONE) return
         val pending = goAsync()
         ClipPlayer.play(context, clip) { pending.finish() }
