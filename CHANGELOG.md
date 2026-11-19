@@ -1,8 +1,6 @@
 # Changelog
 
-<!-- TODO(ahmed): put the day the production PR merges in place of DATE, it shows on the GitHub release. -->
-
-## [1.0.0] - DATE
+## [1.0.0]
 
 The first release of Better Muslim.
 

@@ -32,7 +32,7 @@ jobs:
       # the emulator image, ndk and build together fill the runner disk
       - name: Free disk space
         if: steps.find.outputs.found == 'true'
-        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/local/.ghcup /usr/share/swift /usr/local/share/powershell /usr/local/share/chromium /opt/microsoft
 
       - uses: actions/setup-java@v6
         if: steps.find.outputs.found == 'true'
@@ -51,6 +51,23 @@ jobs:
       - name: Get dependencies
         if: steps.find.outputs.found == 'true'
         run: flutter pub get
+
+      # a private repo runner has ~7G, an idle gradle daemon next to the emulator got it killed
+      # swap on /mnt, the root disk has no room left for it
+      - name: Smaller Gradle heap and swap
+        if: steps.find.outputs.found == 'true'
+        run: |
+          mkdir -p ~/.gradle
+          {
+            echo "org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m"
+            echo "org.gradle.daemon=false"
+            echo "kotlin.compiler.execution.strategy=in-process"
+          } >> ~/.gradle/gradle.properties
+          sudo fallocate -l 8G /mnt/swapfile2
+          sudo chmod 600 /mnt/swapfile2
+          sudo mkswap /mnt/swapfile2
+          sudo swapon /mnt/swapfile2
+          free -h && df -h / /mnt
 
       # without this the emulator falls back to software and is too slow to boot
       - name: Enable KVM
