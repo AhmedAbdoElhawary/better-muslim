@@ -8,6 +8,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+log="$(mktemp)"
 failed=()
 for test in integration_test/*_test.dart; do
   # on ci the emulator quits when a journey's app is stopped, so boot it again for the next one
@@ -20,11 +21,14 @@ for test in integration_test/*_test.dart; do
     until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; do sleep 2; done
   fi
 
+  # that quit also loses the run's summary and exit code, so a journey counts by its own line
   # flutter also lists desktop and web targets, so name the adb device
   flutter test "$test" \
+    -r github \
     -d "$(adb get-serialno)" \
     --flavor dev \
-    --dart-define-from-file=dart_define/dev.json || failed+=("$test")
+    --dart-define-from-file=dart_define/dev.json | tee "$log" || true
+  if ! grep -q '^✅ ' "$log" || grep -q '❌' "$log"; then failed+=("$test"); fi
 done
 
 if [ ${#failed[@]} -gt 0 ]; then
