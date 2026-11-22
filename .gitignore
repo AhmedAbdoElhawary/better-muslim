@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/ios/build/
+/android/build/
 
 # Symbolication related
 app.*.symbols
@@ -75,4 +77,4 @@ app.*.map.json
 
 # tanzil and qul downloads for tool/quran/build_quran.dart
 /tool/quran/.cache/
-/promots/enhance 3
+/promots/
