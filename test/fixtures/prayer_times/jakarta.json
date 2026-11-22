@@ -1,0 +1,27 @@
+{
+  "city": "Jakarta",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 11 (Majlis Ugama Islam Singapura), school 0, latitudeAdjustmentMethod 1 (middle of the night), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": -6.2146,
+  "longitude": 106.845,
+  "timeZone": "Asia/Jakarta",
+  "method": "singapore",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "04:13",
+      "sunrise": "05:31",
+      "dhuhr": "11:38",
+      "asr": "14:45",
+      "maghrib": "17:46",
+      "isha": "18:56",
+      "gaps": {
+        "dhuhr": "adhan's singapore preset adds 1 min to dhuhr and rounds up, as the MUIS tables do. AlAdhan method 11 has neither"
+      }
+    }
+  ]
+}

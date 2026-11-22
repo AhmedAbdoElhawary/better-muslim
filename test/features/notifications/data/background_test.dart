@@ -1,0 +1,296 @@
+import 'package:better_muslim/core/azkar/azkar_content.dart';
+import 'package:better_muslim/core/azkar/azkar_window.dart';
+import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/settings/adhan_recording.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/features/notifications/data/background.dart';
+import 'package:better_muslim/features/notifications/domain/alert.dart';
+import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart';
+
+import '../../../helpers/notifications.dart';
+import '../../../helpers/phone_storage.dart';
+import '../../../helpers/surfaces.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late AppDatabase db;
+
+  setUpAll(tz.initializeTimeZones);
+
+  setUp(() {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+  });
+
+  String payload(Prayer prayer, DateTime day, {int hour = 17}) => payloadOf(
+    Alert(
+      day: day,
+      prayer: prayer,
+      kind: AlertKind.adhan,
+      at: TZDateTime(getLocation('Asia/Riyadh'), day.year, day.month, day.day, hour),
+      sound: PrayerSound.adhan,
+    ),
+  );
+
+  Future<List<PrayerLogData>> log() => db.select(db.prayerLog).get();
+
+  test('logs the payload\'s day and prayer once, twice changes nothing', () async {
+    final maghrib = payload(Prayer.maghrib, DateTime(2026, 10, 15));
+
+    await markFromPayload(maghrib, db: db);
+    await markFromPayload(maghrib, db: db);
+
+    final [row] = await log();
+    expect(row.date, DateTime(2026, 10, 15));
+    expect(row.prayer, Prayer.maghrib);
+  });
+
+  test('isha marked after midnight lands on the day it started', () async {
+    await markFromPayload(payload(Prayer.isha, DateTime(2026, 10, 14), hour: 19), db: db);
+
+    expect((await log()).single.date, DateTime(2026, 10, 14));
+  });
+
+  test('a prayer that has passed is logged the same way (FR-038)', () async {
+    await markFromPayload(payload(Prayer.fajr, DateTime(2026, 10, 1), hour: 5), db: db);
+
+    expect((await log()).single.prayer, Prayer.fajr);
+  });
+
+  group('add to qada', () {
+    final day = DateTime(2026, 10, 15);
+    Future<List<QadaEntry>> qada() => db.select(db.qadaEntries).get();
+
+    test('saves the prayer once and logs nothing', () async {
+      await markFromPayload(payload(Prayer.maghrib, day), qada: true, db: db);
+      await markFromPayload(payload(Prayer.maghrib, day), qada: true, db: db);
+
+      final [row] = await qada();
+      expect(row.prayer, Prayer.maghrib);
+      expect(row.missedOn, day);
+      expect(await log(), isEmpty);
+    });
+
+    test('marking it prayed after takes it back', () async {
+      await markFromPayload(payload(Prayer.maghrib, day), qada: true, db: db);
+      await markFromPayload(payload(Prayer.maghrib, day), db: db);
+
+      expect(await qada(), isEmpty);
+      expect(await log(), hasLength(1));
+    });
+  });
+
+  group('cleanDelivered', () {
+    final day = DateTime(2026, 10, 15);
+    final maghrib = alertId(day, Prayer.maghrib, AlertKind.adhan);
+
+    test('a prayer prayed or in qada takes its notification, the playing one stays', () async {
+      final scheduler = FakeScheduler();
+      final isha = alertId(day, Prayer.isha, AlertKind.adhan);
+      final asr = alertId(day, Prayer.asr, AlertKind.adhan);
+      scheduler.active.addAll([maghrib, isha, asr]);
+      await db.markPrayed(day, Prayer.maghrib);
+      await db.addQada(day, Prayer.isha);
+      await db.markPrayed(day, Prayer.asr);
+
+      await cleanDelivered(db, scheduler: scheduler, playing: asr);
+
+      expect(scheduler.cancelled, unorderedEquals([maghrib, isha]));
+    });
+
+    test('ios keeps only the newest one', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final scheduler = FakeScheduler();
+      final asr = alertId(day, Prayer.asr, AlertKind.adhan);
+      scheduler.active.addAll([asr, maghrib]);
+
+      await cleanDelivered(db, scheduler: scheduler);
+
+      expect(scheduler.cancelled, [asr]);
+    });
+  });
+
+  test('no store to open does nothing and never makes one', () async {
+    final folder = usePhoneStorage();
+
+    await markFromPayload(payload(Prayer.maghrib, DateTime(2026, 10, 15)));
+
+    expect(folder.listSync(), isEmpty);
+  });
+
+  group('the surfaces from the background (US4)', () {
+    setUp(() async {
+      muteAdhanChannel();
+      await db.updateSettings(
+        const SettingsCompanion(
+          latitude: Value(21.4225),
+          longitude: Value(39.8262),
+          placeName: Value('Makkah'),
+          countryCode: Value('SA'),
+          timeZone: Value('Asia/Riyadh'),
+          locationMode: Value(LocationMode.manual),
+        ),
+      );
+    });
+
+    test('mark prayed from a notification writes them once after the mark', () async {
+      final surfaces = FakeSurfacesChannel();
+
+      await markFromPayload(
+        payload(Prayer.maghrib, DateTime(2026, 10, 15)),
+        db: db,
+        surfaces: surfaces,
+      );
+
+      expect((await log()).single.prayer, Prayer.maghrib);
+      expect(surfaces.updates, hasLength(1));
+    });
+
+    test('without the channel nothing is written, the app\'s boot does it', () async {
+      final surfaces = FakeSurfacesChannel();
+
+      await markFromPayload(payload(Prayer.maghrib, DateTime(2026, 10, 15)), db: db);
+
+      expect(surfaces.updates, isEmpty);
+    });
+
+    test('the top-up writes them before the permission check', () async {
+      final scheduler = FakeScheduler(allowed: false);
+      final surfaces = FakeSurfacesChannel();
+
+      await backgroundTopUp(
+        db,
+        scheduler: scheduler,
+        surfaces: surfaces,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 16, 32),
+      );
+
+      expect(surfaces.updates, hasLength(1));
+      expect(scheduler.applied, isEmpty);
+    });
+
+    test('allowed, the top-up schedules too', () async {
+      final scheduler = FakeScheduler();
+      final surfaces = FakeSurfacesChannel();
+
+      await backgroundTopUp(
+        db,
+        scheduler: scheduler,
+        surfaces: surfaces,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, 16, 32),
+      );
+
+      expect(surfaces.updates, hasLength(1));
+      expect(scheduler.applied, hasLength(1));
+    });
+  });
+
+  group('the azkar nudges in the top-up (US6)', () {
+    TZDateTime makkah(int hour, int minute) =>
+        TZDateTime(getLocation('Asia/Riyadh'), 2026, 10, 15, hour, minute);
+
+    Future<List<Alert>> nudgesAt(DateTime now) async {
+      final scheduler = FakeScheduler();
+      await topUp(
+        db,
+        scheduler: scheduler,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: now,
+      );
+      return [
+        for (final alert in scheduler.applied.single)
+          if (alert.kind == AlertKind.azkar) alert,
+      ];
+    }
+
+    setUp(() async {
+      muteAdhanChannel();
+      await db.watchSettings().first;
+      await db.updateSettings(
+        const SettingsCompanion(
+          latitude: Value(21.4225),
+          longitude: Value(39.8262),
+          placeName: Value('Makkah'),
+          countryCode: Value('SA'),
+          timeZone: Value('Asia/Riyadh'),
+          locationMode: Value(LocationMode.manual),
+        ),
+      );
+    });
+
+    test('each prayer\'s recording goes to the scheduler', () async {
+      await db.updateSettings(
+        const SettingsCompanion(maghribRecording: Value(AdhanRecording.alafasy)),
+      );
+      final scheduler = FakeScheduler();
+      await topUp(
+        db,
+        scheduler: scheduler,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: makkah(9, 0),
+      );
+      final recordings = scheduler.appliedRecordings.single;
+      expect(recordings[Prayer.maghrib], AdhanRecording.alafasy);
+      expect(recordings[Prayer.fajr], AdhanRecording.alafasy);
+    });
+
+    test('on by default: 3 quiet nudges, tonight\'s first before asr + 20', () async {
+      final nudges = await nudgesAt(makkah(15, 30));
+
+      expect(nudges, hasLength(3));
+      expect((nudges.first.day, nudges.first.prayer), (DateTime(2026, 10, 15), Prayer.asr));
+      expect(nudges.every((nudge) => nudge.sound == PrayerSound.silent), isTrue);
+    });
+
+    test('a finished evening set skips tonight\'s nudge', () async {
+      final content = await loadAzkarContent();
+      for (final zikr in content.evening.items) {
+        await db.setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), zikr.id, zikr.count);
+      }
+      final nudges = await nudgesAt(makkah(15, 30));
+
+      expect((nudges.first.day, nudges.first.prayer), (DateTime(2026, 10, 16), Prayer.fajr));
+    });
+
+    test('the switch off schedules none', () async {
+      await db.updateSettings(const SettingsCompanion(azkarNudges: Value(false)));
+
+      expect(await nudgesAt(makkah(15, 30)), isEmpty);
+    });
+
+    test('the voice switch reaches the scheduler', () async {
+      await db.updateSettings(const SettingsCompanion(azkarVoice: Value(false)));
+      final scheduler = FakeScheduler();
+
+      await topUp(
+        db,
+        scheduler: scheduler,
+        locale: const Locale('en'),
+        use24h: true,
+        phoneZone: 'Asia/Riyadh',
+        now: makkah(15, 30),
+      );
+
+      expect(scheduler.appliedVoices, [false]);
+    });
+  });
+}

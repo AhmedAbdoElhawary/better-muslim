@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the countdown's digits, dp so the phone's font size leaves them alone -->
+    <style name="SurfacesTimer">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:fontFamily">@font/surfaces_timer</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="android:visibility">gone</item>
+    </style>
+</resources>

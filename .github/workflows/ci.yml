@@ -1,0 +1,269 @@
+name: CI
+
+# PR gate only. Once a PR merges, release-on-merge.yml creates the tag and calls deploy.yml.
+# ci-ok at the bottom is the one check that matters: release-on-merge.yml refuses to tag a PR without it.
+on:
+  pull_request:
+    branches:
+      - develop
+      - staging
+      - production
+
+permissions:
+  contents: read
+  pull-requests: read # release-commit-guard reads the PR's own commit list
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  merge-guard:
+    name: Merge direction check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify ${{ github.head_ref }} is allowed to merge into ${{ github.base_ref }}
+        # passed through env, a branch named like `$(curl ...)` would run as shell otherwise
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          base="$BASE"
+          head="$HEAD"
+          case "$base" in
+            develop)
+              exit 0 ;; # anything may merge into develop
+            staging)
+              case "$head" in
+                develop|production|hotfix/*) exit 0 ;;
+                *) echo "::error::'$head' -> 'staging' is not allowed. staging only accepts develop, production (back-merge), or hotfix/*."; exit 1 ;;
+              esac
+              ;;
+            production)
+              case "$head" in
+                staging|hotfix/*) exit 0 ;;
+                *) echo "::error::'$head' -> 'production' is not allowed. production only accepts staging or hotfix/* — not even develop directly."; exit 1 ;;
+              esac
+              ;;
+            *)
+              exit 0 ;; # any other target branch (e.g. a feature branch) is unrestricted
+          esac
+
+  # A PR asks for a dev build by carrying one commit whose subject is "release: v1.0.1-dev.16"
+  # and whose body is the tag message. This only checks it is well formed, so a typo fails the PR
+  # instead of failing after it has already landed on develop.
+  release-commit-guard:
+    name: Release marker check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Validate the "release:" commit, if the PR has one
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          # a promotion PR carries markers that already shipped on develop, only develop reads them
+          if [ "$BASE" != "develop" ]; then
+            echo "Promotion into '$BASE' — its tag is derived after the merge, release: markers are ignored."
+            exit 0
+          fi
+
+          # read from the API, not local history, so it agrees with release-on-merge.yml after a squash merge
+          commits="$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/commits" \
+            --paginate \
+            --jq '.[] | (.commit.message | split("\n")) as $l
+                  | [$l[0], (($l[1:] | join("")) | gsub("\\s"; "") | length | tostring)]
+                  | @tsv')"
+
+          markers=0
+          tag=""
+          body_len=0
+          while IFS=$'\t' read -r subject len; do
+            case "$subject" in
+              release:*) ;;
+              *) continue ;;
+            esac
+            markers=$((markers + 1))
+            tag="${subject#release: }"
+            body_len="$len"
+          done <<< "$commits"
+
+          if [ "$markers" -eq 0 ]; then
+            echo "No 'release:' commit — this PR merges without shipping anything."
+            exit 0
+          fi
+
+          if [ "$markers" -gt 1 ]; then
+            echo "::error::this PR has $markers 'release:' commits. A PR may ship at most one tag."
+            exit 1
+          fi
+
+          if ! printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+-dev\.[0-9]+$'; then
+            echo "::error::'$tag' is not a dev tag. A PR into develop must use v<x.y.z>-dev.<n>, e.g. v1.0.1-dev.16."
+            exit 1
+          fi
+
+          if [ "$body_len" -eq 0 ]; then
+            echo "::error::the 'release: $tag' commit has an empty body. Its body becomes the tag message — write what this build contains."
+            exit 1
+          fi
+
+          if [ -n "$(git ls-remote --tags origin "refs/tags/$tag")" ]; then
+            echo "::error::tag '$tag' already exists. Pick the next free number."
+            exit 1
+          fi
+
+          echo "OK — merging this PR will create '$tag' and ship a dev build."
+
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: 3.50.0 # keep in sync with the local toolchain and every other workflow
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Prepare coverage
+        run: dart run tool/coverage_gate.dart prepare
+
+      # random order catches tests that quietly depend on each other, the seed is printed so a failure can be replayed
+      - name: Run tests
+        run: flutter test --coverage --test-randomize-ordering-seed=random --dart-define-from-file=dart_define/dev.json
+
+      - name: Coverage gate
+        run: dart run tool/coverage_gate.dart check
+
+  # one Android build per PR, for the flavor the target branch ships
+  build-android:
+    name: Build Android (${{ github.base_ref }})
+    needs: quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # the runner disk filled up while saving the cache. these are big and the build never uses them
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: 3.50.0
+          cache: true
+
+      # the 8g heap in android/gradle.properties got the build killed on a runner once
+      - name: Fit Gradle in the runner's memory
+        run: |
+          mkdir -p ~/.gradle
+          printf '%s\n' 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g' 'kotlin.daemon.jvmargs=-Xmx2g' 'org.gradle.workers.max=2' > ~/.gradle/gradle.properties
+
+      # the image has neither, downloading them took 5 min of every build. the ndk is flutter 3.50.0's
+      - name: Cache the NDK and CMake
+        uses: actions/cache@v6
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.2.13676358
+            /usr/local/lib/android/sdk/cmake/3.22.1
+          key: android-ndk-28.2.13676358-cmake-3.22.1
+
+      - name: Resolve flavor from target branch
+        id: map
+        run: |
+          case "${{ github.base_ref }}" in
+            develop)    f=dev;        t=lib/main_dev.dart;     d=dart_define/dev.json ;;
+            staging)    f=staging;    t=lib/main_staging.dart; d=dart_define/staging.json ;;
+            production) f=production; t=lib/main_prod.dart;    d=dart_define/prod.json ;;
+            *) echo "::error::unsupported base branch '${{ github.base_ref }}'"; exit 1 ;;
+          esac
+          { echo "flavor=$f"; echo "target=$t"; echo "dart_define=$d"; } >> "$GITHUB_OUTPUT"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build
+        run: >-
+          flutter build apk --debug
+          --flavor ${{ steps.map.outputs.flavor }}
+          -t ${{ steps.map.outputs.target }}
+          --dart-define-from-file=${{ steps.map.outputs.dart_define }}
+
+  # iOS compile check, iOS does not ship yet. it takes the longest, so only promotions wait for it,
+  # ci-ok counts the develop skip as a pass.
+  build-ios:
+    name: Build iOS
+    needs: quality
+    if: github.base_ref != 'develop'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: 3.50.0
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build
+        run: >-
+          flutter build ios --debug --no-codesign
+          --flavor production
+          -t lib/main_prod.dart
+          --dart-define-from-file=dart_define/prod.json
+
+  # the on-device journeys take far longer than the rest, so only promotions run them
+  integration:
+    name: Integration
+    needs: quality
+    if: github.base_ref != 'develop'
+    uses: ./.github/workflows/integration.yml
+
+  # every job above must succeed, so a job added later tightens the gate on its own
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [merge-guard, release-commit-guard, quality, build-android, build-ios, integration]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail unless every check passed
+        run: |
+          results='${{ toJSON(needs) }}'
+          echo "$results"
+          failed="$(printf '%s' "$results" | jq -r 'to_entries | map(select(.value.result != "success" and ((.key | IN("integration", "build-ios") | not) or .value.result != "skipped")) | .key) | join(" ")')"
+          if [ -n "$failed" ]; then
+            echo "::error::these checks did not pass: $failed"
+            exit 1
+          fi
+          echo "All checks passed."

@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Dev",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_dev.dart",
+            "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json"]
+        },
+        {
+            "name": "Dev · profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main_dev.dart",
+            "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json"]
+        },
+        {
+            "name": "Dev · design scenario",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_dev.dart",
+            "toolArgs": ["--flavor", "dev", "--dart-define-from-file=dart_define/dev.json", "--dart-define=SCENARIO=design"]
+        },
+        {
+            "name": "Staging",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_staging.dart",
+            "toolArgs": ["--flavor", "staging", "--dart-define-from-file=dart_define/staging.json"]
+        },
+        {
+            "name": "Prod",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart",
+            "toolArgs": ["--flavor", "production", "--dart-define-from-file=dart_define/prod.json"]
+        }
+    ]
+}

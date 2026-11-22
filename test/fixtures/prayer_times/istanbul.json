@@ -1,0 +1,38 @@
+{
+  "city": "Istanbul",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 13 (Diyanet), school 0, latitudeAdjustmentMethod 1 (middle of the night), same coordinates",
+    "diyanet": "Diyanet official timetable, namazvakitleri.diyanet.gov.tr/tr-TR/9541 (Istanbul), its own district coordinates. 15 Oct was already gone from the site on the fetch day, so 16 Oct is used"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 41.0138,
+  "longitude": 28.9497,
+  "timeZone": "Europe/Istanbul",
+  "method": "turkiye",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:44",
+      "sunrise": "07:08",
+      "dhuhr": "12:55",
+      "asr": "16:00",
+      "maghrib": "18:31",
+      "isha": "19:50",
+      "gaps": {
+        "asr": "adhan_dart takes the asr shadow from the declination at 0h UT, so it runs about 1.5 min early in autumn and late in spring at this latitude, and AlAdhan errs the other way. NOAA solar position gives 15:54:46 + the preset's 4 min, between the two. Diyanet's own table has 15:58 on 16 Oct, adhan matches it"
+      }
+    },
+    {
+      "date": "2026-10-16",
+      "source": "diyanet",
+      "fajr": "05:45",
+      "sunrise": "07:09",
+      "dhuhr": "12:55",
+      "asr": "15:58",
+      "maghrib": "18:30",
+      "isha": "19:49"
+    }
+  ]
+}

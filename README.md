@@ -1,17 +1,9 @@
-# better_muslim
+# Better Muslim
 
-A new Flutter project.
+Prayer times, Quran, azkar and qibla for iOS and Android, in English and Arabic.
 
-## Getting Started
+The source is public to read, not to reuse. All rights reserved, see [LICENSE](LICENSE).
 
-This project is a starting point for a Flutter application.
+## Place list
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+`assets/places/places.tsv.gzip` comes from GeoNames. To refresh it, run `dart run tool/places/build_places.dart`.

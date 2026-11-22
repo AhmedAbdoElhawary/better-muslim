@@ -1,0 +1,1560 @@
+{
+  "_meta": {
+    "description": "This file contains a serialized version of schema entities for drift.",
+    "version": "1.3.0"
+  },
+  "options": {
+    "store_date_time_values_as_text": false
+  },
+  "entities": [
+    {
+      "id": 0,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "settings",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "latitude",
+            "getter_name": "latitude",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "longitude",
+            "getter_name": "longitude",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "place_name",
+            "getter_name": "placeName",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "place_name_ar",
+            "getter_name": "placeNameAr",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "region_name",
+            "getter_name": "regionName",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "region_name_ar",
+            "getter_name": "regionNameAr",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "country_code",
+            "getter_name": "countryCode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "time_zone",
+            "getter_name": "timeZone",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "location_mode",
+            "getter_name": "locationMode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<LocationMode>(LocationMode.values)",
+              "dart_type_name": "LocationMode"
+            }
+          },
+          {
+            "name": "method",
+            "getter_name": "method",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerMethod>(PrayerMethod.values)",
+              "dart_type_name": "PrayerMethod"
+            }
+          },
+          {
+            "name": "asr_method",
+            "getter_name": "asrMethod",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AsrMethod>(AsrMethod.values)",
+              "dart_type_name": "AsrMethod"
+            }
+          },
+          {
+            "name": "hijri_adjust",
+            "getter_name": "hijriAdjust",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "hijriAdjust",
+                        "tag": "hijriAdjust"
+                      },
+                      ").isBetweenValues(-2,2)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "digits",
+            "getter_name": "digits",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'eastern\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Digits>(Digits.values)",
+              "dart_type_name": "Digits"
+            }
+          },
+          {
+            "name": "theme",
+            "getter_name": "theme",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'qiyamEmerald\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<BmThemeId>(BmThemeId.values)",
+              "dart_type_name": "BmThemeId"
+            }
+          },
+          {
+            "name": "theme_mode",
+            "getter_name": "themeMode",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'followSky\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<BmThemeMode>(BmThemeMode.values)",
+              "dart_type_name": "BmThemeMode"
+            }
+          },
+          {
+            "name": "reduce_motion",
+            "getter_name": "reduceMotion",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"reduce_motion\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"reduce_motion\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "haptics",
+            "getter_name": "haptics",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"haptics\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"haptics\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ui_sounds",
+            "getter_name": "uiSounds",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"ui_sounds\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"ui_sounds\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "store_reset_pending",
+            "getter_name": "storeResetPending",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"store_reset_pending\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"store_reset_pending\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "first_use",
+            "getter_name": "firstUse",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "fajr_sound",
+            "getter_name": "fajrSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'adhan\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "dhuhr_sound",
+            "getter_name": "dhuhrSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'tone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "asr_sound",
+            "getter_name": "asrSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'tone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "maghrib_sound",
+            "getter_name": "maghribSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'adhan\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "isha_sound",
+            "getter_name": "ishaSound",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'tone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PrayerSound>(PrayerSound.values)",
+              "dart_type_name": "PrayerSound"
+            }
+          },
+          {
+            "name": "fajr_recording",
+            "getter_name": "fajrRecording",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'makkah\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AdhanRecording>(AdhanRecording.values)",
+              "dart_type_name": "AdhanRecording"
+            }
+          },
+          {
+            "name": "dhuhr_recording",
+            "getter_name": "dhuhrRecording",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'makkah\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AdhanRecording>(AdhanRecording.values)",
+              "dart_type_name": "AdhanRecording"
+            }
+          },
+          {
+            "name": "asr_recording",
+            "getter_name": "asrRecording",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'makkah\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AdhanRecording>(AdhanRecording.values)",
+              "dart_type_name": "AdhanRecording"
+            }
+          },
+          {
+            "name": "maghrib_recording",
+            "getter_name": "maghribRecording",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'makkah\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AdhanRecording>(AdhanRecording.values)",
+              "dart_type_name": "AdhanRecording"
+            }
+          },
+          {
+            "name": "isha_recording",
+            "getter_name": "ishaRecording",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'makkah\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AdhanRecording>(AdhanRecording.values)",
+              "dart_type_name": "AdhanRecording"
+            }
+          },
+          {
+            "name": "reminder_minutes",
+            "getter_name": "reminderMinutes",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('10')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "reminderMinutes",
+                        "tag": "reminderMinutes"
+                      },
+                      ".isIn(const [0,5,10,15,20,25,30])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "notifications_asked",
+            "getter_name": "notificationsAsked",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"notifications_asked\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"notifications_asked\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "tasbih_dhikr",
+            "getter_name": "tasbihDhikr",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "tasbihDhikr",
+                        "tag": "tasbihDhikr"
+                      },
+                      ").isBetweenValues(0,2)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "subhanallah_count",
+            "getter_name": "subhanallahCount",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "subhanallahCount",
+                        "tag": "subhanallahCount"
+                      },
+                      ").isBiggerOrEqualValue(0)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "alhamdulillah_count",
+            "getter_name": "alhamdulillahCount",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "alhamdulillahCount",
+                        "tag": "alhamdulillahCount"
+                      },
+                      ").isBiggerOrEqualValue(0)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "allahu_akbar_count",
+            "getter_name": "allahuAkbarCount",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "allahuAkbarCount",
+                        "tag": "allahuAkbarCount"
+                      },
+                      ").isBiggerOrEqualValue(0)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "morning_opened_on",
+            "getter_name": "morningOpenedOn",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "evening_opened_on",
+            "getter_name": "eveningOpenedOn",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "azkar_nudges",
+            "getter_name": "azkarNudges",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"azkar_nudges\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"azkar_nudges\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "prayer_countdown",
+            "getter_name": "prayerCountdown",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"prayer_countdown\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"prayer_countdown\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "calendar_mode",
+            "getter_name": "calendarMode",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'hijri\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<CalendarMode>(CalendarMode.values)",
+              "dart_type_name": "CalendarMode"
+            }
+          },
+          {
+            "name": "top_glow",
+            "getter_name": "topGlow",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"top_glow\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"top_glow\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "language",
+            "getter_name": "language",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'phone\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Language>(Language.values)",
+              "dart_type_name": "Language"
+            }
+          },
+          {
+            "name": "onboarded",
+            "getter_name": "onboarded",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"onboarded\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"onboarded\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "last_read_surah",
+            "getter_name": "lastReadSurah",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "last_read_ayah",
+            "getter_name": "lastReadAyah",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "last_read_page",
+            "getter_name": "lastReadPage",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "lastReadPage",
+                        "tag": "lastReadPage"
+                      },
+                      ").isBetweenValues(1,604)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "last_read_at",
+            "getter_name": "lastReadAt",
+            "moor_type": "dateTime",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "page_color",
+            "getter_name": "pageColor",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'followSky\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PageColor>(PageColor.values)",
+              "dart_type_name": "PageColor"
+            }
+          },
+          {
+            "name": "quran_layout",
+            "getter_name": "quranLayout",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'mushaf\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<QuranLayout>(QuranLayout.values)",
+              "dart_type_name": "QuranLayout"
+            }
+          },
+          {
+            "name": "page_turn",
+            "getter_name": "pageTurn",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'book\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<PageTurn>(PageTurn.values)",
+              "dart_type_name": "PageTurn"
+            }
+          },
+          {
+            "name": "keep_screen_on",
+            "getter_name": "keepScreenOn",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"keep_screen_on\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"keep_screen_on\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "quran_font",
+            "getter_name": "quranFont",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'kfgqpc\\'')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<QuranFont>(QuranFont.values)",
+              "dart_type_name": "QuranFont"
+            }
+          },
+          {
+            "name": "mushaf_size",
+            "getter_name": "mushafSize",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "mushafSize",
+                        "tag": "mushafSize"
+                      },
+                      ").isBetweenValues(-2,5)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "quran_arabic_size",
+            "getter_name": "quranArabicSize",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "quranArabicSize",
+                        "tag": "quranArabicSize"
+                      },
+                      ").isBetweenValues(-2,3)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "quran_translation_size",
+            "getter_name": "quranTranslationSize",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "quranTranslationSize",
+                        "tag": "quranTranslationSize"
+                      },
+                      ").isBetweenValues(-2,3)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "recite_speed",
+            "getter_name": "reciteSpeed",
+            "moor_type": "double",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1.0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "reciteSpeed",
+                        "tag": "reciteSpeed"
+                      },
+                      ".isIn(const [0.75,1.0,1.25,1.5])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "recite_repeat",
+            "getter_name": "reciteRepeat",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "reciteRepeat",
+                        "tag": "reciteRepeat"
+                      },
+                      ".isIn(const [1,2,3,5,10])"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "recite_pause",
+            "getter_name": "recitePause",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "recitePause",
+                        "tag": "recitePause"
+                      },
+                      ".isIn(const [0,1,2,3,5])"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "prayer_log",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "date",
+            "getter_name": "date",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "prayer",
+            "getter_name": "prayer",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Prayer>(Prayer.values)",
+              "dart_type_name": "Prayer"
+            }
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "date",
+          "prayer"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "qada_entries",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "PRIMARY KEY AUTOINCREMENT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "PRIMARY KEY AUTOINCREMENT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "prayer",
+            "getter_name": "prayer",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<Prayer>(Prayer.values)",
+              "dart_type_name": "Prayer"
+            }
+          },
+          {
+            "name": "missed_on",
+            "getter_name": "missedOn",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "made_up_at",
+            "getter_name": "madeUpAt",
+            "moor_type": "dateTime",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 3,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "azkar_counts",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "set_id",
+            "getter_name": "setId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<AzkarSet>(AzkarSet.values)",
+              "dart_type_name": "AzkarSet"
+            }
+          },
+          {
+            "name": "day",
+            "getter_name": "day",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const CivilDate()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "zikr",
+            "getter_name": "zikr",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "count",
+            "getter_name": "count",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "set_id",
+          "day",
+          "zikr"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "saved_duas",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "dua",
+            "getter_name": "dua",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "saved_at",
+            "getter_name": "savedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "dua"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "quran_bookmarks",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "PRIMARY KEY AUTOINCREMENT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "PRIMARY KEY AUTOINCREMENT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "surah",
+            "getter_name": "surah",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ayah",
+            "getter_name": "ayah",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "page",
+            "getter_name": "page",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "page",
+                        "tag": "page"
+                      },
+                      ").isBetweenValues(1,604)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "color",
+            "getter_name": "color",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<RibbonColor>(RibbonColor.values)",
+              "dart_type_name": "RibbonColor"
+            }
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 6,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "quran_notes",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "surah",
+            "getter_name": "surah",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ayah",
+            "getter_name": "ayah",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "note",
+            "getter_name": "note",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      {
+                        "lexeme": "ComparableExpr",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "StringExpressionOperators",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(",
+                      {
+                        "lexeme": "note",
+                        "tag": "note"
+                      },
+                      ").trim().length).isBiggerThanValue(0)"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "updated_at",
+            "getter_name": "updatedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "surah",
+          "ayah"
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "references": [
+        2
+      ],
+      "type": "index",
+      "data": {
+        "on": 2,
+        "name": "qada_day",
+        "sql": null,
+        "unique": true,
+        "columns": [
+          {
+            "column": "missed_on",
+            "order_by": null
+          },
+          {
+            "column": "prayer",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "references": [
+        5
+      ],
+      "type": "index",
+      "data": {
+        "on": 5,
+        "name": "quran_bookmark_ayah",
+        "sql": null,
+        "unique": true,
+        "columns": [
+          {
+            "column": "surah",
+            "order_by": null
+          },
+          {
+            "column": "ayah",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "references": [
+        5
+      ],
+      "type": "index",
+      "data": {
+        "on": 5,
+        "name": "quran_bookmark_page",
+        "sql": "create unique index quran_bookmark_page on quran_bookmarks (page) where surah is null",
+        "unique": true,
+        "columns": []
+      }
+    }
+  ],
+  "fixed_sql": [
+    {
+      "name": "settings",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"settings\" (\"id\" INTEGER NOT NULL DEFAULT 1, \"latitude\" REAL NULL, \"longitude\" REAL NULL, \"place_name\" TEXT NULL, \"place_name_ar\" TEXT NULL, \"region_name\" TEXT NULL, \"region_name_ar\" TEXT NULL, \"country_code\" TEXT NULL, \"time_zone\" TEXT NULL, \"location_mode\" TEXT NULL, \"method\" TEXT NULL, \"asr_method\" TEXT NULL, \"hijri_adjust\" INTEGER NOT NULL DEFAULT 0 CHECK(\"hijri_adjust\" BETWEEN -2 AND 2), \"digits\" TEXT NOT NULL DEFAULT 'eastern', \"theme\" TEXT NOT NULL DEFAULT 'qiyamEmerald', \"theme_mode\" TEXT NOT NULL DEFAULT 'followSky', \"reduce_motion\" INTEGER NOT NULL DEFAULT 0 CHECK (\"reduce_motion\" IN (0, 1)), \"haptics\" INTEGER NOT NULL DEFAULT 1 CHECK (\"haptics\" IN (0, 1)), \"ui_sounds\" INTEGER NOT NULL DEFAULT 0 CHECK (\"ui_sounds\" IN (0, 1)), \"store_reset_pending\" INTEGER NOT NULL DEFAULT 0 CHECK (\"store_reset_pending\" IN (0, 1)), \"first_use\" TEXT NULL, \"fajr_sound\" TEXT NOT NULL DEFAULT 'adhan', \"dhuhr_sound\" TEXT NOT NULL DEFAULT 'tone', \"asr_sound\" TEXT NOT NULL DEFAULT 'tone', \"maghrib_sound\" TEXT NOT NULL DEFAULT 'adhan', \"isha_sound\" TEXT NOT NULL DEFAULT 'tone', \"fajr_recording\" TEXT NOT NULL DEFAULT 'makkah', \"dhuhr_recording\" TEXT NOT NULL DEFAULT 'makkah', \"asr_recording\" TEXT NOT NULL DEFAULT 'makkah', \"maghrib_recording\" TEXT NOT NULL DEFAULT 'makkah', \"isha_recording\" TEXT NOT NULL DEFAULT 'makkah', \"reminder_minutes\" INTEGER NOT NULL DEFAULT 10 CHECK(\"reminder_minutes\" IN (0, 5, 10, 15, 20, 25, 30)), \"notifications_asked\" INTEGER NOT NULL DEFAULT 0 CHECK (\"notifications_asked\" IN (0, 1)), \"tasbih_dhikr\" INTEGER NOT NULL DEFAULT 0 CHECK(\"tasbih_dhikr\" BETWEEN 0 AND 2), \"subhanallah_count\" INTEGER NOT NULL DEFAULT 0 CHECK(\"subhanallah_count\" >= 0), \"alhamdulillah_count\" INTEGER NOT NULL DEFAULT 0 CHECK(\"alhamdulillah_count\" >= 0), \"allahu_akbar_count\" INTEGER NOT NULL DEFAULT 0 CHECK(\"allahu_akbar_count\" >= 0), \"morning_opened_on\" TEXT NULL, \"evening_opened_on\" TEXT NULL, \"azkar_nudges\" INTEGER NOT NULL DEFAULT 1 CHECK (\"azkar_nudges\" IN (0, 1)), \"prayer_countdown\" INTEGER NOT NULL DEFAULT 1 CHECK (\"prayer_countdown\" IN (0, 1)), \"calendar_mode\" TEXT NOT NULL DEFAULT 'hijri', \"top_glow\" INTEGER NOT NULL DEFAULT 1 CHECK (\"top_glow\" IN (0, 1)), \"language\" TEXT NOT NULL DEFAULT 'phone', \"onboarded\" INTEGER NOT NULL DEFAULT 0 CHECK (\"onboarded\" IN (0, 1)), \"last_read_surah\" INTEGER NOT NULL DEFAULT 1, \"last_read_ayah\" INTEGER NOT NULL DEFAULT 1, \"last_read_page\" INTEGER NOT NULL DEFAULT 1 CHECK(\"last_read_page\" BETWEEN 1 AND 604), \"last_read_at\" INTEGER NULL, \"page_color\" TEXT NOT NULL DEFAULT 'followSky', \"quran_layout\" TEXT NOT NULL DEFAULT 'mushaf', \"page_turn\" TEXT NOT NULL DEFAULT 'book', \"keep_screen_on\" INTEGER NOT NULL DEFAULT 0 CHECK (\"keep_screen_on\" IN (0, 1)), \"quran_font\" TEXT NOT NULL DEFAULT 'kfgqpc', \"mushaf_size\" INTEGER NOT NULL DEFAULT 0 CHECK(\"mushaf_size\" BETWEEN -2 AND 5), \"quran_arabic_size\" INTEGER NOT NULL DEFAULT 0 CHECK(\"quran_arabic_size\" BETWEEN -2 AND 3), \"quran_translation_size\" INTEGER NOT NULL DEFAULT 0 CHECK(\"quran_translation_size\" BETWEEN -2 AND 3), \"recite_speed\" REAL NOT NULL DEFAULT 1.0 CHECK(\"recite_speed\" IN (0.75, 1.0, 1.25, 1.5)), \"recite_repeat\" INTEGER NOT NULL DEFAULT 1 CHECK(\"recite_repeat\" IN (1, 2, 3, 5, 10)), \"recite_pause\" INTEGER NOT NULL DEFAULT 0 CHECK(\"recite_pause\" IN (0, 1, 2, 3, 5)), PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "prayer_log",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"prayer_log\" (\"date\" TEXT NOT NULL, \"prayer\" TEXT NOT NULL, PRIMARY KEY (\"date\", \"prayer\"));"
+        }
+      ]
+    },
+    {
+      "name": "qada_entries",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"qada_entries\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"prayer\" TEXT NOT NULL, \"missed_on\" TEXT NULL, \"made_up_at\" INTEGER NULL);"
+        }
+      ]
+    },
+    {
+      "name": "azkar_counts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"azkar_counts\" (\"set_id\" TEXT NOT NULL, \"day\" TEXT NOT NULL, \"zikr\" TEXT NOT NULL, \"count\" INTEGER NOT NULL, PRIMARY KEY (\"set_id\", \"day\", \"zikr\"));"
+        }
+      ]
+    },
+    {
+      "name": "saved_duas",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"saved_duas\" (\"dua\" TEXT NOT NULL, \"saved_at\" INTEGER NOT NULL, PRIMARY KEY (\"dua\"));"
+        }
+      ]
+    },
+    {
+      "name": "quran_bookmarks",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"quran_bookmarks\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"surah\" INTEGER NULL, \"ayah\" INTEGER NULL, \"page\" INTEGER NOT NULL CHECK(\"page\" BETWEEN 1 AND 604), \"name\" TEXT NULL, \"color\" TEXT NOT NULL, \"created_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "quran_notes",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"quran_notes\" (\"surah\" INTEGER NOT NULL, \"ayah\" INTEGER NOT NULL, \"note\" TEXT NOT NULL CHECK(LENGTH(TRIM(\"note\")) > 0), \"updated_at\" INTEGER NOT NULL, PRIMARY KEY (\"surah\", \"ayah\"));"
+        }
+      ]
+    },
+    {
+      "name": "qada_day",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX qada_day ON qada_entries (missed_on, prayer)"
+        }
+      ]
+    },
+    {
+      "name": "quran_bookmark_ayah",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX quran_bookmark_ayah ON quran_bookmarks (surah, ayah)"
+        }
+      ]
+    },
+    {
+      "name": "quran_bookmark_page",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX quran_bookmark_page ON quran_bookmarks (page) WHERE surah IS NULL"
+        }
+      ]
+    }
+  ]
+}

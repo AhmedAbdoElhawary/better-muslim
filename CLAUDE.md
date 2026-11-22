@@ -1,0 +1,103 @@
+# Better Muslim
+
+Prayer times, Quran, azkar and qibla for iOS and Android, English and Arabic. The rules are in the
+constitution:
+
+@.specify/memory/constitution.md
+
+## Design handoff
+
+`design_handoff_better_muslim/` is the approved design. Its code (theme, tokens, text, motion,
+icons, sky) is already in `lib/core/resources/design/`, the sky painter in
+`lib/features/home/view/widgets/`, fonts and icons in `assets/`, strings in `assets/l10n/` with
+their keys in `StringsManager`.
+
+- `reference/screens/*.png`, `reference/surfaces/*.png`: what each screen looks like. Only to look
+  at, never compared against (no golden tests, no screenshot checks).
+- `specs/screens/*.md`, `specs/surfaces/*.md`: exact layout trees. Read `specs/HOW_TO_READ.md`
+  first.
+- `SCREENS.md` (entry, dynamic values, behaviour), `MOTION.md` (animations, haptics, reduce
+  motion), `TOKENS.md`, `OVERVIEW.md`, `design/*.dc.html` (open in a browser).
+- `HANDOFF_CLAUDE.md`: the designer's original notes and build order. Its api rules
+  (`context.bm`, `BmText`, copying `flutter/`) are replaced by the table below.
+
+From the spec to the code:
+
+| In the spec | In the code |
+| --- | --- |
+| `var(--x)` color role | `context.getColor(ThemeEnum.x)` (`--pc` = `primaryContainer`, see HOW_TO_READ) |
+| Schibsted Grotesk / Noto Sans Arabic text | `RegularText`, `MediumText`, `SemiBoldText`... by weight |
+| Marcellus / Reem Kufi text | `RegularText(..., font: FontEnum.display)` |
+| copy | `StringsManager.x` (the arb key), `args: {...}` for `{placeholders}` |
+| font size, line height, letter spacing | `FontSizeManager.role`, `LineHeightManager.role`, `LetterSpacingManager.role` (BmText names) |
+| padding, gap, radius, size | adaptive paddings, `RSizedBox`, `SpaceManager`, `RadiusManager`, `SizeManager` |
+| a value only one component uses | a named entry in the manager first (like `SpaceManager.navBarSide`) |
+| `ICON outline/x`, `ICON ui/x` | `BmIcon(BmIconName.x)`, `BmIcon.ui(BmUiIcon.x)` |
+| animation, haptic | `BmMotion` + `MOTION.md`, `BmHaptics` |
+
+- The always-dark adhan screen may use literal colors: add that one file to the allow list at the
+  top of `test/architecture_test.dart`. The widgets and the live countdown take the theme's colors
+  from the surface data.
+- Text scale is clamped at 2.0 in `App`. Above 1.4 the countdown and prayer rows stack.
+- Living Sky follows `BmSkyState`. The design scenario shows the theme's base sky.
+- Quran mockups use Amiri Quran. Production needs KFGQPC Hafs + QCF V2 (licensed separately).
+
+## Milestones
+
+1. Setup: core, theme, fonts, l10n, 5-tab shell, icons, splash. **Done, waiting for my review.**
+2. Data: location, prayer times (Umm al-Qura in KSA), hijri, settings in drift, and a debug
+   scenario that freezes time at Thu 15 Oct 2026 16:32 Makkah, a fixed moment for tests and demos.
+   **Done, waiting for my review.**
+3. Home: Living Sky, live countdown and glow, the prayer day strip, verse and shortcuts, the
+   location sheet with offline city search. **Done, waiting for my review.**
+4. Prayer: logging, qada, method sheet. **Done, waiting for my review.**
+5. Notifications and adhan: the 6 day schedule with reminders, the adhan screen (4.03), the full
+   adhan on Android from `packages/adhan_alarms`, Mark prayed from every notification, the
+   background top-up, a dev page from More. **Done, waiting for my review.**
+6. Qibla: compass, alignment, haptics. **Done, waiting for my review.**
+7. 7a. Quran reader: the Mushaf page by page, ayah sheet, tafsir and translation, recitation,
+   bookmarks and notes, share, display, with the Motion v2 loader and container transform first.
+   **Done, waiting for my review.** 7b (word by word, memorise, search, khatmah) comes next.
+8. Azkar, Tasbih and Duas: the Azkar tab, both sets, Tasbih, Duas with save, share and Listen ready
+   for clips, the azkar nudges. **Done, waiting for my review.**
+9. More, Theme and Hijri calendar: every setting, the 8 themes with Follow sky, the calendar with its
+   events and adjustment, the Adhan and reminders page, Reset prayer journey and Credits. **Done,
+   waiting for my review.**
+10. Onboarding: the sunrise first screen in liquid glass, the welcome, location, notifications and
+    theme steps. Backup and restore with the store reset notice was built here, then removed.
+    **Done, waiting for my review.**
+11. Widgets and Live Activity: the iOS home widgets and lock screen accessories, the Android widget,
+    the countdown before each prayer as a Live Activity with the Dynamic Island and as an Android
+    ongoing notification, all fed by `packages/prayer_surfaces`. **Done, waiting for my review.**
+12. Polish and motion, before the Quran reader (7): the calendar's day area, Gregorian mode and
+    pickers, the theme skies, the azkar and Tasbih moves with the 99 bead string, Acknowledgements
+    and CONTACT, Apple's push and the title flights, every state change animated, the large titles
+    into the bar and the top glow with its switch. **Done, waiting for my review.**
+13. Enhancements after the review (specs/008): the shell and the verse for today, several ayahs on
+    one share card with its own look, Ibn Kathir and As-Sa'di downloads, sharp pages on Android,
+    the Quran font and six page palettes, the page curl, the whole day and night on the Home arc
+    with the turn at maghrib. **Done, waiting for my review.** Phase E (the tafsir host, the Home
+    bar flight, the animated vector splash, the mushaf ink with no layer) **done, waiting for my
+    review**, the tafsir release (T081) is mine.
+
+14. Performance and notifications (specs/011): nothing loops at rest, the adhan's sound and progress
+    on Android, one notification for the prayer with Mark prayed and Add to qada, the countdown set
+    by "Reminder before each prayer", azkar replacing each other. **Built, the numbers and the sound
+    wait for a run on my phone.**
+
+## Run
+
+VS Code (Run and Debug) and Android Studio (run configurations) both have Dev, Staging and Prod.
+Terminal, same on iOS and Android:
+
+```bash
+flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=dart_define/dev.json
+```
+
+## Before saying done
+
+```bash
+dart format --set-exit-if-changed lib test
+flutter analyze
+flutter test
+```
