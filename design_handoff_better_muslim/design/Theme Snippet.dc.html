@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&amp;family=Marcellus&amp;family=Reem+Kufi:wght@400;500&amp;family=Schibsted+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
+</helmet>
+<div ref="{{ root }}" style="width:300px;background:var(--bg);color:var(--text);font-family:'Schibsted Grotesk',system-ui,sans-serif;border-radius:30px;overflow:hidden;box-shadow:0 0 0 1px color-mix(in oklab,var(--text) 10%,transparent),0 18px 40px -24px rgba(0,0,0,.45)">
+  <div data-a="sky" style="position:relative;height:176px;background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 28%,var(--sky3) 50%,var(--sky2) 75%,var(--sky1) 100%);background-size:100% 200%;background-position:0% 0%;color:var(--onSky);overflow:hidden">
+    <div style="position:absolute;left:0;right:0;top:0;height:120px;opacity:var(--stars)">
+      <div data-a="tw" style="position:absolute;left:30px;top:22px;width:2px;height:2px;border-radius:50%;background:#fff"></div>
+      <div data-a="tw" style="position:absolute;left:96px;top:44px;width:1.5px;height:1.5px;border-radius:50%;background:#fff"></div>
+      <div data-a="tw" style="position:absolute;left:150px;top:18px;width:2px;height:2px;border-radius:50%;background:#fff"></div>
+      <div data-a="tw" style="position:absolute;left:200px;top:58px;width:1.5px;height:1.5px;border-radius:50%;background:#fff"></div>
+      <div data-a="tw" style="position:absolute;left:250px;top:34px;width:2px;height:2px;border-radius:50%;background:#fff"></div>
+      <div data-a="tw" style="position:absolute;left:276px;top:80px;width:1.5px;height:1.5px;border-radius:50%;background:#fff"></div>
+      <div data-a="tw" style="position:absolute;left:120px;top:84px;width:1.5px;height:1.5px;border-radius:50%;background:#fff"></div>
+    </div>
+    <div data-a="pt" style="position:absolute;left:60px;top:120px;width:10px;height:10px;border-radius:50%;opacity:.4;background:radial-gradient(circle,var(--sun) 0%,transparent 70%)"></div>
+    <div data-a="pt" style="position:absolute;left:140px;top:132px;width:8px;height:8px;border-radius:50%;opacity:.4;background:radial-gradient(circle,var(--sun) 0%,transparent 70%)"></div>
+    <div data-a="pt" style="position:absolute;left:210px;top:110px;width:12px;height:12px;border-radius:50%;opacity:.4;background:radial-gradient(circle,var(--sun) 0%,transparent 70%)"></div>
+    <div data-a="pt" style="position:absolute;left:100px;top:96px;width:8px;height:8px;border-radius:50%;opacity:.4;background:radial-gradient(circle,var(--sun) 0%,transparent 70%)"></div>
+    <svg viewBox="0 0 300 176" width="300" height="176" style="position:absolute;inset:0">
+      <path d="M100 150A90 90 0 0 1 280 150" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-dasharray="1 5" stroke-linecap="round"></path>
+      <path d="M100 150A90 90 0 0 1 273.4 116.3" fill="none" stroke="currentColor" stroke-opacity=".75" stroke-width="1.2" stroke-linecap="round"></path>
+      <path d="M0 150H300" stroke="currentColor" stroke-opacity=".22"></path>
+    </svg>
+    <div data-a="sun" style="position:absolute;left:266.4px;top:109.3px;width:14px;height:14px;border-radius:50%;background:var(--sun);box-shadow:0 0 18px 6px color-mix(in oklab,var(--sun) 55%,transparent)"></div>
+    <div style="position:relative;display:flex;justify-content:space-between;padding:16px 20px 0;font-size:11.5px;opacity:.92"><span>Makkah · Thu 15 Oct</span><span>4 Jumada I 1448</span></div>
+    <div style="position:relative;padding:12px 20px 0"><div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.85">Now</div><div style="font-family:'Marcellus',serif;font-size:34px;line-height:1.1">Asr</div></div>
+  </div>
+
+  <div style="position:relative;margin:-58px 14px 0">
+    <div data-a="glow" style="position:absolute;inset:-16px;border-radius:34px;background:radial-gradient(ellipse at 50% 50%,color-mix(in oklab,var(--glow) 60%,transparent) 0%,transparent 72%);filter:blur(6px)"></div>
+    <div style="position:relative;background:var(--surface);border-radius:20px;padding:14px 16px 15px;box-shadow:0 0 0 1px color-mix(in oklab,var(--text) 8%,transparent);display:flex;flex-direction:column;gap:7px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;color:var(--text2)">Next prayer</span><span dir="rtl" lang="ar" style="font-family:'Reem Kufi',sans-serif;font-size:15px;line-height:1;color:var(--text2)">المغرب</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Marcellus',serif;font-size:28px;line-height:1">Maghrib</span><span style="font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.01em;color:var(--primary)">{{ cd }}</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:3px;border-radius:2px;background:color-mix(in oklab,var(--text) 10%,transparent);overflow:hidden"><div style="width:68%;height:100%;border-radius:2px;background:var(--primary)"></div></div><span style="font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums">at 17:56</span></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:14px 14px 0">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;border-radius:12px"><span style="font-size:11px;color:var(--text2)">Fajr</span><span style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--text2)">04:58</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;border-radius:12px"><span style="font-size:11px;color:var(--text2)">Dhuhr</span><span style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--text2)">12:05</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;border-radius:12px;background:color-mix(in oklab,var(--primary) 15%,transparent);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--primary) 30%,transparent)"><span style="font-size:11px;font-weight:600;color:var(--primary)">Asr</span><span style="font-size:13px;font-weight:500;font-variant-numeric:tabular-nums">15:27</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;border-radius:12px"><span style="font-size:11px;color:var(--text2)">Maghrib</span><span style="font-size:13px;font-variant-numeric:tabular-nums">17:56</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;border-radius:12px"><span style="font-size:11px;color:var(--text2)">Isha</span><span style="font-size:13px;font-variant-numeric:tabular-nums">19:26</span></div>
+  </div>
+
+  <div style="margin:12px 14px 0;background:var(--surface);border-radius:18px;padding:13px 16px 15px;box-shadow:0 0 0 1px color-mix(in oklab,var(--text) 8%,transparent)">
+    <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">Verse of the day</span><span style="color:var(--accent);font-weight:500">Al-Fatiha 1:1</span></div>
+    <div dir="rtl" lang="ar" style="margin-top:6px;text-align:center;font-family:'Amiri Quran',serif;font-size:24px;line-height:2.3;padding-bottom:4px;color:var(--text)">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <div style="margin-top:8px;text-align:center;font-size:12px;line-height:1.5;color:var(--text2);text-wrap:pretty">In the name of Allah, the Entirely Merciful, the Especially Merciful.</div>
+  </div>
+
+  <div style="margin:12px 14px 0;height:48px;border-radius:14px;background:var(--primary);color:var(--on);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500">Continue reading</div>
+
+  <div style="margin-top:14px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:8px 6px 14px;background:var(--surface);box-shadow:0 -1px 0 color-mix(in oklab,var(--text) 8%,transparent)">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--primary)"><div style="width:50px;height:30px;border-radius:15px;background:color-mix(in oklab,var(--primary) 15%,transparent);display:grid;place-items:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 18a6.5 6.5 0 0 1 13 0z" fill="currentColor"></path><path d="M3 18h18"></path><circle cx="18.5" cy="7" r="1.8" fill="currentColor"></circle></svg></div><span style="font-size:10.5px;font-weight:600">Home</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text2)"><div style="width:50px;height:30px;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21v-9.5C6 7.6 12 3 12 3s6 4.6 6 8.5V21"></path><path d="M4 21h16"></path><path d="M9.5 21v-6.5c0-1.9 2.5-4 2.5-4s2.5 2.1 2.5 4V21"></path></svg></div><span style="font-size:10.5px">Prayer</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text2)"><div style="width:50px;height:30px;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v12.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"></path><path d="M12 6.5V19"></path></svg></div><span style="font-size:10.5px">Quran</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text2)"><div style="width:50px;height:30px;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7.5" width="14" height="13" rx="2.5"></rect><path d="M7.5 4.5h9"></path><path d="M12 10.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"></path></svg></div><span style="font-size:10.5px">Azkar</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text2)"><div style="width:50px;height:30px;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h8.5M17.5 7.5H20M4 16.5h2.5M11.5 16.5H20"></path><circle cx="15" cy="7.5" r="2.5"></circle><circle cx="9" cy="16.5" r="2.5"></circle></svg></div><span style="font-size:10.5px">More</span></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:300,&quot;height&quot;:600},&quot;still&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { t: 5048 };
+  root = React.createRef();
+  anims = [];
+  componentDidMount() {
+    this.iv = setInterval(() => this.setState(s => ({ t: s.t > 0 ? s.t - 1 : 5048 })), 1000);
+    this.start();
+  }
+  componentDidUpdate(pp) { if (pp.still !== this.props.still) { this.stop(); this.start(); } }
+  componentWillUnmount() { clearInterval(this.iv); this.stop(); }
+  start() {
+    const r = this.root.current;
+    const prefers = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!r || this.props.still || prefers) return;
+    const A = (el, k, o) => this.anims.push(el.animate(k, o)), q = s => r.querySelectorAll(s);
+    q('[data-a=sky]').forEach(el => A(el, [{ backgroundPosition: '0% 0%' }, { backgroundPosition: '0% 22%' }], { duration: 8000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }));
+    q('[data-a=glow]').forEach(el => A(el, [{ opacity: .4, transform: 'scale(.97)' }, { opacity: 1, transform: 'scale(1.03)' }], { duration: 3000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }));
+    q('[data-a=sun]').forEach(el => A(el, [{ transform: 'scale(1)', opacity: .9 }, { transform: 'scale(1.15)', opacity: 1 }], { duration: 4000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }));
+    q('[data-a=tw]').forEach(el => { const x = Math.random(); A(el, [{ opacity: .2 }, { opacity: 1 }], { duration: 2200 + x * 3000, delay: -x * 3000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }); });
+    q('[data-a=pt]').forEach(el => { const x = Math.random(); A(el, [{ transform: 'translate(0,0)', opacity: 0 }, { opacity: .8, offset: .4 }, { transform: `translate(${(x - .5) * 30}px,-60px)`, opacity: 0 }], { duration: 7000 + x * 4000, delay: -x * 7000, iterations: Infinity, easing: 'ease-in-out' }); });
+  }
+  stop() { this.anims.forEach(a => a.cancel()); this.anims = []; }
+  renderVals() {
+    const t = this.state.t, p = n => String(n).padStart(2, '0');
+    return { root: this.root, cd: `${p(Math.floor(t / 3600))}:${p(Math.floor(t % 3600 / 60))}:${p(t % 60)}` };
+  }
+}
+</script>
+</body>
+</html>

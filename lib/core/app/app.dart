@@ -1,0 +1,116 @@
+import 'package:better_muslim/core/app/app_localizations.dart';
+import 'package:better_muslim/core/app/launch.dart';
+import 'package:better_muslim/core/audio/ui_sounds.dart';
+import 'package:better_muslim/core/extensions/l10n.dart';
+import 'package:better_muslim/core/location/location_controller.dart';
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/resources/design/bm_haptics.dart';
+import 'package:better_muslim/core/resources/design/bm_motion.dart';
+import 'package:better_muslim/core/resources/design/bm_text.dart';
+import 'package:better_muslim/core/resources/dimensions_manager.dart';
+import 'package:better_muslim/core/resources/strings_manager.dart';
+import 'package:better_muslim/core/resources/theme_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/appearance.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/adaptive/screen_util_init.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:material_ui/material_ui.dart';
+
+class App extends ConsumerStatefulWidget {
+  const App({super.key});
+
+  @override
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// a timer doesn't run while the phone sleeps, so the next boundary is worked out again
+    _lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(boundaryProvider));
+
+    /// after the cold open, so the saved location's times show before any gps work (FR-007)
+    ref.read(launchSettledProvider).then((_) {
+      if (mounted) ref.read(locationControllerProvider).refresh();
+    });
+    ref.listenManual(
+      settingsProvider.select(
+        (settings) => (haptics: settings.value?.haptics, uiSounds: settings.value?.uiSounds),
+      ),
+      (_, flags) {
+        BmHaptics.enabled = flags.haptics ?? true;
+        BmSounds.enabled = flags.uiSounds ?? false;
+      },
+      fireImmediately: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeId = ref.watch(themeIdProvider);
+    final language = ref.watch(settingsProvider.select((settings) => settings.value?.language));
+    final reduceMotion = ref.watch(
+      settingsProvider.select((settings) => settings.value?.reduceMotion ?? false),
+    );
+    final textSize = ref.watch(
+      settingsProvider.select((settings) => settings.value?.textSize ?? TextSize.standard),
+    );
+    return AppScreenUtilInit(
+      child: MaterialApp.router(
+        onGenerateTitle: (context) => context.tr(StringsManager.appName),
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(themeId),
+        darkTheme: AppTheme.dark(themeId),
+        themeMode: ref.watch(themeModeProvider),
+        themeAnimationDuration: BmMotion.standard,
+        themeAnimationCurve: BmMotion.standardCurve,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+
+        /// null keeps flutter's own pick, which follows a change in the phone's settings
+        locale: language == null || language == Language.phone
+            ? null
+            : AppLocalizations.localeOf(language),
+        routerConfig: ref.watch(routerProvider),
+
+        /// the in-app switch joins the os flag here, so every widget reads one flag (R4)
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: MediaQuery.disableAnimationsOf(context) || reduceMotion,
+
+            /// default keeps the phone's own scaler, android 14 grows big text less than linear
+            textScaler: textSize == TextSize.standard
+                ? null
+                : TextScaler.linear(MediaQuery.textScalerOf(context).scale(1) * textSize.scale),
+          ),
+          child: MediaQuery.withClampedTextScaling(
+            maxScaleFactor: bmMaxTextScale,
+            child: ColoredBox(
+              color: context.getColor(ThemeEnum.bg),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: SizeManager.maxContentWidth.w),
+
+                  /// the outermost overlay, toasts go in it to stay above every route and sheet
+                  child: Overlay.wrap(child: child!),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

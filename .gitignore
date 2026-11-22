@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/ios/build/
+/android/build/
 
 # Symbolication related
 app.*.symbols
@@ -43,6 +45,36 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/.kotlin/
 
 # Widget Preview related
 .widget_preview/
+
+# design exports, kept local
+*.zip
+/Living Sky prayer app branding 2/
+
+# store screenshots, only needed at release
+/design_handoff_better_muslim/store/
+
+# release signing, never committed
+/android/key.properties
+*.jks
+*.keystore
+# tier 2 config, CI writes it and deletes it after the build
+/dart_define/*.secret.json
+
+# written by tool/accounts_wizard.sh, CI writes the same files from its secrets
+/.accounts.env
+/android/app/src/*/google-services.json
+/ios/Runner/Firebase/
+/ios/Runner/GoogleService-Info.plist
+# coverage gate output
+/coverage/
+/test/coverage_helper_test.dart
+# geonames downloads for tool/places/build_places.dart, about 220 MB
+/tool/places/.cache/
+
+# tanzil and qul downloads for tool/quran/build_quran.dart
+/tool/quran/.cache/
+/promots/

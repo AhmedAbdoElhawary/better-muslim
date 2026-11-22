@@ -1,0 +1,7 @@
+Place names, regions, coordinates, populations and time zones in places.tsv.gz come from GeoNames
+(https://www.geonames.org), downloaded from https://download.geonames.org/export/dump/.
+
+The data is licensed under the Creative Commons Attribution 4.0 License
+(https://creativecommons.org/licenses/by/4.0/). The file was built from cities1000,
+admin1CodesASCII, countryInfo and alternateNamesV2 by tool/places/build_places.dart, which keeps
+only the columns the app needs and the Arabic names.

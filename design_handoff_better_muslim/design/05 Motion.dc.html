@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Noto+Sans+Arabic:wght@400;500&amp;family=Reem+Kufi:wght@400;500&amp;family=Schibsted+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#000;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}a{color:#A88A52}a:hover{color:#D9C08A}</style>
+</helmet>
+<div style="width:1440px;margin:0 auto;background:#000;color:#D9D3C2;font-family:'Schibsted Grotesk',system-ui,sans-serif">
+<nav style="display:flex;align-items:center;gap:28px;padding:14px 72px;background:#07100D;color:#7B8079;font-size:12px;letter-spacing:.14em;text-transform:uppercase;box-shadow:0 1px 0 #1C2C26">
+  <span>Brand</span><span>Tokens</span><span>Components</span><span>Themes</span><span style="color:#A88A52">Motion</span><span>Screens</span><span>System surfaces</span><span>Store</span><span>Handoff</span>
+  <span style="margin-left:auto;letter-spacing:.06em;text-transform:none">Phase 3 · Motion system</span>
+</nav>
+<header style="padding:88px 72px 40px">
+  <div style="font-size:12px;letter-spacing:.14em;color:#A88A52">MOTION · #9 QIYAM EMERALD</div>
+  <h1 style="margin:14px 0 0;font-family:'Marcellus',serif;font-weight:400;font-size:72px;line-height:1.05">Motion</h1>
+  <p style="margin:18px 0 0;max-width:760px;font-size:17px;line-height:1.6;color:#878C82;text-wrap:pretty">Sixteen animations, all built from the Phase 2 motion tokens. At rest the app moves slowly, like the sky. When you act, it answers quickly and settles. Every animation has a reduce-motion fallback, and haptics are reserved for moments of completion and alignment. Click any demo to replay it from the start. Tweaks: playback speed and reduce motion.</p>
+</header>
+
+<section data-screen-label="01 Principles" style="padding:56px 72px 24px">
+<div style="display:flex;align-items:baseline;gap:24px;margin-bottom:12px"><span style="font-family:'Marcellus',serif;font-size:16px;letter-spacing:.14em;color:#A88A52">01</span><h2 style="margin:0;font-family:'Marcellus',serif;font-weight:400;font-size:48px;line-height:1.1">Three tiers</h2></div>
+<p style="margin:0 0 36px 50px;max-width:760px;font-size:16px;line-height:1.6;color:#878C82;text-wrap:pretty">Every animation belongs to one tier. The tier fixes its tempo, curve family, haptics and priority, so a new animation is specified by choosing a tier first.</p>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:26px 28px 28px;display:flex;flex-direction:column;gap:16px"><span style="align-self:flex-start;font-size:12px;font-weight:500;padding:5px 10px;border-radius:8px;color:#8FCDB4;background:#0E2620">Ambient</span><span style="font-family:'Marcellus',serif;font-size:28px;line-height:1.2">The sky breathes</span><p style="margin:0;font-size:14.5px;line-height:1.6;color:#878C82;text-wrap:pretty">Driven by time, never by touch. Slow enough to go unnoticed until you look for it.</p><div style="display:flex;flex-direction:column;gap:0;font-size:13px"><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Tempo</span><span>4–8 s loops, 300 ms ticks</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Curves</span><span>breathe, standard</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Haptics</span><span>Never</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Budget</span><span>30 fps, paused off-screen</span></div></div><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">02</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">04</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">05</span></div></div>
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:26px 28px 28px;display:flex;flex-direction:column;gap:16px"><span style="align-self:flex-start;font-size:12px;font-weight:500;padding:5px 10px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font-family:'Marcellus',serif;font-size:28px;line-height:1.2">The hand is answered</span><p style="margin:0;font-size:14.5px;line-height:1.6;color:#878C82;text-wrap:pretty">Driven by touch or sensors. Starts on the first frame after input and can be interrupted at any point.</p><div style="display:flex;flex-direction:column;gap:0;font-size:13px"><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Tempo</span><span>150–380 ms</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Curves</span><span>standard, snappy, needle</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Haptics</span><span>Light, selection</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Budget</span><span>Display rate, 60/120 Hz</span></div></div><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">07</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">09</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">11</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">13</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">14</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">15</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">16</span></div></div>
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:26px 28px 28px;display:flex;flex-direction:column;gap:16px"><span style="align-self:flex-start;font-size:12px;font-weight:500;padding:5px 10px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font-family:'Marcellus',serif;font-size:28px;line-height:1.2">Moments are marked</span><p style="margin:0;font-size:14.5px;line-height:1.6;color:#878C82;text-wrap:pretty">Prayer times and completions. Slower and rarer, with at most one playing at a time.</p><div style="display:flex;flex-direction:column;gap:0;font-size:13px"><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Tempo</span><span>520–1800 ms</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Curves</span><span>sacred, decelerate, gentle</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Haptics</span><span>Success, medium</span></div><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;box-shadow:0 -1px 0 #1C2C26"><span style="color:#7B8079">Budget</span><span>Display rate, never blocks input</span></div></div><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">01</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">03</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">06</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">08</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">10</span><span style="font-family:'Marcellus',serif;font-size:12px;letter-spacing:.1em;padding:4px 8px;border-radius:8px;background:#0C1814;color:#A88A52">12</span></div></div>
+</div>
+</section>
+<section data-screen-label="02 Animations" style="padding:56px 72px 40px">
+<div style="display:flex;align-items:baseline;gap:24px;margin-bottom:12px"><span style="font-family:'Marcellus',serif;font-size:16px;letter-spacing:.14em;color:#A88A52">02</span><h2 style="margin:0;font-family:'Marcellus',serif;font-weight:400;font-size:48px;line-height:1.1">Animations</h2></div>
+<p style="margin:0 0 36px 50px;max-width:760px;font-size:16px;line-height:1.6;color:#878C82;text-wrap:pretty">Each demo loops; click one to replay it. Springs are simulated from the token values (mass 1), so settle times match Flutter's SpringSimulation.</p>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="launch" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:radial-gradient(120% 80% at 50% 100%,#0C1814 0%,#000 60%)"><div data-p="g" style="position:absolute;inset:0">
+<svg data-p="star" viewBox="-11 -11 22 22" width="72" height="72" style="position:absolute;left:50%;top:40px;margin-left:-36px;overflow:visible"><polygon points="0,-10 2.93,-7.07 7.07,-7.07 7.07,-2.93 10,0 7.07,2.93 7.07,7.07 2.93,7.07 0,10 -2.93,7.07 -7.07,7.07 -7.07,2.93 -10,0 -7.07,-2.93 -7.07,-7.07 -2.93,-7.07" fill="none" stroke="#A88A52" stroke-width=".6" stroke-linejoin="round"></polygon></svg>
+<div style="position:absolute;left:50%;top:104px;width:40px;height:36px;margin-left:-20px;overflow:hidden"><i data-p="sun" style="position:absolute;left:14px;top:38px;width:12px;height:12px;border-radius:50%;background:#CDB27A;box-shadow:0 0 16px rgba(205,178,122,.6)"></i></div>
+<i data-p="hz" style="position:absolute;left:50%;top:140px;width:120px;height:1px;margin-left:-60px;background:#4C5E57"></i>
+<div data-p="word" style="position:absolute;left:0;right:0;top:166px;text-align:center;font-family:'Marcellus',serif;font-size:22px">Better Muslim</div>
+</div></div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">01</span><span style="font-family:'Marcellus',serif;font-size:21px">App launch</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Splash · cold start</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">1200 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">sacred</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="sky" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:linear-gradient(180deg,#000 0%,#04100C 55%,#173328 100%)">
+<div data-p="lay" style="position:absolute;inset:0;opacity:0;background:linear-gradient(180deg,#04100C 0%,#173328 60%,#4A5A3E 100%)"></div>
+<i data-p="sun" style="position:absolute;left:50%;bottom:-70px;width:200px;height:200px;margin-left:-100px;border-radius:50%;background:radial-gradient(circle,rgba(205,178,122,.42),rgba(205,178,122,0) 65%)"></i>
+<i data-p="tw" style="position:absolute;left:12%;top:18%;width:2px;height:2px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:28%;top:34%;width:2px;height:2px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:44%;top:12%;width:3px;height:3px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:61%;top:26%;width:2px;height:2px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:78%;top:14%;width:2px;height:2px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:86%;top:38%;width:2px;height:2px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:20%;top:52%;width:2px;height:2px;border-radius:50%;background:#D9D3C2"></i><i data-p="tw" style="position:absolute;left:70%;top:48%;width:3px;height:3px;border-radius:50%;background:#D9D3C2"></i>
+<div style="position:absolute;left:16px;bottom:16px;padding:8px 12px;border-radius:12px;background:rgba(7,16,13,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12);font-size:12.5px">Isha · 19:26</div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">02</span><span style="font-family:'Marcellus',serif;font-size:21px">Living Sky</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Home · always on</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#8FCDB4;background:#0E2620">Ambient</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">6000 ms loop</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">breathe</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="change" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<div data-p="lay" style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#3A3A26 0%,#8F7A52 60%,#D9BE86 100%)"><span style="position:absolute;left:18px;top:16px;font-family:'Marcellus',serif;font-size:22px;color:#FFFFFF">Asr</span></div>
+<div data-p="lay" style="position:absolute;inset:0;background:linear-gradient(180deg,#1E1A26 0%,#6A4436 60%,#C98E5E 100%)"><span style="position:absolute;left:18px;top:16px;font-family:'Marcellus',serif;font-size:22px;color:#FFFFFF">Maghrib</span></div>
+<div data-p="lay" style="position:absolute;inset:0;background:linear-gradient(180deg,#000 0%,#04100C 55%,#173328 100%)"><span style="position:absolute;left:18px;top:16px;font-family:'Marcellus',serif;font-size:22px;color:#D9D3C2">Isha</span></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">03</span><span style="font-family:'Marcellus',serif;font-size:21px">Sky change</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Home, widgets · each prayer time</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">1800 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">sacred</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="tick" title="Click to replay" style="cursor:pointer;position:relative;height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#000">
+<span style="font-size:13px;color:#878C82">Maghrib in</span>
+<div style="display:flex;font-family:'Marcellus',serif;font-size:48px;line-height:56px;height:56px"><span>1:12:</span><span style="display:block;width:.62em;height:56px;overflow:hidden;text-align:center"><span data-p="tens" style="display:flex;flex-direction:column"><span>4</span><span>3</span><span>2</span><span>1</span><span>0</span><span>5</span><span>4</span></span></span><span style="display:block;width:.62em;height:56px;overflow:hidden;text-align:center"><span data-p="ones" style="display:flex;flex-direction:column"><span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span><span>0</span><span>9</span></span></span></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">04</span><span style="font-family:'Marcellus',serif;font-size:21px">Countdown tick</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Home · every second</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#8FCDB4;background:#0E2620">Ambient</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">300 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">standard</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="glow" title="Click to replay" style="cursor:pointer;position:relative;height:240px;display:grid;place-items:center;background:#000">
+<div data-p="card" style="width:220px;padding:20px 22px;border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26, 0 0 32px -8px rgba(168,138,82,.3);display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;letter-spacing:.12em;color:#7B8079">NEXT</span><span style="font-family:'Marcellus',serif;font-size:26px">Maghrib</span><span style="font-size:13px;color:#878C82">in 8 min · 17:56</span></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">05</span><span style="font-family:'Marcellus',serif;font-size:21px">Prayer glow</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Home card · final 10 minutes</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#8FCDB4;background:#0E2620">Ambient</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">6000 ms loop</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">breathe</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="adhan" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<div style="position:absolute;left:16px;right:16px;top:18px;display:flex;flex-direction:column;gap:10px"><i style="display:block;height:64px;border-radius:16px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"></i><i style="display:block;height:44px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"></i><i style="display:block;height:44px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"></i></div>
+<div data-p="ov" style="position:absolute;inset:0;clip-path:circle(0% at 50% 62%);background:linear-gradient(180deg,#1E1A26 0%,#6A4436 62%,#C98E5E 100%)"></div>
+<div data-p="txt" style="position:absolute;left:0;right:0;top:40px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#FFFFFF;opacity:0">
+<svg viewBox="-11 -11 22 22" width="26" height="26" style="overflow:visible"><polygon points="0,-10 2.93,-7.07 7.07,-7.07 7.07,-2.93 10,0 7.07,2.93 7.07,7.07 2.93,7.07 0,10 -2.93,7.07 -7.07,7.07 -7.07,2.93 -10,0 -7.07,-2.93 -7.07,-7.07 -2.93,-7.07" fill="none" stroke="#F1E3C4" stroke-width=".9" stroke-linejoin="round"></polygon></svg>
+<span style="font-family:'Reem Kufi',sans-serif;font-size:22px;line-height:1.3">المغرب</span><span style="font-family:'Marcellus',serif;font-size:30px;line-height:1.1">Maghrib</span><span style="font-size:13px;color:#F1E3C4">Adhan · 17:56</span></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">06</span><span style="font-family:'Marcellus',serif;font-size:21px">Adhan reveal</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Full screen · prayer time</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">520 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">decelerate</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="mark" title="Click to replay" style="cursor:pointer;position:relative;height:240px;padding:0 18px;background:#000;display:flex;flex-direction:column;justify-content:center;gap:8px">
+<div style="height:52px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;display:flex;align-items:center;gap:12px;padding:0 14px"><span style="flex:1;font-size:15px">Fajr</span><span style="font-size:13px;color:#878C82">04:58</span><span style="width:26px;height:26px;border-radius:50%;border:1.5px solid #A88A52;background:#A88A52;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></div>
+<div style="height:52px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;display:flex;align-items:center;gap:12px;padding:0 14px"><span style="flex:1;font-size:15px">Dhuhr</span><span style="font-size:13px;color:#878C82">12:05</span><span style="width:26px;height:26px;border-radius:50%;border:1.5px solid #A88A52;background:#A88A52;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></div>
+<div style="height:52px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;display:flex;align-items:center;gap:12px;padding:0 14px"><span style="flex:1;font-size:15px">Asr</span><span style="font-size:13px;color:#878C82">15:27</span><span data-p="box" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #4C5E57;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path data-p="chk" d="M5 12.5l4.5 4.5L19 7.5" stroke-dasharray="20" stroke-dashoffset="20"></path></svg></span></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">07</span><span style="font-family:'Marcellus',serif;font-size:21px">Mark prayed</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Prayer · tap check</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">380 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">spring.snappy</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="day" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<i data-p="dot" data-x="-48" style="position:absolute;left:50%;top:100px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#A88A52;transform:translateX(-48px)"></i><i data-p="dot" data-x="-24" style="position:absolute;left:50%;top:100px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#A88A52;transform:translateX(-24px)"></i><i data-p="dot" data-x="0" style="position:absolute;left:50%;top:100px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#A88A52"></i><i data-p="dot" data-x="24" style="position:absolute;left:50%;top:100px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#A88A52;transform:translateX(24px)"></i><i data-p="dot" data-x="48" style="position:absolute;left:50%;top:100px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#A88A52;transform:translateX(48px)"></i>
+<i data-p="ring" style="position:absolute;left:50%;top:105px;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;box-shadow:0 0 0 1px #A88A52;opacity:0"></i>
+<svg data-p="star" viewBox="-11 -11 22 22" width="56" height="56" style="position:absolute;left:50%;top:105px;margin:-28px 0 0 -28px;overflow:visible;opacity:0"><polygon points="0,-10 2.93,-7.07 7.07,-7.07 7.07,-2.93 10,0 7.07,2.93 7.07,7.07 2.93,7.07 0,10 -2.93,7.07 -7.07,7.07 -7.07,2.93 -10,0 -7.07,-2.93 -7.07,-7.07 -2.93,-7.07" fill="#A88A52"></polygon></svg>
+<div data-p="cap" style="position:absolute;left:0;right:0;top:162px;text-align:center;font-family:'Marcellus',serif;font-size:20px;opacity:0">All five prayed</div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">08</span><span style="font-family:'Marcellus',serif;font-size:21px">Day complete</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Prayer · fifth prayer marked</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">1400 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">spring.gentle</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="needle" title="Click to replay" style="cursor:pointer;position:relative;height:240px;display:grid;place-items:center;background:#000">
+<div style="position:relative;width:176px;height:176px;border-radius:50%;box-shadow:0 0 0 1px #1C2C26;background:radial-gradient(circle,#07100D 0%,#000 72%)">
+<span style="position:absolute;left:50%;top:10px;transform:translateX(-50%);font-size:11px;color:#7B8079">N</span><span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#7B8079">E</span><span style="position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font-size:11px;color:#7B8079">S</span><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#7B8079">W</span>
+<i style="position:absolute;left:50%;top:-6px;width:12px;height:12px;margin-left:-6px;border-radius:3px;background:#4E9C80"></i>
+<div data-p="ndl" style="position:absolute;inset:0"><i style="position:absolute;left:50%;top:24px;width:2px;height:64px;margin-left:-1px;border-radius:1px;background:linear-gradient(#A88A52,rgba(168,138,82,.15))"></i><i style="position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#A88A52"></i></div>
+</div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">09</span><span style="font-family:'Marcellus',serif;font-size:21px">Qibla needle</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Qibla · heading update</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">≈1030 ms settle</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">spring.needle</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="align" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<i data-p="ring" style="position:absolute;left:50%;top:22px;width:150px;height:150px;margin-left:-75px;border-radius:50%;border:1.5px solid #4E9C80;opacity:0"></i>
+<div data-p="dial" style="position:absolute;left:50%;top:22px;width:150px;height:150px;margin-left:-75px;border-radius:50%;border:1.5px solid #1C2C26;background:radial-gradient(circle,#07100D 0%,#000 72%)">
+<i style="position:absolute;left:50%;top:-7px;width:12px;height:12px;margin-left:-6px;border-radius:3px;background:#4E9C80"></i>
+<div data-p="ndl" style="position:absolute;inset:0"><i style="position:absolute;left:50%;top:20px;width:2px;height:54px;margin-left:-1px;border-radius:1px;background:linear-gradient(#A88A52,rgba(168,138,82,.15))"></i><i style="position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#A88A52"></i></div>
+</div>
+<div data-p="lab" style="position:absolute;left:0;right:0;top:192px;text-align:center;font-size:14px;font-weight:500;color:#8FCDB4;opacity:0">Facing the Qibla</div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">10</span><span style="font-family:'Marcellus',serif;font-size:21px">Qibla aligned</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Qibla · within ±3° for 400 ms</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">900 ms ×2</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">decelerate</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="bead" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<div data-p="cnt" style="position:absolute;left:0;right:0;top:30px;text-align:center;font-family:'Marcellus',serif;font-size:44px;line-height:56px">16</div>
+<span style="position:absolute;left:0;right:0;top:90px;text-align:center;font-size:12.5px;color:#878C82">SubhanAllah · of 33</span>
+<i style="position:absolute;left:0;right:0;top:165px;height:1px;background:#4C5E57"></i>
+<div data-p="strip" style="position:absolute;top:151px;left:50%;margin-left:-234px;display:flex;gap:16px"><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i><i style="flex:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A3A33,#0C1814);box-shadow:0 0 0 1px #4C5E57"></i></div>
+<i style="position:absolute;left:50%;top:147px;width:36px;height:36px;margin-left:-18px;border-radius:50%;box-shadow:0 0 0 1.5px #A88A52"></i>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">11</span><span style="font-family:'Marcellus',serif;font-size:21px">Tasbih bead</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Tasbih · tap anywhere</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">380 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">spring.snappy</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="set" title="Click to replay" style="cursor:pointer;position:relative;height:240px;display:grid;place-items:center;overflow:hidden;background:#000">
+<div data-p="grp" style="position:relative;width:140px;height:140px">
+<svg viewBox="0 0 140 140" width="140" height="140" style="position:absolute;inset:0;transform:rotate(-90deg)"><circle cx="70" cy="70" r="54" fill="none" stroke="#13221D" stroke-width="4"></circle><circle data-p="prog" cx="70" cy="70" r="54" fill="none" stroke="#A88A52" stroke-width="4" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="10.3"></circle></svg>
+<span data-p="n32" style="position:absolute;inset:0;display:grid;place-items:center;font-family:'Marcellus',serif;font-size:40px">32</span>
+<span data-p="n33" style="position:absolute;inset:0;display:grid;place-items:center;font-family:'Marcellus',serif;font-size:40px;color:#D9C08A;opacity:0">33</span>
+<i data-p="pt" data-dx="0" data-dy="-92" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="65" data-dy="-65" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="92" data-dy="0" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="65" data-dy="65" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="0" data-dy="92" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="-65" data-dy="65" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="-92" data-dy="0" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i><i data-p="pt" data-dx="-65" data-dy="-65" style="position:absolute;left:67px;top:67px;width:6px;height:6px;border-radius:50%;background:#D9C08A;opacity:0"></i>
+</div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">12</span><span style="font-family:'Marcellus',serif;font-size:21px">Set complete</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Tasbih · 33, 99 or custom target</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9C08A;background:#221C10">Ceremonial</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">300 + 700 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">standard · decelerate</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="page" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<div data-p="pg" style="position:absolute;left:50%;top:22px;width:150px;height:196px;margin-left:-75px;border-radius:6px;background:#0C1814;box-shadow:0 0 0 1px #1C2C26;padding:18px 16px 10px;display:flex;flex-direction:column;align-items:flex-end;gap:9px"><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:62%;border-radius:2px;background:#24342E"></i><span style="margin-top:auto;align-self:center;font-family:'Noto Sans Arabic',sans-serif;font-size:12px;color:#7B8079">٢</span></div>
+<div data-p="pg" style="position:absolute;left:50%;top:22px;width:150px;height:196px;margin-left:-75px;border-radius:6px;background:#0C1814;box-shadow:0 0 0 1px #1C2C26;padding:18px 16px 10px;display:flex;flex-direction:column;align-items:flex-end;gap:9px;opacity:0"><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:78%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><i style="display:block;height:4px;width:100%;border-radius:2px;background:#24342E"></i><span style="margin-top:auto;align-self:center;font-family:'Noto Sans Arabic',sans-serif;font-size:12px;color:#7B8079">٣</span></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">13</span><span style="font-family:'Marcellus',serif;font-size:21px">Page turn</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Quran reader · swipe, RTL order</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">300 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">standard</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="ayah" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<i data-p="hl" style="position:absolute;right:30px;top:0;height:22px;width:232px;border-radius:8px;background:#0E2620;box-shadow:inset 0 0 0 1px #1F4A3C;transform:translateY(39px)"></i>
+<i style="position:absolute;right:36px;top:48px;width:220px;height:4px;border-radius:2px;background:#4C5E57"></i><i style="position:absolute;right:36px;top:76px;width:236px;height:4px;border-radius:2px;background:#4C5E57"></i><i style="position:absolute;right:36px;top:104px;width:180px;height:4px;border-radius:2px;background:#4C5E57"></i><i style="position:absolute;right:36px;top:132px;width:236px;height:4px;border-radius:2px;background:#4C5E57"></i><i style="position:absolute;right:36px;top:160px;width:200px;height:4px;border-radius:2px;background:#4C5E57"></i><i style="position:absolute;right:36px;top:188px;width:140px;height:4px;border-radius:2px;background:#4C5E57"></i>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">14</span><span style="font-family:'Marcellus',serif;font-size:21px">Ayah follow</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Quran reader · recitation timing cue</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">300 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">standard</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="sheet" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<div style="position:absolute;left:18px;right:18px;top:18px;display:flex;flex-direction:column;gap:10px"><i style="display:block;height:56px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"></i><i style="display:block;height:40px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"></i><i style="display:block;height:40px;border-radius:14px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"></i></div>
+<div data-p="scr" style="position:absolute;inset:0;background:#000;opacity:0"></div>
+<div data-p="sh" style="position:absolute;left:0;right:0;bottom:0;height:156px;border-radius:24px 24px 0 0;background:#0C1814;box-shadow:0 -1px 0 #1C2C26;padding:10px 18px 0;display:flex;flex-direction:column;gap:8px;transform:translateY(100%)">
+<i style="align-self:center;width:36px;height:4px;border-radius:2px;background:#4C5E57"></i>
+<span style="font-family:'Marcellus',serif;font-size:19px;margin-top:4px">Calculation method</span>
+<div style="height:40px;display:flex;align-items:center;justify-content:space-between;font-size:14px;box-shadow:0 1px 0 #1C2C26"><span>Muslim World League</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#A88A52" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<div style="height:40px;display:flex;align-items:center;font-size:14px;color:#878C82">Umm al-Qura</div>
+</div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">15</span><span style="font-family:'Marcellus',serif;font-size:21px">Bottom sheet</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Global · open and dismiss</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">≈520 / 300 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">gentle · accelerate</span></div></div>
+</div>
+
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;overflow:hidden;display:flex;flex-direction:column">
+<div data-demo="tab" title="Click to replay" style="cursor:pointer;position:relative;height:240px;overflow:hidden;background:#000">
+<div data-p="cnt" style="position:absolute;left:0;right:0;top:66px;text-align:center;font-family:'Marcellus',serif;font-size:34px">Home</div>
+<div style="position:absolute;left:14px;right:14px;bottom:14px;height:56px;border-radius:18px;background:#07100D;box-shadow:0 0 0 1px #1C2C26"><div style="position:absolute;inset:6px"><i data-p="ind" style="position:absolute;left:0;top:0;bottom:0;width:20%;border-radius:12px;background:#221C10"></i><div style="position:relative;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))"><span data-p="tl" style="display:grid;place-items:center;font-size:12px;font-weight:500;color:#D9C08A">Home</span><span data-p="tl" style="display:grid;place-items:center;font-size:12px;font-weight:500;color:#878C82">Prayer</span><span data-p="tl" style="display:grid;place-items:center;font-size:12px;font-weight:500;color:#878C82">Quran</span><span data-p="tl" style="display:grid;place-items:center;font-size:12px;font-weight:500;color:#878C82">Azkar</span><span data-p="tl" style="display:grid;place-items:center;font-size:12px;font-weight:500;color:#878C82">More</span></div></div></div>
+</div>
+<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Marcellus',serif;font-size:13px;letter-spacing:.14em;color:#A88A52">16</span><span style="font-family:'Marcellus',serif;font-size:21px">Tab switch</span></div><span style="font-size:13px;line-height:1.5;color:#878C82">Root navigation · tab tap</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><span style="font-size:11.5px;font-weight:500;padding:4px 8px;border-radius:8px;color:#D9D3C2;background:#13221D">Responsive</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">300 ms</span><span style="font:11.5px ui-monospace,Menlo,monospace;padding:4px 8px;border-radius:8px;background:#0C1814">standard · shared axis</span></div></div>
+</div>
+
+</div>
+</section>
+
+<section data-screen-label="03 Spec" style="padding:72px 72px 40px">
+<div style="display:flex;align-items:baseline;gap:24px;margin-bottom:12px"><span style="font-family:'Marcellus',serif;font-size:16px;letter-spacing:.14em;color:#A88A52">03</span><h2 style="margin:0;font-family:'Marcellus',serif;font-weight:400;font-size:48px;line-height:1.1">Spec</h2></div>
+<p style="margin:0 0 36px 50px;max-width:760px;font-size:16px;line-height:1.6;color:#878C82;text-wrap:pretty">Durations and curves reference BmMotion. Spring durations are settle times to within 0.2% of the target.</p>
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:8px 28px 12px;font-size:13px;line-height:1.5">
+<div style="display:grid;grid-template-columns:28px 120px 104px 160px 112px 132px 168px minmax(0,1fr);gap:16px;padding:14px 0;font-size:11.5px;letter-spacing:.1em;color:#7B8079;box-shadow:0 1px 0 #1C2C26"><span>#</span><span>NAME</span><span>SCREEN</span><span>TRIGGER</span><span>DURATION</span><span>CURVE / SPRING</span><span>REDUCE MOTION</span><span>FLUTTER</span></div>
+<sc-for list="{{ spec }}" as="r" hint-placeholder-count="16"><div style="display:grid;grid-template-columns:28px 120px 104px 160px 112px 132px 168px minmax(0,1fr);gap:16px;padding:14px 0;box-shadow:0 1px 0 #1C2C26;align-items:start"><span style="font-family:'Marcellus',serif;color:#A88A52">{{ r.n }}</span><span style="font-weight:500">{{ r.name }}</span><span style="color:#878C82">{{ r.screen }}</span><span style="color:#878C82">{{ r.trigger }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ r.dur }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#A88A52">{{ r.curve }}</span><span style="color:#878C82">{{ r.fallback }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.6">{{ r.flutter }}</span></div></sc-for>
+</div>
+</section>
+
+<section data-screen-label="04 Haptics" style="padding:72px 72px 40px">
+<div style="display:flex;align-items:baseline;gap:24px;margin-bottom:12px"><span style="font-family:'Marcellus',serif;font-size:16px;letter-spacing:.14em;color:#A88A52">04</span><h2 style="margin:0;font-family:'Marcellus',serif;font-weight:400;font-size:48px;line-height:1.1">Haptics</h2></div>
+<p style="margin:0 0 36px 50px;max-width:760px;font-size:16px;line-height:1.6;color:#878C82;text-wrap:pretty">Haptics mark completion, alignment and counting. Ambient motion, the countdown, sky changes and navigation are silent to the hand. A Haptics setting (default on) sits under Settings › Sound and touch, and the OS system-haptics switch always wins.</p>
+<div style="border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:8px 28px 12px;font-size:13px;line-height:1.5">
+<div style="display:grid;grid-template-columns:150px minmax(0,1fr) 190px 190px 210px 90px;gap:16px;padding:14px 0;font-size:11.5px;letter-spacing:.1em;color:#7B8079;box-shadow:0 1px 0 #1C2C26"><span>EVENT</span><span>WHEN</span><span>IOS</span><span>ANDROID</span><span>FLUTTER</span><span>SOUND</span></div>
+<sc-for list="{{ haptics }}" as="h" hint-placeholder-count="11"><div style="display:grid;grid-template-columns:150px minmax(0,1fr) 190px 190px 210px 90px;gap:16px;padding:14px 0;box-shadow:0 1px 0 #1C2C26;align-items:start"><span style="font-weight:500">{{ h.event }}</span><span style="color:#878C82">{{ h.when }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ h.ios }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ h.android }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#A88A52">{{ h.flutter }}</span><span style="color:#878C82">{{ h.sound }}</span></div></sc-for>
+</div>
+</section>
+
+<section data-screen-label="05 Choreography" style="padding:72px 72px 40px">
+<div style="display:flex;align-items:baseline;gap:24px;margin-bottom:12px"><span style="font-family:'Marcellus',serif;font-size:16px;letter-spacing:.14em;color:#A88A52">05</span><h2 style="margin:0;font-family:'Marcellus',serif;font-weight:400;font-size:48px;line-height:1.1">Choreography and performance</h2></div>
+<p style="margin:0 0 36px 50px;max-width:760px;font-size:16px;line-height:1.6;color:#878C82;text-wrap:pretty">Rules for when animations meet each other, the user's hand, or a low battery.</p>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+<div style="border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:22px 24px;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Priority</span><span style="font-size:14px;line-height:1.6;color:#878C82;text-wrap:pretty">Adhan, then completions (08, 10, 12), then responsive, then ambient. A higher tier pauses lower ones; ambient resumes with a 300 ms fade.</span></div>
+<div style="border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:22px 24px;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">One ceremony at a time</span><span style="font-size:14px;line-height:1.6;color:#878C82;text-wrap:pretty">If two land together, for example the fifth prayer is marked as the Isha adhan begins, the adhan plays and Day complete shows on return to the Prayer tab.</span></div>
+<div style="border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:22px 24px;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Never queue, always retarget</span><span style="font-size:14px;line-height:1.6;color:#878C82;text-wrap:pretty">A new tap during a spring retargets it from its current position and velocity. Fast tasbih counting never builds a backlog.</span></div>
+<div style="border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:22px 24px;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Input stays live</span><span style="font-size:14px;line-height:1.6;color:#878C82;text-wrap:pretty">No animation blocks touch. Ceremonial overlays dismiss on any tap, and the launch sequence skips to Home once data is ready.</span></div>
+<div style="border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:22px 24px;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Frame budget</span><span style="font-size:14px;line-height:1.6;color:#878C82;text-wrap:pretty">Living Sky repaints at 30 fps inside a RepaintBoundary. Everything else runs at the display rate, with no layout work during animation.</span></div>
+<div style="border-radius:20px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;padding:22px 24px;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Battery</span><span style="font-size:14px;line-height:1.6;color:#878C82;text-wrap:pretty">Ambient loops stop when the app is in the background or in Low Power Mode / Battery Saver. Sky changes still happen, as a 300 ms crossfade.</span></div>
+</div>
+</section>
+<section data-screen-label="06 Reduce motion" style="padding:72px 72px 104px">
+<div style="display:flex;align-items:baseline;gap:24px;margin-bottom:12px"><span style="font-family:'Marcellus',serif;font-size:16px;letter-spacing:.14em;color:#A88A52">06</span><h2 style="margin:0;font-family:'Marcellus',serif;font-weight:400;font-size:48px;line-height:1.1">Reduce motion</h2></div>
+<p style="margin:0 0 36px 50px;max-width:760px;font-size:16px;line-height:1.6;color:#878C82;text-wrap:pretty">One flag drives every fallback: the OS setting or the in-app switch. Turn on Reduce motion in Tweaks to see each demo above play its fallback.</p>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:20px;font-size:14.5px;line-height:1.6;color:#878C82">
+<div><b style="display:block;margin-bottom:4px;font-weight:600;color:#D9D3C2">No travel</b>Translation, scale, rotation and clip reveals become crossfades of 150–300 ms. Springs become standard 300 ms with no overshoot.</div>
+<div><b style="display:block;margin-bottom:4px;font-weight:600;color:#D9D3C2">No loops</b>Living Sky, twinkle and the prayer glow freeze on the current sky state. Sky changes still happen, as a 300 ms crossfade.</div>
+<div><b style="display:block;margin-bottom:4px;font-weight:600;color:#D9D3C2">Meaning stays</b>State changes stay visible: the check still fills, the dial still turns accent at alignment, and haptics still fire.</div>
+</div>
+<pre style="margin:0;border-radius:24px;background:#07100D;box-shadow:0 0 0 1px #1C2C26;color:#D9D3C2;padding:28px 32px;font:13px/1.65 ui-monospace,Menlo,monospace;white-space:pre-wrap">// lib/theme/motion.dart
+extension BmMotionX on BuildContext {
+  bool get reduceMotion =&gt;
+      MediaQuery.disableAnimationsOf(this) || BmPrefs.of(this).reduceMotion;
+
+  /// Travel animations collapse to a short fade.
+  Duration motion(Duration d) =&gt; reduceMotion ? BmMotion.micro : d;
+  Curve curve(Curve c) =&gt; reduceMotion ? Curves.linear : c;
+}
+
+// usage
+AnimatedSwitcher(
+  duration: context.motion(BmMotion.standard),
+  transitionBuilder: context.reduceMotion
+      ? (c, a) =&gt; FadeTransition(opacity: a, child: c)
+      : BmTransitions.sharedAxisY,
+  child: Text(nextPrayer.name, key: ValueKey(nextPrayer)),
+);</pre>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;reduceMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;speed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;0.5&quot;,&quot;0.25&quot;],&quot;default&quot;:&quot;1&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  anims = []; timers = []; orig = new Map();
+  E = { std: 'cubic-bezier(.2,0,0,1)', dec: 'cubic-bezier(.05,.7,.1,1)', acc: 'cubic-bezier(.3,0,.8,.15)', br: 'cubic-bezier(.37,0,.63,1)', sac: 'cubic-bezier(.4,0,.2,1)' };
+  SP = { gentle: [180, .9], snappy: [420, .8], needle: [120, .55] };
+  componentDidMount() { this.start(); }
+  componentDidUpdate(pp) { if (pp.reduceMotion !== this.props.reduceMotion || pp.speed !== this.props.speed) { this.stop(); this.start(); } }
+  componentWillUnmount() { this.stop(); }
+  save(el) { if (!this.orig.has(el)) this.orig.set(el, [el.getAttribute('style') || '', el.textContent]); }
+  A(el, kf, o) {
+    const k = this.k, op = Object.assign({}, o, { duration: Math.max(1, (o.duration || 1) * k), delay: (o.delay || 0) * k });
+    const commit = op.commit; delete op.commit;
+    if (commit) { this.save(el); op.fill = 'forwards'; }
+    const a = el.animate(kf, op); a._d = el.closest('[data-demo]')?.dataset.demo; this.anims.push(a);
+    a.addEventListener('finish', () => { const i = this.anims.indexOf(a); if (i > -1 && op.iterations !== Infinity && !op.keep) { if (commit) { try { a.commitStyles(); } catch (e) {} a.cancel(); } if (commit || !op.fill || op.fill === 'none') this.anims.splice(i, 1); } });
+    return a;
+  }
+  every(ms, fn) { const loc = []; const run = i => { loc.forEach(a => { a.cancel(); const j = this.anims.indexOf(a); if (j > -1) this.anims.splice(j, 1); }); loc.length = 0; fn(i, (el, kf, o) => { const a = this.A(el, kf, o); loc.push(a); return a; }); }; let i = 0; run(0); this.timers.push([setInterval(() => run(++i), ms * this.k), this.cur]); }
+  spring(name) {
+    const [s, z] = this.SP[name], w = Math.sqrt(s), wd = w * Math.sqrt(1 - z * z), T = Math.log(500) / (z * w), N = 36, xs = [];
+    for (let i = 0; i <= N; i++) { const t = T * i / N; xs.push(i === N ? 1 : 1 - Math.exp(-z * w * t) * (Math.cos(wd * t) + (z * w / wd) * Math.sin(wd * t))); }
+    return { xs, dur: T * 1000 };
+  }
+  SK(name, from, to, fmt) { const s = this.spring(name); return [s.xs.map(x => fmt(from + (to - from) * x)), s.dur]; }
+  start() {
+    const prefers = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const red = !!this.props.reduceMotion || prefers;
+    this.k = 1 / (parseFloat(this.props.speed) || 1);
+    this.red = red;
+    document.querySelectorAll('[data-demo]').forEach(st => { st.onclick = () => this.restart(st); this.run(st); });
+  }
+  run(st) {
+    const P = n => st.querySelector('[data-p="' + n + '"]'), PA = n => [...st.querySelectorAll('[data-p="' + n + '"]')];
+    this.cur = st.dataset.demo; const f = this['d_' + this.cur]; if (f) f.call(this, P, PA, this.red);
+  }
+  restart(st) {
+    const n = st.dataset.demo;
+    this.anims = this.anims.filter(a => { if (a._d === n) { a.cancel(); return false; } return true; });
+    this.timers = this.timers.filter(t => { if (t[1] === n) { clearInterval(t[0]); return false; } return true; });
+    this.orig.forEach(([s, t], el) => { if (st.contains(el)) { el.setAttribute('style', s); if (el.dataset.p === 'cnt') el.textContent = t; this.orig.delete(el); } });
+    this.run(st);
+  }
+  stop() {
+    this.anims.forEach(a => a.cancel()); this.anims = [];
+    this.timers.forEach(t => clearInterval(t[0])); this.timers = [];
+    this.orig.forEach(([s, t], el) => { el.setAttribute('style', s); if (el.dataset.p === 'cnt') el.textContent = t; }); this.orig.clear();
+  }
+  d_launch(P, PA, red) {
+    const E = this.E;
+    this.every(3800, (i, a) => {
+      const b = { fill: 'both' };
+      if (red) { ['star', 'sun', 'hz', 'word'].forEach(n => a(P(n), [{ opacity: 0 }, { opacity: 1 }], { ...b, duration: 300, delay: 200 })); }
+      else {
+        a(P('star'), [{ opacity: 0, transform: 'scale(.9)' }, { opacity: 1, transform: 'scale(1)' }], { ...b, duration: 600, easing: E.dec });
+        a(P('hz'), [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { ...b, duration: 520, delay: 250, easing: E.std });
+        a(P('sun'), [{ opacity: 0, transform: 'translateY(0)' }, { opacity: 1, transform: 'translateY(-30px)' }], { ...b, duration: 900, delay: 450, easing: E.sac });
+        a(P('word'), [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { ...b, duration: 520, delay: 800, easing: E.dec });
+      }
+      a(P('g'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 3400, easing: E.acc, fill: 'forwards' });
+    });
+  }
+  d_sky(P, PA, red) {
+    if (red) return; const E = this.E;
+    this.A(P('lay'), [{ opacity: 0 }, { opacity: 1 }], { duration: 6000, direction: 'alternate', iterations: Infinity, easing: E.br });
+    this.A(P('sun'), [{ transform: 'translateX(-30px)' }, { transform: 'translateX(30px)' }], { duration: 12000, direction: 'alternate', iterations: Infinity, easing: E.br });
+    PA('tw').forEach((el, i) => this.A(el, [{ opacity: .15 }, { opacity: 1 }], { duration: 1800 + i * 370, delay: i * 240, direction: 'alternate', iterations: Infinity, easing: E.br }));
+  }
+  d_change(P, PA, red) {
+    const L = PA('lay'); let cur = 0, z = 2;
+    this.every(3600, i => { if (!i) return; cur = (cur + 1) % 3; const el = L[cur]; this.save(el); el.style.zIndex = ++z; this.A(el, [{ opacity: 0 }, { opacity: 1 }], { duration: red ? 300 : 1800, easing: this.E.sac, commit: true }); });
+  }
+  d_tick(P, PA, red) {
+    const o = P('ones'), t = P('tens'); let n = 0, m = 0;
+    this.every(1000, i => {
+      if (!i) return; const d = red ? 1 : 300;
+      this.A(o, [{ transform: `translateY(${-n * 56}px)` }, { transform: `translateY(${-(n + 1) * 56}px)` }], { duration: d, easing: this.E.std, commit: true }); n++;
+      if (n === 10) { n = 0; this.A(t, [{ transform: `translateY(${-m * 56}px)` }, { transform: `translateY(${-(m + 1) * 56}px)` }], { duration: d, easing: this.E.std, commit: true }); m = (m + 1) % 6; }
+    });
+  }
+  d_glow(P, PA, red) {
+    if (red) return;
+    this.A(P('card'), [{ boxShadow: '0 0 0 1px #1C2C26, 0 0 20px -10px rgba(168,138,82,.12)' }, { boxShadow: '0 0 0 1px #3A4A3F, 0 0 56px -6px rgba(168,138,82,.55)' }], { duration: 3000, direction: 'alternate', iterations: Infinity, easing: this.E.br });
+  }
+  d_adhan(P, PA, red) {
+    const E = this.E;
+    this.every(4400, (i, a) => {
+      if (red) { a(P('ov'), [{ clipPath: 'circle(150% at 50% 62%)', opacity: 0 }, { clipPath: 'circle(150% at 50% 62%)', opacity: 1 }], { duration: 300, delay: 400, fill: 'both' }); a(P('txt'), [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 550, fill: 'both' }); }
+      else { a(P('ov'), [{ clipPath: 'circle(0% at 50% 62%)' }, { clipPath: 'circle(150% at 50% 62%)' }], { duration: 520, delay: 400, easing: E.dec, fill: 'both' }); a(P('txt'), [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 700, easing: E.dec, fill: 'both' }); }
+      a(P('ov'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 3800, easing: E.acc, fill: 'forwards' });
+      a(P('txt'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 3800, easing: E.acc, fill: 'forwards' });
+    });
+  }
+  d_mark(P, PA, red) {
+    const E = this.E, box = P('box'), chk = P('chk');
+    this.every(2800, (i, a) => {
+      a(box, [{ background: 'transparent', borderColor: '#4C5E57' }, { background: '#A88A52', borderColor: '#A88A52' }], { duration: 150, delay: 700, easing: E.std, fill: 'both' });
+      if (red) a(chk, [{ strokeDashoffset: 0, opacity: 0 }, { strokeDashoffset: 0, opacity: 1 }], { duration: 150, delay: 700, fill: 'both' });
+      else {
+        const [kf, d] = this.SK('snappy', .78, 1, v => ({ transform: `scale(${v})` }));
+        a(box, kf, { duration: d, delay: 700, fill: 'both' });
+        a(chk, [{ strokeDashoffset: 20 }, { strokeDashoffset: 0 }], { duration: 220, delay: 800, easing: E.std, fill: 'both' });
+      }
+    });
+  }
+  d_day(P, PA, red) {
+    const E = this.E;
+    this.every(4400, (i, a) => {
+      PA('dot').forEach((el, j) => { const x = +el.dataset.x; a(el, red ? [{ transform: `translateX(${x}px)`, opacity: 1 }, { transform: `translateX(${x}px)`, opacity: 0 }] : [{ transform: `translateX(${x}px) scale(1)`, opacity: 1 }, { transform: 'translateX(0) scale(.4)', opacity: 0 }], { duration: red ? 300 : 520, delay: 500 + (red ? 0 : j * 40), easing: E.std, fill: 'both' }); });
+      if (red) a(P('star'), [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 700, fill: 'both' });
+      else {
+        const [kf, d] = this.SK('gentle', .5, 1, v => ({ transform: `scale(${v})` }));
+        a(P('star'), kf, { duration: d, delay: 950, fill: 'both' });
+        a(P('star'), [{ opacity: 0 }, { opacity: 1 }], { duration: 150, delay: 950, fill: 'both' });
+        a(P('ring'), [{ transform: 'scale(1)', opacity: .7 }, { transform: 'scale(2)', opacity: 0 }], { duration: 900, delay: 950, easing: E.dec, fill: 'forwards' });
+      }
+      a(P('cap'), red ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: red ? 300 : 520, delay: red ? 800 : 1200, easing: E.dec, fill: 'both' });
+    });
+  }
+  d_needle(P, PA, red) {
+    const n = P('ndl'), T = [-48, 26, 0, 62, -14, 0]; let cur = 0;
+    this.every(2200, i => {
+      const to = T[i % T.length];
+      if (red) this.A(n, [{ transform: `rotate(${cur}deg)` }, { transform: `rotate(${to}deg)` }], { duration: 300, easing: this.E.std, commit: true });
+      else { const [kf, d] = this.SK('needle', cur, to, v => ({ transform: `rotate(${v}deg)` })); this.A(n, kf, { duration: d, commit: true }); }
+      cur = to;
+    });
+  }
+  d_align(P, PA, red) {
+    const E = this.E;
+    this.every(3200, (i, a) => {
+      if (red) a(P('ndl'), [{ transform: 'rotate(9deg)' }, { transform: 'rotate(0)' }], { duration: 300, easing: E.std, fill: 'both' });
+      else { const [kf, d] = this.SK('needle', 9, 0, v => ({ transform: `rotate(${v}deg)` })); a(P('ndl'), kf, { duration: d, fill: 'both' }); }
+      a(P('dial'), [{ borderColor: '#1C2C26' }, { borderColor: '#4E9C80' }], { duration: 300, delay: 700, easing: E.std, fill: 'both' });
+      a(P('lab'), [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 700, easing: E.std, fill: 'both' });
+      if (!red) a(P('ring'), [{ transform: 'scale(1)', opacity: 0 }, { transform: 'scale(1)', opacity: .8, offset: .04 }, { transform: 'scale(1.35)', opacity: 0 }], { duration: 900, delay: 700, iterations: 2, easing: E.dec });
+    });
+  }
+  d_bead(P, PA, red) {
+    const c = P('cnt'), s = P('strip'); let n = 16; this.save(c);
+    this.every(1100, i => {
+      if (!i) return; n = n >= 33 ? 1 : n + 1; c.textContent = n;
+      if (red) return;
+      const [kf, d] = this.SK('snappy', 0, -44, v => ({ transform: `translateX(${v}px)` }));
+      this.A(s, kf, { duration: d });
+      this.A(c, [{ transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 150, easing: this.E.std });
+    });
+  }
+  d_set(P, PA, red) {
+    const E = this.E;
+    this.every(3800, (i, a) => {
+      a(P('prog'), [{ strokeDashoffset: 10.3 }, { strokeDashoffset: 0 }], { duration: 300, delay: 600, easing: E.std, fill: 'both' });
+      a(P('n32'), [{ opacity: 1 }, { opacity: 0 }], { duration: 150, delay: 600, fill: 'both' });
+      a(P('n33'), [{ opacity: 0 }, { opacity: 1 }], { duration: 150, delay: 600, fill: 'both' });
+      if (!red) {
+        a(P('n33'), [{ transform: 'scale(1)' }, { transform: 'scale(1.1)' }, { transform: 'scale(1)' }], { duration: 300, delay: 900, easing: E.std });
+        PA('pt').forEach(el => a(el, [{ transform: 'translate(0,0)', opacity: 0 }, { opacity: 1, offset: .1 }, { transform: `translate(${el.dataset.dx}px,${el.dataset.dy}px)`, opacity: 0 }], { duration: 700, delay: 900, easing: E.dec }));
+      }
+      a(P('grp'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 3400, easing: E.acc, fill: 'forwards' });
+    });
+  }
+  d_page(P, PA, red) {
+    const pg = PA('pg'); let cur = 0;
+    this.every(2400, i => {
+      if (!i) return; const out = pg[cur], inn = pg[1 - cur]; this.save(inn); this.save(out); inn.style.zIndex = 2; out.style.zIndex = 1;
+      if (red) { this.A(inn, [{ opacity: 0, transform: 'none' }, { opacity: 1, transform: 'none' }], { duration: 150, commit: true }); this.A(out, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, commit: true }); }
+      else { this.A(inn, [{ transform: 'translateX(-130%)', opacity: 1 }, { transform: 'translateX(0)', opacity: 1 }], { duration: 300, easing: this.E.std, commit: true }); this.A(out, [{ transform: 'translateX(0)', opacity: 1 }, { transform: 'translateX(30%)', opacity: 0 }], { duration: 300, easing: this.E.std, commit: true }); }
+      cur = 1 - cur;
+    });
+  }
+  d_ayah(P, PA, red) {
+    const hl = P('hl'), W = [220, 236, 180, 236, 200, 140]; let cur = 0;
+    this.every(1400, i => {
+      if (!i) return; const nx = (cur + 1) % 6;
+      this.A(hl, [{ transform: `translateY(${39 + cur * 28}px)`, width: W[cur] + 12 + 'px' }, { transform: `translateY(${39 + nx * 28}px)`, width: W[nx] + 12 + 'px' }], { duration: red ? 1 : 300, easing: this.E.std, commit: true });
+      cur = nx;
+    });
+  }
+  d_sheet(P, PA, red) {
+    const E = this.E;
+    this.every(3800, (i, a) => {
+      if (red) { a(P('scr'), [{ opacity: 0 }, { opacity: .64 }], { duration: 150, delay: 400, fill: 'both' }); a(P('sh'), [{ transform: 'none', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 150, delay: 400, fill: 'both' }); }
+      else {
+        a(P('scr'), [{ opacity: 0 }, { opacity: .64 }], { duration: 300, delay: 400, easing: E.std, fill: 'both' });
+        const [kf, d] = this.SK('gentle', 100, 0, v => ({ transform: `translateY(${v}%)` }));
+        a(P('sh'), kf, { duration: d, delay: 400, fill: 'both' });
+      }
+      a(P('scr'), [{ opacity: .64 }, { opacity: 0 }], { duration: red ? 150 : 300, delay: 2900, easing: E.acc, fill: 'forwards' });
+      a(P('sh'), red ? [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'none' }] : [{ transform: 'translateY(0)' }, { transform: 'translateY(100%)' }], { duration: red ? 150 : 300, delay: 2900, easing: E.acc, fill: 'forwards' });
+    });
+  }
+  d_tab(P, PA, red) {
+    const ind = P('ind'), c = P('cnt'), tl = PA('tl'), N = ['Home', 'Prayer', 'Quran', 'Azkar', 'More']; let cur = 0;
+    this.save(c); tl.forEach(t => this.save(t));
+    this.every(1700, i => {
+      if (!i) return; const nx = (cur + 1) % 5, from = cur;
+      this.A(ind, [{ transform: `translateX(${from * 100}%)` }, { transform: `translateX(${nx * 100}%)` }], { duration: red ? 1 : 300, easing: this.E.std, commit: true });
+      tl.forEach((t, j) => t.style.color = j === nx ? '#D9C08A' : '#878C82');
+      const o = this.A(c, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: red ? 'none' : 'translateY(-8px)' }], { duration: red ? 75 : 120, easing: this.E.acc, fill: 'forwards', keep: true });
+      o.addEventListener('finish', () => { if (!this.anims.includes(o)) return; c.textContent = N[nx]; this.A(c, [{ opacity: 0, transform: red ? 'none' : 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: red ? 75 : 300, easing: this.E.dec, commit: true }); o.cancel(); this.anims.splice(this.anims.indexOf(o), 1); });
+      cur = nx;
+    });
+  }
+  spec = [
+    { n: '01', name: 'App launch', screen: 'Splash', trigger: 'Cold start, until Home first frame', dur: '1200 ms', curve: 'sacred · decelerate', fallback: 'Logo fades in, 300 ms. No sun rise.', flutter: 'flutter_native_splash → AnimationController(1200 ms) with staggered Interval curves' },
+    { n: '02', name: 'Living Sky', screen: 'Home', trigger: 'While Home is visible', dur: '6000 ms loop', curve: 'breathe', fallback: 'Static gradient for the current sky state', flutter: 'CustomPainter on a Ticker inside RepaintBoundary; paused via AppLifecycleListener' },
+    { n: '03', name: 'Sky change', screen: 'Home, widgets', trigger: 'Prayer time boundary', dur: '1800 ms', curve: 'sacred', fallback: '300 ms crossfade', flutter: 'TweenAnimationBuilder<BmSkyStops>, lerping gradient stops' },
+    { n: '04', name: 'Countdown tick', screen: 'Home', trigger: 'Every second', dur: '300 ms', curve: 'standard', fallback: 'Instant digit swap', flutter: 'AnimatedSwitcher per digit with SlideTransition; Timer aligned to the wall clock' },
+    { n: '05', name: 'Prayer glow', screen: 'Home card', trigger: 'Final 10 min before a prayer', dur: '6000 ms loop', curve: 'breathe', fallback: 'Static glow at 50%', flutter: 'AnimationController.repeat(reverse: true) driving BoxShadow' },
+    { n: '06', name: 'Adhan reveal', screen: 'Adhan, full screen', trigger: 'Prayer time in foreground, or notification tap', dur: '520 ms + 520 ms text (300 ms offset)', curve: 'decelerate', fallback: '300 ms fade', flutter: 'ClipPath with a circle-reveal clipper; FadeTransition + SlideTransition for text' },
+    { n: '07', name: 'Mark prayed', screen: 'Prayer', trigger: 'Tap check', dur: '380 ms (+220 ms check)', curve: 'spring.snappy · standard', fallback: 'Fill crossfade, 150 ms', flutter: 'SpringSimulation for scale; PathMetric.extractPath for the check stroke' },
+    { n: '08', name: 'Day complete', screen: 'Prayer', trigger: 'Fifth prayer marked', dur: '1400 ms', curve: 'standard · spring.gentle', fallback: 'Star fades in, 300 ms', flutter: 'Staggered controller; ScaleTransition driven by SpringSimulation' },
+    { n: '09', name: 'Qibla needle', screen: 'Qibla', trigger: 'Heading update (low-pass filtered)', dur: '≈1030 ms settle', curve: 'spring.needle', fallback: 'Standard 300 ms, no overshoot', flutter: 'Compass stream → SpringSimulation on angle; shortest path across 0°/360°' },
+    { n: '10', name: 'Qibla aligned', screen: 'Qibla', trigger: 'Within ±3° for 400 ms', dur: '900 ms × 2', curve: 'decelerate', fallback: 'Color change only', flutter: 'AnimatedContainer border + ScaleTransition ring; once per alignment' },
+    { n: '11', name: 'Tasbih bead', screen: 'Tasbih', trigger: 'Tap anywhere', dur: '380 ms', curve: 'spring.snappy', fallback: 'Beads step instantly; counter swaps', flutter: 'SpringSimulation on strip offset; a new tap retargets from current velocity' },
+    { n: '12', name: 'Set complete', screen: 'Tasbih', trigger: 'Count reaches 33, 99 or target', dur: '300 ms ring + 700 ms burst', curve: 'standard · decelerate', fallback: 'Ring fills, no burst', flutter: 'TweenAnimationBuilder on sweep angle; 8-particle CustomPainter' },
+    { n: '13', name: 'Page turn', screen: 'Quran reader', trigger: 'Swipe or edge tap', dur: '300 ms', curve: 'standard', fallback: '150 ms crossfade', flutter: 'PageView(reverse: true) for RTL order; 30% parallax in a custom transformer' },
+    { n: '14', name: 'Ayah follow', screen: 'Quran reader', trigger: 'Recitation timing cue', dur: '300 ms', curve: 'standard', fallback: 'Highlight jumps', flutter: 'AnimatedPositioned over line rects from the QCF glyph layout' },
+    { n: '15', name: 'Bottom sheet', screen: 'Global', trigger: 'Open picker or settings; dismiss', dur: '≈520 ms in · 300 ms out', curve: 'spring.gentle · accelerate', fallback: '150 ms fade in place', flutter: 'showModalBottomSheet with sheetAnimationStyle; SpringSimulation on drag release' },
+    { n: '16', name: 'Tab switch', screen: 'Root navigation', trigger: 'Tab tap', dur: '300 ms', curve: 'standard (shared axis)', fallback: '150 ms crossfade', flutter: 'NavigationBar + IndexedStack; FadeThroughTransition (animations package)' }
+  ];
+  haptics = [
+    { event: 'Tasbih bead', when: 'Every count', ios: 'Impact .light', android: 'CLOCK_TICK', flutter: 'HapticFeedback.lightImpact()', sound: 'Bead' },
+    { event: 'Set complete', when: '33, 99 or target reached', ios: 'Notification .success', android: 'CONFIRM', flutter: 'mediumImpact() ×2, 80 ms apart', sound: 'Complete' },
+    { event: 'Mark prayed', when: 'Check filled', ios: 'Impact .light', android: 'CONFIRM', flutter: 'HapticFeedback.lightImpact()', sound: '—' },
+    { event: 'Day complete', when: 'Fifth prayer marked', ios: 'Notification .success', android: 'CONFIRM', flutter: 'HapticFeedback.mediumImpact()', sound: 'Complete' },
+    { event: 'Qibla approach', when: 'Needle enters ±10°, once', ios: 'Selection', android: 'CLOCK_TICK', flutter: 'HapticFeedback.selectionClick()', sound: '—' },
+    { event: 'Qibla aligned', when: 'Within ±3° for 400 ms, once per alignment', ios: 'Notification .success', android: 'CONFIRM', flutter: 'HapticFeedback.mediumImpact()', sound: 'Aligned' },
+    { event: 'Sheet detent', when: 'Sheet snaps to a detent on drag release', ios: 'Selection', android: 'SEGMENT_TICK (API 34+)', flutter: 'HapticFeedback.selectionClick()', sound: '—' },
+    { event: 'Toggle, segmented', when: 'Value changes', ios: 'Selection', android: 'CLOCK_TICK', flutter: 'HapticFeedback.selectionClick()', sound: '—' },
+    { event: 'Page turn', when: 'Page settles (off by default)', ios: 'Selection', android: 'CLOCK_TICK', flutter: 'HapticFeedback.selectionClick()', sound: 'Page' },
+    { event: 'Prayer reminder', when: 'Pre-prayer notification', ios: 'System notification', android: 'Channel vibration pattern', flutter: 'flutter_local_notifications channel', sound: 'Reminder' },
+    { event: 'None', when: 'Living Sky, countdown, sky change, adhan reveal, tabs, sheets opening', ios: '—', android: '—', flutter: '—', sound: '—' }
+  ];
+  renderVals() { return { spec: this.spec, haptics: this.haptics }; }
+}
+</script>
+</body>
+</html>

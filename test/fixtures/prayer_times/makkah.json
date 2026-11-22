@@ -1,0 +1,24 @@
+{
+  "city": "Makkah",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 4 (Umm al-Qura), school 0, latitudeAdjustmentMethod 1 (middle of the night), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 21.4266,
+  "longitude": 39.8256,
+  "timeZone": "Asia/Riyadh",
+  "method": "ummAlQura",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:00",
+      "sunrise": "06:16",
+      "dhuhr": "12:06",
+      "asr": "15:28",
+      "maghrib": "17:56",
+      "isha": "19:26"
+    }
+  ]
+}

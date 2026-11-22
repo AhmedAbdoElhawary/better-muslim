@@ -1,0 +1,125 @@
+name: Patch (hotfix)
+
+# Ships a Dart-only fix to the PRODUCTION build in minutes, with no rebuild and no reinstall.
+#
+# Production only on purpose: dev and staging are plain `flutter build`, not patchable, and a
+# new -dev.N / -stag.N tag already ships them in minutes.
+#
+# It can only patch a build deploy.yml shipped through `shorebird release`. It can't change
+# native code, add a plugin with native code, or bump Flutter; Shorebird refuses those.
+# The decision rule is in the hotfix skill.
+#
+# Manual dispatch on purpose: a patch skips the whole review-and-tag ladder, so shipping one
+# must be a deliberate human action. pressing "Run workflow" is the approval.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  patch:
+    name: Patch & publish (Android, production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FLAVOR: production
+      TARGET: lib/main_prod.dart
+      DART_DEFINE: dart_define/prod.json
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the live version comes from the last production tag
+
+      # the patch must be built from the code that is actually live
+      - name: Refuse to patch anything but production
+        run: |
+          branch="$(git rev-parse --abbrev-ref HEAD)"
+          if [ "$branch" != "production" ]; then
+            echo "::error::patch.yml must be run on the 'production' branch (got '$branch'). Run it from Actions -> Patch (hotfix) -> Use workflow from: production."
+            exit 1
+          fi
+
+      # the runner disk filled up while saving the cache. these are big and the build never uses them
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: 3.50.0
+          cache: true
+
+      # the 8g heap in android/gradle.properties got the build killed on a runner once
+      - name: Fit Gradle in the runner's memory
+        run: |
+          mkdir -p ~/.gradle
+          printf '%s\n' 'org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g' 'kotlin.daemon.jvmargs=-Xmx2g' 'org.gradle.workers.max=2' > ~/.gradle/gradle.properties
+
+      # the image has neither, downloading them took 5 min of every build. the ndk is flutter 3.50.0's
+      - uses: actions/cache@v6
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/28.2.13676358
+            /usr/local/lib/android/sdk/cmake/3.22.1
+          key: android-ndk-28.2.13676358-cmake-3.22.1
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@8b1059ddb56a926f0146edf4133cc647775c162f # v1.4.1
+        with:
+          cache: true
+
+      - run: flutter pub get
+
+      # same defines as the release it patches, or the patch silently turns crash reporting off
+      - name: Write Sentry DSN
+        env:
+          SENTRY_DSN: ${{ secrets.PROD_SENTRY_DSN }}
+        run: |
+          if [ -z "$SENTRY_DSN" ]; then
+            echo "::warning::PROD_SENTRY_DSN is not set — this patch would disable crash reporting"
+            printf '{}\n' > "dart_define/${FLAVOR}.secret.json"
+          else
+            tag="$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*')"
+            export VERSION="${tag#v}"
+            python3 -c 'import json,os,sys; json.dump({"SENTRY_DSN": os.environ["SENTRY_DSN"], "SENTRY_RELEASE": "better-muslim@" + os.environ["VERSION"]}, open(sys.argv[1],"w"))' "dart_define/${FLAVOR}.secret.json"
+          fi
+
+      # --release-version=latest builds with the exact Flutter the release used,
+      # otherwise shorebird first builds with the latest stable just to find the version
+      - name: Patch the most recent production release
+        run: |
+          shorebird patch android \
+            --flavor "$FLAVOR" \
+            --release-version=latest \
+            --split-debug-info=build/symbols \
+            -t "$TARGET" \
+            --no-confirm \
+            -- \
+            --dart-define-from-file="$DART_DEFINE" \
+            --dart-define-from-file="dart_define/${FLAVOR}.secret.json"
+
+      # a patch is a new build with its own symbols, without them its crashes are hex addresses.
+      # after the patch on purpose, a failed upload must not stop a fix that is already live
+      - name: Upload debug symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG || secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT || secrets.SENTRY_PROJECT }}
+          SENTRY_URL: ${{ vars.SENTRY_URL || secrets.SENTRY_URL || 'https://de.sentry.io/' }}
+        run: |
+          test -d build/symbols || { echo "::error::build/symbols is missing, this patch's crashes can't be read"; exit 1; }
+          curl -sSfL -o "$RUNNER_TEMP/sentry-cli" \
+            https://github.com/getsentry/sentry-cli/releases/download/3.8.0/sentry-cli-Linux-x86_64
+          echo "13f8cb34ae01a6a272d7d7c22e277a105286615b4020de900ea95a8de47cdbb6  $RUNNER_TEMP/sentry-cli" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/sentry-cli"
+          "$RUNNER_TEMP/sentry-cli" debug-files upload --include-sources build/symbols
+
+      - name: Scrub secrets from the runner
+        if: always()
+        run: rm -f "${GITHUB_WORKSPACE}"/dart_define/*.secret.json

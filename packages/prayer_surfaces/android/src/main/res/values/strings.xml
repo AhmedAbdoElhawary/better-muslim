@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- the launcher reads these before the app ever runs, so they live here and not in the arbs -->
+<resources>
+    <string name="surfaces_widget_label">Prayer times</string>
+    <string name="surfaces_widget_description">The next prayer and today\'s five times.</string>
+    <string name="surfaces_next_label">Next prayer</string>
+    <string name="surfaces_next_description">The next prayer with the sun on its arc.</string>
+    <string name="surfaces_times_label">Today\'s prayers</string>
+    <string name="surfaces_times_description">The day at a glance, with what you prayed.</string>
+    <!-- no file yet, the app hasn't written. the same wording as openToSetPlace in the arbs -->
+    <string name="surfaces_no_place">Open Better Muslim to set your place</string>
+    <string name="surfaces_outdated">Open Better Muslim to update the times</string>
+</resources>

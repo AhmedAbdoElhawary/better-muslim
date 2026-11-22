@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#
+# Runs the journeys in integration_test/ on the one connected Android device.
+#
+# Needs: one device in `adb devices`.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+log="$(mktemp)"
+failed=()
+
+boot() {
+  pkill -f qemu-system || true
+  sleep 2
+  "$ANDROID_HOME/emulator/emulator" -port 5554 -avd test -no-window -gpu swiftshader_indirect \
+    -no-snapshot -noaudio -no-boot-anim >/dev/null 2>&1 &
+  adb wait-for-device
+  until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; do sleep 2; done
+  # a locked screen keeps the app from starting
+  adb shell input keyevent 82
+}
+
+journey() {
+  # on ci a journey after another one hangs on the same emulator, a fresh boot costs a minute
+  if [ -n "${CI:-}" ]; then boot; fi
+
+  # that quit also loses the run's summary and exit code, so a journey counts by its own line.
+  # flutter also lists desktop and web targets, so name the adb device
+  ${CI:+timeout 6m} flutter test "$1" \
+    -r github \
+    -d "$(adb get-serialno)" \
+    --flavor dev \
+    --dart-define-from-file=dart_define/dev.json | tee "$log" || true
+  grep -q '^✅ ' "$log" && ! grep -q '❌' "$log"
+}
+
+for test in integration_test/*_test.dart; do
+  # a fresh ci emulator sometimes never starts the app, so a journey gets one more try on a new one
+  journey "$test" || { [ -n "${CI:-}" ] && boot && journey "$test"; } || failed+=("$test")
+done
+
+if [ ${#failed[@]} -gt 0 ]; then
+  printf 'failed: %s\n' "${failed[@]}"
+  exit 1
+fi

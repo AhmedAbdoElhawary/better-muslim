@@ -1,0 +1,697 @@
+import 'package:better_muslim/core/azkar/azkar_window.dart';
+import 'package:better_muslim/core/clock/clock.dart';
+import 'package:better_muslim/core/database/app_database.dart';
+import 'package:better_muslim/core/location/location_controller.dart';
+import 'package:better_muslim/core/location/place_list.dart';
+import 'package:better_muslim/core/prayer_times/day_times.dart';
+import 'package:better_muslim/core/prayer_times/prayer_method.dart';
+import 'package:better_muslim/core/prayer_times/prayer_times_providers.dart';
+import 'package:better_muslim/core/quran/quran_assets.dart';
+import 'package:better_muslim/core/resources/design/bm_icons.dart';
+import 'package:better_muslim/core/resources/dimensions_manager.dart';
+import 'package:better_muslim/core/router/app_router.dart';
+import 'package:better_muslim/core/settings/settings.dart';
+import 'package:better_muslim/core/widgets/adaptive/text/adaptive_text.dart';
+import 'package:better_muslim/core/widgets/compact_app_bar.dart';
+import 'package:better_muslim/core/widgets/rolling_digits.dart';
+import 'package:better_muslim/core/widgets/title_glow.dart';
+import 'package:better_muslim/features/azkar/view/azkar_set_page.dart';
+import 'package:better_muslim/features/home/view/home_page.dart';
+import 'package:better_muslim/features/home/view/widgets/countdown.dart';
+import 'package:better_muslim/features/home/view/widgets/next_prayer_card.dart';
+import 'package:better_muslim/features/home/view/widgets/no_location_card.dart';
+import 'package:better_muslim/features/home/view/widgets/now_block.dart';
+import 'package:better_muslim/features/home/view/widgets/prayer_strip.dart';
+import 'package:better_muslim/features/home/view/widgets/shortcuts_card.dart';
+import 'package:better_muslim/features/home/view/widgets/sky_header_painter.dart';
+import 'package:better_muslim/features/home/view/widgets/sky_labels.dart';
+import 'package:better_muslim/features/home/view/widgets/strip_cell.dart';
+import 'package:better_muslim/features/home/view/widgets/strip_row.dart';
+import 'package:better_muslim/features/home/view/widgets/verse_card.dart';
+import 'package:better_muslim/features/home/view_model/home_providers.dart';
+import 'package:better_muslim/features/prayer/presentation/view/prayer_page.dart';
+import 'package:better_muslim/features/quran/presentation/providers/selection.dart';
+import 'package:better_muslim/features/quran/presentation/view/reader_page.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+import '../../../helpers/fonts.dart';
+import '../../../helpers/home.dart';
+import '../../../helpers/providers.dart';
+
+void main() {
+  setUpAll(tz.initializeTimeZones);
+
+  late PlaceList places;
+  setUpAll(() async => places = await PlaceList.load());
+
+  /// the real fonts, the square test font is far wider and would overflow where the app doesn't
+  setUpAll(loadAppFonts);
+
+  String countdown(WidgetTester tester) =>
+      tester.widgetList<RollingDigit>(find.byType(RollingDigit)).map((digit) => digit.digit).join();
+
+  Finder checkIn(int cell) => find.descendant(
+    of: find.byWidgetPredicate((widget) => widget is StripCell && widget.index == cell),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is BmIcon && widget.asset.endsWith('ui/check.svg'),
+    ),
+  );
+
+  /// the current cell's name is the only semibold text on home
+  Finder currentCell() =>
+      find.descendant(of: find.byType(PrayerStrip), matching: find.byType(SemiBoldText));
+
+  /// the arc keeps a time only label for its middle points too
+  Finder stripTime(String time) =>
+      find.descendant(of: find.byType(PrayerStrip), matching: find.text(time));
+
+  /// the strip's highlighted cell is a semibold maghrib too, so only the card and the bar count
+  Finder flyingName() => find.byElementPredicate(
+    (element) =>
+        element.widget is SemiBoldText &&
+        (element.widget as SemiBoldText).text == Prayer.maghrib.nameKey &&
+        element.findAncestorWidgetOfExactType<PrayerStrip>() == null,
+  );
+
+  bool cut(WidgetTester tester, Finder text) =>
+      tester.renderObject<RenderParagraph>(text).didExceedMaxLines;
+
+  ProviderContainer containerOf(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(find.byType(HomePage)));
+
+  group('the design scenario (4.01, 4.02, 4.16)', () {
+    testWidgets('the adhan line follows the reminder setting (FR-036)', (tester) async {
+      await pumpHome(tester, await designOverrides());
+      final db = containerOf(tester).read(databaseProvider);
+
+      await db.updateSettings(const SettingsCompanion(reminderMinutes: Value(15)));
+      await tester.pumpAndSettle();
+      expect(find.text('Adhan at 17:56 · reminder 15 min before'), findsOneWidget);
+
+      await db.updateSettings(const SettingsCompanion(reminderMinutes: Value(0)));
+      await tester.pumpAndSettle();
+      expect(find.text('Adhan at 17:56'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('english, an hour after asr\'s now window', (tester) async {
+      await pumpHome(tester, await designOverrides());
+
+      expect(find.text('NOW'), findsNothing);
+      expect(find.text('NEXT'), findsOneWidget);
+      expect(find.text('Asr'), findsOneWidget);
+      expect(find.text('العصر'), findsNothing);
+      expect(find.text('At 17:56'), findsOneWidget);
+      expect(find.text('Next prayer'), findsOneWidget);
+      expect(find.text('Maghrib'), findsNWidgets(3));
+      expect(countdown(tester), '1:24:00');
+      expect(find.text('Adhan at 17:56 · reminder 10 min before'), findsOneWidget);
+      for (final time in ['04:58', '12:05', '15:27', '17:56', '19:26']) {
+        expect(stripTime(time), findsOneWidget, reason: time);
+      }
+      expect(find.text('Sunrise 06:15'), findsOneWidget);
+      expect(find.text('Maghrib 17:56'), findsOneWidget);
+      expect(find.text('Thu 15 Oct · 4 Jumada I 1448'), findsOneWidget);
+      expect(find.text('Makkah'), findsOneWidget);
+      expect(checkIn(0), findsOneWidget);
+      expect(checkIn(1), findsOneWidget);
+      for (final cell in [2, 3, 4]) {
+        expect(checkIn(cell), findsNothing);
+      }
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.maghrib.nameKey);
+      await unmount(tester);
+    });
+
+    testWidgets('a tick repaints only the countdown', (tester) async {
+      await pumpHome(tester, await designOverrides());
+
+      expect(
+        find.descendant(of: find.byType(Countdown), matching: find.byType(RepaintBoundary)),
+        findsOneWidget,
+      );
+      await unmount(tester);
+    });
+
+    testWidgets('the card\'s name and countdown fly into the bar, a tap brings them back', (
+      tester,
+    ) async {
+      await pumpHome(tester, await designOverrides());
+      final flying = flyingName();
+      final cardRow = find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.byType(Visibility),
+      );
+      expect(flying, findsNothing);
+
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(flying, findsOneWidget);
+      expect(tester.widget<Visibility>(cardRow).visible, isFalse);
+      expect(countdown(tester), '1:24:001:24:00');
+
+      await tester.tap(find.byType(CompactAppBar));
+      await tester.pumpAndSettle();
+      expect(flying, findsNothing);
+      expect(tester.widget<Visibility>(cardRow).visible, isTrue);
+      await unmount(tester);
+    });
+
+    group('the flight waits for the card', () {
+      final flying = flyingName();
+      final cardRow = find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.byType(Visibility),
+      );
+      final cardCountdown = find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.byType(Countdown),
+      );
+      ScrollPosition position(WidgetTester tester) =>
+          tester.state<ScrollableState>(find.byType(Scrollable).first).position;
+      Future<void> scrollBy(WidgetTester tester, double distance) async {
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          Offset(0, -(distance + kDragSlopDefault)),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      double start(WidgetTester tester) =>
+          tester.getTopLeft(find.byType(NextPrayerCard)).dy +
+          position(tester).pixels -
+          SizeManager.appBar;
+
+      testWidgets('the text stays in the card and the page rests until the card reaches the bar', (
+        tester,
+      ) async {
+        await pumpHome(tester, await designOverrides());
+        final rest = start(tester) - 20;
+        await scrollBy(tester, rest);
+
+        expect(position(tester).pixels, closeTo(rest, 1));
+        expect(flying, findsNothing);
+        expect(tester.widget<Visibility>(cardRow).visible, isTrue);
+        await unmount(tester);
+      });
+
+      testWidgets('a short page scrolls until the name is on the bar\'s title', (tester) async {
+        await pumpHome(tester, await designOverrides());
+        await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -800));
+        await tester.pumpAndSettle();
+
+        expect(tester.getTopLeft(find.byType(NextPrayerCard)).dy, lessThan(SizeManager.appBar));
+        expect(tester.getCenter(cardCountdown).dy, closeTo(SizeManager.appBar / 2, 8));
+        await unmount(tester);
+      });
+
+      testWidgets('halfway the text is level with the card', (tester) async {
+        await pumpHome(tester, await designOverrides());
+        final from = start(tester);
+        final to = position(tester).maxScrollExtent;
+        final gesture = await tester.startGesture(const Offset(200, 600));
+        await gesture.moveBy(const Offset(0, -40));
+        await tester.pump();
+        await gesture.moveBy(Offset(0, -(from + (to - from) / 2 - position(tester).pixels)));
+        await tester.pump();
+        await tester.pump();
+
+        expect(position(tester).pixels, closeTo(from + (to - from) / 2, 1));
+        final inBar = find.descendant(
+          of: find.byWidgetPredicate((widget) => widget.runtimeType.toString() == '_FlyingPrayer'),
+          matching: find.byType(Countdown),
+        );
+        expect(tester.getCenter(inBar).dy, closeTo(tester.getCenter(cardCountdown).dy, 1));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        await unmount(tester);
+      });
+
+      testWidgets('a stop inside the flight settles to its start or end', (tester) async {
+        await pumpHome(tester, await designOverrides());
+        final from = start(tester);
+        final to = position(tester).maxScrollExtent;
+        await scrollBy(tester, from + (to - from) * .3);
+        expect(position(tester).pixels, closeTo(from, 1));
+
+        await scrollBy(tester, (to - from) * .7);
+        expect(position(tester).pixels, closeTo(to, 1));
+        await unmount(tester);
+      });
+    });
+
+    testWidgets('the sky glows under the bar once it shows, the top glow switch takes it off', (
+      tester,
+    ) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+      double glow() => tester
+          .widget<AnimatedOpacity>(
+            find
+                .descendant(
+                  of: find.ancestor(
+                    of: find.byType(CompactAppBar),
+                    matching: find.byType(TitleGlow),
+                  ),
+                  matching: find.byType(AnimatedOpacity),
+                )
+                .first,
+          )
+          .opacity;
+      expect(glow(), 0);
+
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(glow(), 1);
+
+      await containerOf(tester)
+          .read(databaseProvider)
+          .updateSettings(const SettingsCompanion(topGlow: Value(false)));
+      await tester.pumpAndSettle();
+      expect(glow(), 0);
+      await unmount(tester);
+    });
+
+    testWidgets('with reduce motion the bar crossfades in and nothing flies', (tester) async {
+      await pumpHome(tester, await designOverrides(), reduceMotion: true);
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      final cardRow = find.descendant(
+        of: find.byType(NextPrayerCard),
+        matching: find.byType(Visibility),
+      );
+      expect(tester.widget<Visibility>(cardRow).visible, isTrue);
+      expect(flyingName(), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('arabic, with eastern digits and no second name', (tester) async {
+      await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
+
+      expect(find.text('التالية'), findsOneWidget);
+      expect(find.text('العصر'), findsOneWidget);
+      expect(find.text('الساعة ١٧:٥٦'), findsOneWidget);
+      expect(find.text('الصلاة القادمة'), findsOneWidget);
+      expect(countdown(tester), '١:٢٤:٠٠');
+      expect(find.text('الأذان ١٧:٥٦ · تذكير قبل ١٠ دقائق'), findsOneWidget);
+      for (final time in ['٠٤:٥٨', '١٢:٠٥', '١٥:٢٧', '١٧:٥٦', '١٩:٢٦']) {
+        expect(stripTime(time), findsOneWidget, reason: time);
+      }
+      expect(find.text('الخميس · ٤ جمادى الأولى ١٤٤٨'), findsOneWidget);
+      expect(find.text('مكة المكرمة'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('dark and light both build', (tester) async {
+      await pumpHome(tester, await designOverrides(), brightness: Brightness.light);
+      expect(find.byType(NextPrayerCard), findsOneWidget);
+      await unmount(tester);
+
+      await pumpHome(tester, await designOverrides());
+      expect(find.byType(NextPrayerCard), findsOneWidget);
+      await unmount(tester);
+    });
+  });
+
+  group('live values', () {
+    testWidgets('the countdown ticks with the clock, and maghrib takes over at 17:56', (
+      tester,
+    ) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+      StripEntry cell(Prayer prayer) => containerOf(tester).read(stripProvider)[prayer.index];
+      expect(countdown(tester), '1:24:00');
+      expect(cell(Prayer.maghrib).current, isTrue);
+      expect(cell(Prayer.maghrib).now, isFalse);
+
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(countdown(tester), '1:23:59');
+
+      await tester.pump(const Duration(hours: 1, minutes: 23, seconds: 59));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(of: find.byType(NowBlock), matching: find.text('Maghrib')),
+        findsOneWidget,
+      );
+      expect(find.text('NOW'), findsOneWidget);
+      expect(find.text('Until Isha at 19:26'), findsOneWidget);
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.maghrib.nameKey);
+      expect(cell(Prayer.maghrib).now, isTrue);
+
+      await tester.pump(DayTimes.nowWindow);
+      await tester.pumpAndSettle();
+
+      expect(find.text('NEXT'), findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(NowBlock), matching: find.text('Isha')),
+        findsOneWidget,
+      );
+      expect(find.text('At 19:26'), findsOneWidget);
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.isha.nameKey);
+      expect(cell(Prayer.isha).now, isFalse);
+      expect(cell(Prayer.maghrib).current, isFalse);
+      await unmount(tester);
+    });
+
+    testWidgets('duha is never now, after fajr\'s window dhuhr is next', (tester) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 6)));
+
+      expect(find.text('Duha'), findsNothing);
+      expect(
+        find.descendant(of: find.byType(NowBlock), matching: find.text('Dhuhr')),
+        findsOneWidget,
+      );
+      expect(find.text('At 12:06'), findsOneWidget);
+      expect(tester.widget<SemiBoldText>(currentCell()).text, Prayer.dhuhr.nameKey);
+      await unmount(tester);
+    });
+
+    testWidgets('after isha the next prayer is tomorrow\'s fajr', (tester) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 18)));
+
+      expect(find.text('NEXT'), findsOneWidget);
+      expect(find.text('At 05:00'), findsOneWidget);
+      expect(currentCell(), findsNothing);
+      expect(find.text('Isha 19:26'), findsOneWidget);
+      expect(find.text('Fajr 05:00'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('a polar day with no isha shows a dash', (tester) async {
+      final zone = tz.getLocation('Asia/Riyadh');
+      await pumpHome(
+        tester,
+        makkahAt(
+          tester,
+          DateTime.utc(2026, 10, 15, 13, 32),
+          extra: [
+            dayTimesProvider.overrideWith(
+              (ref, date) => DayTimes(
+                date: date,
+                fajr: tz.TZDateTime(zone, date.year, date.month, date.day, 4, 58),
+                sunrise: tz.TZDateTime(zone, date.year, date.month, date.day, 6, 15),
+                dhuhr: tz.TZDateTime(zone, date.year, date.month, date.day, 12, 5),
+                asr: tz.TZDateTime(zone, date.year, date.month, date.day, 15, 27),
+                maghrib: tz.TZDateTime(zone, date.year, date.month, date.day, 17, 56),
+                isha: null,
+                method: PrayerMethod.ummAlQura,
+                asrMethod: AsrMethod.standard,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byWidgetPredicate((widget) => widget is StripCell && widget.index == 4),
+          matching: find.text('—'),
+        ),
+        findsOneWidget,
+      );
+      await unmount(tester);
+    });
+
+    testWidgets('location, method, hijri and digits changes show without leaving home (FR-007)', (
+      tester,
+    ) async {
+      await pumpHome(tester, [
+        ...testOverrides(),
+        clockProvider.overrideWithValue(() => DateTime.utc(2026, 10, 15, 13, 32)),
+      ]);
+      final container = containerOf(tester);
+      final db = container.read(databaseProvider);
+      await tester.runAsync(
+        () => db.updateSettings(
+          const SettingsCompanion(
+            latitude: Value(21.4225),
+            longitude: Value(39.8262),
+            placeName: Value('Makkah'),
+            countryCode: Value('SA'),
+            timeZone: Value('Asia/Riyadh'),
+            locationMode: Value(LocationMode.manual),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(stripTime('15:27'), findsOneWidget);
+      expect(stripTime('05:00'), findsOneWidget);
+
+      await tester.runAsync(
+        () => db.updateSettings(const SettingsCompanion(method: Value(PrayerMethod.egyptian))),
+      );
+      await tester.pumpAndSettle();
+      expect(stripTime('05:00'), findsNothing);
+
+      await tester.runAsync(
+        () => container.read(locationControllerProvider).choose(places.search('tanta').first),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Tanta'), findsOneWidget);
+      expect(stripTime('15:27'), findsNothing);
+
+      await tester.runAsync(
+        () => db.updateSettings(const SettingsCompanion(hijriAdjust: Value(1))),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('5 Jumada I 1448'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('arabic follows the digits setting', (tester) async {
+      await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
+      expect(stripTime('١٥:٢٧'), findsOneWidget);
+
+      await tester.runAsync(
+        () =>
+            containerOf(tester)
+                .read(databaseProvider)
+                .updateSettings(const SettingsCompanion(digits: Value(Digits.western))),
+      );
+      await tester.pumpAndSettle();
+
+      expect(stripTime('15:27'), findsOneWidget);
+      expect(countdown(tester), '1:24:00');
+      await unmount(tester);
+    });
+  });
+
+  group('one tap to what I need (US3)', () {
+    testWidgets('the verse, continue reading and the evening azkar in english', (tester) async {
+      await pumpHome(tester, await designOverrides());
+      final verse = containerOf(tester).read(verseOfDayProvider).value!;
+
+      expect(find.text('${verse.surah.en} ${verse.key.surah}:${verse.key.ayah}'), findsOneWidget);
+      expect(find.text(verse.text), findsOneWidget);
+      expect(find.text(verse.translation), findsOneWidget);
+      expect(find.text('Continue reading'), findsOneWidget);
+      expect(find.text('Al-Fatiha · ayah 3 of 7'), findsOneWidget);
+      expect(find.text('Evening azkar'), findsOneWidget);
+      expect(find.text('After Asr · 0 of 20'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('the azkar row shows the evening set\'s real progress and opens it', (
+      tester,
+    ) async {
+      await pumpHome(tester, await designOverrides());
+      final container = containerOf(tester);
+      await container
+          .read(databaseProvider)
+          .setZikrCount(AzkarSet.evening, DateTime(2026, 10, 15), 'e01', 1);
+      await tester.pumpAndSettle();
+      expect(find.text('After Asr · 1 of 20'), findsOneWidget);
+
+      /// at rest the row sits under the glass tab bar
+      await tester.fling(find.byType(Scrollable).first, const Offset(0, -1000), 3000);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Evening azkar'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(routerProvider).routerDelegate.currentConfiguration.uri.path,
+        '/azkar/evening',
+      );
+      await unmount(tester);
+    });
+
+    testWidgets('morning azkar from fajr until asr', (tester) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 5)));
+
+      expect(find.text('Morning azkar'), findsOneWidget);
+      expect(find.text('After Fajr · 0 of 23'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('arabic has no translation and no azkar row', (tester) async {
+      await pumpHome(tester, await designOverrides(), locale: const Locale('ar'));
+      final verse = containerOf(tester).read(verseOfDayProvider).value!;
+
+      expect(find.text(verse.text), findsOneWidget);
+      expect(find.text(verse.translation), findsNothing);
+      expect(find.text('متابعة القراءة'), findsOneWidget);
+      expect(find.text('أذكار المساء'), findsNothing);
+      await unmount(tester);
+    });
+
+    testWidgets('each card and row opens its tab', (tester) async {
+      final taps = <(Finder, Type)>[
+        (find.byType(NextPrayerCard), PrayerPage),
+        (find.byWidgetPredicate((widget) => widget is StripCell && widget.index == 0), PrayerPage),
+        (find.text('Evening azkar'), AzkarSetPage),
+      ];
+      for (final (target, page) in taps) {
+        await pumpHome(tester, await designOverrides());
+        if (target.hitTestable().evaluate().isEmpty) await tester.ensureVisible(target);
+        await tester.pumpAndSettle();
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(page), findsOneWidget, reason: '$target');
+        expect(find.byType(HomePage), findsNothing);
+        await unmount(tester);
+      }
+    });
+
+    testWidgets('the verse opens its page with the ayah selected, continue reading the last read', (
+      tester,
+    ) async {
+      for (final verse in [true, false]) {
+        await pumpHome(tester, await designOverrides());
+        final container = containerOf(tester);
+        final target = verse ? find.byType(VerseCard) : find.text('Continue reading');
+        final ayah = verse ? container.read(verseOfDayProvider).value!.key : null;
+        final page = ayah == null ? 1 : container.read(quranAssetsProvider).value!.pageOf(ayah);
+        await tester.ensureVisible(target);
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+
+        final reader = tester.widget<ReaderPage>(find.byType(ReaderPage));
+        expect((reader.page, reader.ayah), (page, ayah), reason: '$target');
+        expect(container.read(selectionProvider).sheet, ayah);
+        await unmount(tester);
+      }
+    });
+  });
+
+  testWidgets('with no location: no sun, no labels, no NOW, no strip, the two choices (US4)', (
+    tester,
+  ) async {
+    await pumpHome(tester, testOverrides());
+
+    expect(find.text('No location yet'), findsOneWidget);
+    expect(find.byType(NoLocationCard), findsOneWidget);
+    expect(find.text('Use my location'), findsOneWidget);
+    expect(find.text('Choose a city instead'), findsOneWidget);
+    expect(find.byType(NowBlock), findsNothing);
+    expect(find.byType(PrayerStrip), findsNothing);
+    expect(find.byType(SkyLabels), findsNothing);
+    expect(find.byType(VerseCard), findsOneWidget);
+    expect(find.byType(ShortcutsCard), findsOneWidget);
+    final painter = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((paint) => paint.painter)
+        .whereType<SkyHeaderPainter>()
+        .single;
+    expect(painter.markerShare, isNull);
+    await unmount(tester);
+  });
+
+  group('readable for everyone (US5)', () {
+    for (final locale in [const Locale('en'), const Locale('ar')]) {
+      for (final scale in [1.5, 2.0]) {
+        testWidgets('${locale.languageCode} at $scale stacks the card and the strip', (
+          tester,
+        ) async {
+          await pumpHome(tester, await designOverrides(), locale: locale, textScale: scale);
+
+          final name = find.descendant(
+            of: find.byType(NextPrayerCard),
+            matching: find.byWidgetPredicate(
+              (widget) => widget is RegularText && widget.text == Prayer.maghrib.nameKey,
+            ),
+          );
+          expect(
+            tester.getTopLeft(find.byType(Countdown)).dy,
+            greaterThanOrEqualTo(tester.getBottomLeft(name).dy),
+          );
+          expect(find.byType(StripRow), findsNWidgets(5));
+
+          /// the arc and its labels move under the text instead of crossing it (SC-005)
+          final text = tester.getRect(find.byType(NowBlock));
+          for (final label in skyLabels(tester)) {
+            expect(label.rect.top, greaterThan(text.bottom), reason: label.text);
+          }
+          await unmount(tester);
+        });
+      }
+    }
+
+    testWidgets('24 hour times fit the strip cells', (tester) async {
+      await pumpHome(tester, await designOverrides());
+      expect(find.byType(StripCell), findsNWidgets(5));
+      for (final time in ['04:58', '12:05', '15:27', '17:56', '19:26']) {
+        expect(cut(tester, stripTime(time)), isFalse, reason: time);
+      }
+      await unmount(tester);
+    });
+
+    for (final scale in [1.0, 1.4]) {
+      testWidgets('a 12 hour phone at $scale keeps one row with no AM or PM', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pumpHome(tester, await designOverrides(), use24: false, textScale: scale);
+        expect(find.byType(StripCell), findsNWidgets(5));
+        expect(find.byType(StripRow), findsNothing);
+        for (final time in ['4:58', '12:05', '3:27', '5:56', '7:26']) {
+          expect(cut(tester, stripTime(time)), isFalse, reason: time);
+        }
+
+        /// intl puts a narrow no-break space before PM
+        final maghrib = find.byWidgetPredicate(
+          (widget) => widget is StripCell && widget.index == 3,
+        );
+        expect(tester.getSemantics(maghrib).label, contains('5:56\u202fPM'));
+
+        /// the rest of home keeps the period
+        expect(find.text('At 5:56\u202fPM'), findsOneWidget);
+        semantics.dispose();
+        await unmount(tester);
+      });
+    }
+
+    testWidgets('a screen reader hears hours and minutes, not every tick', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpHome(tester, await designOverrides());
+
+      /// the card is one button, so the countdown's label is read as part of it
+      final card = find.bySemanticsLabel(RegExp('1 h 24 min until Maghrib'));
+      expect(card, findsOneWidget);
+      expect(tester.getSemantics(card).label, isNot(contains('1:24:00')));
+      expect(tester.getSemantics(card).flagsCollection.isLiveRegion, isFalse);
+      semantics.dispose();
+      await unmount(tester);
+    });
+
+    testWidgets('with reduce motion the digits change with no animation', (tester) async {
+      await pumpHome(tester, makkahAt(tester, DateTime.utc(2026, 10, 15, 13, 32)));
+      await tester.runAsync(
+        () =>
+            containerOf(tester)
+                .read(databaseProvider)
+                .updateSettings(const SettingsCompanion(reduceMotion: Value(true))),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+
+      expect(countdown(tester), isNot('1:24:00'));
+      expect(tester.hasRunningAnimations, isFalse);
+      await unmount(tester);
+    });
+  });
+}

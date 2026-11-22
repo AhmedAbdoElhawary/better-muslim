@@ -1,0 +1,37 @@
+{
+  "city": "Oslo",
+  "sources": {
+    "aladhan": "AlAdhan API v1, method 3 (Muslim World League), school 0, latitudeAdjustmentMethod 2 (one seventh), same coordinates"
+  },
+  "fetched": "2026-10-16",
+  "latitude": 59.9127,
+  "longitude": 10.7461,
+  "timeZone": "Europe/Oslo",
+  "method": "muslimWorldLeague",
+  "asrMethod": "standard",
+  "days": [
+    {
+      "date": "2026-10-15",
+      "source": "aladhan",
+      "fajr": "05:58",
+      "sunrise": "07:56",
+      "dhuhr": "13:03",
+      "asr": "15:28",
+      "maghrib": "18:08",
+      "isha": "20:07",
+      "gaps": {
+        "asr": "adhan_dart takes the asr shadow from the declination at 0h UT, so it runs about 1.5 min early in autumn and late in spring at this latitude, and AlAdhan errs the other way. NOAA solar position gives 15:26:04, between the two"
+      }
+    },
+    {
+      "date": "2026-06-21",
+      "source": "aladhan",
+      "fajr": "03:10",
+      "sunrise": "03:54",
+      "dhuhr": "13:19",
+      "asr": "18:00",
+      "maghrib": "22:44",
+      "isha": "23:28"
+    }
+  ]
+}
