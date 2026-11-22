@@ -18,9 +18,8 @@ The only way up the ladder is a merged pull request.
 So this skill never runs `git push origin staging`, never runs `git tag`, and
 never runs `git merge` on a protected branch. It opens a PR and merges it.
 
-The repo is private on GitHub Free, so the merge button works even when
-`ci-ok` is red. **Never merge on red.** The code would land and nothing would
-ship.
+The repo is public and its rulesets refuse a merge without a green `ci-ok`.
+**Never merge on red** or try to get around them.
 
 One version line runs through all three stages, the stage is a suffix:
 

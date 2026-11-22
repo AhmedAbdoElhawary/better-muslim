@@ -53,8 +53,8 @@ release. Shorebird can only patch a build it originally released.
    refuses a direct push to `develop`/`staging`/`production`.
 2. Get it onto `production` **by pull request**: `gh pr create --base
    production --head hotfix/<name>`, wait for `ci-ok` (`gh pr checks --watch`),
-   then `gh pr merge --merge`. Never merge on red, the button works on this
-   plan but `release-on-merge.yml` will refuse it. A `hotfix/*` merge into
+   then `gh pr merge --merge`. Never merge on red, the rulesets refuse it
+   and `release-on-merge.yml` would not ship it. A `hotfix/*` merge into
    production creates **no tag** on purpose, the patch below is what ships.
 3. Run the patch workflow from the `production` branch:
    `gh workflow run patch.yml --ref production`. It refuses any other branch,
