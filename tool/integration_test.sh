@@ -23,8 +23,8 @@ boot() {
 }
 
 journey() {
-  # on ci the emulator quits when a journey's app is stopped, so boot it again for the next one
-  if [ -n "${CI:-}" ] && [ "$(adb get-state 2>/dev/null)" != device ]; then boot; fi
+  # on ci a journey after another one hangs on the same emulator, a fresh boot costs a minute
+  if [ -n "${CI:-}" ]; then boot; fi
 
   # that quit also loses the run's summary and exit code, so a journey counts by its own line.
   # flutter also lists desktop and web targets, so name the adb device

@@ -93,7 +93,12 @@ void main() {
     final page = tester.allRenderObjects.whereType<RenderMushafPage>().firstWhere(
       (page) => page.washBounds(const AyahKey(1, 5)) != null,
     );
-    await tester.tapAt(page.localToGlobal(page.washBounds(const AyahKey(1, 5))!.center));
+
+    /// the ci emulator can drop the first tap while the page still opens
+    for (var i = 0; i < 3 && find.byType(AyahSheet).evaluate().isEmpty; i++) {
+      await tester.tapAt(page.localToGlobal(page.washBounds(const AyahKey(1, 5))!.center));
+      await settle(tester);
+    }
     await waitFor(tester, find.byType(AyahSheet));
 
     await tap(tester, find.text('Bookmark'));
