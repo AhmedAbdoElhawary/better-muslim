@@ -54,7 +54,7 @@ jobs:
         if: steps.find.outputs.found == 'true'
         run: flutter pub get
 
-      # a private repo runner has ~7G, an idle gradle daemon next to the emulator got it killed
+      # an idle gradle daemon next to the emulator got it killed
       # swap on /mnt, the root disk has no room left for it
       - name: Smaller Gradle heap and swap
         if: steps.find.outputs.found == 'true'

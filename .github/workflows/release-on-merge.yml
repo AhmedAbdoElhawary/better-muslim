@@ -45,8 +45,7 @@ jobs:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
 
-      # github free can't make ci-ok a required check on a private repo, so the merge button
-      # still works on red. this is the lock instead: red or unfinished ci-ok, nothing ships.
+      # the rulesets already require ci-ok, this is the second lock: red or unfinished ci-ok, nothing ships.
       - name: Refuse a PR that was merged without a green ci-ok
         env:
           GH_TOKEN: ${{ github.token }}

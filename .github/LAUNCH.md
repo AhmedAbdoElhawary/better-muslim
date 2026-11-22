@@ -16,15 +16,19 @@ My account is personal and newer than 13 Nov 2023, so production waits for a clo
 - [ ] Sentry project: Settings › Security & Privacy › "Prevent Storing of IP Addresses" is on, and an
       alert emails me on a new issue.
 - [ ] Screenshots and the feature graphic are redone for Android, see "Graphics" in
-      `design_handoff_better_muslim/store/LISTING.md`.
+      `design_handoff_better_muslim/store/LISTING.md`, and the slots in "Graphics" below.
 
 ## 2. The build
 
-1. `feature/enhance1`, then `feature/release-prep`, merge into `develop`.
-2. PR `develop` → `staging`. The integration journeys run there.
-3. PR `staging` → `production`. CI tags `v1.0.0`, builds it
-   through Shorebird, uploads the symbols to Sentry and puts the `.aab` on the GitHub release.
-4. Download that `.aab`. Play only ever gets this file, never a local build.
+1. `feature/release-prep` merges into `develop` with the `release: v1.0.0-dev.6` marker, the dev
+   app reaches App Distribution.
+2. PR `develop` → `staging`. The integration journeys run there, the staging app reaches App
+   Distribution.
+3. PR `staging` → `production`. CI tags `v1.0.0`, builds it through Shorebird, uploads the symbols
+   to Sentry, sends the production app to App Distribution and puts the `.aab` on the GitHub
+   release.
+4. Download that `.aab` from the `v1.0.0` release. Play only ever gets this file, never a local
+   build.
 
 ## 3. Create the app
 
@@ -155,6 +159,18 @@ English under the default language and Arabic under the Arabic translation.
 - Contact email: elhawarydev@gmail.com
 - Website: optional, the LinkedIn link from More
 - Countries: all
+
+### Graphics
+
+Everything below goes straight into Play Console › Grow users › Store presence › Main store
+listing. None of it is in git (`design_handoff_better_muslim/store/` is ignored).
+
+| Slot | Size | English | Arabic |
+| --- | --- | --- | --- |
+| App icon | 512 × 512 PNG | `assets/app_icon/png/play_store_512.png` | same |
+| Feature graphic | 1024 × 500, no transparency | `[ ] my file` | `[ ] my file` |
+| Phone screenshots, 2 to 8 | 1080 × 2160 | `[ ] 1` `[ ] 2` `[ ] 3` `[ ] 4` `[ ] 5` `[ ] 6` | `[ ] 1` `[ ] 2` `[ ] 3` `[ ] 4` `[ ] 5` `[ ] 6` |
+| 7-inch and 10-inch tablet | optional | skip, the app has no tablet layout yet | skip |
 
 ## 7. Internal test
 

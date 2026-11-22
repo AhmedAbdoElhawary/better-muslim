@@ -6,19 +6,18 @@ this flow.
 
 ## The locks
 
-The repo is private on GitHub Free, so GitHub itself can't refuse a push or
-require a check. The locks are:
+The repo is public, so the rulesets in `.github/rulesets/` are applied. The locks are:
 
 | What | Enforced by |
 | --- | --- |
-| No direct push to `develop`, `staging`, `production` | `.githooks/pre-push` (run `git config core.hooksPath .githooks` once per clone) |
+| No direct push, force push or delete on `develop`, `staging`, `production` | the branch rulesets, and `.githooks/pre-push` (run `git config core.hooksPath .githooks` once per clone) |
+| No merge with a red or missing `ci-ok` | the branch rulesets |
+| No moved or deleted `v*` tag | `version-tags.json` |
 | No hand-made `v*` tag | `.githooks/pre-push` |
 | A red PR never ships | `release-on-merge.yml` refuses to tag unless the PR's `ci-ok` was green |
 | A tag on the wrong branch never ships | the `guard` job in `deploy.yml` |
 
-The merge button still works on a red PR. Don't press it: the code lands and
-nothing ships, and the next release carries it anyway. The real rulesets are in
-`.github/rulesets/`, ready for the day the plan changes.
+A PR from a fork waits for my approval before any workflow runs, and it never sees the secrets.
 
 ## The ladder
 
@@ -106,8 +105,7 @@ release brings the bug back.
 the repo root, it can be re-run and keeps what is done.
 
 All are **repository** secrets/variables (Settings → Secrets and variables →
-Actions). GitHub Free has no environment secrets on a private repo, so values
-that differ per flavor carry a prefix.
+Actions). Values that differ per flavor carry a prefix.
 
 | Name | Type | Value |
 | --- | --- | --- |
