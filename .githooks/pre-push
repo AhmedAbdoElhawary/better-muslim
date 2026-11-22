@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# github free + private has no rulesets, so the server can't refuse these pushes. this refuses them locally.
+# the rulesets refuse these on the server, this refuses them before the push leaves the mac.
 # turn it on once per clone: git config core.hooksPath .githooks
 
 while read -r local_ref local_sha remote_ref remote_sha; do

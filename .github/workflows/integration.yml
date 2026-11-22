@@ -13,6 +13,8 @@ jobs:
   journeys:
     name: Integration Journeys
     runs-on: ubuntu-latest
+    # a hung journey once held the runner for 4 hours, a full run takes about 50 minutes
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -52,7 +54,7 @@ jobs:
         if: steps.find.outputs.found == 'true'
         run: flutter pub get
 
-      # a private repo runner has ~7G, an idle gradle daemon next to the emulator got it killed
+      # an idle gradle daemon next to the emulator got it killed
       # swap on /mnt, the root disk has no room left for it
       - name: Smaller Gradle heap and swap
         if: steps.find.outputs.found == 'true'
@@ -68,6 +70,11 @@ jobs:
           sudo mkswap /mnt/swapfile2
           sudo swapon /mnt/swapfile2
           free -h && df -h / /mnt
+
+      # the first build fetches the ndk for 11 minutes, more than a journey's 6 minute cap
+      - name: Build once
+        if: steps.find.outputs.found == 'true'
+        run: flutter build apk --debug --flavor dev -t lib/main_dev.dart --dart-define-from-file=dart_define/dev.json
 
       # without this the emulator falls back to software and is too slow to boot
       - name: Enable KVM

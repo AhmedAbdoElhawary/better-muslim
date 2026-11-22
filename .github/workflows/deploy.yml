@@ -7,8 +7,7 @@ name: Deploy
 #   v1.3.0-stag.1  -> flavor staging    -> STAGING_* secrets
 #   v1.3.0         -> flavor production -> PROD_* secrets, Shorebird, Sentry symbols, GitHub Release
 #
-# github free + private has no environment secrets, so per-flavor values are repo secrets
-# with a prefix. The full secret and variable list is in .github/RELEASES.md.
+# per-flavor values are repo secrets with a prefix, one list instead of three environments. The full secret and variable list is in .github/RELEASES.md.
 #
 # Production is built through `shorebird release` so patch.yml can hotfix it later. A plain
 # `flutter build` artifact can never receive a patch, so production must stay on Shorebird.
@@ -149,7 +148,7 @@ jobs:
           flutter-version: 3.50.0
           cache: true
 
-      # the private runner has less ram than the 8g in android/gradle.properties, the os killed the build
+      # the 8g heap in android/gradle.properties got the build killed on a runner once
       - name: Fit Gradle in the runner's memory
         run: |
           mkdir -p ~/.gradle
